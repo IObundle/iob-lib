@@ -33,6 +33,10 @@ def write_mapping(outfile, name_map, width_map, init_val_map, type_map):
     fout.write("   endcase\n")
     fout.write("end\n")
 
+    fout.write("\n\n//registers width\n")
+    for i in range(len(name_map)):
+        fout.write("`define " + str(name_map[i]) + "_W " + str(width_map[i]) + "\n")
+
     fout.close()
     return
 
