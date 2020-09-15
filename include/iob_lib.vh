@@ -42,10 +42,51 @@
 `define ENDCOMB end
 
 
+//COUNTERS
+
+`define COUNTER_AR(CLK, RST, NAME,  WIDTH) \
+   `REG_AR(CLK, RST, 0, NAME, NAME+1'b1)
+
+
+`define WRAPCNT_AR(CLK, RST, NAME,  WIDTH, WRAP) \
+   `REG_AR(CLK, RST, 0, NAME, NAME==WRAP? 0: NAME+1'b1)
+
+
+`define WRAPCNT_ARE(CLK, RST, EN, NAME,  WIDTH, WRAP) \
+   `REG_AR(CLK, RST, 0, NAME, NAME==WRAP? 0: EN? NAME+1'b1: NAME)
+
+// SYNCRONIZERS
+`define RESET_SYNC(CLK, RST_IN, RST_OUT) \
+   wire  RST_OUT;
+   reg [1:0] RST_IN_sync; \
+   always @(posedge CLK, posedge RST_IN) \
+   if(IN) RST_IN_sync = 2'b0; else RST_IN_sync = {RST_IN_sync[0], 1'b0}; \
+   assign RST_OUT = RST_IN_sync[1];
+   
+`define S2F_SYNC(CLK, rst, W, IN, OUT) \
+   reg [W-1:0] IN_sync [1:0]; \
+   always @(posedge CLK, posedge RST) \
+   if(rst) begin \
+   IN_sync[0] = W'b0; \
+   IN_sync[1] = W'b0; \
+   end else begin \
+      IN_sync[0] = IN; \
+      IN_sync[1] = IN_sync[0]; \
+   end
+
+
+//
+// COMMON TESTBENCH UTILS
+//
+   
 //CLOCK GENERATOR
+`define CLOCK(CLK, PER) reg CLK=1; always #PER CLK = ~CLK
 
-`define CLOCK(PER) initial CLK=1; always #PER clk = ~CLK
+//RESET GENERATOR
+`define RESET(RST, W) reg RST=1 initial #W RST=0; 
 
+   
+   
    
    
    
