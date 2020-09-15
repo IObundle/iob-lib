@@ -13,7 +13,7 @@
 `define NAME_REG(I) I2S_TDM_REG_I
 `define NAME_REG_INI(I) I2S_TDM_REG_INIT_I
 
-//generate following definitions using script
+//generate following definitions using script swreg2regmap.py
 
 //name mapping
 `define `NAME_REG(0) actual_reg0_name
@@ -37,23 +37,24 @@
 
  */
 
+`include "i2s_swregs.vh"
 
 //write registers
 genvar i;
 generate for (i=0; i<`N_WREGS; i=i+1)
   if(`NAME_REG_TYP(i) == W_TYP || `NAME_REG_TYP(i) == RW_TYP)
-    `REG_ARE(clk, rst, valid & wstrb, `NAME_REG_INI(i), wdata[`NAME_REG_W(i)]);  
+    `REG_ARE(clk, rst, valid & wstrb & (i == addr), `NAME_REG_INI(i), `NAME_REG(i), wdata[`NAME_REG_W(i)-1:0]);  
 endgenerate
     
 //read registers
-generate for (i=0; i<`N_WREGS; i=i+1)
-  `COMB
-    if(`NAME_REG_TYP(i) == R_TYP || `NAME_REG_TYP(i) == RW_TYP)
-      rdata = `NAME_REG(i) | `DATA_W'd0;
-    else
-      rdata = `DATA_W'd0;
-   `ENDCOMB  
-endgenerate
+integer j;
+`COMB
+    for (j=0; j<`N_WREGS; j=j+1)
+      if(j == addr && (`NAME_REG_TYP(j) == R_TYP || `NAME_REG_TYP(j) == RW_TYP))
+        rdata = `NAME_REG(j) | `DATA_W'd0;
+      else
+        rdata = `DATA_W'd0;
+`ENDCOMB  
     
 // reply with ready
 `REG_AR(clk, rst, ready, valid);

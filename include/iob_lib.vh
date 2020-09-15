@@ -26,13 +26,17 @@
 `define REG_ARE(CLK, RST, EN, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= IVAL; else if (EN) OUT <= IN
 
 //SOFTWARE ACCESSIBLE REGISTERS
-`define SWREG_R(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME
-`define SWREG_R_S(NAME, WIDTH, RST_VAL) reg signed [WIDTH-1:0] NAME
+`define SWREG_R(NAME, WIDTH, RST_VAL) wire [WIDTH-1:0] NAME
+`define SWREG_R_S(NAME, WIDTH, RST_VAL) wire signed [WIDTH-1:0] NAME
 `define SWREG_W(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME
 `define SWREG_W_S(NAME, WIDTH, RST_VAL) reg signed [WIDTH-1:0] NAME
 `define SWREG_RW(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME
 `define SWREG_RW_S(NAME, WIDTH, RST_VAL) reg signed [WIDTH-1:0] NAME
 
+//convert some internal reg type (IN) to SWREG_R wire (OUT)
+`define TO_SWREG_R(OUT, IN) assign OUT = IN;
+
+   
  //COMBINATORIAL CIRCUIT
 `define COMB always @* begin
 `define ENDCOMB end
@@ -42,5 +46,6 @@
 
 `define CLOCK(PER) initial CLK=1; always #PER clk = ~CLK
 
+   
    
    
