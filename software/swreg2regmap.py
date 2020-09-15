@@ -7,7 +7,7 @@ import sys
 import os.path
 import re
 
-def write_mapping(outfile, name_map, width_map, init_val_map, type_map, regname):
+def write_mapping(outfile, name_map, width_map, init_val_map, type_map):
     #write output file
     fout = open (outfile, 'w')
 
@@ -37,7 +37,7 @@ def write_mapping(outfile, name_map, width_map, init_val_map, type_map, regname)
     return
 
 
-def swreg_parse (program, outfile, regname) :
+def swreg_parse (program, outfile) :
     name_map = []
     width_map = []
     init_val_map = []
@@ -70,22 +70,21 @@ def swreg_parse (program, outfile, regname) :
             type_map.append(reg_type)
         else: continue #not a recognized macro
 
-    write_mapping(outfile, name_map, width_map, init_val_map, type_map, regname)
+    write_mapping(outfile, name_map, width_map, init_val_map, type_map)
     return
 
 def main () :
     #parse command line
     if len(sys.argv) != 4:
-        vaError("Usage: ./v2tex.py infile outfile REG_NAME")
+        vaError("Usage: ./v2tex.py infile outfile")
     else:
         infile = sys.argv[1]
         outfile = sys.argv[2]
-        regname = sys.argv[3]
         
     #parse input file
     fin = open (infile, 'r')
     program = fin.readlines()
     fin.close()
-    swreg_parse (program, outfile, regname)
+    swreg_parse (program, outfile)
 
 if __name__ == "__main__" : main ()
