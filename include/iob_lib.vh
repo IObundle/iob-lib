@@ -18,12 +18,12 @@
 `define REG(CLK, OUT, IN) always @(posedge clk) OUT <= IN
 `define REG_E(CLK, EN, OUT, IN) always @(posedge clk) if(EN) OUT <= IN
 
-`define REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= IVAL; else OUT <= IN
-`define REG_RE(CLK, RST, EN, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= IVAL; else if (EN) OUT <= IN
+`define REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= IN
+`define REG_RE(CLK, RST, EN, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN
 
-`define REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= IVAL; else OUT <= IN
+`define REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; else OUT <= IN
 
-`define REG_ARE(CLK, RST, EN, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= IVAL; else if (EN) OUT <= IN
+`define REG_ARE(CLK, RST, EN, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN
 
 //SOFTWARE ACCESSIBLE REGISTERS
 `define SWREG_R(NAME, WIDTH, RST_VAL) wire [WIDTH-1:0] NAME
@@ -41,23 +41,19 @@
 `define COMB always @* begin
 `define ENDCOMB end
 
-
+   
 //COUNTERS
-
-`define COUNTER_AR(CLK, RST, NAME,  WIDTH) \
+`define COUNTER_AR(CLK, RST, NAME) \
    `REG_AR(CLK, RST, 0, NAME, NAME+1'b1)
-
-
-`define WRAPCNT_AR(CLK, RST, NAME,  WIDTH, WRAP) \
+`define WRAPCNT_AR(CLK, RST, NAME, WRAP) \
    `REG_AR(CLK, RST, 0, NAME, NAME==WRAP? 0: NAME+1'b1)
-
-
-`define WRAPCNT_ARE(CLK, RST, EN, NAME,  WIDTH, WRAP) \
+`define WRAPCNT_ARE(CLK, RST, EN, NAME, WRAP) \
    `REG_AR(CLK, RST, 0, NAME, NAME==WRAP? 0: EN? NAME+1'b1: NAME)
 
+   
 // SYNCRONIZERS
 `define RESET_SYNC(CLK, RST_IN, RST_OUT) \
-   wire  RST_OUT;
+   wire  RST_OUT; \
    reg [1:0] RST_IN_sync; \
    always @(posedge CLK, posedge RST_IN) \
    if(IN) RST_IN_sync = 2'b0; else RST_IN_sync = {RST_IN_sync[0], 1'b0}; \
