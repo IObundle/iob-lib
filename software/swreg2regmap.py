@@ -79,8 +79,9 @@ def swreg_parse (program, outfile) :
 
 def main () :
     #parse command line
-    if len(sys.argv) != 4:
-        vaError("Usage: ./v2tex.py infile outfile")
+    if len(sys.argv) != 3:
+        print "Usage: ./swreg2regmap.py infile outfile"
+        quit()
     else:
         infile = sys.argv[1]
         outfile = sys.argv[2]
