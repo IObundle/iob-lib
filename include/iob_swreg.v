@@ -1,46 +1,60 @@
-//IOs
-`define INPUT(NAME, WIDTH) input [WIDTH-1:0] NAME
-`define INPUT_S(NAME, WIDTH) input signed [WIDTH-1:0] NAME
-`define OUTPUT(NAME, WIDTH) output [WIDTH-1:0] NAME
-`define OUTPUT_S(NAME, WIDTH) output signed [WIDTH-1:0] NAME
-`define OUTPUT_R(NAME, WIDTH) output reg [WIDTH-1:0] NAME
-`define OUTPUT_RS(NAME, WIDTH) output reg signed [WIDTH-1:0] NAME
-`define INOUT(NAME, WIDTH) inout [WIDTH-1:0] NAME
-`define INOUT_S(NAME, WIDTH) inout signed [WIDTH-1:0] NAME
+//
+//include this file in your top module to assign registers 
+//
 
-//SIGNALs
-`define SIGNAL(NAME, WIDTH) reg [WIDTH-1:0] NAME
-`define SIGNAL_S(NAME, WIDTH) reg signed [WIDTH-1:0] NAME
-`define SIGNAL_O(NAME, WIDTH) wire [WIDTH-1:0] NAME
-`define SIGNAL_OS(NAME, WIDTH) wire signed [WIDTH-1:0] NAME
-
-//REGISTERS
-`define REG(CLK, OUT, IN) always @(posedge clk) OUT <= IN
-`define REG_E(CLK, EN, OUT, IN) always @(posedge clk) if(EN) OUT <= IN
-
-`define REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= IVAL; else OUT <= IN
-`define REG_RE(CLK, RST, EN, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= IVAL; else if (EN) OUT <= IN
-
-`define REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= IVAL; else OUT <= IN
-
-`define REG_ARE(CLK, RST, EN, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= IVAL; else if (EN) OUT <= IN
-
-//SOFTWARE ACCESSIBLE REGISTERS
-`define SWREG_R(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME
-`define SWREG_R_S(NAME, WIDTH, RST_VAL) reg signed [WIDTH-1:0] NAME
-`define SWREG_W(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME
-`define SWREG_W_S(NAME, WIDTH, RST_VAL) reg signed [WIDTH-1:0] NAME
-`define SWREG_RW(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME
-`define SWREG_RW_S(NAME, WIDTH, RST_VAL) reg signed [WIDTH-1:0] NAME
-
- //COMBINATORIAL CIRCUIT
-`define COMB always @* begin
-`define ENDCOMB end
+`define R_TYP 1
+`define W_TYP 2
+`define RW_TYP 3
 
 
-//CLOCK GENERATOR
+/*
+ in your project do:
+ 
+`define NAME_REG(I) I2S_TDM_REG_I
+`define NAME_REG_INI(I) I2S_TDM_REG_INIT_I
 
-`define CLOCK(PER) initial CLK=1; always #PER clk = ~CLK
+//generate following definitions using script
 
-   
+//name mapping
+`define `NAME_REG(0) actual_reg0_name
+....
+`define `NAME_REG(N) actual_regN_name
+
+//width mapping 
+`define `NAME_REG_W(0) reg0_width;
+....
+`define `NAME_REG_W(N) regN_width;
+
+//init val mapping
+`define `NAME_REG_INI(0) reg0_init_val;
+....
+`define `NAME_REG_INI(N) regN_init_val;
+
+//init type mapping
+`define `NAME_REG_TYP(0) reg0_init_val;
+....
+`define `NAME_REG_TYP(N) regN_init_val;
+
+ */
+
+
+//write registers
+genvar i;
+generate for (i=0; i<`N_WREGS; i=i+1)
+  if(`NAME_REG_TYP(i) == W_TYP || `NAME_REG_TYP(i) == RW_TYP)
+    `REG_ARE(clk, rst, valid & wstrb, `NAME_REG_INI(i), wdata[`NAME_REG_W(i)]);  
+endgenerate
+    
+//read registers
+generate for (i=0; i<`N_WREGS; i=i+1)
+  `COMB
+    if(`NAME_REG_TYP(i) == R_TYP || `NAME_REG_TYP(i) == RW_TYP)
+      rdata = `NAME_REG(i) | `DATA_W'd0;
+    else
+      rdata = `DATA_W'd0;
+   `ENDCOMB  
+endgenerate
+    
+// reply with ready
+`REG_AR(clk, rst, ready, valid);
    
