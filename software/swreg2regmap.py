@@ -22,14 +22,14 @@ def write_mapping(outfile, name_map, width_map, init_val_map, type_map):
         
     fout.write("\n\n//read registers\n")
     fout.write("always @* begin\n")
-    fout.write("   rdata = `DATA_W'd0;\n")
+    fout.write("   rdata_reg = `DATA_W'd0;\n")
     fout.write("   case(addr)\n")
     for i in range(len(name_map)):
         if (type_map[i] == "`R_TYP" or type_map[i] == "`RW_TYP"):
-            fout.write("     " + str(i) + ": rdata = " + str(name_map[i]) + " | `DATA_W'd0;\n")
+            fout.write("     " + str(i) + ": rdata_reg = " + str(name_map[i]) + " | `DATA_W'd0;\n")
             pass
         pass
-    fout.write("     default: rdata = `DATA_W'd0;\n")
+    fout.write("     default: rdata_reg = `DATA_W'd0;\n")
     fout.write("   endcase\n")
     fout.write("end\n")
 
