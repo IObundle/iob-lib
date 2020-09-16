@@ -27,7 +27,7 @@
 `define COMPONENT_OUT(NAME, WIDTH) wire [WIDTH-1:0] NAME
    
 //convert signal to a module ou component output
-`define SIGNAL2OUT(OUT, IN) assign OUT = IN;
+`define SIGNAL2OUT(OUT, IN) assign OUT = IN
    
 //COMBINATORIAL CIRCUIT
 `define COMB always @* begin
