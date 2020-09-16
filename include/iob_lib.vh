@@ -46,8 +46,8 @@
    wire  RST_OUT; \
    reg [1:0] RST_IN_sync; \
    always @(posedge CLK, posedge RST_IN) \
-   if(IN) RST_IN_sync = 2'b0; else RST_IN_sync = {RST_IN_sync[0], 1'b0}; \
-   assign RST_OUT = RST_IN_sync[1];
+   if(RST_IN) RST_IN_sync = 2'b0; else RST_IN_sync = {RST_IN_sync[0], 1'b0}; \
+   assign RST_OUT = RST_IN_sync[1]
    
 `define S2F_SYNC(CLK, rst, W, IN, OUT) \
    reg [W-1:0] IN_sync [1:0]; \
@@ -69,8 +69,9 @@
 `define CLOCK(CLK, PER) reg CLK=1; always #PER CLK = ~CLK
 
 //RESET GENERATOR
-`define RESET(RST, W) reg RST=1 initial #W RST=0; 
+`define RESET(RST, W) reg RST=1; initial #W RST=0
 
+   
    
    
    
