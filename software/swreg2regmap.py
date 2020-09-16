@@ -62,7 +62,7 @@ def swreg_parse (program, outfile) :
             #register type
             if '_RW' in flds[0]:
                 reg_type = '`RW_TYP'
-            elif 'W' in flds[1]:
+            elif '_W' in flds[0]:
                 reg_type = '`W_TYP'
             else:
                 reg_type = '`R_TYP'
