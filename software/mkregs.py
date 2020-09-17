@@ -17,7 +17,7 @@ def write_mapping(name_map, width_map, init_val_map, type_map):
     fout.write("//write registers\n")
     for i in range(len(name_map)):
         if (type_map[i] == "`W_TYP" or type_map[i] == "`RW_TYP"):
-            fout.write("`REG_ARE(clk, rst, valid & wstrb & (address == " + str(i) + "), " + str(init_val_map[i]) + ", " + str(name_map[i]) + ", wdata[" + str(width_map[i]) + "-1:0])\n")
+            fout.write("`REG_ARE(clk, rst, " + str(init_val_map[i]) + ", valid & wstrb & (address == " + str(i) + "), " + str(name_map[i]) + ", wdata[" + str(width_map[i]) + "-1:0])\n")
             pass
         pass
         
