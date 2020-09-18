@@ -110,7 +110,7 @@ def swreg_parse (program, hwsw):
 def main () :
     #parse command line
     if len(sys.argv) != 3:
-        print("Usage: ./swreg2regmap.py infile [HW/SW]")
+        print("Usage: ./mkregs.py infile [HW/SW]")
         quit()
     else:
         infile = sys.argv[1]
