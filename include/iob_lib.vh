@@ -68,23 +68,24 @@
 
    
 // SYNCRONIZERS
-`define RESET_SYNC(CLK, RST_IN, SYNC, RST_OUT) \
-   wire  RST_OUT; \
-   reg [1:0] SYNC; \
+`define RESET_SYNC(CLK, RST_IN, RST_OUT) \
+   reg [1:0] RST_IN``_sync; \
    always @(posedge CLK, posedge RST_IN) \
-   if(RST_IN) SYNC <= 2'b11; else SYNC <= {SYNC[0], 1'b0}; \
-   assign RST_OUT = SYNC[1];
+   if(RST_IN)  RST_IN``_sync <= 2'b11; else RST_IN``_sync <= {RST_IN``_sync[0], 1'b0}; \
+   `COMB RST_OUT = RST_IN``_sync[1];
    
-`define S2F_SYNC(CLK, rst, W, SYNC, OUT, IN) \
-   reg [W-1:0] SYNC [1:0]; \
+`define S2F_SYNC(CLK, RST, W, IN, OUT) \
+   reg [W-1:0] IN``_sync [1:0]; \
    always @(posedge CLK, posedge RST) \
    if(rst) begin \
-   SYNC[0] <= W'b0; \
-   SYNC[1] <= W'b0; \
+      IN``_sync[0] <= W'b0; \
+      IN``_sync[1] <= W'b0; \
    end else begin \
-      SYNC[0] <= IN; \
-      SYNC[1] <= SYNC[0]; \
-   end
+      IN``_sync[0] <= IN; \
+      IN``_sync[1] <= IN``_sync[0]; \
+   end \
+   `COMB OUT = IN``_sync[1];
+   
 
 
 //
@@ -92,7 +93,7 @@
 //
    
 //CLOCK GENERATOR
-`define CLOCK(CLK, PER) reg CLK=1; always #(PER) CLK = ~CLK;
+`define CLOCK(CLK, PER) reg CLK=1; always #(PER/2) CLK = ~CLK;
 
 
 //RESET GENERATOR
