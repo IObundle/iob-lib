@@ -11,28 +11,33 @@
 `define SIGNAL2OUT(OUT, IN) assign OUT = IN;
 
 //REGISTER
-`define REG(CLK, OUT, IN) always @(posedge clk) OUT <= IN;
-`define REG_E(CLK, EN, OUT, IN) always @(posedge clk) if(EN) OUT <= IN;
+`define REG(CLK, OUT, IN) always @(posedge CLK) OUT <= IN;
+`define REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if(EN) OUT <= IN;
 `define REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= IN;
 `define REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
 `define REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; else OUT <= IN;
 `define REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
 
 //SHIFT REGISTER
-`define S_REG(CLK, OUT, IN) always @(posedge clk) OUT <= (OUT << 1) | IN;
-`define S_REG_E(CLK, EN, OUT, IN) always @(posedge clk) if (EN) OUT <= (OUT << 1) | IN;
-`define S_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge clk) if (RST) OUT <= RST_VAL; else OUT <= (OUT << 1) | IN;
-`define S_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge clk) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT << 1) | IN;
-`define S_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge clk, posedge RST) if (RST) OUT <= RST_VAL; \
+//serial-in and parallel out shift reg
+`define SIPO_REG(CLK, OUT, IN) always @(posedge CLK) OUT <= (OUT << 1) | IN;
+`define SIPO_REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if (EN) OUT <= (OUT << 1) | IN;
+`define SIPO_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= (OUT << 1) | IN;
+`define SIPO_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT << 1) | IN;
+`define SIPO_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
    else OUT <= (OUT << 1) | IN;
-`define S_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge clk, posedge RST) if (RST) OUT <= RST_VAL; \
+`define SIPO_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
    else if(EN) OUT <= (OUT << 1) | IN;
- 
+
+//parallel in and serial-out shift reg
+`define PISO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT >> 1);
+`define PISO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
+   
 //COUNTER
 `define COUNTER_R(CLK, RST, NAME) \
    `REG_R(CLK, RST, 0, NAME, NAME+1'b1)
 `define COUNTER_RE(CLK, RST, EN, NAME) \
-   `REG_ARE(CLK, RST, 0, EN, NAME, NAME+1'b1)
+   `REG_RE(CLK, RST, 0, EN, NAME, NAME+1'b1)
 `define COUNTER_AR(CLK, RST, NAME) \
    `REG_AR(CLK, RST, 0, NAME, NAME+1'b1)
 `define COUNTER_ARE(CLK, RST, EN, NAME) \
@@ -41,6 +46,8 @@
 //CIRCULAR COUNTER
 `define WRAPCNT_R(CLK, RST, NAME, WRAP) \
    `REG_R(CLK, RST, 0, NAME, (NAME==WRAP? 0: NAME+1'b1))
+`define WRAPCNT_RE(CLK, RST, EN, NAME, WRAP) \
+   `REG_RE(CLK, RST, 0, EN, NAME, (NAME==WRAP? 0: NAME+1'b1))
 `define WRAPCNT_AR(CLK, RST, NAME, WRAP) \
    `REG_AR(CLK, RST, 0, NAME, (NAME==WRAP? 0: NAME+1'b1))
 `define WRAPCNT_ARE(CLK, RST, EN, NAME, WRAP) \
@@ -54,24 +61,30 @@
 //COMBINATORIAL CIRCUIT
 `define COMB always @*
 
-// SYNCRONIZERS
-`define RESET_SYNC(CLK, RST_IN, SYNC, RST_OUT) \
-   wire  RST_OUT; \
-   reg [1:0] SYNC; \
-   always @(posedge CLK, posedge RST_IN) \
-   if(RST_IN) SYNC <= 2'b11; else SYNC <= {SYNC[0], 1'b0}; \
-   assign RST_OUT = SYNC[1];
+
+//MUX
+`define MUX(SEL, OUT, IN) `COMB OUT = IN[SEL];
+
    
-`define S2F_SYNC(CLK, rst, W, IN, SYNC, OUT) \
-   reg [W-1:0] SYNC [1:0]; \
+// SYNCRONIZERS
+`define RESET_SYNC(CLK, RST_IN, RST_OUT) \
+   reg [1:0] RST_IN``_sync; \
+   always @(posedge CLK, posedge RST_IN) \
+   if(RST_IN)  RST_IN``_sync <= 2'b11; else RST_IN``_sync <= {RST_IN``_sync[0], 1'b0}; \
+   `COMB RST_OUT = RST_IN``_sync[1];
+   
+`define S2F_SYNC(CLK, RST, W, IN, OUT) \
+   reg [W-1:0] IN``_sync [1:0]; \
    always @(posedge CLK, posedge RST) \
-   if(rst) begin \
-   SYNC[0] <= W'b0; \
-   SYNC[1] <= W'b0; \
+   if(RST) begin \
+      IN``_sync[0] <= W'b0; \
+      IN``_sync[1] <= W'b0; \
    end else begin \
-      SYNC[0] <= IN; \
-      SYNC[1] <= SYNC[0]; \
-   end
+      IN``_sync[0] <= IN; \
+      IN``_sync[1] <= IN``_sync[0]; \
+   end \
+   `COMB OUT = IN``_sync[1];
+   
 
 
 //
@@ -79,7 +92,7 @@
 //
    
 //CLOCK GENERATOR
-`define CLOCK(CLK, PER) reg CLK=1; always #PER CLK = ~CLK;
+`define CLOCK(CLK, PER) reg CLK=1; always #(PER/2) CLK = ~CLK;
 
 
 //RESET GENERATOR
