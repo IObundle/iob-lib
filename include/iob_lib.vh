@@ -11,8 +11,8 @@
 `define SIGNAL2OUT(OUT, IN) assign OUT = IN;
 
 //REGISTER
-`define REG(CLK, OUT, IN) always @(posedge clk) OUT <= IN;
-`define REG_E(CLK, EN, OUT, IN) always @(posedge clk) if(EN) OUT <= IN;
+`define REG(CLK, OUT, IN) always @(posedge CLK) OUT <= IN;
+`define REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if(EN) OUT <= IN;
 `define REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= IN;
 `define REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
 `define REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; else OUT <= IN;
@@ -20,27 +20,24 @@
 
 //SHIFT REGISTER
 //serial-in and parallel out shift reg
-`define SIPO_REG(CLK, OUT, IN) always @(posedge clk) OUT <= (OUT << 1) | IN;
-`define SIPO_REG_E(CLK, EN, OUT, IN) always @(posedge clk) if (EN) OUT <= (OUT << 1) | IN;
-`define SIPO_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge clk) if (RST) OUT <= RST_VAL; else OUT <= (OUT << 1) | IN;
-`define SIPO_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge clk) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT << 1) | IN;
-`define SIPO_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge clk, posedge RST) if (RST) OUT <= RST_VAL; \
+`define SIPO_REG(CLK, OUT, IN) always @(posedge CLK) OUT <= (OUT << 1) | IN;
+`define SIPO_REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if (EN) OUT <= (OUT << 1) | IN;
+`define SIPO_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= (OUT << 1) | IN;
+`define SIPO_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT << 1) | IN;
+`define SIPO_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
    else OUT <= (OUT << 1) | IN;
-`define SIPO_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge clk, posedge RST) if (RST) OUT <= RST_VAL; \
+`define SIPO_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
    else if(EN) OUT <= (OUT << 1) | IN;
 
 //parallel in and serial-out shift reg
-`define PISO_REG(CLK, LD, OUT, IN) always @(posedge clk) if(LD) OUT <= IN; else OUT <= (OUT >> 1);
-`define PISO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge clk) if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
-
-//bus signal reversion
-`define REV_BUS(W, OUT, IN) `COMB begin integer i; for (i=0; i<W; i=i+1) OUT[i] = IN[W-i-1]; end
- 
+`define PISO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT >> 1);
+`define PISO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
+   
 //COUNTER
 `define COUNTER_R(CLK, RST, NAME) \
    `REG_R(CLK, RST, 0, NAME, NAME+1'b1)
 `define COUNTER_RE(CLK, RST, EN, NAME) \
-   `REG_ARE(CLK, RST, 0, EN, NAME, NAME+1'b1)
+   `REG_RE(CLK, RST, 0, EN, NAME, NAME+1'b1)
 `define COUNTER_AR(CLK, RST, NAME) \
    `REG_AR(CLK, RST, 0, NAME, NAME+1'b1)
 `define COUNTER_ARE(CLK, RST, EN, NAME) \
@@ -49,6 +46,8 @@
 //CIRCULAR COUNTER
 `define WRAPCNT_R(CLK, RST, NAME, WRAP) \
    `REG_R(CLK, RST, 0, NAME, (NAME==WRAP? 0: NAME+1'b1))
+`define WRAPCNT_RE(CLK, RST, EN, NAME, WRAP) \
+   `REG_RE(CLK, RST, 0, EN, NAME, (NAME==WRAP? 0: NAME+1'b1))
 `define WRAPCNT_AR(CLK, RST, NAME, WRAP) \
    `REG_AR(CLK, RST, 0, NAME, (NAME==WRAP? 0: NAME+1'b1))
 `define WRAPCNT_ARE(CLK, RST, EN, NAME, WRAP) \
@@ -77,7 +76,7 @@
 `define S2F_SYNC(CLK, RST, W, IN, OUT) \
    reg [W-1:0] IN``_sync [1:0]; \
    always @(posedge CLK, posedge RST) \
-   if(rst) begin \
+   if(RST) begin \
       IN``_sync[0] <= W'b0; \
       IN``_sync[1] <= W'b0; \
    end else begin \
