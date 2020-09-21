@@ -70,6 +70,8 @@ def swreg_parse (program, hwsw):
     init_val_map = []
     type_map = []
     for line in program :
+        if line.startswith("//"): continue #commented line
+        
         subline = re.sub('\[|\]|:|,|//|\;',' ', line)
         subline = re.sub('\(',' ',subline, 1)
         subline = re.sub('\)',' ', subline, 1)
