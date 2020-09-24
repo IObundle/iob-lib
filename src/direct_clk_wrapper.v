@@ -12,8 +12,8 @@
 
 module clk_wrapper
   (
-   `INPUT(clk_in),
-   `OUTPUT(clk_out)
+   `INPUT(clk_in, 1),
+   `OUTPUT(clk_out, 1)
    );
 
    assign clk_out = clk_in;
