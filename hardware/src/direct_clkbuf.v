@@ -10,12 +10,12 @@
 `timescale 1ns / 1ps
 `include "iob_lib.vh"
 
-module clk_wrapper
+module clkbuf
   (
    `INPUT(clk_in, 1),
    `OUTPUT(clk_out, 1)
    );
 
-   BUFG BUFG_inst(.I(clk_in),.O(clk_out));
+   assign clk_out = clk_in;
    
 endmodule
