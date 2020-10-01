@@ -8,7 +8,7 @@
 `timescale 1ns / 1ps
 `include "iob_lib.vh"
 
-module iobuf.v
+module iobuf
   (
    `INPUT(I, 1), //input from FPGA
    `INPUT(T, 1), //(1) disables I (0) enables I
