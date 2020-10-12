@@ -67,13 +67,13 @@
 
    
 // SYNCRONIZERS
-`define RESET_SYNC(CLK, RST_IN, RST_OUT) \
+`define RESET_SYNC(CLK, RST_OUT, RST_IN) \
    reg [1:0] RST_IN``_sync; \
    always @(posedge CLK, posedge RST_IN) \
    if(RST_IN)  RST_IN``_sync <= 2'b11; else RST_IN``_sync <= {RST_IN``_sync[0], 1'b0}; \
    `COMB RST_OUT = RST_IN``_sync[1];
    
-`define S2F_SYNC(CLK, RST, W, IN, OUT) \
+`define S2F_SYNC(CLK, RST, W, OUT, IN) \
    reg [W-1:0] IN``_sync [1:0]; \
    always @(posedge CLK, posedge RST) \
    if(RST) begin \
