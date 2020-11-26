@@ -10,7 +10,7 @@ import math
 
 infile = ''
 
-def write_mapping(name_map, width_map, init_val_map, type_map):
+def write_mapping(name_map, width_map, init_val_map, type_map, bank_map):
     #write output file
     global infile
     fout = open (infile+'_gen.v', 'w')
@@ -35,12 +35,16 @@ def write_mapping(name_map, width_map, init_val_map, type_map):
     fout.write("always @* begin\n")
     fout.write("   rdata_int = `DATA_W'd0;\n")
     fout.write("   case(address)\n")
+    j = 0
     for i in range(len(name_map)):
         if (type_map[i] == "`R_TYP" or type_map[i] == "`RW_TYP"):
             fout.write("     " + str(i) + ": rdata_int = " + str(name_map[i]) + " | `DATA_W'd0;\n")
             pass
+        pass
+    for i in range(len(name_map)):
         if (type_map[i] == "`BANK_R_TYP"):
-            fout.write("     " + str(i) + ": rdata_int = " + str(name_map[i]) + " | `DATA_W'd0;\n")
+            fout.write("     " + str(i) + ": rdata_int = " + str(bank_map[j]) + " | `DATA_W'd0;\n")
+            j = j + 1
             pass
         pass
     fout.write("     default: rdata_int = `DATA_W'd0;\n")
@@ -123,12 +127,12 @@ def swreg_parse (program, hwsw):
                 reg_type = '`BANK_R_TYP'
                 for i in range(int(reg_n_elems)-1):
                     name_map.append(reg_name+str(i))
-                    bank_map.append(reg_name +str(i))
+                    bank_map.append(reg_name+"["+str(i)+"]")
                     bank_width_map.append('['+reg_width+ "*"+str(i+1)+"-1"+':'+reg_width+"*"+str(i)+']')
                     width_map.append(reg_width)
                     init_val_map.append(reg_init_val)
                     type_map.append(reg_type)
-                bank_map.append(reg_name +str(i+1))
+                bank_map.append(reg_name +"["+str(i+1)+"]")
                 reg_name = reg_name+str(i+1)
                 bank_width_map.append('['+reg_width+ "*"+str(i+2)+"-1"+':'+reg_width+"*"+str(i+1)+']')
 
@@ -143,7 +147,7 @@ def swreg_parse (program, hwsw):
         else: continue #not a recognized macro
 
     if(hwsw == "HW"):
-        write_mapping(name_map, width_map, init_val_map, type_map)
+        write_mapping(name_map, width_map, init_val_map, type_map, bank_map)
         write_weights(name_map, width_map)
         write_h_bank(bank_map,bank_width_map)
     elif(hwsw == "SW"):
