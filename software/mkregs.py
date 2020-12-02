@@ -10,7 +10,7 @@ import math
 
 infile = ''
 
-def write_mapping(name_map, width_map, init_val_map, type_map, bank_map):
+def write_mapping(name_map, width_map, init_val_map, type_map, bank_map,cube_map):
     #write output file
     global infile
     fout = open (infile+'_gen.v', 'w')
@@ -22,9 +22,16 @@ def write_mapping(name_map, width_map, init_val_map, type_map, bank_map):
         fout.write("`define " + str(name_map[i]) + "_ADDR " + str(i) + "\n")
 
     fout.write("\n\n//write registers\n")
+    j=0
     for i in range(len(name_map)):
         if (type_map[i] == "`W_TYP" or type_map[i] == "`RW_TYP"):
             fout.write("`REG_ARE(clk, rst, " + str(init_val_map[i]) + ", valid & wstrb & (address == " + str(i) + "), " + str(name_map[i]) + ", wdata[" + str(width_map[i]) + "-1:0])\n")
+            j=j+1
+            pass
+        pass
+    for i in range(len(bank_map)+j):
+        if (type_map[i] == "`BANKW_TYP"):
+            fout.write("`REG_ARE(clk, rst, " + str(init_val_map[i]) + ", valid & wstrb & (address == " + str(i) + "), " + str(bank_map[i-j]) + ", wdata[" + str(width_map[i]) + "-1:0])\n")
             pass
         pass
 
@@ -42,11 +49,21 @@ def write_mapping(name_map, width_map, init_val_map, type_map, bank_map):
             pass
         pass
     for i in range(len(name_map)):
-        if (type_map[i] == "`BANK_R_TYP"):
+        if (type_map[i] == "`BANKR_TYP"):
             fout.write("     " + str(i) + ": rdata_int = " + str(bank_map[j]) + " | `DATA_W'd0;\n")
             j = j + 1
             pass
         pass
+    var=j
+    j=0
+    for i in range(len(name_map)):
+        if (type_map[i] == "`CUBER_TYP"):
+            print(cube_map[j])
+            fout.write("     " + str(i) + ": rdata_int = " + str(cube_map[j]) + " | `DATA_W'd0;\n")
+            j = j + 1
+            pass
+        pass
+
     fout.write("     default: rdata_int = `DATA_W'd0;\n")
     fout.write("   endcase\n")
     fout.write("end\n")
@@ -79,7 +96,7 @@ def write_h(name_map):
     fout.close()
     return
 
-def write_h_bank(bank_map,bank_width_map):
+def write_h_bank(bank_map,bank_width_map,cube_map,cube_width_map):
     global infile
     fout = open(infile+'_w.vh', 'a+')
 
@@ -87,7 +104,9 @@ def write_h_bank(bank_map,bank_width_map):
     fout.write("//Register Bank Addressing\n")
     for i in range(len(bank_map)):
         fout.write("`define " + str(bank_map[i]) + " " + str(bank_width_map[i]) + "\n")
-
+    for i in range(len(cube_map)):
+        fout.write("`define " + str(cube_map[i]) + " " + str(cube_width_map[i]) + "\n")
+        
     fout.close()
     return
 
@@ -101,6 +120,9 @@ def swreg_parse (program, hwsw):
     type_map = []
     bank_map =[]
     bank_width_map =[]
+    cube_map =[]
+    cube_width_map =[]
+
     for line in program :
         if line.startswith("//"): continue #commented line
 
@@ -120,11 +142,21 @@ def swreg_parse (program, hwsw):
             #register type
             if '_RW' in flds[0]:
                 reg_type = '`RW_TYP'
+                name_map.append(reg_name)
+                width_map.append(reg_width)
+                init_val_map.append(reg_init_val)
+                type_map.append(reg_type)
+
             elif '_W' in flds[0]:
                 reg_type = '`W_TYP'
-            elif '_BANK_R' in flds[0]:
+                name_map.append(reg_name)
+                width_map.append(reg_width)
+                init_val_map.append(reg_init_val)
+                type_map.append(reg_type)
+
+            elif '_BANKR' in flds[0]:
                 reg_n_elems = flds[4]
-                reg_type = '`BANK_R_TYP'
+                reg_type = '`BANKR_TYP'
                 for i in range(int(reg_n_elems)-1):
                     name_map.append(reg_name+str(i))
                     bank_map.append(reg_name+"["+str(i)+"]")
@@ -135,21 +167,53 @@ def swreg_parse (program, hwsw):
                 bank_map.append(reg_name +"["+str(i+1)+"]")
                 reg_name = reg_name+str(i+1)
                 bank_width_map.append('['+reg_width+ "*"+str(i+2)+"-1"+':'+reg_width+"*"+str(i+1)+']')
+                name_map.append(reg_name)
+                width_map.append(reg_width)
+                init_val_map.append(reg_init_val)
+                type_map.append(reg_type)
 
+            elif '_BANKW' in flds[0]:
+                reg_n_elems = flds[4]
+                reg_type = '`BANKW_TYP'
+                for i in range(int(reg_n_elems)-1):
+                    name_map.append(reg_name+str(i))
+                    bank_map.append(reg_name+"["+str(i)+"]")
+                    bank_width_map.append('['+reg_width+ "*"+str(i+1)+"-1"+':'+reg_width+"*"+str(i)+']')
+                    width_map.append(reg_width)
+                    init_val_map.append(reg_init_val)
+                    type_map.append(reg_type)
+                bank_map.append(reg_name +"["+str(i+1)+"]")
+                reg_name = reg_name+str(i+1)
+                bank_width_map.append('['+reg_width+ "*"+str(i+2)+"-1"+':'+reg_width+"*"+str(i+1)+']')
+                name_map.append(reg_name)
+                width_map.append(reg_width)
+                init_val_map.append(reg_init_val)
+                type_map.append(reg_type)
+
+            elif '_CUBER' in flds[0]:
+                reg_type = '`CUBER_TYP'
+                cube_nelements = flds[4]
+                cube_nlength =flds[5]
+                for i in range(int(cube_nelements)):
+                    for j in range(int(cube_nlength)):   
+                        cube_map.append(reg_name+"["+str(i)+"]"+"["+str(j)+"]")
+                        cube_width_map.append('['+reg_width+ "*"+str(i*int(cube_nlength)+j+1)+"-1"+':'+reg_width+"*"+str(i*int(cube_nlength)+j)+']')
+                        width_map.append(reg_width)
+                        init_val_map.append(reg_init_val)
+                        type_map.append(reg_type)
+                        name_map.append(reg_name+str(i)+str(j))
             else:
                 reg_type = '`R_TYP'
-
-
-            name_map.append(reg_name)
-            width_map.append(reg_width)
-            init_val_map.append(reg_init_val)
-            type_map.append(reg_type)
+                name_map.append(reg_name)
+                width_map.append(reg_width)
+                init_val_map.append(reg_init_val)
+                type_map.append(reg_type)
         else: continue #not a recognized macro
 
     if(hwsw == "HW"):
-        write_mapping(name_map, width_map, init_val_map, type_map, bank_map)
+        write_mapping(name_map, width_map, init_val_map, type_map, bank_map, cube_map)
         write_weights(name_map, width_map)
-        write_h_bank(bank_map,bank_width_map)
+        write_h_bank(bank_map,bank_width_map,cube_map,cube_width_map)
     elif(hwsw == "SW"):
 
         write_h(name_map)
