@@ -33,6 +33,16 @@
 `define PISO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT >> 1);
 `define PISO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
 
+//ACCUMULATOR
+`define ACC_R(CLK, RST, RST_VAL, NAME, INCR) \
+   `REG_R(CLK, RST, RST_VAL, NAME, NAME+INCR)
+`define ACC_RE(CLK, RST, RST_VAL, EN, NAME, INCR) \
+   `REG_RE(CLK, RST, RST_VAL, EN, NAME, NAME+INCR)
+`define ACC_AR(CLK, RST, RST_VAL, NAME, INCR) \
+   `REG_AR(CLK, RST, RST_VAL, NAME, NAME+INCR)
+`define ACC_ARE(CLK, RST, RST_VAL, EN, NAME, INCR) \
+   `REG_ARE(CLK, RST, RST_VAL, EN, NAME, NAME+INCR)
+
 //COUNTER
 `define COUNTER_R(CLK, RST, NAME) \
    `REG_R(CLK, RST, 0, NAME, NAME+1'b1)
