@@ -22,16 +22,14 @@ def write_mapping(name_map, width_map, init_val_map, type_map, bank_map,cube_map
         fout.write("`define " + str(name_map[i]) + "_ADDR " + str(i) + "\n")
 
     fout.write("\n\n//write registers\n")
-    j=0
     for i in range(len(name_map)):
         if (type_map[i] == "`W_TYP" or type_map[i] == "`RW_TYP"):
             fout.write("`REG_ARE(clk, rst, " + str(init_val_map[i]) + ", valid & wstrb & (address == " + str(i) + "), " + str(name_map[i]) + ", wdata[" + str(width_map[i]) + "-1:0])\n")
-            j=j+1
             pass
         pass
-    for i in range(len(bank_map)+j):
+    for i in range(len(bank_map)):
         if (type_map[i] == "`BANKW_TYP"):
-            fout.write("`REG_ARE(clk, rst, " + str(init_val_map[i]) + ", valid & wstrb & (address == " + str(i) + "), " + str(bank_map[i-j]) + ", wdata[" + str(width_map[i]) + "-1:0])\n")
+            fout.write("`REG_ARE(clk, rst, " + str(init_val_map[i]) + ", valid & wstrb & (address == " + str(i) + "), " + str(bank_map[i]) + ", wdata[" + str(width_map[i]) + "-1:0])\n")
             pass
         pass
     for i in range(len(bank_map)):
@@ -47,7 +45,6 @@ def write_mapping(name_map, width_map, init_val_map, type_map, bank_map,cube_map
     fout.write("always @* begin\n")
     fout.write("   rdata_int = `DATA_W'd0;\n")
     fout.write("   case(address)\n")
-    j = 0
     for i in range(len(name_map)):
         if (type_map[i] == "`R_TYP" or type_map[i] == "`RW_TYP"):
             fout.write("     " + str(i) + ": rdata_int = " + str(name_map[i]) + " | `DATA_W'd0;\n")
@@ -55,12 +52,9 @@ def write_mapping(name_map, width_map, init_val_map, type_map, bank_map,cube_map
         pass
     for i in range(len(name_map)):
         if (type_map[i] == "`BANKR_TYP"):
-
             fout.write("     " + str(i) + ": rdata_int = " + str(bank_map[i]) + " | `DATA_W'd0;\n")
             pass
         pass
-    var=j
-    j=0
     for i in range(len(name_map)):
         if (type_map[i] == "`CUBER_TYP"):
             print(cube_map[j])
