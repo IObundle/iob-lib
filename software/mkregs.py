@@ -32,11 +32,6 @@ def write_mapping(name_map, width_map, init_val_map, type_map, bank_map,cube_map
             fout.write("`REG_ARE(clk, rst, " + str(init_val_map[i]) + ", valid & wstrb & (address == " + str(i) + "), " + str(bank_map[i]) + ", wdata[" + str(width_map[i]) + "-1:0])\n")
             pass
         pass
-    for i in range(len(bank_map)):
-        if (type_map[i] == "`BANKW_TYP"):
-            fout.write("`REG_ARE(clk, rst, " + str(init_val_map[i]) + ", valid & wstrb & (address == " + str(i) + "), " + str(bank_map[i]) + ", wdata[" + str(width_map[i]) + "-1:0])\n")
-            pass
-        pass
 
     fout.write("\n\n//read registers\n")
     fout.write("`SIGNAL(rdata_int,`DATA_W)\n")
@@ -57,7 +52,6 @@ def write_mapping(name_map, width_map, init_val_map, type_map, bank_map,cube_map
         pass
     for i in range(len(name_map)):
         if (type_map[i] == "`CUBER_TYP"):
-            print(cube_map[j])
             fout.write("     " + str(i) + ": rdata_int = " + str(cube_map[i]) + " | `DATA_W'd0;\n")
             pass
         pass
@@ -94,7 +88,7 @@ def write_h(name_map):
     fout.close()
     return
 
-def write_h_bank(bank_map,bank_width_map,cube_map,cube_width_map):
+def write_w_bank(bank_map,bank_width_map,cube_map,cube_width_map):
     global infile
     fout = open(infile+'_w.vh', 'a+')
 
@@ -233,7 +227,7 @@ def swreg_parse (program, hwsw):
     if(hwsw == "HW"):
         write_mapping(name_map, width_map, init_val_map, type_map, bank_map, cube_map)
         write_weights(name_map, width_map)
-        write_h_bank(bank_map,bank_width_map,cube_map,cube_width_map)
+        write_w_bank(bank_map,bank_width_map,cube_map,cube_width_map)
     elif(hwsw == "SW"):
 
         write_h(name_map)
