@@ -32,7 +32,7 @@
 //parallel in and serial-out shift reg
 `define PISO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT >> 1);
 `define PISO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
-   
+
 //ACCUMULATOR
 `define ACC_R(CLK, RST, RST_VAL, NAME, INCR) \
    `REG_R(CLK, RST, RST_VAL, NAME, NAME+INCR)
@@ -67,7 +67,10 @@
 `define SWREG_R(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME;
 `define SWREG_W(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME;
 `define SWREG_RW(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME;
-   
+`define SWREG_BANKR(NAME, WIDTH, RST_VAL, N_ELEMENTS)  reg [WIDTH-1:0] NAME [N_ELEMENTS-1:0];
+`define SWREG_BANKW(NAME, WIDTH, RST_VAL, N_ELEMENTS)  reg [WIDTH-1:0] NAME [N_ELEMENTS-1:0];
+`define SWREG_CUBER(NAME, WIDTH, RST_VAL, N_ELEMENTS, LENGTH) reg [WIDTH-1:0] NAME [N_ELEMENTS-1:0] [LENGTH-1:0];
+
 //COMBINATORIAL CIRCUIT
 `define COMB always @*
 
@@ -75,14 +78,14 @@
 //MUX
 `define MUX(SEL, OUT, IN) `COMB OUT = IN[SEL];
 
-   
+
 // SYNCRONIZERS
 `define RESET_SYNC(CLK, RST_IN, RST_OUT) \
    reg [1:0] RST_IN``_sync; \
    always @(posedge CLK, posedge RST_IN) \
    if(RST_IN)  RST_IN``_sync <= 2'b11; else RST_IN``_sync <= {RST_IN``_sync[0], 1'b0}; \
    `COMB RST_OUT = RST_IN``_sync[1];
-   
+
 `define S2F_SYNC(CLK, RST, W, IN, OUT) \
    reg [W-1:0] IN``_sync [1:0]; \
    always @(posedge CLK, posedge RST) \
@@ -94,13 +97,13 @@
       IN``_sync[1] <= IN``_sync[0]; \
    end \
    `COMB OUT = IN``_sync[1];
-   
+
 
 
 //
 // COMMON TESTBENCH UTILS
 //
-   
+
 //CLOCK GENERATOR
 `define CLOCK(CLK, PER) reg CLK=1; always #(PER/2) CLK = ~CLK;
 
@@ -108,7 +111,3 @@
 //RESET GENERATOR
 `define RESET(RST, RISE_TIME, DURATION) reg RST=0; \
 initial begin #RISE_TIME RST=1; #DURATION RST=0; end
-    
-   
-   
-   
