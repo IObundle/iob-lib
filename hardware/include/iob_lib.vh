@@ -98,6 +98,15 @@
    end \
    `COMB OUT = IN``_sync[1];
 
+//Posedge Detector
+`define POSEDGE_DETECT(CLK, RST, IN, OUT) \
+   reg IN``_det_reg; \
+   always @(posedge CLK, posedge RST) \
+     if(RST) \
+       IN``_det_reg <= 1'b1; \
+     else \
+       IN``_det_reg <= IN; \
+   `COMB OUT = IN & ~IN``_det_reg;
 
 
 //
