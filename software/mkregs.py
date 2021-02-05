@@ -34,29 +34,29 @@ def write_mapping(name_map, width_map, init_val_map, type_map, bank_map,cube_map
         pass
 
     fout.write("\n\n//read registers\n")
-    fout.write("`SIGNAL(rdata_int,`DATA_W)\n")
+    fout.write("`SIGNAL(rdata_int, DATA_W)\n")
     fout.write("`SIGNAL2OUT(rdata, rdata_int)\n\n")
 
     fout.write("always @* begin\n")
-    fout.write("   rdata_int = `DATA_W'd0;\n")
+    fout.write("   rdata_int = DATA_W'd0;\n")
     fout.write("   case(address)\n")
     for i in range(len(name_map)):
         if (type_map[i] == "`R_TYP" or type_map[i] == "`RW_TYP"):
-            fout.write("     " + str(i) + ": rdata_int = " + str(name_map[i]) + " | `DATA_W'd0;\n")
+            fout.write("     " + str(i) + ": rdata_int = " + str(name_map[i]) + " | DATA_W'd0;\n")
             pass
         pass
     for i in range(len(name_map)):
         if (type_map[i] == "`BANKR_TYP"):
-            fout.write("     " + str(i) + ": rdata_int = " + str(bank_map[i]) + " | `DATA_W'd0;\n")
+            fout.write("     " + str(i) + ": rdata_int = " + str(bank_map[i]) + " | DATA_W'd0;\n")
             pass
         pass
     for i in range(len(name_map)):
         if (type_map[i] == "`CUBER_TYP"):
-            fout.write("     " + str(i) + ": rdata_int = " + str(cube_map[i]) + " | `DATA_W'd0;\n")
+            fout.write("     " + str(i) + ": rdata_int = " + str(cube_map[i]) + " | DATA_W'd0;\n")
             pass
         pass
 
-    fout.write("     default: rdata_int = `DATA_W'd0;\n")
+    fout.write("     default: rdata_int = DATA_W'd0;\n")
     fout.write("   endcase\n")
     fout.write("end\n")
 
