@@ -86,8 +86,8 @@
    reg [W-1:0] IN``_sync [1:0]; \
    always @(posedge CLK, posedge RST) \
    if(RST) begin \
-      IN``_sync[0] <= W'b0; \
-      IN``_sync[1] <= W'b0; \
+      IN``_sync[0] <= !1; \
+      IN``_sync[1] <= !1; \
    end else begin \
       IN``_sync[0] <= IN; \
       IN``_sync[1] <= IN``_sync[0]; \
