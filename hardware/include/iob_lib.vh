@@ -45,13 +45,13 @@
 
 //COUNTER
 `define COUNTER_R(CLK, RST, NAME) \
-   `REG_R(CLK, RST, 0, NAME, NAME+1'b1)
+   `REG_R(CLK, RST, !1, NAME, NAME+1'b1)
 `define COUNTER_RE(CLK, RST, EN, NAME) \
-   `REG_RE(CLK, RST, 0, EN, NAME, NAME+1'b1)
+   `REG_RE(CLK, RST, !1, EN, NAME, NAME+1'b1)
 `define COUNTER_AR(CLK, RST, NAME) \
-   `REG_AR(CLK, RST, 0, NAME, NAME+1'b1)
+   `REG_AR(CLK, RST, !1, NAME, NAME+1'b1)
 `define COUNTER_ARE(CLK, RST, EN, NAME) \
-   `REG_ARE(CLK, RST, 0, EN, NAME, NAME+1'b1)
+   `REG_ARE(CLK, RST, !1, EN, NAME, NAME+1'b1)
 
 //CIRCULAR COUNTER
 `define WRAPCNT_R(CLK, RST, NAME, WRAP) \
@@ -86,8 +86,8 @@
    reg [W-1:0] IN``_sync [1:0]; \
    always @(posedge CLK, posedge RST) \
    if(RST) begin \
-      IN``_sync[0] <= W'b0; \
-      IN``_sync[1] <= W'b0; \
+      IN``_sync[0] <= !1; \
+      IN``_sync[1] <= !1; \
    end else begin \
       IN``_sync[0] <= IN; \
       IN``_sync[1] <= IN``_sync[0]; \
