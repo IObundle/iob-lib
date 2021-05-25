@@ -94,6 +94,22 @@
    end \
    `COMB OUT = IN``_sync[1];
 
+// Clock crossing for a pulse (signal asserted for only one cycle) in a faster clock (clock A) to a slower or equal clock (clock B) 
+`define PULSE_SYNC(PULSE_IN,CLK_A,PULSE_OUT,CLK_B,RST) \
+   reg PULSE_IN``_sync; \
+   always @(posedge CLK_A, posedge RST) \
+      if(RST) \
+         PULSE_IN``_sync <= 1'b0; \
+      else \
+         PULSE_IN``_sync <= PULSE_IN``_sync ^ PULSE_IN; \
+   reg [2:0] PULSE_OUT``_sync; \
+   always @(posedge CLK_B,posedge RST) \
+      if(RST) \
+         PULSE_OUT``_sync <= 3'b000; \
+      else \
+         PULSE_OUT``_sync <= {PULSE_OUT``_sync[1],PULSE_OUT``_sync[0],PULSE_IN``_sync}; \
+   `COMB PULSE_OUT = PULSE_OUT``_sync[2] ^ PULSE_OUT``_sync[1];
+
 //Posedge Detector
 `define POSEDGE_DETECT(CLK, RST, IN, OUT) \
    reg IN``_det_reg; \
