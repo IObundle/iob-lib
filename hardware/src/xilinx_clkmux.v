@@ -20,8 +20,8 @@ module clkmux
 
    BUFGMUX #(.CLK_SEL_TYPE("ASYNC")
 	     ) BUFGMUX_inst(
-			.I0(clk_in1), 
-			.I1(clk_in2), 
+			.I0(clk_in0), 
+			.I1(clk_in1), 
 			.S(clk_sel), 
 			.O(clk_out)
 			);
