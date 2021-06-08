@@ -45,13 +45,13 @@
 
 //COUNTER
 `define COUNTER_R(CLK, RST, NAME) \
-   `REG_R(CLK, RST, 0, NAME, NAME+1'b1)
+   `REG_R(CLK, RST, !1, NAME, NAME+1'b1)
 `define COUNTER_RE(CLK, RST, EN, NAME) \
-   `REG_RE(CLK, RST, 0, EN, NAME, NAME+1'b1)
+   `REG_RE(CLK, RST, !1, EN, NAME, NAME+1'b1)
 `define COUNTER_AR(CLK, RST, NAME) \
-   `REG_AR(CLK, RST, 0, NAME, NAME+1'b1)
+   `REG_AR(CLK, RST, !1, NAME, NAME+1'b1)
 `define COUNTER_ARE(CLK, RST, EN, NAME) \
-   `REG_ARE(CLK, RST, 0, EN, NAME, NAME+1'b1)
+   `REG_ARE(CLK, RST, !1, EN, NAME, NAME+1'b1)
 
 //CIRCULAR COUNTER
 `define WRAPCNT_R(CLK, RST, NAME, WRAP) \
@@ -77,17 +77,17 @@
 
 // SYNCRONIZERS
 `define RESET_SYNC(CLK, RST_IN, RST_OUT) \
-   reg [1:0] RST_IN``_sync; \
+   reg [1:0] RST_IN``_``RST_OUT``_sync; \
    always @(posedge CLK, posedge RST_IN) \
-   if(RST_IN)  RST_IN``_sync <= 2'b11; else RST_IN``_sync <= {RST_IN``_sync[0], 1'b0}; \
-   `COMB RST_OUT = RST_IN``_sync[1];
+   if(RST_IN)  RST_IN``_``RST_OUT``_sync <= 2'b11; else RST_IN``_``RST_OUT``_sync <= {RST_IN``_``RST_OUT``_sync[0], 1'b0}; \
+   `COMB RST_OUT = RST_IN``_``RST_OUT``_sync[1];
 
 `define S2F_SYNC(CLK, RST, W, IN, OUT) \
    reg [W-1:0] IN``_sync [1:0]; \
    always @(posedge CLK, posedge RST) \
    if(RST) begin \
-      IN``_sync[0] <= W'b0; \
-      IN``_sync[1] <= W'b0; \
+      IN``_sync[0] <= !1; \
+      IN``_sync[1] <= !1; \
    end else begin \
       IN``_sync[0] <= IN; \
       IN``_sync[1] <= IN``_sync[0]; \
