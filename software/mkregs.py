@@ -26,7 +26,9 @@ def write_hw(name_map, width_map, init_val_map, type_map):
 
     fout.write("\n\n//read registers\n")
     fout.write("`SIGNAL(rdata_int, DATA_W)\n")
-    fout.write("`SIGNAL2OUT(rdata, rdata_int)\n\n")
+    fout.write("`SIGNAL(rdata_int2, DATA_W)\n")
+    fout.write("`REG_ARE(clk, rst, 0, valid, rdata_int2, rdata_int)\n")
+    fout.write("`SIGNAL2OUT(rdata, rdata_int2)\n\n")
 
     fout.write("always @* begin\n")
     fout.write("   rdata_int = 1'b0;\n")
