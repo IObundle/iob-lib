@@ -82,12 +82,15 @@
    if(RST_IN)  RST_IN``_``RST_OUT``_sync <= 2'b11; else RST_IN``_``RST_OUT``_sync <= {RST_IN``_``RST_OUT``_sync[0], 1'b0}; \
    `COMB RST_OUT = RST_IN``_``RST_OUT``_sync[1];
 
-`define S2F_SYNC(CLK, RST, W, IN, OUT) \
+`define F2S_SYNC(CLK, IN, OUT) \
+    `RESET_SYNC(CLK, IN, OUT)
+
+`define S2F_SYNC(CLK, RST, RST_VAL, W, IN, OUT) \
    reg [W-1:0] IN``_sync [1:0]; \
    always @(posedge CLK, posedge RST) \
    if(RST) begin \
-      IN``_sync[0] <= !1; \
-      IN``_sync[1] <= !1; \
+      IN``_sync[0] <= RST_VAL; \
+      IN``_sync[1] <= RST_VAL; \
    end else begin \
       IN``_sync[0] <= IN; \
       IN``_sync[1] <= IN``_sync[0]; \
