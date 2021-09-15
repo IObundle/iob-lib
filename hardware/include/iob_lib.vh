@@ -3,10 +3,18 @@
 `define OUTPUT(NAME, WIDTH) output [WIDTH-1:0] NAME
 `define INOUT(NAME, WIDTH) inout [WIDTH-1:0] NAME
 
-//SIGNAL
+//WIRES AND VARIABLES
+`define VAR(NAME, WIDTH) reg [WIDTH-1:0] NAME;
+`define WIRE(NAME, WIDTH) wire [WIDTH-1:0] NAME;
+`define WIRE_SIGNED(NAME, WIDTH) reg signed [WIDTH-1:0] NAME;
+//convert VAR to WIRE
+`define VAR2WIRE(OUT, IN) assign OUT = IN;
+
+
+//SIGNAL (deprecated)
 `define SIGNAL(NAME, WIDTH) reg [WIDTH-1:0] NAME;
-`define SIGNAL_SIGNED(NAME, WIDTH) reg signed [WIDTH-1:0] NAME;
 `define SIGNAL_OUT(NAME, WIDTH) wire [WIDTH-1:0] NAME;
+`define SIGNAL_SIGNED(NAME, WIDTH) reg signed [WIDTH-1:0] NAME;
 //convert signal to output
 `define SIGNAL2OUT(OUT, IN) assign OUT = IN;
 
