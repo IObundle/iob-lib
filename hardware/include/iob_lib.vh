@@ -123,6 +123,15 @@
        IN``_det_reg <= IN; \
    `COMB OUT = IN & ~IN``_det_reg;
 
+//One Detected
+`define PULSE_DETECTED(CLK, RST, IN, OUT) \
+   reg OUT; \
+   always @(posedge CLK, posedge RST) \
+     if(RST) \
+       OUT <= 1'b0; \
+     else if (IN)\
+       OUT <= 1'b1;
+
 //
 // ASIC MACRO VERSIONS: (Cadence tools do not support `` to append arguments
 // to strings)
