@@ -204,3 +204,10 @@
 //RESET GENERATOR
 `define RESET(RST, RISE_TIME, DURATION) reg RST=0; \
 initial begin #RISE_TIME RST=1; #DURATION RST=0; end
+
+
+//DIFFERENTIATOR
+`define DIFF(CLK, RST, EN, D, X, X_REG) \
+   `REG_ARE(CLK, RST, 1'b0, EN, X_REG, X) \
+   `COMB D = X - X_REG;
+   
