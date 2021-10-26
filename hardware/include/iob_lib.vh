@@ -133,7 +133,7 @@
    `COMB OUT = IN & ~IN``_det_reg;
 
 //One Detected
-`define PULSE_DETECTED(CLK, RST, IN, OUT) \
+`define PULSE_DETECT(CLK, RST, IN, OUT) \
    reg OUT; \
    always @(posedge CLK, posedge RST) \
      if(RST) \
