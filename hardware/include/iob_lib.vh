@@ -94,7 +94,7 @@
 `define F2S_SYNC(CLK, IN, OUT) \
     `RESET_SYNC(CLK, IN, OUT)
 
-`define S2F_SYNC(CLK, RST, RST_VAL, W, IN, OUT) \
+`define SYNC(CLK, RST, RST_VAL, W, IN, OUT) \
    reg [W-1:0] IN``_sync [1:0]; \
    always @(posedge CLK, posedge RST) \
    if(RST) begin \
@@ -106,6 +106,9 @@
    end \
    `COMB OUT = IN``_sync[1];
 
+`define S2F_SYNC(CLK, RST, RST_VAL, W, IN, OUT) \
+   `SYNC(CLK, RST, RST_VAL, W, IN, OUT)
+   
 // Clock crossing for a pulse (signal asserted for only one cycle) in a faster clock (clock A) to a slower or equal clock (clock B) 
 `define PULSE_SYNC(PULSE_IN,CLK_A,PULSE_OUT,CLK_B,RST) \
    reg PULSE_IN``_sync; \
@@ -155,7 +158,7 @@
 `define F2S_SYNC_(CLK, IN, IN_SYNC, OUT) \
     `RESET_SYNC_(CLK, IN, IN_SYNC, OUT)
 
-`define S2F_SYNC_(CLK, RST, RST_VAL, W, IN, IN_SYNC_0, IN_SYNC_1, OUT) \
+`define SYNC_(CLK, RST, RST_VAL, W, IN, IN_SYNC_0, IN_SYNC_1, OUT) \
    reg [W-1:0] IN_SYNC_0; \
    reg [W-1:0] IN_SYNC_1; \
    always @(posedge CLK, posedge RST) \
@@ -167,6 +170,9 @@
       IN_SYNC_1 <= IN_SYNC_0; \
    end \
    `COMB OUT = IN_SYNC_1;
+
+`define S2F_SYNC_(CLK, RST, RST_VAL, W, IN, IN_SYNC_0, IN_SYNC_1, OUT) \
+   `SYNC_(CLK, RST, RST_VAL, W, IN, IN_SYNC_0, IN_SYNC_1, OUT)
 
 // Clock crossing for a pulse (signal asserted for only one cycle) in a faster clock (clock A) to a slower or equal clock (clock B) 
 `define PULSE_SYNC_(PULSE_IN, PULSE_IN_SYNC, CLK_A, PULSE_OUT, PULSE_OUT_SYNC, CLK_B, RST) \
