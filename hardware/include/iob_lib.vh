@@ -162,6 +162,25 @@
        IN_REG <= IN; \
    `COMB OUT = IN & ~IN_REG;
 
+`define NEGEDGE_DETECT(CLK, RST, IN, OUT) \
+   reg IN``_det_reg; \
+   always @(posedge CLK, posedge RST) \
+     if(RST) \
+       IN``_det_reg <= 1'b1; \
+     else \
+       IN``_det_reg <= IN; \
+   `COMB OUT = ~IN & IN``_det_reg;
+
+   //use this one when `` is not supported
+`define NEGEDGE_DETECT_(CLK, RST, IN, IN_REG, OUT) \
+   reg IN_REG; \
+   always @(posedge CLK, posedge RST) \
+     if(RST) \
+       IN_REG <= 1'b1; \
+     else \
+       IN_REG <= IN; \
+   `COMB OUT = ~IN & IN_REG;
+
 //One Detected
 `define PULSE_DETECT(CLK, RST, IN, OUT) \
    reg OUT; \
