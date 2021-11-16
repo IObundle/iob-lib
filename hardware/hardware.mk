@@ -4,6 +4,6 @@ include $(LIB_DIR)/config.mk
 MODULES+=LIB
 
 #header
-INCLUDE+=$(LIB_DIR)/hardware/include
+INCLUDE+=$(incdir) $(LIB_DIR)/hardware/include
 #verilog sources
 $(foreach p, $(LIBVSRC), $(eval VSRC+=$p))
