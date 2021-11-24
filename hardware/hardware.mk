@@ -1,7 +1,7 @@
 include $(LIB_DIR)/config.mk
 
 #add itself to MODULES list
-MODULES+=$(MODULE)
+MODULES+=LIB
 
 #header
 INCLUDE+=$(incdir) $(LIB_DIR)/hardware/include
