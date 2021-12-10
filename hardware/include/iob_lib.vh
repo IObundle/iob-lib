@@ -6,6 +6,7 @@
 
 //WIRES AND VARIABLES
 `define VAR(NAME, WIDTH) reg [WIDTH-1:0] NAME;
+`define VAR_SIGNED(NAME, WIDTH) reg signed [WIDTH-1:0] NAME;
 `define WIRE(NAME, WIDTH) wire [WIDTH-1:0] NAME;
 `define WIRE_SIGNED(NAME, WIDTH) wire signed [WIDTH-1:0] NAME;
 //convert VAR to WIRE
