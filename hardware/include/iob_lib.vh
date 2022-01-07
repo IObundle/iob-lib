@@ -136,7 +136,7 @@
 
 
 `define S2F_SYNC(CLK, RST, RST_VAL, W, IN, OUT) \
-   `SYNC(CLK, RST, RST_VAL, IN, OUT)
+   `SYNC(CLK, RST, RST_VAL, W, IN, OUT)
 
    //use this one when `` is not supported
 `define S2F_SYNC_(CLK, RST, RST_VAL, W, IN, IN_SYNC, OUT) \
