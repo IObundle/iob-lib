@@ -1,3 +1,7 @@
+// COMMON UTILS
+`define max(a,b) {(a) > (b) ? (a) : (b)}
+`define min(a,b) {(a) < (b) ? (a) : (b)}
+
 //IO
 `define INPUT(NAME, WIDTH) input [WIDTH-1:0] NAME
 `define INPUT_SIGNED(NAME, WIDTH) input signed [WIDTH-1:0] NAME
