@@ -2,7 +2,7 @@
 
 `include "axi.vh"
 
-module axil2native_adapter #
+module axil2iob #
   (
    parameter AXIL_ADDR_W = 32, // Width of address bus in bits
    parameter AXIL_DATA_W = 32  // Width of data bus in bits
