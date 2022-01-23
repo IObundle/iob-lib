@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 `include "interconnect.vh"
 
-module split
+module iob_split
   #(
     parameter DATA_W = 32,
     parameter ADDR_W = 32,
