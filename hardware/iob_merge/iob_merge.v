@@ -2,7 +2,7 @@
 `include "interconnect.vh"
 
 
-module merge
+module iob_merge
   #(
     parameter N_MASTERS = 2,
     parameter DATA_W = 32,
