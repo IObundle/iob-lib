@@ -58,7 +58,7 @@ module axil2iob #
    reg [1:0]                   state_nxt;
 
    // State register
-   always @(posedge clk) begin
+   always @(posedge clk, posedge rst) begin
       if (rst) begin
          state <= 2'b00;
       end else begin
@@ -68,7 +68,7 @@ module axil2iob #
 
    wire                        rst_ready_int = (state_nxt == IDLE)? 1'b1: 1'b0;
    reg                         ready_int;
-   always @(posedge clk) begin
+   always @(posedge clk, posedge rst) begin
       if (rst_ready_int) begin
          ready_int <= 1'b0;
       end else if (ready) begin
