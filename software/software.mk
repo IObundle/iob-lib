@@ -1,3 +1,7 @@
-MODULES+=INTERCON
+ifneq (LIB,$(filter LIB, $(MODULES)))
 
-INCLUDE+=-I$(INTERCON_DIR)/software
+MODULES+=LIB
+
+INCLUDE+=-I$(LIB_DIR)/software
+
+endif
