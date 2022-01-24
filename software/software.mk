@@ -2,6 +2,6 @@ ifneq (LIB,$(filter LIB, $(MODULES)))
 
 MODULES+=LIB
 
-INCLUDE+=-I$(LIB_DIR)/software
+INCLUDE+=-I$(LIB_DIR)/software/include
 
 endif
