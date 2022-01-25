@@ -69,7 +69,9 @@ module axil2iob #
    wire                        rst_ready_int = (state_nxt == IDLE)? 1'b1: 1'b0;
    reg                         ready_int;
    always @(posedge clk, posedge rst) begin
-      if (rst_ready_int) begin
+      if (rst) begin
+         ready_int <= 1'b0;
+      end else if (rst_ready_int) begin
          ready_int <= 1'b0;
       end else if (ready) begin
          ready_int <= 1'b1;
