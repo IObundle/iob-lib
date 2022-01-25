@@ -1,0 +1,85 @@
+\documentclass{../../submodules/TEX/document/ug/ug}
+\usepackage{float}
+\usepackage{color, colortbl}
+\usepackage[section]{placeins}
+\usepackage{mathtools}
+\usepackage{amsthm}
+%\usepackage[T1]{helvet}
+\usepackage[OT1]{fontenc} 
+\usepackage{array}
+\usepackage[binary-units=true]{siunitx}
+\usepackage{subcaption}
+\usepackage{caption,tabularx,booktabs}
+\usepackage{longtable}
+\usepackage[all]{nowidow}
+\widowpenalty10000
+\clubpenalty10000
+
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+
+\graphicspath{ {./figures/} }
+
+\input{../title}
+\category{User Guide, \input{version.txt}, Build \input{shortHash.txt}}
+%\confidential{}
+
+\input{\TEX/color}
+
+\begin{document}
+\maketitle
+\cleardoublepage
+\tableofcontents
+\listoftables
+\listoffigures
+\cleardoublepage
+
+\section{Introduction}
+\input{../intro}
+
+\section{Symbol}
+\input{\TEX/symb}
+
+\section{Features}
+\input{../features}
+
+\section{Benefits}
+\input{../benefits}
+
+\section{Deliverables}
+\input{../deliverables}
+
+\section{Block Diagram and Description}
+\input{\TEX/ug/bdd}
+
+%synthesis parameters
+\ifnum\SP=1
+\input{\TEX/ug/sp}
+\fi
+
+\section{Interface Signals}
+\input{\TEX/ug/is}
+
+%timing diagrams
+\ifnum\TD=1
+\input{\TEX/td}
+\fi
+
+%software accessible registers
+\ifnum\SWREGS=1
+\input{\TEX/ug/sw_reg}
+\fi
+
+%software components
+\ifnum\SWCOMPS=1
+\input{sw}
+\fi
+
+\section{Implementation Results}
+\input{../results}
+
+\ifnum\CUSTOM=1
+\input{custom}
+\fi
+
+
+\end{document}
