@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "interconnect.vh"
+`include "iob_intercon.vh"
 
 
 module iob_merge

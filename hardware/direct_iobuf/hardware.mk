@@ -1,7 +1,7 @@
-ifneq (direct_iobuf,$(filter direct_iobuf, $(MODULES)))
+ifneq (direct_iobuf,$(filter direct_iobuf, $(HW_MODULES)))
 
 # Add to modules list
-MODULES+=direct_iobuf
+HW_MODULES+=direct_iobuf
 
 # Sources
 VSRC+=$(LIB_DIR)/hardware/direct_iobuf/direct_iobuf.v

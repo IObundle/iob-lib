@@ -1,6 +1,6 @@
-ifneq (LIB,$(filter LIB, $(MODULES)))
+ifneq (LIB,$(filter LIB, $(SW_MODULES)))
 
-MODULES+=LIB
+SW_MODULES+=LIB
 
 INCLUDE+=-I$(LIB_DIR)/software/include
 
