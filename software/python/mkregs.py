@@ -25,10 +25,10 @@ def write_hw(name_map, width_map, init_val_map, type_map):
         pass
 
     fout.write("\n\n//read registers\n")
-    fout.write("`SIGNAL(rdata_int, DATA_W)\n")
-    fout.write("`SIGNAL(rdata_int2, DATA_W)\n")
+    fout.write("`VAR(rdata_int, DATA_W)\n")
+    fout.write("`VAR(rdata_int2, DATA_W)\n")
     fout.write("`REG_ARE(clk, rst, 0, valid, rdata_int2, rdata_int)\n")
-    fout.write("`SIGNAL2OUT(rdata, rdata_int2)\n\n")
+    fout.write("`VAR2WIRE(rdata, rdata_int2)\n\n")
 
     fout.write("always @* begin\n")
     fout.write("   rdata_int = 1'b0;\n")
@@ -44,9 +44,9 @@ def write_hw(name_map, width_map, init_val_map, type_map):
     fout.write("end\n")
 
     #ready signal   
-    fout.write("`SIGNAL(ready_int, 1)\n")
+    fout.write("`VAR(ready_int, 1)\n")
     fout.write("`REG_AR(clk, rst, 0, ready_int, valid)\n")
-    fout.write("`SIGNAL2OUT(ready, ready_int)\n")
+    fout.write("`VAR2WIRE(ready, ready_int)\n")
     
     fout.close()
     return
