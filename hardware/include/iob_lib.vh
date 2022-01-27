@@ -16,14 +16,6 @@
 //convert VAR to WIRE
 `define VAR2WIRE(OUT, IN) assign OUT = IN;
 
-
-//SIGNAL (deprecated)
-`define SIGNAL(NAME, WIDTH) reg [WIDTH-1:0] NAME;
-`define SIGNAL_OUT(NAME, WIDTH) wire [WIDTH-1:0] NAME;
-`define SIGNAL_SIGNED(NAME, WIDTH) reg signed [WIDTH-1:0] NAME;
-//convert signal to output
-`define SIGNAL2OUT(OUT, IN) assign OUT = IN;
-
 //REGISTER
 `define REG(CLK, OUT, IN) always @(posedge CLK) OUT <= IN;
 `define REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if(EN) OUT <= IN;
