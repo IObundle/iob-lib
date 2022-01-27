@@ -1,3 +1,6 @@
+`ifndef LIBINC
+`define LIBINC
+
 // COMMON UTILS
 `define max(a,b) {(a) > (b) ? (a) : (b)}
 `define min(a,b) {(a) < (b) ? (a) : (b)}
@@ -206,4 +209,6 @@ initial begin #RISE_TIME RST=1; #DURATION RST=0; end
 `define DIFF(CLK, RST, EN, D, X, X_REG) \
    `REG_ARE(CLK, RST, 1'b0, EN, X_REG, X) \
    `COMB D = X - X_REG;
+   
+`endif
    
