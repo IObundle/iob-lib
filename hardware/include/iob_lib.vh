@@ -12,12 +12,18 @@
 `define INOUT(NAME, WIDTH) inout [WIDTH-1:0] NAME
 
 //WIRES AND VARIABLES
-`define VAR(NAME, WIDTH) reg [WIDTH-1:0] NAME;
-`define VAR_SIGNED(NAME, WIDTH) reg signed [WIDTH-1:0] NAME;
 `define WIRE(NAME, WIDTH) wire [WIDTH-1:0] NAME;
 `define WIRE_SIGNED(NAME, WIDTH) wire signed [WIDTH-1:0] NAME;
+`define VAR(NAME, WIDTH) reg [WIDTH-1:0] NAME;
+`define VAR_SIGNED(NAME, WIDTH) reg signed [WIDTH-1:0] NAME;
 //convert VAR to WIRE
 `define VAR2WIRE(OUT, IN) assign OUT = IN;
+//2d arrays
+`define WIREARRAY_2D(NAME, LEN, WIDTH) wire [WIDTH-1:0] NAME [LEN-1:0];
+`define WIREARRAY_2D_SIGNED(NAME, LEN, WIDTH) wire signed [WIDTH-1:0] NAME [LEN-1:0];
+`defne VARARRAY_2D(NAME, LEN, WIDTH) reg [WIDTH-1:0] NAME [LEN-1:0];
+`defne VARARRAY_2D_SIGNED(NAME, LEN, WIDTH) reg signed [WIDTH-1:0] NAME [LEN-1:0];
+
 
 //REGISTER
 `define REG(CLK, OUT, IN) always @(posedge CLK) OUT <= IN;
@@ -63,14 +69,14 @@
    `REG_ARE(CLK, RST, 1'b0, EN, NAME, NAME+1'b1)
 
 //CIRCULAR COUNTER
-`define WRAPCNT_R(CLK, RST, NAME, WRAP) \
-   `REG_R(CLK, RST, 1'b0, NAME, (NAME>=WRAP? 1'b0: NAME+1'b1))
-`define WRAPCNT_RE(CLK, RST, EN, NAME, WRAP) \
-   `REG_RE(CLK, RST, 1'b0, EN, NAME, (NAME>=WRAP? 1'b0: NAME+1'b1))
-`define WRAPCNT_AR(CLK, RST, NAME, WRAP) \
-   `REG_AR(CLK, RST, 1'b0, NAME, (NAME>=WRAP? 1'b0: NAME+1'b1))
-`define WRAPCNT_ARE(CLK, RST, EN, NAME, WRAP) \
-   `REG_ARE(CLK, RST, 1'b0, EN, NAME, (NAME>=WRAP? 1'b0: NAME+1'b1))
+`define MODCNT_R(CLK, RST, NAME, MOD) \
+   `REG_R(CLK, RST, 1'b0, NAME, (NAME==(MOD-1'b1)? 1'b0: NAME+1'b1))
+`define MODCNT_RE(CLK, RST, EN, NAME, MOD) \
+   `REG_RE(CLK, RST, 1'b0, EN, NAME, (NAME==(MOD-1'b1? 1'b0: NAME+1'b1))
+`define MODCNT_AR(CLK, RST, NAME, MOD) \
+   `REG_AR(CLK, RST, 1'b0, NAME, (NAME==(MOD-1b'1)? 1'b0: NAME+1'b1))
+`define MODCNT_ARE(CLK, RST, EN, NAME, MOD) \
+   `REG_ARE(CLK, RST, 1'b0, EN, NAME, (NAME==(MOD-1'b1)? 1'b0: NAME+1'b1))
 
 //SOFTWARE ACCESSIBLE REGISTER
 `define SWREG_R(NAME, WIDTH, RST_VAL) wire [WIDTH-1:0] NAME;
