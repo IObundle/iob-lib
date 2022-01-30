@@ -1,3 +1,4 @@
+`include "axi.vh"
    //address write
    `OUTPUT(m_axi_awid,   `AXI_ID_W),      //Address write channel ID
    `OUTPUT(m_axi_awaddr,  AXI_ADDR_W),    //Address write channel address

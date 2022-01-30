@@ -21,8 +21,8 @@
 //2d arrays
 `define WIREARRAY_2D(NAME, LEN, WIDTH) wire [WIDTH-1:0] NAME [LEN-1:0];
 `define WIREARRAY_2D_SIGNED(NAME, LEN, WIDTH) wire signed [WIDTH-1:0] NAME [LEN-1:0];
-`defne VARARRAY_2D(NAME, LEN, WIDTH) reg [WIDTH-1:0] NAME [LEN-1:0];
-`defne VARARRAY_2D_SIGNED(NAME, LEN, WIDTH) reg signed [WIDTH-1:0] NAME [LEN-1:0];
+`define VARARRAY_2D(NAME, LEN, WIDTH) reg [WIDTH-1:0] NAME [LEN-1:0];
+`define VARARRAY_2D_SIGNED(NAME, LEN, WIDTH) reg signed [WIDTH-1:0] NAME [LEN-1:0];
 
 
 //REGISTER
@@ -34,20 +34,44 @@
 `define REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
 
 //SHIFT REGISTER
-//serial-in and parallel out shift reg
-`define SIPO_REG(CLK, OUT, IN) always @(posedge CLK) OUT <= (OUT << 1) | IN;
-`define SIPO_REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if (EN) OUT <= (OUT << 1) | IN;
-`define SIPO_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= (OUT << 1) | IN;
-`define SIPO_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT << 1) | IN;
-`define SIPO_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
+
+//shift left
+`define SL_REG(CLK, OUT, IN) always @(posedge CLK) OUT <= (OUT << 1) | IN;
+`define SL_REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if (EN) OUT <= (OUT << 1) | IN;
+`define SL_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= (OUT << 1) | IN;
+`define SL_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT << 1) | IN;
+`define SL_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
    else OUT <= (OUT << 1) | IN;
-`define SIPO_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
+`define SL_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
    else if(EN) OUT <= (OUT << 1) | IN;
 
-//parallel in and serial-out shift reg
-`define PISO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT >> 1);
-`define PISO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
+//shift right
+`define SR_REG(CLK, OUT, IN) always @(posedge CLK) OUT <= (OUT >> 1) | IN;
+`define SR_REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if (EN) OUT <= (OUT >> 1) | IN;
+`define SR_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= (OUT >> 1) | IN;
+`define SR_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT >> 1) | IN;
+`define SR_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
+   else OUT <= (OUT >> 1) | IN;
+`define SR_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
+   else if(EN) OUT <= (OUT >> 1) | IN;
 
+//parallel in and serial-out shift reg
+//shift left
+`define PISLO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT << 1);
+`define PISLO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1);
+//shift right
+`define PISRO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT >> 1);
+`define PISRO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
+
+//REVERSER -- NOT TESTED
+`define REVERSE(A, B, W) \
+   reg [W-1:0] B;\
+   always @* begin\
+      integer rev_i;\
+      for(ref_i = 0; rev_i < W; rev_i = rev_i + 1)\
+        B[i] = A[W-1-i];\
+   end
+   
 //ACCUMULATOR
 `define ACC_R(CLK, RST, RST_VAL, NAME, INCR) \
    `REG_R(CLK, RST, RST_VAL, NAME, NAME+INCR)

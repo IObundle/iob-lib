@@ -1,3 +1,5 @@
+`ifndef AXI
+`define AXI
 //
 // Signals width
 //
@@ -363,3 +365,5 @@
     wire [`AXI_RESP_W-1:0]   PREFIX``axil_rresp;   /*Read channel response*/ \
     wire                     PREFIX``axil_rvalid;  /*Read channel valid*/ \
     wire                     PREFIX``axil_rready   /*Read channel ready*/
+`endif //  `ifndef AXI
+
