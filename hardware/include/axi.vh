@@ -40,7 +40,7 @@
 
 // Port
 
-`define AXI4_M_IF_PORT(PREFIX) \
+`define AXI4_M_WRITE_IF_PORT(PREFIX) \
     /*address write*/ \
     output [`AXI_ID_W-1:0]    PREFIX``axi_awid,    /*Address write channel ID*/ \
     output [AXI_ADDR_W-1:0]   PREFIX``axi_awaddr,  /*Address write channel address*/ \
@@ -64,7 +64,9 @@
     input [`AXI_ID_W-1:0]     PREFIX``axi_bid,     /*Write response channel ID*/ \
     input [`AXI_RESP_W-1:0]   PREFIX``axi_bresp,   /*Write response channel response*/ \
     input                     PREFIX``axi_bvalid,  /*Write response channel valid*/ \
-    output                    PREFIX``axi_bready,  /*Write response channel ready*/ \
+    output                    PREFIX``axi_bready,  /*Write response channel ready*/
+
+`define AXI4_M_READ_IF_PORT(PREFIX) \
     /*address read*/ \
     output [`AXI_ID_W-1:0]    PREFIX``axi_arid,    /*Address read channel ID*/ \
     output [AXI_ADDR_W-1:0]   PREFIX``axi_araddr,  /*Address read channel address*/ \
@@ -85,7 +87,11 @@
     input                     PREFIX``axi_rvalid,  /*Read channel valid*/ \
     output                    PREFIX``axi_rready   /*Read channel ready*/
 
-`define AXI4_S_IF_PORT(PREFIX) \
+`define AXI4_M_IF_PORT(PREFIX) \
+    `AXI4_M_WRITE_IF_PORT(PREFIX), \
+    `AXI4_M_READ_IF_PORT(PREFIX)
+
+`define AXI4_S_WRITE_IF_PORT(PREFIX) \
     /*address write*/ \
     input [`AXI_ID_W-1:0]     PREFIX``axi_awid,    /*Address write channel ID*/ \
     input [AXI_ADDR_W-1:0]    PREFIX``axi_awaddr,  /*Address write channel address*/ \
@@ -109,7 +115,9 @@
     output [`AXI_ID_W-1:0]    PREFIX``axi_bid,     /*Write response channel ID*/ \
     output [`AXI_RESP_W-1:0]  PREFIX``axi_bresp,   /*Write response channel response*/ \
     output                    PREFIX``axi_bvalid,  /*Write response channel valid*/ \
-    input                     PREFIX``axi_bready,  /*Write response channel ready*/ \
+    input                     PREFIX``axi_bready,  /*Write response channel ready*/
+
+`define AXI4_S_READ_IF_PORT(PREFIX) \
     /*address read*/ \
     input [`AXI_ID_W-1:0]     PREFIX``axi_arid,    /*Address read channel ID*/ \
     input [AXI_ADDR_W-1:0]    PREFIX``axi_araddr,  /*Address read channel address*/ \
@@ -130,9 +138,13 @@
     output                    PREFIX``axi_rvalid,  /*Read channel valid*/ \
     input                     PREFIX``axi_rready   /*Read channel ready*/
 
+`define AXI4_S_IF_PORT(PREFIX) \
+    `AXI4_S_WRITE_IF_PORT(PREFIX), \
+    `AXI4_S_READ_IF_PORT(PREFIX)
+
 // Portmap
 
-`define AXI4_IF_PORTMAP(PORT_PREFIX, WIRE_PREFIX) \
+`define AXI4_WRITE_IF_PORTMAP(PORT_PREFIX, WIRE_PREFIX) \
     /*address write*/ \
     .``PORT_PREFIX``axi_awid    (WIRE_PREFIX``axi_awid),    /*Address write channel ID*/ \
     .``PORT_PREFIX``axi_awaddr  (WIRE_PREFIX``axi_awaddr),  /*Address write channel address*/ \
@@ -156,7 +168,9 @@
     .``PORT_PREFIX``axi_bid     (WIRE_PREFIX``axi_bid),     /*Write response channel ID*/ \
     .``PORT_PREFIX``axi_bresp   (WIRE_PREFIX``axi_bresp),   /*Write response channel response*/ \
     .``PORT_PREFIX``axi_bvalid  (WIRE_PREFIX``axi_bvalid),  /*Write response channel valid*/ \
-    .``PORT_PREFIX``axi_bready  (WIRE_PREFIX``axi_bready),  /*Write response channel ready*/ \
+    .``PORT_PREFIX``axi_bready  (WIRE_PREFIX``axi_bready),  /*Write response channel ready*/
+
+`define AXI4_READ_IF_PORTMAP(PORT_PREFIX, WIRE_PREFIX) \
     /*address read*/ \
     .``PORT_PREFIX``axi_arid    (WIRE_PREFIX``axi_arid),    /*Address read channel ID*/ \
     .``PORT_PREFIX``axi_araddr  (WIRE_PREFIX``axi_araddr),  /*Address read channel address*/ \
@@ -177,9 +191,13 @@
     .``PORT_PREFIX``axi_rvalid  (WIRE_PREFIX``axi_rvalid),  /*Read channel valid*/ \
     .``PORT_PREFIX``axi_rready  (WIRE_PREFIX``axi_rready)   /*Read channel ready*/
 
+`define AXI4_IF_PORTMAP(PORT_PREFIX, WIRE_PREFIX) \
+    `AXI4_WRITE_IF_PORTMAP(PORT_PREFIX, WIRE_PREFIX), \
+    `AXI4_READ_IF_PORTMAP(PORT_PREFIX, WIRE_PREFIX)
+
 // Wire
 
-`define AXI4_IF_WIRE(PREFIX) \
+`define AXI4_WRITE_IF_WIRE(PREFIX) \
     /*address write*/ \
     wire [`AXI_ID_W-1:0]    PREFIX``axi_awid;    /*Address write channel ID*/ \
     wire [AXI_ADDR_W-1:0]   PREFIX``axi_awaddr;  /*Address write channel address*/ \
@@ -203,7 +221,9 @@
     wire [`AXI_ID_W-1:0]    PREFIX``axi_bid;     /*Write response channel ID*/ \
     wire [`AXI_RESP_W-1:0]  PREFIX``axi_bresp;   /*Write response channel response*/ \
     wire                    PREFIX``axi_bvalid;  /*Write response channel valid*/ \
-    wire                    PREFIX``axi_bready;  /*Write response channel ready*/ \
+    wire                    PREFIX``axi_bready;  /*Write response channel ready*/
+
+`define AXI4_READ_IF_WIRE(PREFIX) \
     /*address read*/ \
     wire [`AXI_ID_W-1:0]    PREFIX``axi_arid;    /*Address read channel ID*/ \
     wire [AXI_ADDR_W-1:0]   PREFIX``axi_araddr;  /*Address read channel address*/ \
@@ -223,6 +243,10 @@
     wire                    PREFIX``axi_rlast;   /*Read channel last word*/ \
     wire                    PREFIX``axi_rvalid;  /*Read channel valid*/ \
     wire                    PREFIX``axi_rready   /*Read channel ready*/
+
+`define AXI4_IF_WIRE(PREFIX) \
+    `AXI4_WRITE_IF_WIRE(PREFIX) \
+    `AXI4_READ_IF_WIRE(PREFIX) \
 
 //
 // AXI-4 lite
