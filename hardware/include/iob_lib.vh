@@ -13,11 +13,15 @@
 
 //WIRES AND VARIABLES
 `define WIRE(NAME, WIDTH) wire [WIDTH-1:0] NAME;
+`define WIRE_INIT(NAME, WIDTH, INIT) wire [WIDTH-1:0] NAME = INIT;
 `define WIRE_SIGNED(NAME, WIDTH) wire signed [WIDTH-1:0] NAME;
 `define VAR(NAME, WIDTH) reg [WIDTH-1:0] NAME;
+`define VAR_INIT(NAME, WIDTH, INIT) reg [WIDTH-1:0] NAME = INIT;
 `define VAR_SIGNED(NAME, WIDTH) reg signed [WIDTH-1:0] NAME;
-//convert VAR to WIRE
-`define VAR2WIRE(OUT, IN) assign OUT = IN;
+`define WIRE2WIRE(IN, OUT) assign OUT = IN;//assign WIRE to WIRE
+`define VAR2WIRE(IN, OUT) assign OUT = IN;//convert VAR to WIRE
+`define WIRE2VAR(IN, OUT) `COMB OUT = IN;//convert WIRE to VAR
+
 //2d arrays
 `define WIREARRAY_2D(NAME, LEN, WIDTH) wire [WIDTH-1:0] NAME [LEN-1:0];
 `define WIREARRAY_2D_SIGNED(NAME, LEN, WIDTH) wire signed [WIDTH-1:0] NAME [LEN-1:0];
@@ -94,16 +98,16 @@
 
 //CIRCULAR COUNTER
 `define MODCNT_R(CLK, RST, NAME, MOD) \
-   `REG_R(CLK, RST, 1'b0, NAME, (NAME==(MOD-1'b1)? 1'b0: NAME+1'b1))
+   `REG_R(CLK, RST, 1'b0, NAME, (NAME==(MOD-1)? 1'b0: NAME+1'b1))
 `define MODCNT_RE(CLK, RST, EN, NAME, MOD) \
-   `REG_RE(CLK, RST, 1'b0, EN, NAME, (NAME==(MOD-1'b1? 1'b0: NAME+1'b1))
+   `REG_RE(CLK, RST, 1'b0, EN, NAME, (NAME==(MOD-1)? 1'b0: NAME+1'b1))
 `define MODCNT_AR(CLK, RST, NAME, MOD) \
-   `REG_AR(CLK, RST, 1'b0, NAME, (NAME==(MOD-1b'1)? 1'b0: NAME+1'b1))
+   `REG_AR(CLK, RST, 1'b0, NAME, (NAME==(MOD-1)? 1'b0: NAME+1'b1))
 `define MODCNT_ARE(CLK, RST, EN, NAME, MOD) \
-   `REG_ARE(CLK, RST, 1'b0, EN, NAME, (NAME==(MOD-1'b1)? 1'b0: NAME+1'b1))
+   `REG_ARE(CLK, RST, 1'b0, EN, NAME, (NAME==(MOD-1)? 1'b0: NAME+1'b1))
 
 //SOFTWARE ACCESSIBLE REGISTER
-`define SWREG_R(NAME, WIDTH, RST_VAL) wire [WIDTH-1:0] NAME;
+`define SWREG_R(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME;
 `define SWREG_W(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME;
 
 //COMBINATORIAL CIRCUIT
@@ -240,5 +244,6 @@ initial begin #RISE_TIME RST=1; #DURATION RST=0; end
    `REG_ARE(CLK, RST, 1'b0, EN, X_REG, X) \
    `COMB D = X - X_REG;
    
-`endif
+`endif //  `ifndef LIBINC
+           
    

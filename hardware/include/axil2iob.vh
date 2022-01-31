@@ -5,7 +5,7 @@
    `WIRE(ready, 1)
    `WIRE(address, ADDR_W)
    `WIRE(wdata, DATA_W)
-   `WIRE(wstrb, 1)
+   `WIRE(wstrb, 4)
    `WIRE(rdata, DATA_W)
 
    //AXI TO NATIVE INTERFACE ADAPTER
