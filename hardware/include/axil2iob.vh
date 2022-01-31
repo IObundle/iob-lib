@@ -3,10 +3,10 @@
    //native interface signals 
    `WIRE(valid, 1)
    `WIRE(ready, 1)
-   `WIRE(address, ADDR_W)
-   `WIRE(wdata, DATA_W)
+   `WIRE(address, AXIL_ADDR_W)
+   `WIRE(wdata, AXIL_DATA_W)
    `WIRE(wstrb, 4)
-   `WIRE(rdata, DATA_W)
+   `WIRE(rdata, AXIL_DATA_W)
 
    //AXI TO NATIVE INTERFACE ADAPTER
    axil2iob #
