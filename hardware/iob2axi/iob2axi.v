@@ -25,7 +25,7 @@ module iob2axi
     //
     // AXI-4 Full Master I/F
     //
-`include "axi_m_if.vh"
+    `AXI4_M_IF_PORT(m_),
 
     //
     // Native Slave I/F
