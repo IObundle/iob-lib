@@ -1,223 +1,200 @@
-`timescale 1ns/1ps
+`timescale 1ns / 1ps
+
+`include "axi.vh"
 
 module iob2axi_tb;
 
-   parameter clk_frequency = `CLK_FREQ;
-   parameter clk_per = 1e9/clk_frequency; // clock period in ns
+   parameter TEST_SZ = 256;
 
-   parameter DATA_W = 32;
-   parameter ADDR_W = 10;
+   parameter ADDR_W = 24;
+   parameter DATA_W = 128;
 
-   // System signals
-   reg                 clk;
-   reg                 rst;
+   parameter AXI_ADDR_W = ADDR_W;
+   parameter AXI_DATA_W = DATA_W;
 
-   // Native interface
-   reg                 valid;
-   reg [ADDR_W-1:0]    addr;
-   reg [DATA_W-1:0]    wdata;
-   reg [DATA_W/8-1:0]  wstrb;
-   wire [DATA_W-1:0]   rdata;
-   wire                ready;
+   // Clock
+   reg clk = 1;
+   always #(`CLK_PER/2) clk = ~clk;
 
-   // AXI4-lite interface
-   // Master Interface Write Address
-   wire [ADDR_W-1:0]   M_AXI_AWADDR;
-   wire [2:0]          M_AXI_AWPROT;
-   wire                M_AXI_AWVALID;
-   wire                M_AXI_AWREADY;
+   // Reset
+   reg rst = 0;
 
-   // Master Interface Write Data
-   wire [DATA_W-1:0]   M_AXI_WDATA;
-   wire [DATA_W/8-1:0] M_AXI_WSTRB;
-   wire                M_AXI_WVALID;
-   wire                M_AXI_WREADY;
+   //
+   // DMA interface
+   //
 
-   // Master Interface Write Response
-   wire [1:0]          M_AXI_BRESP;
-   wire                M_AXI_BVALID;
-   wire                M_AXI_BREADY;
+   // Control I/F
+   reg [`AXI_LEN_W-1:0] length;
+   wire                 iob2axi_ready;
+   wire                 error;
 
-   // Master Interface Read Address
-   wire [ADDR_W-1:0]   M_AXI_ARADDR;
-   wire [2:0]          M_AXI_ARPROT;
-   wire                M_AXI_ARVALID;
-   wire                M_AXI_ARREADY;
+   // Native slave I/F
+   reg                  valid;
+   reg [ADDR_W-1:0]     addr;
+   reg [DATA_W-1:0]     wdata;
+   reg [DATA_W/8-1:0]   wstrb;
+   wire [DATA_W-1:0]    rdata;
+   wire                 ready;
 
-   // Master Interface Read Data 
-   wire [DATA_W-1:0]   M_AXI_RDATA;
-   wire [1:0]          M_AXI_RRESP;
-   wire                M_AXI_RVALID;
-   wire                M_AXI_RREADY;
+   // AXI-4 full master I/F
+   `AXI4_IF_WIRE(ddr_);
 
-   // auxilary signals
-
-   // iterator
-   integer                      i;
-
-   // Instantiate the Unit Under Test (UUT)
-   iob2axi # (
-              .ADDR_W(ADDR_W),
-              .DATA_W(DATA_W)
-              )
-     uut (
-		  .clk(clk),
-		  .rst(rst),
-
-          // Native interface
-          .valid(valid),
-          .addr(addr),
-          .wdata(wdata),
-          .wstrb(wstrb),
-          .rdata(rdata),
-          .ready(ready),
-
-          // AXI4-lite interface
-          // Master Interface Write Address
-          .M_AXI_AWADDR(M_AXI_AWADDR),
-          .M_AXI_AWPROT(M_AXI_AWPROT),
-          .M_AXI_AWVALID(M_AXI_AWVALID),
-          .M_AXI_AWREADY(M_AXI_AWREADY),
-
-          // Master Interface Write Data
-          .M_AXI_WDATA(M_AXI_WDATA),
-          .M_AXI_WSTRB(M_AXI_WSTRB),
-          .M_AXI_WVALID(M_AXI_WVALID),
-          .M_AXI_WREADY(M_AXI_WREADY),
-
-          // Master Interface Write Response
-          .M_AXI_BRESP(M_AXI_BRESP),
-          .M_AXI_BVALID(M_AXI_BVALID),
-          .M_AXI_BREADY(M_AXI_BREADY),
-
-          // Master Interface Read Address
-          .M_AXI_ARADDR(M_AXI_ARADDR),
-          .M_AXI_ARPROT(M_AXI_ARPROT),
-          .M_AXI_ARVALID(M_AXI_ARVALID),
-          .M_AXI_ARREADY(M_AXI_ARREADY),
-
-          // Master Interface Read Data 
-          .M_AXI_RDATA(M_AXI_RDATA),
-          .M_AXI_RRESP(M_AXI_RRESP),
-          .M_AXI_RVALID(M_AXI_RVALID),
-          .M_AXI_RREADY(M_AXI_RREADY)
-		  );
-
-   axil_ram # (
-               //.PIPELINE_OUTPUT(3),
-               .DATA_WIDTH(DATA_W),
-               .ADDR_WIDTH(ADDR_W)
-               )
-   ddr (
-        .clk(clk),
-        .rst(rst),
-
-        .s_axil_awaddr(M_AXI_AWADDR),
-        .s_axil_awprot(M_AXI_AWPROT),
-        .s_axil_awvalid(M_AXI_AWVALID),
-        .s_axil_awready(M_AXI_AWREADY),
-
-        .s_axil_wdata(M_AXI_WDATA),
-        .s_axil_wstrb(M_AXI_WSTRB),
-        .s_axil_wvalid(M_AXI_WVALID),
-        .s_axil_wready(M_AXI_WREADY),
-
-        .s_axil_bresp(M_AXI_BRESP),
-        .s_axil_bvalid(M_AXI_BVALID),
-        .s_axil_bready(M_AXI_BREADY),
-
-        .s_axil_araddr(M_AXI_ARADDR),
-        .s_axil_arprot(M_AXI_ARPROT),
-        .s_axil_arvalid(M_AXI_ARVALID),
-        .s_axil_arready(M_AXI_ARREADY),
-
-        .s_axil_rdata(M_AXI_RDATA),
-        .s_axil_rresp(M_AXI_RRESP),
-        .s_axil_rvalid(M_AXI_RVALID),
-        .s_axil_rready(M_AXI_RREADY)
-        );
+   // Iterators
+   integer               i, seq_ini;
 
    initial begin
 
 `ifdef VCD
-      $dumpfile("iob2axi.vcd");
-      $dumpvars;
+      $dumpfile("uut.vcd");
+      $dumpvars();
 `endif
 
-      // Global reset of FPGA
-      #100;
-
-      clk = 1;
-      rst = 0;
+      //
+      // Init signals
+      //
+      length = 0;
 
       valid = 0;
       addr = 0;
       wdata = 0;
       wstrb = 0;
 
-      // Global reset
-      #(clk_per+1);
-      rst = 1;
+      //
+      // Initialize memory
+      //
 
-      #clk_per;
+      // Assert reset
+      #100 rst = 1;
+
+      // Deassert rst
+      repeat (100) @(posedge clk) #1;
       rst = 0;
 
+      // Wait an arbitray (10) number of cycles
+      repeat (10) @(posedge clk) #1;
+
+      //
+      // Test starts here
+      //
+
+      // Number from which to start the incremental sequence to initialize the RAM
+      seq_ini = 32;
+
       // Write
-      #clk_per;
+      length = TEST_SZ-1;
       valid = 1;
-      addr = 0;
-      wdata = 1;
+      addr = 0x4000;
       wstrb = -1;
-
-      i = 0;
-      while (i < 10) begin
-         if (ready) begin
-            addr = ++i*4;
-            wdata = 2*i+1;
-
-            if (i == 10) begin
-               valid = 0;
-               wstrb = 0;
-            end
-         end
-
-         #clk_per;
+      for (i=0; i < TEST_SZ; i=i+1) begin
+         wdata = i+seq_ini;
+         @(posedge clk) #1;
       end
-
-      // Read
-      #clk_per;
-      valid = 1;
-      addr = 0;
-
-      i = 0;
-      while (i < 10) begin
-         if (ready) begin
-            if (rdata != 2*i+1) begin
-               $display("Fail");
-               $finish;
-            end
-
-            addr = ++i*4;
-
-            if (i == 10) begin
-               valid = 0;
-            end
-         end
-
-         #clk_per;
-      end
-
       valid = 0;
 
-      $display("Test completed successfully");
+      // Wait an arbitray (5) number of cycles
+      repeat (5) @(posedge clk) #1;
+
+      // Read
+      length = TEST_SZ-1;
+      valid = 1;
+      addr = 0x4000;
+      wstrb = 0;
+      for (i=0; i < TEST_SZ+1; i=i+1) begin
+         if (i == TEST_SZ) begin
+            valid = 0;
+         end
+
+         @(posedge clk) #1;
+         if (rdata != i+seq_ini) begin
+            $display("ERROR: Test failed! At position %d, data=%h and rdata=%h.", i, i+seq_ini, rdata);
+         end
+      end
+
+      $display("INFO: Test completed successfully!");
+
       $finish;
    end
 
-   //
-   // Clocks
-   //
+   iob2axi
+     #(
+       .ADDR_W(ADDR_W),
+       .DATA_W(DATA_W)
+       )
+   uut
+     (
+      .clk      (clk),
+      .rst      (rst),
 
-   // system clock
-   always #(clk_per/2) clk = ~clk;
+      //
+      // Native interface
+      //
+
+      //
+      // AXI-4 full master interface
+      //
+
+      `AXI4_IF_PORTMAP(m_, ddr_)
+      );
+
+   axi_ram
+     #(
+       .ID_WIDTH   (`AXI_ID_W),
+       .DATA_WIDTH (AXI_DATA_W),
+       .ADDR_WIDTH (AXI_ADDR_W)
+       )
+   axi_ram0
+     (
+      .clk            (clk),
+      .rst            (rst),
+
+      //
+      // AXI-4 full master interface
+      //
+
+      // Address write
+      .s_axi_awid     (ddr_axi_awid),
+      .s_axi_awaddr   (ddr_axi_awaddr),
+      .s_axi_awlen    (ddr_axi_awlen),
+      .s_axi_awsize   (ddr_axi_awsize),
+      .s_axi_awburst  (ddr_axi_awburst),
+      .s_axi_awlock   (ddr_axi_awlock),
+      .s_axi_awprot   (ddr_axi_awprot),
+      .s_axi_awcache  (ddr_axi_awcache),
+      .s_axi_awvalid  (ddr_axi_awvalid),
+      .s_axi_awready  (ddr_axi_awready),
+
+      // Write
+      .s_axi_wvalid   (ddr_axi_wvalid),
+      .s_axi_wdata    (ddr_axi_wdata),
+      .s_axi_wstrb    (ddr_axi_wstrb),
+      .s_axi_wlast    (ddr_axi_wlast),
+      .s_axi_wready   (ddr_axi_wready),
+
+      // Write response
+      .s_axi_bid      (ddr_axi_bid),
+      .s_axi_bvalid   (ddr_axi_bvalid),
+      .s_axi_bresp    (ddr_axi_bresp),
+      .s_axi_bready   (ddr_axi_bready),
+
+      // Address read
+      .s_axi_arid     (ddr_axi_arid),
+      .s_axi_araddr   (ddr_axi_araddr),
+      .s_axi_arlen    (ddr_axi_arlen),
+      .s_axi_arsize   (ddr_axi_arsize),
+      .s_axi_arburst  (ddr_axi_arburst),
+      .s_axi_arlock   (ddr_axi_arlock),
+      .s_axi_arcache  (ddr_axi_arcache),
+      .s_axi_arprot   (ddr_axi_arprot),
+      .s_axi_arvalid  (ddr_axi_arvalid),
+      .s_axi_arready  (ddr_axi_arready),
+
+      // Read
+      .s_axi_rid      (ddr_axi_rid),
+      .s_axi_rvalid   (ddr_axi_rvalid),
+      .s_axi_rdata    (ddr_axi_rdata),
+      .s_axi_rlast    (ddr_axi_rlast),
+      .s_axi_rresp    (ddr_axi_rresp),
+      .s_axi_rready   (ddr_axi_rready)
+      );
 
 endmodule
