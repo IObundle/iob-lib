@@ -19,33 +19,33 @@ module iob2axi
     // Control I/F
     //
     input [`AXI_LEN_W-1:0] length,
-    output                 iob2axi_ready,
+    output                 ready,
     output                 error,
 
     //
     // AXI-4 Full Master I/F
     //
-`include "axi_m_if.vh"
+    `AXI4_M_IF_PORT(m_),
 
     //
     // Native Slave I/F
     //
-    input                  valid,
-    input [ADDR_W-1:0]     addr,
-    input [DATA_W-1:0]     wdata,
-    input [DATA_W/8-1:0]   wstrb,
-    output [DATA_W-1:0]    rdata,
-    output                 ready
+    input                  s_valid,
+    input [ADDR_W-1:0]     s_addr,
+    input [DATA_W-1:0]     s_wdata,
+    input [DATA_W/8-1:0]   s_wstrb,
+    output [DATA_W-1:0]    s_rdata,
+    output                 s_ready
     );
 
    // internal wires
-   wire                    ready_rd_int, ready_wr_int;
+   wire                    s_ready_rd, s_ready_wr;
    wire                    rd_ready, wr_ready;
    wire                    rd_error, wr_error;
 
    // assign outputs
-   assign ready = |wstrb? ready_wr_int: ready_rd_int;
-   assign iob2axi_ready = rd_ready & wr_ready;
+   assign s_ready = s_ready_wr & s_ready_rd;
+   assign ready = |wstrb? wr_ready: rd_ready;
    assign error = rd_error | wr_error;
 
    // AXI Read
@@ -56,19 +56,19 @@ module iob2axi
        )
    iob2axi_rd0
      (
-      .clk      (clk),
-      .rst      (rst),
+      .clk    (clk),
+      .rst    (rst),
 
       // Control I/F
-      .length   (length),
-      .rd_ready (rd_ready),
-      .error    (rd_error),
+      .length (length),
+      .ready  (rd_ready),
+      .error  (rd_error),
 
       // Native Slave I/F
-      .valid    (valid & ~|wstrb),
-      .addr     (addr),
-      .rdata    (rdata),
-      .ready    (ready_rd_int),
+      .s_valid (s_valid & ~|s_wstrb),
+      .s_addr  (s_addr),
+      .s_rdata (s_rdata),
+      .s_ready (s_ready_rd),
 
       // AXI-4 full read master I/F
       `AXI4_READ_IF_PORTMAP(m_, m_)
@@ -82,20 +82,20 @@ module iob2axi
         )
    iob2axi_wr0
      (
-      .clk      (clk),
-      .rst      (rst),
+      .clk     (clk),
+      .rst     (rst),
 
       // Control I/F
-      .length   (length),
-      .wr_ready (wr_ready),
-      .error    (wr_error),
+      .length  (length),
+      .ready   (wr_ready),
+      .error   (wr_error),
 
       // Native Slave I/F
-      .valid    (valid & |wstrb),
-      .addr     (addr),
-      .wdata    (wdata),
-      .wstrb    (wstrb),
-      .ready    (ready_wr_int),
+      .s_valid (s_valid & |s_wstrb),
+      .s_addr  (s_addr),
+      .s_wdata (s_wdata),
+      .s_wstrb (s_wstrb),
+      .s_ready (s_ready_wr),
 
       // AXI-4 full write master I/F
       `AXI4_WRITE_IF_PORTMAP(m_, m_)

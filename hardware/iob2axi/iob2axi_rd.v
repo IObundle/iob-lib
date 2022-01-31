@@ -15,16 +15,16 @@ module iob2axi_rd
     // Control I/F
     //
     input [`AXI_LEN_W-1:0] length,
-    output reg             rd_ready,
+    output reg             ready,
     output                 error,
 
     //
     // Native Slave I/F
     //
-    output reg             ready,
-    input                  valid,
-    input [ADDR_W-1:0]     addr,
-    output [DATA_W-1:0]    rdata,
+    output reg             s_ready,
+    input                  s_valid,
+    input [ADDR_W-1:0]     s_addr,
+    output [DATA_W-1:0]    s_rdata,
    
     //
     // AXI-4 Full Master Read I/F
@@ -45,7 +45,7 @@ module iob2axi_rd
    reg                     error_int, error_nxt;
 
    // Read ready
-   reg                     rd_ready_nxt;
+   reg                     ready_nxt;
 
    reg                     m_axi_arvalid_int;
 
@@ -68,7 +68,7 @@ module iob2axi_rd
    assign m_axi_arqos = `AXI_QOS_W'd0;
 
    // Read
-   assign rdata = m_axi_rdata;
+   assign s_rdata = m_axi_rdata;
    assign m_axi_rready = m_axi_rready_int;
 
    // Delay register
@@ -80,16 +80,16 @@ module iob2axi_rd
       end
    end
 
-   // Counter, error and addr valid registers
+   // Counter, error and ready registers
    always @(posedge clk, posedge rst) begin
       if (rst) begin
          counter_int <= `AXI_LEN_W'd0;
          error_int <= 1'b0;
-         rd_ready <= 1'b1;
+         ready <= 1'b1;
       end else begin
          counter_int <= counter_int_nxt;
          error_int <= error_nxt;
-         rd_ready <= rd_ready_nxt;
+         ready <= ready_nxt;
       end
    end
 
@@ -99,7 +99,7 @@ module iob2axi_rd
          addr_reg <= {ADDR_W{1'b0}};
          length_reg <= `AXI_LEN_W'd0;
       end else if (state == ADDR_HS) begin
-         addr_reg <= addr;
+         addr_reg <= s_addr;
          length_reg <= length;
       end
    end
@@ -135,10 +135,10 @@ module iob2axi_rd
       state_nxt = state;
 
       error_nxt = error_int;
-      rd_ready_nxt = 1'b0;
+      ready_nxt = 1'b0;
       counter_int_nxt = counter_int;
 
-      ready = 1'b0;
+      s_ready = 1'b0;
 
       m_axi_arvalid_int = 1'b0;
       m_axi_rready_int = 1'b0;
@@ -147,21 +147,21 @@ module iob2axi_rd
         // Read address handshake
         ADDR_HS: begin
            counter_int_nxt = `AXI_LEN_W'd0;
-           rd_ready_nxt = 1'b1;
+           ready_nxt = 1'b1;
 
-           if (valid) begin
+           if (s_valid) begin
               state_nxt = READ;
 
               m_axi_arvalid_int = 1'b1;
-              rd_ready_nxt = 1'b0;
+              ready_nxt = 1'b0;
            end
         end
         // Read data
         READ: begin
-           ready = m_axi_rvalid;
+           s_ready = m_axi_rvalid;
 
            m_axi_arvalid_int = arvalid_int;
-           m_axi_rready_int = valid;
+           m_axi_rready_int = s_valid;
 
            if (m_axi_rvalid) begin
               if (counter_int == length_reg) begin
@@ -170,7 +170,7 @@ module iob2axi_rd
                  state_nxt = ADDR_HS;
               end
 
-              if (valid) begin
+              if (s_valid) begin
                  counter_int_nxt = counter_int + 1'b1;
               end
            end
