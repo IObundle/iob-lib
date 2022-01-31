@@ -1,142 +1,104 @@
-`timescale 1ns/1ps
+`timescale 1ns / 1ps
 
-module iob2axi #
-  (
-   parameter ADDR_W = 32,
-   parameter DATA_W = 32
-   )
-  (
-   input                 clk,
-   input                 rst,
+`include "axi.vh"
+`include "iob_lib.vh"
 
-   // Native interface
-   input                 valid,
-   input [ADDR_W-1:0]    addr,
-   input [DATA_W-1:0]    wdata,
-   input [DATA_W/8-1:0]  wstrb,
-   output [DATA_W-1:0]   rdata,
-   output                ready,
+module iob2axi
+  #(
+    parameter ADDR_W = 0,
+    parameter DATA_W = 0,
+    // AXI-4 Full I/F parameters
+    parameter AXI_ADDR_W = ADDR_W,
+    parameter AXI_DATA_W = DATA_W
+    )
+   (
+    input                  clk,
+    input                  rst,
 
-   // AXI4-lite interface
-   // Master Interface Write Address
-   output [ADDR_W-1:0]   M_AXI_AWADDR,
-   output [2:0]          M_AXI_AWPROT,
-   output                M_AXI_AWVALID,
-   input                 M_AXI_AWREADY,
+    //
+    // Control I/F
+    //
+    input [`AXI_LEN_W-1:0] length,
+    output                 ready,
+    output                 error,
 
-   // Master Interface Write Data
-   output [DATA_W-1:0]   M_AXI_WDATA,
-   output [DATA_W/8-1:0] M_AXI_WSTRB,
-   output                M_AXI_WVALID,
-   input                 M_AXI_WREADY,
+    //
+    // AXI-4 Full Master I/F
+    //
+    `AXI4_M_IF_PORT(m_),
 
-   // Master Interface Write Response
-   input [1:0]           M_AXI_BRESP,
-   input                 M_AXI_BVALID,
-   output                M_AXI_BREADY,
+    //
+    // Native Slave I/F
+    //
+    input                  s_valid,
+    input [ADDR_W-1:0]     s_addr,
+    input [DATA_W-1:0]     s_wdata,
+    input [DATA_W/8-1:0]   s_wstrb,
+    output [DATA_W-1:0]    s_rdata,
+    output                 s_ready
+    );
 
-   // Master Interface Read Address
-   output [ADDR_W-1:0]   M_AXI_ARADDR,
-   output [2:0]          M_AXI_ARPROT,
-   output                M_AXI_ARVALID,
-   input                 M_AXI_ARREADY,
+   // internal wires
+   wire                    s_ready_rd, s_ready_wr;
+   wire                    rd_ready, wr_ready;
+   wire                    rd_error, wr_error;
 
-   // Master Interface Read Data 
-   input [DATA_W-1:0]    M_AXI_RDATA,
-   input [1:0]           M_AXI_RRESP,
-   input                 M_AXI_RVALID,
-   output                M_AXI_RREADY
-   );
+   // assign outputs
+   assign s_ready = s_ready_wr & s_ready_rd;
+   assign ready = |wstrb? wr_ready: rd_ready;
+   assign error = rd_error | wr_error;
 
-   // Read not write
-   wire                  rnw = (|wstrb)? 1'b0: 1'b1;
+   // AXI Read
+   iob2axi_rd
+     #(
+       .ADDR_W(ADDR_W),
+       .DATA_W(DATA_W)
+       )
+   iob2axi_rd0
+     (
+      .clk    (clk),
+      .rst    (rst),
 
-   // Transaction errors
-   wire                  wr_err = M_AXI_BVALID & M_AXI_BRESP[1];
-   wire                  rd_err = M_AXI_RVALID & M_AXI_RRESP[1];
+      // Control I/F
+      .length (length),
+      .ready  (rd_ready),
+      .error  (rd_error),
 
-   // Posedge detection
-   wire                  M_AXI_AWREADY_pos = M_AXI_AWREADY & ~M_AXI_AWREADY_reg;
-   wire                  M_AXI_ARREADY_pos = M_AXI_ARREADY & ~M_AXI_ARREADY_reg;
-   wire                  M_AXI_WREADY_pos = M_AXI_WREADY & ~M_AXI_WREADY_reg;
-   wire                  M_AXI_RVALID_pos = M_AXI_RVALID & ~M_AXI_RVALID_reg;
-   wire                  M_AXI_BVALID_pos = M_AXI_BVALID & ~M_AXI_BVALID_reg;
+      // Native Slave I/F
+      .s_valid (s_valid & ~|s_wstrb),
+      .s_addr  (s_addr),
+      .s_rdata (s_rdata),
+      .s_ready (s_ready_rd),
 
-   reg                   M_AXI_AWREADY_reg;
-   reg                   M_AXI_ARREADY_reg;
-   reg                   M_AXI_WREADY_reg;
-   reg                   M_AXI_RVALID_reg;
-   reg                   M_AXI_BVALID_reg;
+      // AXI-4 full read master I/F
+      `AXI4_READ_IF_PORTMAP(m_, m_)
+      );
 
-   reg                   en_aw;
-   reg                   en_ar;
-   reg                   en_w;
-   reg                   en_r;
-   reg                   en_b;
+   // AXI Write
+   iob2axi_wr
+     # (
+        .ADDR_W(ADDR_W),
+        .DATA_W(DATA_W)
+        )
+   iob2axi_wr0
+     (
+      .clk     (clk),
+      .rst     (rst),
 
-   assign M_AXI_AWPROT = 3'b010;
-   assign M_AXI_ARPROT = 3'b010;
+      // Control I/F
+      .length  (length),
+      .ready   (wr_ready),
+      .error   (wr_error),
 
-   assign M_AXI_BREADY = 1'b1;
-   assign M_AXI_RREADY = 1'b1;
+      // Native Slave I/F
+      .s_valid (s_valid & |s_wstrb),
+      .s_addr  (s_addr),
+      .s_wdata (s_wdata),
+      .s_wstrb (s_wstrb),
+      .s_ready (s_ready_wr),
 
-   assign M_AXI_AWVALID = (rnw | ~en_aw)? 1'b0 : valid;
-   assign M_AXI_ARVALID = (rnw & en_ar)? valid : 1'b0;
-
-   assign M_AXI_AWADDR = addr;
-   assign M_AXI_ARADDR = addr;
-
-   assign M_AXI_WVALID = (rnw | ~en_w)? 1'b0 : valid;
-
-   assign rdata = M_AXI_RDATA;
-   assign M_AXI_WDATA = wdata;
-   assign M_AXI_WSTRB = wstrb;
-
-   assign ready = ready_int & ~wr_err & ~rd_err;
-
-   wire ready_int = (~en_aw & ~en_w & ~en_b) |
-                    (~en_ar & ~en_r);
-
-   always @ (posedge clk) begin
-      if (rst) begin
-         M_AXI_AWREADY_reg <= 1'b0;
-         M_AXI_ARREADY_reg <= 1'b0;
-         M_AXI_WREADY_reg <= 1'b0;
-         M_AXI_RVALID_reg <= 1'b0;
-         M_AXI_BVALID_reg <= 1'b0;
-      end else begin
-         M_AXI_AWREADY_reg <= M_AXI_AWREADY;
-         M_AXI_ARREADY_reg <= M_AXI_ARREADY;
-         M_AXI_WREADY_reg <= M_AXI_WREADY;
-         M_AXI_RVALID_reg <= M_AXI_RVALID;
-         M_AXI_BVALID_reg <= M_AXI_BVALID;
-      end
-   end
-
-   always @ (posedge clk) begin
-      if (ready_int | rst) begin
-         en_aw <= 1'b1;
-         en_ar <= 1'b1;
-         en_w <= 1'b1;
-         en_r <= 1'b1;
-         en_b <= 1'b1;
-      end else begin
-         if (M_AXI_AWREADY_pos) begin
-            en_aw <= 1'b0;
-         end 
-         if (M_AXI_ARREADY_pos) begin
-            en_ar <= 1'b0;
-         end 
-         if (M_AXI_WREADY_pos) begin
-            en_w <= 1'b0;
-         end 
-         if (M_AXI_RVALID_pos) begin
-            en_r <= 1'b0;
-         end 
-         if (M_AXI_BVALID_pos) begin
-            en_b <= 1'b0;
-         end
-      end
-   end
+      // AXI-4 full write master I/F
+      `AXI4_WRITE_IF_PORTMAP(m_, m_)
+      );
 
 endmodule
