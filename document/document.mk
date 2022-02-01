@@ -104,16 +104,16 @@ sw_%reg_tab.tex: $(CORE_DIR)/hardware/include/$(CORENAME)sw_reg.vh
 gen_is_tab.tex: $(LIB_DIR)/hardware/include/gen_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
-cpu_nat_s_is_tab.tex: $(LIB_DIR)/hardware/include/cpu_nat_s_if.vh
+iob_s_if_is_tab.tex: $(LIB_DIR)/hardware/include/iob_s_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
-cpu_nat_m_if.vh: $(LIB_DIR)/hardware/include/cpu_nat_m_if.vh
+iob_m_if.vh: $(LIB_DIR)/hardware/include/iob_m_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
-cpu_axi4lite_s_is_tab.tex: $(LIB_DIR)/hardware/include/cpu_axi4lite_s_if.vh
+axil_s_if_is_tab.tex: $(LIB_DIR)/hardware/include/axil_s_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
-cpu_axi4_m_if_is_tab.tex:  $(LIB_DIR)/hardware/include/cpu_axi4_m_if.vh
+axi_m_if_is_tab.tex:  $(LIB_DIR)/hardware/include/axi_m_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
 #cleaning
