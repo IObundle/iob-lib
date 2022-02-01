@@ -64,7 +64,7 @@
     input [`AXI_ID_W-1:0]     PREFIX``axi_bid,     /*Write response channel ID*/ \
     input [`AXI_RESP_W-1:0]   PREFIX``axi_bresp,   /*Write response channel response*/ \
     input                     PREFIX``axi_bvalid,  /*Write response channel valid*/ \
-    output                    PREFIX``axi_bready,  /*Write response channel ready*/
+    output                    PREFIX``axi_bready   /*Write response channel ready*/
 
 `define AXI4_M_READ_IF_PORT(PREFIX) \
     /*address read*/ \
@@ -115,7 +115,7 @@
     output [`AXI_ID_W-1:0]    PREFIX``axi_bid,     /*Write response channel ID*/ \
     output [`AXI_RESP_W-1:0]  PREFIX``axi_bresp,   /*Write response channel response*/ \
     output                    PREFIX``axi_bvalid,  /*Write response channel valid*/ \
-    input                     PREFIX``axi_bready,  /*Write response channel ready*/
+    input                     PREFIX``axi_bready   /*Write response channel ready*/
 
 `define AXI4_S_READ_IF_PORT(PREFIX) \
     /*address read*/ \
@@ -168,7 +168,7 @@
     .``PORT_PREFIX``axi_bid     (WIRE_PREFIX``axi_bid),     /*Write response channel ID*/ \
     .``PORT_PREFIX``axi_bresp   (WIRE_PREFIX``axi_bresp),   /*Write response channel response*/ \
     .``PORT_PREFIX``axi_bvalid  (WIRE_PREFIX``axi_bvalid),  /*Write response channel valid*/ \
-    .``PORT_PREFIX``axi_bready  (WIRE_PREFIX``axi_bready),  /*Write response channel ready*/
+    .``PORT_PREFIX``axi_bready  (WIRE_PREFIX``axi_bready)   /*Write response channel ready*/
 
 `define AXI4_READ_IF_PORTMAP(PORT_PREFIX, WIRE_PREFIX) \
     /*address read*/ \
@@ -221,7 +221,7 @@
     wire [`AXI_ID_W-1:0]    PREFIX``axi_bid;     /*Write response channel ID*/ \
     wire [`AXI_RESP_W-1:0]  PREFIX``axi_bresp;   /*Write response channel response*/ \
     wire                    PREFIX``axi_bvalid;  /*Write response channel valid*/ \
-    wire                    PREFIX``axi_bready;  /*Write response channel ready*/
+    wire                    PREFIX``axi_bready   /*Write response channel ready*/
 
 `define AXI4_READ_IF_WIRE(PREFIX) \
     /*address read*/ \
@@ -245,8 +245,8 @@
     wire                    PREFIX``axi_rready   /*Read channel ready*/
 
 `define AXI4_IF_WIRE(PREFIX) \
-    `AXI4_WRITE_IF_WIRE(PREFIX) \
-    `AXI4_READ_IF_WIRE(PREFIX) \
+    `AXI4_WRITE_IF_WIRE(PREFIX); \
+    `AXI4_READ_IF_WIRE(PREFIX)
 
 //
 // AXI-4 lite
@@ -389,5 +389,71 @@
     wire [`AXI_RESP_W-1:0]   PREFIX``axil_rresp;   /*Read channel response*/ \
     wire                     PREFIX``axil_rvalid;  /*Read channel valid*/ \
     wire                     PREFIX``axil_rready   /*Read channel ready*/
-`endif //  `ifndef AXI
 
+`define AXI4_LITE_M_IF_WIRE(PREFIX) \
+    /*address write*/ \
+    reg [`AXI_ID_W-1:0]      PREFIX``axil_awid;    /*Address write channel ID*/ \
+    reg [AXIL_ADDR_W-1:0]    PREFIX``axil_awaddr;  /*Address write channel address*/ \
+    reg [`AXI_PROT_W-1:0]    PREFIX``axil_awprot;  /*Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).*/ \
+    reg [`AXI_QOS_W-1:0]     PREFIX``axil_awqos;   /*Address write channel quality of service*/ \
+    reg                      PREFIX``axil_awvalid; /*Address write channel valid*/ \
+    wire                     PREFIX``axil_awready; /*Address write channel ready*/ \
+    /*write*/ \
+    reg [`AXI_ID_W-1:0]      PREFIX``axil_wid;     /*Write channel ID*/ \
+    reg [AXIL_DATA_W-1:0]    PREFIX``axil_wdata;   /*Write channel data*/ \
+    reg [AXIL_DATA_W/8-1:0]  PREFIX``axil_wstrb;   /*Write channel write strobe*/ \
+    reg                      PREFIX``axil_wvalid;  /*Write channel valid*/ \
+    wire                     PREFIX``axil_wready;  /*Write channel ready*/ \
+    /*write response*/ \
+    wire [`AXI_ID_W-1:0]     PREFIX``axil_bid;     /*Write response channel ID*/ \
+    wire [`AXI_RESP_W-1:0]   PREFIX``axil_bresp;   /*Write response channel response*/ \
+    wire                     PREFIX``axil_bvalid;  /*Write response channel valid*/ \
+    reg                      PREFIX``axil_bready;  /*Write response channel ready*/ \
+    /*address read*/ \
+    reg [`AXI_ID_W-1:0]      PREFIX``axil_arid;    /*Address read channel ID*/ \
+    reg [AXIL_ADDR_W-1:0]    PREFIX``axil_araddr;  /*Address read channel address*/ \
+    reg [`AXI_PROT_W-1:0]    PREFIX``axil_arprot;  /*Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).*/ \
+    reg [`AXI_QOS_W-1:0]     PREFIX``axil_arqos;   /*Address read channel quality of service*/ \
+    reg                      PREFIX``axil_arvalid; /*Address read channel valid*/ \
+    wire                     PREFIX``axil_arready; /*Address read channel ready*/ \
+    /*read*/ \
+    wire [`AXI_ID_W-1:0]     PREFIX``axil_rid;     /*Read channel ID*/ \
+    wire [AXIL_DATA_W-1:0]   PREFIX``axil_rdata;   /*Read channel data*/ \
+    wire [`AXI_RESP_W-1:0]   PREFIX``axil_rresp;   /*Read channel response*/ \
+    wire                     PREFIX``axil_rvalid;  /*Read channel valid*/ \
+    reg                      PREFIX``axil_rready   /*Read channel ready*/
+
+`define AXI4_LITE_S_IF_WIRE(PREFIX) \
+    /*address write*/ \
+    wire [`AXI_ID_W-1:0]     PREFIX``axil_awid;    /*Address write channel ID*/ \
+    wire [AXIL_ADDR_W-1:0]   PREFIX``axil_awaddr;  /*Address write channel address*/ \
+    wire [`AXI_PROT_W-1:0]   PREFIX``axil_awprot;  /*Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).*/ \
+    wire [`AXI_QOS_W-1:0]    PREFIX``axil_awqos;   /*Address write channel quality of service*/ \
+    wire                     PREFIX``axil_awvalid; /*Address write channel valid*/ \
+    reg                      PREFIX``axil_awready; /*Address write channel ready*/ \
+    /*write*/ \
+    wire [`AXI_ID_W-1:0]     PREFIX``axil_wid;     /*Write channel ID*/ \
+    wire [AXIL_DATA_W-1:0]   PREFIX``axil_wdata;   /*Write channel data*/ \
+    wire [AXIL_DATA_W/8-1:0] PREFIX``axil_wstrb;   /*Write channel write strobe*/ \
+    wire                     PREFIX``axil_wvalid;  /*Write channel valid*/ \
+    reg                      PREFIX``axil_wready;  /*Write channel ready*/ \
+    /*write response*/ \
+    reg [`AXI_ID_W-1:0]      PREFIX``axil_bid;     /*Write response channel ID*/ \
+    reg [`AXI_RESP_W-1:0]    PREFIX``axil_bresp;   /*Write response channel response*/ \
+    reg                      PREFIX``axil_bvalid;  /*Write response channel valid*/ \
+    wire                     PREFIX``axil_bready;  /*Write response channel ready*/ \
+    /*address read*/ \
+    wire [`AXI_ID_W-1:0]     PREFIX``axil_arid;    /*Address read channel ID*/ \
+    wire [AXIL_ADDR_W-1:0]   PREFIX``axil_araddr;  /*Address read channel address*/ \
+    wire [`AXI_PROT_W-1:0]   PREFIX``axil_arprot;  /*Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).*/ \
+    wire [`AXI_QOS_W-1:0]    PREFIX``axil_arqos;   /*Address read channel quality of service*/ \
+    wire                     PREFIX``axil_arvalid; /*Address read channel valid*/ \
+    reg                      PREFIX``axil_arready; /*Address read channel ready*/ \
+    /*read*/ \
+    reg [`AXI_ID_W-1:0]      PREFIX``axil_rid;     /*Read channel ID*/ \
+    reg [AXIL_DATA_W-1:0]    PREFIX``axil_rdata;   /*Read channel data*/ \
+    reg [`AXI_RESP_W-1:0]    PREFIX``axil_rresp;   /*Read channel response*/ \
+    reg                      PREFIX``axil_rvalid;  /*Read channel valid*/ \
+    wire                     PREFIX``axil_rready   /*Read channel ready*/
+
+`endif //  `ifndef AXI

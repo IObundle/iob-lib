@@ -44,8 +44,8 @@ module iob2axi
    wire                    rd_error, wr_error;
 
    // assign outputs
-   assign s_ready = s_ready_wr & s_ready_rd;
-   assign ready = |wstrb? wr_ready: rd_ready;
+   assign ready = wr_ready & rd_ready;
+   assign s_ready = |s_wstrb? s_ready_wr: s_ready_rd;
    assign error = rd_error | wr_error;
 
    // AXI Read

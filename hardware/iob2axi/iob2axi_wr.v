@@ -5,7 +5,10 @@
 module iob2axi_wr
   #(
     parameter ADDR_W = 0,
-    parameter DATA_W = 0
+    parameter DATA_W = 0,
+    // AXI-4 Full I/F parameters
+    parameter AXI_ADDR_W = ADDR_W,
+    parameter AXI_DATA_W = DATA_W
     )
    (
     input                  clk,
@@ -16,7 +19,7 @@ module iob2axi_wr
     //
     input [`AXI_LEN_W-1:0] length,
     output reg             ready,
-    output                 error,
+    output reg             error,
 
     //
     // Native Slave I/F
@@ -42,15 +45,16 @@ module iob2axi_wr
    reg [1:0]               state, state_nxt;
 
    // Counter and error signals
-   reg [`AXI_LEN_W:0]      counter_int, counter_int_nxt;
-   reg                     error_int, error_nxt;
+   reg [`AXI_LEN_W:0]      counter, counter_nxt;
+   reg                     error_nxt;
 
    // Write ready
    reg                     ready_nxt;
 
-   reg                     m_axi_awvalid_int, m_axi_awvalid_reg;
+   reg                     m_axi_awvalid_int;
    reg                     m_axi_wvalid_int;
    reg                     m_axi_wlast_int;
+   reg                     m_axi_bready_int;
 
    // Control register signals
    reg [ADDR_W-1:0]        addr_reg;
@@ -59,11 +63,10 @@ module iob2axi_wr
    reg                     s_ready_int;
 
    assign s_ready = s_ready_int;
-   assign error = error_int;
 
    // Write address
    assign m_axi_awid = `AXI_ID_W'd0;
-   assign m_axi_awvalid = m_axi_awvalid_reg;
+   assign m_axi_awvalid = m_axi_awvalid_int;
    assign m_axi_awaddr = addr_reg;
    assign m_axi_awlen = length_reg;
    assign m_axi_awsize = axi_awsize;
@@ -83,24 +86,15 @@ module iob2axi_wr
    // Write response
    assign m_axi_bready = m_axi_bready_int;
 
-   // Delay register
-   always @(posedge clk, posedge rst) begin
-      if (rst) begin
-         m_axi_awvalid_reg <= 1'b0;
-      end else begin
-         m_axi_awvalid_reg <= m_axi_awvalid_int;
-      end
-   end
-
    // Counter, error and ready registers
    always @(posedge clk, posedge rst) begin
       if (rst) begin
-         counter_int <= `AXI_LEN_W'd0;
-         error_int <= 1'b0;
+         counter <= `AXI_LEN_W'd0;
+         error <= 1'b0;
          ready <= 1'b1;
       end else begin
-         counter_int <= counter_int_nxt;
-         error_int <= error_nxt;
+         counter <= counter_nxt;
+         error <= error_nxt;
          ready <= ready_nxt;
       end
    end
@@ -147,9 +141,9 @@ module iob2axi_wr
    always @* begin
       state_nxt = state;
 
-      error_nxt = error_int;
+      error_nxt = error;
       ready_nxt = 1'b0;
-      counter_int_nxt = counter_int;
+      counter_nxt = counter;
 
       s_ready_int = 1'b0;
 
@@ -161,7 +155,7 @@ module iob2axi_wr
       case (state)
         // Write address handshake
         ADDR_HS: begin
-           counter_int_nxt = `AXI_LEN_W'd0;
+           counter_nxt = `AXI_LEN_W'd0;
            ready_nxt = 1'b1;
 
            if (s_valid) begin
@@ -179,12 +173,12 @@ module iob2axi_wr
            m_axi_wvalid_int = s_valid;
 
            if (m_axi_wready & s_valid) begin
-              if (counter_int == length_reg) begin
+              if (counter == length_reg) begin
                  m_axi_wlast_int = 1'b1;
                  state_nxt = W_RESPONSE;
               end
 
-              counter_int_nxt = counter_int + 1'b1;
+              counter_nxt = counter + 1'b1;
            end
         end
         // Write response
