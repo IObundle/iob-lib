@@ -111,8 +111,8 @@
    `REG_ARE(CLK, RST, 1'b0, EN, NAME, (NAME==(MOD-1)? 1'b0: NAME+1'b1))
 
 //SOFTWARE ACCESSIBLE REGISTER
-`define SWREG_R(NAME, WIDTH, RST_VAL) wire [WIDTH-1:0] NAME;
-`define SWREG_W(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME;
+`define SWREG_R(NAME, WIDTH, RST_VAL) wire [WIDTH-1:0] NAME; //RST_VAL is used in mkregs.py
+`define SWREG_W(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME; //RST_VAL is used in mkregs.py
 
 //COMBINATORIAL CIRCUIT
 `define COMB always @*
@@ -128,7 +128,7 @@
    reg [1:0] SYNC_REG; \
    always @(posedge CLK, posedge RST_IN) \
    if(RST_IN)  SYNC_REG <= 2'b11; else SYNC_REG <= {SYNC_REG[0], 1'b0}; \
-   wire RST_OUT = SYNC_REG[1];
+   assign RST_OUT = SYNC_REG[1];
 
    //fast to slow
 `define F2S_SYNC(CLK, IN, IN_SYNC, OUT) \
