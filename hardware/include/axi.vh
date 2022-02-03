@@ -4,8 +4,9 @@
 // Signals width
 //
 
-// Address width
-`define AXI_ADDR_W 32
+// Data width and address width should be defined by the user of this header
+//`define AXI_DATA_W 32
+//`define AXI_ADDR_W 32
 
 // 2**1 = 2 AXI IDs
 `define AXI_ID_W 1
