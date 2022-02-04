@@ -130,10 +130,6 @@
    if(RST_IN)  SYNC_REG <= 2'b11; else SYNC_REG <= {SYNC_REG[0], 1'b0}; \
    assign RST_OUT = SYNC_REG[1];
 
-   //fast to slow
-`define F2S_SYNC(CLK, IN, IN_SYNC, OUT) \
-    `RESET_SYNC(CLK, IN, IN_SYNC, OUT)
-
    //regular 2-flop sync
 `define SYNC(CLK, RST, RST_VAL, W, IN, SYNC_REG0, SYNC_REG1, OUT) \
    reg [W-1:0] SYNC_REG0, SYNC_REG1; \
@@ -148,7 +144,11 @@
    assign OUT = SYNC_REG1;
    
 
-   //slow to fast
+   //fast domain to slow domain
+`define F2S_SYNC(CLK, IN, IN_SYNC, OUT) \
+    `RESET_SYNC(CLK, IN, IN_SYNC, OUT)
+
+   //slow domain to fast domain
 `define S2F_SYNC(CLK, RST, RST_VAL, W, IN, IN_SYNC, OUT) \
    `SYNC(CLK, RST, RST_VAL, W, IN, IN_SYNC, OUT)
 
