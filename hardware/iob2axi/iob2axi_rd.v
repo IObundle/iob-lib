@@ -54,6 +54,8 @@ module iob2axi_rd
    reg                     m_axi_rready_int;
 
    // Control register signals
+   reg [`AXI_LEN_W-1:0]    length_reg;
+
    reg                     s_ready_int;
 
    // Read address
@@ -85,6 +87,15 @@ module iob2axi_rd
          ready <= ready_nxt;
          s_ready <= s_ready_int;
          s_rdata <= m_axi_rdata;
+      end
+   end
+
+   // Control registers
+   always @(posedge clk, posedge rst) begin
+      if (rst) begin
+         length_reg <= `AXI_LEN_W'd0;
+      end else if (state == ADDR_HS) begin
+         length_reg <= length;
       end
    end
 
@@ -151,7 +162,7 @@ module iob2axi_rd
            m_axi_rready_int = s_valid;
 
            if (m_axi_rvalid) begin
-              if (s_valid & counter == length) begin
+              if (s_valid & counter == length_reg) begin
                  error_nxt = ~m_axi_rlast;
 
                  state_nxt = ADDR_HS;
