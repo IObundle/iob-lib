@@ -1,12 +1,12 @@
 [*]
 [*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
-[*] Fri Feb  4 15:02:10 2022
+[*] Fri Feb  4 17:16:08 2022
 [*]
 [dumpfile] "/home/zettasticks/IOBundle/iob-soc-eth/submodules/ETHERNET/submodules/DMA/submodules/LIB/hardware/iob2axi/uut.vcd"
-[dumpfile_mtime] "Fri Feb  4 14:52:46 2022"
-[dumpfile_size] 168547
+[dumpfile_mtime] "Fri Feb  4 17:15:49 2022"
+[dumpfile_size] 168065
 [savefile] "/home/zettasticks/IOBundle/iob-soc-eth/submodules/ETHERNET/submodules/DMA/submodules/LIB/hardware/iob2axi/waves.gtkw"
-[timestart] 118890000
+[timestart] 118870000
 [size] 1848 1016
 [pos] -1 -1
 *-23.000000 112380000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
@@ -28,6 +28,9 @@ iob2axi_tb.uut.s_wdata[31:0]
 iob2axi_tb.uut.s_rdata[31:0]
 iob2axi_tb.uut.s_wstrb[3:0]
 iob2axi_tb.uut.s_addr[23:0]
+@23
+iob2axi_tb.length[7:0]
+@22
 iob2axi_tb.uut.length[7:0]
 @200
 -AXI_WRITE

@@ -129,9 +129,6 @@ module iob2axi_tb;
 
       length = 2;
       addr = 12;
-
-      @(posedge  clk) #1;
-
       valid = 1;
       wdata = 4;
 
@@ -163,9 +160,6 @@ module iob2axi_tb;
       length = 0;
       addr = 0;
       wstrb = 4'h0;
-
-      @(posedge  clk) #1;
-
       valid = 1;
 
       while(!ready)
@@ -183,9 +177,6 @@ module iob2axi_tb;
 
       length = 1;
       addr = 4;
-
-      @(posedge  clk) #1;
-
       valid = 1;
 
       while(!ready)
@@ -216,9 +207,6 @@ module iob2axi_tb;
 
       length = 2;
       addr = 12;
-
-      @(posedge  clk) #1;
-
       valid = 1;
 
       while(!ready)
