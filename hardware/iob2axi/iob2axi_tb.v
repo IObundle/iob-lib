@@ -244,25 +244,26 @@ module iob2axi_tb;
 
       valid = 0;
 
-      @(posedge  clk) #1;
-      @(posedge  clk) #1;
-      @(posedge  clk) #1;
-      @(posedge  clk) #1;
-      @(posedge  clk) #1;
+      $display("INFO: Individual tests completed!");
 
-      $finish;
+      repeat (10) @(posedge  clk) #1;
 
       // Number from which to start the incremental sequence to initialize the RAM
       seq_ini = 32;
 
       // Write
       length = TEST_SZ-1;
-      valid = 1;
       addr = 32'h4000;
       wstrb = -1;
+
+      @(posedge clk) #1;
+
+      valid = 1;
       for (i=0; i < TEST_SZ; i=i+1) begin
          wdata = i+seq_ini;
-         @(posedge clk) #1;
+         do
+            @(posedge clk) #1;
+         while(!ready);
       end
       valid = 0;
 
@@ -271,21 +272,26 @@ module iob2axi_tb;
 
       // Read
       length = TEST_SZ-1;
-      valid = 1;
-      addr = 32'h4000;
       wstrb = 0;
-      for (i=0; i < TEST_SZ+1; i=i+1) begin
-         if (i == TEST_SZ) begin
-            valid = 0;
-         end
+      addr = 32'h4000;
 
-         @(posedge clk) #1;
+      @(posedge clk) #1;
+
+      valid = 1;
+      for (i=0; i < TEST_SZ; i=i+1) begin
+         do
+            @(posedge clk) #1;
+         while(!ready);
+
          if (rdata != i+seq_ini) begin
             $display("ERROR: Test failed! At position %d, data=%h and rdata=%h.", i, i+seq_ini, rdata);
          end
       end
+      valid = 0;
 
       $display("INFO: Test completed successfully!");
+
+      repeat (10) @(posedge clk) #1;
 
       $finish;
    end

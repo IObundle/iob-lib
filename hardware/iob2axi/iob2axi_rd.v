@@ -81,7 +81,7 @@ module iob2axi_rd
          error <= 1'b0;
          ready <= 1'b1;
          s_ready <= 1'b0;
-         s_rdata <= `DATA_W'd0;
+         s_rdata <= {DATA_W{1'd0}};
       end else begin
          counter <= counter_nxt;
          error <= error_nxt;
