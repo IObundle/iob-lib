@@ -67,9 +67,17 @@
 //shift left
 `define PISLO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT << 1);
 `define PISLO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1);
+`define PISLO_REG_R(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT << 1);
+`define PISLO_REG_RE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1);
+`define PISLO_REG_AR(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT << 1);
+`define PISLO_REG_ARE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1);
 //shift right
 `define PISRO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT >> 1);
 `define PISRO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
+`define PISRO_REG_R(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT >> 1);
+`define PISRO_REG_RE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
+`define PISRO_REG_AR(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT >> 1);
+`define PISLO_REG_ARE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
 
 //REVERSER -- NOT TESTED
 `define REVERSE(A, B, W) \
