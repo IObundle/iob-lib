@@ -24,10 +24,10 @@ module iob2axi_rd
     //
     // Native Slave I/F
     //
-    input                  s_valid,
-    input [ADDR_W-1:0]     s_addr,
-    output [DATA_W-1:0]    s_rdata,
-    output                 s_ready,
+    input                   s_valid,
+    input [ADDR_W-1:0]      s_addr,
+    output reg [DATA_W-1:0] s_rdata,
+    output reg              s_ready,
 
     //
     // AXI-4 Full Master Read I/F
@@ -59,8 +59,6 @@ module iob2axi_rd
 
    reg                     s_ready_int;
 
-   assign s_ready = s_ready_int;
-
    // Read address
    assign m_axi_arid = `AXI_ID_W'b0;
    assign m_axi_arvalid = m_axi_arvalid_int;
@@ -74,7 +72,6 @@ module iob2axi_rd
    assign m_axi_arqos = `AXI_QOS_W'd0;
 
    // Read
-   assign s_rdata = m_axi_rdata;
    assign m_axi_rready = m_axi_rready_int;
 
    // Counter, error and ready registers
@@ -83,10 +80,14 @@ module iob2axi_rd
          counter <= `AXI_LEN_W'd0;
          error <= 1'b0;
          ready <= 1'b1;
+         s_ready <= 1'b0;
+         s_rdata <= `DATA_W'd0;
       end else begin
          counter <= counter_nxt;
          error <= error_nxt;
          ready <= ready_nxt;
+         s_ready <= s_ready_int;
+         s_rdata <= m_axi_rdata;
       end
    end
 
@@ -147,21 +148,24 @@ module iob2axi_rd
            ready_nxt = 1'b1;
 
            if (s_valid) begin
-              state_nxt = READ;
-
               m_axi_arvalid_int = 1'b1;
-              ready_nxt = 1'b0;
+
+              if(m_axi_arready) begin
+                 state_nxt = READ;
+
+                 ready_nxt = 1'b0;
+              end
            end
         end
         // Read data
         READ: begin
-           s_ready_int = m_axi_rvalid;
+           s_ready_int = (s_valid & m_axi_rvalid);
 
            m_axi_arvalid_int = arvalid_int;
            m_axi_rready_int = s_valid;
 
            if (m_axi_rvalid) begin
-              if (counter == length_reg) begin
+              if (s_valid & counter == length_reg) begin
                  error_nxt = ~m_axi_rlast;
 
                  state_nxt = ADDR_HS;

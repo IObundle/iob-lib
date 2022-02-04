@@ -28,7 +28,7 @@ module iob2axi_wr
     input [ADDR_W-1:0]     s_addr,
     input [DATA_W-1:0]     s_wdata,
     input [DATA_W/8-1:0]   s_wstrb,
-    output                 s_ready,
+    output reg             s_ready,
 
     //
     // AXI-4 Full Master Write I/F
@@ -62,8 +62,6 @@ module iob2axi_wr
 
    reg                     s_ready_int;
 
-   assign s_ready = s_ready_int;
-
    // Write address
    assign m_axi_awid = `AXI_ID_W'd0;
    assign m_axi_awvalid = m_axi_awvalid_int;
@@ -92,10 +90,12 @@ module iob2axi_wr
          counter <= `AXI_LEN_W'd0;
          error <= 1'b0;
          ready <= 1'b1;
+         s_ready <= 1'b0;
       end else begin
          counter <= counter_nxt;
          error <= error_nxt;
          ready <= ready_nxt;
+         s_ready <= s_ready_int;
       end
    end
 
@@ -167,7 +167,7 @@ module iob2axi_wr
         end
         // Write data
         WRITE: begin
-           s_ready_int = m_axi_wready;
+           s_ready_int = (s_valid & m_axi_wready);
 
            m_axi_awvalid_int = awvalid_int;
            m_axi_wvalid_int = s_valid;
