@@ -57,16 +57,13 @@ module iob2axi_wr
    reg                     m_axi_bready_int;
 
    // Control register signals
-   reg [ADDR_W-1:0]        addr_reg;
-   reg [`AXI_LEN_W-1:0]    length_reg;
-
    reg                     s_ready_int;
 
    // Write address
    assign m_axi_awid = `AXI_ID_W'd0;
    assign m_axi_awvalid = m_axi_awvalid_int;
-   assign m_axi_awaddr = addr_reg;
-   assign m_axi_awlen = length_reg;
+   assign m_axi_awaddr = s_addr;
+   assign m_axi_awlen = length;
    assign m_axi_awsize = axi_awsize;
    assign m_axi_awburst = `AXI_BURST_W'd1;
    assign m_axi_awlock = `AXI_LOCK_W'd0;
@@ -96,17 +93,6 @@ module iob2axi_wr
          error <= error_nxt;
          ready <= ready_nxt;
          s_ready <= s_ready_int;
-      end
-   end
-
-   // Control registers
-   always @(posedge clk, posedge rst) begin
-      if (rst) begin
-         addr_reg <= 1'b0;
-         length_reg <= 1'b0;
-      end else if (state == ADDR_HS) begin
-         addr_reg <= s_addr;
-         length_reg <= length;
       end
    end
 
@@ -173,7 +159,7 @@ module iob2axi_wr
            m_axi_wvalid_int = s_valid;
 
            if (m_axi_wready & s_valid) begin
-              if (counter == length_reg) begin
+              if (counter == length) begin
                  m_axi_wlast_int = 1'b1;
                  state_nxt = W_RESPONSE;
               end

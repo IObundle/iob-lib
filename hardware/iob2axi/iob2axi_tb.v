@@ -102,9 +102,6 @@ module iob2axi_tb;
 
       length = 1;
       addr = 4;
-
-      @(posedge  clk) #1;
-
       valid = 1;
       wdata = 2;
 
