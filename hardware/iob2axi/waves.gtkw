@@ -1,0 +1,62 @@
+[*]
+[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
+[*] Fri Feb  4 17:16:08 2022
+[*]
+[dumpfile] "/home/zettasticks/IOBundle/iob-soc-eth/submodules/ETHERNET/submodules/DMA/submodules/LIB/hardware/iob2axi/uut.vcd"
+[dumpfile_mtime] "Fri Feb  4 17:15:49 2022"
+[dumpfile_size] 168065
+[savefile] "/home/zettasticks/IOBundle/iob-soc-eth/submodules/ETHERNET/submodules/DMA/submodules/LIB/hardware/iob2axi/waves.gtkw"
+[timestart] 118870000
+[size] 1848 1016
+[pos] -1 -1
+*-23.000000 112380000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] iob2axi_tb.
+[treeopen] iob2axi_tb.uut.
+[sst_width] 258
+[signals_width] 286
+[sst_expanded] 1
+[sst_vpaned_height] 289
+@28
+iob2axi_tb.clk
+@200
+-NATIVE
+@28
+iob2axi_tb.uut.s_valid
+iob2axi_tb.uut.s_ready
+@22
+iob2axi_tb.uut.s_wdata[31:0]
+iob2axi_tb.uut.s_rdata[31:0]
+iob2axi_tb.uut.s_wstrb[3:0]
+iob2axi_tb.uut.s_addr[23:0]
+@23
+iob2axi_tb.length[7:0]
+@22
+iob2axi_tb.uut.length[7:0]
+@200
+-AXI_WRITE
+@28
+iob2axi_tb.uut.m_axi_awvalid
+iob2axi_tb.uut.m_axi_awready
+@22
+iob2axi_tb.uut.m_axi_awaddr[23:0]
+iob2axi_tb.uut.m_axi_awlen[7:0]
+@28
+iob2axi_tb.uut.m_axi_wvalid
+iob2axi_tb.uut.m_axi_wready
+@22
+iob2axi_tb.uut.m_axi_wdata[31:0]
+@200
+-AXI_READ
+@28
+iob2axi_tb.uut.m_axi_arvalid
+iob2axi_tb.uut.m_axi_arready
+@22
+iob2axi_tb.uut.m_axi_araddr[23:0]
+iob2axi_tb.uut.m_axi_arlen[7:0]
+@28
+iob2axi_tb.uut.m_axi_rvalid
+iob2axi_tb.uut.m_axi_rready
+@22
+iob2axi_tb.uut.iob2axi_rd0.m_axi_rdata[31:0]
+[pattern_trace] 1
+[pattern_trace] 0
