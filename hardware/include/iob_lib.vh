@@ -42,43 +42,24 @@
 `define REG_ARRE(CLK, ARST, ARST_VAL, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge ARST) if (ARST) OUT <= ARST_VAL; \
         else if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
 
-//SHIFT REGISTER
-
-//shift left
-`define SL_REG(CLK, OUT, IN) always @(posedge CLK) OUT <= (OUT << 1) | IN;
-`define SL_REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if (EN) OUT <= (OUT << 1) | IN;
-`define SL_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= (OUT << 1) | IN;
-`define SL_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT << 1) | IN;
-`define SL_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
+//SERIAL IN PARALLEL OUT SHIFT LEFT REGISTER
+`define SIPO_REG(CLK, OUT, IN) always @(posedge CLK) OUT <= (OUT << 1) | IN;
+`define SIPO_REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if (EN) OUT <= (OUT << 1) | IN;
+`define SIPO_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= (OUT << 1) | IN;
+`define SIPO_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT << 1) | IN;
+`define SIPO_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
    else OUT <= (OUT << 1) | IN;
-`define SL_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
+`define SIPO_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
    else if(EN) OUT <= (OUT << 1) | IN;
 
+//PARALLEL IN AND SERIAL OUT SHIFT LEFT REG
+`define PISO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT << 1)|IN;
+`define PISO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1)|IN;
+`define PISO_REG_R(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT << 1)|IN;
+`define PISO_REG_RE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1)|IN;
+`define PISO_REG_AR(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT << 1)|IN;
+`define PISO_REG_ARE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1)|IN;
 //shift right
-`define SR_REG(CLK, OUT, IN) always @(posedge CLK) OUT <= (OUT >> 1) | IN;
-`define SR_REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if (EN) OUT <= (OUT >> 1) | IN;
-`define SR_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= (OUT >> 1) | IN;
-`define SR_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT >> 1) | IN;
-`define SR_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
-   else OUT <= (OUT >> 1) | IN;
-`define SR_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
-   else if(EN) OUT <= (OUT >> 1) | IN;
-
-//parallel in and serial-out shift reg
-//shift left
-`define PISLO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT << 1);
-`define PISLO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1);
-`define PISLO_REG_R(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT << 1);
-`define PISLO_REG_RE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1);
-`define PISLO_REG_AR(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT << 1);
-`define PISLO_REG_ARE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1);
-//shift right
-`define PISRO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT >> 1);
-`define PISRO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
-`define PISRO_REG_R(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT >> 1);
-`define PISRO_REG_RE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
-`define PISRO_REG_AR(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT >> 1);
-`define PISLO_REG_ARE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT >> 1);
 
 //REVERSER -- NOT TESTED
 `define REVERSE(A, B, W) \
