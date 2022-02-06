@@ -16,6 +16,7 @@ def param_parse (program, vhfile) :
         defines = header_parse(vhfile)
 
     program_out = []
+    macros = []
 
     for line in program :
         flds_out = ['', '', '']
@@ -42,9 +43,10 @@ def param_parse (program, vhfile) :
             flds_out[1] = re.sub('_', '\_', str(flds[2])) #parameter value
         flds_out[2] = "\\noindent\parbox[c]{\hsize}{\\rule{0pt}{15pt} " + str(param_desc) + " \\vspace{2mm}}" #parameter description
 
-        program_out.append(flds_out)
+        if param_desc.startswith("MACRO"): macros.append(flds_out)
+        else: program_out.append(flds_out)
 
-    return program_out
+    return [program_out, macros]
 
 def main () :
     #parse command line
@@ -54,14 +56,15 @@ def main () :
     else:
         infile = sys.argv[1]
         outfile = sys.argv[2]
-        if len(sys.argv) == 4:
-            vhfile = sys.argv[3]
+        outfile_macros = sys.argv[3]
+        if len(sys.argv) == 5:
+            vhfile = sys.argv[4]
         pass
 
     #parse input file
     fin = open (infile, 'r')
     program = fin.readlines()
-    program = param_parse (program, vhfile)
+    [program, macros] = param_parse (program, vhfile)
 
     #write output file
     fout = open (outfile, 'w')
@@ -73,8 +76,19 @@ def main () :
             line_out = line_out + (' & %s' % line[l])
         fout.write(line_out + ' \\\ \hline\n')
 
+    #write output file for macros
+    fout_macros = open (outfile_macros, 'w')
+    for i in range(len(macros)):
+        if ((i%2) != 0): fout_macros.write("\\rowcolor{iob-blue}\n")
+        line = macros[i]
+        line_out = str(line[0])
+        for l in range(1,len(line)):
+            line_out = line_out + (' & %s' % line[l])
+        fout_macros.write(line_out + ' \\\ \hline\n')
+
     #Close files
     fin.close()
     fout.close()
+    fout_macros.close()
 
 if __name__ == "__main__" : main ()
