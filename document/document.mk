@@ -94,7 +94,7 @@ bd_tab.tex: $(CORE_DIR)/hardware/src/$(BD_VSRC)
 
 #synthesis parameters
 sp_tab.tex: $(CORE_DIR)/hardware/src/$(TOP_MODULE).v
-	$(LIB_SW_PYTHON_DIR)/param2tex.py $< $@ $(CORE_DIR)/hardware/include/$(TOP_MODULE).vh
+	$(LIB_SW_PYTHON_DIR)/param2tex.py $< $@ sm_tab.tex $(CORE_DIR)/hardware/include/$(TOP_MODULE).vh
 
 #sw accessible registers
 sw_%reg_tab.tex: $(CORE_DIR)/hardware/include/$(CORENAME)sw_reg.vh
