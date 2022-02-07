@@ -12,6 +12,8 @@ module iob_modcnt
     input                   rst,
     input                   en,
 
+    input [DATA_W-1:0]      ld_val,
+
     //masters interface
     input [DATA_W-1:0]      mod,
 
@@ -22,11 +24,12 @@ module iob_modcnt
    always @(posedge clk, posedge rst)
      if(rst)
        cnt <= 1'b0;
-     else if (en) begin
-        if(cnt == (mod-1'b1))
-          cnt <= 1'b0;
-        else 
-          cnt <= cnt + 1'b1;
-     end
-   
+     else if (en)
+       if(cnt == (mod-1'b1))
+         cnt <= 1'b0;
+       else 
+         cnt <= cnt + 1'b1;
+     else
+       cnt <= ld_val;
+
 endmodule
