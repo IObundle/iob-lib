@@ -6,16 +6,19 @@
 
 ******************************************************************************/
 `timescale 1ns / 1ps
+
 `include "iob_lib.vh"
 
 module iobuf
   (
-   `INPUT(I, 1), //input from FPGA
-   `INPUT(T, 1), //(1) disables I (0) enables I
-   `OUTPUT(O, 1), //output into FPGA
-   `INOUT(IO, 1) //IO to/from device pad
+   `INPUT(I, 1), //from core
+   `INPUT(T, 1), //from core: tristate control
+   `INPUT(N, 1), //from core: inversion control
+   `OUTPUT(O, 1),//to core
+   `INOUT(IO, 1) //to device IO
    );
 
+`ifdef XILINX
    IOBUF IOBUF_inst
      (
       .I(I),
@@ -23,4 +26,9 @@ module iobuf
       .O(O),
       .IO(IO)
       );
+`else
+   assign IO = T? 1'bz : I;
+   assign O = N^IO;
+`endif
+
 endmodule
