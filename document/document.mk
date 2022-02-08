@@ -107,10 +107,10 @@ gen_is_tab.tex: $(LIB_DIR)/hardware/include/gen_if.vh
 iob_s_if_is_tab.tex: $(LIB_DIR)/hardware/include/iob_s_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
-iob_m_if.vh: $(LIB_DIR)/hardware/include/iob_m_if.vh
+iob_m_if.vh: $(AXI_DIR)/hardware/include/iob_m_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
-axil_s_if_is_tab.tex: $(LIB_DIR)/hardware/include/axil_s_if.vh
+axil_s_if_is_tab.tex: $(AXI_DIR)/hardware/include/axil_s_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
 axi_m_if_is_tab.tex:  $(LIB_DIR)/hardware/include/axi_m_if.vh
