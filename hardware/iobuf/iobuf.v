@@ -28,7 +28,8 @@ module iobuf
       );
 `else
    assign IO = T? 1'bz : I;
-   assign O = N^IO;
 `endif
+
+   assign O = N^IO;
 
 endmodule
