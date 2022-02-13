@@ -15,7 +15,7 @@ def param_parse (program, vhfile) :
         #Creates header dictionary
         defines = header_parse(vhfile)
 
-    program_out = []
+    params = []
     macros = []
 
     for line in program :
@@ -29,8 +29,15 @@ def param_parse (program, vhfile) :
         if (flds[0] != 'parameter'): continue #not a block description
         #print flds
         param_desc = str(re.sub('_','\_', " ".join(flds[3:])))
-        if param_desc.startswith("NODOC"): continue #undocummented parameter
-
+        if param_desc.startswith("PARAM"):
+            params.append(flds_out)
+            param_desc =  param_desc[len("PARAM "):]
+        elif param_desc.startswith("MACRO"):
+            macros.append(flds_out)
+            param_desc =  param_desc[len("MACRO "):]
+        else:
+            continue #undocummented parameter
+           
         flds_out[0] = re.sub('_','\_', flds[1]) #parameter name
         flds[2] = re.sub(',', '', str(flds[2]))
 
@@ -43,15 +50,18 @@ def param_parse (program, vhfile) :
             flds_out[1] = re.sub('_', '\_', str(flds[2])) #parameter value
         flds_out[2] = "\\noindent\parbox[c]{\hsize}{\\rule{0pt}{15pt} " + str(param_desc) + " \\vspace{2mm}}" #parameter description
 
-        if param_desc.startswith("MACRO"): macros.append(flds_out)
-        else: program_out.append(flds_out)
-
-    return [program_out, macros]
+ 
+    return [params, macros]
 
 def main () :
     #parse command line
-    if len(sys.argv) != 3 and len(sys.argv) != 4:
-        print("Usage: ./param2tex.py infile outfile [header_file]")
+    if len(sys.argv) != 4 and len(sys.argv) != 5:
+        print(len(sys.argv))
+        print("Usage: ./param2tex.py infile outfile_params outfile_macros [header_file]")
+        print("infile is the top-level .v file, where the synthesis parameters are defined")
+        print("outfile_params is the .tex file, where the synthesis parameters are tabulated")
+        print("outfile_macros is the .tex file, where the synthesis macros are tabulated")
+        print("header_file is a .vh file with definitions of the macros used in infile")
         exit()
     else:
         infile = sys.argv[1]

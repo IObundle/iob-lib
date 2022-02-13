@@ -30,8 +30,7 @@ endif
 
 #add software accessible registers table to the list of tables
 ifeq ($(SWREGS),1)
-# expected sw_%reg table namming convention in CORENAMEsw_reg.v
-TAB +=$(shell grep START_TABLE $(CORE_DIR)/hardware/include/$(CORENAME)sw_reg.vh | awk '{print $$2}' | sed s/$$/_tab.tex/)
+TAB +=$(shell grep START_TABLE $(CORE_DIR)/hardware/include/$(TOP_MODULE)_sw_reg.vh | awk '{print $$2}' | sed s/$$/_tab.tex/)
 endif 
 
 
@@ -50,7 +49,7 @@ pb.aux: $(LIB_DOC_DIR)/pb/pb.tex $(SRC) $(TAB)
 ug.pdf: ug.aux
 	evince $@ &
 
-ug.aux: $(LIB_DOC_DIR)/ug/ug.tex $(SRC) $(TAB) $(CORENAME)_version.txt
+ug.aux: $(LIB_DOC_DIR)/ug/ug.tex $(SRC) $(TAB) $(TOP_MODULE)_version.txt
 	echo $(TAB)
 	exit
 	git rev-parse --short HEAD > shortHash.txt
@@ -97,23 +96,27 @@ sp_tab.tex: $(CORE_DIR)/hardware/src/$(TOP_MODULE).v
 	$(LIB_SW_PYTHON_DIR)/param2tex.py $< $@ sm_tab.tex $(CORE_DIR)/hardware/include/$(TOP_MODULE).vh
 
 #sw accessible registers
-sw_%reg_tab.tex: $(CORE_DIR)/hardware/include/$(CORENAME)sw_reg.vh
+sw_%reg_tab.tex: $(CORE_DIR)/hardware/include/$(TOP_MODULE)_sw_reg.vh
 	$(LIB_SW_PYTHON_DIR)/swreg2tex.py $< 
 
 #general interface signals (clk and rst)
 gen_is_tab.tex: $(LIB_DIR)/hardware/include/gen_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
-iob_s_if_is_tab.tex: $(LIB_DIR)/hardware/include/iob_s_if.vh
+#iob native slave interface
+iob_s_if_tab.tex: $(LIB_DIR)/hardware/include/iob_s_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
-iob_m_if.vh: $(AXI_DIR)/hardware/include/iob_m_if.vh
+#iob native master interface
+iob_m_if_tab.tex: $(AXI_DIR)/hardware/include/iob_m_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
-axil_s_if_is_tab.tex: $(AXI_DIR)/hardware/include/axil_s_if.vh
+#axi lite slave interface
+axil_s_if_tab.tex: $(AXI_DIR)/hardware/include/axil_s_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
-axi_m_if_is_tab.tex:  $(LIB_DIR)/hardware/include/axi_m_if.vh
+#axi master interface
+axi_m_if_tab.tex:  $(AXI_DIR)/hardware/include/axi_m_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
 #cleaning
