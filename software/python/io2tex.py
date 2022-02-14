@@ -1,45 +1,47 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 #
 #    Build Latex tables of verilog module interface signals and registers
 #
 
 import sys
 import os.path
-import re
 import math
+from parse import parse
 
 from vhparser import header_parse
 
-def io_parse (program, defines) :
-    program_out = []
-    swreg_list = []
-    for line in program :
-        flds_out = ['','','','']
-        subline = re.sub('\[|\]|:|,|//|\;',' ', line)
-        subline = re.sub('\(',' ',subline, 1)
-        subline = re.sub('\)',' ', subline, 1)
+def io_parse (verilog, defines) :
+    io_out = []
+    io_list = []
+    io_flds = []
+    for line in verilog:
+        print(line)
+        io_flds = parse('`{}({},{}),{}', line)
+        if line.find('INPUT')>=0:
+            print (line)
+            print (io_flds)
+        if io_flds is None:
+            continue #not an io
+        else:            
+            print("bla")
+            io_type = io_flds[0].replace('_VAR','').strip(' ')
+            io_flds[0] = io_flds[1].strip(' ') #io name
+            io_flds[1] = io_type
 
-        flds = subline.split()
-        if not flds : continue #empty line
-        #print flds[0]
-        if (flds[0] != '`INPUT') & (flds[0] != '`OUTPUT') & (flds[0] != '`INOUT'): continue #not IO
-        #print flds
-        flds_out[1] = re.sub('`','', flds[0]).lower() #signal direction
-
-        flds_out[0] = re.sub('_','\_',flds[1]) #signal name
-        if flds[2] in defines:#check for matching key first
-            flds[2] = defines[flds[2]]
-        else: #macro composed by multiple defines
+            #io width
+            #may be defined using macros: replace and evaluate
             for key, val in defines.items():
-                if key in str(flds[2]):
-                    flds[2] = eval(re.sub(str(key),str(val), flds[2]))
-                pass
-        flds_out[2] = re.sub('_', '\_', str(flds[2]))  #signal width
-        flds_out[3] = re.sub('_','\_'," ".join(flds[3:])) #signal description
+                if key in io_flds[2]:
+                    io_flds[2] = io_flds[2].replace(str(key),str(val))
+            #may be defined using parameters: beware of '_'
+            io_flds[2] = io_flds[2].replace('_', '\_').strip(' ')
 
-        program_out.append(flds_out)
+            io_flds[3] = io_flds[2].strip('//').strip(' ')  #io description
+        
+        io_list.append(io_flds)
 
-    return program_out
+    #print(io_list)
+    return io_list
 
 def main () :
     #parse command line
@@ -60,18 +62,18 @@ def main () :
         
     #parse input file
     fin = open (infile, 'r')
-    program = fin.readlines()
-    program = io_parse (program, defines)
+    verilog = fin.readlines()
+    io = io_parse (verilog, defines)
 
-    #print program
-    #for line in range(len(program)):
-     #   print program[line]
+    #print ios
+    #for line in range(len(io)):
+     #   print io[line]
 
     #write output file
     fout = open (outfile, 'w')
-    for i in range(len(program)):
+    for i in range(len(io)):
         if ((i%2) != 0): fout.write("\\rowcolor{iob-blue}\n")
-        line = program[i]
+        line = io[i]
         line_out = str(line[0])
         for l in range(1,len(line)):
             line_out = line_out + (' & %s' % line[l])

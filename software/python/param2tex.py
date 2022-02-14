@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 #
 #    Build Latex tables of verilog module interface signals and registers
 #
@@ -24,10 +24,12 @@ def param_parse (program, vhfile) :
         subline = re.sub('=', '', subline, 1)
 
         flds = subline.split()
-        if not flds : continue #empty line
-        #print flds[0]
-        if (flds[0] != 'parameter'): continue #not a block description
-        #print flds
+        if not flds:
+            continue #empty line
+
+        if (flds[0] != 'parameter'):
+            continue #not a block description
+
         param_desc = str(re.sub('_','\_', " ".join(flds[3:])))
         if param_desc.startswith("PARAM"):
             params.append(flds_out)
