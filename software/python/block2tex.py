@@ -15,7 +15,6 @@ def block_parse (block) :
         if line.find('//BLOCK') < 0: continue #not a block description
         line_out = line.replace( '//BLOCK', '')
         line_out = line_out.split('&')
-        print(line_out)
         block_out.append("\\item["+ line_out[0] +":]{"+ line_out[1]+"}")
 
     return block_out
@@ -30,7 +29,6 @@ def main () :
         infiles = sys.argv[2:]
         pass
 
-    print(sys.argv)
     #add input files
     block = []
     for infile in infiles:

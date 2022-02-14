@@ -16,7 +16,7 @@ TEX_DEFINES +=\def\SP{$(SP)}\def\SWREGS{$(SWREGS)}\def\SWCOMPS{$(SWCOMPS)}
 TEX_DEFINES +=\def\TD{$(TD)}\def\CUSTOM{$(CUSTOM)}
 
 #add general interface signals to the list of tables
-TAB +=gen_is_tab.tex
+TAB +=gen_if_tab.tex
 
 #add block diagram table to the list of tables
 ifeq ($(BDTAB),1)
@@ -103,7 +103,7 @@ sw_%reg_tab.tex: $(CORE_DIR)/hardware/include/$(TOP_MODULE)_sw_reg.vh
 	$(LIB_SW_PYTHON_DIR)/swreg2tex.py $< 
 
 #general interface signals (clk and rst)
-gen_is_tab.tex: $(LIB_DIR)/hardware/include/gen_if.vh
+gen_if_tab.tex: $(LIB_DIR)/hardware/include/gen_if.vh
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
 
 #iob native slave interface
