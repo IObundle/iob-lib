@@ -77,12 +77,15 @@ figures:
 	make -C ./figures
 
 #FPGA implementation results
+VIVADOLOG = $(CORE_DIR)/hardware/fpga/vivado/$(XIL_FAMILY)/vivado.log
+QUARTUSLOG = $(CORE_DIR)/hardware/fpga/quartus/$(INT_FAMILY)/quartus.log
+
 fpga_res:
 ifeq ($(XILINX),1)
-	cp $(CORE_DIR)/hardware/fpga/vivado/$(XIL_FAMILY)/vivado.log .
+	if [ -f $(VIVADOLOG) ]; then cp $(VIVADOLOG) .; else make fpga-build FPGA_FAMILY = $(XIL_FAMILY); fi
 endif
 ifeq ($(INTEL),1)
-	cp $(CORE_DIR)/hardware/fpga/quartus/$(INT_FAMILY)/quartus.log .
+	if [ -f $(QUARTUSLOG) ]; then cp $(QUARTUSLOG) .; else make fpga-build FPGA_FAMILY = $(INT_FAMILY); fi
 endif
 	INTEL=$(INTEL) XILINX=$(XILINX) $(LIB_SW_DIR)/fpga2tex.sh
 

@@ -16,6 +16,11 @@
 \RequirePackage{tabularx}
 \RequirePackage{lipsum}
 \RequirePackage{catchfile}
+\RequirePackage[all]{nowidow}
+\widowpenalty10000
+\clubpenalty10000
+\RequirePackage{enumerate}
+\RequirePackage{enumitem}
 
 \geometry{
  a4paper,
@@ -68,3 +73,4 @@
 \newcommand{\getenv}[2][]{%
   \CatchFileEdef{\temp}{"|kpsewhich --var-value #2"}{\endlinechar=-1}%
   \if\relax\detokenize{#1}\relax\temp\else\let#1\temp\fi}
+

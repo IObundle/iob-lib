@@ -7,24 +7,18 @@ import sys
 import os.path
 import re
 
-def block_parse (program) :
-    program_out = []
+def block_parse (block) :
+    block_out = []
+    line_out = []
+    
+    for line in block :
+        if line.find('//BLOCK') < 0: continue #not a block description
+        line_out = line.replace( '//BLOCK', '')
+        line_out = line_out.split('&')
+        print(line_out)
+        block_out.append("\\item["+ line_out[0] +":]{"+ line_out[1]+"}")
 
-    for line in program :
-        flds_out = ['']
-        subline = line
-
-        flds = subline.split()
-        if not flds : continue #empty line
-        #print flds[0]
-        if (flds[0] != '//BLOCK'): continue #not a block description
-        #print flds
-
-        flds_out[0] = re.sub('_','\_'," ".join(flds[1:])) + " \\vspace{2mm}" #block
-
-        program_out.append(flds_out)
-
-    return program_out
+    return block_out
 
 def main () :
     #parse command line
@@ -38,24 +32,19 @@ def main () :
 
     print(sys.argv)
     #add input files
-    program = []
+    block = []
     for infile in infiles:
         fin = open (infile, 'r')
-        program.extend(fin.readlines())
+        block.extend(fin.readlines())
         fin.close()
     
     #parse input files
-    program = block_parse (program)
+    block = block_parse (block)
 
     #write output file
     fout = open (outfile, 'w')
-    for i in range(len(program)):
-        if ((i%2) != 0): fout.write("\\rowcolor{iob-blue}\n")
-        line = program[i]
-        line_out = str(line[0])
-        for l in range(1,len(line)):
-            line_out = line_out + (' & %s' % line[l])
-        fout.write(line_out + ' \\\ \hline\n')
+    for i in range(len(block)):
+        fout.write(str(block[i]))
 
     #Close output file
     fout.close()
