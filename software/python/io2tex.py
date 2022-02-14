@@ -11,36 +11,32 @@ from parse import parse
 from vhparser import header_parse
 
 def io_parse (verilog, defines) :
-    io_out = []
     io_list = []
-    io_flds = []
     for line in verilog:
-        print(line)
-        io_flds = parse('`{}({},{}),{}', line)
-        if line.find('INPUT')>=0:
-            print (line)
-            print (io_flds)
-        if io_flds is None:
+        io_flds = []
+        io_flds_tmp = parse('{}`{}({},{}),{}//{}', line)
+        if io_flds_tmp is None:
             continue #not an io
         else:            
-            print("bla")
-            io_type = io_flds[0].replace('_VAR','').strip(' ')
-            io_flds[0] = io_flds[1].strip(' ') #io name
-            io_flds[1] = io_type
-
+            #io name
+            io_flds.append(io_flds_tmp[2].replace('_','\_').strip(' '))
+            #io type
+            io_flds.append(io_flds_tmp[1].replace('_VAR','').strip(' '))
             #io width
             #may be defined using macros: replace and evaluate
+            eval_str = io_flds_tmp[3]
             for key, val in defines.items():
-                if key in io_flds[2]:
-                    io_flds[2] = io_flds[2].replace(str(key),str(val))
-            #may be defined using parameters: beware of '_'
-            io_flds[2] = io_flds[2].replace('_', '\_').strip(' ')
-
-            io_flds[3] = io_flds[2].strip('//').strip(' ')  #io description
-        
+                eval_str = eval_str.replace(str(key),str(val))
+            try:
+                io_flds.append(eval(eval_exp))
+            except:
+                #eval_str has undefined parameters: use as is
+                io_flds.append(eval_str.replace('_','\_').strip(' '))
+                
+            #io description
+            io_flds.append(io_flds_tmp[5].replace('_','\_'))
+            
         io_list.append(io_flds)
-
-    #print(io_list)
     return io_list
 
 def main () :
