@@ -94,9 +94,9 @@ endif
 bd_tab.tex: $(CORE_DIR)/hardware/src/$(BD_VSRC)
 	$(LIB_SW_PYTHON_DIR)/block2tex.py $@ $^
 
-#synthesis parameters
-sp_tab.tex: $(CORE_DIR)/hardware/src/$(TOP_MODULE).v
-	$(LIB_SW_PYTHON_DIR)/param2tex.py $< $@ sm_tab.tex $(CORE_DIR)/hardware/include/$(TOP_MODULE).vh
+#synthesis parameters and macros
+sp_tab.tex: $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(SP_VHDR)
+	$(LIB_SW_PYTHON_DIR)/param2tex.py $^
 
 #sw accessible registers
 sw_%reg_tab.tex: $(CORE_DIR)/hardware/include/$(TOP_MODULE)_sw_reg.vh

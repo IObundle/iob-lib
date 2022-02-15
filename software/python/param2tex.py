@@ -1,94 +1,89 @@
 #!/usr/bin/python3
-#
-#    Build Latex tables of verilog module interface signals and registers
-#
+
+# create parameter and macro tables
+
 
 import sys
-import os.path
-import re
+from parse import parse
 
 from vhparser import header_parse
 
-def param_parse (program, vhfile) :
-    defines = {}
-    if 'vhfile' in locals():
-        #Creates header dictionary
-        defines = header_parse(vhfile)
-
+def param_parse (verilog, defines):
     params = []
     macros = []
 
-    for line in program :
-        flds_out = ['', '', '']
-        subline = re.sub('//',' ', line)
-        subline = re.sub('=', '', subline, 1)
+    for line in verilog:
+        p_flds = []
 
-        flds = subline.split()
-        if not flds:
-            continue #empty line
+        p_flds_tmp = parse('{}parameter {} = {}//{}', line)
 
-        if (flds[0] != 'parameter'):
-            continue #not a block description
+        if p_flds_tmp is None:
+            continue #not a parameter or macro
 
-        param_desc = str(re.sub('_','\_', " ".join(flds[3:])))
-        if param_desc.startswith("PARAM"):
-            params.append(flds_out)
-            param_desc =  param_desc[len("PARAM "):]
-        elif param_desc.startswith("MACRO"):
-            macros.append(flds_out)
-            param_desc =  param_desc[len("MACRO "):]
+        #NAME 
+        p_flds.append(p_flds_tmp[1].replace('_','\_').strip(' '))
+
+        #VALUE
+        #may be defined using macros: replace and evaluate
+        eval_str = p_flds_tmp[2]
+        for key, val in defines.items():
+            eval_str = eval_str.replace(str(key),str(val))
+        try:
+            p_flds.append(eval(eval_exp))
+        except:
+            #eval_str has undefined parameters: use as is
+            p_flds.append(eval_str.replace('_','\_').strip(' '))
+                
+        #DESCRIPTION
+        if p_flds_tmp[3].find('PARAM')>=0:
+            is_param = 1;
+            p_flds.append(p_flds_tmp[3].replace('_','\_').strip('PARAM'))
         else:
-            continue #undocummented parameter
-           
-        flds_out[0] = re.sub('_','\_', flds[1]) #parameter name
-        flds[2] = re.sub(',', '', str(flds[2]))
+            is_param = 0
+            p_flds.append(p_flds_tmp[3].replace('_','\_').strip('MACRO'))
 
-        if flds[2].isdigit():
-            flds_out[1] = re.sub('_', '\_', re.sub(',', '', flds[2])) #parameter value
+        if is_param == 1:
+            params.append(p_flds)
         else:
-            for key in defines:
-                if key in str(flds[2]):
-                    flds[2] = eval(re.sub(str(key), str(defines[key]), flds[2]))
-            flds_out[1] = re.sub('_', '\_', str(flds[2])) #parameter value
-        flds_out[2] = "\\noindent\parbox[c]{\hsize}{\\rule{0pt}{15pt} " + str(param_desc) + " \\vspace{2mm}}" #parameter description
-
- 
+            macros.append(p_flds)
+     
     return [params, macros]
 
 def main () :
+    
     #parse command line
-    if len(sys.argv) != 4 and len(sys.argv) != 5:
-        print(len(sys.argv))
-        print("Usage: ./param2tex.py infile outfile_params outfile_macros [header_file]")
-        print("infile is the top-level .v file, where the synthesis parameters are defined")
-        print("outfile_params is the .tex file, where the synthesis parameters are tabulated")
-        print("outfile_macros is the .tex file, where the synthesis macros are tabulated")
-        print("header_file is a .vh file with definitions of the macros used in infile")
+    if len(sys.argv) < 2:
+        print("Usage: ./param2tex.py top_level.v [header_files]")
+        print("top-level.v file is the Verilog top-level module file, where the synthesis parameters are defined")
+        print("[header_files] are a list of .vh header files containing the macro definitions used in top-level.v")
         exit()
-    else:
-        infile = sys.argv[1]
-        outfile = sys.argv[2]
-        outfile_macros = sys.argv[3]
-        if len(sys.argv) == 5:
-            vhfile = sys.argv[4]
-        pass
 
+
+    infile = sys.argv[1]
+    outfile_params = "sp_tab.tex"
+    outfile_macros = "sm_tab.tex"
+
+    #create macro dictionary
+    defines = {}
+    for i in sys.argv[2:]:
+        header_parse(i, defines)
+        
     #parse input file
     fin = open (infile, 'r')
-    program = fin.readlines()
-    [program, macros] = param_parse (program, vhfile)
+    verilog = fin.readlines()
+    [params, macros] = param_parse (verilog, defines)
 
-    #write output file
-    fout = open (outfile, 'w')
-    for i in range(len(program)):
+    #write out params
+    fout = open (outfile_params, 'w')
+    for i in range(len(params)):
         if ((i%2) != 0): fout.write("\\rowcolor{iob-blue}\n")
-        line = program[i]
+        line = params[i]
         line_out = str(line[0])
         for l in range(1,len(line)):
             line_out = line_out + (' & %s' % line[l])
         fout.write(line_out + ' \\\ \hline\n')
 
-    #write output file for macros
+    #write out macros
     fout_macros = open (outfile_macros, 'w')
     for i in range(len(macros)):
         if ((i%2) != 0): fout_macros.write("\\rowcolor{iob-blue}\n")
@@ -97,10 +92,5 @@ def main () :
         for l in range(1,len(line)):
             line_out = line_out + (' & %s' % line[l])
         fout_macros.write(line_out + ' \\\ \hline\n')
-
-    #Close files
-    fin.close()
-    fout.close()
-    fout_macros.close()
 
 if __name__ == "__main__" : main ()
