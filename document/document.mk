@@ -94,8 +94,11 @@ endif
 bd_tab.tex: $(CORE_DIR)/hardware/src/$(BD_VSRC)
 	$(LIB_SW_PYTHON_DIR)/block2tex.py $@ $^
 
+#header files with macro definitions
+VHDR=$(CORE_DIR)/hardware/include/$(TOP_MODULE).vh $(TOP_MODULE)_sw_reg_def.vh $(AXI_DIR)/hardware/include/axi.vh
+
 #synthesis parameters and macros
-sp_tab.tex: $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(SP_VHDR)
+sp_tab.tex: $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR)
 	$(LIB_SW_PYTHON_DIR)/param2tex.py $^
 
 #sw accessible registers
@@ -104,23 +107,23 @@ sw_%reg_tab.tex: $(CORE_DIR)/hardware/include/$(TOP_MODULE)_sw_reg.vh
 
 #general interface signals (clk and rst)
 gen_if_tab.tex: $(LIB_DIR)/hardware/include/gen_if.vh
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
+	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
 
 #iob native slave interface
 iob_s_if_tab.tex: $(LIB_DIR)/hardware/include/iob_s_if.vh
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
+	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
 
 #iob native master interface
 iob_m_if_tab.tex: $(AXI_DIR)/hardware/include/iob_m_if.vh
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
+	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
 
 #axi lite slave interface
 axil_s_if_tab.tex: $(AXI_DIR)/hardware/include/axil_s_if.vh
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
+	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
 
 #axi master interface
 axi_m_if_tab.tex:  $(AXI_DIR)/hardware/include/axi_m_if.vh
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@
+	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
 
 #cleaning
 clean: ug-clean

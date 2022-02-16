@@ -8,7 +8,9 @@ from parse import parse
 from vhparser import header_parse
 
 def io_parse (verilog, defines) :
+
     io_list = []
+
     for line in verilog:
         io_flds = []
         io_flds_tmp = parse('{}`{}({},{}){}//{}', line)
@@ -23,11 +25,11 @@ def io_parse (verilog, defines) :
 
         #WIDTH
         #may be defined using macros: replace and evaluate
-        eval_str = io_flds_tmp[3]
+        eval_str = io_flds_tmp[3].replace('`','').replace(',','')
         for key, val in defines.items():
             eval_str = eval_str.replace(str(key),str(val))
         try:
-            io_flds.append(eval(eval_exp))
+            io_flds.append(eval(eval_str))
         except:
             #eval_str has undefined parameters: use as is
             io_flds.append(eval_str.replace('_','\_').strip(' '))
@@ -36,6 +38,7 @@ def io_parse (verilog, defines) :
         io_flds.append(io_flds_tmp[5].replace('_','\_'))
             
         io_list.append(io_flds)
+
     return io_list
 
 def main () :
@@ -50,8 +53,9 @@ def main () :
 
     #create macro dictionary
     defines = {}
-    for i in sys.argv[2:]:
-        defines.append(header_parse(i))
+    for i in sys.argv[3:]:
+        header_parse(i, defines)
+    header_parse(infile, defines)
         
     #parse input file
     fin = open (infile, 'r')

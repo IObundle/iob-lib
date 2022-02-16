@@ -14,9 +14,7 @@ def param_parse (verilog, defines):
 
     for line in verilog:
         p_flds = []
-
         p_flds_tmp = parse('{}parameter {} = {}//{}', line)
-
         if p_flds_tmp is None:
             continue #not a parameter or macro
 
@@ -25,7 +23,8 @@ def param_parse (verilog, defines):
 
         #VALUE
         #may be defined using macros: replace and evaluate
-        eval_str = p_flds_tmp[2]
+        eval_str = p_flds_tmp[2].replace('`','').replace(',','')
+        #print(eval_str)
         for key, val in defines.items():
             eval_str = eval_str.replace(str(key),str(val))
         try:
@@ -53,9 +52,8 @@ def main () :
     
     #parse command line
     if len(sys.argv) < 2:
-        print("Usage: ./param2tex.py top_level.v [header_files]")
-        print("top-level.v file is the Verilog top-level module file, where the synthesis parameters are defined")
-        print("[header_files] are a list of .vh header files containing the macro definitions used in top-level.v")
+        print("Usage: param2tex.py path/to/top_level.v [header_files]")
+        print("header_files: paths to .vh files used to extract macro values")
         exit()
 
 
@@ -65,7 +63,7 @@ def main () :
 
     #create macro dictionary
     defines = {}
-    for i in sys.argv[2:]:
+    for i in sys.argv[1:]:
         header_parse(i, defines)
         
     #parse input file
