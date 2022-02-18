@@ -50,7 +50,6 @@ ug.pdf: ug.aux
 	evince $@ &
 
 ug.aux: $(LIB_DOC_DIR)/ug/ug.tex $(SRC) $(TAB) $(TOP_MODULE)_version.txt
-	echo $(TAB)
 	exit
 	git rev-parse --short HEAD > shortHash.txt
 ifeq ($(CUSTOM),1)
@@ -82,10 +81,10 @@ QUARTUSLOG = $(CORE_DIR)/hardware/fpga/quartus/$(INT_FAMILY)/quartus.log
 
 fpga_res:
 ifeq ($(XILINX),1)
-	if [ -f $(VIVADOLOG) ]; then cp $(VIVADOLOG) .; else make fpga-build FPGA_FAMILY = $(XIL_FAMILY); fi
+	if [ ! -f $(VIVADOLOG) ]; then make  -C $(CORE_DIR) fpga-build FPGA_FAMILY=$(XIL_FAMILY); fi; cp $(VIVADOLOG) .
 endif
 ifeq ($(INTEL),1)
-	if [ -f $(QUARTUSLOG) ]; then cp $(QUARTUSLOG) .; else make fpga-build FPGA_FAMILY = $(INT_FAMILY); fi
+	if [ ! -f $(QUARTUSLOG) ]; then make -C $(CORE_DIR) fpga-build FPGA_FAMILY=$(INT_FAMILY); fi; cp $(QUARTUSLOG) .
 endif
 	INTEL=$(INTEL) XILINX=$(XILINX) $(LIB_SW_DIR)/fpga2tex.sh
 
@@ -95,7 +94,7 @@ bd_tab.tex: $(CORE_DIR)/hardware/src/$(BD_VSRC)
 	$(LIB_SW_PYTHON_DIR)/block2tex.py $@ $^
 
 #header files with macro definitions
-VHDR=$(CORE_DIR)/hardware/include/$(TOP_MODULE).vh $(TOP_MODULE)_sw_reg_def.vh $(AXI_DIR)/hardware/include/axi.vh
+VHDR+=$(TOP_MODULE)_sw_reg_def.vh
 
 #synthesis parameters and macros
 sp_tab.tex: $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR)
@@ -106,23 +105,23 @@ sw_%reg_tab.tex: $(CORE_DIR)/hardware/include/$(TOP_MODULE)_sw_reg.vh
 	$(LIB_SW_PYTHON_DIR)/swreg2tex.py $< 
 
 #general interface signals (clk and rst)
-gen_if_tab.tex: $(LIB_DIR)/hardware/include/gen_if.vh
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
+gen_if_tab.tex: $(LIB_DIR)/hardware/include/gen_if.vh $(VHDR)
+	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@ $(VHDR)
 
 #iob native slave interface
-iob_s_if_tab.tex: $(LIB_DIR)/hardware/include/iob_s_if.vh
+iob_s_if_tab.tex: $(LIB_DIR)/hardware/include/iob_s_if.vh $(VHDR) $(MACRO_LIST)
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
 
 #iob native master interface
-iob_m_if_tab.tex: $(AXI_DIR)/hardware/include/iob_m_if.vh
+iob_m_if_tab.tex: $(LIB_DIR)/hardware/include/iob_m_if.vh $(VHDR) $(MACRO_LIST)
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
 
 #axi lite slave interface
-axil_s_if_tab.tex: $(AXI_DIR)/hardware/include/axil_s_if.vh
+axil_s_if_tab.tex: $(FPGA_DIR)/axil_s_port.vh $(VHDR) $(MACRO_LIST)
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
 
 #axi master interface
-axi_m_if_tab.tex:  $(AXI_DIR)/hardware/include/axi_m_if.vh
+axi_m_if_tab.tex:  $(FPGA_DIR)/axi_m_port.vh $(VHDR) $(MACRO_LIST)
 	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
 
 #cleaning

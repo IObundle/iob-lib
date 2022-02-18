@@ -4,6 +4,7 @@
 #
 
 import sys
+import os
 from parse import parse
 from vhparser import header_parse
 
@@ -42,6 +43,10 @@ def io_parse (verilog, defines) :
     return io_list
 
 def main () :
+
+    #get the DEFINE environment variable
+    DEFINE = os.getenv('DEFINE').split()
+
     #parse command line
     if len(sys.argv) < 3:
         print("Usage: ./io2tex.py infile outfile [header_files]")
@@ -53,6 +58,13 @@ def main () :
 
     #create macro dictionary
     defines = {}
+
+    #insert DEFINE macros
+    for i in range(len(DEFINE)):
+        MACRO=DEFINE[i].split('=')
+        defines[MACRO[0]]=eval(MACRO[1])
+
+    #insert header macros
     for i in sys.argv[3:]:
         header_parse(i, defines)
     header_parse(infile, defines)
@@ -60,8 +72,13 @@ def main () :
     #parse input file
     fin = open (infile, 'r')
     verilog = fin.readlines()
+
+    print(verilog)
+
     io = io_parse (verilog, defines)
 
+    print(io)
+    
     #write output file
     fout = open (outfile, 'w')
     for i in range(len(io)):

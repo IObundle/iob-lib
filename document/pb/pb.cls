@@ -1,6 +1,6 @@
 \LoadClass[twoside,twocolumn,a4paper]{article}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{../../submodules/TEX/document/pb/pb}
+\ProvidesClass{../../submodules/LIB/document/pb/pb}
 
 \RequirePackage{graphicx}
 \RequirePackage{helvet}
