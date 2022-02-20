@@ -1,66 +1,55 @@
-#paths
 LIB_DOC_DIR:=$(LIB_DIR)/document
 LIB_SW_DIR:=$(LIB_DIR)/software
 LIB_SW_PYTHON_DIR:=$(LIB_SW_DIR)/python
 
-#latex build macros
-BDTAB ?=1
-SP ?=0
-SWREGS ?=1
-SWCOMPS ?=0
-TD ?=0
-CUSTOM ?= 0
+VHDR +=$(LIB_DIR)/hardware/include/gen_if.vh
 
-TEX_DEFINES=\def\TEX{$(LIB_DOC_DIR)}\def\XILINX{$(XILINX)}\def\INTEL{$(INTEL)}\def\ASIC{$(ASIC)}
-TEX_DEFINES +=\def\SP{$(SP)}\def\SWREGS{$(SWREGS)}\def\SWCOMPS{$(SWCOMPS)}
-TEX_DEFINES +=\def\TD{$(TD)}\def\CUSTOM{$(CUSTOM)}
+.PHONY: texfiles all figures fpga_res clean
 
-#add general interface signals to the list of tables
-TAB +=gen_if_tab.tex
+SHELL = /bin/bash
+top.tex: texfiles
+	echo "\def\TEX{$(LIB_DOC_DIR)}" > top.tex
+	if [ -f sp_tab.tex ]; then SP=1; else SP=0; fi; echo "\def\SP{$$SP}" >> top.tex
+	if [ -f sm_tab.tex ]; then SM=1; else SM=0; fi; echo "\def\SM{$$SM}" >> top.tex
+	if [ `find . -name \*reg_tab.tex -print -quit` ]; then SWREGS=1; else SWREGS=0; fi; echo "\def\SWREGS{$$SWREGS}" >> top.tex
+	if [ -f sw_tab.tex ]; then SWCOMPS=1; else SWCOMPS=0; fi; echo "\def\SWCOMPS{$$SWCOMPS}" >> top.tex
+	if [ `find figures -name *td_fig.pdf -print -quit` ]; then TD=1; else TD=0; fi; echo "\def\TD{$$TD}" >> top.tex
+	if [ -f custom.tex ]; then CUSTOM=1; else CUSTOM=0; fi; echo "\def\CUSTOM{$$CUSTOM}" >> top.tex
+	if [ -f vivado.tex ]; then XILINX=1; else XILINX=0; fi; echo "\def\XILINX{$$XILINX}" >> top.tex
+	if [ -f quartus.tex ]; then INTEL=1; else INTEL=0; fi; echo "\def\INTEL{$$INTEL}" >> top.tex
+	if [ -f asic.tex ]; then ASIC=1; else ASIC=0; fi; echo "\def\ASIC{$$ASIC}" >> top.tex
+	echo "\input{$(LIB_DOC_DIR)/ug/$(DOC).tex}" >> top.tex
 
-#add block diagram table to the list of tables
-ifeq ($(BDTAB),1)
-TAB +=bd_tab.tex
-endif
-
-#add synthesis parameters table to the list of tables
-ifeq ($(SP),1)
-TAB +=sp_tab.tex
-endif
-
-#add software accessible registers table to the list of tables
-ifeq ($(SWREGS),1)
-TAB +=$(shell grep START_TABLE $(CORE_DIR)/hardware/include/$(TOP_MODULE)_sw_reg.vh | awk '{print $$2}' | sed s/$$/_tab.tex/)
-endif 
+texfiles: $(MACRO_LIST)
+	$(LIB_SW_PYTHON_DIR)/verilog2tex.py $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC)
+	echo $(VHDR)
 
 
-SRC:= $(wildcard ./*.tex) $(wildcard ../*.tex)
-
-all: figures fpga_res $(TAB) $(DOC).pdf
+all: fpga_res $(DOC).pdf
 
 pb.pdf: pb.aux
 	evince $@ &
 
-pb.aux: $(LIB_DOC_DIR)/pb/pb.tex $(SRC) $(TAB)
+pb.aux: top.tex
+	mkdir -p figures
+	cp -u $(LIB_DOC_DIR)/figures/* ../figures/bd.odg  ./figures
+	make -C ./figures
 	cp -u $(LIB_DOC_DIR)/pb/pb.cls .
-	pdflatex '$(TEX_DEFINES)\input{$<}'
-	pdflatex '$(TEX_DEFINES)\input{$<}'
+	pdflatex $<
+	pdflatex $<
 
-ug.pdf: ug.aux
+ug.pdf: $(TOP_MODULE)_version.txt ug.aux
 	evince $@ &
 
-ug.aux: $(LIB_DOC_DIR)/ug/ug.tex $(SRC) $(TAB) $(TOP_MODULE)_version.txt
-	exit
+ug.aux: top.tex
+	mkdir -p figures
+	cp -u $(LIB_DOC_DIR)/figures/* ../figures/* ./figures
+	make -C ./figures
 	git rev-parse --short HEAD > shortHash.txt
-ifeq ($(CUSTOM),1)
-	make custom
-endif
-	pdflatex '$(TEX_DEFINES)\input{$<}'
-ifeq ($(BIB),1)
-	bibtex ug
-endif
-	pdflatex '$(TEX_DEFINES)\input{$<}'
-	pdflatex '$(TEX_DEFINES)\input{$<}'
+	pdflatex $<
+	if [ -f *.bib ]; then bibtex ug; fi
+	pdflatex $<
+	pdflatex $<
 
 presentation.pdf: presentation.aux
 	evince $@ &
@@ -72,62 +61,27 @@ presentation.aux: presentation.tex
 figures:
 	mkdir -p ./figures
 	cp -u $(LIB_DOC_DIR)/figures/* ./figures
-	cp -u ../figures/* ./figures
-	make -C ./figures
 
 #FPGA implementation results
 VIVADOLOG = $(CORE_DIR)/hardware/fpga/vivado/$(XIL_FAMILY)/vivado.log
 QUARTUSLOG = $(CORE_DIR)/hardware/fpga/quartus/$(INT_FAMILY)/quartus.log
 
-fpga_res:
-ifeq ($(XILINX),1)
-	if [ ! -f $(VIVADOLOG) ]; then make  -C $(CORE_DIR) fpga-build FPGA_FAMILY=$(XIL_FAMILY); fi; cp $(VIVADOLOG) .
-endif
-ifeq ($(INTEL),1)
-	if [ ! -f $(QUARTUSLOG) ]; then make -C $(CORE_DIR) fpga-build FPGA_FAMILY=$(INT_FAMILY); fi; cp $(QUARTUSLOG) .
-endif
-	INTEL=$(INTEL) XILINX=$(XILINX) $(LIB_SW_DIR)/fpga2tex.sh
+vivado.tex: $(VIVADOLOG)
+	cp $(VIVADOLOG) .; LOG=$< $(LIB_SW_DIR)/vivado2tex.sh
 
+quartus.tex: $(QUARTUSLOG)
+	cp $(QUARTUSLOG); LOG=$< $(LIB_SW_DIR)/quartus2tex.sh
 
-#block diagram
-bd_tab.tex: $(CORE_DIR)/hardware/src/$(BD_VSRC)
-	$(LIB_SW_PYTHON_DIR)/block2tex.py $@ $^
+$(VIVADOLOG):
+	make  -C $(CORE_DIR) fpga-build FPGA_FAMILY=$(XIL_FAMILY)
 
-#header files with macro definitions
-VHDR+=$(TOP_MODULE)_sw_reg_def.vh
+$(QUARTUSLOG):
+	make  -C $(CORE_DIR) fpga-build FPGA_FAMILY=$(INT_FAMILY)
 
-#synthesis parameters and macros
-sp_tab.tex: $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR)
-	$(LIB_SW_PYTHON_DIR)/param2tex.py $^
-
-#sw accessible registers
-sw_%reg_tab.tex: $(CORE_DIR)/hardware/include/$(TOP_MODULE)_sw_reg.vh
-	$(LIB_SW_PYTHON_DIR)/swreg2tex.py $< 
-
-#general interface signals (clk and rst)
-gen_if_tab.tex: $(LIB_DIR)/hardware/include/gen_if.vh $(VHDR)
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@ $(VHDR)
-
-#iob native slave interface
-iob_s_if_tab.tex: $(LIB_DIR)/hardware/include/iob_s_if.vh $(VHDR) $(MACRO_LIST)
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
-
-#iob native master interface
-iob_m_if_tab.tex: $(LIB_DIR)/hardware/include/iob_m_if.vh $(VHDR) $(MACRO_LIST)
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
-
-#axi lite slave interface
-axil_s_if_tab.tex: $(FPGA_DIR)/axil_s_port.vh $(VHDR) $(MACRO_LIST)
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
-
-#axi master interface
-axi_m_if_tab.tex:  $(FPGA_DIR)/axi_m_port.vh $(VHDR) $(MACRO_LIST)
-	$(LIB_SW_PYTHON_DIR)/io2tex.py $< $@  $(VHDR)
+fpga_res: vivado.tex quartus.tex
 
 #cleaning
-clean: ug-clean
+clean:
 	@find . -type f -not \( $(NOCLEAN) \) -delete
-	@rm -rf figures
+	@rm -rf figures top.tex
 	@rm -rf $(LIB_SW_PYTHON_DIR)/__pycache__/ $(LIB_SW_PYTHON_DIR)/*.pyc
-
-.PHONY:  all figures fpga_res ug-clean clean

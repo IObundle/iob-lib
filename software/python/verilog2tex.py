@@ -3,6 +3,7 @@
  Verilog2Tex: extract user guide documentation from Verilog sources
 '''
 import sys
+import os
 from parse import parse
 
 '''
@@ -12,7 +13,6 @@ def header_parse (vh, defines):
 
     for line in vh:
         d_flds = parse('`define {} {}\n', line.lstrip(' '))
-        #print(line, d_flds)
 
         if d_flds is None:
             continue #not a macro
@@ -22,30 +22,57 @@ def header_parse (vh, defines):
 
         #VALUE
         eval_str = d_flds[1].strip('`').lstrip(' ').replace("$", "") #to replace $clog2 with clog2
-        #print (eval_str)
         for key, val in defines.items():
             eval_str = eval_str.replace(str(key),str(val))
 
         try:
             value = eval(eval_str)
         except:
-            #eval_str has undefined parameters: quit
-            print("ERROR: Macro cannot be defined using another undefined macro:", eval_str)
+            #eval_str has undefined parameters: use as is
+            value = eval_str
 
         #insert in dictionary
         if name not in defines:
             defines[name] = value
 
+'''
+Write Latex table
+'''
+            
+def write_table(outfile, table):
+    #write output file
+    fout = open (outfile, 'w')
+    for i in range(len(table)):
+        if ((i%2) != 0): fout.write("\\rowcolor{iob-blue}\n")
+        line = table[i]
+        line_out = str(line[0])
+        for l in range(1,len(line)):
+            line_out = line_out + (' & %s' % line[l])
+        fout.write(line_out + ' \\\ \hline\n')
+
+    fout.close()
+    return
+
+
+'''
+Write Latex description
+'''
+            
+def write_description(outfile, text):
+    #write output file
+    fout = open (outfile, 'w')
+    for line in text:
+        fout.write('\item['+line[0]+'] '+'{'+line[1]+'}\n')
+    fout.close()
 
 '''
 Parse top-level parameters and macros
 '''
     
-def param_parse (topv, defines):
+def param_parse (topv, param_defaults, defines):
 
-    outfile_params = "sp_tab.tex"
-    outfile_macros = "sm_tab.tex"
-
+    defines.update(param_defaults)
+    
     params = []
     macros = []
 
@@ -61,7 +88,7 @@ def param_parse (topv, defines):
         #VALUE
         #may be defined using macros: replace and evaluate
         eval_str = p_flds_tmp[2].replace('`','').replace(',','')
-        #print(eval_str)
+
         for key, val in defines.items():
             eval_str = eval_str.replace(str(key),str(val))
         try:
@@ -84,63 +111,58 @@ def param_parse (topv, defines):
             macros.append(p_flds)
      
     #write out params
-    fout = open (outfile_params, 'w')
-    for i in range(len(params)):
-        if ((i%2) != 0): fout.write("\\rowcolor{iob-blue}\n")
-        line = params[i]
-        line_out = str(line[0])
-        for l in range(1,len(line)):
-            line_out = line_out + (' & %s' % line[l])
-        fout.write(line_out + ' \\\ \hline\n')
-        fout.close()
-        
+    write_table("sp_tab.tex", params)
+
     #write out macros
-    fout_macros = open (outfile_macros, 'w')
-    for i in range(len(macros)):
-        if ((i%2) != 0): fout_macros.write("\\rowcolor{iob-blue}\n")
-        line = macros[i]
-        line_out = str(line[0])
-        for l in range(1,len(line)):
-            line_out = line_out + (' & %s' % line[l])
-        fout_macros.write(line_out + ' \\\ \hline\n')
-        fout_macros.close()
+    write_table("sm_tab.tex", macros)
+
+
 
 '''
 Parse block diagram modules
 '''
 
-def block_parse (topv,v):
+def block_parse (block):
 
-    block = topv.append(v)
-    block_out = []
-    line_out = []
+    b_list = []
     
     for line in block :
-        if line.find('//BLOCK') < 0: continue #not a block description
-        line_out = line.replace( '//BLOCK', '')
-        line_out = line_out.split('&')
-        block_out.append("\\item["+ line_out[0] +":]{"+ line_out[1]+"}")
+        b_flds = []
+        b_flds_tmp = parse('{}//BLOCK {} & {}\n', line)
+        if b_flds_tmp is None:
+            continue #not a block
 
-    #write output file
-    fout = open (outfile, 'w')
-    for i in range(len(block)):
-        fout.write(str(block[i]))
+        #NAME 
+        b_flds.append(b_flds_tmp[1].replace('_','\_').strip(' '))
 
-    #Close output file
-    fout.close()
+        #DESCRIPTION
+        b_flds.append(b_flds_tmp[2].replace('_','\_'))    
 
-def io_parse (topv, vh, defines) :
+        b_list.append(b_flds)
 
-    verilog = topv.append(vh)
+    write_description("bd_tab.tex", b_list)
+
+def io_parse (io_lines, defines):
 
     table_found = 0
     table_lines = []
-    
+    table_name = ''    
     io_list = []
 
-    for line in verilog:
+    for line in io_lines:
+
+        #find table start
+        if '//START_TABLE' in line:
+            if table_found == 1:
+                write_table(table_name + '_tab.tex', table_lines)
+            table_found = 1
+            flds = line.split()
+            table_name = flds[1]
+            continue
+
         io_flds = []
         io_flds_tmp = parse('{}`{}({},{}){}//{}', line)
+
         if io_flds_tmp is None:
             continue #not an io
 
@@ -166,21 +188,18 @@ def io_parse (topv, vh, defines) :
             
         io_list.append(io_flds)
 
-    #write output file
-    fout = open (outfile, 'w')
-    for i in range(len(io)):
-        if ((i%2) != 0): fout.write("\\rowcolor{iob-blue}\n")
-        line = io[i]
-        line_out = str(line[0])
-        for l in range(1,len(line)):
-            line_out = line_out + (' & %s' % line[l])
-        fout.write(line_out + ' \\\ \hline\n')
+    #write last table
+    if table_found == 1:
+        write_table(table_name + '_tab.tex', table_lines)
 
+        
 def swreg_parse (vh, defines) :
 
     swreg_cnt = 0
     table_found = 0
     table_lines = []
+
+    print(vh)
     
     for line in vh:
 
@@ -215,7 +234,7 @@ def swreg_parse (vh, defines) :
         try:
             swreg_flds.append(eval(eval_str))
         except:
-            #eval_str has undefined parameters: do not replace and use as is
+            #eval_str has undefined parameters: use as is
             swreg_flds.append(eval_str.replace('_','\_').strip(' '))
 
         #DEFAULT VALUE
@@ -228,16 +247,13 @@ def swreg_parse (vh, defines) :
 
         swreg_list.append(swreg_flds)
 
-    #write output file
-    fout = open (outfile, 'w')
-    for i in range(len(io)):
-        if ((i%2) != 0): fout.write("\\rowcolor{iob-blue}\n")
-        line = io[i]
-        line_out = str(line[0])
-        for l in range(1,len(line)):
-            line_out = line_out + (' & %s' % line[l])
-        fout.write(line_out + ' \\\ \hline\n')
+    #write last table
+    if table_found == 1:
+        write_table(table_name + '_tab.tex', table_lines)
 
+
+
+        
 def main () :
     #parse command line
     if len(sys.argv) < 2:
@@ -258,32 +274,50 @@ def main () :
         i=2
         while i<len(sys.argv) and sys.argv[i].find('.vh'):
             fvh =  open (sys.argv[i], 'r')
-            vh.append(fvh.readlines())
+            vh = [*vh, *fvh.readlines()]
             fvh.close()
             i = i+1
 
         #parse headers
         header_parse(vh, defines)
 
+        #read top-level Verilog file
+        fv =  open (topv, 'r')
+        topv_lines = fv.readlines()
+        fv.close()
+
         #read source files
         v = []
-        while i<len(sys.argv) and sys.argv[i].find('.v'):
+        while i<len(sys.argv):
             fv =  open (sys.argv[i], 'r')
-            v.append(fv.readlines())
+            v = [*v *fv.readlines()]
             fv.close()
             i = i+1
             
 
-    #parse top-level parameters and macros
-    param_parse (topv, defines)
+    #PARSE TOP-LEVEL PARAMETERS AND MACROS
 
-    #parse block diagram modules
-    block_parse(topv, v)
+    #get the DEFINE environment variable
+    DEFINE = os.getenv('DEFINE')
+    if DEFINE is not None:
+        DEFINE = DEFINE.split()
 
-    #parse inputs and outputs
-    io_parse (topv, vh, defines)
+    
+    #store param defaults in dictionary
+    param_defaults = {}
+    for i in range(len(DEFINE)):
+        MACRO=DEFINE[i].split('=')
+        param_defaults[MACRO[0]]=eval(MACRO[1])
 
-    #parse software accessible registers
+    param_parse (topv_lines, param_defaults, defines)
+
+    #PARSE BLOCK DIAGRAM MODULES
+    block_parse([*topv_lines, *v])
+
+    #PARSE INTERFACE SIGNALS
+    io_parse ([*topv_lines, *vh], defines)
+
+    #PARSE SOFTWARE ACCESSIBLE REGISTERS
     swreg_parse (vh, defines)
     
 if __name__ == "__main__" : main ()
