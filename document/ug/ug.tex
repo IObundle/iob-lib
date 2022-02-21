@@ -20,7 +20,7 @@
 \graphicspath{ {./figures/} }
 
 \input{../title}
-\category{User Guide, \input{version.txt}, Build \input{shortHash.txt}}
+\category{User Guide, \input{version.tex}, Build \input{shortHash.tex}}
 %\confidential{}
 
 \input{\TEX/color}
@@ -58,17 +58,17 @@
 \clearpage
 
 \section{Interface Signals}
-\input{\TEX/ug/is}
+\input{\TEX/ug/if}
 
 %timing diagrams
 \ifnum\TD=1
-\input{\TEX/td}
+\input{\TEX/ug/td}
 \fi
 \clearpage
 
 %software accessible registers
 \ifnum\SWREGS=1
-\input{\TEX/ug/sw_reg}
+\input{\TEX/ug/swreg}
 \fi
 
 %software components

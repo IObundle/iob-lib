@@ -1,28 +1,28 @@
-CC = libreoffice
-CFLAGS = --headless --convert-to pdf
 LO_RUNNING = $(shell pgrep libreoffice)
 
-LO_FIGS = $(patsubst %.odg,%.pdf,$(wildcard *.odg))
-WD_FIGS = $(patsubst %.drom,%.pdf,$(wildcard *.drom))
+ODG = $(patsubst %.odg,%.pdf,$(wildcard *.odg))
+SVG = $(patsubst %.svg,%.pdf,$(wildcard *.svg))
 
-all: $(LO_FIGS) $(WD_FIGS)
+.PHONY: pb_figs ug_figs clean debug
+
+pb_figs: $(ODG)
+
+ug_figs: $(ODG) $(SVG)
 
 #make libreoffice figures
 ifeq ($(LO_RUNNING), )
-$(LO_FIGS): %.pdf : %.odg
-	$(CC) $(CFLAGS) $<
+%.pdf : %.odg
+	soffice --headless --convert-to pdf $<
 else 	
 $(error LibreOffice is running. Close it before proceeding.)
 endif
 
 #make wavedrom figures
-$(WD_FIGS): %.pdf : ../figures/%.drom
-	npx wavedrom-cli -i $< -s temp.svg
-	inkscape --file temp.svg --export-pdf $@
-	rm -f temp.svg
+%.pdf: %.svg
+	inkscape --file $< --export-pdf $@
+
+%.svg: %.drom
+	npx wavedrom-cli -i $< -s $<
 
 clean:
-	@rm -f *.pdf *~ $(TD_FIGS)
-
-.PHONY: all clean
-
+	@rm -f *.pdf *.svg *~

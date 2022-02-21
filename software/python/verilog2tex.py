@@ -40,8 +40,7 @@ Write Latex table
 '''
             
 def write_table(outfile, table):
-    #write output file
-    fout = open (outfile, 'w')
+    fout = open (outfile+'_tab.tex', 'w')
     for i in range(len(table)):
         if ((i%2) != 0): fout.write("\\rowcolor{iob-blue}\n")
         line = table[i]
@@ -59,8 +58,7 @@ Write Latex description
 '''
             
 def write_description(outfile, text):
-    #write output file
-    fout = open (outfile, 'w')
+    fout = open (outfile+'_desc.tex', 'w')
     for line in text:
         fout.write('\item['+line[0]+'] '+'{'+line[1]+'}\n')
     fout.close()
@@ -71,7 +69,7 @@ Parse top-level parameters and macros
     
 def param_parse (topv, param_defaults, defines):
 
-    defines.update(param_defaults)
+    param_defaults.update(defines)
     
     params = []
     macros = []
@@ -89,7 +87,7 @@ def param_parse (topv, param_defaults, defines):
         #may be defined using macros: replace and evaluate
         eval_str = p_flds_tmp[2].replace('`','').replace(',','')
 
-        for key, val in defines.items():
+        for key, val in param_defaults.items():
             eval_str = eval_str.replace(str(key),str(val))
         try:
             p_flds.append(eval(eval_exp))
@@ -111,10 +109,10 @@ def param_parse (topv, param_defaults, defines):
             macros.append(p_flds)
      
     #write out params
-    write_table("sp_tab.tex", params)
+    write_table("sp", params)
 
     #write out macros
-    write_table("sm_tab.tex", macros)
+    write_table("sm", macros)
 
 
 
@@ -140,30 +138,29 @@ def block_parse (block):
 
         b_list.append(b_flds)
 
-    write_description("bd_tab.tex", b_list)
+    write_description("bd", b_list)
 
 def io_parse (io_lines, defines):
 
     table_found = 0
-    table_lines = []
-    table_name = ''    
-    io_list = []
+    table_name = ''
+    table = []
 
     for line in io_lines:
 
         #find table start
-        if '//START_TABLE' in line:
+        if '//START_IO_TABLE' in line:
             if table_found == 1:
-                write_table(table_name + '_tab.tex', table_lines)
+                write_table(table_name + '_if', table)
+                table = []
             table_found = 1
-            flds = line.split()
-            table_name = flds[1]
+            table_name = line.split()[1]
             continue
 
         io_flds = []
         io_flds_tmp = parse('{}`{}({},{}){}//{}', line)
 
-        if io_flds_tmp is None:
+        if io_flds_tmp is None or 'PUT' not in io_flds_tmp[1]:
             continue #not an io
 
         #NAME
@@ -186,39 +183,36 @@ def io_parse (io_lines, defines):
         #DESCRIPTION
         io_flds.append(io_flds_tmp[5].replace('_','\_'))
             
-        io_list.append(io_flds)
+        table.append(io_flds)
 
     #write last table
     if table_found == 1:
-        write_table(table_name + '_tab.tex', table_lines)
+        write_table(table_name + '_if', table)
 
         
 def swreg_parse (vh, defines) :
 
     swreg_cnt = 0
     table_found = 0
-    table_lines = []
+    table = []
 
-    print(vh)
-    
     for line in vh:
 
         #find table start
-        if '//START_TABLE' in line:
+        if '//START_SWREG_TABLE' in line:
             if table_found == 1:
-                write_table(table_name + '_tab.tex', table_lines)
+                write_table(table_name + '_swreg', table)
+                table = [] #clear table
             table_found = 1
             flds = line.split()
             table_name = flds[1]
             continue
 
         swreg_flds = []
-        swreg_flds_tmp = parse('{}`{}({},{},{}){}//{}', line)
+        swreg_flds_tmp = parse('{}`SWREG_{}({},{},{}){}//{}', line)
 
         if swreg_flds_tmp is None:
             continue #not a sw reg
-
-        swreg_cnt = swreg_cnt + 1
 
         #NAME
         swreg_flds.append(swreg_flds_tmp[2].replace('_','\_').strip(' '))
@@ -226,6 +220,10 @@ def swreg_parse (vh, defines) :
         #TYPE
         swreg_flds.append(swreg_flds_tmp[1])
 
+        #ADDRESS
+        swreg_flds.append(4*swreg_cnt)
+        swreg_cnt = swreg_cnt + 1        
+        
         #WIDTH
         #may be defined using macros: replace and evaluate
         eval_str = swreg_flds_tmp[3].replace('`','').replace(',','')
@@ -243,17 +241,13 @@ def swreg_parse (vh, defines) :
         #DESCRIPTION
         swreg_flds.append(swreg_flds_tmp[6].replace('_','\_'))
             
-        swreg_list.append(swreg_flds)
-
-        swreg_list.append(swreg_flds)
+        table.append(swreg_flds)
 
     #write last table
     if table_found == 1:
-        write_table(table_name + '_tab.tex', table_lines)
+        write_table(table_name + '_swreg', table)
 
-
-
-        
+      
 def main () :
     #parse command line
     if len(sys.argv) < 2:
@@ -268,9 +262,16 @@ def main () :
     defines = {}
 
     
+    #read top-level Verilog file
+    fv =  open (topv, 'r')
+    topv_lines = fv.readlines()
+    fv.close()
+
+    vh = [] #header list
+    v = [] #source list
+
     if(len(sys.argv) > 2):
         #read header files
-        vh = []
         i=2
         while i<len(sys.argv) and sys.argv[i].find('.vh'):
             fvh =  open (sys.argv[i], 'r')
@@ -278,16 +279,10 @@ def main () :
             fvh.close()
             i = i+1
 
-        #parse headers
-        header_parse(vh, defines)
-
-        #read top-level Verilog file
-        fv =  open (topv, 'r')
-        topv_lines = fv.readlines()
-        fv.close()
+        #parse headers if any
+        if(i > 2): header_parse(vh, defines)
 
         #read source files
-        v = []
         while i<len(sys.argv):
             fv =  open (sys.argv[i], 'r')
             v = [*v *fv.readlines()]
@@ -298,16 +293,14 @@ def main () :
     #PARSE TOP-LEVEL PARAMETERS AND MACROS
 
     #get the DEFINE environment variable
+    param_defaults = {}
     DEFINE = os.getenv('DEFINE')
     if DEFINE is not None:
         DEFINE = DEFINE.split()
-
-    
-    #store param defaults in dictionary
-    param_defaults = {}
-    for i in range(len(DEFINE)):
-        MACRO=DEFINE[i].split('=')
-        param_defaults[MACRO[0]]=eval(MACRO[1])
+        #store param defaults in dictionary
+        for i in range(len(DEFINE)):
+            MACRO=DEFINE[i].split('=')
+            param_defaults[MACRO[0]]=eval(MACRO[1])
 
     param_parse (topv_lines, param_defaults, defines)
 
@@ -318,6 +311,7 @@ def main () :
     io_parse ([*topv_lines, *vh], defines)
 
     #PARSE SOFTWARE ACCESSIBLE REGISTERS
+    print(vh)
     swreg_parse (vh, defines)
     
 if __name__ == "__main__" : main ()
