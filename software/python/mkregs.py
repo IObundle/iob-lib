@@ -117,26 +117,29 @@ def swreg_parse (code, hwsw):
         swreg_flds_tmp = parse('{}`SWREG_{}({},{},{}){}//{}', line)
 
         if swreg_flds_tmp is None:
-            continue #not a sw reg
+            swreg_flds_tmp = parse('`SWREG_{}({},{},{}){}//{}', line)
+            if swreg_flds_tmp is None: continue #not a sw reg
+        else:
+            swreg_flds_tmp = swreg_flds_tmp[1:]
 
         #NAME
-        swreg_flds.append(swreg_flds_tmp[2].strip(' '))
+        swreg_flds.append(swreg_flds_tmp[1].strip(' '))
 
         #TYPE
-        swreg_flds.append(swreg_flds_tmp[1])
+        swreg_flds.append(swreg_flds_tmp[0])
 
         #ADDRESS
         swreg_flds.append(str(swreg_cnt))
         swreg_cnt = swreg_cnt + 1        
                
         #WIDTH
-        swreg_flds.append(swreg_flds_tmp[3])
+        swreg_flds.append(swreg_flds_tmp[2])
 
         #DEFAULT VALUE
-        swreg_flds.append(swreg_flds_tmp[4])
+        swreg_flds.append(swreg_flds_tmp[3])
 
         #DESCRIPTION
-        swreg_flds.append(swreg_flds_tmp[6])
+        swreg_flds.append(swreg_flds_tmp[5])
             
         table.append(swreg_flds)
 
