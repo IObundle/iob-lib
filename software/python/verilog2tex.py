@@ -128,13 +128,16 @@ def block_parse (block):
         b_flds = []
         b_flds_tmp = parse('{}//BLOCK {} & {}\n', line)
         if b_flds_tmp is None:
-            continue #not a block
+            b_flds_tmp = parse('//BLOCK {} & {}\n', line)
+            if b_flds_tmp is None: continue #not a block
+        else:
+            b_flds_tmp = b_flds_tmp[1:]
 
         #NAME 
-        b_flds.append(b_flds_tmp[1].replace('_','\_').strip(' '))
+        b_flds.append(b_flds_tmp[0].replace('_','\_').strip(' '))
 
         #DESCRIPTION
-        b_flds.append(b_flds_tmp[2].replace('_','\_'))    
+        b_flds.append(b_flds_tmp[1].replace('_','\_'))
 
         b_list.append(b_flds)
 
@@ -212,13 +215,16 @@ def swreg_parse (vh, defines) :
         swreg_flds_tmp = parse('{}`SWREG_{}({},{},{}){}//{}', line)
 
         if swreg_flds_tmp is None:
-            continue #not a sw reg
+            swreg_flds_tmp = parse('`SWREG_{}({},{},{}){}//{}', line)
+            if swreg_flds_tmp is None: continue #not a sw reg
+        else:
+            swreg_flds_tmp = swreg_flds_tmp[1:]
 
         #NAME
-        swreg_flds.append(swreg_flds_tmp[2].replace('_','\_').strip(' '))
+        swreg_flds.append(swreg_flds_tmp[1].replace('_','\_').strip(' '))
 
         #TYPE
-        swreg_flds.append(swreg_flds_tmp[1])
+        swreg_flds.append(swreg_flds_tmp[0])
 
         #ADDRESS
         swreg_flds.append(4*swreg_cnt)
@@ -226,7 +232,7 @@ def swreg_parse (vh, defines) :
         
         #WIDTH
         #may be defined using macros: replace and evaluate
-        eval_str = swreg_flds_tmp[3].replace('`','').replace(',','')
+        eval_str = swreg_flds_tmp[2].replace('`','').replace(',','')
         for key, val in defines.items():
             eval_str = eval_str.replace(str(key),str(val))
         try:
@@ -236,10 +242,10 @@ def swreg_parse (vh, defines) :
             swreg_flds.append(eval_str.replace('_','\_').strip(' '))
 
         #DEFAULT VALUE
-        swreg_flds.append(swreg_flds_tmp[4])
+        swreg_flds.append(swreg_flds_tmp[3])
 
         #DESCRIPTION
-        swreg_flds.append(swreg_flds_tmp[6].replace('_','\_'))
+        swreg_flds.append(swreg_flds_tmp[5].replace('_','\_'))
             
         table.append(swreg_flds)
 
