@@ -129,10 +129,12 @@ def param_parse (topv, param_defaults, defines):
             macros.append(p_flds)
      
     #write out params
-    write_table("sp", params)
+    if params != []:
+        write_table("sp", params)
 
     #write out macros
-    write_table("sm", macros)
+    if macros != []:
+        write_table("sm", macros)
 
 
 
@@ -321,6 +323,7 @@ def main () :
     #get the DEFINE environment variable
     param_defaults = {}
     DEFINE = os.getenv('DEFINE')
+    print(DEFINE)
     if DEFINE is not None:
         DEFINE = DEFINE.split()
         #store param defaults in dictionary
