@@ -58,10 +58,10 @@
 \input{\TEX/ug/bdd}
 
 %synthesis parameters
-\ifnum\SP=1
+\ifdefined\SMP
 \section{Synthesis Macros and Parameters}
 \label{sec:sp}
-\input{\TEX/ug/sp}
+\input{\TEX/ug/smp}
 \fi
 
 \section{Interface Signals}
@@ -69,14 +69,14 @@
 \input{\TEX/ug/if}
 
 %timing diagrams
-\ifnum\TD=1
+\ifdefined\TD
 \section{Timing Diagrams}
 \label{sec:td}
 \input{\TEX/ug/td}
 \fi
 
 %software components
-\ifnum\SW=1
+\ifdefined\SW
 \section{Software Driver}
 \label{sec:sw}
 \input{\TEX/ug/sw}
@@ -98,7 +98,7 @@
 \label{sec:results}
 \input{../results}
 
-\ifnum\CUSTOM=1
+\ifdefined\CUSTOM
 \input{custom}
 \fi
 

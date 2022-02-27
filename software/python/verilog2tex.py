@@ -76,7 +76,9 @@ def param_parse (topv, param_defaults, defines):
 
     for line in topv:
         p_flds = []
-        p_flds_tmp = parse('{}parameter {} = {}\&{}\&{}//{}', line)
+        p_flds_tmp = parse('{}parameter {} = {}//{}&{}&{}&{}', line)
+        #spc, name, typ, macroparam, min, max, desc
+        print(p_flds,  p_flds_tmp)
         if p_flds_tmp is None:
             continue #not a parameter or macro
 
@@ -84,30 +86,6 @@ def param_parse (topv, param_defaults, defines):
         p_flds.append(p_flds_tmp[1].replace('_','\_').strip(' '))
 
         #MINIMUM VALUE
-        #may be defined using macros: replace and evaluate
-        eval_str = p_flds_tmp[2].replace('`','').replace(',','')
-
-        for key, val in param_defaults.items():
-            eval_str = eval_str.replace(str(key),str(val))
-        try:
-            p_flds.append(eval(eval_exp))
-        except:
-            #eval_str has undefined parameters: use as is
-            p_flds.append(eval_str.replace('_','\_').strip(' '))
-                
-        #DEFAULT VALUE
-        #may be defined using macros: replace and evaluate
-        eval_str = p_flds_tmp[3].replace('`','').replace(',','')
-
-        for key, val in param_defaults.items():
-            eval_str = eval_str.replace(str(key),str(val))
-        try:
-            p_flds.append(eval(eval_exp))
-        except:
-            #eval_str has undefined parameters: use as is
-            p_flds.append(eval_str.replace('_','\_').strip(' '))
-                
-        #MAXIMUM VALUE
         #may be defined using macros: replace and evaluate
         eval_str = p_flds_tmp[4].replace('`','').replace(',','')
 
@@ -119,17 +97,36 @@ def param_parse (topv, param_defaults, defines):
             #eval_str has undefined parameters: use as is
             p_flds.append(eval_str.replace('_','\_').strip(' '))
                 
-        #DESCRIPTION
-        if p_flds_tmp[5].find('PARAM')>=0:
-            is_param = 1;
-            p_flds.append(p_flds_tmp[3].replace('_','\_').strip('PARAM'))
-        else:
-            is_param = 0
-            p_flds.append(p_flds_tmp[3].replace('_','\_').strip('MACRO'))
+        #DEFAULT VALUE
+        #may be defined using macros: replace and evaluate
+        eval_str = p_flds_tmp[2].replace('`','').replace(',','')
 
-        if is_param == 1:
+        for key, val in param_defaults.items():
+            eval_str = eval_str.replace(str(key),str(val))
+        try:
+            p_flds.append(eval(eval_exp))
+        except:
+            #eval_str has undefined parameters: use as is
+            p_flds.append(eval_str.replace('_','\_').strip(' '))
+                
+        #MAXIMUM VALUE
+        #may be defined using macros: replace and evaluate
+        eval_str = p_flds_tmp[5].replace('`','').replace(',','')
+
+        for key, val in param_defaults.items():
+            eval_str = eval_str.replace(str(key),str(val))
+        try:
+            p_flds.append(eval(eval_exp))
+        except:
+            #eval_str has undefined parameters: use as is
+            p_flds.append(eval_str.replace('_','\_').strip(' '))
+                
+        #DESCRIPTION
+        if p_flds_tmp[3].find('PARAM')>=0:
+            p_flds.append(p_flds_tmp[6].replace('_','\_').strip('PARAM'))
             params.append(p_flds)
         else:
+            p_flds.append(p_flds_tmp[6].replace('_','\_').strip('MACRO'))
             macros.append(p_flds)
      
     #write out params
@@ -341,7 +338,6 @@ def main () :
     io_parse ([*topv_lines, *vh], defines)
 
     #PARSE SOFTWARE ACCESSIBLE REGISTERS
-    print(vh)
     swreg_parse (vh, defines)
     
 if __name__ == "__main__" : main ()

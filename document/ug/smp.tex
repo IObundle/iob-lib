@@ -1,3 +1,7 @@
+\ifdefined\SMP
+
+\ifdefined\SM
+
 The synthesis macros of the core are presented in this section. For each macro
 or parameter a minimum typical and maximum value is provided. The typical valu
 is used as the default value.
@@ -21,6 +25,10 @@ The synthesis macros apply to all instances of the core, and are listed in Table
   \label{tab:sm}
 \end{table}
 
+\fi
+
+\ifdefined\SP
+
 \subsection{Parameters}
 \label{sec:param}
 
@@ -40,3 +48,5 @@ The generic synthesis parameters of the core are presented in Table~\ref{tab:sp}
   \label{tab:sp}
 \end{table}
 
+\fi
+\fi
