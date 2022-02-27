@@ -76,14 +76,14 @@ def param_parse (topv, param_defaults, defines):
 
     for line in topv:
         p_flds = []
-        p_flds_tmp = parse('{}parameter {} = {}//{}', line)
+        p_flds_tmp = parse('{}parameter {} = {}\&{}\&{}//{}', line)
         if p_flds_tmp is None:
             continue #not a parameter or macro
 
         #NAME 
         p_flds.append(p_flds_tmp[1].replace('_','\_').strip(' '))
 
-        #VALUE
+        #MINIMUM VALUE
         #may be defined using macros: replace and evaluate
         eval_str = p_flds_tmp[2].replace('`','').replace(',','')
 
@@ -95,8 +95,32 @@ def param_parse (topv, param_defaults, defines):
             #eval_str has undefined parameters: use as is
             p_flds.append(eval_str.replace('_','\_').strip(' '))
                 
+        #DEFAULT VALUE
+        #may be defined using macros: replace and evaluate
+        eval_str = p_flds_tmp[3].replace('`','').replace(',','')
+
+        for key, val in param_defaults.items():
+            eval_str = eval_str.replace(str(key),str(val))
+        try:
+            p_flds.append(eval(eval_exp))
+        except:
+            #eval_str has undefined parameters: use as is
+            p_flds.append(eval_str.replace('_','\_').strip(' '))
+                
+        #MAXIMUM VALUE
+        #may be defined using macros: replace and evaluate
+        eval_str = p_flds_tmp[4].replace('`','').replace(',','')
+
+        for key, val in param_defaults.items():
+            eval_str = eval_str.replace(str(key),str(val))
+        try:
+            p_flds.append(eval(eval_exp))
+        except:
+            #eval_str has undefined parameters: use as is
+            p_flds.append(eval_str.replace('_','\_').strip(' '))
+                
         #DESCRIPTION
-        if p_flds_tmp[3].find('PARAM')>=0:
+        if p_flds_tmp[5].find('PARAM')>=0:
             is_param = 1;
             p_flds.append(p_flds_tmp[3].replace('_','\_').strip('PARAM'))
         else:

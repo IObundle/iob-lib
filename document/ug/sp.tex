@@ -1,14 +1,37 @@
-\section{Synthesis Parameters and Macros}
-\label{sec:sp}
+The synthesis macros of the core are presented in this section. For each macro
+or parameter a minimum typical and maximum value is provided. The typical valu
+is used as the default value.
+
+\subsection{Macros}
+\label{sec:macr}
+
+The synthesis macros apply to all instances of the core, and are listed in Table~\ref{tab:sm}.
+
+\begin{table}[H]
+  \centering
+    \begin{tabularx}{\textwidth}{ | c | c | c | c | X | }
+    \hline
+    \rowcolor{iob-green}
+    {\bf Parameter} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description} \\\hline
+
+    \input{sm_tab}
+
+    \end{tabularx}
+  \caption{Synthesis Macros.}
+  \label{tab:sm}
+\end{table}
+
+\subsection{Parameters}
+\label{sec:param}
 
 The generic synthesis parameters of the core are presented in Table~\ref{tab:sp}. Generic parameters can vary from instance to instance.
 
 \begin{table}[H]
   \centering
-    \begin{tabularx}{\textwidth}{ | c | c | X | }
+    \begin{tabularx}{\textwidth}{ | c | c | c | c | X | }
     \hline
     \rowcolor{iob-green}
-    {\bf Parameter} & {\bf Default Value} & {\bf Description} \\\hline
+    {\bf Parameter} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description} \\\hline
 
     \input{sp_tab}
 
@@ -17,19 +40,3 @@ The generic synthesis parameters of the core are presented in Table~\ref{tab:sp}
   \label{tab:sp}
 \end{table}
 
-The synthesis macros of the core are presented in Table~\ref{tab:sm}. Macros
-apply to all instances of the core.
-
-\begin{table}[H]
-  \centering
-    \begin{tabularx}{\textwidth}{ | c | c | X | }
-    \hline
-    \rowcolor{iob-green}
-    {\bf Parameter} & {\bf Default Value} & {\bf Description} \\\hline
-
-    \input{sm_tab}
-
-    \end{tabularx}
-  \caption{Synthesis Macros.}
-  \label{tab:sm}
-\end{table}

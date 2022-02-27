@@ -1,13 +1,15 @@
 LO_RUNNING = $(shell pgrep libreoffice)
 
-ODG = $(patsubst %.odg,%.pdf,$(wildcard *.odg))
-SVG = $(patsubst %.svg,%.pdf,$(wildcard *.svg))
+PDF = $(patsubst %.odg,%.pdf,$(wildcard *.odg))
+PDF += $(patsubst %.drom,%.pdf,$(wildcard *.drom))
+
+SVG = $(patsubst %.drom,%.svg,$(wildcard *.drom))
 
 .PHONY: pb_figs ug_figs clean debug
 
-pb_figs: $(ODG)
+pb_figs: $(PDF)
 
-ug_figs: $(ODG) $(SVG)
+ug_figs: $(PDF)
 
 #make libreoffice figures
 ifeq ($(LO_RUNNING), )
@@ -22,7 +24,11 @@ endif
 	inkscape --file $< --export-pdf $@
 
 %.svg: %.drom
-	npx wavedrom-cli -i $< -s $<
+	npx wavedrom-cli -i $< -s $@
 
 clean:
 	@rm -f *.pdf *.svg *~
+
+debug:
+	@echo $(SVG)
+	@echo $(PDF)

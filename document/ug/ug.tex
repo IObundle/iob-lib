@@ -34,56 +34,72 @@
 \cleardoublepage
 
 \section{Introduction}
+\label{sec:intro}
 \input{../intro}
 
 \section{Symbol}
-\input{\TEX/symb}
+\label{sec:symb}
+\input{\TEX/ug/symb}
 
 \section{Features}
+\label{sec:feat}
 \input{../features}
 
 \section{Benefits}
+\label{sec:benef}
 \input{../benefits}
 
 \section{Deliverables}
+\label{sec:deliv}
 \input{../deliverables}
-\clearpage
 
 \section{Block Diagram and Description}
+\label{sec:bdd}
 \input{\TEX/ug/bdd}
 
 %synthesis parameters
 \ifnum\SP=1
+\section{Synthesis Macros and Parameters}
+\label{sec:sp}
 \input{\TEX/ug/sp}
 \fi
-\clearpage
 
 \section{Interface Signals}
+\label{sec:ifsig}
 \input{\TEX/ug/if}
 
 %timing diagrams
 \ifnum\TD=1
+\section{Timing Diagrams}
+\label{sec:td}
 \input{\TEX/ug/td}
-\fi
-\clearpage
-
-%software accessible registers
-\ifnum\SWREGS=1
-\input{\TEX/ug/swreg}
 \fi
 
 %software components
-\ifnum\SWCOMPS=1
-\input{sw}
+\ifnum\SW=1
+\section{Software Driver}
+\label{sec:sw}
+\input{\TEX/ug/sw}
 \fi
 
+\section{Instantiation and External Circuitry}
+\label{sec:inst}
+\input{\TEX/ug/inst}
+
+\section{Testbench Block Diagram}
+\label{sec:tbbd}
+\input{\TEX/ug/tbbd}
+
+\section{Synthesis}
+\label{sec:synth}
+\input{\TEX/ug/synth}
+
 \section{Implementation Results}
+\label{sec:results}
 \input{../results}
-\clearpage
 
 \ifnum\CUSTOM=1
 \input{custom}
 \fi
-
 
 \end{document}
