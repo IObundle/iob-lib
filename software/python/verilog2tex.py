@@ -78,7 +78,6 @@ def param_parse (topv, param_defaults, defines):
         p_flds = []
         p_flds_tmp = parse('{}parameter {} = {}//{}&{}&{}&{}', line)
         #spc, name, typ, macroparam, min, max, desc
-        print(p_flds,  p_flds_tmp)
         if p_flds_tmp is None:
             continue #not a parameter or macro
 
