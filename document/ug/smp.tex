@@ -3,15 +3,20 @@
 \ifdefined\SM
 
 The synthesis macros of the core are presented in this section. For each macro
-or parameter a minimum typical and maximum value is provided. The typical valu
-is used as the default value.
+or parameter, the minimum, default and maximum values are provided. The minimum
+and maximum values may be marked with
+\begin{description}
+\item{Not Applicable(NA)}:  the macro or parameter value cannot be set by the user; its value is set automatically by the system.
+\item{Not Specified (NS)}:  the minimum or maximum value for the macro or parameter has not been determined; if needed, values other than the default should be determined and tested by the user. 
+\end{description}
 
 \subsection{Macros}
 \label{sec:macr}
 
-The synthesis macros apply to all instances of the core, and are listed in Table~\ref{tab:sm}.
+The synthesis macros apply to all instances of the core, and are listed in
+Table~\ref{tab:sm}.
 
-\begin{table}[H]
+\begin{table}[h]
   \centering
     \begin{tabularx}{\textwidth}{ | c | c | c | c | X | }
     \hline
@@ -34,7 +39,7 @@ The synthesis macros apply to all instances of the core, and are listed in Table
 
 The generic synthesis parameters of the core are presented in Table~\ref{tab:sp}. Generic parameters can vary from instance to instance.
 
-\begin{table}[H]
+\begin{table}[h]
   \centering
     \begin{tabularx}{\textwidth}{ | c | c | c | c | X | }
     \hline
