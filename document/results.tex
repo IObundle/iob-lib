@@ -1,6 +1,7 @@
 The following are FPGA implementation results for two FPGA families.
 \input ../results.tex
 
+
 \begin{table}[H]
 \ifdefined\XILINX
 \ifdefined\INTEL
@@ -37,7 +38,7 @@ The following are FPGA implementation results for two FPGA families.
 \end{minipage}
 \fi
 \ifdefined\INTEL
-\if@undefined\XILINX
+\ifdefined\XILINX
 \caption{FPGA results for Kintex Ultrascale (left) and Cyclone V GT (right).}
 \fi
 \if@undefined\XILINX
@@ -51,6 +52,9 @@ The following are FPGA implementation results for two FPGA families.
 \fi
 \label{tab:fpga_results}
 \end{table}
+
+
+
 
 \ifdefined\ASIC
 \begin{table}[H]
