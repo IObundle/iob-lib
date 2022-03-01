@@ -4,7 +4,7 @@ LIB_DOC_DIR:=$(LIB_DIR)/document
 LIB_SW_DIR:=$(LIB_DIR)/software
 LIB_SW_PYTHON_DIR:=$(LIB_SW_DIR)/python
 
-$(DOC).pdf: fpga_res figures $(DOC)top.tex
+$(DOC).pdf: fpga_res asic_res figures $(DOC)top.tex
 ifeq ($(DOC),pb)
 	make -C ./figures pb_figs
 endif
@@ -18,7 +18,7 @@ endif
 	pdflatex -jobname $(DOC) $(DOC)top.tex
 	pdflatex -jobname $(DOC) $(DOC)top.tex
 
-.PHONY: view texfiles figures fpga_res clean
+.PHONY: view texfiles figures fpga_res asic_res clean
 
 view: $(DOC).pdf
 	evince $< &
@@ -46,17 +46,28 @@ fpga_res: vivado.tex quartus.tex
 VIVADOLOG = $(CORE_DIR)/hardware/fpga/vivado/$(XIL_FAMILY)/vivado.log
 QUARTUSLOG = $(CORE_DIR)/hardware/fpga/quartus/$(INT_FAMILY)/quartus.log
 
+#ASIC implementation results
+asic_res: asic.tex
+ASICLOG = $(CORE_DIR)/hardware/asic/$(ASIC_NODE)/rc.log
+ASICRPT = $(CORE_DIR)/hardware/asic/$(ASIC_NODE)/*.rpt
+
 vivado.tex: $(VIVADOLOG)
 	cp $(VIVADOLOG) .; LOG=$< $(LIB_SW_DIR)/vivado2tex.sh
 
 quartus.tex: $(QUARTUSLOG)
 	cp $(QUARTUSLOG) .; LOG=$< $(LIB_SW_DIR)/quartus2tex.sh
 
+asic.tex: $(ASICLOG)
+	cp $(ASICRPT) .; LOG=$< $(LIB_SW_DIR)/asic2tex.sh
+
 $(VIVADOLOG):
 	make  -C $(CORE_DIR) fpga-build FPGA_FAMILY=$(XIL_FAMILY)
 
 $(QUARTUSLOG):
 	make  -C $(CORE_DIR) fpga-build FPGA_FAMILY=$(INT_FAMILY)
+
+$(ASICLOG):
+	make  -C $(CORE_DIR) asic ASIC_NODE=$(ASIC_NODE)
 
 #cleaning
 clean:
