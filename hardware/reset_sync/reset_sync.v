@@ -2,9 +2,9 @@
 
 module reset_sync
   (
-   `INPUT(clk, 1),
-   `OUTPUT(rst, 1),
-   `OUTPUT(rst_out, 1)
+   `IOB_INPUT(clk, 1),
+   `IOB_OUTPUT(rst, 1),
+   `IOB_OUTPUT(rst_out, 1)
    );
 
   reg [1:0] sync_reg;

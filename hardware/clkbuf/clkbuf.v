@@ -4,8 +4,8 @@
 
 module clkbuf
   (
-   `INPUT(clk_in, 1),
-   `OUTPUT(clk_out, 1)
+   `IOB_INPUT(clk_in, 1),
+   `IOB_OUTPUT(clk_out, 1)
    );
 
 `ifdef XILINX
