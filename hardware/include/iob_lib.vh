@@ -4,6 +4,7 @@
 // COMMON UTILS
 `define iob_max(a,b) {(a) > (b) ? (a) : (b)}
 `define iob_min(a,b) {(a) < (b) ? (a) : (b)}
+`define iob_abs(a, w) {a[w-1]? (-a): (a)}
 
 //IO
 `define IOB_INPUT(NAME, WIDTH) input [WIDTH-1:0] NAME
