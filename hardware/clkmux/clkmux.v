@@ -11,10 +11,10 @@
 
 module clkmux
   (
-   `INPUT(clk_in0, 1),
-   `INPUT(clk_in1, 1),
-   `INPUT(clk_sel, 1),
-   `OUTPUT(clk_out, 1)
+   `IOB_INPUT(clk_in0, 1),
+   `IOB_INPUT(clk_in1, 1),
+   `IOB_INPUT(clk_sel, 1),
+   `IOB_OUTPUT(clk_out, 1)
    );
 
 `ifdef XILINX

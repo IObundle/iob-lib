@@ -11,10 +11,10 @@
 
 module iobuf
   (
-   `INPUT(I, 1), //from core
-   `INPUT(T, 1), //from core: tristate control
-   `INPUT(N, 1), //from core: inversion control
-   `OUTPUT(O, 1),//to core
+   `IOB_INPUT(I, 1), //from core
+   `IOB_INPUT(T, 1), //from core: tristate control
+   `IOB_INPUT(N, 1), //from core: inversion control
+   `IOB_OUTPUT(O, 1),//to core
    `INOUT(IO, 1) //to device IO
    );
 

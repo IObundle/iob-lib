@@ -6,9 +6,9 @@
 `define min(a,b) {(a) < (b) ? (a) : (b)}
 
 //IO
-`define INPUT(NAME, WIDTH) input [WIDTH-1:0] NAME
+`define IOB_INPUT(NAME, WIDTH) input [WIDTH-1:0] NAME
 `define INPUT_SIGNED(NAME, WIDTH) input signed [WIDTH-1:0] NAME
-`define OUTPUT(NAME, WIDTH) output [WIDTH-1:0] NAME
+`define IOB_OUTPUT(NAME, WIDTH) output [WIDTH-1:0] NAME
 `define OUTPUT_VAR(NAME, WIDTH) output reg [WIDTH-1:0] NAME
 `define INOUT(NAME, WIDTH) inout [WIDTH-1:0] NAME
 
