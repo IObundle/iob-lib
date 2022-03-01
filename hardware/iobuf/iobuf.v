@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-  Description: INOUT 3-State Buffer
+  Description: IOB_INOUT 3-State Buffer
 
   Copyright (C) 2020 IObundle, Lda  All rights reserved
 
@@ -15,7 +15,7 @@ module iobuf
    `IOB_INPUT(T, 1), //from core: tristate control
    `IOB_INPUT(N, 1), //from core: inversion control
    `IOB_OUTPUT(O, 1),//to core
-   `INOUT(IO, 1) //to device IO
+   `IOB_INOUT(IO, 1) //to device IO
    );
 
 `ifdef XILINX

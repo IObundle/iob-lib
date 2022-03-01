@@ -27,15 +27,15 @@ def write_hw(table):
         default_val = row[4]
 
         if (typ == 'W'):
-            fout.write("`REG_ARE(clk, rst, " + default_val + ", valid & wstrb & (address == " + address + "), " + name + ", wdata[" + width + "-1:0])\n")
+            fout.write("`IOB_REG_ARE(clk, rst, " + default_val + ", valid & wstrb & (address == " + address + "), " + name + ", wdata[" + width + "-1:0])\n")
         else:
             continue
         
     fout.write("\n\n//read registers\n")
-    fout.write("`VAR(rdata_int, DATA_W)\n")
-    fout.write("`VAR(rdata_int2, DATA_W)\n")
-    fout.write("`REG_ARE(clk, rst, 0, valid, rdata_int2, rdata_int)\n")
-    fout.write("`VAR2WIRE(rdata_int2, rdata)\n\n")
+    fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
+    fout.write("`IOB_VAR(rdata_int2, DATA_W)\n")
+    fout.write("`IOB_REG_ARE(clk, rst, 0, valid, rdata_int2, rdata_int)\n")
+    fout.write("`IOB_VAR2WIRE(rdata_int2, rdata)\n\n")
 
     fout.write("always @* begin\n")
     fout.write("   rdata_int = 1'b0;\n")
@@ -58,9 +58,9 @@ def write_hw(table):
     fout.write("end\n")
 
     #ready signal   
-    fout.write("`VAR(ready_int, 1)\n")
-    fout.write("`REG_AR(clk, rst, 0, ready_int, valid)\n")
-    fout.write("`VAR2WIRE(ready_int, ready)\n")
+    fout.write("`IOB_VAR(ready_int, 1)\n")
+    fout.write("`IOB_REG_AR(clk, rst, 0, ready_int, valid)\n")
+    fout.write("`IOB_VAR2WIRE(ready_int, ready)\n")
     
     fout.close()
 
@@ -114,10 +114,10 @@ def swreg_parse (code, hwsw):
     for line in code:
 
         swreg_flds = []
-        swreg_flds_tmp = parse('{}`SWREG_{}({},{},{}){}//{}', line)
+        swreg_flds_tmp = parse('{}`IOB_SWREG_{}({},{},{}){}//{}', line)
 
         if swreg_flds_tmp is None:
-            swreg_flds_tmp = parse('`SWREG_{}({},{},{}){}//{}', line)
+            swreg_flds_tmp = parse('`IOB_SWREG_{}({},{},{}){}//{}', line)
             if swreg_flds_tmp is None: continue #not a sw reg
         else:
             swreg_flds_tmp = swreg_flds_tmp[1:]
