@@ -1,5 +1,69 @@
+\subsection{Synthesis Macros and Parameters}
+\label{sec:smp}
+
+\ifdefined\SMP
+The synthesis macros and parameters of the core are presented in this section.
+For each macro or parameter, the minimum, default and maximum values are
+provided. The minimum and maximum values may be marked with
+
+\begin{description}
+\item{Not Applicable(NA)}:  the macro or parameter value cannot be set by the user; its value is set automatically by the system.
+\item{Not Specified (NS)}:  the minimum or maximum value for the macro or parameter has not been determined; if needed, values other than the default should be determined and tested by the user. 
+\end{description}
+
+
+\ifdefined\SM
+
+The synthesis macros apply to all instances of the core, and are listed in
+Table~\ref{tab:sm}.
+
+\begin{table}[h]
+  \centering
+    \begin{tabularx}{\textwidth}{ | c | c | c | c | X | }
+    \hline
+    \rowcolor{iob-green}
+    {\bf Parameter} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description} \\\hline
+
+    \input{sm_tab}
+
+    \end{tabularx}
+  \caption{Synthesis Macros.}
+  \label{tab:sm}
+\end{table}
+\fi
+
+
+\ifdefined\SP
+
+The generic synthesis parameters of the core are presented in
+Table~\ref{tab:sp}. Generic parameters can vary from instance to instance.
+
+\begin{table}[h]
+  \centering
+    \begin{tabularx}{\textwidth}{ | c | c | c | c | X | }
+    \hline
+    \rowcolor{iob-green}
+    {\bf Parameter} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description} \\\hline
+
+    \input{sp_tab}
+
+    \end{tabularx}
+  \caption{Synthesis Parameters.}
+  \label{tab:sp}
+\end{table}
+\fi
+\fi
+
+
+\subsection{Synthesis Script and Timing Constraints}
+
 A simple {\tt .tcl} script is provided for the Cadence Genus synthesis tool. The
 script reads the technology files, compiles and elaborates the design, and
-proceeds to synthesise it. After synthesis, reports on silicon area usage, power
-consumption, and timing closure are generated. A post-synthesis Verilog is
-created, which can be used for simulation.
+proceeds to synthesise it. The timing constraints are contained within the
+constraints file provided, or provided in a separate file.
+
+After synthesis, reports on silicon area usage, power consumption, and timing
+closure are generated. A post-synthesis Verilog file is created, to be used in
+post-synthesis simulation.
+
+\input{synth}
