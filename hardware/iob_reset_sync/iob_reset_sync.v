@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module reset_sync
+module iob_reset_sync
   (
    `IOB_INPUT(clk, 1),
    `IOB_OUTPUT(rst, 1),
