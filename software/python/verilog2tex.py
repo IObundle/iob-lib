@@ -192,7 +192,7 @@ def io_parse (io_lines, defines):
         io_flds.append(io_flds_tmp[2].replace('_','\_').strip(' '))
 
         #TYPE
-        io_flds.append(io_flds_tmp[1].replace('_VAR','').strip(' '))
+        io_flds.append(io_flds_tmp[1].replace('_VAR','').replace('_','\_').strip(' '))
 
         #WIDTH
         #may be defined using macros: replace and evaluate
