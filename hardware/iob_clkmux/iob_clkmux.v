@@ -9,7 +9,7 @@
 
 `include "iob_lib.vh"
 
-module clkmux
+module iob_clkmux
   (
    `IOB_INPUT(clk_in0, 1),
    `IOB_INPUT(clk_in1, 1),

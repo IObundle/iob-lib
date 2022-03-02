@@ -9,7 +9,7 @@
 
 `include "iob_lib.vh"
 
-module iobuf
+module iob_iobuf
   (
    `IOB_INPUT(I, 1), //from core
    `IOB_INPUT(T, 1), //from core: tristate control

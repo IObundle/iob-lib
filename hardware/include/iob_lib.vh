@@ -114,14 +114,14 @@
 
 
    // IOB_SYNCRONIZERS
-   // reset sync
+   // reset iob_sync
 `define IOB_RESET_SYNC(CLK, RST_IN, IOB_SYNC_REG, RST_OUT) \
    reg [1:0] IOB_SYNC_REG; \
    always @(posedge CLK, posedge RST_IN) \
    if(RST_IN)  IOB_SYNC_REG <= 2'b11; else IOB_SYNC_REG <= {IOB_SYNC_REG[0], 1'b0}; \
    assign RST_OUT = IOB_SYNC_REG[1];
 
-   //regular 2-flop sync
+   //regular 2-flop iob_sync
 `define IOB_SYNC(CLK, RST, RST_VAL, W, IN, IOB_SYNC_REG0, IOB_SYNC_REG1, OUT) \
    reg [W-1:0] IOB_SYNC_REG0, IOB_SYNC_REG1; \
    always @(posedge CLK, posedge RST) \

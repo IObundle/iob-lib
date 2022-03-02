@@ -2,7 +2,7 @@
 
 `include "iob_lib.vh"
 
-module clkbuf
+module iob_clkbuf
   (
    `IOB_INPUT(clk_in, 1),
    `IOB_OUTPUT(clk_out, 1)

@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module sync
+module iob_sync
   #(
     parameter WIDTH = 0,
     parameter RST_VAL = 0
@@ -15,7 +15,7 @@ module sync
 
    reg [WIDTH-1:0]        sync_reg;
 
-   always @(posedge clk, posedge rst) begin : sync
+   always @(posedge clk, posedge rst) begin : iob_sync
       if(rst) begin
          sync_reg <= RST_VAL;
          signal_out <= RST_VAL;
