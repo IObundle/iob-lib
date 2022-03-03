@@ -24,7 +24,7 @@ endif
 	inkscape --file $< --export-pdf $@
 
 %.svg: %.drom
-	npx wavedrom-cli -i $< -s $@
+	wavedrompy -i $< -s $@
 
 clean:
 	@rm -f *.pdf *.svg *~
