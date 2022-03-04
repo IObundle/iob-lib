@@ -41,13 +41,23 @@ texfiles: $(MACRO_LIST)
 
 
 #FPGA implementation results
-fpga_res: vivado.tex quartus.tex
+fpga_res:
+ifneq ($(XIL_FAMILY),)
+	make vivado.tex
+endif
+ifneq ($(INT_FAMILY),)
+	make quartus.tex
+endif
 
 VIVADOLOG = $(CORE_DIR)/hardware/fpga/vivado/$(XIL_FAMILY)/vivado.log
 QUARTUSLOG = $(CORE_DIR)/hardware/fpga/quartus/$(INT_FAMILY)/quartus.log
 
 #ASIC implementation results
-asic_res: asic.tex
+asic_res:
+ifneq ($(ASIC_NODE),)
+	make asic.tex
+endif
+
 ASICLOG = $(CORE_DIR)/hardware/asic/$(ASIC_NODE)/rc.log
 ASICRPT = $(CORE_DIR)/hardware/asic/$(ASIC_NODE)/*.rpt
 
