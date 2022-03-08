@@ -4,7 +4,11 @@ LIB_DOC_DIR:=$(LIB_DIR)/document
 LIB_SW_DIR:=$(LIB_DIR)/software
 LIB_SW_PYTHON_DIR:=$(LIB_SW_DIR)/python
 
-$(DOC).pdf: fpga_res asic_res figures $(DOC)top.tex
+presentation.pdf: presentation.tex
+	pdflatex '\def\TEX{$(LIB_DOC_DIR)}\input{$<}'
+	pdflatex '\def\TEX{$(LIB_DOC_DIR)}\input{$<}'
+
+%.pdf: fpga_res asic_res figures $(DOC)top.tex
 ifeq ($(DOC),pb)
 	make -C ./figures pb_figs
 endif
@@ -37,7 +41,9 @@ $(DOC)top.tex: texfiles
 
 #tex files extracted from code comments
 texfiles: $(MACRO_LIST)
+ifneq ($(TOP_MODULE),)
 	$(LIB_SW_PYTHON_DIR)/verilog2tex.py $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC)
+endif
 
 
 #FPGA implementation results
