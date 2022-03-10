@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #
 #    Build Latex tables of verilog module interface signals and registers
 #
@@ -30,7 +30,7 @@ def write_hw(table):
             fout.write("`IOB_REG_ARE(clk, rst, " + default_val + ", valid & wstrb & (address == " + address + "), " + name + ", wdata[" + width + "-1:0])\n")
         else:
             continue
-        
+
     fout.write("\n\n//read registers\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
     fout.write("`IOB_VAR(rdata_int2, DATA_W)\n")
@@ -57,11 +57,11 @@ def write_hw(table):
     fout.write("   endcase\n")
     fout.write("end\n")
 
-    #ready signal   
+    #ready signal
     fout.write("`IOB_VAR(ready_int, 1)\n")
     fout.write("`IOB_REG_AR(clk, rst, 0, ready_int, valid)\n")
     fout.write("`IOB_VAR2WIRE(ready_int, ready)\n")
-    
+
     fout.close()
 
 
@@ -130,8 +130,8 @@ def swreg_parse (code, hwsw):
 
         #ADDRESS
         swreg_flds.append(str(swreg_cnt))
-        swreg_cnt = swreg_cnt + 1        
-               
+        swreg_cnt = swreg_cnt + 1
+
         #WIDTH
         swreg_flds.append(swreg_flds_tmp[2])
 
@@ -140,7 +140,7 @@ def swreg_parse (code, hwsw):
 
         #DESCRIPTION
         swreg_flds.append(swreg_flds_tmp[5])
-            
+
         table.append(swreg_flds)
 
 
