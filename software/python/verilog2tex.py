@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 '''
  Verilog2Tex: extract user guide documentation from Verilog sources
 '''
@@ -38,7 +38,7 @@ def header_parse (vh, defines):
 '''
 Write Latex table
 '''
-            
+
 def write_table(outfile, table):
     fout = open (outfile+'_tab.tex', 'w')
     for i in range(len(table)):
@@ -56,7 +56,7 @@ def write_table(outfile, table):
 '''
 Write Latex description
 '''
-            
+
 def write_description(outfile, text):
     fout = open (outfile+'_desc.tex', 'w')
     for line in text:
@@ -66,11 +66,11 @@ def write_description(outfile, text):
 '''
 Parse top-level parameters and macros
 '''
-    
+
 def param_parse (topv, param_defaults, defines):
 
     param_defaults.update(defines)
-    
+
     params = []
     macros = []
 
@@ -81,7 +81,7 @@ def param_parse (topv, param_defaults, defines):
         if p_flds_tmp is None:
             continue #not a parameter or macro
 
-        #NAME 
+        #NAME
         p_flds.append(p_flds_tmp[1].replace('_','\_').strip(' '))
 
         #MINIMUM VALUE
@@ -95,7 +95,7 @@ def param_parse (topv, param_defaults, defines):
         except:
             #eval_str has undefined parameters: use as is
             p_flds.append(eval_str.replace('_','\_').strip(' '))
-                
+
         #DEFAULT VALUE
         #may be defined using macros: replace and evaluate
         eval_str = p_flds_tmp[2].replace('`','').replace(',','')
@@ -107,7 +107,7 @@ def param_parse (topv, param_defaults, defines):
         except:
             #eval_str has undefined parameters: use as is
             p_flds.append(eval_str.replace('_','\_').strip(' '))
-                
+
         #MAXIMUM VALUE
         #may be defined using macros: replace and evaluate
         eval_str = p_flds_tmp[5].replace('`','').replace(',','')
@@ -119,7 +119,7 @@ def param_parse (topv, param_defaults, defines):
         except:
             #eval_str has undefined parameters: use as is
             p_flds.append(eval_str.replace('_','\_').strip(' '))
-                
+
         #DESCRIPTION
         if p_flds_tmp[3].find('PARAM')>=0:
             p_flds.append(p_flds_tmp[6].replace('_','\_').strip('PARAM'))
@@ -127,7 +127,7 @@ def param_parse (topv, param_defaults, defines):
         else:
             p_flds.append(p_flds_tmp[6].replace('_','\_').strip('MACRO'))
             macros.append(p_flds)
-     
+
     #write out params
     if params != []:
         write_table("sp", params)
@@ -145,7 +145,7 @@ Parse block diagram modules
 def block_parse (block):
 
     b_list = []
-    
+
     for line in block :
         b_flds = []
         b_flds_tmp = parse('{}//BLOCK {} & {}\n', line)
@@ -155,7 +155,7 @@ def block_parse (block):
         else:
             b_flds_tmp = b_flds_tmp[1:]
 
-        #NAME 
+        #NAME
         b_flds.append(b_flds_tmp[0].replace('_','\_').strip(' '))
 
         #DESCRIPTION
@@ -204,17 +204,17 @@ def io_parse (io_lines, defines):
         except:
             #eval_str has undefined parameters: use as is
             io_flds.append(eval_str.replace('_','\_').strip(' '))
-                
+
         #DESCRIPTION
         io_flds.append(io_flds_tmp[5].replace('_','\_'))
-            
+
         table.append(io_flds)
 
     #write last table
     if table_found == 1:
         write_table(table_name + '_if', table)
 
-        
+
 def swreg_parse (vh, defines) :
 
     swreg_cnt = 0
@@ -250,8 +250,8 @@ def swreg_parse (vh, defines) :
 
         #ADDRESS
         swreg_flds.append(4*swreg_cnt)
-        swreg_cnt = swreg_cnt + 1        
-        
+        swreg_cnt = swreg_cnt + 1
+
         #WIDTH
         #may be defined using macros: replace and evaluate
         eval_str = swreg_flds_tmp[2].replace('`','').replace(',','')
@@ -268,14 +268,14 @@ def swreg_parse (vh, defines) :
 
         #DESCRIPTION
         swreg_flds.append(swreg_flds_tmp[5].replace('_','\_'))
-            
+
         table.append(swreg_flds)
 
     #write last table
     if table_found == 1:
         write_table(table_name + '_swreg', table)
 
-      
+
 def main () :
     #parse command line
     if len(sys.argv) < 2:
@@ -289,7 +289,7 @@ def main () :
     #macro dictionary
     defines = {}
 
-    
+
     #read top-level Verilog file
     fv =  open (topv, 'r')
     topv_lines = fv.readlines()
@@ -316,7 +316,7 @@ def main () :
             v = [*v *fv.readlines()]
             fv.close()
             i = i+1
-            
+
 
     #PARSE TOP-LEVEL PARAMETERS AND MACROS
 
@@ -341,5 +341,5 @@ def main () :
 
     #PARSE SOFTWARE ACCESSIBLE REGISTERS
     swreg_parse (vh, defines)
-    
+
 if __name__ == "__main__" : main ()
