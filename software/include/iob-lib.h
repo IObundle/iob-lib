@@ -8,11 +8,11 @@
 #define IO_GET(base, location)        (*((volatile int*) ( (base) + (sizeof(int)) * (location) )))
 #else // ifdef PC
 //memory access functions
-void MEM_SET(int type, int location, int value);
-int MEM_GET(int type, int location);
+static void MEM_SET(int type, int location, int value);
+static int MEM_GET(int type, int location);
 
 //stream access functions
-void IO_SET(int base, int location, int value);
-int IO_GET(int base, int location);
+static void IO_SET(int base, int location, int value);
+static int IO_GET(int base, int location);
 #endif
 
