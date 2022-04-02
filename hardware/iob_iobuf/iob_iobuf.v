@@ -18,18 +18,21 @@ module iob_iobuf
    `IOB_INOUT(IO, 1) //to device IO
    );
 
+   `IOB_WIRE(O_int, 1)
+
 `ifdef XILINX
    IOBUF IOBUF_inst
      (
       .I(I),
       .T(T),
-      .O(O),
+      .O(O_int),
       .IO(IO)
       );
 `else
    assign IO = T? 1'bz : I;
+   assign O_int = IO;
 `endif
 
-   assign O = N^IO;
+   assign O = N^O_int;
 
 endmodule

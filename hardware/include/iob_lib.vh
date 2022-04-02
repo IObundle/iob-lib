@@ -38,7 +38,7 @@
 `define IOB_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
 `define IOB_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; else OUT <= IN;
 `define IOB_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
-`define IOB_REG_ARR(CLK, ARST, ARST_VAL, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge ARST) if (ARST) OUT <= ARST_VAL; \
+`define IOB_REG_ARR(CLK, ARST, ARST_VAL, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge ARST) if (ARST) OUT <= ARST_VAL; \
         else if (RST) OUT <= RST_VAL; else OUT <= IN;
 `define IOB_REG_ARRE(CLK, ARST, ARST_VAL, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge ARST) if (ARST) OUT <= ARST_VAL; \
         else if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
