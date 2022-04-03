@@ -27,7 +27,8 @@ def write_hw(table):
         default_val = row[4]
 
         if (typ == 'W'):
-            fout.write("`IOB_REG_ARE(clk, rst, " + default_val + ", valid & wstrb & (address == " + address + "), " + name + ", wdata[" + width + "-1:0])\n")
+            fout.write("`IOB_REG_ARE(clk, rst, " + default_val + ", valid & wstrb & (address == " + str(int(address)>>2) + "), "
+                       + name + ", wdata["+width+"-1:0])\n")
         else:
             continue
 
@@ -38,7 +39,6 @@ def write_hw(table):
     fout.write("`IOB_VAR2WIRE(rdata_int2, rdata)\n\n")
 
     fout.write("always @* begin\n")
-    fout.write("   rdata_int = 1'b0;\n")
     fout.write("   case(address)\n")
 
     for row in table:
@@ -49,7 +49,7 @@ def write_hw(table):
         default_val = row[4]
 
         if (typ == 'R'):
-            fout.write("     " + address + ": rdata_int = " + name + ";\n")
+            fout.write("     " + str(int(address)>>2) + ": rdata_int = " + name + ";\n")
         else:
             continue
 
@@ -79,7 +79,7 @@ def write_hwheader(table):
     for row in table:
         name = row[0]
         address = row[2]
-        fout.write("`define " + name + "_ADDR " + address + "\n")
+        fout.write("`define " + name + "_ADDR " + str(int(address)>>2) + "\n")
 
     fout.write("\n//registers width\n")
     for row in table:
@@ -106,9 +106,9 @@ def write_swheader(table):
     fout.close()
 
 
+swreg_addr = 0
 def swreg_parse (code, hwsw):
-
-    swreg_cnt = 0
+    global swreg_addr
     table = [] #name, type, address, width, default value, description
 
     for line in code:
@@ -129,11 +129,12 @@ def swreg_parse (code, hwsw):
         swreg_flds.append(swreg_flds_tmp[0])
 
         #ADDRESS
-        swreg_flds.append(str(swreg_cnt))
-        swreg_cnt = swreg_cnt + 1
+        swreg_width = int(swreg_flds_tmp[2])
+        swreg_flds.append(str(swreg_addr))
+        swreg_addr = swreg_addr + 4
 
         #WIDTH
-        swreg_flds.append(swreg_flds_tmp[2])
+        swreg_flds.append(str(swreg_width))
 
         #DEFAULT VALUE
         swreg_flds.append(swreg_flds_tmp[3])
