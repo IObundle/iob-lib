@@ -129,12 +129,12 @@ def swreg_parse (code, hwsw):
         swreg_flds.append(swreg_flds_tmp[0])
 
         #ADDRESS
-        swreg_width = int(swreg_flds_tmp[2])
+        swreg_width = swreg_flds_tmp[2]
         swreg_flds.append(str(swreg_addr))
         swreg_addr = swreg_addr + 4
 
         #WIDTH
-        swreg_flds.append(str(swreg_width))
+        swreg_flds.append(swreg_width)
 
         #DEFAULT VALUE
         swreg_flds.append(swreg_flds_tmp[3])
