@@ -3,16 +3,6 @@
 
 #include <stdint.h>
 
-// IOB_TYPES
-#define IOB_UINT8_T    uint8_t
-#define IOB_UINT16_T   uint16_t
-#define IOB_UINT32_T   uint32_t
-#define IOB_UINT64_T   uint64_t
-#define IOB_INT8_T     int8_t
-#define IOB_INT16_T    int16_t
-#define IOB_INT32_T    int32_t
-#define IOB_INT64_T    int64_t
-
 #ifndef PC
 // Embedded version
 
