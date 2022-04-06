@@ -89,6 +89,30 @@ def write_hwheader(table):
 
     fout.close()
 
+# Get C type from swreg width
+# use IOB_TYPES defined in LIB/software/include/iob-lib.h
+# width: SWREG width
+# sign: 0 unsigned type, 1 signed type
+def swreg_type(width, sign=0):
+    width_int = int(width)
+    if width_int < 1:
+        print(f'MKREGS: invalid SWREG width value {width}.')
+        width_int = 64
+    
+    if sign:
+        type_dict = dict([(8, 'IOB_INT8_T'), (16, 'IOB_INT16_T'), 
+            (32, 'IOB_INT32_T')])
+        default_width = 'IOB_INT64_T'
+    else:
+        type_dict = dict([(8, 'IOB_UINT8_T'), (16, 'IOB_UINT16_T'), 
+            (32, 'IOB_UINT32_T')])
+        default_width = 'IOB_UINT64_T'
+    
+    # next 8*2^k last enough to store width
+    next_pow2 = 2**(math.ceil(math.log2(math.ceil(width_int/8))))
+    sw_width = 8*next_pow2
+
+    return type_dict.get(sw_width, default_width)
 
 def write_swheader(table):
 
@@ -101,7 +125,12 @@ def write_swheader(table):
     for row in table:
         name = row[0]
         address = row[2]
+        width = row[3]
         fout.write("#define " + name + " " + address + "\n")
+        # define SWREG software type
+        reg_type = swreg_type(width)
+        if reg_type:
+            fout.write("#define " + name + "_TYPE " + reg_type + "\n")
 
     fout.close()
 
