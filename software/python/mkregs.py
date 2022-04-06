@@ -94,7 +94,13 @@ def write_hwheader(table):
 # width: SWREG width
 # sign: 0 unsigned type, 1 signed type
 def swreg_type(width, sign=0):
-    width_int = int(width)
+    # Check if width is a number string (1, 8, 15, etc)
+    try:
+        width_int = int(width)
+    except:
+        # if width is a parameter (example: DATA_W, etc, set default width)
+        width_int = 32
+
     if width_int < 1:
         print(f'MKREGS: invalid SWREG width value {width}.')
         width_int = 64
