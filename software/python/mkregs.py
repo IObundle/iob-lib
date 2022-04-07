@@ -90,10 +90,9 @@ def write_hwheader(table):
     fout.close()
 
 # Get C type from swreg width
-# use IOB_TYPES defined in LIB/software/include/iob-lib.h
+# uses unsigned int types from C stdint library
 # width: SWREG width
-# sign: 0 unsigned type, 1 signed type
-def swreg_type(width, sign=0):
+def swreg_type(width):
     # Check if width is a number string (1, 8, 15, etc)
     try:
         width_int = int(width)
@@ -103,16 +102,10 @@ def swreg_type(width, sign=0):
 
     if width_int < 1:
         print(f'MKREGS: invalid SWREG width value {width}.')
-        width_int = 64
+        width_int = 32
     
-    if sign:
-        type_dict = dict([(8, 'int8_t'), (16, 'int16_t'), 
-            (32, 'int32_t')])
-        default_width = 'int64_t'
-    else:
-        type_dict = dict([(8, 'uint8_t'), (16, 'uint16_t'), 
-            (32, 'uint32_t')])
-        default_width = 'uint64_t'
+    type_dict = dict([(8, 'uint8_t'), (16, 'uint16_t'), (32, 'uint32_t')])
+    default_width = 'uint64_t'
     
     # next 8*2^k last enough to store width
     next_pow2 = 2**(math.ceil(math.log2(math.ceil(width_int/8))))
