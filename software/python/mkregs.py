@@ -6,6 +6,7 @@
 import sys
 from parse import parse
 import math
+from verilog2tex import header_parse
 
 #name, type, address, width, default value, description
 
@@ -85,22 +86,55 @@ def write_hwheader(table, regvfile_name):
 
     fout.close()
 
+# Read vh files to get non-literal widths
+def get_defines():
+    # .vh file lines
+    vh = []
+
+    if(len(sys.argv) > 4):
+        i = 4
+        while i<len(sys.argv) and sys.argv[i].find('.vh'):
+            fvh =  open (sys.argv[i], 'r')
+            vh = [*vh, *fvh.readlines()]
+            fvh.close()
+            i = i+1
+
+    defines = {}
+    #parse headers if any
+    if vh: 
+        header_parse(vh, defines)
+
+    return defines
+
+
 # Get C type from swreg width
 # uses unsigned int types from C stdint library
 # width: SWREG width
-def swreg_type(width):
+def swreg_type(width, defines):
     # Check if width is a number string (1, 8, 15, etc)
     try:
         width_int = int(width)
     except:
-        # if width is a parameter (example: DATA_W, etc, set default width)
-        width_int = 32
+        # width is a parameter or macro (example: DATA_W, ADDR_W)
+        eval_str = width.replace('`','').replace(',','')
+        for key, val in defines.items():
+            eval_str = eval_str.replace(str(key),str(val))
+        try:
+            width_int = int(eval_str)
+        except:
+            #eval_str has undefined parameters: use default value
+            width_int = 32
 
     if width_int < 1:
         print(f'MKREGS: invalid SWREG width value {width}.')
         width_int = 32
     
-    type_dict = dict([(8, 'uint8_t'), (16, 'uint16_t'), (32, 'uint32_t')])
+    type_dict = {
+        8: 'uint8_t',
+        16: 'uint16_t',
+        32: 'uint32_t',
+        64: 'uint64_t'
+    }
     default_width = 'uint64_t'
     
     # next 8*2^k last enough to store width
@@ -109,7 +143,7 @@ def swreg_type(width):
 
     return type_dict.get(sw_width, default_width)
 
-def write_swheader(table, regvfile_name, core_prefix):
+def write_swheader(table, regvfile_name, core_prefix, defines):
 
     fout = open(regvfile_name+'.h', 'w')
 
@@ -135,7 +169,7 @@ def write_swheader(table, regvfile_name, core_prefix):
             name = row[0]
             width = row[3]
             parsed_name = name.split("_",1)[1]
-            sw_type = swreg_type(width)
+            sw_type = swreg_type(width, defines)
             fout.write(f"void {core_prefix}_SET_{parsed_name}({sw_type} value);\n")
 
     fout.write("\n// Core Getters\n")
@@ -145,14 +179,14 @@ def write_swheader(table, regvfile_name, core_prefix):
             name = row[0]
             width = row[3]
             parsed_name = name.split("_",1)[1]
-            sw_type = swreg_type(width)
+            sw_type = swreg_type(width, defines)
             fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}();\n")
 
     fout.write("\n#endif // H_IOB_UART_SWREG_H\n")
 
     fout.close()
 
-def write_sw_emb(table, regvfile_name, core_prefix):
+def write_sw_emb(table, regvfile_name, core_prefix, defines):
 
     fout = open(regvfile_name+'_emb.c', 'w')
 
@@ -173,7 +207,7 @@ def write_sw_emb(table, regvfile_name, core_prefix):
             name = row[0]
             width = row[3]
             parsed_name = name.split("_",1)[1]
-            sw_type = swreg_type(width)
+            sw_type = swreg_type(width, defines)
             fout.write(f"void {core_prefix}_SET_{parsed_name}({sw_type} value) {{\n")
             fout.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({name}) ) ) = (value));\n")
             fout.write(f"}}\n\n")
@@ -185,14 +219,14 @@ def write_sw_emb(table, regvfile_name, core_prefix):
             name = row[0]
             width = row[3]
             parsed_name = name.split("_",1)[1]
-            sw_type = swreg_type(width)
+            sw_type = swreg_type(width, defines)
             fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}() {{\n")
             fout.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({name}) ) ));\n")
             fout.write(f"}}\n\n")
 
     fout.close()
 
-def write_sw_pc_emul(table, regvfile_name, core_prefix):
+def write_sw_pc_emul(table, regvfile_name, core_prefix, defines):
 
     fout = open(regvfile_name+'_pc_emul.c', 'w')
 
@@ -215,7 +249,7 @@ def write_sw_pc_emul(table, regvfile_name, core_prefix):
             name = row[0]
             width = row[3]
             parsed_name = name.split("_",1)[1]
-            sw_type = swreg_type(width)
+            sw_type = swreg_type(width, defines)
             fout.write(f"void {core_prefix}_SET_{parsed_name}({sw_type} value) {{\n")
             fout.write(f"\tpc_emul_set_{name.lower()}((int64_t) (value));\n")
             fout.write(f"}}\n\n")
@@ -227,14 +261,14 @@ def write_sw_pc_emul(table, regvfile_name, core_prefix):
             name = row[0]
             width = row[3]
             parsed_name = name.split("_",1)[1]
-            sw_type = swreg_type(width)
+            sw_type = swreg_type(width, defines)
             fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}() {{\n")
             fout.write(f"\treturn pc_emul_get_{name.lower()}();\n")
             fout.write(f"}}\n\n")
 
     fout.close()
 
-def write_sw_pc_emul_header(table, regvfile_name, core_prefix):
+def write_sw_pc_emul_header(table, regvfile_name, core_prefix, defines):
 
     fout = open(regvfile_name+'_pc_emul.h', 'w')
 
@@ -247,7 +281,7 @@ def write_sw_pc_emul_header(table, regvfile_name, core_prefix):
     for row in table:
         name = row[0]
         width = row[3]
-        sw_type = swreg_type(width)
+        sw_type = swreg_type(width, defines)
         fout.write(f"#define {name}_TYPE {sw_type}\n")
 
 
@@ -311,16 +345,18 @@ def swreg_parse (code, hwsw, regvfile_name, core_prefix):
         write_hw(table, regvfile_name)
 
     elif(hwsw == "SW"):
-        write_swheader(table, regvfile_name, core_prefix)
-        write_sw_emb(table, regvfile_name, core_prefix)
-        write_sw_pc_emul(table, regvfile_name, core_prefix)
-        write_sw_pc_emul_header(table, regvfile_name, core_prefix)
+        defines = get_defines()
+        write_swheader(table, regvfile_name, core_prefix, defines)
+        write_sw_emb(table, regvfile_name, core_prefix, defines)
+        write_sw_pc_emul(table, regvfile_name, core_prefix, defines)
+        write_sw_pc_emul_header(table, regvfile_name, core_prefix, defines)
 
 def print_usage():
-    print("Usage: ./mkregs.py TOP_swreg.vh [HW|SW] [CORE_PREFIX]")
+    print("Usage: ./mkregs.py TOP_swreg.vh [HW|SW] [CORE_PREFIX] [vh_files]")
     print(" TOP_swreg.vh:the software accessible registers definitions file")
     print(" [HW|SW]: use HW to generate the hardware files or SW to generate the software files")
     print(" [CORE_PREFIX]: (SW only) core prefix name. This is added as sw function prefix")
+    print(" [vh_files]: (SW only) paths to .vh files used to extract macro values")
 
 def main () :
 
