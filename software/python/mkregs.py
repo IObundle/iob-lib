@@ -217,7 +217,7 @@ def write_sw_pc_emul(table, regvfile_name, core_prefix):
             parsed_name = name.split("_",1)[1]
             sw_type = swreg_type(width)
             fout.write(f"void {core_prefix}_SET_{parsed_name}({sw_type} value) {{\n")
-            fout.write(f"\t{core_prefix}_io_set_int( ({name}), (int64_t) (value));\n")
+            fout.write(f"\tpc_emul_set_{name.lower()}((int64_t) (value));\n")
             fout.write(f"}}\n\n")
 
     fout.write("\n// Core Getters\n")
@@ -229,45 +229,8 @@ def write_sw_pc_emul(table, regvfile_name, core_prefix):
             parsed_name = name.split("_",1)[1]
             sw_type = swreg_type(width)
             fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}() {{\n")
-            fout.write(f"\treturn ({sw_type}) {core_prefix}_io_get_int( ({name}) );\n")
+            fout.write(f"\treturn pc_emul_get_{name.lower()}();\n")
             fout.write(f"}}\n\n")
-
-    # Emulate write accesses
-    fout.write(f"void {core_prefix}_io_set_int(int addr, int64_t value) {{\n")
-    fout.write(f"\tswitch(addr) {{\n")
-    for row in table:
-        read_write = row[1]
-        if read_write == "W":
-            name = row[0]
-            fout.write(f"\t\tcase {name}:\n")
-            fout.write(f"\t\t\tpc_emul_set_{name.lower()}(value);\n")
-            fout.write(f"\t\t\tbreak;\n")
-    fout.write(f"\t\tdefault:\n")
-    fout.write(f"\t\t\t// unassigned addr, do nothing\n")
-    fout.write(f"\t\t\tbreak;\n")
-    fout.write(f"\t}}\n")
-    fout.write(f"\treturn;\n")
-    fout.write(f"}}\n")
-
-    # Emulate read accesses
-    fout.write(f"int64_t {core_prefix}_io_get_int(int addr) {{\n")
-    fout.write(f"\tint64_t ret_val;\n")
-    fout.write(f"\tswitch(addr) {{\n")
-    for row in table:
-        read_write = row[1]
-        if read_write == "R":
-            name = row[0]
-            parsed_name = name.split("_",1)[1]
-            sw_type = swreg_type(width)
-            fout.write(f"\t\tcase {name}:\n")
-            fout.write(f"\t\t\tret_val = pc_emul_get_{name.lower()}();\n")
-            fout.write(f"\t\t\tbreak;\n")
-    fout.write(f"\t\tdefault:\n")
-    fout.write(f"\t\t\tret_val = -1;\n")
-    fout.write(f"\t\t\tbreak;\n")
-    fout.write(f"\t}}\n")
-    fout.write(f"\treturn ret_val;\n")
-    fout.write(f"}}\n")
 
     fout.close()
 
@@ -298,12 +261,6 @@ def write_sw_pc_emul_header(table, regvfile_name, core_prefix):
             parsed_name = name.split("_",1)[1]
             sw_type = swreg_type(width)
             fout.write(f"int64_t pc_emul_get_{name.lower()}();\n")
-
-    pc_emul_fname = regvfile_name+'_pc_emul.c'
-    fout.write(f"\n// PC Emulation of Core accesses\n")
-    fout.write(f"// implemented in {pc_emul_fname}\n")
-    fout.write(f"void {core_prefix}_io_set_int(int addr, int64_t value);\n")
-    fout.write(f"int64_t {core_prefix}_io_get_int(int addr);\n")
 
     fout.write("\n#endif // H_IOB_UART_SWREG_PC_EMUL_H\n")
 
