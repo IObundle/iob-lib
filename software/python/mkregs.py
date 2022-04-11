@@ -23,13 +23,13 @@ def gen_mem_wires(table, fout):
             name = reg["name"]
             addr_w = reg["addr_w"]
             width = reg["width"]
-            fout.write(f"`IOB_WIRE({name}_addr_int, {addr_w})\n")
+            fout.write(f"`IOB_VAR({name}_addr_int, {addr_w})\n")
             if reg["rw_type"] == "W":
-                fout.write(f"`IOB_WIRE({name}_wdata_int, {width})\n")
-                fout.write(f"`IOB_WIRE({name}_wstrb_int, {width}/8)\n")
+                fout.write(f"`IOB_VAR({name}_wdata_int, {width})\n")
+                fout.write(f"`IOB_VAR({name}_wstrb_int, {width}/8)\n")
             else:
-                fout.write(f"`IOB_WIRE({name}_rdata_int, {width})\n")
-                fout.write(f"`IOB_WIRE({name}_ren_int, 1)\n")
+                fout.write(f"`IOB_VAR({name}_rdata_int, {width})\n")
+                fout.write(f"`IOB_VAR({name}_ren_int, 1)\n")
     fout.write(f"\n")
 
 # Obtain Address range between memories (if addresses are already calculated)
@@ -69,7 +69,7 @@ def gen_mem_reads(table, fout):
 
     # switch case for mem reads
     if has_mem_reads:
-        fout.write(f"`IOB_WIRE(mem_address, ADDR_W)\n")
+        fout.write(f"`IOB_VAR(mem_address, ADDR_W)\n")
         mem_range_w = str(int(math.log(int(get_mem_range(table))>>2, 2)))
         fout.write(f"`IOB_COMB mem_address = address[ADDR_W-1:{mem_range_w}] << {mem_range_w};\n")
         fout.write(f"always @* begin\n")
@@ -106,7 +106,7 @@ def write_hw(table, regvfile_name):
                 continue
 
     fout.write("\n\n//read registers\n")
-    fout.write("`IOB_WIRE(mem_rdata_int, DATA_W)\n")
+    fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
     fout.write("`IOB_VAR(rdata_int2, DATA_W)\n")
     fout.write("`IOB_REG_ARE(clk, rst, 0, valid, rdata_int2, rdata_int)\n")
