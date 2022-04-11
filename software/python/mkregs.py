@@ -18,11 +18,11 @@ def write_hw(table, regvfile_name):
 
     fout.write("\n\n//write registers\n")
     for row in table:
-        name = row[0]
-        typ = row[1]
-        address = row[2]
-        width = row[3]
-        default_val = row[4]
+        name = row["name"]
+        typ = row["type"]
+        address = row["addr"]
+        width = row["width"]
+        default_val = row["default_value"]
 
         if (typ == 'W'):
             fout.write("`IOB_REG_ARE(clk, rst, " + default_val + ", valid & wstrb & (address == " + str(int(address)>>2) + "), "
@@ -40,11 +40,11 @@ def write_hw(table, regvfile_name):
     fout.write("   case(address)\n")
 
     for row in table:
-        name = row[0]
-        typ = row[1]
-        address = row[2]
-        width = row[3]
-        default_val = row[4]
+        name = row["name"]
+        typ = row["type"]
+        address = row["addr"]
+        width = row["width"]
+        default_val = row["default_value"]
 
         if (typ == 'R'):
             fout.write("     " + str(int(address)>>2) + ": rdata_int = " + name + ";\n")
@@ -74,14 +74,14 @@ def write_hwheader(table, regvfile_name):
 
     fout.write("//address macros\n")
     for row in table:
-        name = row[0]
-        address = row[2]
+        name = row["name"]
+        address = row["addr"]
         fout.write("`define " + name + "_ADDR " + str(int(address)>>2) + "\n")
 
     fout.write("\n//registers width\n")
     for row in table:
-        name = row[0]
-        width = row[3]
+        name = row["name"]
+        width = row["width"]
         fout.write("`define " + name + "_W " + width + "\n")
 
     fout.close()
@@ -154,8 +154,8 @@ def write_swheader(table, regvfile_name, core_prefix, defines):
 
     fout.write("//register address mapping\n")
     for row in table:
-        name = row[0]
-        address = row[2]
+        name = row["name"]
+        address = row["addr"]
         fout.write("#define " + name + " " + address + "\n")
 
     fout.write("\n// Base Address\n")
@@ -164,20 +164,20 @@ def write_swheader(table, regvfile_name, core_prefix, defines):
 
     fout.write("\n// Core Setters\n")
     for row in table:
-        read_write = row[1]
+        read_write = row["type"]
         if read_write == "W":
-            name = row[0]
-            width = row[3]
+            name = row["name"]
+            width = row["width"]
             parsed_name = name.split("_",1)[1]
             sw_type = swreg_type(width, defines)
             fout.write(f"void {core_prefix}_SET_{parsed_name}({sw_type} value);\n")
 
     fout.write("\n// Core Getters\n")
     for row in table:
-        read_write = row[1]
+        read_write = row["type"]
         if read_write == "R":
-            name = row[0]
-            width = row[3]
+            name = row["name"]
+            width = row["width"]
             parsed_name = name.split("_",1)[1]
             sw_type = swreg_type(width, defines)
             fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}();\n")
@@ -202,10 +202,10 @@ def write_sw_emb(table, regvfile_name, core_prefix, defines):
 
     fout.write("\n// Core Setters\n")
     for row in table:
-        read_write = row[1]
+        read_write = row["type"]
         if read_write == "W":
-            name = row[0]
-            width = row[3]
+            name = row["name"]
+            width = row["width"]
             parsed_name = name.split("_",1)[1]
             sw_type = swreg_type(width, defines)
             fout.write(f"void {core_prefix}_SET_{parsed_name}({sw_type} value) {{\n")
@@ -214,10 +214,10 @@ def write_sw_emb(table, regvfile_name, core_prefix, defines):
 
     fout.write("\n// Core Getters\n")
     for row in table:
-        read_write = row[1]
+        read_write = row["type"]
         if read_write == "R":
-            name = row[0]
-            width = row[3]
+            name = row["name"]
+            width = row["width"]
             parsed_name = name.split("_",1)[1]
             sw_type = swreg_type(width, defines)
             fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}() {{\n")
@@ -232,7 +232,7 @@ def swreg_parse (code, hwsw, regvfile_name, core_prefix):
 
     for line in code:
 
-        swreg_flds = []
+        swreg_flds = {}
         swreg_flds_tmp = parse('{}`IOB_SWREG_{}({},{},{}){}//{}', line)
 
         if swreg_flds_tmp is None:
@@ -242,24 +242,23 @@ def swreg_parse (code, hwsw, regvfile_name, core_prefix):
             swreg_flds_tmp = swreg_flds_tmp[1:]
 
         #NAME
-        swreg_flds.append(swreg_flds_tmp[1].strip(' '))
+        swreg_flds["name"] = swreg_flds_tmp[1].strip(' ')
 
         #TYPE
-        swreg_flds.append(swreg_flds_tmp[0])
+        swreg_flds["type"] = swreg_flds_tmp[0]
 
         #ADDRESS
-        swreg_width = swreg_flds_tmp[2]
-        swreg_flds.append(str(swreg_addr))
+        swreg_flds["addr"] = str(swreg_addr)
         swreg_addr = swreg_addr + 4
 
         #WIDTH
-        swreg_flds.append(swreg_width)
+        swreg_flds["width"] = swreg_flds_tmp[2]
 
         #DEFAULT VALUE
-        swreg_flds.append(swreg_flds_tmp[3])
+        swreg_flds["default_value"] = swreg_flds_tmp[3]
 
         #DESCRIPTION
-        swreg_flds.append(swreg_flds_tmp[5])
+        swreg_flds["description"] = swreg_flds_tmp[5]
 
         table.append(swreg_flds)
 
@@ -295,7 +294,7 @@ def main () :
         try:
             core_prefix = sys.argv[3]
         except:
-            print(" Expected [CORE_PREFIX] in SW mode. Check Usage.")
+            print("Expected [CORE_PREFIX] in SW mode. Check Usage.")
             print_usage()
             quit()
 
