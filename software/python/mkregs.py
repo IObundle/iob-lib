@@ -143,7 +143,6 @@ def write_hw(table, regvfile_name):
         gen_mem_writes(table, fout)
         gen_mem_reads(table, fout)
     else:
-        fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
         fout.write("`IOB_COMB mem_rdata_int = 1'b0;\n")
 
     fout.close()
