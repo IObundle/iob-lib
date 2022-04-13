@@ -104,12 +104,12 @@
 //SOFTWARE IOB_ACCESSIBLE IOB_REGISTER
 `define IOB_SWREG_R(NAME, WIDTH, RST_VAL) wire [WIDTH-1:0] NAME; //RST_VAL is used in mkregs.py
 `define IOB_SWREG_W(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME; //RST_VAL is used in mkregs.py
-`define IOB_SWMEM_W(NAME, WIDTH, ADDR_W) \ 
+`define IOB_SWMEM_W(NAME, WIDTH, ADDR_W) 
     // Triggers generation of:
     // wire [ADDR_W-1:0] NAME_addr_int;
     // wire [WIDTH-1:0] NAME_wdata_int;
     // wire [WIDTH/8-1:0] NAME_wstrb_int;
-`define IOB_SWMEM_R(NAME, WIDTH, ADDR_W) \ 
+`define IOB_SWMEM_R(NAME, WIDTH, ADDR_W)
     // Triggers generation of:
     // wire [ADDR_W-1:0] NAME_addr_int;
     // wire [WIDTH-1:0] NAME_rdata_int;
