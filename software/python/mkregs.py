@@ -351,7 +351,7 @@ def write_sw_emb(table, regvfile_name, core_prefix, defines):
                 addr_w = row["addr_w"]
                 addr_type = swreg_type(addr_w, defines)
                 fout.write(f"void {core_prefix}_SET_{parsed_name}({addr_type} addr, {sw_type} value) {{\n")
-                fout.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({name}) + (addr) ) ) = (value));\n")
+                fout.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({name}) + (addr<<2) ) ) = (value));\n")
                 fout.write(f"}}\n\n")
 
     fout.write("\n// Core Getters\n")
@@ -370,7 +370,7 @@ def write_sw_emb(table, regvfile_name, core_prefix, defines):
                 addr_w = row["addr_w"]
                 addr_type = swreg_type(addr_w, defines)
                 fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}({addr_type} addr) {{\n")
-                fout.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({name}) + (addr) ) ));\n")
+                fout.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({name}) + (addr<<2) ) ));\n")
                 fout.write(f"}}\n\n")
 
     fout.close()
