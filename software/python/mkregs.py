@@ -72,7 +72,8 @@ def gen_mem_reads(table, fout):
     if has_mem_reads:
         fout.write(f"`IOB_VAR(mem_address, ADDR_W)\n")
         mem_range_w = str(int(math.log(int(get_mem_range(table))>>2, 2)))
-        fout.write(f"`IOB_COMB mem_address =  {{address[ADDR_W-1:{mem_range_w}], {{ {mem_range_w} {{1'b0}} }} }};\n")
+        # Delay SWMEM_R address 1 cycle to wait for rdata
+        fout.write(f"`IOB_REG_AR(clk, rst, 0, mem_address, {{address[ADDR_W-1:{mem_range_w}], {{ {mem_range_w} {{1'b0}} }} }})\n")
         fout.write(f"always @* begin\n")
         fout.write(f"\tcase(mem_address)\n")
         for reg in table:
@@ -107,16 +108,17 @@ def write_hw(table, regvfile_name):
                 continue
 
     fout.write("\n\n//read registers\n")
-    fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
     fout.write("`IOB_VAR(rdata_int2, DATA_W)\n")
     fout.write("`IOB_REG_ARE(clk, rst, 0, valid, rdata_int2, rdata_int)\n")
     if has_mem_type(table, ["R"]):
+        fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
         fout.write("`IOB_VAR(mem_read_op, 1)\n")
         # Register condition for SWMEM_R access
-        fout.write("`IOB_REG_AR(clk, rst, 0, mem_read_op, (valid & (wstrb == 0) & (|mem_address) ) )\n")
+        mem_range_w = str(int(math.log(int(get_mem_range(table))>>2, 2)))
+        fout.write(f"`IOB_REG_AR(clk, rst, 0, mem_read_op, (valid & (wstrb == 0) & (|address[ADDR_W-1:{mem_range_w}]) ) )\n")
         # skip rdata_int2 delay for memory read accesses
-        fout.write("`IOB_VAR2WIRE((mem_read_op) ? rdata_int : rdata_int2, rdata)\n\n")
+        fout.write("`IOB_VAR2WIRE((mem_read_op) ? mem_rdata_int : rdata_int2, rdata)\n\n")
     else:
         fout.write("`IOB_VAR2WIRE(rdata_int2, rdata)\n\n")
 
@@ -136,7 +138,7 @@ def write_hw(table, regvfile_name):
             else:
                 continue
 
-    fout.write("     default: rdata_int = mem_rdata_int;\n")
+    fout.write("     default: rdata_int = 1'b0;\n")
     fout.write("   endcase\n")
     fout.write("end\n")
 
@@ -150,8 +152,6 @@ def write_hw(table, regvfile_name):
         gen_mem_wires(table, fout)
         gen_mem_writes(table, fout)
         gen_mem_reads(table, fout)
-    else:
-        fout.write("`IOB_COMB mem_rdata_int = 1'b0;\n")
 
     fout.close()
 
