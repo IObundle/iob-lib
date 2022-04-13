@@ -10,10 +10,11 @@ from verilog2tex import header_parse
 
 #name, type, address, width, default value, description
 
-def has_mem_type(table):
+def has_mem_type(table, mem_type_list=["W","R"]):
     for reg in table:
         if reg["reg_type"] == "MEM":
-            return 1
+            if reg["rw_type"] in mem_type_list:
+                return 1
     return 0
 
 def gen_mem_wires(table, fout):
@@ -110,7 +111,14 @@ def write_hw(table, regvfile_name):
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
     fout.write("`IOB_VAR(rdata_int2, DATA_W)\n")
     fout.write("`IOB_REG_ARE(clk, rst, 0, valid, rdata_int2, rdata_int)\n")
-    fout.write("`IOB_VAR2WIRE(rdata_int2, rdata)\n\n")
+    if has_mem_type(table, ["R"]):
+        fout.write("`IOB_VAR(mem_read_op, 1)\n")
+        # Register condition for SWMEM_R access
+        fout.write("`IOB_REG_AR(clk, rst, 0, mem_read_op, (valid & (wstrb == 0) & (|mem_address) ) )\n")
+        # skip rdata_int2 delay for memory read accesses
+        fout.write("`IOB_VAR2WIRE((mem_read_op) ? rdata_int : rdata_int2, rdata)\n\n")
+    else:
+        fout.write("`IOB_VAR2WIRE(rdata_int2, rdata)\n\n")
 
     fout.write("always @* begin\n")
     fout.write("   case(address)\n")
