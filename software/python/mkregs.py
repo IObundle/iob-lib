@@ -52,7 +52,7 @@ def gen_mem_writes(table, fout):
                 mem_range_w = str(int(math.log(int(get_mem_range(table))>>2, 2)))
                 fout.write(f"`IOB_COMB {name}_addr_int = address[{addr_w}-1:0];\n")
                 fout.write(f"`IOB_COMB {name}_wdata_int = wdata[{width}-1:0];\n")
-                fout.write(f"`IOB_COMB {name}_wstrb_int = (valid & ( (address[ADDR_W-1:{mem_range_w}] << {mem_range_w}) == {addr})) ? wstrb : {{(DATA_W/8){{1'b0}}}};\n")
+                fout.write(f"`IOB_COMB {name}_wstrb_int = (valid & ( {{address[ADDR_W-1:{mem_range_w}], {{ {mem_range_w} {{1'b0}} }} }} == {addr})) ? wstrb : {{(DATA_W/8){{1'b0}}}};\n")
 
 def gen_mem_reads(table, fout):
     has_mem_reads = 0
@@ -66,13 +66,13 @@ def gen_mem_reads(table, fout):
                 addr = str(int(reg["addr"])>>2)
                 mem_range_w = str(int(math.log(int(get_mem_range(table))>>2, 2)))
                 fout.write(f"`IOB_COMB {name}_addr_int = address[{addr_w}-1:0];\n")
-                fout.write(f"`IOB_COMB {name}_ren_int = (valid & ( (address[ADDR_W-1:{mem_range_w}] << {mem_range_w}) == {addr}));\n")
+                fout.write(f"`IOB_COMB {name}_ren_int = (valid & ( {{address[ADDR_W-1:{mem_range_w}], {{ {mem_range_w} {{1'b0}} }} }} == {addr}));\n")
 
     # switch case for mem reads
     if has_mem_reads:
         fout.write(f"`IOB_VAR(mem_address, ADDR_W)\n")
         mem_range_w = str(int(math.log(int(get_mem_range(table))>>2, 2)))
-        fout.write(f"`IOB_COMB mem_address = address[ADDR_W-1:{mem_range_w}] << {mem_range_w};\n")
+        fout.write(f"`IOB_COMB mem_address =  {{address[ADDR_W-1:{mem_range_w}], {{ {mem_range_w} {{1'b0}} }} }};\n")
         fout.write(f"always @* begin\n")
         fout.write(f"\tcase(mem_address)\n")
         for reg in table:
