@@ -38,7 +38,7 @@
 `define IOB_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
 `define IOB_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; else OUT <= IN;
 `define IOB_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
-`define IOB_REG_ARR(CLK, ARST, ARST_VAL, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge ARST) if (ARST) OUT <= ARST_VAL; \
+`define IOB_REG_ARR(CLK, ARST, ARST_VAL, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge ARST) if (ARST) OUT <= ARST_VAL; \
         else if (RST) OUT <= RST_VAL; else OUT <= IN;
 `define IOB_REG_ARRE(CLK, ARST, ARST_VAL, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge ARST) if (ARST) OUT <= ARST_VAL; \
         else if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
@@ -90,6 +90,10 @@
    `IOB_REG_AR(CLK, RST, 1'b0, NAME, NAME+1'b1)
 `define IOB_COUNTER_ARE(CLK, RST, EN, NAME) \
    `IOB_REG_ARE(CLK, RST, 1'b0, EN, NAME, NAME+1'b1)
+`define IOB_COUNTER_ARR(CLK, ARST, RST, NAME) \
+   `IOB_REG_ARR(CLK, ARST, 1'b0, RST, 1'b0, NAME, NAME+1'b1)
+`define IOB_COUNTER_ARRE(CLK, ARST, RST, EN, NAME) \
+   `IOB_REG_ARRE(CLK, ARST, 1'b0, RST, 1'b0, EN, NAME, NAME+1'b1)
 
 //MODULO IOB_COUNTER
 `define IOB_MODCNT_R(CLK, RST, RST_VAL, NAME, MOD) \
