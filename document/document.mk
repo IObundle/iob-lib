@@ -34,7 +34,7 @@ $(DOC)top.tex: texfiles
 	if [ -f asic.tex ]; then echo "\def\ASIC{Y}" >> $(DOC)top.tex; fi
 	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
 	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
-	if [ -f swreg.tex ]; then echo "\def\SW{Y}" >> $@; fi
+	if [ -f swreg.tex ]; then echo "\def\SWREG{Y}" >> $@; fi
 	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $@; fi
 	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi
 	echo "\input{$(LIB_DOC_DIR)/$(DOC)/$(DOC).tex}" >> $(DOC)top.tex
