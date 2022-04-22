@@ -136,7 +136,7 @@ def param_parse (topv, param_defaults, defines):
     if macros != []:
         write_table("sm", macros)
 
-
+    return params
 
 '''
 Parse block diagram modules
@@ -165,14 +165,19 @@ def block_parse (block):
 
     write_description("bd", b_list)
 
-def io_parse (io_lines, defines):
+def io_parse (io_lines, params, defines):
 
     table_found = 0
     table_name = ''
     table = []
 
-    for line in io_lines:
+    #extract param names to list
+    param_names = []
+    for param_idx in range(len(params)):
+        param_names.append(params[param_idx][0].replace('\\',''))
 
+    #parse each interface signal 
+    for line in io_lines:
         #find table start
         if '//START_IO_TABLE' in line:
             if table_found == 1:
@@ -198,7 +203,8 @@ def io_parse (io_lines, defines):
         #may be defined using macros: replace and evaluate
         eval_str = io_flds_tmp[3].replace('`','').replace(',','')
         for key, val in defines.items():
-            eval_str = eval_str.replace(str(key),str(val))
+            if key not in param_names:
+                eval_str = eval_str.replace(str(key),str(val))
         try:
             io_flds.append(eval(eval_str))
         except:
@@ -323,7 +329,6 @@ def main () :
     #get the DEFINE environment variable
     param_defaults = {}
     DEFINE = os.getenv('DEFINE')
-    print(DEFINE)
     if DEFINE is not None:
         DEFINE = DEFINE.split()
         #store param defaults in dictionary
@@ -331,13 +336,13 @@ def main () :
             MACRO=DEFINE[i].split('=')
             param_defaults[MACRO[0]]=eval(MACRO[1])
 
-    param_parse (topv_lines, param_defaults, defines)
+    params = param_parse (topv_lines, param_defaults, defines)
 
     #PARSE BLOCK DIAGRAM MODULES
     block_parse([*topv_lines, *v])
 
     #PARSE INTERFACE SIGNALS
-    io_parse ([*topv_lines, *vh], defines)
+    io_parse ([*topv_lines, *vh], params, defines)
 
     #PARSE SOFTWARE ACCESSIBLE REGISTERS
     swreg_parse (vh, defines)
