@@ -22,8 +22,6 @@ endif
 	pdflatex -jobname $(DOC) $(DOC)top.tex
 	pdflatex -jobname $(DOC) $(DOC)top.tex
 
-.PHONY: view texfiles figures fpga_res asic_res clean
-
 view: $(DOC).pdf
 	evince $< &
 
@@ -40,7 +38,7 @@ $(DOC)top.tex: texfiles
 	echo "\input{$(LIB_DOC_DIR)/$(DOC)/$(DOC).tex}" >> $(DOC)top.tex
 
 #tex files extracted from code comments
-texfiles: $(MACRO_LIST)
+texfiles: $(MACRO_LIST) benefits.tex deliverables.tex
 ifneq ($(TOP_MODULE),)
 	$(LIB_SW_PYTHON_DIR)/verilog2tex.py $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC)
 endif
@@ -67,6 +65,12 @@ endif
 ASICLOG = $(CORE_DIR)/hardware/asic/$(ASIC_NODE)/rc.log
 ASICRPT = $(CORE_DIR)/hardware/asic/$(ASIC_NODE)/*.rpt
 
+benefits.tex:
+	if [ -f ../benefits.tex ]; then cp ../$@ .; else cp $(LIB_DOC_DIR)/$@ .; fi
+
+deliverables.tex:
+	if [ -f ../benefits.tex ]; then cp ../$@ .; else cp $(LIB_DOC_DIR)/$@ .; fi
+
 vivado.tex: $(VIVADOLOG)
 	cp $(VIVADOLOG) .; LOG=$< $(LIB_SW_DIR)/vivado2tex.sh
 
@@ -90,3 +94,6 @@ clean:
 	@find . -type f -not \( $(NOCLEAN) \) -delete
 	@rm -rf figures $(DOC)top.tex
 	@rm -rf $(LIB_SW_PYTHON_DIR)/__pycache__/ $(LIB_SW_PYTHON_DIR)/*.pyc
+
+.PHONY: view texfiles figures fpga_res asic_res clean benefits.tex deliverables.tex
+
