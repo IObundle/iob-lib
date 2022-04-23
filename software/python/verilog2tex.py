@@ -201,7 +201,7 @@ def io_parse (io_lines, params, defines):
 
         #WIDTH
         #may be defined using macros: replace and evaluate
-        eval_str = io_flds_tmp[3].replace('`','').replace(',','')
+        eval_str = io_flds_tmp[3].replace('`','').replace(',','').replace('(','')
         for key, val in defines.items():
             if key not in param_names:
                 eval_str = eval_str.replace(str(key),str(val))
