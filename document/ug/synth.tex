@@ -1,16 +1,4 @@
-\subsection{Synthesis Macros and Parameters}
-\label{sec:smp}
-
-\ifdefined\SMP
-The synthesis macros and parameters of the core are presented in this section.
-For each macro or parameter, the minimum, default and maximum values are
-provided. The minimum and maximum values may be marked with
-
-\begin{description}
-\item{Not Applicable(NA)}:  the macro or parameter value cannot be set by the user; its value is set automatically by the system.
-\item{Not Specified (NS)}:  the minimum or maximum value for the macro or parameter has not been determined; if needed, values other than the default should be determined and tested by the user. 
-\end{description}
-
+\subsection{Synthesis Macros}
 
 \ifdefined\SM
 
@@ -30,8 +18,18 @@ Table~\ref{tab:sm}.
   \caption{Synthesis Macros.}
   \label{tab:sm}
 \end{table}
+
+\noindent
+\small{{\bf Note}: NS (Not Specified) means that the minimum or maximum value
+  for the macro has not been determined; if needed, values other than the
+  defaults should be determined and tested by the user.}
+
+\else
+The IP core has no user-definable macros other than the default synthesis parameters values.
 \fi
 
+
+\subsection{Synthesis Parameters}
 
 \ifdefined\SP
 
@@ -48,10 +46,20 @@ Table~\ref{tab:sp}. Generic parameters can vary from instance to instance.
     \input{sp_tab}
 
     \end{tabularx}
-  \caption{Synthesis Parameters.}
+    
+\caption{Synthesis Parameters.}
   \label{tab:sp}
 \end{table}
-\fi
+
+\noindent
+\small{{\bf Note}: NS (Not Specified) means that the minimum or maximum value
+  for the parameter has not been determined; if needed, values other than the
+  defaults should be determined and tested by the user.}
+
+\else
+
+This IP core has no synthesis parameters.
+
 \fi
 
 
