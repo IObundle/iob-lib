@@ -218,7 +218,7 @@ def get_defines():
 
     if(len(sys.argv) > 4):
         i = 4
-        while i<len(sys.argv) and sys.argv[i].find('.vh'):
+        while i<len(sys.argv) and -1<sys.argv[i].find('.vh'):
             fvh =  open (sys.argv[i], 'r')
             vh = [*vh, *fvh.readlines()]
             fvh.close()
