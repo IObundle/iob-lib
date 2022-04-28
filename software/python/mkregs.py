@@ -166,10 +166,12 @@ def get_core_addr_w(table):
             else:
                 max_addr_from_mem = 0
 
+
     if max_addr_from_mem:
         max_addr = max_addr + int(get_mem_range(table)) 
 
-    hw_max_addr = max_addr >> 2
+    hw_max_addr = (max_addr >> 2) + 1
+
     addr_w = int(math.ceil(math.log(hw_max_addr, 2)))
     return addr_w
 
