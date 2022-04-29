@@ -86,7 +86,7 @@ def param_parse (topv, param_defaults, defines):
 
         #MINIMUM VALUE
         #may be defined using macros: replace and evaluate
-        eval_str = p_flds_tmp[4].replace('`','').replace(',','').replace("?","")
+        eval_str = p_flds_tmp[4].replace('`','').replace(',','')
 
         for key, val in param_defaults.items():
             eval_str = eval_str.replace(str(key),str(val))
@@ -110,8 +110,7 @@ def param_parse (topv, param_defaults, defines):
 
         #MAXIMUM VALUE
         #may be defined using macros: replace and evaluate
-        eval_str = p_flds_tmp[5].replace('`','').replace(',','').replace("?","")
-
+        eval_str = p_flds_tmp[5].replace('`','').replace(',','')
         for key, val in param_defaults.items():
             eval_str = eval_str.replace(str(key),str(val))
         try:
