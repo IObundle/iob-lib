@@ -1,0 +1,55 @@
+\subsubsection{Macros}
+
+\ifdefined\SM
+
+The configuration macros apply to all instances of the core, and are listed in
+Table~\ref{tab:sm}.
+
+\begin{table}[h]
+  \centering
+    \begin{tabularx}{\textwidth}{ | c | c | c | c | X | }
+    \hline
+    \rowcolor{iob-green}
+    {\bf Parameter} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description} \\\hline
+
+    \input{sm_tab}
+
+    \end{tabularx}
+  \caption{Synthesis Macros.}
+  \label{tab:sm}
+\end{table}
+
+\noindent
+
+\else
+The IP core has no user-definable macros other than the default configuration parameter values, described in Section~\ref{sec:cp} if available.
+\fi
+
+
+\subsubsection{Parameters}
+\label{sec:cp}
+\ifdefined\SP
+
+The generic synthesis parameters of the core are presented in
+Table~\ref{tab:sp}. Generic parameters can vary from instance to instance.
+
+\begin{table}[h]
+  \centering
+    \begin{tabularx}{\textwidth}{ | c | c | c | c | X | }
+    \hline
+    \rowcolor{iob-green}
+    {\bf Parameter} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description} \\\hline
+
+    \input{sp_tab}
+
+    \end{tabularx}
+    
+\caption{Synthesis Parameters.}
+  \label{tab:sp}
+\end{table}
+
+\else
+
+This IP core has no synthesis parameters.
+
+\fi

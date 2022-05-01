@@ -36,54 +36,55 @@
 \section{Introduction}
 \label{sec:intro}
 \input{../intro}
-
-\section{Symbol}
-\label{sec:symb}
 \input{\TEX/ug/symb}
 
-\section{Features}
+\subsection{Features}
 \label{sec:feat}
 \input{../features}
 
-\section{Benefits}
+\subsection{Benefits}
 \label{sec:benef}
 \input{benefits}
 
-\section{Deliverables}
+\subsection{Deliverables}
 \label{sec:deliv}
 \input{deliverables}
 
-\section{Block Diagram and Description}
+\section{Description}
+\subsection{Block Diagram}
 \label{sec:bdd}
 \input{\TEX/ug/bdd}
 
-\section{Interface Signals}
+\subsection{Configuration}
+\label{sec:ipconfig}
+\input{\TEX/ug/config}
+
+\subsection{Interface Signals}
 \label{sec:ifsig}
-\input{./if}
 
 %timing diagrams
 \ifdefined\TD
-\section{Timing Diagrams}
+\subsection{Timing Diagrams}
 \label{sec:td}
 \input{./td}
 \fi
 
 %software components
 \ifdefined\SWREG
-\section{Software Accessible Registers}
+\subsection{Software Accessible Registers}
 \label{sec:swreg}
 \input{\TEX/ug/sw}
 \fi
 
-\section{Instantiation and External Circuitry}
+\section{Usage}
 \label{sec:inst}
 \input{\TEX/ug/inst}
 
-\section{Simulation}
+\subsection{Simulation}
 \label{sec:tbbd}
 \input{\TEX/ug/sim}
 
-\section{Synthesis}
+\subsection{Synthesis}
 \label{sec:synth}
 \input{\TEX/ug/synth}
 

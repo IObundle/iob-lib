@@ -27,15 +27,16 @@ view: $(DOC).pdf
 
 $(DOC)top.tex: texfiles
 	echo "\def\TEX{$(LIB_DOC_DIR)}" > $(DOC)top.tex
+	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
+	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
+	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi
+	if [ -f swreg.tex ]; then echo "\def\SWREG{Y}" >> $@; fi
+	if [ -f vivado.tex -o -f quartus.tex ]; then echo "\def\FPGA{Y}" >> $(DOC)top.tex; fi
 	if [ -f vivado.tex ]; then echo "\def\XILINX{Y}" >> $(DOC)top.tex; fi
 	if [ -f quartus.tex ]; then echo "\def\INTEL{Y}" >> $(DOC)top.tex; fi
 	if [ -f asic.tex ]; then echo "\def\ASIC{Y}" >> $(DOC)top.tex; fi
-	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
-	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
-	if [ -f swreg.tex ]; then echo "\def\SWREG{Y}" >> $@; fi
 	$(if $(RESULTS), @echo "\def\RESULTS{Y}" >> $@,)
 	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $@; fi
-	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi
 	echo "\input{$(LIB_DOC_DIR)/$(DOC)/$(DOC).tex}" >> $(DOC)top.tex
 
 #tex files extracted from code comments
