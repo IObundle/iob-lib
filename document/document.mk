@@ -13,6 +13,7 @@ ifeq ($(DOC),pb)
 	make -C ./figures pb_figs
 endif
 ifeq ($(DOC),ug)
+	if [ ! -f ./config.tex ]; then cp $(LIB_DOC_DIR)/$(DOC)/config.tex .; fi
 	make -C ./figures ug_figs
 	echo $(VERSION) > version.tex
 	git rev-parse --short HEAD > shortHash.tex
@@ -25,7 +26,7 @@ endif
 view: $(DOC).pdf
 	evince $< &
 
-$(DOC)top.tex: texfiles
+$(DOC)top.tex: texfiles 
 	echo "\def\TEX{$(LIB_DOC_DIR)}" > $(DOC)top.tex
 	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
 	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
