@@ -72,7 +72,7 @@ benefits.tex:
 	if [ -f ../benefits.tex ]; then cp ../$@ .; else cp $(LIB_DOC_DIR)/$@ .; fi
 
 deliverables.tex:
-	if [ -f ../benefits.tex ]; then cp ../$@ .; else cp $(LIB_DOC_DIR)/$@ .; fi
+	if [ -f ../deliverables.tex ]; then cp ../$@ .; else cp $(LIB_DOC_DIR)/$@ .; fi
 
 vivado.tex: $(VIVADOLOG)
 	cp $(VIVADOLOG) .; LOG=$< $(LIB_SW_DIR)/vivado2tex.sh
