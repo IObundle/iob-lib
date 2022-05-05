@@ -21,7 +21,7 @@ module iob_sipo_reg_are
 
    reg [DATA_W-1:0]  data_reg;
    
-   always @(posedge clk, posedge rst)
+   always @(negedge clk, posedge rst)
      if(rst)
        data_reg <= 1'b0;
      else if (en)

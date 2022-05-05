@@ -13,6 +13,8 @@ module iob_modcnt
     input                   rst,
     input                   en,
 
+    input [DATA_W-1:0]      load_val,
+
     //masters interface
     input [DATA_W-1:0]      mod,
 
@@ -20,15 +22,22 @@ module iob_modcnt
     output reg [DATA_W-1:0] cnt
     );
 
-   always @(posedge clk, posedge arst)
-     if(arst)
-       cnt <= mod-1'b1;
-     else if (rst)
-       cnt <= mod-1'b1;
-     else if (en)
-       if(cnt == (mod-1'b1))
-         cnt <= 1'b0;
-       else 
+   reg                      loaded;
+   
+   always @(posedge clk, posedge arst) 
+      if(arst) begin
+         cnt <= -1'b1;
+         loaded <= 1'b0;
+      end else if (rst) begin 
+         cnt <= -1'b1;
+         loaded <= 1'b0;
+      end else if (en)
+        if (!loaded) begin
+          cnt <= load_val;
+          loaded <= 1'b1;
+        end else if (cnt == (mod-1'b1))
+          cnt <= 1'b0;
+        else
          cnt <= cnt + 1'b1;
-
+   
 endmodule
