@@ -9,6 +9,7 @@ module iob_modcnt
    (
 
     input                   clk,
+    input                   arst,
     input                   rst,
     input                   en,
 
@@ -19,8 +20,10 @@ module iob_modcnt
     output reg [DATA_W-1:0] cnt
     );
 
-   always @(posedge clk, posedge rst)
-     if(rst)
+   always @(posedge clk, posedge arst)
+     if(arst)
+       cnt <= mod-1'b1;
+     else if (rst)
        cnt <= mod-1'b1;
      else if (en)
        if(cnt == (mod-1'b1))
