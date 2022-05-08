@@ -1,7 +1,7 @@
 `ifndef LIBINC
 `define LIBINC
 
-// COMMON UTILS
+//COMMON UTILS
 `define IOB_MAX(a,b) {((a) > (b)) ? (a) : (b)}
 `define IOB_MIN(a,b) {((a) < (b)) ? (a) : (b)}
 `define IOB_ABS(a, w) {a[w-1]? (-a): (a)}
@@ -13,7 +13,7 @@
 `define IOB_OUTPUT_VAR(NAME, WIDTH) output reg [WIDTH-1:0] NAME
 `define IOB_INOUT(NAME, WIDTH) inout [WIDTH-1:0] NAME
 
-//IOB_WIRES AND IOB_VARIABLES
+//WIRES AND VARIABLES
 `define IOB_WIRE(NAME, WIDTH) wire [WIDTH-1:0] NAME;
 `define IOB_WIRE_INIT(NAME, WIDTH, INIT) wire [WIDTH-1:0] NAME = INIT;
 `define IOB_WIRE_SIGNED(NAME, WIDTH) wire signed [WIDTH-1:0] NAME;
@@ -23,7 +23,6 @@
 `define IOB_WIRE2WIRE(IN, OUT) assign OUT = IN;//assign IOB_WIRE to IOB_WIRE
 `define IOB_VAR2WIRE(IN, OUT) assign OUT = IN;//convert IOB_VAR to IOB_WIRE
 `define IOB_WIRE2VAR(IN, OUT) `IOB_COMB OUT = IN;//convert IOB_WIRE to IOB_VAR
-
 //2d arrays
 `define IOB_WIREARRAY_2D(NAME, LEN, WIDTH) wire [WIDTH-1:0] NAME [LEN-1:0];
 `define IOB_WIREARRAY_2D_SIGNED(NAME, LEN, WIDTH) wire signed [WIDTH-1:0] NAME [LEN-1:0];
@@ -43,31 +42,12 @@
 `define IOB_REG_ARRE(CLK, ARST, ARST_VAL, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge ARST) if (ARST) OUT <= ARST_VAL; \
         else if (RST) OUT <= RST_VAL; else if (EN) OUT <= IN;
 
-//SERIAL IN PARALLEL OUT SHIFT LEFT IOB_REGISTER
-`define IOB_SIPO_REG(CLK, OUT, IN) always @(posedge CLK) OUT <= (OUT << 1) | IN;
-`define IOB_SIPO_REG_E(CLK, EN, OUT, IN) always @(posedge CLK) if (EN) OUT <= (OUT << 1) | IN;
-`define IOB_SIPO_REG_R(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else OUT <= (OUT << 1) | IN;
-`define IOB_SIPO_REG_RE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK) if (RST) OUT <= RST_VAL; else if(EN) OUT <= (OUT << 1) | IN;
-`define IOB_SIPO_REG_AR(CLK, RST, RST_VAL, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
-   else OUT <= (OUT << 1) | IN;
-`define IOB_SIPO_REG_ARE(CLK, RST, RST_VAL, EN, OUT, IN) always @(posedge CLK, posedge RST) if (RST) OUT <= RST_VAL; \
-   else if(EN) OUT <= (OUT << 1) | IN;
-
-//PARALLEL IN AND SERIAL OUT SHIFT LEFT IOB_REG
-`define IOB_PISO_REG(CLK, LD, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else OUT <= (OUT << 1);
-`define IOB_PISO_REG_E(CLK, LD, EN, OUT, IN) always @(posedge CLK) if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1);
-`define IOB_PISO_REG_R(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT << 1);
-`define IOB_PISO_REG_RE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1);
-`define IOB_PISO_REG_AR(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else OUT <= (OUT << 1);
-`define IOB_PISO_REG_ARE(CLK, RST, RST_VAL, LD, EN, OUT, IN) always @(posedge CLK, posedge RST) if(RST) OUT <= RST_VAL; else if(LD) OUT <= IN; else if (EN) OUT <= (OUT << 1);
-//shift right
-
 //IOB_REVERSER -- NOT TESTED
 `define IOB_REVERSE(A, B, W) \
    reg [W-1:0] B;\
    always @* begin\
       integer rev_i;\
-      for(ref_i = 0; rev_i < W; rev_i = rev_i + 1)\
+      for(rev_i = 0; rev_i < W; rev_i = rev_i + 1)\
         B[i] = A[W-1-i];\
    end
    
@@ -106,18 +86,24 @@
    `IOB_REG_ARE(CLK, RST, RST_VAL, EN, NAME, (NAME==(MOD-1)? 1'b0: NAME+1'b1))
 
 //SOFTWARE IOB_ACCESSIBLE IOB_REGISTER
-`define IOB_SWREG_R(NAME, WIDTH, RST_VAL) wire [WIDTH-1:0] NAME; //RST_VAL is used in mkregs.py
-`define IOB_SWREG_W(NAME, WIDTH, RST_VAL) reg [WIDTH-1:0] NAME; //RST_VAL is used in mkregs.py
+`define IOB_SWREG_R(NAME, WIDTH, RST_VAL)
+   // sw can read NAME at address NAME_ADDR
+   // hw can assign wire NAME
+`define IOB_SWREG_W(NAME, WIDTH, RST_VAL)
+   // sw can write NAME at address NAME_ADDR
+   // hw can use signal NAME
+`define IOB_SWREGF_R(NAME, WIDTH, ADDR_W)
+`define IOB_SWREGF_W(NAME, WIDTH, ADDR_W)
 `define IOB_SWMEM_W(NAME, WIDTH, ADDR_W) 
-    // Triggers generation of:
-    // wire [ADDR_W-1:0] NAME_addr_int;
-    // wire [WIDTH-1:0] NAME_wdata_int;
-    // wire [WIDTH/8-1:0] NAME_wstrb_int;
+   // Triggers generation of:
+   // wire [ADDR_W-1:0] NAME_addr_int;
+   // wire [WIDTH-1:0] NAME_wdata_int;
+   // wire [WIDTH/8-1:0] NAME_wstrb_int;
 `define IOB_SWMEM_R(NAME, WIDTH, ADDR_W)
-    // Triggers generation of:
-    // wire [ADDR_W-1:0] NAME_addr_int;
-    // wire [WIDTH-1:0] NAME_rdata_int;
-    // wire NAME_ren_int;
+   // Triggers generation of:
+   // wire [ADDR_W-1:0] NAME_addr_int;
+   // wire [WIDTH-1:0] NAME_rdata_int;
+   // wire NAME_ren_int;
 
 
 //IOB_COMBINATORIAL CIRCUIT
@@ -186,7 +172,10 @@
      else if (IN)\
        OUT <= 1'b1;
 
-
+//IOB_DIFFERENTIATOR
+`define IOB_DIFF(CLK, RST, EN, D, X, X_IOB_REG) \
+   `IOB_REG_ARE(CLK, RST, 1'b0, EN, X_IOB_REG, X) \
+   `IOB_COMB D = X - X_IOB_REG;
 
 //
 // COMMON TESTBENCH UTILS
@@ -201,11 +190,6 @@
 initial begin #RISE_TIME RST=1; #DURATION RST=0; end
 
 
-//IOB_DIFFERENTIATOR
-`define IOB_DIFF(CLK, RST, EN, D, X, X_IOB_REG) \
-   `IOB_REG_ARE(CLK, RST, 1'b0, EN, X_IOB_REG, X) \
-   `IOB_COMB D = X - X_IOB_REG;
-   
 `endif //  `ifndef LIBINC
            
    

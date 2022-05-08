@@ -31,13 +31,13 @@ module iob_modcnt
       end else if (rst) begin 
          cnt <= -1'b1;
          loaded <= 1'b0;
-      end else if (en)
-        if (!loaded) begin
+      end else if (!loaded) begin
           cnt <= load_val;
           loaded <= 1'b1;
-        end else if (cnt == (mod-1'b1))
+      end else if (en)
+        if (cnt == (mod-1'b1))
           cnt <= 1'b0;
         else
-         cnt <= cnt + 1'b1;
+          cnt <= cnt + 1'b1;
    
 endmodule
