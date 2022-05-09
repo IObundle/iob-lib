@@ -17,6 +17,27 @@ def print_usage():
     print(" [vh_files]: (SW only) paths to .vh files used to extract macro values")
 
 
+    #TODO: move to mkregs.py   
+#SOFTWARE IOB_ACCESSIBLE IOB_REGISTER
+#IOB_SWREG_R(NAME, WIDTH, RST_VAL)
+   # sw can read NAME at address NAME_ADDR
+   # hw can assign wire NAME
+# IOB_SWREG_W(NAME, WIDTH, RST_VAL)
+   # sw can write NAME at address NAME_ADDR
+   # hw can use signal NAME
+# IOB_SWMEM_W(NAME, WIDTH, ADDR_W)
+   #TODO: comments should show what hw and sw do 
+   # Triggers generation of:
+   # wire [ADDR_W-1:0] NAME_addr_int;
+   # wire [WIDTH-1:0] NAME_wdata_int;
+   # wire [WIDTH/8-1:0] NAME_wstrb_int;
+# IOB_SWMEM_R(NAME, WIDTH, ADDR_W)
+   # Triggers generation of:
+   # wire [ADDR_W-1:0] NAME_addr_int;
+   # wire [WIDTH-1:0] NAME_rdata_int;
+   # wire NAME_ren_int;
+
+
 def has_mem_type(table, mem_type_list=["W","R"]):
     for reg in table:
         if reg["reg_type"] == "MEM":
@@ -40,14 +61,13 @@ def gen_mem_wires(table, fout):
                 fout.write(f"`IOB_VAR({name}_ren_int, 1)\n")
     fout.write(f"\n")
 
-# Obtain Address range between memories (if addresses are already calculated)
-def get_mem_range(table):
+def get_addr_block(table):
     for reg in table:
         if reg["reg_type"] == "MEM":
             return reg["addr"]
     return 0
 
-def gen_mem_writes(table, fout):
+def gen_mem_write_hw(table, fout):
     fout.write(f"\n//mem write logic\n")
     for reg in table:
         if reg["reg_type"] == "MEM":
@@ -56,12 +76,12 @@ def gen_mem_writes(table, fout):
                 addr_w = reg["addr_w"]
                 width = reg["width"]
                 addr = str(int(reg["addr"])>>2)
-                mem_range_w = str(int(math.log(int(get_mem_range(table))>>2, 2)))
+                addr_block_w = str(int(math.log(int(get_addr_block(table))>>2, 2)))
                 fout.write(f"`IOB_COMB {name}_addr_int = address[{addr_w}-1:0];\n")
                 fout.write(f"`IOB_COMB {name}_wdata_int = wdata[{width}-1:0];\n")
-                fout.write(f"`IOB_COMB {name}_wstrb_int = (valid & ( {{address[ADDR_W-1:{mem_range_w}], {{ {mem_range_w} {{1'b0}} }} }} == {addr})) ? wstrb : {{(DATA_W/8){{1'b0}}}};\n")
+                fout.write(f"`IOB_COMB {name}_wstrb_int = (valid & ( {{address[ADDR_W-1:{addr_block_w}], {{ {addr_block_w} {{1'b0}} }} }} == {addr})) ? wstrb : {{(DATA_W/8){{1'b0}}}};\n")
 
-def gen_mem_reads(table, fout):
+def gen_mem_read_hw(table, fout):
     has_mem_reads = 0
     fout.write(f"\n//mem read logic\n")
     for reg in table:
@@ -71,16 +91,16 @@ def gen_mem_reads(table, fout):
                 name = reg["name"]
                 addr_w = reg["addr_w"]
                 addr = str(int(reg["addr"])>>2)
-                mem_range_w = str(int(math.log(int(get_mem_range(table))>>2, 2)))
+                addr_block_w = str(int(math.log(int(get_addr_block(table))>>2, 2)))
                 fout.write(f"`IOB_COMB {name}_addr_int = address[{addr_w}-1:0];\n")
-                fout.write(f"`IOB_COMB {name}_ren_int = (valid & ( {{address[ADDR_W-1:{mem_range_w}], {{ {mem_range_w} {{1'b0}} }} }} == {addr}));\n")
+                fout.write(f"`IOB_COMB {name}_ren_int = (valid & ( {{address[ADDR_W-1:{addr_block_w}], {{ {addr_block_w} {{1'b0}} }} }} == {addr}));\n")
 
     # switch case for mem reads
     if has_mem_reads:
         fout.write(f"`IOB_VAR(mem_address, ADDR_W)\n")
-        mem_range_w = str(int(math.log(int(get_mem_range(table))>>2, 2)))
+        addr_block_w = str(int(math.log(int(get_addr_block(table))>>2, 2)))
         # Delay SWMEM_R address 1 cycle to wait for rdata
-        fout.write(f"`IOB_REG_AR(clk, rst, 0, mem_address, {{address[ADDR_W-1:{mem_range_w}], {{ {mem_range_w} {{1'b0}} }} }})\n")
+        fout.write(f"`IOB_REG_AR(clk, rst, 0, mem_address, {{address[ADDR_W-1:{addr_block_w}], {{ {addr_block_w} {{1'b0}} }} }})\n")
         fout.write(f"always @* begin\n")
         fout.write(f"\tcase(mem_address)\n")
         for reg in table:
@@ -119,14 +139,16 @@ def write_hw(table, regfile_name):
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
     fout.write("`IOB_VAR(rdata_int2, DATA_W)\n")
     fout.write("`IOB_REG_ARE(clk, rst, 0, valid, rdata_int2, rdata_int)\n")
+
+    #if read memory present then add mem_rdata_int
     if has_mem_type(table, ["R"]):
         fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
-        fout.write("`IOB_VAR(mem_read_op, 1)\n")
+        fout.write("`IOB_VAR(mem_read_sel, 1)\n")
         # Register condition for SWMEM_R access
-        mem_range_w = str(int(math.log(int(get_mem_range(table))>>2, 2)))
-        fout.write(f"`IOB_REG_AR(clk, rst, 0, mem_read_op, (valid & (wstrb == 0) & (|address[ADDR_W-1:{mem_range_w}]) ) )\n")
+        addr_block_w = str(int(math.log(int(get_addr_block(table))>>2, 2)))
+        fout.write(f"`IOB_REG_AR(clk, rst, 0, mem_read_sel, (valid & (wstrb == 0) & (|address[ADDR_W-1:{addr_block_w}]) ) )\n")
         # skip rdata_int2 delay for memory read accesses
-        fout.write("`IOB_VAR2WIRE((mem_read_op) ? mem_rdata_int : rdata_int2, rdata)\n\n")
+        fout.write("`IOB_VAR2WIRE((mem_read_sel) ? mem_rdata_int : rdata_int2, rdata)\n\n")
     else:
         fout.write("`IOB_VAR2WIRE(rdata_int2, rdata)\n\n")
 
@@ -134,18 +156,12 @@ def write_hw(table, regfile_name):
     fout.write("   case(address)\n")
 
     for row in table:
-        #TODO: why repeat the code below?
         if row["reg_type"] == "REG":
-            name = row["name"]
-            typ = row["rw_type"]
-            address = row["addr"]
-            width = row["width"]
-            default_val = row["default_value"]
-
-            if (typ == 'R'):
-                fout.write("     " + str(int(address)>>2) + ": rdata_int = " + name + ";\n")
+            if (row["rw_type"] == 'R'):
+                fout.write("     " + str(int(row["addr"])>>2) + ": rdata_int = " + row["name"] + ";\n")
             else:
                 continue
+        #TODO: the above code was rewritten to use dict: to the same wherever
 
     fout.write("     default: rdata_int = 1'b0;\n")
     fout.write("   endcase\n")
@@ -156,11 +172,11 @@ def write_hw(table, regfile_name):
     fout.write("`IOB_REG_AR(clk, rst, 0, ready_int, valid)\n")
     fout.write("`IOB_VAR2WIRE(ready_int, ready)\n")
 
-    #Memory section
+    #memory section
     if has_mem_type(table):
         gen_mem_wires(table, fout)
-        gen_mem_writes(table, fout)
-        gen_mem_reads(table, fout)
+        gen_mem_write_hw(table, fout)
+        gen_mem_read_hw(table, fout)
 
     fout.close()
 
@@ -177,7 +193,7 @@ def get_core_addr_w(table):
 
 
     if max_addr_from_mem:
-        max_addr = max_addr + int(get_mem_range(table)) 
+        max_addr = max_addr + int(get_addr_block(table)) 
 
     hw_max_addr = (max_addr >> 2) + 1
 
@@ -195,7 +211,8 @@ def write_hwheader(table, regfile_name):
 
     fout.write("//address macros\n")
     fout.write("//SWREGs\n")
-    #TODO: contents of if repeats and should be in a function
+
+    #TODO: if contents repeats and should be in a function
     for row in table:
         if row["reg_type"] == "REG":
             name = row["name"]
@@ -208,7 +225,7 @@ def write_hwheader(table, regfile_name):
             address = row["addr"]
             fout.write("`define " + name + "_ADDR " + str(int(address)>>2) + "\n")
 
-    fout.write("\n//registers/mems width\n")
+    fout.write("\n//register/mem data width\n")
     for row in table:
         name = row["name"]
         width = row["width"]
@@ -411,27 +428,29 @@ def swreg_parse_mem(swreg_flds, parsed_line):
 def calc_swreg_addr(table):
     reg_addr = 0
 
-    # REGs have initial addresses
+    #REG addresses come first
     for reg in table:
         if reg["reg_type"] == "REG":
             reg["addr"] = str(reg_addr)
             reg_addr = reg_addr + 4
 
-    mem_range = reg_addr
-    # Obtain largest MEM range (or reg range)
+    #register addresses and each memorie is contained in an address block
+    addr_block = reg_addr
+    
     for reg in table:
         if reg["reg_type"] == "MEM":
             # Note x4 factor to use software addresses
-            mem_range_tmp = 2**(int(reg["addr_w"]))*4
-            if mem_range_tmp > mem_range:
-                mem_range = mem_range_tmp
+            addr_block_tmp = 2**(int(reg["addr_w"]))*4
+            if addr_block_tmp > addr_block:
+                addr_block = addr_block_tmp
 
-    reg_addr = mem_range
+    mem_addr = addr_block
+
     # Assign MEM addresses
     for reg in table:
         if reg["reg_type"] == "MEM":
-            reg["addr"] = str(reg_addr)
-            reg_addr = reg_addr + mem_range
+            reg["addr"] = str(mem_addr)
+            mem_addr = mem_addr + addr_block
 
     return table
 
@@ -442,6 +461,8 @@ def swreg_parse (code, hwsw, regfile_name, core_prefix):
     for line in code:
 
         swreg_flds = {}
+
+        #TODO: parse at ONCE
         swreg_flds_tmp = parse('{}`IOB_SW{}_{}({},{},{}){}//{}', line)
 
         if swreg_flds_tmp is None:
@@ -469,14 +490,12 @@ def swreg_parse (code, hwsw, regfile_name, core_prefix):
         # REG_TYPE specific fields
         if swreg_flds["reg_type"] == "REG":
             swreg_flds = swreg_parse_reg(swreg_flds, swreg_flds_tmp)
-        elif swreg_flds["reg_type"] == "REGF":
-            swreg_flds = swreg_parse_mem(swreg_flds, swreg_flds_tmp)
         elif swreg_flds["reg_type"] == "MEM":
             swreg_flds = swreg_parse_mem(swreg_flds, swreg_flds_tmp)
 
         table.append(swreg_flds)
 
-    # Calculate Address field
+    #calculate address field
     table = calc_swreg_addr(table)
 
 

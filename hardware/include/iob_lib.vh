@@ -5,6 +5,9 @@
 `define IOB_MAX(a,b) {((a) > (b)) ? (a) : (b)}
 `define IOB_MIN(a,b) {((a) < (b)) ? (a) : (b)}
 `define IOB_ABS(a, w) {a[w-1]? (-a): (a)}
+`define IOB_MUX2(SEL, OUT, IN1, IN2) assign OUT = SET==1'b0? IN1 : IN2;
+`define IOB_COMB always @*
+`define IOB_MUX(SEL, OUT, IN) `IOB_COMB OUT = IN[SEL];
 
 //IO
 `define IOB_INPUT(NAME, WIDTH) input [WIDTH-1:0] NAME
@@ -84,34 +87,6 @@
    `IOB_REG_AR(CLK, RST, RST_VAL, NAME, (NAME==(MOD-1)? 1'b0: NAME+1'b1))
 `define IOB_MODCNT_ARE(CLK, RST, RST_VAL, EN, NAME, MOD) \
    `IOB_REG_ARE(CLK, RST, RST_VAL, EN, NAME, (NAME==(MOD-1)? 1'b0: NAME+1'b1))
-
-//SOFTWARE IOB_ACCESSIBLE IOB_REGISTER
-`define IOB_SWREG_R(NAME, WIDTH, RST_VAL)
-   // sw can read NAME at address NAME_ADDR
-   // hw can assign wire NAME
-`define IOB_SWREG_W(NAME, WIDTH, RST_VAL)
-   // sw can write NAME at address NAME_ADDR
-   // hw can use signal NAME
-`define IOB_SWREGF_R(NAME, WIDTH, ADDR_W)
-`define IOB_SWREGF_W(NAME, WIDTH, ADDR_W)
-`define IOB_SWMEM_W(NAME, WIDTH, ADDR_W) 
-   // Triggers generation of:
-   // wire [ADDR_W-1:0] NAME_addr_int;
-   // wire [WIDTH-1:0] NAME_wdata_int;
-   // wire [WIDTH/8-1:0] NAME_wstrb_int;
-`define IOB_SWMEM_R(NAME, WIDTH, ADDR_W)
-   // Triggers generation of:
-   // wire [ADDR_W-1:0] NAME_addr_int;
-   // wire [WIDTH-1:0] NAME_rdata_int;
-   // wire NAME_ren_int;
-
-
-//IOB_COMBINATORIAL CIRCUIT
-`define IOB_COMB always @*
-
-
-//IOB_MUX
-`define IOB_MUX(SEL, OUT, IN) `IOB_COMB OUT = IN[SEL];
 
 
    // IOB_SYNCRONIZERS
