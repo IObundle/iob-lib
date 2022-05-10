@@ -239,10 +239,10 @@ def swreg_parse (vh, defines) :
             continue
 
         swreg_flds = []
-        swreg_flds_tmp = parse('{}`IOB_SWREG_{}({},{},{}){}//{}', line)
+        swreg_flds_tmp = parse('{}IOB_SWREG_{}({},{},{}){}//{}', line)
 
         if swreg_flds_tmp is None:
-            swreg_flds_tmp = parse('`IOB_SWREG_{}({},{},{}){}//{}', line)
+            swreg_flds_tmp = parse('IOB_SWREG_{}({},{},{}){}//{}', line)
             if swreg_flds_tmp is None: continue #not a sw reg
         else:
             swreg_flds_tmp = swreg_flds_tmp[1:]
@@ -284,9 +284,10 @@ def swreg_parse (vh, defines) :
 def main () :
     #parse command line
     if len(sys.argv) < 2:
-        print("Usage: param2tex.py path/to/top_level.v [vh_files] [v_files]")
+        print("Usage: param2tex.py path/to/top_level.v [vh_files] [v_files] [mkregs.conf]")
         print("vh_files: paths to .vh files used to extract macro values")
         print("v_files: paths to .v files used to extract blocks info")
+        print("mkregs_conf: path to mkregs.conf file with SW accessible regs and mems")
         exit()
 
     #top-level verilog file
@@ -302,6 +303,7 @@ def main () :
 
     vh = [] #header list
     v = [] #source list
+    conf = [] # mkregs.conf list
 
     if(len(sys.argv) > 2):
         #read header files
@@ -316,11 +318,19 @@ def main () :
         if(i > 2): header_parse(vh, defines)
 
         #read source files
-        while i<len(sys.argv):
+        while i<len(sys.argv) and -1<sys.argv[i].find('.v'):
             fv =  open (sys.argv[i], 'r')
-            v = [*v *fv.readlines()]
+            v = [*v, *fv.readlines()]
             fv.close()
             i = i+1
+
+        # read mkregs.conf file
+        if sys.argv[i].find('mkregs.conf'):
+            fconf =  open (sys.argv[i], 'r')
+            conf = [*conf, *fconf.readlines()]
+            fconf.close()
+            i = i+1
+
 
 
     #PARSE TOP-LEVEL PARAMETERS AND MACROS
@@ -344,6 +354,6 @@ def main () :
     io_parse ([*topv_lines, *vh], params, defines)
 
     #PARSE SOFTWARE ACCESSIBLE REGISTERS
-    swreg_parse (vh, defines)
+    swreg_parse (conf, defines)
 
 if __name__ == "__main__" : main ()
