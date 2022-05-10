@@ -239,8 +239,13 @@ def swreg_parse (vh, defines) :
             continue
 
         swreg_flds = []
-        swreg_flds_tmp = parse('IOB_SWREG_{}({},{},{}){}//{}', line)
-        if swreg_flds_tmp is None: continue #not a sw reg
+        swreg_flds_tmp = parse('{}IOB_SWREG_{}({},{},{}){}//{}', line)
+
+        if swreg_flds_tmp is None:
+            swreg_flds_tmp = parse('IOB_SWREG_{}({},{},{}){}//{}', line)
+            if swreg_flds_tmp is None: continue #not a sw reg
+        else:
+            swreg_flds_tmp = swreg_flds_tmp[1:]
 
         #NAME
         swreg_flds.append(swreg_flds_tmp[1].replace('_','\_').strip(' '))

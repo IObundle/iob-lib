@@ -72,7 +72,6 @@ def print_help():
                     wire NAME_wstrb_int;
 
     Example mkregs.conf file:
-    // Note: No whitespace before declarations
     //START_SWREG_TABLE example_core
     IOB_SWREG_W(CORE_RUN, 1, 0) //Brief description.
     IOB_SWMEM_W(CORE_WR_BUFFER, 8, 12) //Core write buffer
@@ -475,9 +474,14 @@ def swreg_parse(code, hwsw, top):
 
         swreg_flds = {}
 
-        swreg_flds_tmp = parse("IOB_SW{}_{}({},{},{}){}//{}", line)
+        swreg_flds_tmp = parse("{}IOB_SW{}_{}({},{},{}){}//{}", line)
+
         if swreg_flds_tmp is None:
-            continue  # not a sw reg
+            swreg_flds_tmp = parse("IOB_SW{}_{}({},{},{}){}//{}", line)
+            if swreg_flds_tmp is None:
+                continue  # not a sw reg
+        else:
+            swreg_flds_tmp = swreg_flds_tmp[1:]
 
         # Common fields for REG and MEM
         # REG_TYPE
