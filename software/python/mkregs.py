@@ -11,9 +11,10 @@ from verilog2tex import header_parse
 
 def print_usage():
 
-    usage_str = """Usage: ./mkregs.py [TOP] [HW|SW] [vh_files] [--help]
-        [TOP]:      Top/core module name
-        [HW|SW]:    HW: generate the hardware files
+    usage_str = """Usage: ./mkregs.py TOP PATH {HW|SW} [vh_files] [--help]
+        TOP:        Top/core module name
+        PATH:       Path to mkregs.conf file
+        {HW|SW}:    HW: generate the hardware files
                     SW: generate the software files
         [vh_files]: (SW only) paths to .vh files used to extract macro values
         [--help]:   (optional) display detailed help information"""
@@ -27,7 +28,7 @@ def print_help():
         interface core with CPU.
 
     General operation:
-        1. Read <TOP>.configuration file with information about the software
+        1. Read ./<PATH>/mkregs.conf file with information about the software
         accessible registers and memories.
         2. Generate boilerplate code for integration.
         [HW files]: generates <TOP>_swreg_def.vh and <TOP>_swreg_gen.vh files.
@@ -43,7 +44,7 @@ def print_help():
             Note: for PC-Emulation, the core developer needs to implement the
             setters and getters defined in <TOP>_swreg.h.
 
-    <TOP>.configuration file:
+    mkregs.conf file:
         The configuration file supports the following types of register and
         memory declarations:
 
@@ -70,8 +71,9 @@ def print_help():
                     wire NAME_wdata_int;
                     wire NAME_wstrb_int;
 
-    Example <TOP>.configuration file:
+    Example mkregs.conf file:
     // Note: No whitespace before declarations
+    //START_SWREG_TABLE example_core
     IOB_SWREG_W(CORE_RUN, 1, 0) //Brief description.
     IOB_SWMEM_W(CORE_WR_BUFFER, 8, 12) //Core write buffer
     IOB_SWREG_R(CORE_DONE, 1, 0) //Done signal.
@@ -473,7 +475,7 @@ def swreg_parse(code, hwsw, top):
 
         swreg_flds = {}
 
-        swreg_flds_tmp = parse("`IOB_SW{}_{}({},{},{}){}//{}", line)
+        swreg_flds_tmp = parse("IOB_SW{}_{}({},{},{}){}//{}", line)
         if swreg_flds_tmp is None:
             continue  # not a sw reg
 
@@ -527,10 +529,11 @@ def main():
         quit()
     else:
         top = sys.argv[1]
-        hwsw = sys.argv[2]
+        path = sys.argv[2]
+        hwsw = sys.argv[3]
 
     # parse input file
-    config_file_name = top + ".configuration"
+    config_file_name = f"{path}/mkregs.conf"
     try:
         fin = open(config_file_name, "r")
     except FileNotFoundError:
