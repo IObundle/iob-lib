@@ -10,9 +10,9 @@ module iob_pulse_detect
 
   reg bit_in_reg;
    always @(posedge clk, posedge rst)
-     if rst
+     if (rst)
        bit_in_reg <= 1'b0; 
-     else if bit_in
+     else if (bit_in)
        bit_in_reg <= 1'b1;
        
    assign detected = bit_in | bit_in_reg;
