@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module iob_f2s_sync
+module iob_f2s_1bit_sync
   (
    input  clk,
    input  in,
