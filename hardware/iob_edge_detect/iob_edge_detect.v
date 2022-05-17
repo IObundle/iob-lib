@@ -1,5 +1,7 @@
 `timescale 1ns / 1ps
 
+`include "iob_lib.vh"
+
 module iob_edge_detect
   (
    `IOB_INPUT(clk, 1),
@@ -8,13 +10,13 @@ module iob_edge_detect
    `IOB_OUTPUT(detected, 1)
    );
 
-  reg bit_in_reg;
+   reg bit_in_reg;
    always @(posedge clk, posedge rst)
-     if(rst)  
-       bit_in_reg <= 1'b0; 
-     else 
+     if (rst)
+       bit_in_reg <= 1'b0;
+     else
        bit_in_reg <= bit_in;
-       
+
    assign detected = bit_in & ~bit_in_reg;
-   
+
 endmodule
