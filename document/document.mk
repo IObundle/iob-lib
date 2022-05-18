@@ -43,7 +43,7 @@ $(DOC)top.tex: texfiles
 #tex files extracted from code comments
 texfiles: benefits.tex deliverables.tex
 ifneq ($(TOP_MODULE),)
-	$(LIB_SW_PYTHON_DIR)/verilog2tex.py $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF)
+	$(LIB_SW_PYTHON_DIR)/verilog2tex.py $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC) $(CORE_DIR)/mkregs.conf
 endif
 
 
