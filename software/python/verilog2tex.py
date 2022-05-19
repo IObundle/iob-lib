@@ -306,26 +306,24 @@ def main () :
     conf = [] # mkregs.conf list
 
     if(len(sys.argv) > 2):
-        #read header files
+        #read and parse header files if any
         i=2
-        while i<len(sys.argv) and -1<sys.argv[i].find('.vh'):
+        while i<len(sys.argv) and sys.argv[i].find('.vh') > -1:
             fvh =  open (sys.argv[i], 'r')
             vh = [*vh, *fvh.readlines()]
             fvh.close()
             i = i+1
-
-        #parse headers if any
-        if(i > 2): header_parse(vh, defines)
+        header_parse(vh, defines)
 
         #read source files
-        while i<len(sys.argv) and -1<sys.argv[i].find('.v'):
+        while i<len(sys.argv) and sys.argv[i].find('.v') > -1:
             fv =  open (sys.argv[i], 'r')
             v = [*v, *fv.readlines()]
             fv.close()
             i = i+1
 
         # read mkregs.conf file
-        if sys.argv[i].find('mkregs.conf'):
+        if i!=len(sys.argv) and sys.argv[i].find('mkregs.conf'):
             fconf =  open (sys.argv[i], 'r')
             conf = [*conf, *fconf.readlines()]
             fconf.close()
@@ -354,6 +352,7 @@ def main () :
     io_parse ([*topv_lines, *vh], params, defines)
 
     #PARSE SOFTWARE ACCESSIBLE REGISTERS
-    swreg_parse (conf, defines)
+    if conf != []:
+        swreg_parse (conf, defines)
 
 if __name__ == "__main__" : main ()

@@ -41,9 +41,10 @@ $(DOC)top.tex: texfiles
 	echo "\input{$(LIB_DOC_DIR)/$(DOC)/$(DOC).tex}" >> $(DOC)top.tex
 
 #tex files extracted from code comments
+MKREGS_CONF:=$(shell if [ -f $(CORE_DIR)/mkregs.conf ]; then echo $(CORE_DIR)/mkregs.conf; fi)
 texfiles: benefits.tex deliverables.tex
 ifneq ($(TOP_MODULE),)
-	$(LIB_SW_PYTHON_DIR)/verilog2tex.py $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC) $(CORE_DIR)/mkregs.conf
+	$(LIB_SW_PYTHON_DIR)/verilog2tex.py $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF)
 endif
 
 
