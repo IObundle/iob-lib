@@ -49,11 +49,13 @@ endif
 
 #FPGA implementation results
 fpga_res:
+ifeq ($(RESULTS),1)
 ifneq ($(XIL_FAMILY),)
 	make vivado.tex
 endif
 ifneq ($(INT_FAMILY),)
 	make quartus.tex
+endif
 endif
 
 VIVADOLOG = $(CORE_DIR)/hardware/fpga/vivado/$(XIL_FAMILY)/vivado.log
@@ -61,8 +63,10 @@ QUARTUSLOG = $(CORE_DIR)/hardware/fpga/quartus/$(INT_FAMILY)/quartus.log
 
 #ASIC implementation results
 asic_res:
+ifeq ($(RESULTS),1)
 ifneq ($(ASIC_NODE),)
 	make asic.tex
+endif
 endif
 
 ASICLOG = $(CORE_DIR)/hardware/asic/$(ASIC_NODE)/rc.log
