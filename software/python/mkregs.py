@@ -167,7 +167,7 @@ def write_hw(table, regfile_name):
         if row["reg_type"] == "REG":
             fout.write(f"`IOB_WIRE({row['name']},{row['width']})\n")
             if row['rw_type'] == "W":
-                fout.write(f"iob_reg #({row['width']}) write_reg{i} (clk, rst, {{{row['width']}{{1'b0}}}}, 1'b0, {{{row['width']}{{1'b0}}}}, (valid & (&wstrb) & (address == {int(row['addr']) >> 2})), wdata[{row['width']}-1:0], {row['name']});\n")
+                fout.write(f"iob_reg #({row['width']}) write_reg{i} (clk, rst, {{{row['width']}{{1'b0}}}}, 1'b0, {{{row['width']}{{1'b0}}}}, (valid & (|wstrb) & (address == {int(row['addr']) >> 2})), wdata[{row['width']}-1:0], {row['name']});\n")
                 i=i+1
 
     fout.write("\n\n//read registers\n")
