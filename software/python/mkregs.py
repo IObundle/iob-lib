@@ -434,6 +434,14 @@ def swreg_parse_mem(swreg_flds, parsed_line):
     return swreg_flds
 
 
+# Calculate next power of 2 after value (inclusive)
+def calc_next_pow2(value):
+    if value < 1:
+        return 0
+    else:
+        return int(2 ** math.ceil(math.log2(value)))
+
+
 # Calculate REG and MEM addresses
 def calc_swreg_addr(table):
     reg_addr = 0
@@ -444,8 +452,8 @@ def calc_swreg_addr(table):
             reg["addr"] = str(reg_addr)
             reg_addr = reg_addr + 4
 
-    # register addresses and each memorie is contained in an address block
-    addr_block = reg_addr
+    # register addresses and each memory is contained in an address block
+    addr_block = calc_next_pow2(reg_addr)
 
     for reg in table:
         if reg["reg_type"] == "MEM":
