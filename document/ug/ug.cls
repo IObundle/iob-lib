@@ -37,7 +37,7 @@
 \renewcommand{\headrulewidth}{.4pt}
 \fancyhead{}
 \fancyhead[RO,LE]{
-\textbf{\@title}
+\textbf{\@header}
 \\
 \textsc{\small{\@category}}
 }
@@ -51,24 +51,9 @@
 \fancyfoot[LE,RO]{\thepage}
 
 \newcommand{\category}[1]{\def\@category{#1}}
+\newcommand{\header}[1]{\def\@header{#1}}
+
 \renewcommand{\familydefault}{\sfdefault}
-
-\renewcommand{\maketitle}{
-\begin{titlepage}
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{1ex}
-\vspace*{100pt}
-\Huge{\textbf{\@title}}
-
-\huge{\@category}
-
-\vspace*{2ex}
-\includegraphics[keepaspectratio,scale=.7]{Logo.png}
-
-\small{\today}
-\vspace*{\fill}
-\end{titlepage}
-}
 
 \newcommand{\getenv}[2][]{%
   \CatchFileEdef{\temp}{"|kpsewhich --var-value #2"}{\endlinechar=-1}%

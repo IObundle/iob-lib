@@ -21,19 +21,31 @@
 \graphicspath{ {./figures/} }
 
 \input{../title}
+\date{\today}
 \category{User Guide, \input{version.tex}, Build \input{shortHash.tex}}
-%\confidential{}
 
 \input{\TEX/color}
 
 \begin{document}
+
 \maketitle
+\pagenumbering{gobble}
+
+\vspace*{\fill}
+User Guide, \input{version.tex}, Build \input{shortHash.tex}
+\hspace*{\fill} \includegraphics[keepaspectratio,scale=.7]{Logo.png}
+
+\cleardoublepage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\input{\TEX/ug/revhist}
 \cleardoublepage
 \tableofcontents
 \listoftables
 \listoffigures
 \cleardoublepage
-
+\pagenumbering{arabic}
+\setcounter{page}{1}
 \section{Introduction}
 \label{sec:intro}
 \input{../intro}
