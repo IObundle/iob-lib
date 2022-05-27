@@ -4,7 +4,7 @@
 #
 
 import sys
-from parse import parse
+from parse import parse, search
 import math
 from verilog2tex import header_parse
 
@@ -227,7 +227,7 @@ def get_core_addr_w(table):
     if max_addr_from_mem:
         max_addr = max_addr + int(get_addr_block(table))
 
-    hw_max_addr = (max_addr >> 2) + 1
+    hw_max_addr = (max_addr) + 1
 
     addr_w = int(math.ceil(math.log(hw_max_addr, 2)))
     return addr_w
@@ -247,15 +247,15 @@ def write_hwheader(table, regfile_name):
 
     for row in table:
         if row["reg_type"] == "REG":
-            fout.write(f"`define {row['name']}_ADDR {int(row['addr']) >> 2}\n")
+            fout.write(f"`define {row['name']}_ADDR {int(row['addr'])}\n")
     fout.write("//SWMEMs\n")
     for row in table:
         if row["reg_type"] == "MEM":
-            fout.write(f"`define {row['name']}_ADDR {int(row['addr']) >> 2}\n")
+            fout.write(f"`define {row['name']}_ADDR {int(row['addr'])}\n")
 
     fout.write("\n//register/mem data width\n")
     for row in table:
-        fout.write(f"`define {row['name']}_W {row['width']}\n")
+        fout.write(f"`define {row['name']}_W {int(row['byte_w'])*8}\n")
 
     fout.write("\n//mem address width\n")
     for row in table:
@@ -442,15 +442,37 @@ def calc_next_pow2(value):
         return int(2 ** math.ceil(math.log2(value)))
 
 
+def align_addr(addr, reg):
+    aligned_addr = addr
+    reg_w = int(reg["byte_w"])
+    off_bytes = (addr % reg_w)
+    if off_bytes:
+        aligned_addr = addr + reg_w - off_bytes
+
+    return aligned_addr
+
+
 # Calculate REG and MEM addresses
 def calc_swreg_addr(table):
+    """Calculate REG and MEM addresses.
+
+    Registers have initial addresses.
+    Addresses are byte aligned:
+        - 1 byte registers can have any address
+        - 2 byte registers can have even addresses
+        - 4 byte registers can have addresses multiples of 4
+    Memories are assigned starting addresses at a power of 2.
+    The interval between memories is the maximum memory size (or block of
+    registers).
+    """
     reg_addr = 0
 
     # REG addresses come first
     for reg in table:
         if reg["reg_type"] == "REG":
+            reg_addr = align_addr(reg_addr, reg)
             reg["addr"] = str(reg_addr)
-            reg_addr = reg_addr + 4
+            reg_addr = reg_addr + int(reg["byte_w"])
 
     # register addresses and each memory is contained in an address block
     addr_block = calc_next_pow2(reg_addr)
@@ -458,7 +480,7 @@ def calc_swreg_addr(table):
     for reg in table:
         if reg["reg_type"] == "MEM":
             # Note x4 factor to use software addresses
-            addr_block_tmp = 2 ** (int(reg["addr_w"])) * 4
+            addr_block_tmp = 2 ** (int(reg["addr_w"])) * int(reg["byte_w"])
             if addr_block_tmp > addr_block:
                 addr_block = addr_block_tmp
 
@@ -473,43 +495,59 @@ def calc_swreg_addr(table):
     return table
 
 
+def swreg_get_fields(line):
+    """ get direct fields from mkreg.conf line.
+
+    Parse line for SWREG/SWMEM patterns and get key : value pairs for direct
+    line fields.
+    Parameters
+    ----------
+    line : str
+        String to parse
+    Returns
+    -------
+        None if no matches.
+        Dictionary with named fields read from line (except addr field)
+            - rwtype: R (read) or W (write)
+            - name: register / memory name
+            - byte_w: register / memory DATA_W in bytes
+            - default_value: reset value
+            - addr_w: log2(address width of register/memory)
+            - wspace: whitespace
+            - description: register / memory comment at the end of the line
+            - reg_type: register type: REG (register) or MEM (memory)
+    """
+
+    # Parse IOB_SWREG_{R|W}(NAME, WIDTH, RST_VAL, ADDR_W) // Comment
+    result = search("IOB_SWREG_{rwtype}({name},{byte_w},{default_value},{addr_w}){wspace}//{description}\n", line)
+
+    # Get dictionary of named fields from parse.Result object
+    if result:
+        swreg_flds = result.named
+        # Set reg_type
+        if int(swreg_flds["addr_w"]) == 0:
+            swreg_flds["reg_type"] = "REG"
+        elif int(swreg_flds["addr_w"]) > 0:
+            swreg_flds["reg_type"] = "MEM"
+        else:
+            print("ADDR_W Field: invalid value")
+            swreg_flds["reg_type"] = ""
+        # Remove whitespace
+        for key in swreg_flds:
+            swreg_flds[key] = swreg_flds[key].strip(" ").strip("\t")
+    else:
+        swreg_flds = None
+
+    return swreg_flds
+
+
 def swreg_parse(code, hwsw, top):
-    table = []  # name, regtype, rwtype, address, width, default value, description
+    table = []  # list of swreg dictionaries
 
     for line in code:
-
-        swreg_flds = {}
-
-        swreg_flds_tmp = parse("{}IOB_SW{}_{}({},{},{}){}//{}", line)
-
-        if swreg_flds_tmp is None:
-            swreg_flds_tmp = parse("IOB_SW{}_{}({},{},{}){}//{}", line)
-            if swreg_flds_tmp is None:
-                continue  # not a sw reg
-        else:
-            swreg_flds_tmp = swreg_flds_tmp[1:]
-
-        # Common fields for REG and MEM
-        # REG_TYPE
-        swreg_flds["reg_type"] = swreg_flds_tmp[0].strip(" ").strip("\t")
-
-        # RW_TYPE
-        swreg_flds["rw_type"] = swreg_flds_tmp[1].strip(" ").strip("\t")
-
-        # NAME
-        swreg_flds["name"] = swreg_flds_tmp[2].strip(" ").strip("\t")
-
-        # WIDTH
-        swreg_flds["width"] = swreg_flds_tmp[3].strip(" ").strip("\t")
-
-        # DESCRIPTION
-        swreg_flds["description"] = swreg_flds_tmp[6]
-
-        # REG_TYPE specific fields
-        if swreg_flds["reg_type"] == "REG":
-            swreg_flds = swreg_parse_reg(swreg_flds, swreg_flds_tmp)
-        elif swreg_flds["reg_type"] == "MEM":
-            swreg_flds = swreg_parse_mem(swreg_flds, swreg_flds_tmp)
+        swreg_flds = swreg_get_fields(line)
+        if swreg_flds is None:
+            continue
 
         table.append(swreg_flds)
 
@@ -520,13 +558,13 @@ def swreg_parse(code, hwsw, top):
 
     if hwsw == "HW":
         write_hwheader(table, regfile_name)
-        write_hw(table, regfile_name)
-
-    elif hwsw == "SW":
-        core_prefix = top.upper()
-        defines = get_defines()
-        write_swheader(table, regfile_name, core_prefix, defines)
-        write_sw_emb(table, regfile_name, core_prefix, defines)
+        # write_hw(table, regfile_name)
+    #
+    # elif hwsw == "SW":
+    #     core_prefix = top.upper()
+    #     defines = get_defines()
+    #     write_swheader(table, regfile_name, core_prefix, defines)
+    #     write_sw_emb(table, regfile_name, core_prefix, defines)
 
 
 def main():
