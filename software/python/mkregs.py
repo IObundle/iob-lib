@@ -93,11 +93,11 @@ def gen_mem_wires(table, fout):
     fout.write("\n//mem wires\n")
     for reg in table:
         if reg["reg_type"] == "MEM":
-            data_w = int(reg['byte_w'])*8
+            data_w = int(reg['nbytes'])*8
             fout.write(f"`IOB_WIRE({reg['name']}_addr, {reg['addr_w']})\n")
             if reg["rw_type"] == "W":
                 fout.write(f"`IOB_VAR({reg['name']}_wdata, {data_w})\n")
-                fout.write(f"`IOB_WIRE({reg['name']}_wstrb, {reg['byte_w']})\n")
+                fout.write(f"`IOB_WIRE({reg['name']}_wstrb, {reg['nbytes']})\n")
             else:
                 fout.write(f"`IOB_WIRE({reg['name']}_rdata, {data_w})\n")
                 fout.write(f"`IOB_WIRE({reg['name']}_ren, 1)\n")
@@ -119,19 +119,21 @@ def gen_mem_write_hw(table, fout):
         if reg["reg_type"] == "MEM" and reg['rw_type'] == "W":
             fout.write(f"`IOB_WIRE2WIRE(address[{reg['addr_w']}-1:0], {reg['name']}_addr)\n")
             # get correct bytes from aligned wdata
-            num_splits = int(4/int(reg['byte_w']))
+            num_splits = int(4/int(reg['nbytes']))
             num_splits_w = int(math.log(num_splits, 2))
             fout.write("always @* begin\n")
             if num_splits_w == 0:
                 fout.write(f"{reg['name']}_wdata = wdata;\n")
             else:
                 fout.write(f"    case(address[0+:{num_splits_w}])\n")
-                data_w = int(reg['byte_w'])*8
+                data_w = int(reg['nbytes'])*8
                 for i in range(num_splits-1):
                     fout.write(f"        {i}: {reg['name']}_wdata = wdata[{data_w*i}+:{data_w}];\n")
                 fout.write(f"        default: {reg['name']}_wdata = wdata[{data_w*(num_splits-1)}+:{data_w}];\n")
                 fout.write("    endcase\n")
             fout.write("end\n")
+            addr_block_w = str(int(math.log(int(get_addr_block(table)), 2)))
+            fout.write(f"`IOB_WIRE2WIRE((valid & ( {{address[ADDR_W-1:{addr_block_w}], {{{addr_block_w}{{1'b0}}}}}} == {reg['addr']})) ? {{{reg['nbytes']}{{|wstrb}}}} : {{{reg['nbytes']}{{1'b0}}}}, {reg['name']}_wstrb)")
 
 
 def gen_mem_read_hw(table, fout):
@@ -148,14 +150,14 @@ def gen_mem_read_hw(table, fout):
             fout.write(f"`IOB_WIRE2WIRE(address[{reg['addr_w']}-1:0], {reg['name']}_addr)\n")
             fout.write(f"`IOB_WIRE2WIRE((valid & ( {{address[ADDR_W-1:{addr_block_w}], {{ {addr_block_w} {{1'b0}} }} }} == {reg['addr']})), {reg['name']}_ren)\n")
             # align MEM rdata
-            num_splits = int(4/int(reg['byte_w']))
+            num_splits = int(4/int(reg['nbytes']))
             num_splits_w = int(math.log(num_splits, 2))
             fout.write("always @* begin\n")
             if num_splits_w == 0:
                 fout.write(f"{reg['name']}_rdata_int = {reg['name']}_rdata;\n")
             else:
                 fout.write(f"    case(addr_offset_reg[0+:{num_splits_w}])\n")
-                data_w = int(reg['byte_w'])*8
+                data_w = int(reg['nbytes'])*8
                 for i in range(num_splits-1):
                     if i == 0:
                         fout.write(f"        {i}: {reg['name']}_rdata_int = {reg['name']}_rdata;\n")
@@ -189,9 +191,9 @@ def write_hw(table, regfile_name):
     for row in table:
         if row["reg_type"] == "REG" and row['rw_type'] == "W":
             addr_offset = int(row['addr']) % 4
-            reg_w = int(row['byte_w']) * 8
+            reg_w = int(row['nbytes']) * 8
             fout.write(f"`IOB_WIRE({row['name']}_en, 1)\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & (|wstrb[{addr_offset}+:{row['byte_w']}]) & (address == {row['addr']}, {row['name']}_en)\n")
+            fout.write(f"`IOB_WIRE2WIRE((valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (address == {row['addr']}, {row['name']}_en)\n")
             fout.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
             fout.write(f"`IOB_WIRE2WIRE(wdata[{8*addr_offset}+:{reg_w}], {row['name']}_wdata)\n\n")
 
@@ -207,7 +209,7 @@ def write_hw(table, regfile_name):
         fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
         fout.write("`IOB_WIRE(mem_read_sel, 1)\n")
         # Register condition for SWMEM_R access
-        addr_block_w = str(int(math.log(int(get_addr_block(table)) >> 2, 2)))
+        addr_block_w = str(int(math.log(int(get_addr_block(table)), 2)))
         fout.write(f"iob_reg #(1) mem_read_sel_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, (valid & (wstrb == 0) & (|address[ADDR_W-1:{addr_block_w}])), mem_read_sel);\n")
         # skip rdata_int2 delay for memory read accesses
         fout.write("`IOB_VAR2WIRE((mem_read_sel) ? mem_rdata_int : rdata_int2, rdata)\n\n")
@@ -216,7 +218,7 @@ def write_hw(table, regfile_name):
 
     for row in table:
         if row["reg_type"] == "REG" and row['rw_type'] == "R":
-            fout.write(f"`IOB_WIRE({row['name']}_rdata, {int(row['byte_w']) * 8})\n")
+            fout.write(f"`IOB_WIRE({row['name']}_rdata, {int(row['nbytes']) * 8})\n")
 
     fout.write("\nalways @* begin\n")
     fout.write("   case(address)\n")
@@ -289,7 +291,7 @@ def write_hwheader(table, regfile_name):
 
     fout.write("\n//register/mem data width\n")
     for row in table:
-        fout.write(f"`define {row['name']}_W {int(row['byte_w'])*8}\n")
+        fout.write(f"`define {row['name']}_W {int(row['nbytes'])*8}\n")
 
     fout.write("\n//mem address width\n")
     for row in table:
@@ -478,7 +480,7 @@ def calc_next_pow2(value):
 
 def align_addr(addr, reg):
     aligned_addr = addr
-    reg_w = int(reg["byte_w"])
+    reg_w = int(reg["nbytes"])
     off_bytes = (addr % reg_w)
     if off_bytes:
         aligned_addr = addr + reg_w - off_bytes
@@ -506,7 +508,7 @@ def calc_swreg_addr(table):
         if reg["reg_type"] == "REG":
             reg_addr = align_addr(reg_addr, reg)
             reg["addr"] = str(reg_addr)
-            reg_addr = reg_addr + int(reg["byte_w"])
+            reg_addr = reg_addr + int(reg["nbytes"])
 
     # register addresses and each memory is contained in an address block
     addr_block = calc_next_pow2(reg_addr)
@@ -514,7 +516,7 @@ def calc_swreg_addr(table):
     for reg in table:
         if reg["reg_type"] == "MEM":
             # Note x4 factor to use software addresses
-            addr_block_tmp = 2 ** (int(reg["addr_w"])) * int(reg["byte_w"])
+            addr_block_tmp = 2 ** (int(reg["addr_w"])) * int(reg["nbytes"])
             if addr_block_tmp > addr_block:
                 addr_block = addr_block_tmp
 
@@ -544,7 +546,7 @@ def swreg_get_fields(line):
         Dictionary with named fields read from line (except addr field)
             - rw_type: R (read) or W (write)
             - name: register / memory name
-            - byte_w: register / memory DATA_W in bytes
+            - nbytes: register / memory DATA_W in bytes
             - default_value: reset value
             - addr_w: log2(address width of register/memory)
             - wspace: whitespace
@@ -553,7 +555,7 @@ def swreg_get_fields(line):
     """
 
     # Parse IOB_SWREG_{R|W}(NAME, WIDTH, RST_VAL, ADDR_W) // Comment
-    result = search("IOB_SWREG_{rw_type}({name},{byte_w},{default_value},{addr_w}){wspace}//{description}\n", line)
+    result = search("IOB_SWREG_{rw_type}({name},{nbytes},{default_value},{addr_w}){wspace}//{description}\n", line)
 
     # Get dictionary of named fields from parse.Result object
     if result:
