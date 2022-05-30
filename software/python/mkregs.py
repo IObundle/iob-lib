@@ -89,12 +89,22 @@ def has_mem_type(table, mem_type_list=["W", "R"]):
     return 0
 
 
+def get_num_mem_type(table, rw_type):
+    num_regs = 0
+    for reg in table:
+        if reg['reg_type'] == "MEM" and reg['rw_type'] == rw_type:
+            num_regs = num_regs + 1
+    return num_regs
+
+
 def gen_mem_wires(table, fout):
     fout.write("\n//mem wires\n")
     for reg in table:
         if reg["reg_type"] == "MEM":
             data_w = int(reg['nbytes'])*8
+            fout.write(f"localparam {reg['name']}_ADDR_OFFSET = {reg['addr']};\n")
             fout.write(f"`IOB_WIRE({reg['name']}_addr, {reg['addr_w']})\n")
+            fout.write(f"`IOB_WIRE({reg['name']}_addr_int, DATA_W+1)\n")
             if reg["rw_type"] == "W":
                 fout.write(f"`IOB_VAR({reg['name']}_wdata, {data_w})\n")
                 fout.write(f"`IOB_WIRE({reg['name']}_wstrb, {reg['nbytes']})\n")
@@ -117,7 +127,8 @@ def gen_mem_write_hw(table, fout):
     fout.write("\n//mem write logic\n")
     for reg in table:
         if reg["reg_type"] == "MEM" and reg['rw_type'] == "W":
-            fout.write(f"`IOB_WIRE2WIRE(address[{reg['addr_w']}-1:0], {reg['name']}_addr)\n")
+            fout.write(f"`IOB_WIRE2WIRE((address - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
+            fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{reg['addr_w']}-1:0], {reg['name']}_addr)\n")
             # get correct bytes from aligned wdata
             num_splits = int(4/int(reg['nbytes']))
             num_splits_w = int(math.log(num_splits, 2))
@@ -125,15 +136,14 @@ def gen_mem_write_hw(table, fout):
             if num_splits_w == 0:
                 fout.write(f"{reg['name']}_wdata = wdata;\n")
             else:
-                fout.write(f"    case(address[0+:{num_splits_w}])\n")
+                fout.write(f"    case({reg['name']}_addr_int[0+:{num_splits_w}])\n")
                 data_w = int(reg['nbytes'])*8
                 for i in range(num_splits-1):
                     fout.write(f"        {i}: {reg['name']}_wdata = wdata[{data_w*i}+:{data_w}];\n")
                 fout.write(f"        default: {reg['name']}_wdata = wdata[{data_w*(num_splits-1)}+:{data_w}];\n")
                 fout.write("    endcase\n")
             fout.write("end\n")
-            addr_block_w = str(int(math.log(int(get_addr_block(table)), 2)))
-            fout.write(f"`IOB_WIRE2WIRE((valid & ( {{address[ADDR_W-1:{addr_block_w}], {{{addr_block_w}{{1'b0}}}}}} == {reg['addr']})) ? {{{reg['nbytes']}{{|wstrb}}}} : {{{reg['nbytes']}{{1'b0}}}}, {reg['name']}_wstrb)")
+            fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{reg['addr_w']}] == 0 )) ? {{{reg['nbytes']}{{|wstrb}}}} : {{{reg['nbytes']}{{1'b0}}}}, {reg['name']}_wstrb)")
 
 
 def gen_mem_read_hw(table, fout):
@@ -143,12 +153,13 @@ def gen_mem_read_hw(table, fout):
 
     addr_block_w = str(int(math.log(int(get_addr_block(table)), 2)))
     fout.write("\n//mem read logic\n")
-    fout.write("`IOB_WIRE(addr_offset_reg, 2)\n")
-    fout.write("iob_reg #(2) addr_offset_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, address[0+:2], addr_offset_reg);\n\n")
     for reg in table:
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
-            fout.write(f"`IOB_WIRE2WIRE(address[{reg['addr_w']}-1:0], {reg['name']}_addr)\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & ( {{address[ADDR_W-1:{addr_block_w}], {{ {addr_block_w} {{1'b0}} }} }} == {reg['addr']})), {reg['name']}_ren)\n")
+            fout.write(f"`IOB_WIRE({reg['name']}_addr_reg, 2)\n")
+            fout.write(f"iob_reg #(2) {reg['name']}_addr_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, {reg['name']}_addr_int[0+:2], {reg['name']}_addr_reg);\n\n")
+            fout.write(f"`IOB_WIRE2WIRE((address - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
+            fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{reg['addr_w']}-1:0], {reg['name']}_addr)\n")
+            fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{reg['addr_w']}] == 0 ) & ~(|wstrb)), {reg['name']}_ren)\n")
             # align MEM rdata
             num_splits = int(4/int(reg['nbytes']))
             num_splits_w = int(math.log(num_splits, 2))
@@ -156,7 +167,7 @@ def gen_mem_read_hw(table, fout):
             if num_splits_w == 0:
                 fout.write(f"{reg['name']}_rdata_int = {reg['name']}_rdata;\n")
             else:
-                fout.write(f"    case(addr_offset_reg[0+:{num_splits_w}])\n")
+                fout.write(f"    case({reg['name']}_addr_reg[0+:{num_splits_w}])\n")
                 data_w = int(reg['nbytes'])*8
                 for i in range(num_splits-1):
                     if i == 0:
@@ -168,14 +179,24 @@ def gen_mem_read_hw(table, fout):
             fout.write("end\n")
 
     # switch case for mem reads
-    fout.write("\n`IOB_WIRE(mem_address, ADDR_W)\n")
+    num_read_mems = get_num_mem_type(table, "R")
+    fout.write(f"\n`IOB_WIRE(mem_switch, {num_read_mems})\n")
+    fout.write(f"`IOB_WIRE(mem_switch_reg, {num_read_mems})\n")
+    mem_read_en_concat_str = "}"
+    for reg in table:
+        if reg['reg_type'] == "MEM" and reg['rw_type'] == "R":
+            mem_read_en_concat_str = f"{reg['name']},{mem_read_en_concat_str}"
+    mem_read_en_concat_str = "{" + mem_read_en_concat_str
+    fout.write(f"`IOB_WIRE2WIRE( {mem_read_en_concat_str}, mem_switch)\n")
     # Delay SWMEM_R address 1 cycle to wait for rdata
-    fout.write(f"iob_reg #(ADDR_W) address_reg (clk, rst, {{ADDR_W{{1'b0}}}}, 1'b0, {{ADDR_W{{1'b0}}}}, 1'b1, {{address[ADDR_W-1:{addr_block_w}], {{{addr_block_w}{{1'b0}}}}}}, mem_address);\n")
+    fout.write(f"iob_reg #({num_read_mems}) mem_switch_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, mem_switch, mem_switch_reg);\n")
+    mem_switch_val = 1
     fout.write("always @* begin\n")
-    fout.write("\tcase(mem_address)\n")
+    fout.write("\tcase(mem_switch_reg)\n")
     for reg in table:
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
-            fout.write(f"\t\t{reg['addr']}: mem_rdata_int = {reg['name']}_rdata_int;\n")
+            fout.write(f"\t\t{mem_switch_val}: mem_rdata_int = {reg['name']}_rdata_int;\n")
+            mem_switch_val = int(mem_switch_val * 2)
     fout.write("\t\tdefault: mem_rdata_int = 1'b0;\n")
     fout.write("\tendcase\n")
     fout.write("end\n")
@@ -197,7 +218,6 @@ def write_hw(table, regfile_name):
             fout.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
             fout.write(f"`IOB_WIRE2WIRE(wdata[{8*addr_offset}+:{reg_w}], {row['name']}_wdata)\n\n")
 
-
     fout.write("\n\n//read register logic\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
     fout.write("`IOB_WIRE(rdata_int2, DATA_W)\n")
@@ -208,11 +228,11 @@ def write_hw(table, regfile_name):
         fout.write("//Select read data from registers or memory\n")
         fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
         fout.write("`IOB_WIRE(mem_read_sel, 1)\n")
+        fout.write("`IOB_WIRE(mem_read_sel_reg, 1)\n")
         # Register condition for SWMEM_R access
-        addr_block_w = str(int(math.log(int(get_addr_block(table)), 2)))
-        fout.write(f"iob_reg #(1) mem_read_sel_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, (valid & (wstrb == 0) & (|address[ADDR_W-1:{addr_block_w}])), mem_read_sel);\n")
+        fout.write(f"iob_reg #(1) mem_read_sel_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, (valid & (wstrb == 0) & mem_read_sel), mem_read_sel_reg);\n")
         # skip rdata_int2 delay for memory read accesses
-        fout.write("`IOB_VAR2WIRE((mem_read_sel) ? mem_rdata_int : rdata_int2, rdata)\n\n")
+        fout.write("`IOB_VAR2WIRE((mem_read_sel_reg) ? mem_rdata_int : rdata_int2, rdata)\n\n")
     else:
         fout.write("`IOB_VAR2WIRE(rdata_int2, rdata)\n\n")
 
@@ -262,7 +282,6 @@ def get_core_addr_w(table):
 
         if last_addr > max_addr:
             max_addr = last_addr
-
 
     hw_max_addr = (max_addr) + 1
 
@@ -652,7 +671,7 @@ def swreg_parse(code, hwsw, top):
 
     if hwsw == "HW":
         write_hwheader(table, regfile_name)
-        # write_hw(table, regfile_name)
+        write_hw(table, regfile_name)
 
     # elif hwsw == "SW":
     #     core_prefix = top.upper()
