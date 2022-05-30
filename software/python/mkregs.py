@@ -4,7 +4,7 @@
 #
 
 import sys
-from parse import parse, search
+from parse import search
 import math
 from verilog2tex import header_parse
 
@@ -116,13 +116,6 @@ def gen_mem_wires(table, fout):
     fout.write("\n")
 
 
-def get_addr_block(table):
-    for reg in table:
-        if reg["reg_type"] == "MEM":
-            return reg["addr"]
-    return 0
-
-
 def gen_mem_write_hw(table, fout):
     fout.write("\n//mem write logic\n")
     for reg in table:
@@ -151,7 +144,6 @@ def gen_mem_read_hw(table, fout):
     if has_mem_type(table, ["R"]) == 0:
         return
 
-    addr_block_w = str(int(math.log(int(get_addr_block(table)), 2)))
     fout.write("\n//mem read logic\n")
     for reg in table:
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
@@ -221,7 +213,7 @@ def write_hw(table, regfile_name):
     fout.write("\n\n//read register logic\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
     fout.write("`IOB_WIRE(rdata_int2, DATA_W)\n")
-    fout.write(f"iob_reg #(DATA_W) read_reg (clk, rst, {{DATA_W{{1'b0}}}}, 1'b0, {{DATA_W{{1'b0}}}}, valid, rdata_int, rdata_int2);\n")
+    fout.write("iob_reg #(DATA_W) read_reg (clk, rst, {{DATA_W{{1'b0}}}}, 1'b0, {{DATA_W{{1'b0}}}}, valid, rdata_int, rdata_int2);\n")
 
     # if read memory present then add mem_rdata_int
     if has_mem_type(table, ["R"]):
@@ -230,7 +222,7 @@ def write_hw(table, regfile_name):
         fout.write("`IOB_WIRE(mem_read_sel, 1)\n")
         fout.write("`IOB_WIRE(mem_read_sel_reg, 1)\n")
         # Register condition for SWMEM_R access
-        fout.write(f"iob_reg #(1) mem_read_sel_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, (valid & (wstrb == 0) & mem_read_sel), mem_read_sel_reg);\n")
+        fout.write("iob_reg #(1) mem_read_sel_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, (valid & (wstrb == 0) & mem_read_sel), mem_read_sel_reg);\n")
         # skip rdata_int2 delay for memory read accesses
         fout.write("`IOB_VAR2WIRE((mem_read_sel_reg) ? mem_rdata_int : rdata_int2, rdata)\n\n")
     else:
@@ -258,7 +250,7 @@ def write_hw(table, regfile_name):
     fout.write("end\n")
 
     # ready signal
-    fout.write(f"iob_reg #(1) valid_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, valid, ready);\n")
+    fout.write("iob_reg #(1) valid_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, valid, ready);\n")
 
     # memory section
     if has_mem_type(table):
@@ -477,28 +469,6 @@ def write_sw_emb(table, regfile_name, core_prefix, defines):
     fout.close()
 
 
-# Obtain REG only fields
-def swreg_parse_reg(swreg_flds, parsed_line):
-    # DEFAULT VALUE
-    swreg_flds["default_value"] = parsed_line[4]
-    return swreg_flds
-
-
-# Obtain MEM only fields
-def swreg_parse_mem(swreg_flds, parsed_line):
-    # ADDR_W
-    swreg_flds["addr_w"] = parsed_line[4]
-    return swreg_flds
-
-
-# Calculate next power of 2 after value (inclusive)
-def calc_next_pow2(value):
-    if value < 1:
-        return 0
-    else:
-        return int(2 ** math.ceil(math.log2(value)))
-
-
 def align_addr(addr, reg):
     aligned_addr = addr
     reg_w = int(reg["nbytes"])
@@ -538,6 +508,7 @@ def check_addresses(table):
 
     check_overlapped_addresses(table, "R")
     check_overlapped_addresses(table, "W")
+
 
 # Calculate REG and MEM addresses
 def calc_swreg_addr(table):
