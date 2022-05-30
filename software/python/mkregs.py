@@ -488,45 +488,100 @@ def align_addr(addr, reg):
     return aligned_addr
 
 
+def get_regs_of_type(table, rw_type):
+    type_regs = []
+    for reg in table:
+        if reg['rw_type'] == rw_type:
+            type_regs.append(reg)
+    return type_regs
+
+
+def check_overlapped_addresses(table, rw_type):
+    type_regs = get_regs_of_type(table, rw_type)
+    if not type_regs:
+        return
+
+    # sort regs by address
+    type_regs.sort(key=lambda i: int(i['addr']))
+    for i in range(len(type_regs) - 1):
+        reg_addr_end = int(type_regs[i]['addr']) + int(type_regs[i]['nbytes']) - 1
+        if reg_addr_end >= int(type_regs[i+1]['addr']):
+            print(f"ERROR: {type_regs[i]['name']} and {type_regs[i+1]['name']} registers are overlapped for {rw_type} type")
+
+
+def check_addresses(table):
+    # Check for aligned data
+    for reg in table:
+        if int(reg['addr']) % int(reg['nbytes']) != 0:
+            print(f"ERROR: {reg['name']} register not aligned")
+
+    check_overlapped_addresses(table, "R")
+    check_overlapped_addresses(table, "W")
+
 # Calculate REG and MEM addresses
 def calc_swreg_addr(table):
     """Calculate REG and MEM addresses.
 
-    Registers have initial addresses.
+    Use addresses given by mkregs.conf.
+    Addresses with -1 are automatically assigned after last manual address.
+    Memories are assigned starting addresses like registers.
+    Write and Read addresses are independent.
+    Check for address assignment errors:
     Addresses are byte aligned:
         - 1 byte registers can have any address
         - 2 byte registers can have even addresses
         - 4 byte registers can have addresses multiples of 4
-    Memories are assigned starting addresses at a power of 2.
-    The interval between memories is the maximum memory size (or block of
-    registers).
+    The same address cannot be assigned to multiple read registers/memories.
+    The same address cannot be assigned to multiple write registers/memories.
     """
+    read_addr = 0
+    write_addr = 0
+
+    # Get last manual address for read and write
+    for reg in table:
+        if int(reg['addr']) >= 0:
+            if reg['rw_type'] == "R":
+                read_addr = read_addr + int(reg['nbytes'])
+            elif reg['rw_type'] == "W":
+                write_addr = write_addr + int(reg['nbytes'])
+            else:
+                print(f"Error: invalid RW type for {reg['name']}")
+
+    # Assign automatic addresses
     reg_addr = 0
-
-    # REG addresses come first
     for reg in table:
-        if reg["reg_type"] == "REG":
+        if int(reg['addr']) == -1:
+            # get rw_type address
+            if reg['rw_type'] == "R":
+                reg_addr = read_addr
+            elif reg['rw_type'] == "W":
+                reg_addr = write_addr
+            else:
+                print(f"Error: invalid RW type for {reg['name']}")
+                continue
+
             reg_addr = align_addr(reg_addr, reg)
-            reg["addr"] = str(reg_addr)
-            reg_addr = reg_addr + int(reg["nbytes"])
+            reg['addr'] = str(reg_addr)
 
-    # register addresses and each memory is contained in an address block
-    addr_block = calc_next_pow2(reg_addr)
+            # calculate next available address
+            if reg['reg_type'] == "REG":
+                reg_addr = reg_addr + int(reg['nbytes'])
+            elif reg['reg_type'] == "MEM":
+                reg_addr = reg_addr + (int(reg['nbytes']) << int(reg['addr_w']))
+            else:
+                print(f"Error: invalid REG type for {reg['name']}")
 
-    for reg in table:
-        if reg["reg_type"] == "MEM":
-            # Note x4 factor to use software addresses
-            addr_block_tmp = 2 ** (int(reg["addr_w"])) * int(reg["nbytes"])
-            if addr_block_tmp > addr_block:
-                addr_block = addr_block_tmp
+            # update rw_type address
+            if reg['rw_type'] == "R":
+                read_addr = reg_addr
+            elif reg['rw_type'] == "W":
+                write_addr = reg_addr
+            else:
+                print(f"Error: invalid RW type for {reg['name']}")
+                continue
 
-    mem_addr = addr_block
-
-    # Assign MEM addresses
-    for reg in table:
-        if reg["reg_type"] == "MEM":
-            reg["addr"] = str(mem_addr)
-            mem_addr = mem_addr + addr_block
+    # Check for valid addresses
+    check_addresses(table)
 
     return table
 
@@ -548,14 +603,15 @@ def swreg_get_fields(line):
             - name: register / memory name
             - nbytes: register / memory DATA_W in bytes
             - default_value: reset value
+            - addr: register / memory address
             - addr_w: log2(address width of register/memory)
             - wspace: whitespace
             - description: register / memory comment at the end of the line
             - reg_type: register type: REG (register) or MEM (memory)
     """
 
-    # Parse IOB_SWREG_{R|W}(NAME, WIDTH, RST_VAL, ADDR_W) // Comment
-    result = search("IOB_SWREG_{rw_type}({name},{nbytes},{default_value},{addr_w}){wspace}//{description}\n", line)
+    # Parse IOB_SWREG_{R|W}(NAME, NBYTES, RST_VAL, ADDR, ADDR_W) // Comment
+    result = search("IOB_SWREG_{rw_type}({name},{nbytes},{default_value},{addr},{addr_w}){wspace}//{description}\n", line)
 
     # Get dictionary of named fields from parse.Result object
     if result:
@@ -590,11 +646,11 @@ def swreg_parse(code, hwsw, top):
     # calculate address field
     table = calc_swreg_addr(table)
 
-    regfile_name = top + "_swreg"
-
-    if hwsw == "HW":
-        write_hwheader(table, regfile_name)
-        write_hw(table, regfile_name)
+    # regfile_name = top + "_swreg"
+    #
+    # if hwsw == "HW":
+    #     write_hwheader(table, regfile_name)
+    #     write_hw(table, regfile_name)
     #
     # elif hwsw == "SW":
     #     core_prefix = top.upper()
