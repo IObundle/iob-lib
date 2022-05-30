@@ -251,17 +251,18 @@ def write_hw(table, regfile_name):
 
 def get_core_addr_w(table):
     max_addr = 0
-    max_addr_from_mem = 0
     for reg in table:
-        if int(reg["addr"]) > max_addr:
-            max_addr = int(reg["addr"])
-            if reg["reg_type"] == "MEM":
-                max_addr_from_mem = 1
-            else:
-                max_addr_from_mem = 0
+        # calculate last address of register/memory
+        if reg['reg_type'] == "REG":
+            last_addr = int(reg['addr']) + int(reg['nbytes'])
+        elif reg['reg_type'] == "MEM":
+            last_addr = int(reg['addr']) + (int(reg['nbytes']) << int(reg['addr_w']))
+        else:
+            print(f"Error: {reg['name']} has invalid reg_type {reg['reg_type']}")
 
-    if max_addr_from_mem:
-        max_addr = max_addr + int(get_addr_block(table))
+        if last_addr > max_addr:
+            max_addr = last_addr
+
 
     hw_max_addr = (max_addr) + 1
 
@@ -279,14 +280,15 @@ def write_hwheader(table, regfile_name):
     fout.write(f"`define {regfile_name}_ADDR_W {get_core_addr_w(table)}\n\n")
 
     fout.write("//address macros\n")
-    fout.write("//SWREGs\n")
 
+    fout.write("//Write addresses\n")
     for row in table:
-        if row["reg_type"] == "REG":
+        if row["rw_type"] == "W":
             fout.write(f"`define {row['name']}_ADDR {int(row['addr'])}\n")
-    fout.write("//SWMEMs\n")
+
+    fout.write("//Read Addresses\n")
     for row in table:
-        if row["reg_type"] == "MEM":
+        if row["rw_type"] == "R":
             fout.write(f"`define {row['name']}_ADDR {int(row['addr'])}\n")
 
     fout.write("\n//register/mem data width\n")
@@ -646,12 +648,12 @@ def swreg_parse(code, hwsw, top):
     # calculate address field
     table = calc_swreg_addr(table)
 
-    # regfile_name = top + "_swreg"
-    #
-    # if hwsw == "HW":
-    #     write_hwheader(table, regfile_name)
-    #     write_hw(table, regfile_name)
-    #
+    regfile_name = top + "_swreg"
+
+    if hwsw == "HW":
+        write_hwheader(table, regfile_name)
+        # write_hw(table, regfile_name)
+
     # elif hwsw == "SW":
     #     core_prefix = top.upper()
     #     defines = get_defines()
