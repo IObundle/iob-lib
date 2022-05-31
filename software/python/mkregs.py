@@ -194,6 +194,56 @@ def gen_mem_read_hw(table, fout):
     fout.write("end\n")
 
 
+def get_rdata_cases(table):
+    """Get rdata_int case lines for read registers
+
+    Concatenates all read registers with the same 32bit address.
+    """
+    read_regs = []
+    rdata_cases = {}
+    for reg in table:
+        if reg['reg_type'] == "REG" and reg['rw_type'] == "R":
+            read_regs.append(reg)
+
+    # sort regs by start address
+    read_regs.sort(key=lambda i: int(i['addr']))
+
+    # group regs with same 32 bit address
+    for reg in read_regs:
+        addr = int(reg['addr'])
+        addr32 = str(addr - (addr % 4))
+        if addr32 in rdata_cases:
+            rdata_cases[addr32].append(reg)
+        else:
+            rdata_cases[addr32] = [reg]
+
+    # create rdata_int case strings
+    case_strings = []
+    for addr32, reg_list in rdata_cases.items():
+        byte_cnt = 0
+        case_str = ""
+        for reg in reg_list:
+            byte_offset = int(reg['addr']) % 4
+            # zero bytes before reg
+            while byte_offset > byte_cnt:
+                if not case_str:
+                    case_str = "8'b0};\n"
+                else:
+                    case_str = "8'b0, " + case_str
+                byte_cnt = byte_cnt + 1
+            # append reg rdata
+            if not case_str:
+                case_str = f"{reg['name']}_rdata}};\n"
+            else:
+                case_str = f"{reg['name']}_rdata, " + case_str
+            byte_cnt = byte_cnt + int(reg['nbytes'])
+
+        case_str = f"        {addr32}: rdata_int = {{" + case_str
+        case_strings.append(case_str)
+
+    return case_strings
+
+
 def write_hw(table, regfile_name):
 
     fout = open(regfile_name + "_gen.vh", "w")
@@ -204,16 +254,17 @@ def write_hw(table, regfile_name):
     for row in table:
         if row["reg_type"] == "REG" and row['rw_type'] == "W":
             addr_offset = int(row['addr']) % 4
+            addr_32 = int(row['addr']) - addr_offset
             reg_w = int(row['nbytes']) * 8
             fout.write(f"`IOB_WIRE({row['name']}_en, 1)\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (address == {row['addr']}, {row['name']}_en)\n")
+            fout.write(f"`IOB_WIRE2WIRE((valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (address == {addr_32})), {row['name']}_en)\n")
             fout.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
             fout.write(f"`IOB_WIRE2WIRE(wdata[{8*addr_offset}+:{reg_w}], {row['name']}_wdata)\n\n")
 
     fout.write("\n\n//read register logic\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
     fout.write("`IOB_WIRE(rdata_int2, DATA_W)\n")
-    fout.write("iob_reg #(DATA_W) read_reg (clk, rst, {{DATA_W{{1'b0}}}}, 1'b0, {{DATA_W{{1'b0}}}}, valid, rdata_int, rdata_int2);\n")
+    fout.write("iob_reg #(DATA_W) read_reg (clk, rst, {DATA_W{1'b0}}, 1'b0, {DATA_W{1'b0}}, valid, rdata_int, rdata_int2);\n")
 
     # if read memory present then add mem_rdata_int
     if has_mem_type(table, ["R"]):
@@ -235,15 +286,10 @@ def write_hw(table, regfile_name):
     fout.write("\nalways @* begin\n")
     fout.write("   case(address)\n")
 
-    for row in table:
-        if row["reg_type"] == "REG" and row["rw_type"] == "R":
-            # align rdata according to register address
-            align_offset = int(row['addr']) % 4
-            if align_offset == 0:
-                rdata_str = f"{row['name']}_rdata"
-            else:
-                rdata_str = f"{{{row['name']}_rdata, {align_offset*8}'b0}}"
-            fout.write(f"     {row['addr']}: rdata_int = {rdata_str};\n")
+    # concatenate rdata wires with same 32 bit address
+    rdata_cases = get_rdata_cases(table)
+    for rdata_case in rdata_cases:
+        fout.write(rdata_case)
 
     fout.write("     default: rdata_int = 1'b0;\n")
     fout.write("   endcase\n")
@@ -337,34 +383,30 @@ def get_defines():
 
 # Get C type from swreg width
 # uses unsigned int types from C stdint library
-# width: SWREG width
-def swreg_type(width, defines):
-    # Check if width is a number string (1, 8, 15, etc)
+# nbytes: SWREG nbytes
+def swreg_type(nbytes, defines):
+    # Check if nbytes is a number string (1, 8, 15, etc)
     try:
-        width_int = int(width)
+        nbytes_int = int(nbytes)
     except ValueError:
         # width is a parameter or macro (example: DATA_W, ADDR_W)
-        eval_str = width.replace("`", "").replace(",", "")
+        eval_str = nbytes.replace("`", "").replace(",", "")
         for key, val in defines.items():
             eval_str = eval_str.replace(str(key), str(val))
         try:
-            width_int = int(eval_str)
+            nbytes_int = int(eval_str)
         except ValueError:
             # eval_str has undefined parameters: use default value
-            width_int = 32
+            nbytes_int = 4
 
-    if width_int < 1:
-        print(f"MKREGS: invalid SWREG width value {width}.")
-        width_int = 32
+    if nbytes_int < 1:
+        print(f"MKREGS: invalid SWREG nbytes value {nbytes}.")
+        nbytes_int = 4
 
-    type_dict = {8: "uint8_t", 16: "uint16_t", 32: "uint32_t", 64: "uint64_t"}
+    type_dict = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t", 8: "uint64_t"}
     default_width = "uint64_t"
 
-    # next 8*2^k big enough to store width
-    next_pow2 = 2 ** (math.ceil(math.log2(math.ceil(width_int / 8))))
-    sw_width = 8 * next_pow2
-
-    return type_dict.get(sw_width, default_width)
+    return type_dict.get(nbytes_int, default_width)
 
 
 def write_swheader(table, regfile_name, core_prefix, defines):
@@ -372,30 +414,30 @@ def write_swheader(table, regfile_name, core_prefix, defines):
     fout = open(regfile_name + ".h", "w")
 
     fout.write("//This file was generated by script mkregs.py\n\n")
-    fout.write(f"#ifndef H_IOB_{core_prefix}_SWREG_H\n")
-    fout.write(f"#define H_IOB_{core_prefix}_SWREG_H\n\n")
+    fout.write(f"#ifndef H_{core_prefix}_SWREG_H\n")
+    fout.write(f"#define H_{core_prefix}_SWREG_H\n\n")
     fout.write("#include <stdint.h>\n\n")
 
-    fout.write("//register address mapping\n")
+    fout.write("//register/memory address mapping\n")
+
+    fout.write("//Write Addresses\n")
     for row in table:
-        if row["reg_type"] == "REG":
+        if row["rw_type"] == "W":
             fout.write(f"#define {row['name']} {row['addr']}\n")
 
-    fout.write("//memory address mapping\n")
+    fout.write("//Read Addresses\n")
     for row in table:
-        if row["reg_type"] == "MEM":
+        if row["rw_type"] == "R":
             fout.write(f"#define {row['name']} {row['addr']}\n")
 
     fout.write("\n// Base Address\n")
-    fout.write("static int base;\n")
     fout.write(f"void {core_prefix}_INIT_BASEADDR(uint32_t addr);\n")
 
     fout.write("\n// Core Setters\n")
     for row in table:
-        read_write = row["rw_type"]
-        if read_write == "W":
+        if row["rw_type"] == "W":
             parsed_name = row['name'].split("_", 1)[1]
-            sw_type = swreg_type(row['width'], defines)
+            sw_type = swreg_type(row['nbytes'], defines)
             if row["reg_type"] == "REG":
                 fout.write(f"void {core_prefix}_SET_{parsed_name}({sw_type} value);\n")
             elif row["reg_type"] == "MEM":
@@ -404,10 +446,9 @@ def write_swheader(table, regfile_name, core_prefix, defines):
 
     fout.write("\n// Core Getters\n")
     for row in table:
-        read_write = row["rw_type"]
-        if read_write == "R":
+        if row["rw_type"] == "R":
             parsed_name = row['name'].split("_", 1)[1]
-            sw_type = swreg_type(row['width'], defines)
+            sw_type = swreg_type(row['nbytes'], defines)
             if row["reg_type"] == "REG":
                 fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}();\n")
             elif row["reg_type"] == "MEM":
@@ -415,7 +456,7 @@ def write_swheader(table, regfile_name, core_prefix, defines):
                 addr_type = swreg_type(addr_w, defines)
                 fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}({addr_type} addr);\n")
 
-    fout.write(f"\n#endif // H_IOB_{core_prefix}_SWREG_H\n")
+    fout.write(f"\n#endif // H_{core_prefix}_SWREG_H\n")
 
     fout.close()
 
@@ -430,16 +471,16 @@ def write_sw_emb(table, regfile_name, core_prefix, defines):
     fout.write(f'#include "{swheader_name}"\n\n')
 
     fout.write("\n// Base Address\n")
+    fout.write("static int base;\n")
     fout.write(f"void {core_prefix}_INIT_BASEADDR(uint32_t addr) {{\n")
     fout.write("\tbase = addr;\n")
     fout.write("}\n")
 
     fout.write("\n// Core Setters\n")
     for row in table:
-        read_write = row["rw_type"]
-        if read_write == "W":
+        if row["rw_type"] == "W":
             parsed_name = row['name'].split("_", 1)[1]
-            sw_type = swreg_type(row['width'], defines)
+            sw_type = swreg_type(row['nbytes'], defines)
             if row["reg_type"] == "REG":
                 fout.write(f"void {core_prefix}_SET_{parsed_name}({sw_type} value) {{\n")
                 fout.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({row['name']}) ) ) = (value));\n")
@@ -447,15 +488,14 @@ def write_sw_emb(table, regfile_name, core_prefix, defines):
             elif row["reg_type"] == "MEM":
                 addr_type = swreg_type(row['addr_w'], defines)
                 fout.write(f"void {core_prefix}_SET_{parsed_name}({addr_type} addr, {sw_type} value) {{\n")
-                fout.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({row['name']}) + (addr<<2) ) ) = (value));\n")
+                fout.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({row['name']}) + (addr) ) ) = (value));\n")
                 fout.write("}\n\n")
 
     fout.write("\n// Core Getters\n")
     for row in table:
-        read_write = row["rw_type"]
-        if read_write == "R":
+        if row["rw_type"] == "R":
             parsed_name = row['name'].split("_", 1)[1]
-            sw_type = swreg_type(row['width'], defines)
+            sw_type = swreg_type(row['nbytes'], defines)
             if row["reg_type"] == "REG":
                 fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}() {{\n")
                 fout.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({row['name']}) ) ));\n")
@@ -463,7 +503,7 @@ def write_sw_emb(table, regfile_name, core_prefix, defines):
             elif row["reg_type"] == "MEM":
                 addr_type = swreg_type(row['addr_w'], defines)
                 fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}({addr_type} addr) {{\n")
-                fout.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({row['name']}) + (addr<<2) ) ));\n")
+                fout.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({row['name']}) + (addr) ) ));\n")
                 fout.write("}\n\n")
 
     fout.close()
@@ -644,11 +684,11 @@ def swreg_parse(code, hwsw, top):
         write_hwheader(table, regfile_name)
         write_hw(table, regfile_name)
 
-    # elif hwsw == "SW":
-    #     core_prefix = top.upper()
-    #     defines = get_defines()
-    #     write_swheader(table, regfile_name, core_prefix, defines)
-    #     write_sw_emb(table, regfile_name, core_prefix, defines)
+    elif hwsw == "SW":
+        core_prefix = top.upper()
+        defines = get_defines()
+        write_swheader(table, regfile_name, core_prefix, defines)
+        write_sw_emb(table, regfile_name, core_prefix, defines)
 
 
 def main():
