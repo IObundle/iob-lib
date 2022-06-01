@@ -5,10 +5,10 @@ ifeq ($(filter iob_ram_dp_be, $(HW_MODULES)),)
 HW_MODULES+=iob_ram_dp_be
 
 # Submodules
-include $(MEM_DIR)/hardware/ram/iob_ram_dp/hardware.mk
+include $(LIB_DIR)/hardware/ram/iob_ram_dp/hardware.mk
 
 # Sources
-VSRC+=$(MEM_DIR)/hardware/ram/iob_ram_dp_be/iob_ram_dp_be.v
+VSRC+=$(LIB_DIR)/hardware/ram/iob_ram_dp_be/iob_ram_dp_be.v
 
 endif
 endif

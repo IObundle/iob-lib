@@ -4,6 +4,6 @@ ifeq ($(filter iob_gray_counter, $(HW_MODULES)),)
 HW_MODULES+=iob_gray_counter
 
 # Sources
-VSRC+=$(MEM_DIR)/hardware/fifo/iob_gray_counter/iob_gray_counter.v
+VSRC+=$(LIB_DIR)/hardware/fifo/iob_gray_counter/iob_gray_counter.v
 
 endif
