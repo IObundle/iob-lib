@@ -6,36 +6,8 @@ import sys
 import os
 from parse import parse
 
-import mkregs
+from mkregs import calc_swreg_addr, swreg_get_fields, header_parse
 
-'''
-Parse header files
-'''
-def header_parse (vh, defines):
-
-    for line in vh:
-        d_flds = parse('`define {} {}\n', line.lstrip(' '))
-
-        if d_flds is None:
-            continue #not a macro
-
-        #NAME
-        name = d_flds[0].lstrip(' ')
-
-        #VALUE
-        eval_str = d_flds[1].strip('`').lstrip(' ').replace("$", "") #to replace $clog2 with clog2
-        for key, val in defines.items():
-            eval_str = eval_str.replace(str(key),str(val))
-
-        try:
-            value = eval(eval_str)
-        except:
-            #eval_str has undefined parameters: use as is
-            value = eval_str
-
-        #insert in dictionary
-        if name not in defines:
-            defines[name] = value
 
 '''
 Write Latex table
@@ -238,14 +210,14 @@ def swreg_parse (vh, defines) :
     # get all swregs from mkregs_conf with addresses pre calculated
     swreg_list = []
     for line in vh:
-        swreg_flds = mkregs.swreg_get_fields(line)
+        swreg_flds = swreg_get_fields(line)
         if swreg_flds is None:
             continue
 
         swreg_list.append(swreg_flds)
 
     # calculate address field
-    swreg_list = mkregs.calc_swreg_addr(swreg_list)
+    swreg_list = calc_swreg_addr(swreg_list)
 
     for line in vh:
 
@@ -260,7 +232,7 @@ def swreg_parse (vh, defines) :
             continue
 
         swreg_flds = []
-        swreg_dict = mkregs.swreg_get_fields(line)
+        swreg_dict = swreg_get_fields(line)
         if swreg_dict is None:
             continue
 

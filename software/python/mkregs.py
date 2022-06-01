@@ -4,9 +4,8 @@
 #
 
 import sys
-from parse import search
+from parse import parse, search
 import math
-from verilog2tex import header_parse
 
 
 def print_usage():
@@ -79,6 +78,35 @@ def print_help():
     IOB_SWMEM_R(CORE_READ_BUFFER, 16, 10)//Core read buffer"""
 
     print(help_str)
+
+
+def header_parse (vh, defines):
+    """ Parse header files
+    """
+
+    for line in vh:
+        d_flds = parse('`define {} {}\n', line.lstrip(' '))
+
+        if d_flds is None:
+            continue #not a macro
+
+        #NAME
+        name = d_flds[0].lstrip(' ')
+
+        #VALUE
+        eval_str = d_flds[1].strip('`').lstrip(' ').replace("$", "") #to replace $clog2 with clog2
+        for key, val in defines.items():
+            eval_str = eval_str.replace(str(key),str(val))
+
+        try:
+            value = eval(eval_str)
+        except:
+            #eval_str has undefined parameters: use as is
+            value = eval_str
+
+        #insert in dictionary
+        if name not in defines:
+            defines[name] = value
 
 
 def has_mem_type(table, mem_type_list=["W", "R"]):
