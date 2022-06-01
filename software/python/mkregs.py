@@ -430,6 +430,18 @@ def write_swheader(table, regfile_name, core_prefix, defines):
         if row["rw_type"] == "R":
             fout.write(f"#define {row['name']} {row['addr']}\n")
 
+    fout.write("\n//register/memory data widths (bit)\n")
+
+    fout.write("//Write Register/Memory\n")
+    for row in table:
+        if row["rw_type"] == "W":
+            fout.write(f"#define {row['name']}_W {int(row['nbytes'])*8}\n")
+
+    fout.write("//Read Register/Memory\n")
+    for row in table:
+        if row["rw_type"] == "R":
+            fout.write(f"#define {row['name']}_W {int(row['nbytes'])*8}\n")
+
     fout.write("\n// Base Address\n")
     fout.write(f"void {core_prefix}_INIT_BASEADDR(uint32_t addr);\n")
 
