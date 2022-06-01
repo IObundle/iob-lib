@@ -31,7 +31,7 @@ test: clean-all
 	make build TEST_LOG=">> test.log"
 
 clean: hw-clean
-	find . -type f -not  \( -name 'Makefile' -o -name 'test.expected' -o -name 'test.log' \) -delete
+	find . -type f -not  \( $(NOCLEAN) \) -delete
 ifneq ($(FPGA_SERVER),)
 	rsync -avz --delete --exclude .git $(UART_DIR) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)
 	ssh $(FPGA_USER)@$(FPGA_SERVER) 'cd $(REMOTE_ROOT_DIR); make fpga-clean FPGA_FAMILY=$(FPGA_FAMILY)'

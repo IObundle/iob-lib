@@ -37,6 +37,13 @@ ifeq ($(VERSION),)
 endif
 	echo $(VLINE) > version.txt
 
+
+#lib
+VHDR+=iob_lib.vh
+iob_lib.vh: $(LIB_DIR)/hardware/include/iob_lib.vh
+	cp $< $@
+
+
 gen-clean:
 	@rm -f *# *~
 
