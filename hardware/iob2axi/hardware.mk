@@ -6,7 +6,7 @@ include $(AXI_DIR)/config.mk
 HW_MODULES+=iob2axi
 
 # Submodules
-include $(MEM_DIR)/hardware/fifo/iob_fifo_sync/hardware.mk
+include $(LIB_DIR)/hardware/fifo/iob_fifo_sync/hardware.mk
 
 # Includes
 INCLUDE+=$(incdir). $(incdir)$(AXI_DIR)/hardware/include

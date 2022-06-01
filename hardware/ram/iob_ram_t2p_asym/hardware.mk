@@ -5,10 +5,10 @@ ifeq ($(filter iob_ram_t2p_asym, $(HW_MODULES)),)
 HW_MODULES+=iob_ram_t2p_asym
 
 # Submodules
-include $(MEM_DIR)/hardware/ram/iob_ram_t2p/hardware.mk
+include $(LIB_DIR)/hardware/ram/iob_ram_t2p/hardware.mk
 
 # Sources
-VSRC+=$(MEM_DIR)/hardware/ram/iob_ram_t2p_asym/iob_ram_t2p_asym.v
+VSRC+=$(LIB_DIR)/hardware/ram/iob_ram_t2p_asym/iob_ram_t2p_asym.v
 
 endif
 endif
