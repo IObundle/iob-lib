@@ -1,0 +1,3 @@
+[submodule "submodules/VERILOG_AXI"]
+	path = submodules/VERILOG_AXI
+	url = git@github.com:IObundle/verilog-axi.git
