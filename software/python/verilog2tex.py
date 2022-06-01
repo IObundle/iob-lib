@@ -6,6 +6,8 @@ import sys
 import os
 from parse import parse
 
+import mkregs
+
 '''
 Parse header files
 '''
@@ -220,11 +222,30 @@ def io_parse (io_lines, params, defines):
         write_table(table_name + '_if', table)
 
 
+def get_swreg_by_name(swreg_list, name):
+    for swreg in swreg_list:
+        if 'name' in swreg and swreg['name'] == name:
+            return swreg
+
+    return None
+
 def swreg_parse (vh, defines) :
 
     swreg_cnt = 0
     table_found = 0
     table = []
+
+    # get all swregs from mkregs_conf with addresses pre calculated
+    swreg_list = []
+    for line in vh:
+        swreg_flds = mkregs.swreg_get_fields(line)
+        if swreg_flds is None:
+            continue
+
+        swreg_list.append(swreg_flds)
+
+    # calculate address field
+    swreg_list = mkregs.calc_swreg_addr(swreg_list)
 
     for line in vh:
 
@@ -239,27 +260,27 @@ def swreg_parse (vh, defines) :
             continue
 
         swreg_flds = []
-        swreg_flds_tmp = parse('{}IOB_SWREG_{}({},{},{}){}//{}', line)
+        swreg_dict = mkregs.swreg_get_fields(line)
+        if swreg_dict is None:
+            continue
 
-        if swreg_flds_tmp is None:
-            swreg_flds_tmp = parse('IOB_SWREG_{}({},{},{}){}//{}', line)
-            if swreg_flds_tmp is None: continue #not a sw reg
-        else:
-            swreg_flds_tmp = swreg_flds_tmp[1:]
+        swreg_dict = get_swreg_by_name(swreg_list, swreg_dict['name'])
+        if swreg_dict is None:
+            continue
 
         #NAME
-        swreg_flds.append(swreg_flds_tmp[1].replace('_','\_').strip(' '))
+        swreg_flds.append(swreg_dict['name'].replace('_','\_'))
 
         #TYPE
-        swreg_flds.append(swreg_flds_tmp[0])
+        swreg_flds.append(swreg_dict['rw_type'])
 
         #ADDRESS
-        swreg_flds.append(4*swreg_cnt)
-        swreg_cnt = swreg_cnt + 1
+        swreg_flds.append(swreg_dict['addr'])
 
         #WIDTH
         #may be defined using macros: replace and evaluate
-        eval_str = swreg_flds_tmp[2].replace('`','').replace(',','')
+        tmp_width = f"{int(swreg_dict['nbytes'])*8}"
+        eval_str = tmp_width.replace('`','').replace(',','')
         for key, val in defines.items():
             eval_str = eval_str.replace(str(key),str(val))
         try:
@@ -269,10 +290,10 @@ def swreg_parse (vh, defines) :
             swreg_flds.append(eval_str.replace('_','\_').strip(' '))
 
         #DEFAULT VALUE
-        swreg_flds.append(swreg_flds_tmp[3])
+        swreg_flds.append(swreg_dict['default_value'])
 
         #DESCRIPTION
-        swreg_flds.append(swreg_flds_tmp[5].replace('_','\_'))
+        swreg_flds.append(swreg_dict['description'].replace('_','\_'))
 
         table.append(swreg_flds)
 
