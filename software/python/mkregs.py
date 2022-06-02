@@ -141,7 +141,6 @@ def gen_mem_wires(table, fout):
     fout.write("\n//mem wires\n")
     for reg in table:
         if reg["reg_type"] == "MEM":
-            data_w = int(reg['nbytes'])*8
             fout.write(f"localparam {reg['name']}_ADDR_OFFSET = {reg['addr']};\n")
             fout.write(f"`IOB_WIRE({reg['name']}_addr, {reg['addr_w']})\n")
             fout.write(f"`IOB_WIRE({reg['name']}_addr_int, DATA_W+1)\n")
@@ -183,13 +182,19 @@ def gen_mem_read_hw(table, fout):
     fout.write(f"\n`IOB_WIRE(mem_switch, {num_read_mems})\n")
     fout.write(f"`IOB_WIRE(mem_switch_reg, {num_read_mems})\n")
     mem_read_en_concat_str = "}"
+    first_reg = 1
     for reg in table:
         if reg['reg_type'] == "MEM" and reg['rw_type'] == "R":
-            mem_read_en_concat_str = f"{reg['name']},{mem_read_en_concat_str}"
+            if first_reg:
+                mem_read_en_concat_str = f"{reg['name']}_ren{mem_read_en_concat_str}"
+                first_reg = 0
+            else:
+                mem_read_en_concat_str = f"{reg['name']}_ren,{mem_read_en_concat_str}"
+
     mem_read_en_concat_str = "{" + mem_read_en_concat_str
     fout.write(f"`IOB_WIRE2WIRE( {mem_read_en_concat_str}, mem_switch)\n")
     # Delay SWMEM_R address 1 cycle to wait for rdata
-    fout.write(f"iob_reg #({num_read_mems}) mem_switch_reg (clk, rst, {{{num_read_mems}{{1'b0}}}}, 1'b0, {{{num_read_mems}{{1'b0}}}}, 1'b1, mem_switch, mem_switch_reg);\n")
+    fout.write(f"iob_reg #({num_read_mems}) mem_switch_ (clk, rst, {{{num_read_mems}{{1'b0}}}}, 1'b0, {{{num_read_mems}{{1'b0}}}}, 1'b1, mem_switch, mem_switch_reg);\n")
     mem_switch_val = 1
     fout.write("always @* begin\n")
     fout.write("\tcase(mem_switch_reg)\n")
@@ -278,10 +283,9 @@ def write_hw(table, regfile_name):
     if has_mem_type(table, ["R"]):
         fout.write("//Select read data from registers or memory\n")
         fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
-        fout.write("`IOB_WIRE(mem_read_sel, 1)\n")
         fout.write("`IOB_WIRE(mem_read_sel_reg, 1)\n")
         # Register condition for SWMEM_R access
-        fout.write("iob_reg #(1) mem_read_sel_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, (valid & (wstrb == 0) & mem_read_sel), mem_read_sel_reg);\n")
+        fout.write("iob_reg #(1) mem_read_sel_ (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, (valid & (wstrb == 0) & |mem_switch), mem_read_sel_reg);\n")
         # skip rdata_int2 delay for memory read accesses
         fout.write("`IOB_VAR2WIRE((mem_read_sel_reg) ? mem_rdata_int : rdata_int2, rdata)\n\n")
     else:
