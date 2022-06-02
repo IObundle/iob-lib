@@ -34,7 +34,7 @@ def print_help():
             <TOP>_swreg_def.vh contains verilog definitions for the generated
             registers and memories.
             <TOP>_swreg_gen.vh contains verilog instantiation and logic for the
-            generated registers and memories.
+            software accessible registers and memories.
         [SW files]: generates <TOP>_swreg.h and <TOP>_swreg_emb.c files.
             <TOP>_swreg.h is a C header with addressing, corresponding C data
             types getters and setters for the generated registers and memories.
@@ -44,38 +44,50 @@ def print_help():
             setters and getters defined in <TOP>_swreg.h.
 
     mkregs.conf file:
-        The configuration file supports the following types of register and
-        memory declarations:
-
-        SOFTWARE IOB_ACCESSIBLE IOB_REGISTERS:
-            IOB_SWREG_R(NAME, WIDTH, RST_VAL)
-                sw can read NAME at address NAME_ADDR
-                hw can assign wire NAME
-            IOB_SWREG_W(NAME, WIDTH, RST_VAL)
-                sw can write NAME at address NAME_ADDR
-                hw can use signal NAME
-
-        SOFTWARE IOB_ACCESSIBLE IOB_MEMORIES:
-            IOB_SWMEM_R(NAME, WIDTH, ADDR_W)
-                sw can read NAME[0-(2^ADDR_W-1)]
+        The configuration file supports the following register/memory
+        declarations:
+            IOB_SWREG_R(NAME, NBYTES, RST_VAL, ADDR, ADDR_W) // Description
+                sw can read:
+                    NAME                 (REG case)
+                    NAME[0-(2^ADDR_W-1)] (MEM case)
                 hw can use:
-                    wire NAME_addr_int;
-                    wire NAME_ren_int;
+                    wire NAME_addr; (MEM only)
+                    wire NAME_ren;
                 hw can assign
-                    wire NAME_rdata_int;
-            IOB_SWMEM_W(NAME, WIDTH, ADDR_W)
-                sw can write NAME[0-(2^ADDR_W-1)]
+                    wire NAME_rdata;
+            IOB_SWREG_W(NAME, NBYTES, RST_VAL, ADDR, ADDR_W) // Description
+                sw can write:
+                    NAME                 (REG case)
+                    NAME[0-(2^ADDR_W-1)] (MEM case)
                 hw can use:
-                    wire NAME_addr_int;
-                    wire NAME_wdata_int;
-                    wire NAME_wstrb_int;
+                    wire NAME_wdata;
+                    wire NAME_en;       (REG only)
+                    wire NAME_addr;     (MEM only)
+                    wire NAME_wstrb;    (MEM only)
+
+    mkregs.conf fields:
+    - NAME: Name of software accessible register.
+    - NBYTES: Data width in bytes. (Powers of two only: 1, 2, 4, ...)
+    - RST_VAL: Reset value. (Only used for documentation)
+    - ADDR: Register byte address.
+        The ADDR field needs to be a multiple of NBYTES.
+        For memories, the ADDR needs to be a multiple of CPU data width in
+        bytes.
+        ADDR = -1 assigns automatic address to register/memory. The automatic
+        addresses are always higher than the manually assigned addresses.
+        The read and write addresses are independent. A read register and
+        another write register can have the same address.
+    - ADDR_W: Address width in bits for register.
+        ADDR_W = 0: generates register;
+        ADDR_W > 0: generates memory;
 
     Example mkregs.conf file:
     //START_SWREG_TABLE example_core
-    IOB_SWREG_W(CORE_RUN, 1, 0) //Brief description.
-    IOB_SWMEM_W(CORE_WR_BUFFER, 8, 12) //Core write buffer
-    IOB_SWREG_R(CORE_DONE, 1, 0) //Done signal.
-    IOB_SWMEM_R(CORE_READ_BUFFER, 16, 10)//Core read buffer"""
+    IOB_SWREG_W(CORE_RUN, 1, 0, 2, 0) //Run write register at address 2
+    IOB_SWMEM_W(CORE_WR_BUF, 2, 0, 4, 12) //2^12 x 16 bit write mem at addr 4
+    IOB_SWREG_R(CORE_DONE, 1, 0, 1, 0) //Done read register at address 1
+    IOB_SWMEM_R(CORE_RD_BUF, 4, 0, 4, 10) //2^10 x 4 bit read mem at addr 4
+    """
 
     print(help_str)
 
