@@ -80,7 +80,7 @@ def print_help():
     print(help_str)
 
 
-def header_parse (vh, defines):
+def header_parse(vh, defines):
     """ Parse header files
     """
 
@@ -88,23 +88,23 @@ def header_parse (vh, defines):
         d_flds = parse('`define {} {}\n', line.lstrip(' '))
 
         if d_flds is None:
-            continue #not a macro
+            continue  # not a macro
 
-        #NAME
+        # NAME
         name = d_flds[0].lstrip(' ')
 
-        #VALUE
-        eval_str = d_flds[1].strip('`').lstrip(' ').replace("$", "") #to replace $clog2 with clog2
+        # VALUE
+        eval_str = d_flds[1].strip('`').lstrip(' ').replace("$", "")  # to replace $clog2 with clog2
         for key, val in defines.items():
-            eval_str = eval_str.replace(str(key),str(val))
+            eval_str = eval_str.replace(str(key), str(val))
 
         try:
             value = eval(eval_str)
-        except:
-            #eval_str has undefined parameters: use as is
+        except ValueError:
+            # eval_str has undefined parameters: use as is
             value = eval_str
 
-        #insert in dictionary
+        # insert in dictionary
         if name not in defines:
             defines[name] = value
 
@@ -134,12 +134,11 @@ def gen_mem_wires(table, fout):
             fout.write(f"`IOB_WIRE({reg['name']}_addr, {reg['addr_w']})\n")
             fout.write(f"`IOB_WIRE({reg['name']}_addr_int, DATA_W+1)\n")
             if reg["rw_type"] == "W":
-                fout.write(f"`IOB_VAR({reg['name']}_wdata, {data_w})\n")
-                fout.write(f"`IOB_WIRE({reg['name']}_wstrb, {reg['nbytes']})\n")
+                fout.write(f"`IOB_WIRE({reg['name']}_wdata, DATA_W)\n")
+                fout.write(f"`IOB_WIRE({reg['name']}_wstrb, (DATA_W/8))\n")
             else:
-                fout.write(f"`IOB_WIRE({reg['name']}_rdata, {data_w})\n")
+                fout.write(f"`IOB_WIRE({reg['name']}_rdata, DATA_W)\n")
                 fout.write(f"`IOB_WIRE({reg['name']}_ren, 1)\n")
-                fout.write(f"`IOB_VAR({reg['name']}_rdata_int, 32)\n")
             fout.write("\n")
     fout.write("\n")
 
@@ -151,20 +150,8 @@ def gen_mem_write_hw(table, fout):
             fout.write(f"`IOB_WIRE2WIRE((address - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
             fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{reg['addr_w']}-1:0], {reg['name']}_addr)\n")
             # get correct bytes from aligned wdata
-            num_splits = int(4/int(reg['nbytes']))
-            num_splits_w = int(math.log(num_splits, 2))
-            fout.write("always @* begin\n")
-            if num_splits_w == 0:
-                fout.write(f"{reg['name']}_wdata = wdata;\n")
-            else:
-                fout.write(f"    case({reg['name']}_addr_int[0+:{num_splits_w}])\n")
-                data_w = int(reg['nbytes'])*8
-                for i in range(num_splits-1):
-                    fout.write(f"        {i}: {reg['name']}_wdata = wdata[{data_w*i}+:{data_w}];\n")
-                fout.write(f"        default: {reg['name']}_wdata = wdata[{data_w*(num_splits-1)}+:{data_w}];\n")
-                fout.write("    endcase\n")
-            fout.write("end\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{reg['addr_w']}] == 0 )) ? {{{reg['nbytes']}{{|wstrb}}}} : {{{reg['nbytes']}{{1'b0}}}}, {reg['name']}_wstrb)")
+            fout.write(f"`IOB_WIRE2WIRE(wdata, {reg['name']}_wdata)\n")
+            fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{reg['addr_w']}] == 0 ) & (|wstrb)) ? wstrb : {{(DATA_W/8){{1'b0}}}}, {reg['name']}_wstrb)\n")
 
 
 def gen_mem_read_hw(table, fout):
@@ -175,28 +162,9 @@ def gen_mem_read_hw(table, fout):
     fout.write("\n//mem read logic\n")
     for reg in table:
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
-            fout.write(f"`IOB_WIRE({reg['name']}_addr_reg, 2)\n")
-            fout.write(f"iob_reg #(2) {reg['name']}_addr_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, {reg['name']}_addr_int[0+:2], {reg['name']}_addr_reg);\n\n")
             fout.write(f"`IOB_WIRE2WIRE((address - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
             fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{reg['addr_w']}-1:0], {reg['name']}_addr)\n")
             fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{reg['addr_w']}] == 0 ) & ~(|wstrb)), {reg['name']}_ren)\n")
-            # align MEM rdata
-            num_splits = int(4/int(reg['nbytes']))
-            num_splits_w = int(math.log(num_splits, 2))
-            fout.write("always @* begin\n")
-            if num_splits_w == 0:
-                fout.write(f"{reg['name']}_rdata_int = {reg['name']}_rdata;\n")
-            else:
-                fout.write(f"    case({reg['name']}_addr_reg[0+:{num_splits_w}])\n")
-                data_w = int(reg['nbytes'])*8
-                for i in range(num_splits-1):
-                    if i == 0:
-                        fout.write(f"        {i}: {reg['name']}_rdata_int = {reg['name']}_rdata;\n")
-                    else:
-                        fout.write(f"        {i}: {reg['name']}_rdata_int = {{{reg['name']}_rdata, {data_w*i}'b0}};\n")
-                fout.write(f"        default: {reg['name']}_rdata_int = {{{reg['name']}_rdata, {data_w*(num_splits-1)}'b0}};\n")
-                fout.write("    endcase\n")
-            fout.write("end\n")
 
     # switch case for mem reads
     num_read_mems = get_num_mem_type(table, "R")
@@ -209,13 +177,13 @@ def gen_mem_read_hw(table, fout):
     mem_read_en_concat_str = "{" + mem_read_en_concat_str
     fout.write(f"`IOB_WIRE2WIRE( {mem_read_en_concat_str}, mem_switch)\n")
     # Delay SWMEM_R address 1 cycle to wait for rdata
-    fout.write(f"iob_reg #({num_read_mems}) mem_switch_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, mem_switch, mem_switch_reg);\n")
+    fout.write(f"iob_reg #({num_read_mems}) mem_switch_reg (clk, rst, {{{num_read_mems}{{1'b0}}}}, 1'b0, {{{num_read_mems}{{1'b0}}}}, 1'b1, mem_switch, mem_switch_reg);\n")
     mem_switch_val = 1
     fout.write("always @* begin\n")
     fout.write("\tcase(mem_switch_reg)\n")
     for reg in table:
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
-            fout.write(f"\t\t{mem_switch_val}: mem_rdata_int = {reg['name']}_rdata_int;\n")
+            fout.write(f"\t\t{mem_switch_val}: mem_rdata_int = {reg['name']}_rdata;\n")
             mem_switch_val = int(mem_switch_val * 2)
     fout.write("\t\tdefault: mem_rdata_int = 1'b0;\n")
     fout.write("\tendcase\n")
@@ -413,7 +381,7 @@ def get_defines():
 # uses unsigned int types from C stdint library
 # nbytes: SWREG nbytes
 def swreg_type(nbytes, defines):
-    # Check if nbytes is a number string (1, 8, 15, etc)
+    # Check if nbytes is a number string (1, 2, 4, etc)
     try:
         nbytes_int = int(nbytes)
     except ValueError:
@@ -437,7 +405,7 @@ def swreg_type(nbytes, defines):
     return type_dict.get(nbytes_int, default_width)
 
 
-def write_swheader(table, regfile_name, core_prefix, defines):
+def write_swheader(table, regfile_name, core_prefix, defines, cpu_nbytes=4):
 
     fout = open(regfile_name + ".h", "w")
 
@@ -481,7 +449,7 @@ def write_swheader(table, regfile_name, core_prefix, defines):
             if row["reg_type"] == "REG":
                 fout.write(f"void {core_prefix}_SET_{parsed_name}({sw_type} value);\n")
             elif row["reg_type"] == "MEM":
-                addr_type = swreg_type(row['addr_w'], defines)
+                addr_type = swreg_type(cpu_nbytes, defines)
                 fout.write(f"void {core_prefix}_SET_{parsed_name}({addr_type} addr, {sw_type} value);\n")
 
     fout.write("\n// Core Getters\n")
@@ -492,8 +460,7 @@ def write_swheader(table, regfile_name, core_prefix, defines):
             if row["reg_type"] == "REG":
                 fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}();\n")
             elif row["reg_type"] == "MEM":
-                addr_w = row["addr_w"]
-                addr_type = swreg_type(addr_w, defines)
+                addr_type = swreg_type(cpu_nbytes, defines)
                 fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}({addr_type} addr);\n")
 
     fout.write(f"\n#endif // H_{core_prefix}_SWREG_H\n")
@@ -501,7 +468,7 @@ def write_swheader(table, regfile_name, core_prefix, defines):
     fout.close()
 
 
-def write_sw_emb(table, regfile_name, core_prefix, defines):
+def write_sw_emb(table, regfile_name, core_prefix, defines, cpu_nbytes=4):
 
     fout = open(regfile_name + "_emb.c", "w")
 
@@ -526,9 +493,9 @@ def write_sw_emb(table, regfile_name, core_prefix, defines):
                 fout.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({row['name']}) ) ) = (value));\n")
                 fout.write("}\n\n")
             elif row["reg_type"] == "MEM":
-                addr_type = swreg_type(row['addr_w'], defines)
+                addr_type = swreg_type(cpu_nbytes, defines)
                 fout.write(f"void {core_prefix}_SET_{parsed_name}({addr_type} addr, {sw_type} value) {{\n")
-                fout.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({row['name']}) + (addr) ) ) = (value));\n")
+                fout.write(f"\t*(((volatile {sw_type} *) (base + {row['name']})) + addr) = value;\n")
                 fout.write("}\n\n")
 
     fout.write("\n// Core Getters\n")
@@ -541,20 +508,27 @@ def write_sw_emb(table, regfile_name, core_prefix, defines):
                 fout.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({row['name']}) ) ));\n")
                 fout.write("}\n\n")
             elif row["reg_type"] == "MEM":
-                addr_type = swreg_type(row['addr_w'], defines)
+                addr_type = swreg_type(cpu_nbytes, defines)
                 fout.write(f"{sw_type} {core_prefix}_GET_{parsed_name}({addr_type} addr) {{\n")
-                fout.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({row['name']}) + (addr) ) ));\n")
+                fout.write(f"\treturn *(((volatile {sw_type} *) (base + {row['name']})) + addr);\n")
                 fout.write("}\n\n")
 
     fout.close()
 
 
-def align_addr(addr, reg):
+def align_addr(addr, reg, cpu_nbytes=4):
     aligned_addr = addr
-    reg_w = int(reg["nbytes"])
+    if reg['reg_type'] == "REG":
+        reg_w = int(reg["nbytes"])
+    elif reg['reg_type'] == "MEM":
+        # memory address aligned with CPU data width
+        reg_w = cpu_nbytes
+    else:
+        print(f"Error: invalid REG type for {reg['name']}")
+        return -1
     off_bytes = (addr % reg_w)
     if off_bytes:
-        aligned_addr = addr + reg_w - off_bytes
+        aligned_addr = addr + (reg_w - off_bytes)
 
     return aligned_addr
 
@@ -567,7 +541,7 @@ def get_regs_of_type(table, rw_type):
     return type_regs
 
 
-def check_overlapped_addresses(table, rw_type):
+def check_overlapped_addresses(table, rw_type, cpu_nbytes=4):
     type_regs = get_regs_of_type(table, rw_type)
     if not type_regs:
         return
@@ -575,28 +549,64 @@ def check_overlapped_addresses(table, rw_type):
     # sort regs by address
     type_regs.sort(key=lambda i: int(i['addr']))
     for i in range(len(type_regs) - 1):
-        reg_addr_end = int(type_regs[i]['addr']) + int(type_regs[i]['nbytes']) - 1
+        reg_addr_end = int(type_regs[i]['addr']) + calc_reg_addr_space(type_regs[i], cpu_nbytes) - 1
         if reg_addr_end >= int(type_regs[i+1]['addr']):
             print(f"ERROR: {type_regs[i]['name']} and {type_regs[i+1]['name']} registers are overlapped for {rw_type} type")
 
 
-def check_addresses(table):
+def check_addresses(table, cpu_nbytes=4):
     # Check for aligned data
     for reg in table:
-        if int(reg['addr']) % int(reg['nbytes']) != 0:
-            print(f"ERROR: {reg['name']} register not aligned")
+        if reg['reg_type'] == "REG":
+            if int(reg['addr']) % int(reg['nbytes']) != 0:
+                print(f"ERROR: {reg['name']} register not aligned")
+        elif reg['reg_type'] == "MEM":
+            if int(reg['addr']) % cpu_nbytes != 0:
+                print(f"ERROR: {reg['name']} memory not aligned with cpu data width")
+        else:
+            print(f"Error: invalid REG type for {reg['name']}")
 
-    check_overlapped_addresses(table, "R")
-    check_overlapped_addresses(table, "W")
+    check_overlapped_addresses(table, "R", cpu_nbytes)
+    check_overlapped_addresses(table, "W", cpu_nbytes)
+
+
+def calc_reg_addr_space(reg, cpu_nbytes=4):
+    """Calculate REG address space in bytes
+
+    Calculates the number of bytes reserved for addressing the REG.
+    """
+    addressed_nbytes = -1
+    if reg['reg_type'] == "REG":
+        addressed_nbytes = int(reg['nbytes'])
+    elif reg['reg_type'] == "MEM":
+        mem_nbytes = int(reg['nbytes']) << int(reg['addr_w'])
+        addressed_nbytes = max(mem_nbytes, cpu_nbytes)
+    else:
+        print(f"Error: invalid REG type for {reg['name']}")
+        addressed_nbytes = -1
+
+    return addressed_nbytes
 
 
 # Calculate REG and MEM addresses
-def calc_swreg_addr(table):
+def calc_swreg_addr(table, cpu_nbytes=4):
     """Calculate REG and MEM addresses.
+
+    Parameters
+    ----------
+    table : list
+        list of register dictionaries.
+    cpu_nbytes : int
+        CPU data width in bytes. 4 bytes by default.
+
+    Returns
+    -------
+    table : list
+        list of register dictionaries with calculated addresses.
 
     Use addresses given by mkregs.conf.
     Addresses with -1 are automatically assigned after last manual address.
-    Memories are assigned starting addresses like registers.
+    Memories are assigned starting multiples of CPU DATA_W.
     Write and Read addresses are independent.
     Check for address assignment errors:
     Addresses are byte aligned:
@@ -605,17 +615,20 @@ def calc_swreg_addr(table):
         - 4 byte registers can have addresses multiples of 4
     The same address cannot be assigned to multiple read registers/memories.
     The same address cannot be assigned to multiple write registers/memories.
+    Memory address range reserve a space multiple of CPU DATA_W.
     """
     read_addr = 0
     write_addr = 0
 
-    # Get last manual address for read and write
+    # Get largest manual address for read and write
     for reg in table:
         if int(reg['addr']) >= 0:
-            if reg['rw_type'] == "R":
-                read_addr = read_addr + int(reg['nbytes'])
-            elif reg['rw_type'] == "W":
-                write_addr = write_addr + int(reg['nbytes'])
+            reg_addr = int(reg['addr'])
+            reg_nbytes = int(reg['nbytes'])
+            if reg['rw_type'] == "R" and read_addr <= reg_addr:
+                read_addr = reg_addr + reg_nbytes
+            elif reg['rw_type'] == "W" and write_addr <= reg_addr:
+                write_addr = reg_addr + reg_nbytes
             else:
                 print(f"Error: invalid RW type for {reg['name']}")
 
@@ -632,16 +645,11 @@ def calc_swreg_addr(table):
                 print(f"Error: invalid RW type for {reg['name']}")
                 continue
 
-            reg_addr = align_addr(reg_addr, reg)
+            reg_addr = align_addr(reg_addr, reg, cpu_nbytes)
             reg['addr'] = str(reg_addr)
 
             # calculate next available address
-            if reg['reg_type'] == "REG":
-                reg_addr = reg_addr + int(reg['nbytes'])
-            elif reg['reg_type'] == "MEM":
-                reg_addr = reg_addr + (int(reg['nbytes']) << int(reg['addr_w']))
-            else:
-                print(f"Error: invalid REG type for {reg['name']}")
+            reg_addr = reg_addr + calc_reg_addr_space(reg, cpu_nbytes)
 
             # update rw_type address
             if reg['rw_type'] == "R":
@@ -653,7 +661,7 @@ def calc_swreg_addr(table):
                 continue
 
     # Check for valid addresses
-    check_addresses(table)
+    check_addresses(table, cpu_nbytes)
 
     return table
 
