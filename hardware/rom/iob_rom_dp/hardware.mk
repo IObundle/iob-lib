@@ -5,7 +5,7 @@ ifeq ($(filter iob_rom_dp, $(HW_MODULES)),)
 HW_MODULES+=iob_rom_dp
 
 # Sources
-VSRC+=$(MEM_DIR)/hardware/rom/iob_rom_dp/iob_rom_dp.v
+VSRC+=$(LIB_DIR)/hardware/rom/iob_rom_dp/iob_rom_dp.v
 
 endif
 endif

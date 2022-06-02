@@ -12,7 +12,6 @@ DOC_DIR ?=$(ROOT_DIR)/document/$(DOC)
 
 # submodule paths
 LIB_DIR ?=$(ROOT_DIR)/submodules/LIB
-MEM_DIR ?=$(ROOT_DIR)/submodules/MEM
 AXI_DIR ?=$(ROOT_DIR)/submodules/AXI
 
 
