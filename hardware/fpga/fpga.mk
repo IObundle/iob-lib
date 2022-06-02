@@ -1,8 +1,5 @@
 include $(LIB_DIR)/iob_lib.mk
 
-#this dummy define is necessary to prevent passing empty arguments to tcl script
-DEFINE+=$(defmacro)DUMMY
-
 include $(ROOT_DIR)/hardware/hardware.mk
 
 #select build makefile segment according to FPGA family
