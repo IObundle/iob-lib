@@ -641,8 +641,6 @@ def calc_swreg_addr(table, cpu_nbytes=4):
                 read_addr = reg_addr + reg_nbytes
             elif reg['rw_type'] == "W" and write_addr <= reg_addr:
                 write_addr = reg_addr + reg_nbytes
-            else:
-                print(f"Error: invalid RW type for {reg['name']}")
 
     # Assign automatic addresses
     reg_addr = 0
