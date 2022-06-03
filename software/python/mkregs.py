@@ -179,7 +179,6 @@ def gen_mem_read_hw(table, fout):
 
     # switch case for mem reads
     num_read_mems = get_num_mem_type(table, "R")
-    fout.write(f"\n`IOB_WIRE(mem_switch, {num_read_mems})\n")
     fout.write(f"`IOB_WIRE(mem_switch_reg, {num_read_mems})\n")
     mem_read_en_concat_str = "}"
     first_reg = 1
@@ -284,6 +283,8 @@ def write_hw(table, regfile_name):
         fout.write("//Select read data from registers or memory\n")
         fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
         fout.write("`IOB_WIRE(mem_read_sel_reg, 1)\n")
+        num_read_mems = get_num_mem_type(table, "R")
+        fout.write(f"\n`IOB_WIRE(mem_switch, {num_read_mems})\n")
         # Register condition for SWMEM_R access
         fout.write("iob_reg #(1) mem_read_sel_ (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, (valid & (wstrb == 0) & |mem_switch), mem_read_sel_reg);\n")
         # skip rdata_int2 delay for memory read accesses
