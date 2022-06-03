@@ -1,9 +1,3 @@
-ifeq ($(filter iob_reverse, $(HW_MODULES)),)
-
-# Add to modules list
-HW_MODULES+=iob_reverse
-
-# Sources
-VSRC+=$(LIB_DIR)/hardware/iob_reverse/iob_reverse.v
-
-endif
+VSRC+=iob_reverse.v
+iob_reverse.v:$(LIB_DIR)/hardware/iob_reverse/iob_reverse.v
+	cp $< . 
