@@ -1,11 +1,4 @@
-ifneq ($(ASIC),1)
-ifeq ($(filter iob_ram_dp, $(HW_MODULES)),)
 
-# Add to modules list
-HW_MODULES+=iob_ram_dp
-
-# Sources
-VSRC+=$(LIB_DIR)/hardware/ram/iob_ram_dp/iob_ram_dp.v
-
-endif
-endif
+VSRC+=iob_ram_dp.v
+iob_ram_dp.v:$(LIB_DIR)/hardware/ram/iob_ram_dp/iob_ram_dp.v
+	cp $< .
