@@ -1,11 +1,5 @@
-ifneq (axil2iob,$(filter axil2iob, $(HW_MODULES)))
-
-# Add to modules list
-HW_MODULES+=axil2iob
-
 INCLUDE+=$(incdir)$(AXI_DIR)/hardware/include
 
-# Sources
-VSRC+=$(AXI_DIR)/hardware/axil2iob/axil2iob.v
-
-endif
+VSRC+=axil2iob.v
+axil2iob.v:$(AXI_DIR)/hardware/axil2iob/axil2iob.v
+	cp $< .
