@@ -1,19 +1,13 @@
 #PATHS
-#paths that need disambiguation by prefix 
+
+REMOTE_ROOT_DIR ?= sandbox/$(TOP_MODULE)
 HW_DIR:=$(ROOT_DIR)/hardware
 SW_DIR:=$(ROOT_DIR)/software
 
-#paths that need no disambiguation
-REMOTE_ROOT_DIR ?= sandbox/$(TOP_MODULE)
-SIM_DIR ?=$(HW_DIR)/simulation/$(SIMULATOR)
-#FPGA_DIR ?=$(shell find $(ROOT_DIR)/hardware -name $(FPGA_FAMILY))
+#build directories
+SIM_DIR ?=$(HW_DIR)/simulation
 FPGA_DIR ?=$(HW_DIR)/fpga
-DOC_DIR ?=$(ROOT_DIR)/document/$(DOC)
-
-# submodule paths
-LIB_DIR ?=$(ROOT_DIR)/submodules/LIB
-AXI_DIR ?=$(ROOT_DIR)/submodules/AXI
-
+DOC_DIR ?=$(ROOT_DIR)/document
 
 #DEFAULT SIMULATOR
 SIMULATOR ?=icarus
@@ -37,7 +31,7 @@ endif
 	echo $(VLINE) > version.txt
 
 
-#lib
+#lib verilog header
 VHDR+=iob_lib.vh
 iob_lib.vh: $(LIB_DIR)/hardware/include/iob_lib.vh
 	cp $< $@
@@ -51,7 +45,4 @@ clean-testlog:
 
 clean-all: clean-testlog clean
 
-hw-clean: gen-clean
-	@rm -f *.vh 
-
-.PHONY: gen-clean clean-testlog clean-all hw-clean
+.PHONY: gen-clean clean-testlog clean-all

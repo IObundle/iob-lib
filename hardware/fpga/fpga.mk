@@ -1,6 +1,4 @@
-include $(LIB_DIR)/iob_lib.mk
-
-include $(ROOT_DIR)/hardware/hardware.mk
+include $(ROOT_DIR)/submodules/LIB/iob_lib.mk
 
 #select build makefile segment according to FPGA family
 ifeq ($(FPGA_FAMILY),XCKU)
@@ -25,10 +23,11 @@ endif
 test: clean-all
 	make build TEST_LOG=">> test.log"
 
-clean: hw-clean
+clean:
+ifeq ($(FPGA_SERVER),)
 	find . -type f -not  \( $(NOCLEAN) \) -delete
-ifneq ($(FPGA_SERVER),)
-	rsync -avz --delete --exclude .git $(UART_DIR) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)
+else
+	rsync -avz --delete --exclude .git $(ROOT_DIR) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)
 	ssh $(FPGA_USER)@$(FPGA_SERVER) 'cd $(REMOTE_ROOT_DIR); make fpga-clean FPGA_FAMILY=$(FPGA_FAMILY)'
 endif
 

@@ -1,23 +1,17 @@
 #module paths
-ROOT_DIR:=../../..
-DUT_MODULE=iob_cache_wrapper
+VFLAGS=--cc --exe -I. $(VSRC) $(TOP_MODULE)_tb.cpp --top-module $(VTOP)
+VFLAGS+=-Wno-lint
 
-incdir:=-I
-defmacro:=-D
+ifeq ($(VCD),1)
+VFLAGS+=--trace
+endif
 
-include ../simulation.mk
+comp:
+	verilator $(VFLAGS) $(WAVE)	
+	cd ./obj_dir && make -f V$(VTOP).mk
 
-TB=testbench.cpp
-VSRC+=iob_cache_wrapper.v
-
-VFLAGS=--cc --exe $(INCLUDE) $(DEFINE) $(VSRC) $(TB) --top-module $(DUT_MODULE)
-WNO=-Wno-lint #Disable lint warnings
-WAVE=--trace  #Generate waveforms
-
-run: $(VSRC) $(VHDR)
-	verilator $(VFLAGS) $(WNO) $(WAVE)	
-	cd ./obj_dir && make -f V$(DUT_MODULE).mk
-	./obj_dir/V$(DUT_MODULE) $(TEST_LOG)
+exec: $(VSRC) $(VHDR)
+	./obj_dir/V$(VTOP) $(TEST_LOG)
 
 clean: sim-clean
 	@rm -rf ./obj_dir
