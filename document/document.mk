@@ -61,8 +61,8 @@ ifneq ($(INT_FAMILY),)
 endif
 endif
 
-VIVADOLOG = $(CORE_DIR)/hardware/fpga/vivado/$(XIL_FAMILY)/vivado.log
-QUARTUSLOG = $(CORE_DIR)/hardware/fpga/quartus/$(INT_FAMILY)/quartus.log
+VIVADOLOG = $(CORE_DIR)/hardware/fpga/vivado.log
+QUARTUSLOG = $(CORE_DIR)/hardware/fpga/quartus.log
 
 #ASIC implementation results
 asic_res:
