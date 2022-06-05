@@ -1,4 +1,4 @@
-include $(ROOT_DIR)/submodules/LIB/iob_lib.mk
+include $(CORE_DIR)/submodules/LIB/iob_lib.mk
 
 #select build makefile segment according to FPGA family
 ifeq ($(FPGA_FAMILY),XCKU)
@@ -14,7 +14,7 @@ ifeq ($(FPGA_SERVER),)
 	make $(FPGA_OBJ)
 else 
 	ssh $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_ROOT_DIR) ]; then mkdir -p $(REMOTE_ROOT_DIR); fi"
-	rsync -avz --delete --exclude .git $(ROOT_DIR) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)
+	rsync -avz --delete --exclude .git $(CORE_DIR) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)
 	ssh $(FPGA_USER)@$(FPGA_SERVER) 'cd $(REMOTE_ROOT_DIR); make fpga-build FPGA_FAMILY=$(FPGA_FAMILY)'
 	scp $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)/hardware/fpga/$(FPGA_OBJ) .
 	scp $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)/hardware/fpga/$(FPGA_LOG) .
@@ -27,7 +27,7 @@ clean:
 ifeq ($(FPGA_SERVER),)
 	find . -type f -not  \( $(NOCLEAN) \) -delete
 else
-	rsync -avz --delete --exclude .git $(ROOT_DIR) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)
+	rsync -avz --delete --exclude .git $(CORE_DIR) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)
 	ssh $(FPGA_USER)@$(FPGA_SERVER) 'cd $(REMOTE_ROOT_DIR); make fpga-clean FPGA_FAMILY=$(FPGA_FAMILY)'
 endif
 

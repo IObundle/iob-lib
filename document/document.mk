@@ -1,3 +1,5 @@
+include $(CORE_DIR)/submodules/LIB/iob_lib.mk
+
 SHELL = /bin/bash
 
 LIB_DOC_DIR:=$(LIB_DIR)/document
