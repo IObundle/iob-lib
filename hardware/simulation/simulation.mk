@@ -43,7 +43,7 @@ else ifeq ($(SIMULATOR), icarus)
 include $(LIB_DIR)/hardware/simulation/icarus.mk
 endif
 
-clean:
+sim-clean:
 	@find . -type f -not  \( $(NOCLEAN) \) -delete
 ifneq ($(SIM_SERVER),)
 	rsync -avz --delete --exclude .git $(ROOT_DIR) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_ROOT_DIR)

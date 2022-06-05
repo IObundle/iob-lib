@@ -8,7 +8,7 @@ ifeq ($(VCD),1)
 	gtkwave -a ../waves.gtkw uut.vcd &
 endif	
 
-sim-clean: clean
+clean: sim-clean
 	@rm -f a.out
 
 .PHONY: comp exec clean
