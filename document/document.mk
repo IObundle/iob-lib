@@ -28,7 +28,7 @@ endif
 view: $(DOC).pdf
 	evince $< &
 
-$(DOC)top.tex: texfiles 
+$(DOC)top.tex: texfiles
 	echo "\def\TEX{$(LIB_DOC_DIR)}" > $(DOC)top.tex
 	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
 	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
@@ -44,7 +44,7 @@ $(DOC)top.tex: texfiles
 
 #tex files extracted from code comments
 MKREGS_CONF:=$(shell if [ -f $(CORE_DIR)/mkregs.conf ]; then echo $(CORE_DIR)/mkregs.conf; fi)
-texfiles: benefits.tex deliverables.tex
+texfiles: benefits.tex deliverables.tex $(VHDR)
 ifneq ($(TOP_MODULE),)
 	$(LIB_SW_PYTHON_DIR)/verilog2tex.py $(CORE_DIR)/hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF)
 endif
