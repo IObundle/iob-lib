@@ -1,4 +1,4 @@
 
 VSRC+=iob_sync.v
 iob_sync.v:$(LIB_DIR)/hardware/iob_sync/iob_sync.v
-	cp $< .
+	cp $< $(BUILD_VSRC_DIR)
