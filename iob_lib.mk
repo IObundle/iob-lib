@@ -1,13 +1,16 @@
 #PATHS
 
-REMOTE_ROOT_DIR ?= sandbox/$(TOP_MODULE)
-HW_DIR:=$(ROOT_DIR)/hardware
-SW_DIR:=$(ROOT_DIR)/software
+CORE_DIR=../..
+LIB_DIR=.
+
+REMOTE_CORE_DIR ?= sandbox/$(TOP_MODULE)
+HW_DIR:=$(CORE_DIR)/hardware
+SW_DIR:=$(CORE_DIR)/software
 
 #build directories
 SIM_DIR ?=$(HW_DIR)/simulation
 FPGA_DIR ?=$(HW_DIR)/fpga
-DOC_DIR ?=$(ROOT_DIR)/document
+DOC_DIR ?=$(CORE_DIR)/document
 
 #DEFAULT SIMULATOR
 SIMULATOR ?=icarus
@@ -21,21 +24,34 @@ FPGA_FAMILY_LIST ?=CYCLONEV-GT XCKU
 DOC ?=pb
 DOC_LIST ?=pb ug
 
+
 # VERSION
-VERSION ?=0.1
-VLINE ?="V$(VERSION)"
+VERSION ?=V0.1
 $(TOP_MODULE)_version.txt:
-ifeq ($(VERSION),)
-	$(error "variable VERSION is not set")
-endif
 	echo $(VLINE) > version.txt
 
 
-#lib verilog header
-VHDR+=iob_lib.vh
-iob_lib.vh: $(LIB_DIR)/hardware/include/iob_lib.vh
-	cp $< $@
+# BUILD DIRECTORY
+BUILD_DIR =../../$(TOP_MODULE)-$(VERSION)
+BUILD_VSRC_DIR = $(BUILD_DIR)/vsrc
 
+
+
+#lib verilog header
+VHDR+=$(BUILD_VSRC_DIR)/iob_lib.vh
+$(BUILD_VSRC_DIR)/iob_lib.vh: $(LIB_DIR)/hardware/include/iob_lib.vh
+	cp $< $(BUILD_VSRC_DIR)
+
+#core configuration
+
+include $(CORE_DIR)/config.mk
+
+$(TOP_MODULE)_conf.txt:
+	$(foreach i, $(MACRO_LIST), echo "\`define $i $($i)" >> $@;)
+
+VHDR+=$(BUILD_VSRC_DIR)/$(TOP_MODULE)_conf.vh
+$(BUILD_VSRC_DIR)/$(TOP_MODULE)_conf.vh: $(TOP_MODULE)_conf.txt
+	if [ ! -f $@ ]; then mv $< $@; elif [ "`diff -q $@ $<`" ];  then mv $< $@; fi
 
 gen-clean:
 	@rm -f *# *~
