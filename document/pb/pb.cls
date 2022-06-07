@@ -35,7 +35,7 @@
 \renewcommand{\headrulewidth}{.4pt}
 \fancyhead{}
 \fancyhead[RO,LE]{
-\textbf{\@title}
+\textbf{\@header}
 \\
 \textsc{\small{\@category}}
 }
