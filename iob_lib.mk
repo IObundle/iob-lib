@@ -26,13 +26,13 @@ DOC_LIST ?=pb ug
 
 
 # VERSION
-VERSION ?=V0.1
+
 $(TOP_MODULE)_version.txt:
-	echo $(VLINE) > version.txt
+	echo $(VERSION) > version.txt
 
 
 # BUILD DIRECTORY
-BUILD_DIR =../../$(TOP_MODULE)-$(VERSION)
+BUILD_DIR := ../../$(TOP_MODULE)_$(VERSION)
 BUILD_VSRC_DIR = $(BUILD_DIR)/vsrc
 
 
@@ -43,7 +43,6 @@ $(BUILD_VSRC_DIR)/iob_lib.vh: $(LIB_DIR)/hardware/include/iob_lib.vh
 	cp $< $(BUILD_VSRC_DIR)
 
 #core configuration
-
 include $(CORE_DIR)/config.mk
 
 $(TOP_MODULE)_conf.txt:

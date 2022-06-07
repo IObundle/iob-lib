@@ -1,3 +1,4 @@
+SHELL=/bin/bash
 include iob_lib.mk
 
 include $(CORE_DIR)/hardware/hardware.mk
@@ -12,10 +13,8 @@ create-build-dir:
 	mkdir -p $(BUILD_DIR)/doc
 
 populate-build-dir: $(VHDR) $(VSRC)
-
-
-clean:
-	rm -rf $(BUILD_DIR)
+	cp hardware/simulation/*.mk $(BUILD_DIR)/sim
+	mv $(BUILD_DIR)/sim/simulation.mk $(BUILD_DIR)/sim/Makefile
 
 debug:
 	@echo $(LIB_DIR)
