@@ -146,7 +146,7 @@ def gen_mem_wires(table, fout, cpu_nbytes=4):
     for reg in table:
         if reg["reg_type"] == "MEM":
             mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
-            addr_offset = int(reg['addr']) / cpu_nbytes
+            addr_offset = int(int(reg['addr']) / cpu_nbytes)
             fout.write(f"localparam {reg['name']}_ADDR_OFFSET = {addr_offset};\n")
             fout.write(f"`IOB_WIRE({reg['name']}_addr, {mem_addr_w})\n")
             fout.write(f"`IOB_WIRE({reg['name']}_addr_int, DATA_W+1)\n")
