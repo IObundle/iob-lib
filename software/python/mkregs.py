@@ -137,12 +137,18 @@ def get_num_mem_type(table, rw_type):
     return num_regs
 
 
-def gen_mem_wires(table, fout):
+def calc_mem_addr_w(reg, cpu_nbytes=4):
+    return int(reg['addr_w']) - int(math.log2(cpu_nbytes))
+
+
+def gen_mem_wires(table, fout, cpu_nbytes=4):
     fout.write("\n//mem wires\n")
     for reg in table:
         if reg["reg_type"] == "MEM":
-            fout.write(f"localparam {reg['name']}_ADDR_OFFSET = {reg['addr']};\n")
-            fout.write(f"`IOB_WIRE({reg['name']}_addr, {reg['addr_w']})\n")
+            mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
+            addr_offset = int(int(reg['addr']) / cpu_nbytes)
+            fout.write(f"localparam {reg['name']}_ADDR_OFFSET = {addr_offset};\n")
+            fout.write(f"`IOB_WIRE({reg['name']}_addr, {mem_addr_w})\n")
             fout.write(f"`IOB_WIRE({reg['name']}_addr_int, DATA_W+1)\n")
             if reg["rw_type"] == "W":
                 fout.write(f"`IOB_WIRE({reg['name']}_wdata, DATA_W)\n")
@@ -154,18 +160,20 @@ def gen_mem_wires(table, fout):
     fout.write("\n")
 
 
-def gen_mem_write_hw(table, fout):
+def gen_mem_write_hw(table, fout, cpu_nbytes=4):
     fout.write("\n//mem write logic\n")
     for reg in table:
         if reg["reg_type"] == "MEM" and reg['rw_type'] == "W":
+            # cpu word addressing
+            mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
             fout.write(f"`IOB_WIRE2WIRE((address - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
-            fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{reg['addr_w']}-1:0], {reg['name']}_addr)\n")
+            fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{mem_addr_w}-1:0], {reg['name']}_addr)\n")
             # get correct bytes from aligned wdata
             fout.write(f"`IOB_WIRE2WIRE(wdata, {reg['name']}_wdata)\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{reg['addr_w']}] == 0 ) & (|wstrb)) ? wstrb : {{(DATA_W/8){{1'b0}}}}, {reg['name']}_wstrb)\n")
+            fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & (|wstrb)) ? wstrb : {{(DATA_W/8){{1'b0}}}}, {reg['name']}_wstrb)\n")
 
 
-def gen_mem_read_hw(table, fout):
+def gen_mem_read_hw(table, fout, cpu_nbytes=4):
     # Do nothing if there are no read memories
     if has_mem_type(table, ["R"]) == 0:
         return
@@ -173,9 +181,10 @@ def gen_mem_read_hw(table, fout):
     fout.write("\n//mem read logic\n")
     for reg in table:
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
+            mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
             fout.write(f"`IOB_WIRE2WIRE((address - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
-            fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{reg['addr_w']}-1:0], {reg['name']}_addr)\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{reg['addr_w']}] == 0 ) & ~(|wstrb)), {reg['name']}_ren)\n")
+            fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{mem_addr_w}-1:0], {reg['name']}_addr)\n")
+            fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & ~(|wstrb)), {reg['name']}_ren)\n")
 
     # switch case for mem reads
     num_read_mems = get_num_mem_type(table, "R")
@@ -206,7 +215,7 @@ def gen_mem_read_hw(table, fout):
     fout.write("end\n")
 
 
-def get_rdata_cases(table):
+def get_rdata_cases(table, cpu_nbytes=4):
     """Get rdata_int case lines for read registers
 
     Concatenates all read registers with the same 32bit address.
@@ -223,15 +232,15 @@ def get_rdata_cases(table):
     # group regs with same 32 bit address
     for reg in read_regs:
         addr = int(reg['addr'])
-        addr32 = str(addr - (addr % 4))
-        if addr32 in rdata_cases:
-            rdata_cases[addr32].append(reg)
+        reg_addr = str(math.floor(addr/cpu_nbytes))
+        if reg_addr in rdata_cases:
+            rdata_cases[reg_addr].append(reg)
         else:
-            rdata_cases[addr32] = [reg]
+            rdata_cases[reg_addr] = [reg]
 
     # create rdata_int case strings
     case_strings = []
-    for addr32, reg_list in rdata_cases.items():
+    for reg_addr, reg_list in rdata_cases.items():
         byte_cnt = 0
         case_str = ""
         for reg in reg_list:
@@ -250,13 +259,13 @@ def get_rdata_cases(table):
                 case_str = f"{reg['name']}_rdata, " + case_str
             byte_cnt = byte_cnt + int(reg['nbytes'])
 
-        case_str = f"        {addr32}: rdata_int = {{" + case_str
+        case_str = f"        {reg_addr}: rdata_int = {{" + case_str
         case_strings.append(case_str)
 
     return case_strings
 
 
-def write_hw(table, regfile_name):
+def write_hw(table, regfile_name, cpu_nbytes=4):
 
     fout = open(regfile_name + "_gen.vh", "w")
 
@@ -266,10 +275,10 @@ def write_hw(table, regfile_name):
     for row in table:
         if row["reg_type"] == "REG" and row['rw_type'] == "W":
             addr_offset = int(row['addr']) % 4
-            addr_32 = int(row['addr']) - addr_offset
+            reg_addr = math.floor(int(row['addr'])/cpu_nbytes)
             reg_w = int(row['nbytes']) * 8
             fout.write(f"`IOB_WIRE({row['name']}_en, 1)\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (address == {addr_32})), {row['name']}_en)\n")
+            fout.write(f"`IOB_WIRE2WIRE((valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (address == {reg_addr})), {row['name']}_en)\n")
             fout.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
             fout.write(f"`IOB_WIRE2WIRE(wdata[{8*addr_offset}+:{reg_w}], {row['name']}_wdata)\n\n")
 
@@ -300,7 +309,7 @@ def write_hw(table, regfile_name):
     fout.write("   case(address)\n")
 
     # concatenate rdata wires with same 32 bit address
-    rdata_cases = get_rdata_cases(table)
+    rdata_cases = get_rdata_cases(table, cpu_nbytes)
     for rdata_case in rdata_cases:
         fout.write(rdata_case)
 
@@ -320,7 +329,7 @@ def write_hw(table, regfile_name):
     fout.close()
 
 
-def get_core_addr_w(table):
+def get_core_addr_w(table, cpu_nbytes=4):
     max_addr = 0
     for reg in table:
         # calculate last address of register/memory
@@ -334,32 +343,32 @@ def get_core_addr_w(table):
         if last_addr > max_addr:
             max_addr = last_addr
 
-    hw_max_addr = (max_addr) + 1
+    hw_max_addr = math.floor((max_addr+1)/cpu_nbytes)
 
     addr_w = int(math.ceil(math.log(hw_max_addr, 2)))
     return addr_w
 
 
-def write_hwheader(table, regfile_name):
+def write_hwheader(table, regfile_name, cpu_nbytes=4):
 
     fout = open(regfile_name + "_def.vh", "w")
 
     fout.write("//This file was generated by script mkregs.py\n\n")
 
     fout.write("//address width\n")
-    fout.write(f"`define {regfile_name}_ADDR_W {get_core_addr_w(table)}\n\n")
+    fout.write(f"`define {regfile_name}_ADDR_W {get_core_addr_w(table, cpu_nbytes)}\n\n")
 
     fout.write("//address macros\n")
 
     fout.write("//Write addresses\n")
     for row in table:
         if row["rw_type"] == "W":
-            fout.write(f"`define {row['name']}_ADDR {int(row['addr'])}\n")
+            fout.write(f"`define {row['name']}_ADDR {row['addr']}\n")
 
     fout.write("//Read Addresses\n")
     for row in table:
         if row["rw_type"] == "R":
-            fout.write(f"`define {row['name']}_ADDR {int(row['addr'])}\n")
+            fout.write(f"`define {row['name']}_ADDR {row['addr']}\n")
 
     fout.write("\n//register/mem data width\n")
     for row in table:
@@ -368,7 +377,8 @@ def write_hwheader(table, regfile_name):
     fout.write("\n//mem address width\n")
     for row in table:
         if row["reg_type"] == "MEM":
-            fout.write(f"`define {row['name']}_ADDR_W {row['addr_w']}\n")
+            mem_addr_w = calc_mem_addr_w(row, cpu_nbytes)
+            fout.write(f"`define {row['name']}_ADDR_W {mem_addr_w}\n")
 
     fout.close()
 
@@ -728,7 +738,7 @@ def swreg_get_fields(line):
     return swreg_flds
 
 
-def swreg_parse(code, hwsw, top):
+def swreg_parse(code, hwsw, top, cpu_nbytes=4):
     table = []  # list of swreg dictionaries
 
     for line in code:
@@ -744,8 +754,8 @@ def swreg_parse(code, hwsw, top):
     regfile_name = top + "_swreg"
 
     if hwsw == "HW":
-        write_hwheader(table, regfile_name)
-        write_hw(table, regfile_name)
+        write_hwheader(table, regfile_name, cpu_nbytes)
+        write_hw(table, regfile_name, cpu_nbytes)
 
     elif hwsw == "SW":
         core_prefix = top.upper()
