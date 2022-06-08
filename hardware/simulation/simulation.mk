@@ -1,9 +1,11 @@
 VHDR=$(wildcard ../vsrc/*.vh)
-VSRC=$(wildcard ../vsrc/*.v)
 
 #include the module's testbench
 ifeq ($(SIMULATOR),verilator)
-VSRC=$(filter-out src/$(TOP_MODULE)_tb.v, $(VSRC))
+VSRC_TMP=$(wildcard ../vsrc/*.v)
+VSRC=$(filter-out src/$(TOP_MODULE)_tb.v, $(VSRC_TMP))
+else
+VSRC=$(wildcard ../vsrc/*.v)
 endif
 
 ifeq ($(VCD),1)
