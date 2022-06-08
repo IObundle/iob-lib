@@ -4,12 +4,10 @@ CORE_DIR=../..
 LIB_DIR=.
 
 REMOTE_CORE_DIR ?= sandbox/$(TOP_MODULE)
-HW_DIR:=$(CORE_DIR)/hardware
-SW_DIR:=$(CORE_DIR)/software
 
 #build directories
-SIM_DIR ?=$(HW_DIR)/simulation
-FPGA_DIR ?=$(HW_DIR)/fpga
+SIM_DIR ?=$(CORE_DIR)/hardware/simulation
+FPGA_DIR ?=$(CORE_DIR)/hardware/fpga
 DOC_DIR ?=$(CORE_DIR)/document
 
 #DEFAULT SIMULATOR
@@ -39,7 +37,7 @@ BUILD_VSRC_DIR = $(BUILD_DIR)/vsrc
 
 #lib verilog header
 VHDR+=$(BUILD_VSRC_DIR)/iob_lib.vh
-$(BUILD_VSRC_DIR)/iob_lib.vh: $(LIB_DIR)/hardware/include/iob_lib.vh
+$(BUILD_VSRC_DIR)/iob_lib.vh: hardware/include/iob_lib.vh
 	cp $< $(BUILD_VSRC_DIR)
 
 #core configuration

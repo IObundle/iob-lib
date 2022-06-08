@@ -15,6 +15,7 @@ create-build-dir:
 populate-build-dir: $(VHDR) $(VSRC)
 	cp hardware/simulation/*.mk $(BUILD_DIR)/sim
 	mv $(BUILD_DIR)/sim/simulation.mk $(BUILD_DIR)/sim/Makefile
+	cp $(CORE_DIR)/hardware/simulation/simulation.mk $(BUILD_DIR)/sim
 
 debug:
 	@echo $(LIB_DIR)
@@ -22,6 +23,10 @@ debug:
 	@echo $(VERSION)
 	@echo $(BUILD_DIR)
 	@echo $(CACHE_DIR)
+	@echo $(VHDR)
+	@echo $(VSRC1)
+	@echo $(VSRC2)
+	@echo $(VSRC)
 
 
 .PHONY: build-dir create-build-dir populate-build-dir clean debug

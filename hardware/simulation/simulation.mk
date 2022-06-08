@@ -1,3 +1,5 @@
+include simulation.mk
+
 VHDR=$(wildcard ../vsrc/*.vh)
 VSRC=$(wildcard ../vsrc/*.v)
 
@@ -37,12 +39,26 @@ ifeq ($(VCD),1)
 	if [ ! `pgrep -u $(USER) gtkwave` ]; then gtkwave uut.vcd; fi &
 endif
 
-
 ifeq ($(SIMULATOR), verilator)
 include verilator.mk
 else ifeq ($(SIMULATOR), icarus)
 include icarus.mk
 endif
+
+
+kill-remote-sim:
+	@echo "INFO: Remote simulator $(SIMULATOR) will be killed"
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'killall -q -u $(SIM_USER) -9 $(SIM_PROC); \
+	make -C $(REMOTE_ROOT_DIR)/hardware/simulation/$(SIMULATOR) kill-sim'
+ifeq ($(VCD),1)
+	scp $(SIM_USER)@$(SIM_SERVER):$(REMOTE_ROOT_DIR)/hardware/simulation/$(SIMULATOR)/*.vcd $(SIM_DIR)
+endif
+
+kill-sim:
+	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
+	kill -9 $$(ps aux | grep $(USER) | grep console | grep python3 | grep -v grep | awk '{print $$2}'); fi
+
+
 
 sim-clean:
 	@find . -type f -not  \( $(NOCLEAN) \) -delete
