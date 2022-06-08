@@ -2,6 +2,8 @@ SHELL=/bin/bash
 include iob_lib.mk
 
 include $(CORE_DIR)/hardware/hardware.mk
+include $(CORE_DIR)/hardware/simulation/sim-hw.mk
+#include $(CORE_DIR)/hardware/fpga/fpga-hw.mk
 
 build-dir: create-build-dir populate-build-dir
 
@@ -15,10 +17,12 @@ create-build-dir:
 populate-build-dir: $(VHDR) $(VSRC)
 	cp hardware/simulation/*.mk $(BUILD_DIR)/sim
 	mv $(BUILD_DIR)/sim/simulation.mk $(BUILD_DIR)/sim/Makefile
-	cp $(CORE_DIR)/hardware/simulation/simulation.mk $(BUILD_DIR)/sim
+	cp $(CORE_DIR)/hardware/simulation/*.expected $(BUILD_DIR)/sim
+	cp $(CORE_DIR)/hardware/simulation/*.mk $(BUILD_DIR)/sim
+	cp $(CORE_DIR)/hardware/simulation/*.vh $(BUILD_DIR)/sim
+	cp $(CORE_DIR)/hardware/simulation/*.v $(BUILD_DIR)/sim
 
 debug:
-	@echo $(LIB_DIR)
 	@echo $(TOP_MODULE)
 	@echo $(VERSION)
 	@echo $(BUILD_DIR)

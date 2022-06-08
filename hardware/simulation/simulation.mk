@@ -1,13 +1,17 @@
+# This file becomes the simulation makefile when copied to the build
+# directory
+
+
 include simulation.mk
 
-VHDR=$(wildcard ../vsrc/*.vh)
+VHDR=$(wildcard *.vh) $(wildcard ../vsrc/*.vh)
 
 #include the module's testbench
 ifeq ($(SIMULATOR),verilator)
 VSRC_TMP=$(wildcard ../vsrc/*.v)
 VSRC=$(filter-out src/$(TOP_MODULE)_tb.v, $(VSRC_TMP))
 else
-VSRC=$(wildcard ../vsrc/*.v)
+VSRC=$(wildcard *.v) $(wildcard ../vsrc/*.v)
 endif
 
 ifeq ($(VCD),1)
@@ -23,7 +27,7 @@ else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_ROOT_DIR) sim-build SIMULATOR=$(SIMULATOR) TEST_LOG=\"$(TEST_LOG)\"'
 endif
 
-run: build
+run:
 ifeq ($(SIM_SERVER),)
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make exec"
 else

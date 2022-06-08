@@ -1,5 +1,5 @@
 comp: $(VHDR) $(VSRC)
-	iverilog -W all -g2005-sv -I../vsrc $(VSRC)
+	iverilog -W all -g2005-sv -I. -I../vsrc $(VSRC)
 
 exec:
 	./a.out $(TEST_LOG)

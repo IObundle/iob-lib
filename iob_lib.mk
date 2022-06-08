@@ -31,14 +31,12 @@ $(TOP_MODULE)_version.txt:
 
 # BUILD DIRECTORY
 BUILD_DIR := ../../$(TOP_MODULE)_$(VERSION)
-BUILD_VSRC_DIR = $(BUILD_DIR)/vsrc
-
 
 
 #lib verilog header
-VHDR+=$(BUILD_VSRC_DIR)/iob_lib.vh
-$(BUILD_VSRC_DIR)/iob_lib.vh: hardware/include/iob_lib.vh
-	cp $< $(BUILD_VSRC_DIR)
+VHDR+=$(BUILD_DIR)/vsrc/iob_lib.vh
+$(BUILD_DIR)/vsrc/iob_lib.vh: hardware/include/iob_lib.vh
+	cp $< $(BUILD_DIR)/vsrc
 
 #core configuration
 include $(CORE_DIR)/config.mk
@@ -46,8 +44,8 @@ include $(CORE_DIR)/config.mk
 $(TOP_MODULE)_conf.txt:
 	$(foreach i, $(MACRO_LIST), echo "\`define $i $($i)" >> $@;)
 
-VHDR+=$(BUILD_VSRC_DIR)/$(TOP_MODULE)_conf.vh
-$(BUILD_VSRC_DIR)/$(TOP_MODULE)_conf.vh: $(TOP_MODULE)_conf.txt
+VHDR+=$(BUILD_DIR)/vsrc/$(TOP_MODULE)_conf.vh
+$(BUILD_DIR)/vsrc/$(TOP_MODULE)_conf.vh: $(TOP_MODULE)_conf.txt
 	if [ ! -f $@ ]; then mv $< $@; elif [ "`diff -q $@ $<`" ];  then mv $< $@; fi
 
 gen-clean:
