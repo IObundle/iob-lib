@@ -1,12 +1,15 @@
-include $(CORE_DIR)/submodules/LIB/iob_lib.mk
+#include $(CORE_DIR)/submodules/LIB/iob_lib.mk
+
+VHDR=$(wildcard ../vsrc/*.vh)
+VSRC=$(wildcard ../vsrc/*.v)
 
 #select build makefile segment according to FPGA family
 ifeq ($(FPGA_FAMILY),XCKU)
 FPGA_PART:=xcku040-fbva676-1-c
-include $(LIB_DIR)/hardware/fpga/vivado.mk
+include vivado.mk
 else ifeq ($(FPGA_FAMILY),CYCLONEV-GT)
 FPGA_PART:=5CGTFD9E5F35C7
-include $(LIB_DIR)/hardware/fpga/quartus.mk
+include quartus.mk
 endif
 
 build: 

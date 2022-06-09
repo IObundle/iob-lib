@@ -8,6 +8,7 @@ set FAMILY "Cyclone V"
 set TOP [lindex $argv 0]
 set VSRC [lindex $argv 1]
 set PART [lindex $argv 2]
+set INST [concat $TOP "_0"]
 
 project_new $TOP -overwrite
 
@@ -30,11 +31,11 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 
 
-set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "iob_uart:iob_uart_0"
+set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id $TOP:$INST
 
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id "iob_uart:iob_uart_0"
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id $TOP:$INST
 
-set_global_assignment -name PARTITION_COLOR 39423 -section_id "iob_uart:iob_uart_0"
+set_global_assignment -name PARTITION_COLOR 39423 -section_id $TOP:$INST
 
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 
