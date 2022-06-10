@@ -9,4 +9,4 @@ FPGA_USER=$(VIVADO_USER)
 ENV:= $(VIVADOPATH)/settings64.sh
 
 $(FPGA_OBJ): $(VSRC) $(VHDR)
-	$(ENV); $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mode batch -source $(LIB_DIR)/hardware/fpga/vivado.tcl -tclargs $(TOP_MODULE) "$(VSRC)" "$(INCLUDE)" "$(DEFINE)" $(FPGA_PART)
+	$(ENV); $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mode batch -source vivado.tcl -tclargs $(TOP_MODULE) "$(VSRC)" "$(INCLUDE)" "$(DEFINE)" $(FPGA_PART)

@@ -1,3 +1,5 @@
+SHELL:=/usr/bin/bash
+
 #include $(CORE_DIR)/submodules/LIB/iob_lib.mk
 
 VHDR=$(wildcard ../vsrc/*.vh)
