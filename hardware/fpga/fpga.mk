@@ -1,6 +1,4 @@
-SHELL:=/usr/bin/bash
-
-#include $(CORE_DIR)/submodules/LIB/iob_lib.mk
+SHELL:=/bin/bash
 
 VHDR=$(wildcard ../vsrc/*.vh)
 VSRC=$(wildcard ../vsrc/*.v)
@@ -18,22 +16,19 @@ build:
 ifeq ($(FPGA_SERVER),)
 	make $(FPGA_OBJ)
 else 
-	ssh $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_ROOT_DIR) ]; then mkdir -p $(REMOTE_ROOT_DIR); fi"
-	rsync -avz --delete --exclude .git $(CORE_DIR) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)
-	ssh $(FPGA_USER)@$(FPGA_SERVER) 'cd $(REMOTE_ROOT_DIR); make fpga-build FPGA_FAMILY=$(FPGA_FAMILY)'
-	scp $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)/hardware/fpga/$(FPGA_OBJ) .
-	scp $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)/hardware/fpga/$(FPGA_LOG) .
+	ssh $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_CORE_DIR) ]; then mkdir -p $(REMOTE_CORE_DIR); fi"
+	rsync -avz --delete --exclude .git ../.. $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_CORE_DIR)
+	ssh $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_CORE_DIR) fpga-build FPGA_FAMILY=$(FPGA_FAMILY)'
+	scp $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_CORE_DIR)/$(BUILD_DIR_NAME)/fpga/$(FPGA_OBJ) .
+	scp $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_CORE_DIR)/$(BUILD_DIR_NAME/fpga/$(FPGA_LOG) .
 endif
 
 test: clean-all
 	make build TEST_LOG=">> test.log"
 
 clean:
-ifeq ($(FPGA_SERVER),)
-	find . -type f -not  \( $(NOCLEAN) \) -delete
-else
-	rsync -avz --delete --exclude .git $(CORE_DIR) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_ROOT_DIR)
-	ssh $(FPGA_USER)@$(FPGA_SERVER) 'cd $(REMOTE_ROOT_DIR); make fpga-clean FPGA_FAMILY=$(FPGA_FAMILY)'
+ifneq ($(FPGA_SERVER),)
+	ssh $(FPGA_USER)@$(FPGA_SERVER) 'if [ -d $(REMOTE_CORE_DIR) ]; then make -C $(REMOTE_CORE_DIR) clean; fi'
 endif
 
 clean-all: clean-testlog clean

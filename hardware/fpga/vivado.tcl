@@ -1,7 +1,7 @@
 #extract cli args
 set TOP [lindex $argv 0]
 set VSRC [lindex $argv 1]
-set PART [lindex $argv 4]
+set PART [lindex $argv 2]
 
 puts $VSRC
 

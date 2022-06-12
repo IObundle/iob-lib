@@ -1,8 +1,16 @@
 # This file becomes the simulation makefile when copied to the build
 # directory
 
-
+#include local simulation segment
 include simulation.mk
+
+ifeq ($(SIMULATOR), verilator)
+include verilator.mk
+else
+include icarus.mk
+endif
+
+
 
 VHDR=$(wildcard *.vh) $(wildcard ../vsrc/*.vh)
 
@@ -27,7 +35,7 @@ else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_ROOT_DIR) sim-build SIMULATOR=$(SIMULATOR) TEST_LOG=\"$(TEST_LOG)\"'
 endif
 
-run:
+run: build
 ifeq ($(SIM_SERVER),)
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make exec"
 else
@@ -45,13 +53,6 @@ ifeq ($(VCD),1)
 	if [ ! `pgrep -u $(USER) gtkwave` ]; then gtkwave uut.vcd; fi &
 endif
 
-ifeq ($(SIMULATOR), verilator)
-include verilator.mk
-else ifeq ($(SIMULATOR), icarus)
-include icarus.mk
-endif
-
-
 kill-remote-sim:
 	@echo "INFO: Remote simulator $(SIMULATOR) will be killed"
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'killall -q -u $(SIM_USER) -9 $(SIM_PROC); \
@@ -67,10 +68,8 @@ kill-sim:
 
 
 sim-clean:
-	@find . -type f -not  \( $(NOCLEAN) \) -delete
 ifneq ($(SIM_SERVER),)
-	rsync -avz --delete --exclude .git .. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_ROOT_DIR)
-	ssh $(SIM_USER)@$(SIM_SERVER) 'cd $(REMOTE_ROOT_DIR); make sim-clean SIMULATOR=$(SIMULATOR)'
+	ssh $(SIM_USER)@$(SIM_SERVER) 'if [ -d $(REMOTE_ROOT_DIR) ]; then make -C $(REMOTE_ROOT_DIR) clean; fi'
 endif
 
 debug:

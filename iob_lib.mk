@@ -5,11 +5,6 @@ LIB_DIR=.
 
 REMOTE_CORE_DIR ?= sandbox/$(TOP_MODULE)
 
-#build directories
-SIM_DIR ?=$(CORE_DIR)/hardware/simulation
-FPGA_DIR ?=$(CORE_DIR)/hardware/fpga
-DOC_DIR ?=$(CORE_DIR)/document
-
 #DEFAULT SIMULATOR
 SIMULATOR ?=icarus
 SIMULATOR_LIST ?=icarus verilator
@@ -30,7 +25,8 @@ $(TOP_MODULE)_version.txt:
 
 
 # BUILD DIRECTORY
-BUILD_DIR := ../../$(TOP_MODULE)_$(VERSION)
+BUILD_DIR_NAME := $(TOP_MODULE)_$(VERSION)
+BUILD_DIR := ../../$(BUILD_DIR_NAME)
 
 
 #lib verilog header

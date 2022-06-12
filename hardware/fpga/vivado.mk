@@ -6,7 +6,7 @@ CONSTRAINTS:=$(wildcard *.xdc)
 FPGA_SERVER=$(VIVADO_SERVER)
 FPGA_USER=$(VIVADO_USER)
 
-ENV:= $(VIVADOPATH)/settings64.sh
+ENV:= bash $(VIVADOPATH)/settings64.sh
 
 $(FPGA_OBJ): $(VSRC) $(VHDR)
-	$(ENV); $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mode batch -source vivado.tcl -tclargs $(TOP_MODULE) "$(VSRC)" "$(INCLUDE)" "$(DEFINE)" $(FPGA_PART)
+	$(ENV) && $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mode batch -source vivado.tcl -tclargs $(TOP_MODULE) "$(VSRC)" $(FPGA_PART)
