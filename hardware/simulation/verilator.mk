@@ -1,5 +1,5 @@
 #module paths
-VFLAGS=--cc --exe -I. $(VSRC) $(TOP_MODULE)_tb.cpp --top-module $(VTOP)
+VFLAGS=--cc --exe -I. -I../vsrc $(VSRC) $(TOP_MODULE)_tb.cpp --top-module $(VTOP)
 VFLAGS+=-Wno-lint
 
 ifeq ($(VCD),1)
