@@ -14,6 +14,6 @@ exec: $(VSRC) $(VHDR)
 	./obj_dir/V$(VTOP) $(TEST_LOG)
 
 clean: sim-clean
-	@rm -rf ./obj_dir include
+	@rm -rf ./obj_dir
 
 .PHONY: run clean

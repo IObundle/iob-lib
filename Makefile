@@ -18,18 +18,9 @@ populate-build-dir: $(VHDR) $(VSRC)
 	cp hardware/simulation/*.mk $(BUILD_DIR)/sim
 	mv $(BUILD_DIR)/sim/simulation.mk $(BUILD_DIR)/sim/Makefile
 	cp $(CORE_DIR)/hardware/simulation/*.expected $(BUILD_DIR)/sim
-ifneq ($(wildcard $(CORE_DIR)/hardware/simulation/*.mk),)
-	cp $(CORE_DIR)/hardware/simulation/*.mk $(BUILD_DIR)/sim
-endif
-ifneq ($(wildcard $(CORE_DIR)/hardware/simulation/*.vh),)
-	cp $(CORE_DIR)/hardware/simulation/*.vh $(BUILD_DIR)/sim
-endif
-ifneq ($(wildcard $(CORE_DIR)/hardware/simulation/*.v),)
-	cp $(CORE_DIR)/hardware/simulation/*.v $(BUILD_DIR)/sim
-endif
-ifneq ($(wildcard $(CORE_DIR)/hardware/simulation/*.cpp),)
-	cp $(CORE_DIR)/hardware/simulation/*.cpp $(BUILD_DIR)/sim
-endif
+	if [ 'ls $(CORE_DIR)/hardware/simulation/*.mk' ]; then cp $(CORE_DIR)/hardware/simulation/*.mk $(BUILD_DIR)/sim; fi
+	if [ 'ls $(CORE_DIR)/hardware/simulation/*.v' ];  then cp $(CORE_DIR)/hardware/simulation/*.v $(BUILD_DIR)/sim; fi
+	if [ 'ls $(CORE_DIR)/hardware/simulation/*.cpp' ]; then cp $(CORE_DIR)/hardware/simulation/*.cpp $(BUILD_DIR)/sim; fi
 	cp hardware/fpga/*.mk $(BUILD_DIR)/fpga                                    
 	cp hardware/fpga/*.tcl $(BUILD_DIR)/fpga                                  
 	mv $(BUILD_DIR)/fpga/fpga.mk $(BUILD_DIR)/fpga/Makefile                    
