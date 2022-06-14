@@ -2,29 +2,19 @@
 
 import sys
 
-if len(sys.argv) < 2 or len(sys.argv) > 2:
-    print "You must set one argument!!!"
+if len(sys.argv) != 3:
     sys.exit()
+core_name = sys.argv[1]
+core_version = sys.argv[2]
 
+print("V{}.{}".format(int(core_version[:2]),core_version[2:]))
 
-def nostring(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
+f = open("./software/python/{}_V{}.{}.vh".format(core_name,int(core_version[:2]),core_version[2:]), "w+")
 
-for arg in sys.argv[1]:
-    if not nostring(arg):
-        sys.exit("All arguments must be integers. Exit.")
+f.write("`define VERSION {}".format(core_version))
 
-a = sys.argv[1]
+f.close()
 
-fh = int(a[:2])
-
-sh = int(a[2:])
-
-print ("V{}.{}".format(fh,sh))
 
 
 
