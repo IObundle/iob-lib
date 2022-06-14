@@ -1,14 +1,12 @@
 FPGA_OBJ:=$(TOP_MODULE)_0.qxp
 FPGA_LOG:=quartus.log
 
-CONSTRAINTS:=$(wildcard *.sdc)
-
 FPGA_SERVER=$(QUARTUS_SERVER)
 FPGA_USER=$(QUARTUS_USER)
 
 ENV=$(QUARTUSPATH)/nios2eds/nios2_command_shell.sh
 
-$(FPGA_OBJ): $(VHDR) $(VSRC) 
+$(FPGA_OBJ): $(VHDR) $(VSRC) $(wildcard *.sdc)
 	$(ENV) quartus_sh -t quartus.tcl $(TOP_MODULE) "$(VSRC)" $(FPGA_PART)
 	$(ENV) quartus_map --read_settings_files=on --write_settings_files=off $(TOP_MODULE) -c $(TOP_MODULE)
 	$(ENV) quartus_fit --read_settings_files=off --write_settings_files=off $(TOP_MODULE) -c $(TOP_MODULE)

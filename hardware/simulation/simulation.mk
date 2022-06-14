@@ -1,6 +1,11 @@
 # This file becomes the simulation makefile when copied to the build
 # directory
 
+SHELL:=/bin/bash
+include ../info.mk
+
+REMOTE_CORE_DIR=sandbox/$(TOP_MODULE)
+
 #include local simulation segment
 include simulation.mk
 
@@ -9,8 +14,6 @@ include verilator.mk
 else
 include icarus.mk
 endif
-
-
 
 VHDR=$(wildcard *.vh) $(wildcard ../vsrc/*.vh)
 

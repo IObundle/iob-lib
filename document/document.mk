@@ -1,6 +1,11 @@
-include $(CORE_DIR)/submodules/LIB/iob_lib.mk
+#
+# This is copied into the doc folder in the build directory as the document Makefile
+#
 
 SHELL = /bin/bash
+
+$(TOP_MODULE)_version.txt:
+	echo $(VERSION) > version.txt
 
 LIB_DOC_DIR:=$(LIB_DIR)/document
 LIB_SW_DIR:=$(LIB_DIR)/software
