@@ -3,17 +3,16 @@ LIB_DIR=.
 CORE_DIR=../..
 
 BUILD_DIR = $(CORE_DIR)/$(TOP_MODULE)_$(VERSION_STR)
-
+BUILD_SRC_DIR=$(BUILD_DIR)/vsrc
 
 # import lib verilog header
-VHDR+=$(BUILD_DIR)/vsrc/iob_lib.vh
-$(BUILD_DIR)/vsrc/iob_lib.vh: hardware/include/iob_lib.vh
-	cp $< $(BUILD_DIR)/vsrc
+VHDR+=$(BUILD_SRC_DIR)/iob_lib.vh
+$(BUILD_SRC_DIR)/iob_lib.vh: hardware/include/iob_lib.vh
+	cp $< $(BUILD_SRC_DIR)
 
 # import specific files
-BUILD_SRC_DIR=$(BUILD_DIR)/vsrc
 include $(CORE_DIR)/hardware/hardware.mk
-include $(CORE_DIR)/hardware/simulation/simulation.mk
+include $(CORE_DIR)/hardware/simulation/build.mk
 
 build-dir: $(BUILD_DIR) populate-build-dir
 
