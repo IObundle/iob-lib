@@ -64,12 +64,6 @@ kill-sim:
 	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
 	kill -9 $$(ps aux | grep $(USER) | grep console | grep python3 | grep -v grep | awk '{print $$2}'); fi
 
-sim-clean:
-	@rm -rf *
-ifneq ($(SIM_SERVER),)
-	ssh $(SIM_USER)@$(SIM_SERVER) 'if [ -d $(REMOTE_ROOT_DIR) ]; then make -C $(REMOTE_ROOT_DIR) sim-clean; fi'
-endif
-
 debug:
 	echo $(VHDR)
 	echo $(VSRC)
