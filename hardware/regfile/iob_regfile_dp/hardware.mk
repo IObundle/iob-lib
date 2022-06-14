@@ -1,11 +1,5 @@
-ifneq ($(ASIC),1)
-ifeq ($(filter iob_regfile_dp, $(HW_MODULES)),)
 
-# Add to modules list
-HW_MODULES+=iob_regfile_dp
+VSRC+=$(BUILD_SRC_DIR)/iob_regfile_dp.v
 
-# Sources
-VSRC+=$(LIB_DIR)/hardware/regfile/iob_regfile_dp/iob_regfile_dp.v
-
-endif
-endif
+$(BUILD_SRC_DIR)/iob_regfile_dp.v:$(LIB_DIR)/hardware/regfile/iob_regfile_dp/iob_regfile_dp.v
+	cp $< $(BUILD_SRC_DIR)
