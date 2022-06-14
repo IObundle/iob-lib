@@ -343,7 +343,7 @@ def get_core_addr_w(table, cpu_nbytes=4):
         if last_addr > max_addr:
             max_addr = last_addr
 
-    hw_max_addr = math.floor((max_addr+1)/cpu_nbytes)
+    hw_max_addr = math.floor(max_addr/cpu_nbytes)+1
 
     addr_w = int(math.ceil(math.log(hw_max_addr, 2)))
     return addr_w
