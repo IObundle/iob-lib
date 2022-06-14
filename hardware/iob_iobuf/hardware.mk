@@ -1,4 +1,4 @@
 
-VSRC+=iob_iobuf.v
-iob_iobuf.v:$(LIB_DIR)/hardware/iob_iobuf/iob_iobuf.v
-	cp $< $(BUILD_DIR)/vsrc
+VSRC+=$(BUILD_SRC_DIR)/iob_iobuf.v
+$(BUILD_SRC_DIR)/iob_iobuf.v:$(LIB_DIR)/hardware/iob_iobuf/iob_iobuf.v
+	cp $< $(BUILD_SRC_DIR)
