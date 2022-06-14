@@ -9,7 +9,7 @@ core_version = sys.argv[2]
 
 print("V{}.{}".format(int(core_version[:2]),core_version[2:]))
 
-f = open("./software/python/{}_V{}.{}.vh".format(core_name,int(core_version[:2]),core_version[2:]), "w+")
+f = open("./{}_version.vh".format(core_name), "w+")
 
 f.write("`define VERSION {}".format(core_version))
 

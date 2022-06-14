@@ -5,13 +5,47 @@ CORE_DIR=../..
 BUILD_DIR = $(CORE_DIR)/$(TOP_MODULE)_$(VERSION_STR)
 BUILD_SRC_DIR=$(BUILD_DIR)/vsrc
 
+CORE_SIM_DIR=$(CORE_DIR)/hardware/simulation
+CORE_FPGA_DIR=$(CORE_DIR)/hardware/fpga
+BUILD_SIM_DIR=$(BUILD_DIR)/sim
+BUILD_FPGA_DIR=$(BUILD_DIR)/fpga
+BUILD_DOC_DIR=$(BUILD_DIR)/doc
+BUILD_SYN_DIR=$(BUILD_DIR)/syn
+
+
+
 # import lib verilog header
 VHDR+=$(BUILD_SRC_DIR)/iob_lib.vh
 $(BUILD_SRC_DIR)/iob_lib.vh: hardware/include/iob_lib.vh
 	cp $< $(BUILD_SRC_DIR)
 
-# import specific files
+# import core files
 include $(CORE_DIR)/hardware/hardware.mk
+
+# make core version header file
+VHDR+=$(BUILD_SRC_DIR)/$(TOP_MODULE)_version.vh
+$(BUILD_SRC_DIR)/$(TOP_MODULE)_version.vh: $(TOP_MODULE)_version.vh
+	cp $< $@
+
+$(TOP_MODULE)_version.vh:
+	./software/python/version.py $(TOP_MODULE) $(VERSION)
+
+
+# import core simulation files
+# verilog testbench
+VSRC+=$(BUILD_SRC_DIR)/$(TOP_MODULE)_tb.v
+$(BUILD_SRC_DIR)/$(TOP_MODULE)_tb.v: $(CORE_SIM_DIR)/$(TOP_MODULE)_tb.v
+	cp $< $(BUILD_SRC_DIR)
+# verilator testbench
+VSRC+=$(BUILD_SRC_DIR)/$(TOP_MODULE)_tb.cpp
+$(BUILD_SRC_DIR)/$(TOP_MODULE)_tb.cpp: $(CORE_SIM_DIR)/$(TOP_MODULE)_tb.cpp
+	cp $< $(BUILD_SRC_DIR)
+# import constraints files
+CONSTRAINTS=$(subst $(CORE_FPGA_DIR), $(BUILD_SRC_DIR), $(wildcard $(CORE_FPGA_DIR)/*.sdc))
+$(BUILD_SRC_DIR)/%.sdc: $(CORE_FPGA_DIR)/%.sdc
+	cp $< $@
+
+
 include $(CORE_DIR)/hardware/simulation/build.mk
 
 build-dir: $(BUILD_DIR) populate-build-dir
@@ -24,15 +58,6 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)/doc
 
 
-CORE_SIM_DIR=$(CORE_DIR)/hardware/simulation
-CORE_FPGA_DIR=$(CORE_DIR)/hardware/fpga
-BUILD_SIM_DIR=$(BUILD_DIR)/sim
-BUILD_FPGA_DIR=$(BUILD_DIR)/fpga
-
-CONSTRAINTS=$(subst $(CORE_FPGA_DIR), $(BUILD_FPGA_DIR), $(wildcard $(CORE_FPGA_DIR)/*.sdc))
-$(BUILD_FPGA_DIR)/%.sdc: $(CORE_FPGA_DIR)/%.sdc
-	cp $< $@
-
 populate-build-dir: $(BUILD_DIR) $(VHDR) $(VSRC) $(CONSTRAINTS)
 	cp $(CORE_DIR)/info.mk $(BUILD_DIR)
 	cp hardware/simulation/*.mk $(BUILD_SIM_DIR)
@@ -44,11 +69,9 @@ populate-build-dir: $(BUILD_DIR) $(VHDR) $(VSRC) $(CONSTRAINTS)
 	cp hardware/fpga/*.tcl $(BUILD_DIR)/fpga                                  
 	cp $(CORE_FPGA_DIR)/*.expected $(BUILD_DIR)/fpga
 	if [ "`ls $(CORE_FPGA_DIR)/*.mk 2>/dev/null`" ]; then cp $(CORE_FPGA_DIR)/*.mk $(BUILD_DIR)/fpga; fi
-	cp $(CORE_FPGA_DIR)/*.sdc $(BUILD_DIR)/fpga
-
 
 clean-build-dir:
-	@rm -rf  $(BUILD_DIR)
+	@rm -rf  *.vh
 
 
 gen-clean:
@@ -64,10 +87,10 @@ debug:
 	@echo $(VERSION)
 	@echo $(BUILD_DIR)
 	@echo $(BUILD_SRC_DIR)
-	@echo $(CACHE_DIR)
 	@echo $(VHDR)
 	@echo $(VSRC1)
 	@echo $(VSRC2)
 	@echo $(VSRC)
+	@echo $(CONSTRAINTS)
 
 .PHONY: build-dir populate-build-dir gen-clean clean-testlog clean-all debug

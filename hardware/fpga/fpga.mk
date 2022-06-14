@@ -33,8 +33,9 @@ test: clean-all
 	make build TEST_LOG=">> test.log"
 
 clean:
+	@rm -rf *
 ifneq ($(FPGA_SERVER),)
-	ssh $(FPGA_USER)@$(FPGA_SERVER) 'if [ -d $(REMOTE_CORE_DIR) ]; then make -C $(REMOTE_CORE_DIR) clean; fi'
+	ssh $(FPGA_USER)@$(FPGA_SERVER) 'if [ -d $(REMOTE_CORE_DIR) ]; then make -C $(REMOTE_CORE_DIR) fpga-clean; fi'
 endif
 
 clean-all: clean-testlog clean
