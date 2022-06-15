@@ -345,7 +345,7 @@ def get_core_addr_w(table, cpu_nbytes=4):
 
     hw_max_addr = math.floor(max_addr/cpu_nbytes)+1
 
-    addr_w = int(math.ceil(math.log(hw_max_addr, 2)))
+    addr_w = max(int(math.ceil(math.log(hw_max_addr, 2))),1)
     return addr_w
 
 
