@@ -1,5 +1,6 @@
-#module paths
-VFLAGS=--cc --exe -I. -I../vsrc $(VSRC) $(TOP_MODULE)_tb.cpp --top-module $(VTOP)
+VSRC_VLTR=$(filter-out ../vsrc/$(TOP_MODULE)_tb.v, $(VSRC))
+
+VFLAGS=--cc --exe -I. -I../vsrc $(VSRC_VLTR) ../vsrc/$(TOP_MODULE)_tb.cpp --top-module $(VTOP)
 VFLAGS+=-Wno-lint
 
 ifeq ($(VCD),1)
@@ -7,13 +8,11 @@ VFLAGS+=--trace
 endif
 
 comp:
+	echo $(TOP_MODULE)
 	verilator $(VFLAGS) $(WAVE)	
 	cd ./obj_dir && make -f V$(VTOP).mk
 
-exec: $(VSRC) $(VHDR)
+exec:
 	./obj_dir/V$(VTOP) $(TEST_LOG)
 
-clean: sim-clean
-	@rm -rf ./obj_dir
-
-.PHONY: run clean
+.PHONY: comp exec

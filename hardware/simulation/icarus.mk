@@ -1,7 +1,13 @@
+VFLAGS=-W all -g2005-sv -I. -I../vsrc $(VSRC)
+
+ifeq ($(VCD),1)
+VFLAGS+=-DVCD
+endif
+
 comp: a.out
 
 a.out: $(VHDR) $(VSRC)
-	iverilog -W all -g2005-sv -I. -I../vsrc $(VSRC)
+	iverilog $(VFLAGS)
 
 exec:
 	./a.out $(TEST_LOG)
@@ -10,7 +16,4 @@ ifeq ($(VCD),1)
 	gtkwave -a ../waves.gtkw uut.vcd &
 endif	
 
-clean: sim-clean
-	@rm -f a.out
-
-.PHONY: comp exec clean
+.PHONY: comp exec

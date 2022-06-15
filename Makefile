@@ -2,6 +2,10 @@ SHELL=/bin/bash
 LIB_DIR=.
 CORE_DIR=../..
 
+CORE_SRC_DIR=$(CORE_DIR)/hardware/src
+CORE_INC_DIR=$(CORE_DIR)/hardware/include
+
+
 BUILD_DIR = $(CORE_DIR)/$(TOP_MODULE)_$(VERSION_STR)
 BUILD_SRC_DIR=$(BUILD_DIR)/vsrc
 
@@ -29,7 +33,6 @@ $(BUILD_SRC_DIR)/$(TOP_MODULE)_version.vh: $(TOP_MODULE)_version.vh
 
 $(TOP_MODULE)_version.vh:
 	./software/python/version.py $(TOP_MODULE) $(VERSION)
-
 
 # import core simulation files
 # verilog testbench
@@ -106,5 +109,6 @@ debug:
 	@echo $(VSRC2)
 	@echo $(VSRC)
 	@echo $(CONSTRAINTS)
+	@echo $(BE_IF)
 
 .PHONY: build-dir populate-build-dir gen-clean clean-testlog clean-all debug

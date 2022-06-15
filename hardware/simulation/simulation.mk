@@ -6,24 +6,15 @@ include ../info.mk
 
 REMOTE_CORE_DIR=sandbox/$(TOP_MODULE)
 
-#include local simulation segment
-include simulation.mk
-
 ifeq ($(SIMULATOR), verilator)
 include verilator.mk
 else
 include icarus.mk
 endif
 
+#include the module's headers and sources
 VHDR=$(wildcard *.vh) $(wildcard ../vsrc/*.vh)
-
-#include the module's testbench
-ifeq ($(SIMULATOR),verilator)
-VSRC_TMP=$(wildcard *.v) $(wildcard ../vsrc/*.v)
-VSRC=$(filter-out $(TOP_MODULE)_tb.v, $(VSRC_TMP))
-else
 VSRC=$(wildcard *.v) $(wildcard ../vsrc/*.v)
-endif
 
 build: $(VHDR) $(VSRC)
 ifeq ($(SIM_SERVER),)
@@ -64,9 +55,15 @@ kill-sim:
 	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
 	kill -9 $$(ps aux | grep $(USER) | grep console | grep python3 | grep -v grep | awk '{print $$2}'); fi
 
+clean:
+	@rm -rf *
+
 debug:
 	echo $(VHDR)
 	echo $(VSRC)
 
+.PHONY: build run kill-sim kill-remote-sim debug
 
-.PHONY: build run debug clean
+#include local simulation segment
+include simulation.mk
+
