@@ -1,3 +1,9 @@
+ifneq (iob2axi,$(filter iob2axi, $(HW_MODULES)))
+
+# Add to modules list
+HW_MODULES+=iob2axi
+
+
 include $(LIB_DIR)/hardware/fifo/iob_fifo_sync/hardware.mk
 
 VHDR+=m_axi_m_port.vh \
@@ -34,3 +40,5 @@ m_m_axi_write_portmap.vh:
 m_m_axi_read_portmap.vh:
 	$(AXI_GEN) axi_read_portmap AXI_ADDR_W AXI_DATA_W 'm_' 'm_'
 
+
+endif
