@@ -99,6 +99,5 @@ debug:
 	@echo $(VSRC2)
 	@echo $(VSRC)
 	@echo $(CONSTRAINTS)
-	@echo $(BE_IF)
 
 .PHONY: build-dir populate-build-dir gen-clean clean-testlog clean-all debug

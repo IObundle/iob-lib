@@ -2,7 +2,16 @@
 # directory
 
 SHELL:=/bin/bash
+
+# include core basic info
 include ../info.mk
+
+#include local simulation segment
+ifneq ($(shell if [ -f simulation.mk ]; then echo yes; fi),)
+include simulation.mk
+endif
+
+
 
 REMOTE_BUILD_DIR=sandbox/$(TOP_MODULE)
 
@@ -66,9 +75,4 @@ debug:
 	echo $(VSRC)
 
 .PHONY: build run clean kill-sim kill-remote-sim debug
-
-#include local simulation segment
-ifneq ($(shell if [ -f simulation.mk ]; then echo yes; fi),)
-include simulation.mk
-endif
 
