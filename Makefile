@@ -74,21 +74,11 @@ populate-build-dir: $(BUILD_DIR) $(VHDR) $(VSRC) $(CONSTRAINTS)
 	if [ "`ls $(CORE_FPGA_DIR)/*.mk 2>/dev/null`" ]; then cp $(CORE_FPGA_DIR)/*.mk $(BUILD_DIR)/fpga; fi
 
 
-clean-sim-dir:
-	@rm -rf $(BUILD_SIM_DIR)
-ifneq ($(SIM_SERVER),)
-	ssh $(SIM_USER)@$(SIM_SERVER) 'if [ -d $(REMOTE_ROOT_DIR) ]; then make -C $(REMOTE_ROOT_DIR) clean-sim-dir; fi'
-endif
-
-
-clean-fpga-dir:
-	@rm -rf $(BUILD_FPGA_DIR)
-ifneq ($(FPGA_SERVER),)
-	ssh $(FPGA_USER)@$(FPGA_SERVER) 'if [ -d $(REMOTE_CORE_DIR) ]; then make -C $(REMOTE_CORE_DIR) fpga-clean; fi'
-endif
-
-clean-build-dir: clean-sim-dir clean-fpga-dir
+clean-build-dir:
 	@rm -rf $(BUILD_DIR) $(CORE_DIR)/*.vh *.vh
+ifneq ($(FPGA_SERVER),)
+	ssh $(FPGA_USER)@$(FPGA_SERVER) 'if [ -d $(REMOTE_CORE_DIR) ]; then make -C $(REMOTE_CORE_DIR) build-clean; fi'
+endif
 
 
 gen-clean:

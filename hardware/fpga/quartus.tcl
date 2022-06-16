@@ -40,7 +40,7 @@ set_global_assignment -name PARTITION_COLOR 39423 -section_id $TOP:$INST
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 
 set_global_assignment -name LAST_QUARTUS_VERSION $QUARTUS_VERSION
-set_global_assignment -name SDC_FILE iob_cache.sdc
+set_global_assignment -name SDC_FILE ../vsrc/iob_cache.sdc
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"

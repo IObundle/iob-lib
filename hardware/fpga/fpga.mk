@@ -3,10 +3,8 @@
 
 SHELL:=/bin/bash
 include ../info.mk
-REMOTE_CORE_DIR=sandbox/$(TOP_MODULE)
 
-VHDR=$(wildcard ../vsrc/*.vh)
-VSRC=$(wildcard ../vsrc/*.v)
+REMOTE_BUILD_DIR=sandbox/$(TOP_MODULE)
 
 #select build makefile segment according to FPGA family
 ifeq ($(FPGA_FAMILY),XCKU)
@@ -18,23 +16,34 @@ FPGA_PART:=5CGTFD9E5F35C7
 include quartus.mk
 endif
 
-build: 
+#include the module's headers and sources
+VHDR=$(wildcard *.vh) $(wildcard ../vsrc/*.vh)
+VSRC=$(wildcard *.v) $(wildcard ../vsrc/*.v)
+
+build: $(VHDR) $(VSRC)
 ifeq ($(FPGA_SERVER),)
 	make $(FPGA_OBJ)
 else 
-	ssh $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_CORE_DIR) ]; then mkdir -p $(REMOTE_CORE_DIR); fi"
-	rsync -avz --exclude .git ../.. $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_CORE_DIR)
-	ssh $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_CORE_DIR) fpga-build FPGA_FAMILY=$(FPGA_FAMILY)'
-	scp $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_CORE_DIR)/$(BUILD_DIR)/fpga/$(FPGA_OBJ) .
-	scp $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_CORE_DIR)/$(BUILD_DIR)/fpga/$(FPGA_LOG) .
+	ssh $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
+	rsync -avz --exclude .git .. $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
+	ssh $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_BUILD_DIR)/fpga build FPGA_FAMILY=$(FPGA_FAMILY)'
+	scp $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)/fpga/$(FPGA_OBJ) .
+	scp $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)/fpga/$(FPGA_LOG) .
 endif
 
-test: clean-all
-	make build TEST_LOG=">> test.log"
-
-clean-all: clean-testlog clean
-
+clean:
+	@rm -rf *
+ifneq ($(FPGA_SERVER),)
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/fpga clean; fi'
+endif
 debug:
+	echo $(VHDR)
+	echo $(VSRC)
 	echo $(FPGA_SERVER)
 
-.PHONY: build test clean-testlog clean clean-all debug
+.PHONY: build test clean debug
+
+#include local fpga segment
+ifneq ($(shell if [ -f fpga.mk ]; then echo yes; fi),)
+include fpga.mk
+endif

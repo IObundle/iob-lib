@@ -17,7 +17,7 @@ set_property part $PART [current_project]
 
 synth_design -part $PART -top $TOP -mode out_of_context -flatten_hierarchy none -verbose
 
-read_xdc iob_cache.xdc
+read_xdc ../vsrc/iob_cache.xdc
 
 opt_design
 place_design
