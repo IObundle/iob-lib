@@ -6,24 +6,22 @@ SHELL:=/bin/bash
 # include core basic info
 include ../info.mk
 
+REMOTE_BUILD_DIR=sandbox/$(TOP_MODULE)
+
+#include the module's headers and sources
+VHDR=$(wildcard ../vsrc/*.vh)
+VSRC+=$(wildcard ../vsrc/*.v)
+
 #include local simulation segment
 ifneq ($(shell if [ -f simulation.mk ]; then echo yes; fi),)
 include simulation.mk
 endif
-
-
-
-REMOTE_BUILD_DIR=sandbox/$(TOP_MODULE)
 
 ifeq ($(SIMULATOR), verilator)
 include verilator.mk
 else
 include icarus.mk
 endif
-
-#include the module's headers and sources
-VHDR=$(wildcard *.vh) $(wildcard ../vsrc/*.vh)
-VSRC=$(wildcard *.v) $(wildcard ../vsrc/*.v)
 
 build: $(VHDR) $(VSRC)
 ifeq ($(SIM_SERVER),)
@@ -71,8 +69,8 @@ ifneq ($(SIM_SERVER),)
 endif
 
 debug:
-	echo $(VHDR)
-	echo $(VSRC)
+	@echo $(VHDR)
+	@echo $(VSRC)
 
 .PHONY: build run clean kill-sim kill-remote-sim debug
 

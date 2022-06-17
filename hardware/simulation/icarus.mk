@@ -6,7 +6,7 @@ endif
 
 comp: a.out
 
-a.out: $(VHDR) $(VSRC)
+a.out:
 	iverilog $(VFLAGS)
 
 exec:

@@ -61,7 +61,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)/doc
 
 
-populate-build-dir: $(BUILD_DIR) $(VHDR) $(VSRC) $(CONSTRAINTS)
+populate-build-dir: $(BUILD_DIR) $(BUILD_SRC_DIR)/top $(VHDR) $(VSRC) $(CONSTRAINTS)
 	cp $(CORE_DIR)/info.mk $(BUILD_DIR)
 	cp hardware/simulation/*.mk $(BUILD_SIM_DIR)
 	mv $(BUILD_SIM_DIR)/simulation.mk $(BUILD_SIM_DIR)/Makefile
