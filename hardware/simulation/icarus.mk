@@ -1,4 +1,4 @@
-VFLAGS=-W all -g2005-sv -I. -I../vsrc $(VSRC)
+VFLAGS+=-W all -g2005-sv -I. -I../vsrc $(VSRC)
 
 ifeq ($(VCD),1)
 VFLAGS+=-DVCD
@@ -6,7 +6,7 @@ endif
 
 comp: a.out
 
-a.out:
+a.out: $(VHDR) $(VSRC)
 	iverilog $(VFLAGS)
 
 exec:

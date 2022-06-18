@@ -1,13 +1,12 @@
-#
-# Synthesis and implementation script
-#
+#extract cli args
+set TOP [lindex $argv 0]
+set DEFINE [lindex $argv 1]
+set VSRC [lindex $argv 2]
+set PART [lindex $argv 3]
 
 set QUARTUS_VERSION "18.0.0 Standard Edition"
 set FAMILY "Cyclone V"
 
-set TOP [lindex $argv 0]
-set VSRC [lindex $argv 1]
-set PART [lindex $argv 2]
 set INST [concat $TOP "_0"]
 
 project_new $TOP -overwrite
@@ -17,6 +16,18 @@ set_global_assignment -name DEVICE $PART
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name TOP_LEVEL_ENTITY $TOP
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
+
+#verilog heders search path
+set_global_assignment -name SEARCH_PATH ../vsrc
+
+
+#verilog macros
+foreach macro [split $DEFINE \ ] {
+    if {$macro != ""} {
+        set_global_assignment -name VERILOG_MACRO $macro
+    }
+}
+
 
 #verilog sources
 foreach file [split $VSRC \ ] {

@@ -1,16 +1,29 @@
+# (c) 2022-Present IObundle, Lda, all rights reserved
+#
+# This makefile creates a build directory
+#
+# It should be called from the user core repository directory which is
+# assumed to be located at ../.. and have iob-lib as submodule called LIB.
+#
+# The user core repository is assumed to have the structure typical of
+# IObundle's repositories
+
+
 SHELL=/bin/bash
 LIB_DIR=.
+
+# core paths
 CORE_DIR=../..
+CORE_HW_DIR=$(CORE_DIR)/hardware
+CORE_SRC_DIR=$(CORE_HW_DIR)/src
+CORE_INC_DIR=$(CORE_HW_DIR)/include
+CORE_SIM_DIR=$(CORE_HW_DIR)/simulation
+CORE_FPGA_DIR=$(CORE_HW_DIR)/fpga
 
-CORE_SRC_DIR=$(CORE_DIR)/hardware/src
-CORE_INC_DIR=$(CORE_DIR)/hardware/include
 
-
+# build dir paths
 BUILD_DIR = $(CORE_DIR)/$(TOP_MODULE)_$(VERSION_STR)
 BUILD_SRC_DIR=$(BUILD_DIR)/vsrc
-
-CORE_SIM_DIR=$(CORE_DIR)/hardware/simulation
-CORE_FPGA_DIR=$(CORE_DIR)/hardware/fpga
 BUILD_SIM_DIR=$(BUILD_DIR)/sim
 BUILD_FPGA_DIR=$(BUILD_DIR)/fpga
 BUILD_DOC_DIR=$(BUILD_DIR)/doc
@@ -45,13 +58,16 @@ $(BUILD_SRC_DIR)/$(TOP_MODULE)_tb.cpp: $(CORE_SIM_DIR)/$(TOP_MODULE)_tb.cpp
 	cp $< $(BUILD_SRC_DIR)
 # import constraints files
 CONSTRAINTS=$(subst $(CORE_FPGA_DIR), $(BUILD_SRC_DIR), $(wildcard $(CORE_FPGA_DIR)/*.sdc))
+CONSTRAINTS+=$(subst $(CORE_FPGA_DIR), $(BUILD_SRC_DIR), $(wildcard $(CORE_FPGA_DIR)/*.xdc))
 $(BUILD_SRC_DIR)/%.sdc: $(CORE_FPGA_DIR)/%.sdc
+	cp $< $@
+$(BUILD_SRC_DIR)/%.xdc: $(CORE_FPGA_DIR)/%.xdc
 	cp $< $@
 
 
 include $(CORE_DIR)/hardware/simulation/build.mk
 
-build-dir: $(BUILD_DIR) populate-build-dir
+build-dir: $(BUILD_DIR) populate
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)/vsrc
@@ -61,8 +77,9 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)/doc
 
 
-populate-build-dir: $(BUILD_DIR) $(BUILD_SRC_DIR)/top $(VHDR) $(VSRC) $(CONSTRAINTS)
+populate: $(BUILD_DIR) $(BUILD_SRC_DIR)/top $(VHDR) $(VSRC) $(CONSTRAINTS)
 	cp $(CORE_DIR)/info.mk $(BUILD_DIR)
+	if [ -f $(CORE_HW_DIR)/hw-comp.mk ]; then cp $(CORE_HW_DIR)/hw-comp.mk $(BUILD_DIR); fi
 	cp hardware/simulation/*.mk $(BUILD_SIM_DIR)
 	mv $(BUILD_SIM_DIR)/simulation.mk $(BUILD_SIM_DIR)/Makefile
 	cp $(CORE_SIM_DIR)/*.expected $(BUILD_SIM_DIR)
@@ -74,20 +91,13 @@ populate-build-dir: $(BUILD_DIR) $(BUILD_SRC_DIR)/top $(VHDR) $(VSRC) $(CONSTRAI
 	if [ "`ls $(CORE_FPGA_DIR)/*.mk 2>/dev/null`" ]; then cp $(CORE_FPGA_DIR)/*.mk $(BUILD_DIR)/fpga; fi
 
 
-clean-build-dir:
-	@rm -rf $(BUILD_DIR) $(CORE_DIR)/*.vh *.vh
-ifneq ($(FPGA_SERVER),)
-	ssh $(FPGA_USER)@$(FPGA_SERVER) 'if [ -d $(REMOTE_CORE_DIR) ]; then make -C $(REMOTE_CORE_DIR) build-clean; fi'
-endif
-
-
-gen-clean:
-	@rm -f *# *~
-
-clean-testlog:
-	@rm -f test.log
-
-clean-all: clean-testlog clean
+clean:
+	if [ -f $(BUILD_SIM_DIR)/Makefile ]; then make -C $(BUILD_SIM_DIR) clean; fi
+	if [ -f $(BUILD_FPGA_DIR)/Makefile ]; then make -C $(BUILD_FPGA_DIR) clean; fi
+	if [ -f $(BUILD_SYN_DIR)/Makefile ]; then make -C $(BUILD_SYN_DIR) clean; fi
+	if [ -f $(BUILD_DOC_DIR)/Makefile ]; then make -C $(BUILD_DOC_DIR) clean; fi
+	@rm -rf $(BUILD_DIR)
+	@rm -f *# *~ $(CORE_DIR)/*.vh *.vh
 
 debug:
 	@echo $(TOP_MODULE)

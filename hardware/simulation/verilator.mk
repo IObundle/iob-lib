@@ -7,7 +7,7 @@ ifeq ($(VCD),1)
 VFLAGS+=--trace
 endif
 
-comp:
+comp: $(VHDR) $(VSRC)
 	echo $(TOP_MODULE)
 	verilator $(VFLAGS) $(WAVE)	
 	cd ./obj_dir && make -f V$(VTOP).mk
