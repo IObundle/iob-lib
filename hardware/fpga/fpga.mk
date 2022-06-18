@@ -18,11 +18,13 @@ include fpga.mk
 endif
 
 #select FPGA part and family
+#default FPGA_FAMILY
+FPGA_FAMILY?=CYCLONEV-GT
 ifeq ($(FPGA_FAMILY),XCKU)
 FPGA_PART:=xcku040-fbva676-1-c
 include vivado.mk
 else
-#default FPGA_FAMILY: CYCLONEV-GT
+#default part
 FPGA_PART:=5CGTFD9E5F35C7
 include quartus.mk
 endif
