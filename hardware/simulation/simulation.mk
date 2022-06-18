@@ -69,7 +69,11 @@ ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/sim clean; fi'
 endif
 
-test: clean $(TEST_LIST) 
+clean_t:
+	@rm -rf a.out test.log obj_dir
+
+test: clean_t $(TEST_LIST) 
+	diff test.expected test.log
 
 debug:
 	@echo $(VHDR)
