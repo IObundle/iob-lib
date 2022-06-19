@@ -48,6 +48,12 @@ ifneq ($(FPGA_SERVER),)
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/fpga clean; fi'
 endif
 
+fpga.log: $(FPGA_OBJ)
+	sed -e '1,3d' quartus.log > $@
+
+test: $(TEST_LIST)
+	diff test.log test.expected
+
 debug:
 	echo $(VHDR)
 	echo $(VSRC)

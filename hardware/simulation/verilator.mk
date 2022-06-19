@@ -7,14 +7,12 @@ ifeq ($(VCD),1)
 VFLAGS+=--trace
 endif
 
-TEST_LOG=test.log
-
 comp: $(VHDR) $(VSRC)
 	echo $(TOP_MODULE)
 	verilator $(VFLAGS) $(WAVE)	
 	cd ./obj_dir && make -f V$(VTOP).mk
 
 exec:
-	./obj_dir/V$(VTOP) | tee -a $(TEST_LOG)
+	./obj_dir/V$(VTOP) | tee -a test.log
 
 .PHONY: comp exec

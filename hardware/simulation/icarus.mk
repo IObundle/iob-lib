@@ -4,15 +4,13 @@ ifeq ($(VCD),1)
 VFLAGS+=-DVCD
 endif
 
-TEST_LOG=test.log
-
 comp: a.out
 
 a.out: $(VHDR) $(VSRC)
 	iverilog $(VFLAGS)
 
 exec:
-	./a.out | tee -a $(TEST_LOG)
+	./a.out | tee -a test.log
 ifeq ($(VCD),1)
 	if [ "`pgrep -u $(USER) gtkwave`" ]; then killall -q -9 gtkwave; fi
 	gtkwave -a ../waves.gtkw uut.vcd &

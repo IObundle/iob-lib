@@ -70,13 +70,16 @@ ifneq ($(SIM_SERVER),)
 endif
 
 
-test: $(TEST_LIST) 
+test: clean-test-log $(TEST_LIST)
 	diff test.log test.expected
+
+clean-test-log:
+	rm -f test.log
 
 debug:
 	@echo $(VHDR)
 	@echo $(VSRC)
 	@echo $(VFLAGS)
 
-.PHONY: build run clean kill-sim kill-remote-sim debug test
+.PHONY: build run clean kill-sim kill-remote-sim debug test $(TEST_LIST)
 
