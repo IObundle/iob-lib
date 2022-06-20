@@ -3,6 +3,7 @@ set TOP [lindex $argv 0]
 set DEFINE [lindex $argv 1]
 set VSRC [lindex $argv 2]
 set PART [lindex $argv 3]
+set NAME [lindex $argv 4]
 
 #verilog sources
 foreach file [split $VSRC \ ] {
@@ -16,7 +17,7 @@ set_property part $PART [current_project]
 
 synth_design -include_dirs ../vsrc -verilog_define $DEFINE -part $PART -top $TOP -mode out_of_context -flatten_hierarchy none -verbose
 
-read_xdc ../vsrc/iob_cache.xdc
+read_xdc ../fpga/$NAME.xdc
 
 opt_design
 place_design
