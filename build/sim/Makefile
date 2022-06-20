@@ -64,13 +64,13 @@ ifeq ($(VCD),1)
 endif
 
 clean:
-	@rm -rf *
+	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "*.expected" \) -delete
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/sim clean; fi'
 endif
 
 
-test: clean-test-log $(TEST_LIST)
+test: clean clean-test-log $(TEST_LIST)
 	diff test.log test.expected
 
 clean-test-log:

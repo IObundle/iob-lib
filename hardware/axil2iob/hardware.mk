@@ -8,7 +8,7 @@ HW_MODULES+=axil2iob
 VSRC+=$(BUILD_SRC_DIR)/axil2iob.v
 
 # Copy the sources to the build directory
-$(BUILD_SRC_DIR)/axil2iob.v:$(LIB_DIR)/hardware/axil2iob/axil2iob.v
+$(BUILD_SRC_DIR)/axil2iob.v:hardware/axil2iob/axil2iob.v
 	cp $< $(BUILD_SRC_DIR)
 
 endif

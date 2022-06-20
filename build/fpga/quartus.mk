@@ -14,3 +14,6 @@ $(FPGA_OBJ): $(VHDR) $(VSRC) $(wildcard *.sdc)
 	$(ENV) quartus_cdb $(TOP_MODULE) -c $(TOP_MODULE) --incremental_compilation_export=$(TOP_MODULE)_0.qxp --incremental_compilation_export_partition_name=Top --incremental_compilation_export_post_synth=on --incremental_compilation_export_post_fit=off --incremental_compilation_export_routing=on --incremental_compilation_export_flatten=on
 	mv output_files/*.fit.summary $(FPGA_LOG)
 
+test.log: $(FPGA_LOG)
+	sed -e '1,3d' $< >> $@
+

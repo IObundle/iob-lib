@@ -8,7 +8,7 @@ HW_MODULES+=iob_modcnt
 VSRC+=$(BUILD_SRC_DIR)/iob_modcnt.v
 
 # Copy the sources to the build directory 
-$(BUILD_SRC_DIR)/iob_modcnt.v:$(LIB_DIR)/hardware/iob_modcnt/iob_modcnt.v
+$(BUILD_SRC_DIR)/iob_modcnt.v:hardware/iob_modcnt/iob_modcnt.v
 	cp $< $(BUILD_SRC_DIR)
 
 endif

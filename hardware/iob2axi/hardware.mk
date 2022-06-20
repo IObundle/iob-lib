@@ -4,7 +4,7 @@ ifneq (iob2axi,$(filter iob2axi, $(HW_MODULES)))
 HW_MODULES+=iob2axi
 
 
-include $(LIB_DIR)/hardware/fifo/iob_fifo_sync/hardware.mk
+include hardware/fifo/iob_fifo_sync/hardware.mk
 
 VHDR+=m_axi_m_port.vh \
 m_axi_write_m_port.vh \

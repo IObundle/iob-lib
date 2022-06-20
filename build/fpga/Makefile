@@ -36,27 +36,29 @@ else
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	scp $(FPGA_SCP_FLAGS) ../*.mk $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
 	rsync $(FPGA_SYNC_FLAGS) -avz --force --delete ../vsrc $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
-	rsync $(FPGA_SYNC_FLAGS) -avz --force --delete ../fpga $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
+	rsync $(FPGA_SYNC_FLAGS) -avz --force ../fpga $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_BUILD_DIR)/fpga $@ FPGA_FAMILY=$(FPGA_FAMILY)'
 	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)/fpga/$(FPGA_OBJ) .
 	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)/fpga/$(FPGA_LOG) .
 endif
 
 clean:
-	@rm -rf *
+	@find . -maxdepth 1 -type d -not \( -name '.' \) -exec rm -rf {} \;
+	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "*.expected" -o -name "*.tcl" \) -delete
 ifneq ($(FPGA_SERVER),)
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/fpga clean; fi'
 endif
 
-fpga.log: $(FPGA_OBJ)
-	sed -e '1,3d' quartus.log > $@
-
-test: $(TEST_LIST)
+test: clean clean-test-log $(TEST_LIST)
 	diff test.log test.expected
+
+clean-test-log:
+	rm -f test.log
 
 debug:
 	echo $(VHDR)
 	echo $(VSRC)
 	echo $(FPGA_SERVER)
+	echo $(FPGA_OBJ)
 
 .PHONY: build test clean debug

@@ -8,7 +8,7 @@ HW_MODULES+=iob_ram_tdp
 VSRC+=$(BUILD_SRC_DIR)/iob_ram_tdp.v
 
 # Copy the osurces to the build directory 
-$(BUILD_SRC_DIR)/iob_ram_tdp.v:$(LIB_DIR)/hardware/ram/iob_ram_tdp/iob_ram_tdp.v
+$(BUILD_SRC_DIR)/iob_ram_tdp.v:hardware/ram/iob_ram_tdp/iob_ram_tdp.v
 	cp $< $(BUILD_SRC_DIR)
 
 endif

@@ -5,13 +5,13 @@ ifeq ($(filter iob_ram_t2p_asym, $(HW_MODULES)),)
 HW_MODULES+=iob_ram_t2p_asym
 
 # Submodules
-include $(LIB_DIR)/hardware/ram/iob_ram_t2p/hardware.mk
+include hardware/ram/iob_ram_t2p/hardware.mk
 
 # Sources
 VSRC+=$(BUILD_SRC_DIR)/iob_ram_t2p_asym.v
 
 # Copy the sources to the build directory
-$(BUILD_SRC_DIR)/iob_ram_t2p_asym.v:$(LIB_DIR)/hardware/ram/iob_ram_t2p_asym/iob_ram_t2p_asym.v
+$(BUILD_SRC_DIR)/iob_ram_t2p_asym.v:hardware/ram/iob_ram_t2p_asym/iob_ram_t2p_asym.v
 	cp $< $(BUILD_SRC_DIR)
 
 endif
