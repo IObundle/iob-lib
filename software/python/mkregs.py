@@ -138,7 +138,8 @@ def get_num_mem_type(table, rw_type):
 
 
 def calc_mem_addr_w(reg, cpu_nbytes=4):
-    return int(reg['addr_w']) - int(math.log2(cpu_nbytes))
+    cpu_addr_offset = int(math.log2(cpu_nbytes/int(reg['nbytes'])))
+    return max(int(reg['addr_w']) - cpu_addr_offset, 0)
 
 
 def gen_mem_wires(table, fout, cpu_nbytes=4):
@@ -148,7 +149,8 @@ def gen_mem_wires(table, fout, cpu_nbytes=4):
             mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
             addr_offset = int(int(reg['addr']) / cpu_nbytes)
             fout.write(f"localparam {reg['name']}_ADDR_OFFSET = {addr_offset};\n")
-            fout.write(f"`IOB_WIRE({reg['name']}_addr, {mem_addr_w})\n")
+            if mem_addr_w > 0:
+                fout.write(f"`IOB_WIRE({reg['name']}_addr, {mem_addr_w})\n")
             fout.write(f"`IOB_WIRE({reg['name']}_addr_int, DATA_W+1)\n")
             if reg["rw_type"] == "W":
                 fout.write(f"`IOB_WIRE({reg['name']}_wdata, DATA_W)\n")
@@ -167,7 +169,8 @@ def gen_mem_write_hw(table, fout, cpu_nbytes=4):
             # cpu word addressing
             mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
             fout.write(f"`IOB_WIRE2WIRE((address - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
-            fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{mem_addr_w}-1:0], {reg['name']}_addr)\n")
+            if mem_addr_w > 0:
+                fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{mem_addr_w}-1:0], {reg['name']}_addr)\n")
             # get correct bytes from aligned wdata
             fout.write(f"`IOB_WIRE2WIRE(wdata, {reg['name']}_wdata)\n")
             fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & (|wstrb)) ? wstrb : {{(DATA_W/8){{1'b0}}}}, {reg['name']}_wstrb)\n")
@@ -183,7 +186,8 @@ def gen_mem_read_hw(table, fout, cpu_nbytes=4):
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
             mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
             fout.write(f"`IOB_WIRE2WIRE((address - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
-            fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{mem_addr_w}-1:0], {reg['name']}_addr)\n")
+            if mem_addr_w > 0:
+                fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{mem_addr_w}-1:0], {reg['name']}_addr)\n")
             fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & ~(|wstrb)), {reg['name']}_ren)\n")
 
     # switch case for mem reads
@@ -345,7 +349,7 @@ def get_core_addr_w(table, cpu_nbytes=4):
 
     hw_max_addr = math.floor(max_addr/cpu_nbytes)+1
 
-    addr_w = max(int(math.ceil(math.log(hw_max_addr, 2))),1)
+    addr_w = max(int(math.ceil(math.log(hw_max_addr, 2))), 1)
     return addr_w
 
 
