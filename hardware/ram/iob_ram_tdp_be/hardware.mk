@@ -8,10 +8,10 @@ HW_MODULES+=iob_ram_tdp_be
 include hardware/ram/iob_ram_tdp/hardware.mk
 
 # Sources
-VSRC+=$(BUILD_SRC_DIR)/iob_ram_tdp_be.v
+VSRC+=$(BUILD_VSRC_DIR)/iob_ram_tdp_be.v
 
 # Copy the sources to the build directoy 
-$(BUILD_SRC_DIR)/iob_ram_tdp_be.v:hardware/ram/iob_ram_tdp_be/iob_ram_tdp_be.v
-	cp $< $(BUILD_SRC_DIR)
+$(BUILD_VSRC_DIR)/iob_ram_tdp_be.v:hardware/ram/iob_ram_tdp_be/iob_ram_tdp_be.v
+	cp $< $(BUILD_VSRC_DIR)
 
 endif

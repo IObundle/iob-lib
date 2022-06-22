@@ -4,10 +4,10 @@ ifeq ($(filter iob_ram_2p_asym, $(HW_MODULES)),)
 HW_MODULES+=iob_ram_2p_asym
 
 # Sources
-VSRC+=$(BUILD_SRC_DIR)/iob_ram_2p_asym.v
+VSRC+=$(BUILD_VSRC_DIR)/iob_ram_2p_asym.v
 
 # Copy the sources to the buil;d directory
-$(BUILD_SRC_DIR)/iob_ram_2p_asym.v: hardware/ram/iob_ram_2p_asym/iob_ram_2p_asym.v
-	cp $< $(BUILD_SRC_DIR)
+$(BUILD_VSRC_DIR)/iob_ram_2p_asym.v: hardware/ram/iob_ram_2p_asym/iob_ram_2p_asym.v
+	cp $< $(BUILD_VSRC_DIR)
 
 endif

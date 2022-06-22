@@ -7,10 +7,10 @@ HW_MODULES+=iob_ram_dp_be
 include hardware/ram/iob_ram_dp/hardware.mk
 
 # Sources
-VSRC+=$(BUILD_SRC_DIR)/iob_ram_dp_be.v
+VSRC+=$(BUILD_VSRC_DIR)/iob_ram_dp_be.v
 
 # Copy the sources to the build directory 
-$(BUILD_SRC_DIR)/iob_ram_dp_be.v:hardware/ram/iob_ram_dp_be/iob_ram_dp_be.v
-	cp $< $(BUILD_SRC_DIR)
+$(BUILD_VSRC_DIR)/iob_ram_dp_be.v:hardware/ram/iob_ram_dp_be/iob_ram_dp_be.v
+	cp $< $(BUILD_VSRC_DIR)
 
 endif

@@ -5,10 +5,10 @@ ifeq ($(filter iob_f2s_1bit_sync, $(HW_MODULES)),)
 HW_MODULES+=iob_f2s_1bit_sync
 
 # Sources
-VSRC+=$(BUILD_SRC_DIR)/iob_f2s_1bit_sync.v
+VSRC+=$(BUILD_VSRC_DIR)/iob_f2s_1bit_sync.v
 
 # Copy the sources to the build directory
-$(BUILD_SRC_DIR)/iob_f2s_1bit_sync.v:hardware/iob_f2s_1bit_sync/iob_f2s_1bit_sync.v
-	cp $< $(BUILD_SRC_DIR)
+$(BUILD_VSRC_DIR)/iob_f2s_1bit_sync.v:hardware/iob_f2s_1bit_sync/iob_f2s_1bit_sync.v
+	cp $< $(BUILD_VSRC_DIR)
 
 endif

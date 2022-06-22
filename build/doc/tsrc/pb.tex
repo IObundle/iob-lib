@@ -1,4 +1,4 @@
-\documentclass[twocolumn]{\TEX/pb/pb}
+\documentclass[twocolumn]{pb}
 
 %Params
 %\def\XILINX{1}
@@ -14,7 +14,7 @@
 \usepackage[binary-units=true]{siunitx}
 \graphicspath{{./figures/}}
 
-\input{title}
+\input{pb_title}
 \category{Product Brief}
 %\confidential{}
 
@@ -28,29 +28,29 @@ keepaspectratio]{bg.pdf}%
 \vfill
 }}}
 
-\input{\TEX/color}
+\input{color}
 
 \begin{document}
 \AddToShipoutPicture*{\BackgroundPic}
 
 \section*{Overview}
-\input{../intro}
+\input{intro}
 
 \section*{Features}
-\input{../features}
+\input{features}
 
 \section*{Benefits}
-\input{../benefits}
+\input{benefits}
 
 \section*{Deliverables}
-\input{../deliverables}
+\input{deliverables}
 
 \section*{Block Diagram}
-\input{\TEX/bd}
+\input{bd}
 
 \section*{Implementation Results}
-\input{\TEX/fpga_results}
-\input{\TEX/asic_results}
+\input{fpga_results}
+\input{asic_results}
 
 
 \end{document}

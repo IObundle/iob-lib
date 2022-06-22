@@ -8,54 +8,56 @@ include version.mk
 # SIMULATE
 #
 
-sim-build: build-dir
-	make -C sim build
+SIM_DIR=hw/sim
+sim-build: 
+	make -C $(SIM_DIR) build
 
 sim-run: sim-build
-	make -C sim run
+	make -C $(SIM_DIR) run
 
-sim-test: build-dir
-	make -C sim test
+sim-test: 
+	make -C $(SIM_DIR) test
 
-sim-clean: build-dir
-	make -C sim clean
+sim-clean: 
+	make -C $(SIM_DIR) clean
 
-sim-debug: build-dir
-	make -C sim debug
+sim-debug: 
+	make -C $(SIM_DIR) debug
 
 #
 # FPGA
 #
 
-fpga-build: build-dir
-	make -C fpga build
+FPGA_DIR=hw/fpga
+fpga-build: 
+	make -C $(FPGA_DIR) build
 
-fpga-run: build-dir
-	make -C fpga run
+fpga-run: 
+	make -C $(FPGA_DIR) run
 
-fpga-test: build-dir
-	make -C fpga test
+fpga-test: 
+	make -C $(FPGA_DIR) test
 
-fpga-clean: build-dir
-	make -C fpga clean
+fpga-clean: 
+	make -C $(FPGA_DIR) clean
 
-fpga-debug: build-dir
-	make -C fpga debug
+fpga-debug: 
+	make -C $(FPGA_DIR) debug
 
 #
 # DOCUMENT
 #
-
-doc-build: build-dir
+DOC?=pb
+doc-build: 
 	make -C doc $(DOC).pdf
 
-doc-test: build-dir
+doc-test: 
 	make -C doc test
 
-doc-clean: build-dir
+doc-clean: 
 	make -C doc clean
 
-doc-debug: build-dir
+doc-debug: 
 	make -C doc debug
 
 #
@@ -72,8 +74,7 @@ test: build-clean sim-test fpga-test #doc-test
 clean: sim-clean fpga-clean #doc-clean
 
 
-.PHONY: build-dir build-clean build-debug \
-	sim-build sim-run sim-test sim-debug sim-clean \
+.PHONY:	sim-build sim-run sim-test sim-debug sim-clean \
 	fpga-build fpga-test fpga-clean fpga-debug \
 	doc-build doc-test doc-clean doc-debug \
 	test clean

@@ -5,11 +5,11 @@ ifneq (iob_iobuf,$(filter iob_iobuf, $(HW_MODULES)),)
 HW_MODULES+=iob_iobuf
 
 # Sources
-VSRC+=$(BUILD_SRC_DIR)/iob_iobuf.v
+VSRC+=$(BUILD_VSRC_DIR)/iob_iobuf.v
 
 # Copy the sources to the build directory 
-$(BUILD_SRC_DIR)/iob_iobuf.v:hardware/iob_iobuf/iob_iobuf.v
-	cp $< $(BUILD_SRC_DIR)
+$(BUILD_VSRC_DIR)/iob_iobuf.v:hardware/iob_iobuf/iob_iobuf.v
+	cp $< $(BUILD_VSRC_DIR)
 
 
 endif

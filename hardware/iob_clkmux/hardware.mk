@@ -5,10 +5,10 @@ ifneq (iob_clkmux,$(filter iob_clkmux, $(HW_MODULES)),)
 HW_MODULES+=iob_clkmux
 
 # Sources 
-VSRC+=$(BUILD_SRC_DIR)/iob_clkmux.v
+VSRC+=$(BUILD_VSRC_DIR)/iob_clkmux.v
 
 # Copy the sources to the build directory
-$(BUILD_SRC_DIR)/iob_clkmux.v: hardware/iob_clkmux/iob_clkmux.v
-	cp $< $(BUILD_SRC_DIR)
+$(BUILD_VSRC_DIR)/iob_clkmux.v: hardware/iob_clkmux/iob_clkmux.v
+	cp $< $(BUILD_VSRC_DIR)
 
 endif

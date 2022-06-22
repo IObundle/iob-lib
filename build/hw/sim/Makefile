@@ -4,9 +4,9 @@
 SHELL:=/bin/bash
 
 # include core basic info
-include ../info.mk
+include ../../info.mk
 
-REMOTE_BUILD_DIR=sandbox/$(TOP_MODULE)_$(VERSION_STR)
+REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
 
 #include the module's headers and sources
 VHDR=$(wildcard ../vsrc/*.vh)
@@ -31,20 +31,18 @@ ifeq ($(SIM_SERVER),)
 	make comp
 else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
-	scp $(SIM_SCP_FLAGS) ../*.mk $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
-	rsync $(SIM_SYNC_FLAGS) -avz --force --delete $(SIM_SYNC_FLAGS) ../vsrc $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
-	rsync $(SIM_SYNC_FLAGS) -avz --force --delete $(SIM_SYNC_FLAGS) ../sim $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_BUILD_DIR)/sim $@ SIMULATOR=$(SIMULATOR)'
+	rsync $(SIM_SYNC_FLAGS) -avz --force $(SIM_SYNC_FLAGS) ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hw/sim $@ SIMULATOR=$(SIMULATOR)'
 endif
 
 run: build
 ifeq ($(SIM_SERVER),)
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make exec"
 else
-	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_BUILD_DIR)/sim $@ SIMULATOR=$(SIMULATOR)'"
-	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/sim/sim.log .
+	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hw/sim $@ SIMULATOR=$(SIMULATOR)'"
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/hw/sim/sim.log .
 ifeq ($(VCD),1)
-	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/hardware/simulation/$(SIMULATOR)/*.vcd .
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/hw/sim/*.vcd .
 endif
 endif
 ifeq ($(VCD),1)
@@ -58,15 +56,15 @@ kill-sim:
 kill-remote-sim:
 	@echo "INFO: Remote simulator $(SIMULATOR) will be killed"
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'killall -q -u $(SIM_USER) -9 $(SIM_PROC); \
-	make -C $(REMOTE_BUILD_DIR)/hardware/simulation/$(SIMULATOR) kill-sim'
+	make -C $(REMOTE_BUILD_DIR)/hw/sim kill-sim'
 ifeq ($(VCD),1)
-	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/hardware/simulation/$(SIMULATOR)/*.vcd $(SIM_DIR)
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/hw/sim/*.vcd $(SIM_DIR)
 endif
 
 clean:
 	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "*.expected" \) -delete
 ifneq ($(SIM_SERVER),)
-	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/sim clean; fi'
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/hw/sim clean; fi'
 endif
 
 

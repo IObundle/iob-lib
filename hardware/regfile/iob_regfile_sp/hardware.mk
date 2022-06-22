@@ -5,10 +5,10 @@ ifeq ($(filter iob_regfile_sp, $(HW_MODULES)),)
 HW_MODULES+=iob_regfile_sp
 
 # Sources
-VSRC+=$(BUILD_SRC_DIR)/iob_regfile_sp.v
+VSRC+=$(BUILD_VSRC_DIR)/iob_regfile_sp.v
 
 # Copy sources to build directory
-$(BUILD_SRC_DIR)/iob_regfile_sp.v: hardware/regfile/iob_regfile_sp/iob_regfile_sp.v
-	cp $< $(BUILD_SRC_DIR)
+$(BUILD_VSRC_DIR)/iob_regfile_sp.v: hardware/regfile/iob_regfile_sp/iob_regfile_sp.v
+	cp $< $(BUILD_VSRC_DIR)
 
 endif

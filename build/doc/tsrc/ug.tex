@@ -1,4 +1,4 @@
-\documentclass{\TEX/ug/ug}
+\documentclass{ug}
 \usepackage{float}
 \usepackage{color, colortbl}
 \usepackage[section]{placeins}
@@ -20,11 +20,11 @@
 
 \graphicspath{ {./figures/} }
 
-\input{title}
+\input{ug_title}
 \date{\today}
 \category{User Guide, \input{version.tex}, Build \input{shortHash.tex}}
 
-\input{\TEX/color}
+\input{color}
 
 \begin{document}
 
@@ -38,7 +38,7 @@ User Guide, \input{version.tex}, Build \input{shortHash.tex}
 \cleardoublepage
 \pagenumbering{roman}
 \setcounter{page}{1}
-\input{\TEX/ug/revhist}
+\input{revhist_lib}
 \cleardoublepage
 \tableofcontents
 \listoftables
@@ -48,12 +48,12 @@ User Guide, \input{version.tex}, Build \input{shortHash.tex}
 \setcounter{page}{1}
 \section{Introduction}
 \label{sec:intro}
-\input{../intro}
-\input{\TEX/ug/symb}
+\input{intro}
+\input{symb}
 
 \subsection{Features}
 \label{sec:feat}
-\input{../features}
+\input{features}
 
 \subsection{Benefits}
 \label{sec:benef}
@@ -66,46 +66,46 @@ User Guide, \input{version.tex}, Build \input{shortHash.tex}
 \section{Description}
 \subsection{Block Diagram}
 \label{sec:bdd}
-\input{\TEX/ug/bdd}
+\input{bdd}
 
 \subsection{Configuration}
 \label{sec:ipconfig}
-\input{./config}
+\input{config}
 
 \subsection{Interface Signals}
 \label{sec:ifsig}
-\input{./if}
+\input{if}
 
 %timing diagrams
 \ifdefined\TD
 \subsection{Timing Diagrams}
 \label{sec:td}
-\input{./td}
+\input{td}
 \fi
 
 %software components
 \ifdefined\SWREG
 \subsection{Software Accessible Registers}
 \label{sec:swreg}
-\input{\TEX/ug/sw}
+\input{sw}
 \fi
 
 \section{Usage}
 \label{sec:inst}
-\input{\TEX/ug/inst}
+\input{inst}
 
 \subsection{Simulation}
 \label{sec:tbbd}
-\input{\TEX/ug/sim}
+\input{sim}
 
 \subsection{Synthesis}
 \label{sec:synth}
-\input{\TEX/ug/synth}
+\input{synth}
 
 \ifdefined\RESULTS
 \section{Implementation Results}
 \label{sec:results}
-\input{\TEX/ug/results}
+\input{results}
 \fi
 
 \ifdefined\CUSTOM

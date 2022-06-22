@@ -4,9 +4,9 @@
 SHELL:=/bin/bash
 
 # include core basic info
-include ../info.mk
+include ../../info.mk
 
-REMOTE_BUILD_DIR=sandbox/$(TOP_MODULE)_$(VERSION_STR)
+REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
 
 #include the module's headers and sources
 VHDR=$(wildcard ../vsrc/*.vh)
@@ -34,19 +34,17 @@ ifeq ($(FPGA_SERVER),)
 	make $(FPGA_OBJ)
 else 
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
-	scp $(FPGA_SCP_FLAGS) ../*.mk $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
-	rsync $(FPGA_SYNC_FLAGS) -avz --force --delete ../vsrc $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
-	rsync $(FPGA_SYNC_FLAGS) -avz --force ../fpga $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_BUILD_DIR)/fpga $@ FPGA_FAMILY=$(FPGA_FAMILY)'
-	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)/fpga/$(FPGA_OBJ) .
-	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)/fpga/$(FPGA_LOG) .
+	rsync $(FPGA_SYNC_FLAGS) -avz --force ../.. $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hw/fpga $@ FPGA_FAMILY=$(FPGA_FAMILY)'
+	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)/hw/fpga/$(FPGA_OBJ) .
+	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)/hw/fpga/$(FPGA_LOG) .
 endif
 
 clean:
 	@find . -maxdepth 1 -type d -not \( -name '.' \) -exec rm -rf {} \;
 	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "*.expected" -o -name "*.tcl" -o -name "*.sdc" -o -name "*.xdc" \) -delete
 ifneq ($(FPGA_SERVER),)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/fpga clean; fi'
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/hw/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/hw/fpga clean; fi'
 endif
 
 test: clean clean-test-log $(TEST_LIST)

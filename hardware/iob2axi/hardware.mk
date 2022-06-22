@@ -12,17 +12,17 @@ m_axi_read_m_port.vh \
 m_m_axi_write_portmap.vh \
 m_m_axi_read_portmap.vh
 
-VSRC+=$(BUILD_SRC_DIR)/iob2axi.v \ $(BUILD_SRC_DIR)/iobwaxi_wr.v \ $(BUILD_SRC_DIR)/iob2axi_rd.v
+VSRC+=$(BUILD_VSRC_DIR)/iob2axi.v \ $(BUILD_VSRC_DIR)/iobwaxi_wr.v \ $(BUILD_VSRC_DIR)/iob2axi_rd.v
 
-$(BUILD_SRC_DIR)/iob2axi.v:$(AXI_DIR)/hardware/iob2axi/iob2axi.v
-	cp $< $(BUILD_SRC_DIR)
+$(BUILD_VSRC_DIR)/iob2axi.v:$(AXI_DIR)/hardware/iob2axi/iob2axi.v
+	cp $< $(BUILD_VSRC_DIR)
 
 
-$(BUILD_SRC_DIR)/iobwaxi_wr.v:$(AXI_DIR)/hardware/iob2axi/iob2axi_wr.v
-	cp $< $(BUILD_SRC_DIR)
+$(BUILD_VSRC_DIR)/iobwaxi_wr.v:$(AXI_DIR)/hardware/iob2axi/iob2axi_wr.v
+	cp $< $(BUILD_VSRC_DIR)
 
-$(BUILD_SRC_DIR)/iob2axi_rd.v:$(AXI_DIR)/hardware/iob2axi/iob2axi_rd.v
-	cp $< $(BUILD_SRC_DIR)
+$(BUILD_VSRC_DIR)/iob2axi_rd.v:$(AXI_DIR)/hardware/iob2axi/iob2axi_rd.v
+	cp $< $(BUILD_VSRC_DIR)
 
 
 m_axi_m_port.vh:
