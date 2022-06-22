@@ -3,19 +3,16 @@
 
 SHELL:=/bin/bash
 
-# include core basic info
-include ../../info.mk
+#include local simulation segment
+ifneq ($(shell if [ -f simulation.mk ]; then echo yes; fi),)
+include simulation.mk
+endif
 
 REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
 
 #include the module's headers and sources
 VHDR=$(wildcard ../vsrc/*.vh)
 VSRC+=$(wildcard ../vsrc/*.v)
-
-#include local simulation segment
-ifneq ($(shell if [ -f simulation.mk ]; then echo yes; fi),)
-include simulation.mk
-endif
 
 #select simulator
 #default simulator

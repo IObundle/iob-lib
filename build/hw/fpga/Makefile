@@ -3,19 +3,17 @@
 
 SHELL:=/bin/bash
 
-# include core basic info
-include ../../info.mk
+#include local fpga segment
+ifneq ($(shell if [ -f fpga.mk ]; then echo yes; fi),)
+include fpga.mk
+endif
+
 
 REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
 
 #include the module's headers and sources
 VHDR=$(wildcard ../vsrc/*.vh)
 VSRC+=$(wildcard ../vsrc/*.v)
-
-#include local fpga segment
-ifneq ($(shell if [ -f fpga.mk ]; then echo yes; fi),)
-include fpga.mk
-endif
 
 #select FPGA part and family
 #default FPGA_FAMILY

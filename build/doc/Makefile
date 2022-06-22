@@ -5,8 +5,10 @@
 
 SHELL = /bin/bash
 
-# include core basic info
-include ../info.mk
+#include local doc segment
+ifneq ($(shell if [ -f doc.mk ]; then echo yes; fi),)
+include document.mk
+endif
 
 $(NAME)_version.txt:
 	echo $(VERSION) > version.txt
@@ -60,7 +62,7 @@ texfiles:
 	$(PYTHON_DIR)/verilog2tex.py ../hw/vsrc/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF)
 
 
-#FPGA implementation results
+#include implementation results
 fpga_res:
 ifeq ($(RESULTS),1)
 ifneq ($(XIL_FAMILY),)
@@ -107,7 +109,11 @@ $(ASICLOG):
 clean:
 	@find . -maxdepth 1 -type f -not \( -name Makefile \) -delete
 	make -C figures clean 
-	@rm -rf $(LIB_SW_PYTHON_DIR)/__pycache__
+	@rm -rf $(PYTHON_DIR)/__pycache__
+
+debug:
+	@echo $(VHDR)
+	@echo $(VSRC)
 
 .PHONY: view texfiles figures fpga_res asic_res clean
 
