@@ -4,7 +4,7 @@
 SHELL:=/bin/bash
 
 #include local simulation segment
-ifneq ($(shell if [ -f simulation.mk ]; then echo yes; fi),)
+ifneq ($(wildcard simulation.mk),)
 include simulation.mk
 endif
 
@@ -29,7 +29,7 @@ ifeq ($(SIM_SERVER),)
 else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(SIM_SYNC_FLAGS) -avz --force $(SIM_SYNC_FLAGS) ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hw/sim $@ SIMULATOR=$(SIMULATOR)'
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hw/sim $@ TOP_MODULE=$(TOP_MODULE) SIMULATOR=$(SIMULATOR)'
 endif
 
 run: build

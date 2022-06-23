@@ -21,6 +21,7 @@ include $(CORE_DIR)/info.mk
 CORE_HW_DIR=$(CORE_DIR)/hardware
 CORE_SIM_DIR=$(CORE_HW_DIR)/simulation
 CORE_FPGA_DIR=$(CORE_HW_DIR)/fpga
+CORE_DOC_DIR=$(CORE_DIR)/document
 
 
 # make version header
@@ -31,8 +32,9 @@ BUILD_DIR := $(CORE_DIR)/$(NAME)_$(VERSION_STR)
 BUILD_VSRC_DIR:=$(BUILD_DIR)/hw/vsrc
 BUILD_SIM_DIR:=$(BUILD_DIR)/hw/sim
 BUILD_FPGA_DIR:=$(BUILD_DIR)/hw/fpga
-BUILD_TSRC_DIR:=$(BUILD_DIR)/doc/tsrc
-BUILD_FIG_DIR:=$(BUILD_DIR)/doc/figures
+BUILD_DOC_DIR:=$(BUILD_DIR)/doc
+BUILD_TSRC_DIR:=$(BUILD_DOC_DIR)/tsrc
+BUILD_FIG_DIR:=$(BUILD_DOC_DIR)/figures
 BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
 # creat build directory
@@ -48,18 +50,31 @@ $(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
 	cp $< $@
 
 setup: $(BUILD_DIR) $(VHDR) $(VSRC)
-	cp $(CORE_DIR)/info.mk $(BUILD_DIR)
 	echo "VERSION_STR=$(VERSION_STR)" > $(BUILD_DIR)/version.mk
+	cp $(CORE_DIR)/info.mk $(BUILD_DIR)
+ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
+	cp $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
+endif
 	cp $(CORE_SIM_DIR)/*.expected $(BUILD_SIM_DIR)
-	if [ "`ls $(CORE_SIM_DIR)/*.mk 2>/dev/null`" ]; then cp $(CORE_SIM_DIR)/*.mk $(BUILD_SIM_DIR); fi
-	if [ "`ls $(CORE_SIM_DIR)/*_tb.* 2>/dev/null`" ]; then cp $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR); fi
+ifneq ($(wildcard $(CORE_SIM_DIR)/*.mk),)
+	cp $(CORE_SIM_DIR)/*.mk $(BUILD_SIM_DIR)
+endif 
+ifneq ($(wildcard $(CORE_FPGA_DIR)/*.mk),)
+	cp $(CORE_FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
+endif
+	cp $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR)
 	cp $(CORE_FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
-	if [ "`ls $(CORE_FPGA_DIR)/*.mk 2>/dev/null`" ]; then cp $(CORE_FPGA_DIR)/*.mk $(BUILD_FPGA_DIR); fi
-	if [ "`ls $(CORE_FPGA_DIR)/*.sdc 2>/dev/null`" ]; then cp $(CORE_FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR); fi
-	if [ "`ls $(CORE_FPGA_DIR)/*.xdc 2>/dev/null`" ]; then cp $(CORE_FPGA_DIR)/*.xdc $(BUILD_FPGA_DIR); fi
-	find $(CORE_DIR)/document -name \*.tex -exec cp {} $(BUILD_TSRC_DIR) \;
-	if [ -f $(CORE_DIR)/mkregs.conf ]; then cp $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR); fi
-	cp $(CORE_DIR)/document/figures/* $(BUILD_FIG_DIR)
+ifneq ($(wildcard $(CORE_FPGA_DIR)/*.sdc),)
+	cp $(CORE_FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR)
+endif
+ifneq ($(wildcard $(CORE_FPGA_DIR)/*.xdc),)
+	cp $(CORE_FPGA_DIR)/*.xdc $(BUILD_FPGA_DIR)
+endif
+ifneq ($(wildcard $(CORE_DOC_DIR)/*.mk),)
+	cp $(CORE_DOC_DIR)/*.mk $(BUILD_DOC_DIR)
+endif
+	cp $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
+	cp $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
 
 
 

@@ -5,8 +5,9 @@
 
 SHELL = /bin/bash
 
+
 #include local doc segment
-ifneq ($(shell if [ -f doc.mk ]; then echo yes; fi),)
+ifneq ($(wildcard document.mk),)
 include document.mk
 endif
 
@@ -54,7 +55,9 @@ $(DOC)top.tex: texfiles
 	echo "\input{$(DOC).tex}" >> $@
 
 #tex files extracted from code comments
-MKREGS_CONF:=$(shell if [ -f tsrc/mkregs.conf ]; then echo tsrc/mkregs.conf; fi)
+ifneq ($(wildcard tsrc/mkregs.conf),)
+MKREGS_CONF:=tsrc/mkregs.conf
+endif
 VHDR:=$(wildcard ../hw/vsrc/*.vh)
 VSRC:=$(wildcard ../hw/vsrc/*.v)
 
@@ -97,23 +100,27 @@ asic.tex: $(ASICLOG)
 	cp $(ASICRPT) .; LOG=$< ../sw/asic2tex.sh
 
 $(VIVADOLOG):
-	make  -C ../hw/fpga fpga-build FPGA_FAMILY=$(XIL_FAMILY)
+	make  -C ../hw/fpga build FPGA_FAMILY=$(XIL_FAMILY) TOP_MODULE=$(TOP_MODULE)
 
 $(QUARTUSLOG):
-	make  -C ../hw/fpga fpga-build FPGA_FAMILY=$(INT_FAMILY)
+	make  -C ../hw/fpga build FPGA_FAMILY=$(INT_FAMILY) TOP_MODULE=$(TOP_MODULE)
 
 $(ASICLOG):
-	make  -C ../hw/fpga asic ASIC_NODE=$(ASIC_NODE)
+	make  -C ../hw/syn build ASIC_NODE=$(ASIC_NODE)
 
 #cleaning
 clean:
-	@find . -maxdepth 1 -type f -not \( -name Makefile \) -delete
+	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk \) -delete
 	make -C figures clean 
 	@rm -rf $(PYTHON_DIR)/__pycache__
 
 debug:
 	@echo $(VHDR)
 	@echo $(VSRC)
+	@echo $(RESULTS)
+	@echo $(INT_FAMILY)
+	@echo $(XIL_FAMILY)
+	@echo $(wildcard document.mk)
 
 .PHONY: view texfiles figures fpga_res asic_res clean
 

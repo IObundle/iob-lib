@@ -4,7 +4,7 @@
 SHELL:=/bin/bash
 
 #include local fpga segment
-ifneq ($(shell if [ -f fpga.mk ]; then echo yes; fi),)
+ifneq ($(wildcard fpga.mk),)
 include fpga.mk
 endif
 
@@ -33,7 +33,7 @@ ifeq ($(FPGA_SERVER),)
 else 
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(FPGA_SYNC_FLAGS) -avz --force ../.. $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hw/fpga $@ FPGA_FAMILY=$(FPGA_FAMILY)'
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hw/fpga $@ TOP_MODULE=$(TOP_MODULE) FPGA_FAMILY=$(FPGA_FAMILY)'
 	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)/hw/fpga/$(FPGA_OBJ) .
 	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)/hw/fpga/$(FPGA_LOG) .
 endif
