@@ -54,7 +54,7 @@ def print_help():
                     wire NAME_addr; (MEM only)
                     wire NAME_ren;
                 hw can assign
-                    wire NAME_rdata;
+                    wire NAME_rdata;     (Sampled in cycle after valid)
             IOB_SWREG_W(NAME, NBYTES, RST_VAL, ADDR, ADDR_W) // Description
                 sw can write:
                     NAME                 (REG case)
@@ -288,8 +288,8 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
 
     fout.write("\n\n//read register logic\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
-    fout.write("`IOB_WIRE(rdata_int2, DATA_W)\n")
-    fout.write("iob_reg #(DATA_W) read_reg (clk, rst, {DATA_W{1'b0}}, 1'b0, {DATA_W{1'b0}}, valid, rdata_int, rdata_int2);\n")
+    fout.write("`IOB_WIRE(address_reg, ADDR_W)\n")
+    fout.write("iob_reg #(ADDR_W) addr_reg (clk, rst, {ADDR_W{1'b0}}, 1'b0, {ADDR_W{1'b0}}, valid, address, address_reg);\n")
 
     # if read memory present then add mem_rdata_int
     if has_mem_type(table, ["R"]):
@@ -300,17 +300,17 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
         fout.write(f"\n`IOB_WIRE(mem_switch, {num_read_mems})\n")
         # Register condition for SWMEM_R access
         fout.write("iob_reg #(1) mem_read_sel_ (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, (valid & (wstrb == 0) & |mem_switch), mem_read_sel_reg);\n")
-        # skip rdata_int2 delay for memory read accesses
-        fout.write("`IOB_VAR2WIRE((mem_read_sel_reg) ? mem_rdata_int : rdata_int2, rdata)\n\n")
+        # choose between register or memory read data
+        fout.write("`IOB_VAR2WIRE((mem_read_sel_reg) ? mem_rdata_int : rdata_int, rdata)\n\n")
     else:
-        fout.write("`IOB_VAR2WIRE(rdata_int2, rdata)\n\n")
+        fout.write("`IOB_VAR2WIRE(rdata_int, rdata)\n\n")
 
     for row in table:
         if row["reg_type"] == "REG" and row['rw_type'] == "R":
             fout.write(f"`IOB_WIRE({row['name']}_rdata, {int(row['nbytes']) * 8})\n")
 
     fout.write("\nalways @* begin\n")
-    fout.write("   case(address)\n")
+    fout.write("   case(address_reg)\n")
 
     # concatenate rdata wires with same 32 bit address
     rdata_cases = get_rdata_cases(table, cpu_nbytes)
