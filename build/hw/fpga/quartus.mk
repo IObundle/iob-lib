@@ -7,7 +7,7 @@ FPGA_USER=$(QUARTUS_USER)
 ENV=$(QUARTUSPATH)/nios2eds/nios2_command_shell.sh
 
 $(FPGA_OBJ): $(VHDR) $(VSRC) $(wildcard *.sdc)
-	$(ENV) quartus_sh -t quartus.tcl $(TOP_MODULE) $(DEFINE) "$(VSRC)" $(FPGA_PART)
+	$(ENV) quartus_sh -t quartus.tcl $(TOP_MODULE) $(DEFINE) "$(VSRC)" $(FPGA_PART) $(NAME)
 	$(ENV) quartus_map --read_settings_files=on --write_settings_files=off $(TOP_MODULE) -c $(TOP_MODULE)
 	$(ENV) quartus_fit --read_settings_files=off --write_settings_files=off $(TOP_MODULE) -c $(TOP_MODULE)
 	$(ENV) quartus_cdb --read_settings_files=off --write_settings_files=off $(TOP_MODULE) -c $(TOP_MODULE) --merge=on
