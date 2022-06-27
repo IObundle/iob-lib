@@ -36,14 +36,20 @@ module iob_ram_2p_be
       if(r_en)
         r_data <= mem[r_addr];
 
-   //write port
+   // Wires for internal manipulation of byte enable
+   wire [DATA_W-1:0] w_data_int;
+   wire [DATA_W-1:0] mem_output = mem[w_addr];
+   // Mux to keep current value or get new one based on byte enable
    genvar c;
    generate
       for (c = 0; c < DATA_W/8; c = c + 1) begin
-         always @(posedge clk)
-           if(w_en[c])
-             mem[w_addr][c+:8] <= w_data[c+:8];
+         assign w_data_int[c*8+:8] = w_en[c] ? w_data[c*8+:8] : mem_output[c*8+:8];
       end
    endgenerate
+
+   //write port
+   always @(posedge clk)
+     if(|w_en)
+       mem[w_addr] <= w_data_int;
 
 endmodule   
