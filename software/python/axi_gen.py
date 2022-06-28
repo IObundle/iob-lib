@@ -180,7 +180,9 @@ def main ():
     # parse command line arguments
     if len(sys.argv) < 2 or len(sys.argv) > 4:
         print(len(sys.argv))
-        print("Usage: ./axi_gen.py [file_prefix port_prefix wire_prefix]")
+        print("Usage: ./axi_gen.py type [file_prefix port_prefix wire_prefix]")
+        print(len(sys.argv))
+        print("       where type={axi_m_port|axi_s_port|axi_portmap|axi_m_tb|axi_s_tb|axi_wire}")
         quit()
 
     #axi bus type
