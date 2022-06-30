@@ -37,7 +37,7 @@ BUILD_TSRC_DIR:=$(BUILD_DOC_DIR)/tsrc
 BUILD_FIG_DIR:=$(BUILD_DOC_DIR)/figures
 BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
-# creat build directory
+# create build directory
 $(BUILD_DIR):
 	cp -r build $@
 
@@ -58,11 +58,11 @@ endif
 	cp $(CORE_SIM_DIR)/*.expected $(BUILD_SIM_DIR)
 ifneq ($(wildcard $(CORE_SIM_DIR)/*.mk),)
 	cp $(CORE_SIM_DIR)/*.mk $(BUILD_SIM_DIR)
-endif 
+endif
+	cp $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR)
 ifneq ($(wildcard $(CORE_FPGA_DIR)/*.mk),)
 	cp $(CORE_FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
 endif
-	cp $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR)
 	cp $(CORE_FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
 ifneq ($(wildcard $(CORE_FPGA_DIR)/*.sdc),)
 	cp $(CORE_FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR)

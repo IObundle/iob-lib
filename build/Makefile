@@ -47,18 +47,18 @@ fpga-debug:
 #
 # DOCUMENT
 #
-DOC?=pb
+DOC_DIR=doc
 doc-build: 
-	make -C doc $(DOC).pdf
+	make -C $(DOC_DIR) build
 
 doc-test: 
-	make -C doc test
+	make -C $(DOC_DIR) test
 
 doc-clean: 
-	make -C doc clean
+	make -C $(DOC_DIR) clean
 
 doc-debug: 
-	make -C doc debug
+	make -C $(DOC_DIR) debug
 
 #
 # TEST

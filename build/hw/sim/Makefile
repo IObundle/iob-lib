@@ -17,11 +17,7 @@ VSRC+=$(wildcard ../vsrc/*.v)
 #select simulator
 #default simulator
 SIMULATOR?=icarus
-ifeq ($(SIMULATOR), verilator)
-include verilator.mk
-else
-include icarus.mk
-endif
+include $(SIMULATOR).mk
 
 build: $(VHDR) $(VSRC)
 ifeq ($(SIM_SERVER),)

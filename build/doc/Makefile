@@ -11,12 +11,17 @@ ifneq ($(wildcard document.mk),)
 include document.mk
 endif
 
+#default DOC
+DOC?=pb
+
 $(NAME)_version.txt:
 	echo $(VERSION) > version.txt
 
 
 SW_DIR:=../sw
 PYTHON_DIR:=$(SW_DIR)/python
+
+build: $(DOC).pdf
 
 presentation.pdf: presentation.tex
 	pdflatex $<
