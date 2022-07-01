@@ -3,42 +3,43 @@
 module axi2axi
   #(
     parameter AXI_ADDR_W = 30,
-    parameter AXI_DATA_W = 32
+    parameter AXI_DATA_W = 32,
+    parameter AXI_ID_W = 4,
+    parameter AXI_LEN_W = 4
     )
    (
     //START_IO_TABLE s_axi_s_port
-    input [1-1:0] s_axi_awid, //Address write channel ID
+    input [AXI_ID_W-1:0] s_axi_awid, //Address write channel ID
     input [AXI_ADDR_W-1:0] s_axi_awaddr, //Address write channel address
-    input [8-1:0] s_axi_awlen, //Address write channel burst length
+    input [AXI_LEN_W-1:0] s_axi_awlen, //Address write channel burst length
     input [3-1:0] s_axi_awsize, //Address write channel burst size. This signal indicates the size of each transfer in the burst
     input [2-1:0] s_axi_awburst, //Address write channel burst type
-    input [1-1:0] s_axi_awlock, //Address write channel lock type
+    input [2-1:0] s_axi_awlock, //Address write channel lock type
     input [4-1:0] s_axi_awcache, //Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
     input [3-1:0] s_axi_awprot, //Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
-    input [4-1:0] s_axi_awqos, //Address write channel quality of service
     input [1-1:0] s_axi_awvalid, //Address write channel valid
     output [1-1:0] s_axi_awready, //Address write channel ready
-    input [1-1:0] s_axi_wid, //Write channel ID
+    input [AXI_ID_W-1:0] s_axi_wid, //Write channel ID
     input [AXI_DATA_W-1:0] s_axi_wdata, //Write channel data
     input [(AXI_DATA_W/8)-1:0] s_axi_wstrb, //Write channel write strobe
     input [1-1:0] s_axi_wlast, //Write channel last word flag
     input [1-1:0] s_axi_wvalid, //Write channel valid
     output [1-1:0] s_axi_wready, //Write channel ready
-    output [1-1:0] s_axi_bid, //Write response channel ID
+    output [AXI_ID_W-1:0] s_axi_bid, //Write response channel ID
     output [2-1:0] s_axi_bresp, //Write response channel response
     output [1-1:0] s_axi_bvalid, //Write response channel valid
     input [1-1:0] s_axi_bready, //Write response channel ready
-    input [1-1:0] s_axi_arid, //Address read channel ID
+    input [AXI_ID_W-1:0] s_axi_arid, //Address read channel ID
     input [AXI_ADDR_W-1:0] s_axi_araddr, //Address read channel address
-    input [4-1:0] s_axi_arlen, //Address read channel burst length
+    input [AXI_LEN_W-1:0] s_axi_arlen, //Address read channel burst length
     input [3-1:0] s_axi_arsize, //Address read channel burst size. This signal indicates the size of each transfer in the burst
     input [2-1:0] s_axi_arburst, //Address read channel burst type
-    input [1-1:0] s_axi_arlock, //Address read channel lock type
+    input [2-1:0] s_axi_arlock, //Address read channel lock type
     input [4-1:0] s_axi_arcache, //Address read channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
     input [3-1:0] s_axi_arprot, //Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
     input [1-1:0] s_axi_arvalid, //Address read channel valid
     output [1-1:0] s_axi_arready, //Address read channel ready
-    output [1-1:0] s_axi_rid, //Read channel ID
+    output [AXI_ID_W-1:0] s_axi_rid, //Read channel ID
     output [AXI_DATA_W-1:0] s_axi_rdata, //Read channel data
     output [2-1:0] s_axi_rresp, //Read channel response
     output [1-1:0] s_axi_rlast, //Read channel last word
@@ -46,38 +47,37 @@ module axi2axi
     input [1-1:0] s_axi_rready, //Read channel ready
 
     //START_IO_TABLE m_axi_m_port
-    output [1-1:0] m_axi_awid, //Address write channel ID
+    output [AXI_ID_W-1:0] m_axi_awid, //Address write channel ID
     output [AXI_ADDR_W-1:0] m_axi_awaddr, //Address write channel address
-    output [8-1:0] m_axi_awlen, //Address write channel burst length
+    output [AXI_LEN_W-1:0] m_axi_awlen, //Address write channel burst length
     output [3-1:0] m_axi_awsize, //Address write channel burst size. This signal indicates the size of each transfer in the burst
     output [2-1:0] m_axi_awburst, //Address write channel burst type
-    output [1-1:0] m_axi_awlock, //Address write channel lock type
+    output [2-1:0] m_axi_awlock, //Address write channel lock type
     output [4-1:0] m_axi_awcache, //Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
     output [3-1:0] m_axi_awprot, //Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
-    output [4-1:0] m_axi_awqos, //Address write channel quality of service
     output [1-1:0] m_axi_awvalid, //Address write channel valid
     input [1-1:0] m_axi_awready, //Address write channel ready
-    output [1-1:0] m_axi_wid, //Write channel ID
+    output [AXI_ID_W-1:0] m_axi_wid, //Write channel ID
     output [AXI_DATA_W-1:0] m_axi_wdata, //Write channel data
     output [(AXI_DATA_W/8)-1:0] m_axi_wstrb, //Write channel write strobe
     output [1-1:0] m_axi_wlast, //Write channel last word flag
     output [1-1:0] m_axi_wvalid, //Write channel valid
     input [1-1:0] m_axi_wready, //Write channel ready
-    input [1-1:0] m_axi_bid, //Write response channel ID
+    input [AXI_ID_W-1:0] m_axi_bid, //Write response channel ID
     input [2-1:0] m_axi_bresp, //Write response channel response
     input [1-1:0] m_axi_bvalid, //Write response channel valid
     output [1-1:0] m_axi_bready, //Write response channel ready
-    output [1-1:0] m_axi_arid, //Address read channel ID
+    output [AXI_ID_W-1:0] m_axi_arid, //Address read channel ID
     output [AXI_ADDR_W-1:0] m_axi_araddr, //Address read channel address
-    output [4-1:0] m_axi_arlen, //Address read channel burst length
+    output [AXI_LEN_W-1:0] m_axi_arlen, //Address read channel burst length
     output [3-1:0] m_axi_arsize, //Address read channel burst size. This signal indicates the size of each transfer in the burst
     output [2-1:0] m_axi_arburst, //Address read channel burst type
-    output [1-1:0] m_axi_arlock, //Address read channel lock type
+    output [2-1:0] m_axi_arlock, //Address read channel lock type
     output [4-1:0] m_axi_arcache, //Address read channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
     output [3-1:0] m_axi_arprot, //Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
     output [1-1:0] m_axi_arvalid, //Address read channel valid
     input [1-1:0] m_axi_arready, //Address read channel ready
-    input [1-1:0] m_axi_rid, //Read channel ID
+    input [AXI_ID_W-1:0] m_axi_rid, //Read channel ID
     input [AXI_DATA_W-1:0] m_axi_rdata, //Read channel data
     input [2-1:0] m_axi_rresp, //Read channel response
     input [1-1:0] m_axi_rlast, //Read channel last word
@@ -98,7 +98,6 @@ module axi2axi
    assign m_axi_awlock = s_axi_awlock; //Address write channel lock type
    assign m_axi_awcache = s_axi_awcache; //Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
    assign m_axi_awprot = s_axi_awprot; //Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
-   assign m_axi_awqos = s_axi_awqos; //Address write channel quality of service
    assign m_axi_awvalid = s_axi_awvalid; //Address write channel valid
    assign s_axi_awready = m_axi_awready; //Address write channel ready
    assign m_axi_wid = s_axi_wid; //Write channel ID

@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 
-# Generates AXI4 and AXI$ Lite ports, port maps and signals:
+# Generates AXI4 and AXI$ Lite ports, port maps and signals
 #
-# ./axi_gen.py type [file_prefix port_prefix wire_prefix]")
-#
-#     type = [axi_port_m|axi_port_s|axi_portmap|axi_wire|axi_m_tb|axi_s_tb]
+#   See "Usage" below
 #
 
 import sys
 
 #bus constants
-AXI_ID_W = '1'
-AXI_LEN_W = '8'
+AXI_ID_W = '4'
+AXI_LEN_W = '4'
 AXI_SIZE_W = '3'
 AXI_BURST_W = '2'
-AXI_LOCK_W = '1'
+AXI_LOCK_W = '2'
 AXI_CACHE_W = '4'
 AXI_PROT_W = '3'
 AXI_QOS_W = '4'
@@ -147,11 +145,35 @@ def axi_s_port(prefix, fout):
     for i in range(len(table)):
         fout.write(' '+reverse(table[i][0])+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
 
+def axi_m_write_port(prefix, fout):
+    for i in range(len(table)):
+        fout.write(' '+table[i][0]+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
+    
+def axi_s_write_port(prefix, fout):
+    for i in range(len(table)):
+        fout.write(' '+reverse(table[i][0])+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
+
+def axi_m_read_port(prefix, fout):
+    for i in range(len(table)):
+        fout.write(' '+table[i][0]+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
+    
+def axi_s_read_port(prefix, fout):
+    for i in range(len(table)):
+        fout.write(' '+reverse(table[i][0])+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
+
 #
 # Portmap
 #
 
 def axi_portmap(port_prefix, wire_prefix, fout):
+    for i in range(len(table)):
+        fout.write('.'+port_prefix+table[i][2]+'('+wire_prefix+table[i][2]+'), //'+table[i][3]+'\n')
+
+def axi_write_portmap(port_prefix, wire_prefix, fout):
+    for i in range(len(table)):
+        fout.write('.'+port_prefix+table[i][2]+'('+wire_prefix+table[i][2]+'), //'+table[i][3]+'\n')
+
+def axi_read_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
         fout.write('.'+port_prefix+table[i][2]+'('+wire_prefix+table[i][2]+'), //'+table[i][3]+'\n')
 
@@ -178,11 +200,32 @@ def axi_wire(prefix, fout):
 def main ():
 
     # parse command line arguments
-    if len(sys.argv) < 2 or len(sys.argv) > 4:
+    if len(sys.argv) < 2 or len(sys.argv) > 5:
         print(len(sys.argv))
         print("Usage: ./axi_gen.py type [file_prefix port_prefix wire_prefix]")
         print(len(sys.argv))
-        print("       where type={axi_m_port|axi_s_port|axi_portmap|axi_m_tb|axi_s_tb|axi_wire}")
+        print("       where type can defined as")
+        print("            axi_m_port: axi full master port")
+        print("            axi_s_port: axi full slave port")
+        print("            axi_m_write_port: axi full master write port")
+        print("            axi_s_write_port: axi slave write port")
+        print("            axi_m_read_port: axi full master read port")
+        print("            axi_s_read_port: axi slave read port")
+        print("            axi_portmap: axi full portmap")
+        print("            axi_write_portmap: axi full portmap")
+        print("            axi_read_portmap: axi full portmap")
+        print("            axil_m_port: axi lite master port")
+        print("            axil_s_port: axi lite slave port")
+        print("            axil_m_write_port: axi lite master write port")
+        print("            axil_s_write_port: axi lite slave write port")
+        print("            axil_m_read_port: axi lite master read port")
+        print("            axil_s_read_port: axi lite slave read port")
+        print("            axil_portmap: axi lite portmap")
+        print("            axil_write_portmap: axi lite portmap")
+        print("            axil_read_portmap: axi lite portmap")
+        print("            axi_wire: axi full wires for interconnection")
+        print("            axi_m_tb: axi full master wires for testbench")
+        print("            axi_s_tb: axi full slave wires for testbench")
         quit()
 
     #axi bus type
@@ -203,16 +246,26 @@ def main ():
 
     global table
     
-    if (typ.find("axi_write_")>=0): table = make_axi_write()
+    if (typ.find("axi_m_write_")>=0): table = make_axi_write()
+    elif (typ.find("axi_s_write_")>=0): table = make_axi_write()
+    elif (typ.find("axi_m_read_")>=0): table = make_axi_read()
+    elif (typ.find("axi_s_read_")>=0): table = make_axi_read()
     elif (typ.find("axi_read_")>=0): table = make_axi_read()
+    elif (typ.find("axi_write_")>=0): table = make_axi_write()
     elif (typ.find("axi_")>=0): table = make_axi()
-    elif (typ.find("axil_write_")>=0): table = make_axil_write()
-    elif (typ.find("axil_read_")>=0): table = make_axil_read()
+    elif (typ.find("axil_m_write_")>=0): table = make_axil_write()
+    elif (typ.find("axil_s_write_")>=0): table = make_axil_write()
+    elif (typ.find("axil_m_read_")>=0): table = make_axil_read()
+    elif (typ.find("axil_s_read_")>=0): table = make_axil_read()
+    elif (typ.find("axil_read_")>=0): table = make_axi_read()
+    elif (typ.find("axil_write_")>=0): table = make_axi_write()
     elif (typ.find("axil_")>=0): table = make_axil()
 
-    port_name = typ.replace("write_","").replace("read_","")
-
-    if (port_name.find("m_port")+1 or port_name.find("s_port")+1):
+    #port_name = typ.replace("write_","").replace("read_","")
+    port_name = typ
+    
+    #write pragma for doc production
+    if (port_name.find("port")+1 and not port_name.find("portmap")+1):
         fout.write('  //START_IO_TABLE '+port_prefix+port_name+'\n')
 
     # call function func to generate .vh file
