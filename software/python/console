@@ -274,7 +274,7 @@ def main():
             cnsl_sendfile()
         elif (byte == DC1):
             print(PROGNAME, end = '')
-            print(': no file transfers in firmware')
+            print(': end of file transfers')
             endFileTransfer()
         else:
             print(str(byte, 'iso-8859-1'), end = '')
