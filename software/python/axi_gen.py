@@ -10,8 +10,11 @@ import sys
 #bus constants
 AXI_SIZE_W = '3'
 AXI_BURST_W = '2'
+AXI_LEN_W = '8'
+AXI_LOCK_W = '2'
 AXI_CACHE_W = '4'
 AXI_PROT_W = '3'
+AXI_QOS_W = '4'
 AXI_RESP_W = '2'
 
 table = []
@@ -24,12 +27,13 @@ def make_axi_write():
     return [ \
 ['`IOB_OUTPUT(', 'AXI_ID_W',        'axi_awid',    'Address write channel ID'], \
 ['`IOB_OUTPUT(', 'AXI_ADDR_W',    'axi_awaddr',  'Address write channel address'], \
-['`IOB_OUTPUT(', 'AXI_LEN_W',       'axi_awlen',   'Address write channel burst length'], \
+['`IOB_OUTPUT(', AXI_LEN_W,       'axi_awlen',   'Address write channel burst length'], \
 ['`IOB_OUTPUT(', AXI_SIZE_W,      'axi_awsize',  'Address write channel burst size. This signal indicates the size of each transfer in the burst'], \
 ['`IOB_OUTPUT(', AXI_BURST_W,     'axi_awburst', 'Address write channel burst type'], \
-['`IOB_OUTPUT(', 'AXI_LOCK_W',      'axi_awlock',  'Address write channel lock type'], \
+['`IOB_OUTPUT(', AXI_LOCK_W,      'axi_awlock',  'Address write channel lock type'], \
 ['`IOB_OUTPUT(', AXI_CACHE_W,     'axi_awcache', 'Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).'], \
 ['`IOB_OUTPUT(', AXI_PROT_W,      'axi_awprot',  'Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'], \
+['`IOB_OUTPUT(', AXI_QOS_W,       'axi_awqos',   'Address write channel quality of service'], \
 ['`IOB_OUTPUT(', '1',             'axi_awvalid', 'Address write channel valid'], \
 ['`IOB_INPUT(',  '1',             'axi_awready', 'Address write channel ready'], \
 ['`IOB_OUTPUT(', 'AXI_DATA_W',    'axi_wdata',   'Write channel data'], \
@@ -47,12 +51,13 @@ def make_axi_read():
     return [ \
 ['`IOB_OUTPUT(', 'AXI_ID_W',        'axi_arid',    'Address read channel ID'], \
 ['`IOB_OUTPUT(', 'AXI_ADDR_W',    'axi_araddr',  'Address read channel address'], \
-['`IOB_OUTPUT(', 'AXI_LEN_W',       'axi_arlen',   'Address read channel burst length'], \
+['`IOB_OUTPUT(', AXI_LEN_W,       'axi_arlen',   'Address read channel burst length'], \
 ['`IOB_OUTPUT(', AXI_SIZE_W,      'axi_arsize',  'Address read channel burst size. This signal indicates the size of each transfer in the burst'], \
 ['`IOB_OUTPUT(', AXI_BURST_W,     'axi_arburst', 'Address read channel burst type'], \
-['`IOB_OUTPUT(', 'AXI_LOCK_W',      'axi_arlock',  'Address read channel lock type'], \
+['`IOB_OUTPUT(', AXI_LOCK_W,      'axi_arlock',  'Address read channel lock type'], \
 ['`IOB_OUTPUT(', AXI_CACHE_W,     'axi_arcache', 'Address read channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).'], \
 ['`IOB_OUTPUT(', AXI_PROT_W,      'axi_arprot',  'Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'], \
+['`IOB_OUTPUT(', AXI_QOS_W,       'axi_arqos',   'Address read channel quality of service'], \
 ['`IOB_OUTPUT(', '1',             'axi_arvalid', 'Address read channel valid'], \
 ['`IOB_INPUT(',  '1',             'axi_arready', 'Address read channel ready'], \
 ['`IOB_INPUT(',  'AXI_ID_W',        'axi_rid',     'Read channel ID'], \
@@ -72,9 +77,10 @@ def make_axi():
 
 def make_axil_write():
     return [ \
-['`IOB_OUTPUT(', 'AXI_ID_W',         'axil_awid',    'Address write channel ID'], \
+['`IOB_OUTPUT(', 'AXI_ID_W',       'axil_awid',    'Address write channel ID'], \
 ['`IOB_OUTPUT(', 'AXIL_ADDR_W',    'axil_awaddr',  'Address write channel address'], \
 ['`IOB_OUTPUT(', AXI_PROT_W,       'axil_awprot',  'Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'], \
+['`IOB_OUTPUT(', AXI_QOS_W,        'axil_awqos',   'Address write channel quality of service'], \
 ['`IOB_OUTPUT(', '1',              'axil_awvalid', 'Address write channel valid'], \
 ['`IOB_INPUT(',  '1',              'axil_awready', 'Address write channel ready'], \
 ['`IOB_OUTPUT(', 'AXIL_DATA_W',    'axil_wdata',   'Write channel data'], \
@@ -92,6 +98,7 @@ def make_axil_read(AXIL_ADDR_W, AXIL_DATA_W):
 ['`IOB_OUTPUT(', 'AXI_ID_W',         'axil_arid',    'Address read channel ID'], \
 ['`IOB_OUTPUT(', 'AXIL_ADDR_W',    'axil_araddr',  'Address read channel address'], \
 ['`IOB_OUTPUT(', AXI_PROT_W,       'axil_arprot',  'Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'], \
+['`IOB_OUTPUT(', AXI_QOS_W,        'axil_arqos',   'Address read channel quality of service'], \
 ['`IOB_OUTPUT(', '1',              'axil_arvalid', 'Address read channel valid'], \
 ['`IOB_INPUT(',  '1',              'axil_arready', 'Address read channel ready'], \
 ['`IOB_INPUT(',  'AXI_ID_W',         'axil_rid',     'Read channel ID'], \
