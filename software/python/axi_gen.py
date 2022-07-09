@@ -98,7 +98,7 @@ def make_axil_write():
 ['`IOB_OUTPUT(', '1',              'axil_bready',  'Write response channel ready'] \
 ]
 
-def make_axil_read(AXIL_ADDR_W, AXIL_DATA_W):
+def make_axil_read():
     return [ \
 ['`IOB_OUTPUT(', AXI_ID_W,         'axil_arid',    'Address read channel ID'], \
 ['`IOB_OUTPUT(', 'AXIL_ADDR_W',    'axil_araddr',  'Address read channel address'], \
