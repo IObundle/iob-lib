@@ -13,7 +13,7 @@ module iob_pulse_gen
    `IOB_OUTPUT_VAR(pulse_out, 1)
    );
 
-   localparam WIDTH = $clog2(DURATION);
+   localparam WIDTH = DURATION==1? 1: $clog2(DURATION);
    
    reg [WIDTH-1:0] cnt;
    
