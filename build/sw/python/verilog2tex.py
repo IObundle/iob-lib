@@ -349,7 +349,7 @@ def main () :
     block_parse([*topv_lines, *v])
 
     #PARSE INTERFACE SIGNALS
-    io_parse ([*topv_lines, *vh], params, defines)
+    io_parse ([*topv_lines, *v, *vh], params, defines)
 
     #PARSE SOFTWARE ACCESSIBLE REGISTERS
     if conf != []:
