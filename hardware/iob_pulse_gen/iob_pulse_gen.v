@@ -10,6 +10,7 @@ module iob_pulse_gen
   (
    `IOB_INPUT(clk, 1),
    `IOB_INPUT(rst, 1),
+   `IOB_INPUT(restart, 1),
    `IOB_OUTPUT_VAR(pulse_out, 1)
    );
 
@@ -19,6 +20,9 @@ module iob_pulse_gen
    
    always @(posedge clk, posedge rst) begin
       if (rst) begin
+         cnt <= {WIDTH{1'b0}};
+         pulse_out <= 1'b0;
+      end else if (restart) begin
          cnt <= {WIDTH{1'b0}};
          pulse_out <= 1'b0;
       end else begin
