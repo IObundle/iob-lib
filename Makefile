@@ -76,8 +76,6 @@ endif
 	cp $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
 	cp $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
 
-
-
 clean:
 	if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
 	@rm -rf $(BUILD_DIR)

@@ -98,7 +98,7 @@ def make_axil_write():
 ['`IOB_OUTPUT(', '1',              'axil_bready',  'Write response channel ready'] \
 ]
 
-def make_axil_read(AXIL_ADDR_W, AXIL_DATA_W):
+def make_axil_read():
     return [ \
 ['`IOB_OUTPUT(', AXI_ID_W,         'axil_arid',    'Address read channel ID'], \
 ['`IOB_OUTPUT(', 'AXIL_ADDR_W',    'axil_araddr',  'Address read channel address'], \
@@ -180,7 +180,9 @@ def main ():
     # parse command line arguments
     if len(sys.argv) < 2 or len(sys.argv) > 4:
         print(len(sys.argv))
-        print("Usage: ./axi_gen.py [file_prefix port_prefix wire_prefix]")
+        print("Usage: ./axi_gen.py type [file_prefix port_prefix wire_prefix]")
+        print(len(sys.argv))
+        print("       where type={axi_m_port|axi_s_port|axi_portmap|axi_m_tb|axi_s_tb|axi_wire}")
         quit()
 
     #axi bus type
