@@ -35,7 +35,7 @@
 \renewcommand{\headrulewidth}{.4pt}
 \fancyhead{}
 \fancyhead[RO,LE]{
-\textbf{\@header}
+\textbf{\@title}
 \\
 \textsc{\small{\@category}}
 }
@@ -53,7 +53,6 @@
 %}
 
 \newcommand{\category}[1]{\def\@category{#1}}
-\newcommand{\header}[1]{\def\@header{#1}}
 \renewcommand{\familydefault}{\sfdefault}
 
 \renewcommand{\maketitle}{
