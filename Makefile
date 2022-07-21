@@ -37,6 +37,9 @@ BUILD_TSRC_DIR:=$(BUILD_DOC_DIR)/tsrc
 BUILD_FIG_DIR:=$(BUILD_DOC_DIR)/figures
 BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
+# mkregs path
+MKREGS:=build/sw/python/mkregs.py
+
 # create build directory
 $(BUILD_DIR):
 	cp -r build $@
@@ -75,8 +78,6 @@ ifneq ($(wildcard $(CORE_DOC_DIR)/*.mk),)
 endif
 	cp $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
 	cp $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
-
-
 
 clean:
 	if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi

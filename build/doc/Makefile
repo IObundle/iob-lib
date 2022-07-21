@@ -29,7 +29,6 @@ presentation.pdf: presentation.tex
 
 
 %.pdf: fpga_res asic_res figures $(DOC)top.tex
-	cp tsrc/* .
 ifeq ($(DOC),pb)
 	make -C ./figures pb_figs
 endif
@@ -47,6 +46,7 @@ view: $(DOC).pdf
 	evince $< &
 
 $(DOC)top.tex: texfiles
+	cp tsrc/* .
 	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
 	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
 	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi

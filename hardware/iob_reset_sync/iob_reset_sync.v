@@ -5,7 +5,7 @@
 module iob_reset_sync
   (
    `IOB_INPUT(clk, 1),
-   `IOB_OUTPUT(rst, 1),
+   `IOB_INPUT(rst, 1),
    `IOB_OUTPUT(rst_out, 1)
    );
 
