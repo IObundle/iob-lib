@@ -6,6 +6,7 @@
 import sys
 from parse import parse, search
 import math
+import re
 
 
 def print_usage():
@@ -92,6 +93,10 @@ def print_help():
     print(help_str)
 
 
+def clog2(x):
+    return math.ceil(math.log2(x))
+
+
 def header_parse(vh, defines):
     """ Parse header files
     """
@@ -106,13 +111,17 @@ def header_parse(vh, defines):
         name = d_flds[0].lstrip(' ')
 
         # VALUE
-        eval_str = d_flds[1].strip('`').lstrip(' ').replace("$", "")  # to replace $clog2 with clog2
-        for key, val in defines.items():
-            eval_str = eval_str.replace(str(key), str(val))
+        eval_str = d_flds[1].replace('`', '').lstrip(' ').replace("$", "")  # to replace $clog2 with clog2
+
+        # split string into alphanumeric words
+        existing_define_candidates = re.split('\W+', eval_str)
+        for define_candidate in existing_define_candidates:
+            if defines.get(define_candidate):
+                eval_str = eval_str.replace(str(define_candidate), str(defines[define_candidate]))
 
         try:
             value = eval(eval_str)
-        except ValueError:
+        except (ValueError, SyntaxError):
             # eval_str has undefined parameters: use as is
             value = eval_str
 
