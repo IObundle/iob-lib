@@ -37,6 +37,9 @@ BUILD_TSRC_DIR:=$(BUILD_DOC_DIR)/tsrc
 BUILD_FIG_DIR:=$(BUILD_DOC_DIR)/figures
 BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
+# mkregs path
+MKREGS:=build/sw/python/mkregs.py
+
 # create build directory
 $(BUILD_DIR):
 	cp -r build $@
