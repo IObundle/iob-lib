@@ -339,7 +339,7 @@ def main () :
     params = param_parse (topv_lines, param_defaults, defines)
 
     #PARSE BLOCK DIAGRAM MODULES
-    block_parse([*topv_lines, *v])
+    block_parse([*topv_lines])
 
     #PARSE INTERFACE SIGNALS
     io_parse ([*topv_lines, *v, *vh], params, defines)
