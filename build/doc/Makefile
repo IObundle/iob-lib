@@ -34,7 +34,7 @@ ifeq ($(DOC),pb)
 endif
 ifeq ($(DOC),ug)
 	make -C ./figures ug_figs
-	echo $(VERSION) > version.tex
+	echo $(VERSION_STR) > version.tex
 	git rev-parse --short HEAD > shortHash.tex
 endif
 	pdflatex -jobname $(DOC) $(DOC)top.tex
