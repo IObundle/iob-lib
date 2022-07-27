@@ -98,9 +98,12 @@ User Guide, \input{version.tex}, Build \input{shortHash.tex}
 \label{sec:tbbd}
 \input{sim_lib}
 
+%ASIC synthesis
+\ifdefined\ASICSYNTH
 \subsection{Synthesis}
 \label{sec:synth}
 \input{synth}
+\fi
 
 \ifdefined\RESULTS
 \section{Implementation Results}

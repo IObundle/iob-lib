@@ -55,6 +55,7 @@ $(DOC)top.tex: texfiles
 	if [ -f vivado.tex ]; then echo "\def\XILINX{Y}" >> $@; fi
 	if [ -f quartus.tex ]; then echo "\def\INTEL{Y}" >> $@; fi
 	if [ -f asic.tex ]; then echo "\def\ASIC{Y}" >> $@; fi
+	if [ -f synth.tex ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
 	$(if $(RESULTS), @echo "\def\RESULTS{Y}" >> $@,)
 	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $@; fi
 	echo "\input{$(DOC).tex}" >> $@

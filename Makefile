@@ -78,6 +78,11 @@ ifneq ($(wildcard $(CORE_DOC_DIR)/*.mk),)
 endif
 	cp $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
 	cp $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
+	if [ ! -f $(BUILD_TSRC_DIR)/deliverables.tex ]; then \
+		mv $(BUILD_TSRC_DIR)/deliverables_lib.tex $(BUILD_TSRC_DIR)/deliverables.tex; \
+	else \
+		rm -f $(BUILD_TSRC_DIR)/deliverables_lib.tex; \
+	fi
 
 clean:
 	if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
