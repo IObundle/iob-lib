@@ -74,10 +74,10 @@ def param_parse (topv, param_defaults, defines):
         #may be defined using macros: replace and evaluate
         eval_str = p_flds_tmp[2].replace('`','').replace(',','').replace("$","")
 
-        for key, val in param_defaults.items():
-            eval_str = eval_str.replace(str(key),str(val))
+        eval_str = str(param_defaults.get(eval_str.strip()))
+        
         try:
-            p_flds.append(eval(eval_exp))
+            p_flds.append(eval(eval_str))
         except:
             #eval_str has undefined parameters: use as is
             p_flds.append(eval_str.replace('_','\_').strip(' '))
@@ -175,9 +175,7 @@ def io_parse (io_lines, params, defines):
         #WIDTH
         #may be defined using macros: replace and evaluate
         eval_str = io_flds_tmp[3].replace('`','').replace(',','').replace('(','')
-        for key, val in defines.items():
-            if key not in param_names:
-                eval_str = eval_str.replace(str(key),str(val))
+        
         try:
             io_flds.append(eval(eval_str))
         except:
