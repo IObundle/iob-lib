@@ -68,9 +68,11 @@ User Guide, \input{version.tex}, Build \input{shortHash.tex}
 \label{sec:bdd}
 \input{bdd}
 
+\ifdefined\SMP
 \subsection{Configuration}
 \label{sec:ipconfig}
 \input{config}
+\fi
 
 \subsection{Interface Signals}
 \label{sec:ifsig}
@@ -108,7 +110,7 @@ User Guide, \input{version.tex}, Build \input{shortHash.tex}
 \ifdefined\RESULTS
 \section{Implementation Results}
 \label{sec:results}
-\input{results}
+\input{results_lib}
 \fi
 
 \ifdefined\CUSTOM
