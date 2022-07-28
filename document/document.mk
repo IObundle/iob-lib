@@ -36,7 +36,7 @@ $(DOC)top.tex: texfiles
 	if [ -f vivado.tex ]; then echo "\def\XILINX{Y}" >> $(DOC)top.tex; fi
 	if [ -f quartus.tex ]; then echo "\def\INTEL{Y}" >> $(DOC)top.tex; fi
 	if [ -f asic.tex ]; then echo "\def\ASIC{Y}" >> $(DOC)top.tex; fi
-	$(if $(RESULTS), @echo "\def\RESULTS{Y}" >> $@,)
+	if [ $(RESULTS) == 1 ]; then echo "\def\RESULTS{Y}" >> $@; fi
 	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $@; fi
 	echo "\input{$(LIB_DOC_DIR)/$(DOC)/$(DOC).tex}" >> $(DOC)top.tex
 
@@ -97,7 +97,9 @@ $(QUARTUSLOG):
 $(ASICLOG):
 	make  -C $(CORE_DIR) asic ASIC_NODE=$(ASIC_NODE)
 
-#cleaning
+debug:
+	@echo $(RESULTS)
+
 clean:
 	@find . -type f -not \( $(NOCLEAN) \) -delete
 	@rm -rf figures $(DOC)top.tex

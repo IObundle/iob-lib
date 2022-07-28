@@ -10,7 +10,6 @@ import sys
 #bus constants
 AXI_SIZE_W = '3'
 AXI_BURST_W = '2'
-AXI_LEN_W = '8'
 AXI_LOCK_W = '2'
 AXI_CACHE_W = '4'
 AXI_PROT_W = '3'
@@ -27,7 +26,7 @@ def make_axi_write():
     return [ \
 ['`IOB_OUTPUT(', 'AXI_ID_W',        'axi_awid',    'Address write channel ID'], \
 ['`IOB_OUTPUT(', 'AXI_ADDR_W',    'axi_awaddr',  'Address write channel address'], \
-['`IOB_OUTPUT(', AXI_LEN_W,       'axi_awlen',   'Address write channel burst length'], \
+['`IOB_OUTPUT(', 'AXI_LEN_W',       'axi_awlen',   'Address write channel burst length'], \
 ['`IOB_OUTPUT(', AXI_SIZE_W,      'axi_awsize',  'Address write channel burst size. This signal indicates the size of each transfer in the burst'], \
 ['`IOB_OUTPUT(', AXI_BURST_W,     'axi_awburst', 'Address write channel burst type'], \
 ['`IOB_OUTPUT(', AXI_LOCK_W,      'axi_awlock',  'Address write channel lock type'], \
@@ -51,7 +50,7 @@ def make_axi_read():
     return [ \
 ['`IOB_OUTPUT(', 'AXI_ID_W',        'axi_arid',    'Address read channel ID'], \
 ['`IOB_OUTPUT(', 'AXI_ADDR_W',    'axi_araddr',  'Address read channel address'], \
-['`IOB_OUTPUT(', AXI_LEN_W,       'axi_arlen',   'Address read channel burst length'], \
+['`IOB_OUTPUT(', 'AXI_LEN_W',       'axi_arlen',   'Address read channel burst length'], \
 ['`IOB_OUTPUT(', AXI_SIZE_W,      'axi_arsize',  'Address read channel burst size. This signal indicates the size of each transfer in the burst'], \
 ['`IOB_OUTPUT(', AXI_BURST_W,     'axi_arburst', 'Address read channel burst type'], \
 ['`IOB_OUTPUT(', AXI_LOCK_W,      'axi_arlock',  'Address read channel lock type'], \
