@@ -42,7 +42,7 @@ clean:
 	@find . -maxdepth 1 -type d -not \( -name '.' \) -exec rm -rf {} \;
 	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "*.expected" -o -name "*.tcl" -o -name "*.sdc" -o -name "*.xdc" \) -delete
 ifneq ($(FPGA_SERVER),)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/hw/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/hw/fpga clean; fi'
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/hw/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/hw/fpga clean; fi'
 endif
 
 test: clean clean-test-log $(TEST_LIST)
