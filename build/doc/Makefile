@@ -56,7 +56,7 @@ $(DOC)top.tex: texfiles
 	if [ -f quartus.tex ]; then echo "\def\INTEL{Y}" >> $@; fi
 	if [ -f asic.tex ]; then echo "\def\ASIC{Y}" >> $@; fi
 	if [ -f synth.tex ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
-	$(if $(RESULTS), @echo "\def\RESULTS{Y}" >> $@,)
+	if [ $(RESULTS) == 1 ]; then echo "\def\RESULTS{Y}" >> $@; fi
 	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $@; fi
 	echo "\input{$(DOC).tex}" >> $@
 

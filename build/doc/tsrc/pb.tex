@@ -49,9 +49,11 @@ keepaspectratio]{bg.pdf}%
 \section*{Block Diagram}
 \input{bd}
 
+
+\ifdefined\RESULTS
 \section*{Implementation Results}
 \input{fpga_results_lib}
 \input{asic_results_lib}
-
+\fi
 
 \end{document}
