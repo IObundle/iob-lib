@@ -42,7 +42,7 @@ MKREGS:=build/sw/python/mkregs.py
 
 # create build directory
 $(BUILD_DIR):
-	cp -r build $@
+	cp -r -u build $@
 
 # import core hardware 
 include $(CORE_DIR)/hardware/hardware.mk
@@ -50,39 +50,39 @@ include $(CORE_DIR)/hardware/hardware.mk
 # copy core version header file
 VHDR+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
-	cp $< $@
+	cp -u $< $@
 
 # tex files requiring specific processing
-tex_files:=deliverables config benefits results fpga_results asic_results features intro 
+tex_files:=deliverables config benefits results fpga_results asic_results features intro
 
 setup: $(BUILD_DIR) $(VHDR) $(VSRC)
 	echo "VERSION_STR=$(VERSION_STR)" > $(BUILD_DIR)/version.mk
-	cp $(CORE_DIR)/info.mk $(BUILD_DIR)
+	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
 ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
-	cp $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
+	cp -u $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
 endif
-	cp $(CORE_SIM_DIR)/*.expected $(BUILD_SIM_DIR)
+	cp -u $(CORE_SIM_DIR)/*.expected $(BUILD_SIM_DIR)
 ifneq ($(wildcard $(CORE_SIM_DIR)/*.mk),)
-	cp $(CORE_SIM_DIR)/*.mk $(BUILD_SIM_DIR)
+	cp -u $(CORE_SIM_DIR)/*.mk $(BUILD_SIM_DIR)
 endif
-	cp $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR)
+	cp -u $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR)
 ifneq ($(wildcard $(CORE_FPGA_DIR)/*.mk),)
-	cp $(CORE_FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
+	cp -u $(CORE_FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
 endif
-	cp $(CORE_FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
+	cp -u $(CORE_FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
 ifneq ($(wildcard $(CORE_FPGA_DIR)/*.sdc),)
-	cp $(CORE_FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR)
+	cp -u $(CORE_FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR)
 endif
 ifneq ($(wildcard $(CORE_FPGA_DIR)/*.xdc),)
-	cp $(CORE_FPGA_DIR)/*.xdc $(BUILD_FPGA_DIR)
+	cp -u $(CORE_FPGA_DIR)/*.xdc $(BUILD_FPGA_DIR)
 endif
 ifneq ($(wildcard $(CORE_DOC_DIR)/*.mk),)
-	cp $(CORE_DOC_DIR)/*.mk $(BUILD_DOC_DIR)
+	cp -u $(CORE_DOC_DIR)/*.mk $(BUILD_DOC_DIR)
 endif
-	cp $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
-	cp $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
+	cp -u $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
+	cp -u $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
 	$(foreach k, $(tex_files), if [ ! -f $(BUILD_TSRC_DIR)/$k.tex ] ; \
-	then mv $(BUILD_TSRC_DIR)/$k_lib.tex $(BUILD_TSRC_DIR)/$k.tex; \
+	then mv -u $(BUILD_TSRC_DIR)/$k_lib.tex $(BUILD_TSRC_DIR)/$k.tex; \
 	else rm -f $(BUILD_TSRC_DIR)/$k_lib.tex; fi;)
 
 clean:
