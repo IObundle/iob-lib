@@ -64,14 +64,14 @@ doc-debug:
 # TEST
 #
 
-test: build-clean sim-test fpga-test #doc-test
+test: build-clean sim-test fpga-test doc-test
 
 
 #
 # CLEAN
 #
 
-clean: sim-clean fpga-clean #doc-clean
+clean: sim-clean fpga-clean doc-clean
 
 
 .PHONY:	sim-build sim-run sim-test sim-debug sim-clean \
