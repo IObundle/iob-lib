@@ -53,7 +53,7 @@ $(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
 	cp $< $@
 
 # tex files requiring specific processing
-tex_files:=deliverables config benefits
+tex_files:=deliverables config benefits results fpga_results asic_results features intro 
 
 setup: $(BUILD_DIR) $(VHDR) $(VSRC)
 	echo "VERSION_STR=$(VERSION_STR)" > $(BUILD_DIR)/version.mk
