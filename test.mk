@@ -7,9 +7,7 @@
 # 	- make sim MEM_MODULE_DIR=<path/to/mem/module>: simulation individual mem
 #
 
-ROOT_DIR=.
-HW_DIR=$(ROOT_DIR)/hardware
-MEM_DIR=$(ROOT_DIR)
+HW_DIR=hardware
 BUILD_VSRC_DIR=.
 
 # Paths to memories
@@ -50,7 +48,7 @@ endif
 
 # Submodules
 ifneq ($(filter iob_ram_2p_asym, $(HW_MODULES)),)
-include $(MEM_DIR)/hardware/ram/iob_ram_2p/hardware.mk
+include hardware/ram/iob_ram_2p/hardware.mk
 endif
 
 # Testbench
