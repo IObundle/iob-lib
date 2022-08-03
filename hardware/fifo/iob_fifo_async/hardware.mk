@@ -1,4 +1,3 @@
-
 ifeq ($(filter iob_fifo_async, $(HW_MODULES)),)
 
 # Add to modules list

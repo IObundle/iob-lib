@@ -1,122 +1,57 @@
-#
-# Test Memory Modules
-#
-# Usage:
-# 	- make all: run make test
-# 	- make test: simulate all memory modules with testbench files
-# 	- make sim MEM_MODULE_DIR=<path/to/mem/module>: simulation individual mem
-#
+#build here
+BUILD_VSRC_DIR:=.
 
-HW_DIR=hardware
-BUILD_VSRC_DIR=.
-
-# Paths to memories
-MEM_HW_DIRS:= fifo ram regfile rom
-MEM_TB_FILES:=
-
-# Run make targets from this makefile
-MAKE_CMD:=make -f $(firstword $(MAKEFILE_LIST))
-
-# Find MEM dirs with testbench files
-$(foreach m, $(MEM_HW_DIRS), $(eval MEM_TB_FILES+=$(shell find $(HW_DIR)/$(m) -name '*_tb.v' -not -path './submodules/*')))
-MEM_TEST_DIRS:=$(dir $(MEM_TB_FILES))
-
-# Get tested memory modules file names
-MEM_MODULES:=
-$(foreach d, $(MEM_TEST_DIRS), $(eval MEM_MODULES+=$(shell basename $(shell find $(d) -name '*.v' -not -name '*_tb.v'))))
-
-# Default mem dir
-MEM_MODULE_DIR ?= $(patsubst %/, %, $(firstword $(MEM_TEST_DIRS)))
-MEM_NAME:=$(notdir $(shell find $(MEM_MODULE_DIR) -name '*.v' -not -name '*_tb.v'))
-defmacro:=-D
-incdir:=-I
-
-# Defines
-DEFINE+=$(defmacro)ADDR_W=10
-DEFINE+=$(defmacro)DATA_W=32
-ifeq ($(VCD),1)
-DEFINE+=$(defmacro)VCD
-endif
-
-# Includes
-INCLUDE+=$(incdir)build/hw/vsrc
-
-# Sources
-ifneq ($(MEM_MODULE_DIR),)
-include $(MEM_MODULE_DIR)/hardware.mk
-endif
-
-# Submodules
-ifneq ($(filter iob_ram_2p_asym, $(HW_MODULES)),)
-include hardware/ram/iob_ram_2p/hardware.mk
+# Default module
+MODULE ?= iob_ram_2p
+MODULE_DIR ?= $(shell find hardware -name $(MODULE))
+ifneq ($(MODULE_DIR),)
+include $(MODULE_DIR)/hardware.mk
+else
+$(info No such module $(MODULE))
 endif
 
 # Testbench
-VSRC+=$(wildcard $(MEM_MODULE_DIR)/*_tb.v)
+TB=$(wildcard $(MODULE_DIR)/*_tb.v)
 
-# list of asymmetric memories
-IS_ASYM=$(shell echo $(MEM_NAME) | grep fifo)
-IS_ASYM+=$(shell echo $(MEM_NAME) | grep 2p)
-IS_ASYM+=$(shell echo $(MEM_NAME) | grep dp)
+# Defines
+DEFINE=-DADDR_W=10 -DDATA_W=32
+ifeq ($(VCD),1)
+DEFINE+= -DVCD
+endif
 
-all: test
+# Includes
+INCLUDE=-Ibuild/hw/vsrc
+
+# asymmetric memory present
+IS_ASYM=$(shell echo $(VSRC) | grep asym)
 
 #
-# Simulate
+# Simulate with Icarus Verilog
 #
-
-# Icarus Verilog simulator flags
 VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
 
-sim: $(VSRC) clean
-	@echo "MEM_HW_DIRS $(MEM_HW_DIRS)"
-	@echo "MEM_TEST_DIRS $(MEM_TEST_DIRS)"
-	@echo "\n\nSimulating module $(MEM_NAME)\n\n"
+sim-sym:
+	$(VLOG) $(VSRC) $(TB)
+	@./a.out $(TEST_LOG)
+
+sim-asym:
+	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(VSRC) $(TB)
+	@./a.out $(TEST_LOG)
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(VSRC) $(TB)
+	@./a.out $(TEST_LOG)
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(VSRC) $(TB)
+	@./a.out $(TEST_LOG)
+
+sim: $(VSRC) $(TB)
+	@echo "Simulating module $(MODULE)"
 ifeq ($(IS_ASYM),)
-	$(MAKE_CMD) sim-sym
+	make sim-sym
 else
-	$(MAKE_CMD) sim-asym
+	make sim-asym
 endif
 ifeq ($(VCD),1)
 	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &
 endif
 
-sim-sym:
-	$(VLOG) $(VSRC)
-	@./a.out $(TEST_LOG)
-
-sim-asym: $(VSRC)
-	$(VLOG) $(defmacro)W_DATA_W=32 $(defmacro)R_DATA_W=8 $(VSRC)
-	@./a.out $(TEST_LOG)
-	$(VLOG) $(defmacro)W_DATA_W=8 $(defmacro)R_DATA_W=32 $(VSRC)
-	@./a.out $(TEST_LOG)
-	$(VLOG) $(defmacro)W_DATA_W=8 $(defmacro)R_DATA_W=8 $(VSRC)
-	@./a.out $(TEST_LOG)
-
-sim-all: $(MEM_TEST_DIRS)
-	@echo "Listing all modules: $(MEM_MODULES)"
-
-$(MEM_TEST_DIRS):
-	$(MAKE_CMD) sim MEM_MODULE_DIR=$(@D)
-
-#
-# Test
-#
-sim-test:
-	$(MAKE_CMD) sim-all VCD=0 TEST_LOG=">> test.log"
-
-test: clean sim-test
-	@if [ `grep -c "ERROR" test.log` != 0 ]; then exit 1; fi
-
-#
-# Clean
-#
-
-clean:
-	@rm -f *~ \#*\# a.out *.vcd *.drom *.png *.pyc *.log *.v
-
 # Rules
-.PHONY: sim sim-sym sim-asym sim-all \
-	$(MEM_TEST_DIRS) \
-	sim-test test \
-	clean
+.PHONY: sim sim-sym sim-asym 

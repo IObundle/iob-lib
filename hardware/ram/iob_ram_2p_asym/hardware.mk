@@ -3,6 +3,9 @@ ifeq ($(filter iob_ram_2p_asym, $(HW_MODULES)),)
 # Add to modules list
 HW_MODULES+=iob_ram_2p_asym
 
+# Needed modules
+include hardware/ram/iob_ram_2p/hardware.mk
+
 # Sources
 VSRC+=$(BUILD_VSRC_DIR)/iob_ram_2p_asym.v
 
