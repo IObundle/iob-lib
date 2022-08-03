@@ -2,6 +2,11 @@
 # core info
 include $(CORE_DIR)/info.mk
 
+# enable all flows in setup by default
+SETUP_SIM ?=1
+SETUP_FPGA ?=1
+SETUP_DOC ?=1
+
 # core internal paths
 CORE_HW_DIR=$(CORE_DIR)/hardware
 CORE_SIM_DIR=$(CORE_HW_DIR)/simulation
@@ -46,11 +51,14 @@ setup: $(BUILD_DIR) $(VHDR) $(VSRC)
 ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
 	cp -u $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
 endif
+ifneq ($(SETUP_SIM),0)
 	cp -u $(CORE_SIM_DIR)/*.expected $(BUILD_SIM_DIR)
 ifneq ($(wildcard $(CORE_SIM_DIR)/*.mk),)
 	cp -u $(CORE_SIM_DIR)/*.mk $(BUILD_SIM_DIR)
 endif
 	cp -u $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR)
+endif
+ifneq ($(SETUP_FPGA),0)
 ifneq ($(wildcard $(CORE_FPGA_DIR)/*.mk),)
 	cp -u $(CORE_FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
 endif
@@ -61,6 +69,8 @@ endif
 ifneq ($(wildcard $(CORE_FPGA_DIR)/*.xdc),)
 	cp -u $(CORE_FPGA_DIR)/*.xdc $(BUILD_FPGA_DIR)
 endif
+endif
+ifneq ($(SETUP_DOC),0)
 ifneq ($(wildcard $(CORE_DOC_DIR)/*.mk),)
 	cp -u $(CORE_DOC_DIR)/*.mk $(BUILD_DOC_DIR)
 endif
@@ -69,3 +79,6 @@ endif
 	$(foreach k, $(tex_files), if [ ! -f $(BUILD_TSRC_DIR)/$k.tex ] ; \
 	then mv -u $(BUILD_TSRC_DIR)/$k_lib.tex $(BUILD_TSRC_DIR)/$k.tex; \
 	else rm -f $(BUILD_TSRC_DIR)/$k_lib.tex; fi;)
+endif
+
+.PHONY: version setup

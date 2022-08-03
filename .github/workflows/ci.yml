@@ -30,4 +30,4 @@ jobs:
         with:
           submodules: 'recursive'
       - name: test memory modules
-        run: make -f test.mk test
+        run: ./test.sh
