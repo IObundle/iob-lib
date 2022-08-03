@@ -1,4 +1,3 @@
-
 ifneq (axiram,$(filter axiram, $(HW_MODULES)),)
 
 # Add to modules list

@@ -215,7 +215,7 @@ def gen_mem_read_hw(table, fout, cpu_nbytes=4):
     mem_read_en_concat_str = "{" + mem_read_en_concat_str
     fout.write(f"`IOB_WIRE2WIRE( {mem_read_en_concat_str}, mem_switch)\n")
     # Delay SWMEM_R address 1 cycle to wait for rdata
-    fout.write(f"iob_reg #({num_read_mems}) mem_switch_ (clk, rst, {{{num_read_mems}{{1'b0}}}}, 1'b0, {{{num_read_mems}{{1'b0}}}}, 1'b1, mem_switch, mem_switch_reg);\n")
+    fout.write(f"iob_reg #({num_read_mems}, 0) mem_switch_ (clk, rst, 1'b0, 1'b1, mem_switch, mem_switch_reg);\n")
     mem_switch_val = 1
     fout.write("always @* begin\n")
     fout.write("\tcase(mem_switch_reg)\n")
@@ -298,7 +298,7 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
     fout.write("\n\n//read register logic\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
     fout.write("`IOB_WIRE(address_reg, ADDR_W)\n")
-    fout.write("iob_reg #(ADDR_W) addr_reg (clk, rst, {ADDR_W{1'b0}}, 1'b0, {ADDR_W{1'b0}}, valid, address, address_reg);\n")
+    fout.write("iob_reg #(ADDR_W, 0) addr_reg (clk, rst, 1'b0, valid, address, address_reg);\n")
 
     # if read memory present then add mem_rdata_int
     if has_mem_type(table, ["R"]):
@@ -308,7 +308,7 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
         num_read_mems = get_num_mem_type(table, "R")
         fout.write(f"\n`IOB_WIRE(mem_switch, {num_read_mems})\n")
         # Register condition for SWMEM_R access
-        fout.write("iob_reg #(1) mem_read_sel_ (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, (valid & (wstrb == 0) & |mem_switch), mem_read_sel_reg);\n")
+        fout.write("iob_reg #(1, 0) mem_read_sel_ (clk, rst, 1'b0, 1'b1, (valid & (wstrb == 0) & |mem_switch), mem_read_sel_reg);\n")
         # choose between register or memory read data
         fout.write("`IOB_VAR2WIRE((mem_read_sel_reg) ? mem_rdata_int : rdata_int, rdata)\n\n")
     else:
@@ -331,7 +331,7 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
     fout.write("end\n")
 
     # ready signal
-    fout.write("iob_reg #(1) valid_reg (clk, rst, 1'b0, 1'b0, 1'b0, 1'b1, valid, ready);\n")
+    fout.write("iob_reg #(1, 0) valid_reg (clk, rst, 1'b0, 1'b1, valid, ready);\n")
 
     # memory section
     if has_mem_type(table):
