@@ -54,6 +54,9 @@ ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
 endif
 ifneq ($(SETUP_SIM),0)
 	cp -u $(CORE_SIM_DIR)/*.expected $(BUILD_SIM_DIR)
+ifneq ($(wildcard $(CORE_SIM_DIR)/*.mk),)
+	cp -u $(CORE_SIM_DIR)/*.mk $(BUILD_SIM_DIR)
+endif
 	cp -u $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR)
 endif
 ifneq ($(SETUP_FPGA),0)
