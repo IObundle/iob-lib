@@ -34,8 +34,9 @@ MKREGS:=build/sw/python/mkregs.py
 $(BUILD_DIR):
 	cp -r -u build $@
 
-# import core hardware 
+# import core hardware and simulation files
 include $(CORE_DIR)/hardware/hardware.mk
+include $(CORE_DIR)/hardware/simulation/simulation.mk
 
 # copy core version header file
 VHDR+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
@@ -53,9 +54,6 @@ ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
 endif
 ifneq ($(SETUP_SIM),0)
 	cp -u $(CORE_SIM_DIR)/*.expected $(BUILD_SIM_DIR)
-ifneq ($(wildcard $(CORE_SIM_DIR)/*.mk),)
-	cp -u $(CORE_SIM_DIR)/*.mk $(BUILD_SIM_DIR)
-endif
 	cp -u $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR)
 endif
 ifneq ($(SETUP_FPGA),0)
