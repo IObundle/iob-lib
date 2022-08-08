@@ -6,6 +6,7 @@ include $(CORE_DIR)/info.mk
 SETUP_SIM ?=1
 SETUP_FPGA ?=1
 SETUP_DOC ?=1
+SETUP_PPROC ?=1
 
 # core internal paths
 CORE_HW_DIR=$(CORE_DIR)/hardware
@@ -26,6 +27,8 @@ BUILD_DOC_DIR:=$(BUILD_DIR)/doc
 BUILD_TSRC_DIR:=$(BUILD_DOC_DIR)/tsrc
 BUILD_FIG_DIR:=$(BUILD_DOC_DIR)/figures
 BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
+BUILD_PPROC_DIR:=$(BUILD_DIR)/pproc
+BUILD_PPROC_HW_DIR:=$(BUILD_PPROC_DIR)/hw
 
 # mkregs path
 MKREGS:=build/sw/python/mkregs.py
@@ -80,6 +83,11 @@ endif
 	$(foreach k, $(tex_files), if [ ! -f $(BUILD_TSRC_DIR)/$k.tex ] ; \
 	then mv -u $(BUILD_TSRC_DIR)/$k_lib.tex $(BUILD_TSRC_DIR)/$k.tex; \
 	else rm -f $(BUILD_TSRC_DIR)/$k_lib.tex; fi;)
+endif
+ifneq ($(SETUP_PPROC),0)
+	cp -u $(VHDR) $(BUILD_PPROC_HW_DIR)
+	cp -u $(VSRC) $(BUILD_PPROC_HW_DIR)
+	make -C $(BUILD_PPROC_HW_DIR) build
 endif
 
 .PHONY: version setup
