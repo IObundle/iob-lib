@@ -40,15 +40,8 @@ BUILD_PPROC_SW_PC_DIR:=$(BUILD_PPROC_DIR)/sw/pc
 MKREGS:=build/sw/python/mkregs.py
 
 # create build directory
-$(BUILD_DIR): setup-sub-cores
+$(BUILD_DIR):
 	cp -r -u build $@
-
-# setup sub cores
-# sub core paths
-SUB_CORE_DIRS:=$(shell find $(CORE_DIR)/submodules/ -name info.mk -printf '%h\n')
-
-setup-sub-cores:
-	$(foreach subcore,$(SUB_CORE_DIRS),$(shell make -C $(subcore) setup))
 
 # import core hardware and simulation files
 include $(CORE_DIR)/hardware/hardware.mk

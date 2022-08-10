@@ -21,8 +21,6 @@ include setup.mk
 endif 
 
 clean:
-	@$(eval SUB_CORE_DIRS:=$(shell find $(CORE_DIR)/submodules/ -name info.mk -printf '%h\n'))
-	@for subcore_dir in $(SUB_CORE_DIRS); do make -C $${subcore_dir} clean; done
 	@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
 	@rm -rf $(BUILD_DIR)
 	@rm -f $(CORE_DIR)/*.vh *.vh
