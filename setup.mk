@@ -69,7 +69,9 @@ ifneq ($(SETUP_SIM),0)
 ifneq ($(wildcard $(CORE_SIM_DIR)/simulation.mk),)
 	cp -u $(CORE_SIM_DIR)/simulation.mk $(BUILD_SIM_DIR)
 endif
+ifneq ($(wildcard $(CORE_SIM_DIR)/*_tb.*),)
 	cp -u $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR)
+endif
 endif
 ifneq ($(SETUP_FPGA),0)
 ifneq ($(wildcard $(CORE_FPGA_DIR)/*.mk),)
