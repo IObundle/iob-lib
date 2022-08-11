@@ -3,12 +3,15 @@
 include $(CORE_DIR)/info.mk
 
 # enable all flows in setup by default
+SETUP_SW ?=1
 SETUP_SIM ?=1
 SETUP_FPGA ?=1
 SETUP_DOC ?=1
 SETUP_PPROC ?=1
 
 # core internal paths
+CORE_SW_DIR=$(CORE_DIR)/software
+CORE_PC_DIR=$(CORE_SW_DIR)/pc-emul
 CORE_HW_DIR=$(CORE_DIR)/hardware
 CORE_SIM_DIR=$(CORE_HW_DIR)/simulation
 CORE_FPGA_DIR=$(CORE_HW_DIR)/fpga
@@ -63,6 +66,14 @@ setup: $(BUILD_DIR) $(VHDR) $(VSRC) $(HDR) $(SRC)
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
 ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
 	cp -u $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
+endif
+ifneq ($(SETUP_PC),0)
+ifneq ($(wildcard $(CORE_PC_DIR)/*.expected),)
+	cp -u $(CORE_PC_DIR)/*.expected $(BUILD_SW_PC_DIR)
+endif
+ifneq ($(wildcard $(CORE_PC_DIR)/pc-emul.mk),)
+	cp -u $(CORE_PC_DIR)/pc-emul.mk $(BUILD_SW_PC_DIR)
+endif
 endif
 ifneq ($(SETUP_SIM),0)
 	cp -u $(CORE_SIM_DIR)/*.expected $(BUILD_SIM_DIR)

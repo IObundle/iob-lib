@@ -5,6 +5,22 @@ include info.mk
 include version.mk
 
 #
+# PC EMUL
+#
+PC_DIR=sw/pc
+pc-emul-build:
+	make -C $(PC_DIR) build
+
+pc-emul-run:
+	make -C $(PC_DIR) run
+
+pc-emul-clean:
+	make -C $(PC_DIR) clean
+
+pc-emul-test:
+	make -C $(PC_DIR) test
+
+#
 # SIMULATE
 #
 
