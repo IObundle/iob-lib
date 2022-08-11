@@ -3,7 +3,7 @@
 include $(CORE_DIR)/info.mk
 
 # enable all flows in setup by default
-SETUP_SW ?=1
+SETUP_PC ?=1
 SETUP_SIM ?=1
 SETUP_FPGA ?=1
 SETUP_DOC ?=1
