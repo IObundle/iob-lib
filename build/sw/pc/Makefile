@@ -43,7 +43,11 @@ run: build
 test: clean $(TEST_LIST)
 	diff test.log test.expected
 
-clean: kill-cnsl $(CLEAN_LIST)
+ifneq ($(SETUP_SW),0)
+CLEAN_LIST+=kill-cnsl
+endif
+
+clean: $(CLEAN_LIST)
 	@rm -rf fw_emul test.log soc2cnsl cnsl2soc
 	@rm -rf *.txt
 
