@@ -8,7 +8,7 @@ include ../../../info.mk
 
 TOOLCHAIN_PREFIX:=riscv64-unknown-elf-
 
-STATIC_LIB:=$(NAME)_emb.so
+STATIC_LIB:=$(NAME)_emb.a
 
 OBJ:=$(patsubst %.c,%.o,$(wildcard *.c))
 HDR:=$(wildcard *.h)

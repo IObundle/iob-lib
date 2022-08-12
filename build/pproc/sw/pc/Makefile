@@ -6,7 +6,7 @@
 #
 include ../../../info.mk
 
-STATIC_LIB:=$(NAME)_pc.so
+STATIC_LIB:=$(NAME)_pc.a
 
 OBJ:=$(patsubst %.c,%.o,$(wildcard *.c))
 HDR:=$(wildcard *.h)

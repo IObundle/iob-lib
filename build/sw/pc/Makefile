@@ -18,8 +18,8 @@ HDR+=$(wildcard ../src/*.h)
 SRC=$(wildcard *.c)
 SRC+=$(wildcard ../src/*.c)
 
-STATIC_LIB=$(wildcard *.so)
-STATIC_LIB+=$(wildcard ../src/*.so)
+STATIC_LIB=$(wildcard *.a)
+STATIC_LIB+=$(wildcard ../src/*.a)
 
 # include local pc-emul segment
 # all previously defined variables can be overwritten in this file
