@@ -1,3 +1,5 @@
+defmacro:=-D
+
 VFLAGS+=-W all -g2005-sv -I. -I../vsrc $(VSRC)
 
 ifeq ($(VCD),1)
