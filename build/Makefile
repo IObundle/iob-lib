@@ -1,8 +1,15 @@
 SHELL:=/bin/bash
 export
 
-include info.mk
-include version.mk
+# 
+# EMBEDDED SOFTWARE
+#
+EMB_DIR=sw/emb
+fw-build:
+	make -C $(EMB_DIR) build-all
+
+fw-clean:
+	make -C $(EMB_DIR) clean-all
 
 #
 # PC EMUL
@@ -97,7 +104,7 @@ test: build-clean sim-test fpga-test doc-test
 # CLEAN
 #
 
-clean: sim-clean fpga-clean doc-clean
+clean: fw-clean pc-emul-clean sim-clean fpga-clean doc-clean
 
 
 .PHONY:	sim-build sim-run sim-test sim-debug sim-clean \

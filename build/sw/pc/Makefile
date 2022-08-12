@@ -1,5 +1,7 @@
 # This file becomes the pc emul makefile when copied to the build directory
 
+defmacro=-D
+
 include ../../info.mk
 
 # compiler flags
