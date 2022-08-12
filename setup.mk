@@ -59,9 +59,6 @@ VHDR+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
 	cp -u $< $@
 
-# tex files requiring specific processing
-tex_files:=deliverables config benefits results fpga_results asic_results features intro
-
 setup: $(BUILD_DIR) $(VHDR) $(VSRC) $(HDR) $(SRC)
 	echo "VERSION_STR=$(VERSION_STR)" > $(BUILD_DIR)/version.mk
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
@@ -106,9 +103,6 @@ ifneq ($(wildcard $(CORE_DOC_DIR)/*.mk),)
 endif
 	cp -f $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
 	cp -u $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
-	$(foreach k, $(tex_files), if [ ! -f $(BUILD_TSRC_DIR)/$k.tex ] ; \
-	then mv -u $(BUILD_TSRC_DIR)/$k_lib.tex $(BUILD_TSRC_DIR)/$k.tex; \
-	else rm -f $(BUILD_TSRC_DIR)/$k_lib.tex; fi;)
 endif
 ifneq ($(SETUP_PPROC),0)
 	cp -u $(VHDR) $(BUILD_PPROC_HW_DIR)
