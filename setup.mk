@@ -25,6 +25,7 @@ VERSION_STR:=$(shell software/python/version.py $(NAME) $(VERSION))
 # establish build dir paths
 BUILD_DIR := $(CORE_DIR)/$(NAME)_$(VERSION_STR)
 BUILD_SW_DIR:=$(BUILD_DIR)/sw
+BUILD_SW_PYTHON_DIR:=$(BUILD_SW_DIR)/python
 BUILD_SW_SRC_DIR:=$(BUILD_DIR)/sw/src
 BUILD_SW_PC_DIR:=$(BUILD_SW_DIR)/pc
 BUILD_SW_EMB_DIR:=$(BUILD_SW_DIR)/emb

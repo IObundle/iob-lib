@@ -41,7 +41,7 @@ FW_SRC=$(wildcard *.c)
 FW_SRC+=$(wildcard ../src/*.c)
 FW_SRC+=../src/firmware.S
 # exclude bootloader sources
-FW_SRC:=$(filter-out %boot.c,$(SRC))
+FW_SRC:=$(filter-out %boot.c,$(FW_SRC))
 
 # include local embedded segment
 # all previously defined variables can be overwritten in this file
