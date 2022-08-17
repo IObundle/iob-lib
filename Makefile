@@ -23,7 +23,7 @@ endif
 clean:
 	@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
 	@rm -rf $(BUILD_DIR)
-	@rm -f $(CORE_DIR)/*.vh *.vh
+	@rm -f $(CORE_DIR)/*.vh *.vh *.c *.h
 	@rm -f *~ \#*\# a.out *.vcd *.pyc *.log *.v
 
 debug: $(BUILD_DIR) $(VHDR) 
