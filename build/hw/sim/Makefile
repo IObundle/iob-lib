@@ -3,21 +3,23 @@
 
 SHELL:=/bin/bash
 
-#include local simulation segment
-ifneq ($(wildcard simulation.mk),)
-include simulation.mk
-endif
+include ../../info.mk
 
 REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
 
 #include the module's headers and sources
-VHDR=$(wildcard ../vsrc/*.vh)
+VHDR+=$(wildcard ../vsrc/*.vh)
 VSRC+=$(wildcard ../vsrc/*.v)
 
 #select simulator
 #default simulator
 SIMULATOR?=icarus
 include $(SIMULATOR).mk
+
+#include local simulation segment
+ifneq ($(wildcard simulation.mk),)
+include simulation.mk
+endif
 
 build: $(VHDR) $(VSRC)
 ifeq ($(SIM_SERVER),)
