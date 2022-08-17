@@ -31,9 +31,6 @@ INCLUDE+=-I../src
 HDR=$(wildcard *.h)
 HDR+=$(wildcard ../src/*.h)
 
-STATIC_LIB=$(wildcard *.a)
-STATIC_LIB+=$(wildcard ../src/*.a)
-
 BOOT_SRC=$(wildcard *.c)
 BOOT_SRC+=../src/boot.c ../src/boot.S
 
@@ -53,14 +50,14 @@ build-all: fw-build boot-build
 
 fw-build: firmware.elf
 
-firmware.elf: $(TEMPLATE_LDS) $(HDR) $(FW_SRC) $(STATIC_LIB)
-	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(FW_LFLAGS) $(INCLUDE) $(FW_SRC) $(STATIC_LIB) $(LLIBS)
+firmware.elf: $(TEMPLATE_LDS) $(HDR) $(FW_SRC)
+	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(FW_LFLAGS) $(INCLUDE) $(FW_SRC) $(LLIBS)
 	$(TOOLCHAIN_PREFIX)objcopy -O binary $@ firmware.bin
 
 boot-build: boot.elf
 
-boot.elf: $(TEMPLATE_LDS) $(HDR) $(BOOT_SRC) $(STATIC_LIB)
-	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(BOOT_LFLAGS) $(INCLUDE) $(BOOT_SRC) $(STATIC_LIB) $(LLIBS)
+boot.elf: $(TEMPLATE_LDS) $(HDR) $(BOOT_SRC)
+	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(BOOT_LFLAGS) $(INCLUDE) $(BOOT_SRC) $(LLIBS)
 	$(TOOLCHAIN_PREFIX)objcopy -O binary $@ boot.bin
 
 clean-all: fw-clean boot-clean $(CLEAN_LIST)

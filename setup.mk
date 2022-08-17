@@ -7,7 +7,6 @@ SETUP_SW ?=1
 SETUP_SIM ?=1
 SETUP_FPGA ?=1
 SETUP_DOC ?=1
-SETUP_PPROC ?=1
 
 # core internal paths
 CORE_SW_DIR=$(CORE_DIR)/software
@@ -36,10 +35,6 @@ BUILD_DOC_DIR:=$(BUILD_DIR)/doc
 BUILD_TSRC_DIR:=$(BUILD_DOC_DIR)/tsrc
 BUILD_FIG_DIR:=$(BUILD_DOC_DIR)/figures
 BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
-BUILD_PPROC_DIR:=$(BUILD_DIR)/pproc
-BUILD_PPROC_HW_DIR:=$(BUILD_PPROC_DIR)/hw
-BUILD_PPROC_SW_EMB_DIR:=$(BUILD_PPROC_DIR)/sw/emb
-BUILD_PPROC_SW_PC_DIR:=$(BUILD_PPROC_DIR)/sw/pc
 
 # mkregs path
 MKREGS:=build/sw/python/mkregs.py
@@ -104,17 +99,6 @@ ifneq ($(wildcard $(CORE_DOC_DIR)/*.mk),)
 endif
 	cp -f $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
 	cp -u $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
-endif
-ifneq ($(SETUP_PPROC),0)
-	cp -u $(VHDR) $(BUILD_PPROC_HW_DIR)
-	cp -u $(VSRC) $(BUILD_PPROC_HW_DIR)
-	make -C $(BUILD_PPROC_HW_DIR) build
-	cp -u $(SW_EMB_SRC) $(BUILD_PPROC_SW_EMB_DIR)
-	cp -u $(SW_EMB_HDR) $(BUILD_PPROC_SW_EMB_DIR)
-	make -C $(BUILD_PPROC_SW_EMB_DIR) build
-	cp -u $(SW_PC_SRC) $(BUILD_PPROC_SW_PC_DIR)
-	cp -u $(SW_PC_HDR) $(BUILD_PPROC_SW_PC_DIR)
-	make -C $(BUILD_PPROC_SW_PC_DIR) build
 endif
 
 .PHONY: version setup

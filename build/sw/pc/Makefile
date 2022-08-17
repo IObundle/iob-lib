@@ -20,17 +20,14 @@ HDR+=$(wildcard ../src/*.h)
 SRC=$(wildcard *.c)
 SRC+=$(wildcard ../src/*.c)
 
-STATIC_LIB=$(wildcard *.a)
-STATIC_LIB+=$(wildcard ../src/*.a)
-
 # include local pc-emul segment
 # all previously defined variables can be overwritten in this file
 ifneq ($(wildcard pc-emul.mk),)
 include pc-emul.mk
 endif
 
-fw_emul: $(HDR) $(SRC) $(STATIC_LIB)
-	gcc -o $@ $(CFLAGS) $(INCLUDE) $(SRC) $(STATIC_LIB) -lgcc -lc
+fw_emul: $(HDR) $(SRC)
+	gcc -o $@ $(CFLAGS) $(INCLUDE) $(SRC) -lgcc -lc
 
 build: fw_emul
 	@echo "build"

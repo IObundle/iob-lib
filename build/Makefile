@@ -84,16 +84,6 @@ doc-debug:
 	make -C $(DOC_DIR) debug
 
 #
-# PREPROCESS
-#
-PPROC_DIR=pproc
-pproc-build:
-	make -C $(PPROC_DIR)/hw build
-
-pproc-clean:
-	make -C $(PPROC_DIR)/hw clean
-
-#
 # TEST
 #
 
