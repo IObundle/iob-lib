@@ -15,7 +15,7 @@ fw-clean:
 # PC EMUL
 #
 PC_DIR=sw/pc
-pc-emul-build:
+pc-emul-build: fw-build
 	make -C $(PC_DIR) build
 
 pc-emul-run:
