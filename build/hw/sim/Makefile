@@ -39,6 +39,9 @@ else
 ifeq ($(VCD),1)
 	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/hw/sim/*.vcd .
 endif
+ifeq ($(DO_COV),1)
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/hw/sim/iob_i2s_tdm_cov.rpt .
+endif
 endif
 ifeq ($(VCD),1)
 	if [ ! `pgrep -u $(USER) gtkwave` ]; then gtkwave uut.vcd; fi &
