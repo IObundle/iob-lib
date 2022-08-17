@@ -1,7 +1,3 @@
-# This file becomes the pc emul makefile when copied to the build directory
-
-defmacro=-D
-
 include ../../info.mk
 
 # compiler flags
@@ -9,7 +5,7 @@ CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
 
 CONSOLE_CMD=../python/console -L
 
-DEFINE+=-DPC
+DEFINE+=PC
 
 INCLUDE=-I.
 INCLUDE+=-I../src

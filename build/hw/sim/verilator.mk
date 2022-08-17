@@ -1,5 +1,3 @@
-defmacro:=-D
-
 VSRC_VLTR=$(filter-out ../vsrc/$(NAME)_tb.v, $(VSRC))
 
 VFLAGS+=--cc --exe -I. -I../vsrc $(VSRC_VLTR) ../vsrc/$(NAME)_tb.cpp --top-module $(VTOP)

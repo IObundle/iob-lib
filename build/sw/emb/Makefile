@@ -1,8 +1,3 @@
-# This file becomes the software embedded makefile when copied to the build
-# directory
-
-defmacro=-D
-
 include ../../info.mk
 
 TEMPLATE_LDS=../src/template.lds

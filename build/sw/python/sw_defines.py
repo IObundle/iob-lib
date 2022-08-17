@@ -28,13 +28,10 @@ if __name__ == "__main__":
         fout.write(f"#ifndef H_{fname}_H\n")
         fout.write(f"#define H_{fname}_H\n\n")
         for define in define_list:
-            if "-D" in define:
-                # remove "-D" prefix
-                define = define.split("-D", 1)[1]
-                if "=" in define:
-                    macro, value = define.split("=", 1)
-                    fout.write(f"#define {macro} ({value})\n")
-                else:
-                    macro = define
-                    fout.write(f"#define {macro}\n")
+            if "=" in define:
+                macro, value = define.split("=", 1)
+                fout.write(f"#define {macro} ({value})\n")
+            else:
+                macro = define
+                fout.write(f"#define {macro}\n")
         fout.write(f"\n#endif // H_{fname}_H")
