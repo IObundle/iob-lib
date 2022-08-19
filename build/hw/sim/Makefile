@@ -60,7 +60,7 @@ ifeq ($(VCD),1)
 endif
 
 clean:
-	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "*.expected" \) -delete
+	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" \) -delete
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/hw/sim clean; fi'
 endif
@@ -76,6 +76,7 @@ debug:
 	@echo $(VHDR)
 	@echo $(VSRC)
 	@echo $(VFLAGS)
+	@echo $(TOP_MODULE)
 
 .PHONY: build run clean kill-sim kill-remote-sim debug test $(TEST_LIST)
 
