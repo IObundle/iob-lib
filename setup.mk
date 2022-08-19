@@ -97,7 +97,9 @@ ifneq ($(SETUP_DOC),0)
 ifneq ($(wildcard $(CORE_DOC_DIR)/*.mk),)
 	cp -u $(CORE_DOC_DIR)/*.mk $(BUILD_DOC_DIR)
 endif
+ifneq ($(wildcard $(CORE_DOC_DIR)/*.tex),)
 	cp -f $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
+endif
 	cp -u $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
 endif
 
