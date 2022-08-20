@@ -55,9 +55,8 @@ $(DOC)top.tex: texfiles
 	if [ -f vivado.tex ]; then echo "\def\XILINX{Y}" >> $@; fi
 	if [ -f quartus.tex ]; then echo "\def\INTEL{Y}" >> $@; fi
 	if [ -f asic.tex ]; then echo "\def\ASIC{Y}" >> $@; fi
-	if [ $(RESULTS) == 2 ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
-	if [ $(RESULTS) == 1 ]; then echo "\def\IMP{Y}" >> $@; fi
-	if [ $(RESULTS) == 3 ]; then echo "\def\ASICSYNTH{Y} \def\IMP{Y}" >> $@; fi
+	if [ $(ASICSYNTH) == 1 ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
+	if [ $(RESULTS) == 1 ]; then echo "\def\RESULTS{Y}" >> $@; fi
 	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $@; fi
 	echo "\input{$(DOC).tex}" >> $@
 
@@ -74,7 +73,7 @@ texfiles:
 
 #include implementation results
 fpga_res:
-ifneq ($(filter $(RESULTS),1 3), )
+ifeq ($(RESULTS),1)
 ifneq ($(XIL_FAMILY),)
 	make vivado.tex
 endif
@@ -88,7 +87,7 @@ QUARTUSLOG = ../hw/fpga/quartus.log
 
 #ASIC implementation results
 asic_res:
-ifneq ($(filter $(RESULTS),1 3), )
+ifeq ($(RESULTS),1)
 ifneq ($(ASIC_NODE),)
 	make asic.tex
 endif
