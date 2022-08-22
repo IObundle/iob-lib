@@ -64,7 +64,7 @@ $(DOC)top.tex: texfiles
 ifneq ($(wildcard tsrc/mkregs.conf),)
 MKREGS_CONF:=tsrc/mkregs.conf
 endif
-VHDR:=$(wildcard ../hw/vsrc/*.vh)
+VHDR:=$(wildcard ../hw/vsrc/*_conf.vh) $(wildcard ../hw/vsrc/*.vh)
 VSRC:=$(wildcard ../hw/vsrc/*.v)
 
 texfiles:
