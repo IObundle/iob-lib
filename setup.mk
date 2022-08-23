@@ -1,6 +1,9 @@
 
 # core info
 include $(CORE_DIR)/info.mk
+ifneq ($(wildcard $(CORE_DIR)/config_setup.mk),)
+include $(CORE_DIR)/config_setup.mk
+endif
 
 # enable all flows in setup by default
 SETUP_SW ?=1
@@ -58,6 +61,9 @@ $(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
 setup: $(BUILD_DIR) $(VHDR) $(VSRC) $(HDR) $(SRC)
 	echo "VERSION_STR=$(VERSION_STR)" > $(BUILD_DIR)/version.mk
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
+ifneq ($(wildcard $(CORE_DIR)/config.mk),)
+	cp -u $(CORE_DIR)/config.mk $(BUILD_DIR)
+endif
 ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
 	cp -u $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
 endif

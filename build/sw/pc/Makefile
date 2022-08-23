@@ -1,4 +1,8 @@
-include ../../info.mk
+CORE_DIR:=../..
+include $(CORE_DIR)/info.mk
+ifneq ($(wildcard $(CORE_DIR)/config.mk),)
+include $(CORE_DIR)/config.mk
+endif
 
 # compiler flags
 CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
