@@ -3,7 +3,11 @@
 
 SHELL:=/bin/bash
 
-include ../../info.mk
+CORE_DIR:=../..
+include $(CORE_DIR)/info.mk
+ifneq ($(wildcard $(CORE_DIR)/config.mk),)
+include $(CORE_DIR)/config.mk
+endif
 
 REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
 
