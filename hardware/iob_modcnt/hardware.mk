@@ -1,5 +1,4 @@
-
-ifneq (iob_modcnt,$(filter iob_modcnt, $(HW_MODULES)),)
+ifeq ($(filter iob_modcnt, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=iob_modcnt
