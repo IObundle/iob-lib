@@ -1,5 +1,4 @@
-
-ifneq (iob_edge_detect,$(filter iob_edge_detect, $(HW_MODULES)),)
+ifeq ($(filter iob_edge_detect, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=iob_edge_detect
