@@ -55,7 +55,7 @@ $(DOC)top.tex: texfiles
 	if [ -f vivado.tex ]; then echo "\def\XILINX{Y}" >> $@; fi
 	if [ -f quartus.tex ]; then echo "\def\INTEL{Y}" >> $@; fi
 	if [ -f asic.tex ]; then echo "\def\ASIC{Y}" >> $@; fi
-	if [ -f synth_desc.tex ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
+	if [ $(ASICSYNTH) == 1 ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
 	if [ $(RESULTS) == 1 ]; then echo "\def\RESULTS{Y}" >> $@; fi
 	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $@; fi
 	echo "\input{$(DOC).tex}" >> $@
@@ -64,7 +64,7 @@ $(DOC)top.tex: texfiles
 ifneq ($(wildcard tsrc/mkregs.conf),)
 MKREGS_CONF:=tsrc/mkregs.conf
 endif
-VHDR:=$(wildcard ../hw/vsrc/*.vh)
+VHDR:=$(wildcard ../hw/vsrc/*_conf.vh) $(wildcard ../hw/vsrc/*.vh)
 VSRC:=$(wildcard ../hw/vsrc/*.v)
 
 texfiles:
