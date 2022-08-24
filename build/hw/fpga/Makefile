@@ -8,7 +8,6 @@ ifneq ($(wildcard fpga.mk),)
 include fpga.mk
 endif
 
-
 REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
 
 #include the module's headers and sources
@@ -52,9 +51,9 @@ clean-test-log:
 	rm -f test.log
 
 debug:
-	echo $(VHDR)
-	echo $(VSRC)
-	echo $(FPGA_SERVER)
-	echo $(FPGA_OBJ)
+	@echo $(VHDR)
+	@echo $(VSRC)
+	@echo $(FPGA_SERVER)
+	@echo $(FPGA_OBJ)
 
 .PHONY: build test clean debug

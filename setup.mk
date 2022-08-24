@@ -44,11 +44,11 @@ $(BUILD_DIR):
 	cp -r -u build $@
 
 # import core hardware and simulation files
-include $(CORE_DIR)/hardware/hardware.mk
-include $(CORE_DIR)/hardware/simulation/sim_setup.mk
+include $(CORE_HW_DIR)/hardware.mk
+include $(CORE_SIM_DIR)/sim_setup.mk
 
 # import core software files
-include $(CORE_DIR)/software/software.mk
+include $(CORE_SW_DIR)/software.mk
 
 # copy core version header file
 VHDR+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
@@ -78,7 +78,7 @@ ifneq ($(wildcard $(CORE_SIM_DIR)/simulation.mk),)
 	cp -u $(CORE_SIM_DIR)/simulation.mk $(BUILD_SIM_DIR)
 endif
 ifneq ($(wildcard $(CORE_SIM_DIR)/*_tb.*),)
-	cp -u $(CORE_SIM_DIR)/*_tb.* $(BUILD_VSRC_DIR)
+	cp -u $(CORE_SIM_DIR)/*_tb.* $(BUILD_SIM_DIR)
 endif
 endif
 ifneq ($(SETUP_FPGA),0)
