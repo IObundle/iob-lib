@@ -3,13 +3,22 @@
 
 SHELL:=/bin/bash
 
-include ../../info.mk
+CORE_DIR:=../..
+include $(CORE_DIR)/info.mk
+ifneq ($(wildcard $(CORE_DIR)/config.mk),)
+include $(CORE_DIR)/config.mk
+endif
 
 REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
 
 #include the module's headers and sources
 VHDR+=$(wildcard ../vsrc/*.vh)
 VSRC+=$(wildcard ../vsrc/*.v)
+
+#include verilog testbench if not using Verilator
+ifneq ($(SIMULATOR), verilator)
+VSRC+=$(wildcard *_tb.v)
+endif
 
 #select simulator
 #default simulator
@@ -60,7 +69,7 @@ ifeq ($(VCD),1)
 endif
 
 clean:
-	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" \) -delete
+	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" -o -name "*_tb.*" \) -delete
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/hw/sim clean; fi'
 endif

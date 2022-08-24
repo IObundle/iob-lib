@@ -87,7 +87,7 @@ doc-debug:
 # TEST
 #
 
-test: build-clean sim-test fpga-test doc-test
+test: sim-test fpga-test doc-test
 
 
 #
