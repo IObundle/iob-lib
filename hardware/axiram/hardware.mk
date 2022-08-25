@@ -4,7 +4,7 @@ ifneq (axiram,$(filter axiram, $(HW_MODULES)),)
 HW_MODULES+=axiram
 
 # Sources
-VSRC+=$(BUILD_VSRC_DIR)/axi_ram.v
+SRC+=$(BUILD_VSRC_DIR)/axi_ram.v
 
 # Copy the sources to the build directory 
 $(BUILD_VSRC_DIR)/axi_ram.v: submodules/VERILOG_AXI/rtl/axi_ram.v

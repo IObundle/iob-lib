@@ -4,6 +4,6 @@ ifneq (altddio_in,$(filter altddio_in, $(HW_MODULES)))
 HW_MODULES+=altddio_in
 
 # Sources
-VSRC+=$(LIB_DIR)/hardware/altddio_in/altddio_in.v
+SRC+=$(LIB_DIR)/hardware/altddio_in/altddio_in.v
 
 endif

@@ -1,11 +1,10 @@
-
 ifneq (axiinterconnect,$(filter axiinterconnect, $(HW_MODULES)))
 
 # Add to modules list
 HW_MODULES+=axiinterconnect
 
 
-VSRC+=$(BUILD_VSRC_DIR)/axi_interconnect.v $(BUILD_VSRC_DIR)/arbiter.v $(BUILD_VSRC_DIR)/priority_encoder.v
+SRC+=$(BUILD_VSRC_DIR)/axi_interconnect.v $(BUILD_VSRC_DIR)/arbiter.v $(BUILD_VSRC_DIR)/priority_encoder.v
 
 
 $(BUILD_VSRC_DIR)/axi_interconnect.v: $(V_AXI_DIR)/rtl/axi_interconnect.v

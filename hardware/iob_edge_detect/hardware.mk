@@ -4,7 +4,7 @@ ifeq ($(filter iob_edge_detect, $(HW_MODULES)),)
 HW_MODULES+=iob_edge_detect
 
 # Sources
-VSRC+=$(BUILD_VSRC_DIR)/iob_edge_detect.v
+SRC+=$(BUILD_VSRC_DIR)/iob_edge_detect.v
 
 # Copy the sources to the build directory 
 $(BUILD_VSRC_DIR)/iob_edge_detect.v:hardware/iob_edge_detect/iob_edge_detect.v

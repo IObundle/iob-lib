@@ -1,11 +1,10 @@
-
 ifneq (iob2axil,$(filter iob2axil, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=iob2axil
 
 # Sources 
-VSRC+=$(BUILD_VSRC_DIR)/iob2axil.v
+SRC+=$(BUILD_VSRC_DIR)/iob2axil.v
 
 # Copy the sources to the build directoy
 $(BUILD_VSRC_DIR)/iob2axil.v:hardware/iob2axil/iob2axil.v
