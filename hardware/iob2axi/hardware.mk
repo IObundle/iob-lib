@@ -6,11 +6,11 @@ HW_MODULES+=iob2axi
 
 include hardware/fifo/iob_fifo_sync/hardware.mk
 
-SRC+=m_axi_m_port.vh \
-m_axi_write_m_port.vh \
-m_axi_read_m_port.vh \
-m_m_axi_write_portmap.vh \
-m_m_axi_read_portmap.vh
+# SRC+=m_axi_m_port.vh \
+# m_axi_write_m_port.vh \
+# m_axi_read_m_port.vh \
+# m_m_axi_write_portmap.vh \
+# m_m_axi_read_portmap.vh
 
 SRC+=$(BUILD_VSRC_DIR)/iob2axi.v $(BUILD_VSRC_DIR)/iobwaxi_wr.v $(BUILD_VSRC_DIR)/iob2axi_rd.v
 
