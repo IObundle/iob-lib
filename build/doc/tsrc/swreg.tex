@@ -1,8 +1,6 @@
 %replace swreg_tab by the name of the table that has been generated for your ip core
 
-\begin{table}[H]
-  \centering
-  \begin{tabular}{|l|c|c|r|P{0.8cm}|p{5.5cm}|}
+\begin{longtable}{|l|c|c|r|P{0.8cm}|p{5.5cm}|}
     \hline
     \rowcolor{iob-green}
     
@@ -10,8 +8,6 @@
 
     \input{swreg_tab}
     
-  \end{tabular}
   \caption{Software Accessible Registers}
-  
   \label{tab:sw_tx}
-\end{table}
+\end{longtable}
