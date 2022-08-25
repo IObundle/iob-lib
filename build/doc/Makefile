@@ -5,6 +5,7 @@
 
 SHELL = /bin/bash
 
+include ../version.mk
 
 #include local doc segment
 ifneq ($(wildcard document.mk),)

@@ -6,13 +6,11 @@
 
 \usepackage{color,soul}
 \usepackage{float}
-\usepackage{color, colortbl}
-\usepackage[section]{placeins}
-\usepackage{mathtools}
-\usepackage{amsthm}
-%\usepackage[T1]{helvet}
-\usepackage[OT1]{fontenc} 
-\usepackage{array}
+\usepackage{makecell}
+\usepackage{lipsum}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{calc}
+\usepackage{eso-pic}
 \usepackage[binary-units=true]{siunitx}
 \usepackage{subcaption}
 \usepackage{caption,tabularx,booktabs}
@@ -20,11 +18,7 @@
 \usepackage[all]{nowidow}
 \usepackage{lscape}
 \widowpenalty10000
-\clubpenalty10000
-
-\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
-
-\graphicspath{ {./figures/} }
+\graphicspath{{./figures/}}
 
 \input{pb_title}
 \category{Product Brief}
@@ -51,15 +45,15 @@ keepaspectratio]{bg.pdf}%
 \section*{Features}
 \input{features}
 
-\section*{Benefits}
-\input{benefits}
+\newpage
+\section*{Block Diagram}
+\input{bd}
 
 \section*{Deliverables}
 \input{deliverables}
 
-\newpage
-%\section*{Block Diagram}
-\input{bd}
+\section*{Benefits}
+\input{benefits}
 
 
 \ifdefined\RESULTS

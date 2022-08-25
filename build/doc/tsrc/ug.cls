@@ -1,6 +1,5 @@
 \LoadClass[twoside,a4paper]{article}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{../../submodules/LIB/document/ug/ug}
 
 \RequirePackage{graphicx}
 \RequirePackage{helvet}
