@@ -5,6 +5,10 @@ ifneq ($(wildcard $(CORE_DIR)/config_setup.mk),)
 include $(CORE_DIR)/config_setup.mk
 endif
 
+# lib paths
+LIB_PYTHON_DIR=software/python
+
+
 # enable all flows in setup by default
 SETUP_SW ?=1
 SETUP_SIM ?=1

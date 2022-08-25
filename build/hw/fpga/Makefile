@@ -8,6 +8,7 @@ ifneq ($(wildcard fpga.mk),)
 include fpga.mk
 endif
 
+include ../../version.mk
 REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
 
 #include the module's headers and sources
