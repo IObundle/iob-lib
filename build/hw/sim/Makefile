@@ -69,7 +69,7 @@ ifeq ($(VCD),1)
 endif
 
 clean:
-	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" -o -name "*_tb.*" \) -delete
+	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" -o -name "*_tb.*" $(NOCLEAN) \) -delete
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/hw/sim clean; fi'
 endif

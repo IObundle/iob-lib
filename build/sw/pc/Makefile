@@ -9,8 +9,6 @@ CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
 
 CONSOLE_CMD=../python/console -L
 
-DEFINE+=PC
-
 INCLUDE=-I.
 INCLUDE+=-I../src
 
