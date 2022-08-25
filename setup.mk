@@ -51,11 +51,11 @@ include $(CORE_SIM_DIR)/sim_setup.mk
 include $(CORE_SW_DIR)/software.mk
 
 # copy core version header file
-VHDR+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
+SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
 	cp -u $< $@
 
-setup: $(BUILD_DIR) $(VHDR) $(VSRC) $(HDR) $(SRC)
+setup: $(BUILD_DIR) $(SRC)
 	echo "VERSION_STR=$(VERSION_STR)" > $(BUILD_DIR)/version.mk
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
 ifneq ($(wildcard $(CORE_DIR)/config.mk),)

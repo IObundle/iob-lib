@@ -9,10 +9,10 @@ HW_MODULES+=axi2axi
 INCLUDE+=$(incdir). $(incdir)$(AXI_DIR)/hardware/include
 
 # Headers
-VHDR+=s_axi_s_port.vh m_axi_m_port.vh
+SRC+=s_axi_s_port.vh m_axi_m_port.vh
 
 # Sources
-VSRC+=$(AXI_DIR)/hardware/axi2axi/axi2axi.v
+SRC+=$(AXI_DIR)/hardware/axi2axi/axi2axi.v
 
 s_axi_s_port.vh:
 	$(AXI_GEN) axi_m_port 's_' 's_'
