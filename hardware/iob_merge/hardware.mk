@@ -5,7 +5,7 @@ ifneq (iob_merge,$(filter iob_merge, $(HW_MODULES)),)
 HW_MODULES+=iob_merge
 
 # Sources
-VSRC+=$(BUILD_VSRC_DIR)/iob_merge.v
+SRC+=$(BUILD_VSRC_DIR)/iob_merge.v
 
 # Copy the sources to the build directoy
 $(BUILD_VSRC_DIR)/iob_merge.v:hardware/iob_merge/iob_merge.v

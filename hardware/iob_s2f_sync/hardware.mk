@@ -5,7 +5,7 @@ ifeq ($(filter iob_s2f_sync, $(HW_MODULES)),)
 HW_MODULES+=iob_s2f_sync
 
 # Sources
-VSRC+=$(BUILD_VSRC_DIR)/iob_s2f_sync.v
+SRC+=$(BUILD_VSRC_DIR)/iob_s2f_sync.v
 
 # Copy the sources to the build directoy 
 $(BUILD_VSRC_DIR)/iob_s2f_sync.v:hardware/iob_s2f_sync/iob_s2f_sync.v

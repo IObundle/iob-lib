@@ -7,7 +7,7 @@ HW_MODULES+=iob_ram_2p_asym
 include hardware/ram/iob_ram_2p/hardware.mk
 
 # Sources
-VSRC+=$(BUILD_VSRC_DIR)/iob_ram_2p_asym.v
+SRC+=$(BUILD_VSRC_DIR)/iob_ram_2p_asym.v
 
 # Copy the sources to the buil;d directory
 $(BUILD_VSRC_DIR)/iob_ram_2p_asym.v: hardware/ram/iob_ram_2p_asym/iob_ram_2p_asym.v

@@ -41,6 +41,10 @@ endif
 
 run: build
 ifeq ($(SIM_SERVER),)
+ifneq ($(CONSOLE_CMD),)
+	@rm -f soc2cnsl cnsl2soc
+	$(CONSOLE_CMD) $(TEST_LOG) &
+endif
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make exec"
 else
 	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hw/sim $@ SIMULATOR=$(SIMULATOR)'"
@@ -49,7 +53,7 @@ ifeq ($(VCD),1)
 	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/hw/sim/*.vcd .
 endif
 ifeq ($(DO_COV),1)
-	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/hw/sim/iob_i2s_tdm_cov.rpt .
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)/hw/sim/$(TOP_MODULE)_cov.rpt .
 endif
 endif
 ifeq ($(VCD),1)
@@ -69,7 +73,7 @@ ifeq ($(VCD),1)
 endif
 
 clean:
-	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" -o -name "*_tb.*" \) -delete
+	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" -o -name "*_tb.*" $(NOCLEAN) \) -delete
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/hw/sim clean; fi'
 endif

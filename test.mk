@@ -23,7 +23,9 @@ endif
 INCLUDE=-Ibuild/hw/vsrc
 
 # asymmetric memory present
-IS_ASYM=$(shell echo $(VSRC) | grep asym)
+IS_ASYM=$(shell echo $(SRC) | grep asym)
+
+AXI_GEN:=./software/python/axi_gen.py
 
 #
 # Simulate with Icarus Verilog
@@ -31,18 +33,18 @@ IS_ASYM=$(shell echo $(VSRC) | grep asym)
 VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
 
 sim-sym:
-	$(VLOG) $(VSRC) $(TB)
+	$(VLOG) $(SRC) $(TB)
 	@./a.out $(TEST_LOG)
 
 sim-asym:
-	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(VSRC) $(TB)
+	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(SRC) $(TB)
 	@./a.out $(TEST_LOG)
-	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(VSRC) $(TB)
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(SRC) $(TB)
 	@./a.out $(TEST_LOG)
-	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(VSRC) $(TB)
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(SRC) $(TB)
 	@./a.out $(TEST_LOG)
 
-sim: $(VSRC) $(TB)
+sim: $(SRC) $(TB)
 	@echo "Simulating module $(MODULE)"
 ifeq ($(IS_ASYM),)
 	make sim-sym

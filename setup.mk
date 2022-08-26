@@ -5,6 +5,10 @@ ifneq ($(wildcard $(CORE_DIR)/config_setup.mk),)
 include $(CORE_DIR)/config_setup.mk
 endif
 
+# lib paths
+LIB_PYTHON_DIR=software/python
+
+
 # enable all flows in setup by default
 SETUP_SW ?=1
 SETUP_SIM ?=1
@@ -39,9 +43,6 @@ BUILD_TSRC_DIR:=$(BUILD_DOC_DIR)/tsrc
 BUILD_FIG_DIR:=$(BUILD_DOC_DIR)/figures
 BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
-# mkregs path
-MKREGS:=build/sw/python/mkregs.py
-
 # create build directory
 $(BUILD_DIR):
 	cp -r -u build $@
@@ -54,11 +55,11 @@ include $(CORE_SIM_DIR)/sim_setup.mk
 include $(CORE_SW_DIR)/software.mk
 
 # copy core version header file
-VHDR+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
+SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
 	cp -u $< $@
 
-setup: $(BUILD_DIR) $(VHDR) $(VSRC) $(HDR) $(SRC)
+setup: $(BUILD_DIR) $(SRC)
 	echo "VERSION_STR=$(VERSION_STR)" > $(BUILD_DIR)/version.mk
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
 ifneq ($(wildcard $(CORE_DIR)/config.mk),)
