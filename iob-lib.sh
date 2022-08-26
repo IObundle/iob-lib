@@ -19,7 +19,7 @@ else
 fi
 
 #find subcore directories
-subcore_dirs=$(find "$core_dir/submodules/" -name info.mk -printf '%h\n')
+subcore_dirs=$(find "$core_dir/submodules/" -maxdepth 2 -name info.mk -printf '%h\n')
 
 #run makefile target for each subcore
 for subcore_dir in $subcore_dirs
