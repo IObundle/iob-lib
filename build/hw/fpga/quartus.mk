@@ -1,6 +1,5 @@
 FPGA_OBJ:=$(TOP_MODULE)_0.qxp
-FPGA_LOG:=quartus.log
-
+FPGA_TEX:=quartus.tex
 FPGA_SERVER=$(QUARTUS_SERVER)
 FPGA_USER=$(QUARTUS_USER)
 
@@ -13,8 +12,8 @@ $(FPGA_OBJ): $(VHDR) $(VSRC) $(wildcard *.sdc)
 	$(ENV) quartus_sta $(TOP_MODULE) -c $(TOP_MODULE) --do_report_timing
 	$(ENV) quartus_cdb --read_settings_files=off --write_settings_files=off $(TOP_MODULE) -c $(TOP_MODULE) --merge=on
 	$(ENV) quartus_cdb $(TOP_MODULE) -c $(TOP_MODULE) --incremental_compilation_export=$(TOP_MODULE)_0.qxp --incremental_compilation_export_partition_name=Top --incremental_compilation_export_post_synth=on --incremental_compilation_export_post_fit=off --incremental_compilation_export_routing=on --incremental_compilation_export_flatten=on
-	mv output_files/*.fit.summary $(FPGA_LOG)
+	LOG=output_files/*.fit.summary ../../sw/quartus2tex.sh
 
-test.log: $(FPGA_LOG)
-	sed -e '1,3d' $< >> $@
+test.log: $(FPGA_OBJ)
+	if [ -f $@ ]; then cp quartus.tex $@; else cat quartus.tex >> $@; fi
 
