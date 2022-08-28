@@ -41,6 +41,10 @@ endif
 
 run: build
 ifeq ($(SIM_SERVER),)
+ifneq ($(CONSOLE_CMD),)
+	@rm -f soc2cnsl cnsl2soc
+	$(CONSOLE_CMD) $(TEST_LOG) &
+endif
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make exec"
 else
 	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hw/sim $@ SIMULATOR=$(SIMULATOR)'"

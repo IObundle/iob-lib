@@ -1,13 +1,11 @@
 `timescale 1ns / 1ps
 
-`include "iob_lib.vh"
-
 module iob_edge_detect
   (
-   `IOB_INPUT(clk, 1),
-   `IOB_INPUT(rst, 1),
-   `IOB_INPUT(bit_in, 1),
-   `IOB_OUTPUT(detected, 1)
+   input  clk,
+   input  rst,
+   input  bit_in,
+   output detected
    );
 
    reg bit_in_reg;
