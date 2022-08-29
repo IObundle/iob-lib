@@ -7,7 +7,7 @@ SVG = $(patsubst %.drom,%.svg,$(wildcard *.drom))
 
 .PHONY: pb_figs ug_figs clean debug
 
-pb_figs: $(PDF)
+pb_figs: bg.pdf bd.pdf
 
 ug_figs: $(PDF)
 

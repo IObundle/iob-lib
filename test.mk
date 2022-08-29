@@ -1,3 +1,9 @@
+# (c) 2022-Present IObundle, Lda, all rights reserved
+#
+# This makefile segment is included by Makefile and is used to test
+# the modules in this repo
+#
+
 #build here
 BUILD_VSRC_DIR:=.
 

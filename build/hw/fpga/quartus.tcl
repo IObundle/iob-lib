@@ -1,9 +1,8 @@
 #extract cli args
-set TOP [lindex $argv 0]
-set DEFINE [lindex $argv 1]
+set NAME [lindex $argv 0]
+set TOP [lindex $argv 1]
 set VSRC [lindex $argv 2]
 set PART [lindex $argv 3]
-set NAME [lindex $argv 4]
 
 set QUARTUS_VERSION "18.0.0 Standard Edition"
 set FAMILY "Cyclone V"
@@ -20,15 +19,6 @@ set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 
 #verilog heders search path
 set_global_assignment -name SEARCH_PATH ../vsrc
-
-
-#verilog macros
-foreach macro [split $DEFINE \ ] {
-    if {$macro != ""} {
-        set_global_assignment -name VERILOG_MACRO $macro
-    }
-}
-
 
 #verilog sources
 foreach file [split $VSRC \ ] {

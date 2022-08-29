@@ -1,22 +1,24 @@
 # (c) 2022-Present IObundle, Lda, all rights reserved
 #
-# This makefile creates a build directory for an IP core
+# This makefile is used to create a build directory for an IP core or to
+# simulate the modules in this repository
 #
-# It should be called from the user core repository directory which is
-# assumed to be located at ../.. and have iob-lib as submodule called LIB.
+# To create a build directory from any directory:
+# > make -C /path/to/iob-lib setup
 #
-# The user core repository is assumed to have the structure typical of
-# IObundle's repositories
+# To simulate a module in this:
+# > make -C /path/to/iob-lib sim MODULE=<some module in the hardware directory>
+#
+
 
 SHELL=/bin/bash
 export
 
-# core path
-CORE_DIR ?=.
-
 ifeq ($(CORE_DIR),.)
+CORE_DIR =.
 include test.mk
 else
+CORE_DIR =../..
 include setup.mk
 endif 
 

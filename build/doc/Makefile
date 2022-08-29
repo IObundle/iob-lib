@@ -38,39 +38,45 @@ presentation.pdf: presentation.tex
 	pdflatex $<
 
 #build product brief document type
-pb.pdf: results pb_figs $(DOC)top.tex
-	pdflatex -jobname $(DOC) $(DOC)top.tex
-	pdflatex -jobname $(DOC) $(DOC)top.tex
+pb.pdf: results pb_figs pbtop.tex
+	pdflatex -jobname pb pbtop.tex
+	pdflatex -jobname pb pbtop.tex
+
+#pb top file containing the definition of sections to include
+pbtop.tex: texfiles
+	make doctop DOC=pb
 
 #build user guide document type
-ug.pdf: version.tex results ug_figs $(DOC)top.tex
+ug.pdf: version.tex results ug_figs ugtop.tex
 	git rev-parse --short HEAD > shortHash.tex
-	pdflatex -jobname $(DOC) $(DOC)top.tex
+	pdflatex -jobname ug ugtop.tex
 	if [ -f *.bib ]; then bibtex ug; fi
-	pdflatex -jobname $(DOC) $(DOC)top.tex
-	pdflatex -jobname $(DOC) $(DOC)top.tex
+	pdflatex -jobname ug ugtop.tex
+	pdflatex -jobname ug ugtop.tex
+
+
+#ug top file containing the definition of sections to include
+ugtop.tex: texfiles
+	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
+	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
+	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi
+	if [ -f swreg.tex ]; then echo "\def\SWREG{Y}" >> $@; fi
+	if [ $(ASICSYNTH) == 1 ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
+	make doctop DOC=ug
+
+doctop:
+	if [ $(RESULTS) ]; then echo "\def\RESULTS{Y}" >> $(DOC)top.tex; fi
+	if [ $(INT_FAMILY)$(XIL_FAMILY) ]; then echo "\def\FPGA{Y}" >> $(DOC)top.tex; fi
+	if [ $(XIL_FAMILY) ]; then echo "\def\XILINX{Y}" >> $(DOC)top.tex; fi
+	if [ $(XIL_FAMILY) ]; then echo "\def\INTEL{Y}" >> $(DOC)top.tex; fi
+	if [ $(ASIC_NODE) ]; then echo "\def\ASIC{Y}" >> $(DOC)top.tex; fi
+	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $(DOC)top.tex; fi
+	echo "\input{$(DOC).tex}" >> $(DOC)top.tex
 
 #view document
 view: $(DOC).pdf
 	evince $< &
 
-#create document top file containing the definition of sections to include
-$(DOC)top.tex: texfiles
-	cp tsrc/* .
-	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
-	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
-	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi
-	if [ -f swreg.tex ]; then echo "\def\SWREG{Y}" >> $@; fi
-	if [ $(RESULTS) == 1 ]; then echo "\def\RESULTS{Y}" >> $@; fi
-	if [ -f ../hw/fpga/vivado.tex ]; then cp ../hw/fpga/vivado.tex .; fi
-	if [ -f ../hw/fpga/quartus.tex ]; then cp ../hw/fpga/quartus.tex .; fi
-	if [ -f vivado.tex -o -f quartus.tex ]; then echo "\def\FPGA{Y}" >> $@; fi
-	if [ -f vivado.tex ]; then echo "\def\XILINX{Y}" >> $@; fi
-	if [ -f quartus.tex ]; then echo "\def\INTEL{Y}" >> $@; fi
-	if [ -f genus.tex ]; then echo "\def\ASIC{Y}" >> $@; fi
-	if [ $(ASICSYNTH) == 1 ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
-	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $@; fi
-	echo "\input{$(DOC).tex}" >> $@
 
 #generate tex files from code comments
 ifneq ($(wildcard tsrc/mkregs.conf),)
@@ -79,27 +85,37 @@ endif
 VHDR:=$(wildcard ../hw/vsrc/*_conf.vh) $(wildcard ../hw/vsrc/*.vh)
 VSRC:=$(wildcard ../hw/vsrc/*.v)
 texfiles:
-	$(PYTHON_DIR)/verilog2tex.py ../hw/vsrc/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF)
+	$(PYTHON_DIR)/verilog2tex.py ../hw/vsrc/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF) && cp tsrc/* .
 
 #run EDA tools to get results to include in document 
 results:
 ifeq ($(RESULTS), 1)
 ifneq ($(INT_FAMILY),)
 	make  -C ../hw/fpga build FPGA_FAMILY=$(INT_FAMILY) TOP_MODULE=$(TOP_MODULE)
+	cp ../hw/fpga/quartus.tex .
 endif
 ifneq ($(XIL_FAMILY),)
 	make  -C ../hw/fpga build FPGA_FAMILY=$(XIL_FAMILY) TOP_MODULE=$(TOP_MODULE)
+	cp ../hw/fpga/vivado.tex .
 endif
 ifneq ($(ASIC_NODE),)
 	make  -C ../hw/syn build ASIC_NODE=$(ASIC_NODE)
+	cp ../hw/syn/genus.tex .
 endif
 endif
 
 #clean
 clean:
-	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk \) -delete
+	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk -o -name "*.expected" \) -delete
 	make -C figures clean 
 	@rm -rf $(PYTHON_DIR)/__pycache__
+
+#test
+test: clean clean-test-log $(TEST_LIST)
+	diff test.log test.expected
+
+clean-test-log:
+	rm -f test.log
 
 debug:
 	@echo $(VHDR)
@@ -110,5 +126,5 @@ debug:
 	@echo $(ASIC_NODE)
 	@echo $(wildcard document.mk)
 
-.PHONY: view texfiles figures results clean
+.PHONY: view texfiles doctop figures results clean test clean-test-log debug
 

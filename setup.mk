@@ -1,3 +1,13 @@
+# (c) 2022-Present IObundle, Lda, all rights reserved
+#
+# This makefile segment is included by Makefile and creates a build directory
+# for an IP core
+#
+# It should be called from the user core repository directory which is
+# assumed to be located at ../.. and have iob-lib as submodule called LIB.
+#
+# The user core repository is assumed to have the structure typical of
+# IObundle's repositories
 
 # core info
 include $(CORE_DIR)/info.mk
@@ -89,10 +99,10 @@ ifneq ($(wildcard $(CORE_SIM_DIR)/*_tb.*),)
 endif
 endif
 ifneq ($(SETUP_FPGA),0)
+	cp -u $(CORE_FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
 ifneq ($(wildcard $(CORE_FPGA_DIR)/*.mk),)
 	cp -u $(CORE_FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
 endif
-	cp -u $(CORE_FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
 ifneq ($(wildcard $(CORE_FPGA_DIR)/*.sdc),)
 	cp -u $(CORE_FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR)
 endif
@@ -101,6 +111,7 @@ ifneq ($(wildcard $(CORE_FPGA_DIR)/*.xdc),)
 endif
 endif
 ifneq ($(SETUP_DOC),0)
+	cp -u $(CORE_DOC_DIR)/*.expected $(BUILD_DOC_DIR)
 ifneq ($(wildcard $(CORE_DOC_DIR)/*.mk),)
 	cp -u $(CORE_DOC_DIR)/*.mk $(BUILD_DOC_DIR)
 endif
