@@ -38,28 +38,22 @@ AXI_GEN:=./software/python/axi_gen.py
 #
 VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
 
-sim-sym:
+sim: $(SRC) $(TB)
+	@echo "Simulating module $(MODULE)"
+ifeq ($(IS_ASYM),)
 	$(VLOG) $(SRC) $(TB)
 	@./a.out $(TEST_LOG)
-
-sim-asym:
+else
 	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(SRC) $(TB)
 	@./a.out $(TEST_LOG)
 	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(SRC) $(TB)
 	@./a.out $(TEST_LOG)
 	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(SRC) $(TB)
 	@./a.out $(TEST_LOG)
-
-sim: $(SRC) $(TB)
-	@echo "Simulating module $(MODULE)"
-ifeq ($(IS_ASYM),)
-	make sim-sym
-else
-	make sim-asym
 endif
 ifeq ($(VCD),1)
 	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &
 endif
 
 # Rules
-.PHONY: sim sim-sym sim-asym 
+.PHONY: sim

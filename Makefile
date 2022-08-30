@@ -14,7 +14,7 @@
 SHELL=/bin/bash
 export
 
-ifeq ($(CORE_DIR),.)
+ifeq ($(MAKECMDGOALS),sim)
 CORE_DIR =.
 include test.mk
 else
@@ -40,5 +40,6 @@ debug: $(BUILD_DIR) $(VHDR)
 	@echo $(VSRC)
 	@echo $(MODULE) $(MODULE_DIR)
 	@echo $(IS_ASYM)
+	@echo $(MAKECMDGOALS)
 
 .PHONY: clean debug
