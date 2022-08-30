@@ -1,7 +1,5 @@
 ifneq (axi2axi,$(filter axi2axi, $(HW_MODULES)))
 
-include $(AXI_DIR)/config.mk
-
 # Add to modules list
 HW_MODULES+=axi2axi
 

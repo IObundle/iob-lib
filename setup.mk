@@ -11,9 +11,7 @@
 
 # core info
 include $(CORE_DIR)/info.mk
-ifneq ($(wildcard $(CORE_DIR)/config_setup.mk),)
 include $(CORE_DIR)/config_setup.mk
-endif
 
 # lib paths
 LIB_PYTHON_DIR=software/python
@@ -72,6 +70,7 @@ $(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
 setup: $(BUILD_DIR) $(SRC)
 	echo "VERSION_STR=$(VERSION_STR)" > $(BUILD_DIR)/version.mk
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
+	cp -u $(CORE_DIR)/config_setup.mk $(BUILD_DIR)
 ifneq ($(wildcard $(CORE_DIR)/config.mk),)
 	cp -u $(CORE_DIR)/config.mk $(BUILD_DIR)
 endif

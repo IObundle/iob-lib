@@ -1,12 +1,17 @@
 SHELL:=/bin/bash
 export
 
+include config_setup.mk
+
+
 # 
 # EMBEDDED SOFTWARE
 #
 EMB_DIR=sw/emb
+ifeq ($(SETUP_SW),1)
 fw-build:
 	make -C $(EMB_DIR) build-all
+endif
 
 fw-clean:
 	make -C $(EMB_DIR) clean-all
@@ -15,23 +20,26 @@ fw-clean:
 # PC EMUL
 #
 PC_DIR=sw/pc
+ifeq ($(SETUP_SW),1)
 pc-emul-build: fw-build
 	make -C $(PC_DIR) build
 
 pc-emul-run:
 	make -C $(PC_DIR) run
 
+pc-emul-test:
+	make -C $(PC_DIR) test
+endif
+
 pc-emul-clean:
 	make -C $(PC_DIR) clean
 
-pc-emul-test:
-	make -C $(PC_DIR) test
 
 #
 # SIMULATE
 #
-
 SIM_DIR=hw/sim
+ifeq ($(SETUP_SIM),1)
 sim-build: 
 	make -C $(SIM_DIR) build
 
@@ -41,17 +49,19 @@ sim-run: sim-build
 sim-test: 
 	make -C $(SIM_DIR) test
 
+sim-debug: 
+	make -C $(SIM_DIR) debug
+endif
+
 sim-clean: 
 	make -C $(SIM_DIR) clean
 
-sim-debug: 
-	make -C $(SIM_DIR) debug
 
 #
 # FPGA
 #
-
 FPGA_DIR=hw/fpga
+ifeq ($(SETUP_FPGA),1)
 fpga-build: 
 	make -C $(FPGA_DIR) build
 
@@ -61,33 +71,46 @@ fpga-run:
 fpga-test: 
 	make -C $(FPGA_DIR) test
 
+fpga-debug: 
+	make -C $(FPGA_DIR) debug
+endif
+
 fpga-clean: 
 	make -C $(FPGA_DIR) clean
 
-fpga-debug: 
-	make -C $(FPGA_DIR) debug
 
 #
 # DOCUMENT
 #
 DOC_DIR=doc
+ifeq ($(SETUP_DOC),1)
 doc-build: 
 	make -C $(DOC_DIR) build
 
 doc-test: 
 	make -C $(DOC_DIR) test
 
-doc-clean: 
-	make -C $(DOC_DIR) clean
-
 doc-debug: 
 	make -C $(DOC_DIR) debug
+endif
+
+doc-clean: 
+	make -C $(DOC_DIR) clean
 
 #
 # TEST
 #
+ifeq ($(SETUP_SIM),1)
+TEST_TYPE_LIST=sim-test
+endif
+ifeq ($(SETUP_FPGA),1)
+TEST_TYPE_LIST=fpga-test
+endif
+ifeq ($(SETUP_DOC),1)
+TEST_TYPE_LIST=doc-test
+endif
 
-test: sim-test fpga-test doc-test
+test: $(TEST_TYPE_LIST)
 
 
 #
