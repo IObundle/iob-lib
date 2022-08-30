@@ -5,6 +5,12 @@
 
 SHELL = /bin/bash
 
+# include core basic info
+include ../../info.mk
+ifneq ($(wildcard ../../config.mk),)
+include ../../config.mk
+endif
+
 #include local doc segment
 ifneq ($(wildcard document.mk),)
 include document.mk

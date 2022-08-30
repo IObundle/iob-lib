@@ -3,6 +3,13 @@
 
 SHELL:=/bin/bash
 
+# include core basic info
+include ../../info.mk
+ifneq ($(wildcard ../../config.mk),)
+include ../../config.mk
+endif
+
+
 #include local fpga segment
 ifneq ($(wildcard fpga.mk),)
 include fpga.mk
