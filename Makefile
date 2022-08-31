@@ -14,12 +14,12 @@
 SHELL=/bin/bash
 export
 
-ifeq ($(MAKECMDGOALS),sim)
-CORE_DIR =.
-include test.mk
-else
+ifeq ($(MAKECMDGOALS),setup)
 CORE_DIR =../..
 include setup.mk
+else
+CORE_DIR =.
+include test.mk
 endif 
 
 clean:
