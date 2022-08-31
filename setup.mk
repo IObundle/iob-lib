@@ -118,6 +118,8 @@ ifneq ($(wildcard $(CORE_DOC_DIR)/*.tex),)
 	cp -f $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
 endif
 	cp -u $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
+	cp -u software/python/verilog2tex.py $(BUILD_SW_PYTHON_DIR)
+	cp -u software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
 endif
 
-.PHONY: version setup
+.PHONY: setup
