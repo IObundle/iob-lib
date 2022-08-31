@@ -12,7 +12,10 @@ if __name__ == "__main__":
     core_name = sys.argv[1]
     core_version = sys.argv[2]
 
-    print(f"V{int(core_version[:2])}.{int(core_version[2:])}")
+    core_version_str = f"V{int(core_version[:2])}.{int(core_version[2:])}"
+    print(core_version_str)
 
     with open("./{}_version.vh".format(core_name), "w+") as f:
         f.write("`define VERSION {}".format(core_version))
+    with open("./{}_version.tex".format(core_name), "w+") as h:
+        h.write(core_version_str)

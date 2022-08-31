@@ -15,8 +15,7 @@ ifneq ($(wildcard fpga.mk),)
 include fpga.mk
 endif
 
-include ../../version.mk
-REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
+REMOTE_BUILD_DIR=sandbox/$(NAME)
 
 #include the module's headers and sources
 VHDR=$(wildcard ../vsrc/*.vh)

@@ -14,19 +14,19 @@
 SHELL=/bin/bash
 export
 
-ifeq ($(MAKECMDGOALS),setup)
-CORE_DIR =../..
-include setup.mk
-else
+ifeq ($(MAKECMDGOALS),sim)
 CORE_DIR =.
 include test.mk
+else
+CORE_DIR =../..
+include setup.mk
 endif 
 
 clean:
 	@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
 	@rm -rf $(BUILD_DIR)
-	@rm -f $(CORE_DIR)/*.vh *.vh *.c *.h
-	@rm -f *~ \#*\# a.out *.vcd *.pyc *.log *.v
+	@rm -f *.v *.vh *.c *.h *.tex
+	@rm -f *~ \#*\# a.out *.vcd *.pyc *.log
 
 debug: $(BUILD_DIR) $(VHDR) 
 	@echo $(TOP_MODULE)

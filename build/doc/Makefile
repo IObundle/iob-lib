@@ -22,11 +22,6 @@ DOC?=pb
 #path to verilog2python script
 PYTHON_DIR:=../sw/python
 
-#create version tex segment
-include ../version.mk
-version.tex:
-	echo $(VERSION_STR) > version.tex
-
 #make product brief figures
 pb_figs:
 	make -C ./figures pb_figs
@@ -53,7 +48,7 @@ pbtop.tex: texfiles
 	make doctop DOC=pb
 
 #build user guide document type
-ug.pdf: version.tex results ug_figs ugtop.tex
+ug.pdf: results ug_figs ugtop.tex
 	git rev-parse --short HEAD > shortHash.tex
 	pdflatex -jobname ug ugtop.tex
 	if [ -f *.bib ]; then bibtex ug; fi
@@ -71,6 +66,7 @@ ugtop.tex: texfiles
 	make doctop DOC=ug
 
 doctop:
+	echo "\def\NAME{$(NAME)}" >> $(DOC)top.tex
 	if [ $(RESULTS) ]; then echo "\def\RESULTS{Y}" >> $(DOC)top.tex; fi
 	if [ $(INT_FAMILY)$(XIL_FAMILY) ]; then echo "\def\FPGA{Y}" >> $(DOC)top.tex; fi
 	if [ $(XIL_FAMILY) ]; then echo "\def\XILINX{Y}" >> $(DOC)top.tex; fi

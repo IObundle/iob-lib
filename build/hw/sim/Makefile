@@ -9,7 +9,7 @@ ifneq ($(wildcard $(CORE_DIR)/config.mk),)
 include $(CORE_DIR)/config.mk
 endif
 
-REMOTE_BUILD_DIR=sandbox/$(NAME)_$(VERSION_STR)
+REMOTE_BUILD_DIR=sandbox/$(NAME)
 
 #include the module's headers and sources
 VHDR+=$(wildcard ../vsrc/*.vh)

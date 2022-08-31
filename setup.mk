@@ -62,13 +62,16 @@ include $(CORE_SIM_DIR)/sim_setup.mk
 # import core software files
 include $(CORE_SW_DIR)/software.mk
 
-# copy core version header file
+# copy core version header files
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
 	cp -u $< $@
 
+SRC+=$(BUILD_DOC_DIR)/tsrc/$(NAME)_version.tex
+$(BUILD_DOC_DIR)/tsrc/$(NAME)_version.tex: $(NAME)_version.tex
+	cp -u $< $@
+
 setup: $(BUILD_DIR) $(SRC)
-	echo "VERSION_STR=$(VERSION_STR)" > $(BUILD_DIR)/version.mk
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
 	cp -u $(CORE_DIR)/config_setup.mk $(BUILD_DIR)
 ifneq ($(wildcard $(CORE_DIR)/config.mk),)
