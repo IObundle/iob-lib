@@ -1,15 +1,14 @@
 # (c) 2022-Present IObundle, Lda, all rights reserved
 #
-# This makefile segment is included by Makefile and creates a build directory
-# for an IP core
+# This makefile is used to setup a build directory for an IP core
 #
-# It should be called from the user core repository directory which is
-# assumed to be located at ../.. and have iob-lib as submodule called LIB.
-#
-# The user core repository is assumed to have the structure typical of
-# IObundle's repositories
 
-# core info
+SHELL=/bin/bash
+export
+
+LIB_DIR=submodules/LIB
+CORE_DIR =.
+
 include $(CORE_DIR)/info.mk
 include $(CORE_DIR)/config_setup.mk
 
@@ -33,10 +32,9 @@ CORE_FPGA_DIR=$(CORE_HW_DIR)/fpga
 CORE_DOC_DIR=$(CORE_DIR)/document
 
 
-# make version header
-VERSION_STR:=$(shell software/python/version.py $(NAME) $(VERSION))
-
 # establish build dir paths
+VERSION_STR := $(shell $(LIB_DIR)/software/python/version.py -n $(NAME) $(VERSION))
+
 BUILD_DIR := $(CORE_DIR)/$(NAME)_$(VERSION_STR)
 BUILD_SW_DIR:=$(BUILD_DIR)/sw
 BUILD_SW_PYTHON_DIR:=$(BUILD_SW_DIR)/python
@@ -51,9 +49,13 @@ BUILD_TSRC_DIR:=$(BUILD_DOC_DIR)/tsrc
 BUILD_FIG_DIR:=$(BUILD_DOC_DIR)/figures
 BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
+all: setup
+
+# make version headers
+
 # create build directory
 $(BUILD_DIR):
-	cp -r -u build $@
+	cp -r -u $(LIB_DIR)/build $@
 
 # import core hardware and simulation files
 include $(CORE_HW_DIR)/hardware.mk
@@ -65,11 +67,14 @@ include $(CORE_SW_DIR)/software.mk
 # copy core version header files
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
-	cp -u $< $@
+	mv -u $< $@
 
 SRC+=$(BUILD_DOC_DIR)/tsrc/$(NAME)_version.tex
 $(BUILD_DOC_DIR)/tsrc/$(NAME)_version.tex: $(NAME)_version.tex
-	cp -u $< $@
+	mv -u $< $@
+
+$(NAME)_version.vh $(NAME)_version.tex:
+	$(LIB_DIR)/software/python/version.py $(NAME) $(VERSION)
 
 setup: $(BUILD_DIR) $(SRC)
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
@@ -121,8 +126,26 @@ ifneq ($(wildcard $(CORE_DOC_DIR)/*.tex),)
 	cp -f $(CORE_DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
 endif
 	cp -u $(CORE_DOC_DIR)/figures/* $(BUILD_FIG_DIR)
-	cp -u software/python/verilog2tex.py $(BUILD_SW_PYTHON_DIR)
-	cp -u software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
+	cp -u $(LIB_DIR)/software/python/verilog2tex.py $(BUILD_SW_PYTHON_DIR)
+	cp -u $(LIB_DIR)/software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
 endif
 
-.PHONY: setup
+clean:
+	@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
+	@rm -rf $(BUILD_DIR)
+
+debug: $(BUILD_DIR) $(VHDR) 
+	@echo $(TOP_MODULE)
+	@echo $(VERSION)
+	@echo $(VERSION_STR)
+	@echo $(BUILD_DIR)
+	@echo $(BUILD_VSRC_DIR)
+	@echo $(VHDR)
+	@echo $(VSRC1)
+	@echo $(VSRC2)
+	@echo $(VSRC)
+	@echo $(MODULE) $(MODULE_DIR)
+	@echo $(IS_ASYM)
+	@echo $(MAKECMDGOALS)
+
+.PHONY: all setup clean debug

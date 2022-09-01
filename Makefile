@@ -14,32 +14,61 @@
 SHELL=/bin/bash
 export
 
-ifeq ($(MAKECMDGOALS),sim)
-CORE_DIR =.
-include test.mk
+#build here
+BUILD_VSRC_DIR:=.
+
+# Default module
+MODULE ?= iob_ram_2p
+MODULE_DIR ?= $(shell find hardware -name $(MODULE))
+ifneq ($(MODULE_DIR),)
+include $(MODULE_DIR)/hardware.mk
 else
-CORE_DIR =../..
-include setup.mk
-endif 
+$(info No such module $(MODULE))
+endif
+
+# Testbench
+TB=$(wildcard $(MODULE_DIR)/*_tb.v)
+
+# Defines
+DEFINE=-DADDR_W=10 -DDATA_W=32
+ifeq ($(VCD),1)
+DEFINE+= -DVCD
+endif
+
+# Includes
+INCLUDE=-Ibuild/hw/vsrc
+
+# asymmetric memory present
+IS_ASYM=$(shell echo $(SRC) | grep asym)
+
+AXI_GEN:=./software/python/axi_gen.py
+
+#
+# Simulate with Icarus Verilog
+#
+VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
+
+sim: $(SRC) $(TB)
+	@echo "Simulating module $(MODULE)"
+ifeq ($(IS_ASYM),)
+	$(VLOG) $(SRC) $(TB)
+	@./a.out $(TEST_LOG)
+else
+	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(SRC) $(TB)
+	@./a.out $(TEST_LOG)
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(SRC) $(TB)
+	@./a.out $(TEST_LOG)
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(SRC) $(TB)
+	@./a.out $(TEST_LOG)
+endif
+ifeq ($(VCD),1)
+	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &
+endif
 
 clean:
-	@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
-	@rm -rf $(BUILD_DIR)
 	@rm -f *.v *.vh *.c *.h *.tex
 	@rm -f *~ \#*\# a.out *.vcd *.pyc *.log
 
-debug: $(BUILD_DIR) $(VHDR) 
-	@echo $(TOP_MODULE)
-	@echo $(VERSION)
-	@echo $(VERSION_STR)
-	@echo $(BUILD_DIR)
-	@echo $(BUILD_VSRC_DIR)
-	@echo $(VHDR)
-	@echo $(VSRC1)
-	@echo $(VSRC2)
-	@echo $(VSRC)
-	@echo $(MODULE) $(MODULE_DIR)
-	@echo $(IS_ASYM)
-	@echo $(MAKECMDGOALS)
+debug:
 
-.PHONY: clean debug
+.PHONY: sim clean debug

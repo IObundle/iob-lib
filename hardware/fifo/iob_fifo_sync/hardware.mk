@@ -4,13 +4,13 @@ ifeq ($(filter iob_fifo_sync, $(HW_MODULES)),)
 HW_MODULES+=iob_fifo_sync
 
 # Submodules
-include hardware/ram/iob_ram_2p_asym/hardware.mk
+include $(LIB_DIR)/hardware/ram/iob_ram_2p_asym/hardware.mk
 
 # Sources
 SRC+=$(BUILD_VSRC_DIR)/iob_fifo_sync.v
 
 # Copy the sources to the build directory 
-$(BUILD_VSRC_DIR)/iob_fifo_sync.v: hardware/fifo/iob_fifo_sync/iob_fifo_sync.v
+$(BUILD_VSRC_DIR)/iob_fifo_sync.v: $(LIB_DIR)/hardware/fifo/iob_fifo_sync/iob_fifo_sync.v
 	cp $< $(BUILD_VSRC_DIR)
 
 endif

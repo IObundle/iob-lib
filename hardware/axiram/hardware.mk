@@ -7,7 +7,7 @@ HW_MODULES+=axiram
 SRC+=$(BUILD_VSRC_DIR)/axi_ram.v
 
 # Copy the sources to the build directory 
-$(BUILD_VSRC_DIR)/axi_ram.v: submodules/VERILOG_AXI/rtl/axi_ram.v
+$(BUILD_VSRC_DIR)/axi_ram.v: $(LIB_DIR)/submodules/VERILOG_AXI/rtl/axi_ram.v
 	cp $< $(BUILD_VSRC_DIR)
 
 endif
