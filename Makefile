@@ -15,6 +15,7 @@ SHELL=/bin/bash
 export
 
 #build here
+LIB_DIR:=.
 BUILD_VSRC_DIR:=.
 
 # Default module
