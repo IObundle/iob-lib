@@ -1,6 +1,6 @@
 # (c) 2022-Present IObundle, Lda, all rights reserved
 #
-# This makefile is used to create a build directory for an IP core or to
+# This makefile is used to setup a build directory for an IP core or to
 # simulate the modules in this repository
 #
 # To create a build directory from any directory:

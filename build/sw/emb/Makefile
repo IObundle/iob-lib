@@ -1,7 +1,12 @@
-CORE_DIR:=../..
-include $(CORE_DIR)/info.mk
-ifneq ($(wildcard $(CORE_DIR)/config.mk),)
-include $(CORE_DIR)/config.mk
+# (c) 2022-Present IObundle, Lda, all rights reserved
+#
+# This makefile is used at build-time in $(BUILD_DIR)/sw/emb/Makefile
+#
+
+BUILD_DIR:=../..
+include $(BUILD_DIR)/info.mk
+ifneq ($(wildcard $(BUILD_DIR)/config.mk),)
+include $(BUILD_DIR)/config.mk
 endif
 
 TEMPLATE_LDS=../src/template.lds
