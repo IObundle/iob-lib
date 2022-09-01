@@ -1,4 +1,4 @@
-ifneq (axiram,$(filter axiram, $(HW_MODULES)),)
+ifeq ($(filter axiram, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=axiram

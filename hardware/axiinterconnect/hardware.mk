@@ -1,4 +1,4 @@
-ifneq (axiinterconnect,$(filter axiinterconnect, $(HW_MODULES)))
+ifeq ($(filter axiinterconnect, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=axiinterconnect

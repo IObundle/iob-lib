@@ -1,4 +1,4 @@
-ifneq (include,$(filter include, $(HW_MODULES)),)
+ifeq ($(filter include, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=include

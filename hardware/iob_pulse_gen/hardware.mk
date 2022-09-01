@@ -1,4 +1,4 @@
-ifneq (iob_pulse_gen,$(filter iob_pulse_gen, $(HW_MODULES)))
+ifeq ($(filter iob_pulse_gen, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=iob_pulse_gen

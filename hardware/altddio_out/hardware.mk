@@ -1,4 +1,4 @@
-ifneq (altddio_out,$(filter altddio_out, $(HW_MODULES)))
+ifeq ($(filter altddio_out, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=altddio_out

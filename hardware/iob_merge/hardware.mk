@@ -1,5 +1,4 @@
-
-ifneq (iob_merge,$(filter iob_merge, $(HW_MODULES)),)
+ifeq ($(filter iob_merge, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=iob_merge
