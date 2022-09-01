@@ -1,7 +1,7 @@
 ifeq ($(filter iob_rom_sp, $(HW_MODULES)),)
 
 # Add to modules list
-HW_MODULES+= iob_rom_sp
+HW_MODULES+=iob_rom_sp
 
 # Sources 
 SRC+=$(BUILD_VSRC_DIR)/iob_rom_sp.v

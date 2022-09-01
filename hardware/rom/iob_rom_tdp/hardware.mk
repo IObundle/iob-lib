@@ -7,7 +7,7 @@ HW_MODULES+=iob_rom_tdp
 SRC+=$(BUILD_VSRC_DIR)/iob_rom_tdp.v
 
 # Copy souces to build directory
-$(BUILD_VSRC_DIR)/iob_rom_tdp.v:hardware/rom/iob_rom_tdp/iob_rom_tdp.v
+$(BUILD_VSRC_DIR)/iob_rom_tdp.v: $(LIB_DIR)/hardware/rom/iob_rom_tdp/iob_rom_tdp.v
 	cp $< $(BUILD_VSRC_DIR)
 
 endif

@@ -1,4 +1,3 @@
-
 ifeq ($(filter iob_reg, $(HW_MODULES)),)
 
 # Add to modules list

@@ -7,7 +7,7 @@ HW_MODULES+=iob_reverse
 SRC+=$(BUILD_VSRC_DIR)/iob_reverse.v
 
 # Copy the sources to the build directory 
-$(BUILD_VSRC_DIR)/iob_reverse.v:hardware/iob_reverse/iob_reverse.v
+$(BUILD_VSRC_DIR)/iob_reverse.v: $(LIB_DIR)/hardware/iob_reverse/iob_reverse.v
 	cp $< $(BUILD_VSRC_DIR)
 
 endif

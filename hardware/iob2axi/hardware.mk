@@ -1,10 +1,9 @@
-ifneq (iob2axi,$(filter iob2axi, $(HW_MODULES)))
+ifeq ($(filter iob2axi, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=iob2axi
 
-
-include hardware/fifo/iob_fifo_sync/hardware.mk
+include $(LIB_DIR)/hardware/fifo/iob_fifo_sync/hardware.mk
 
 # SRC+=m_axi_m_port.vh \
 # m_axi_write_m_port.vh \
@@ -14,14 +13,13 @@ include hardware/fifo/iob_fifo_sync/hardware.mk
 
 SRC+=$(BUILD_VSRC_DIR)/iob2axi.v $(BUILD_VSRC_DIR)/iobwaxi_wr.v $(BUILD_VSRC_DIR)/iob2axi_rd.v
 
-$(BUILD_VSRC_DIR)/iob2axi.v: hardware/iob2axi/iob2axi.v
+$(BUILD_VSRC_DIR)/iob2axi.v: $(LIB_DIR)/hardware/iob2axi/iob2axi.v
 	cp $< $(BUILD_VSRC_DIR)
 
-
-$(BUILD_VSRC_DIR)/iobwaxi_wr.v: hardware/iob2axi/iob2axi_wr.v
+$(BUILD_VSRC_DIR)/iobwaxi_wr.v: $(LIB_DIR)/hardware/iob2axi/iob2axi_wr.v
 	cp $< $(BUILD_VSRC_DIR)
 
-$(BUILD_VSRC_DIR)/iob2axi_rd.v: hardware/iob2axi/iob2axi_rd.v
+$(BUILD_VSRC_DIR)/iob2axi_rd.v: $(LIB_DIR)/hardware/iob2axi/iob2axi_rd.v
 	cp $< $(BUILD_VSRC_DIR)
 
 
