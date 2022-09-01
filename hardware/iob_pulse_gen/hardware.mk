@@ -7,7 +7,7 @@ HW_MODULES+=iob_pulse_gen
 SRC+=$(BUILD_VSRC_DIR)/iob_pulse_gen.v
 
 # Copy the sources to the build directory
-$(BUILD_VSRC_DIR)/iob_pulse_gen.v: hardware/iob_pulse_gen/iob_pulse_gen.v
+$(BUILD_VSRC_DIR)/iob_pulse_gen.v: $(LIB_DIR)/hardware/iob_pulse_gen/iob_pulse_gen.v
 	cp $< $(BUILD_VSRC_DIR)
 
 endif
