@@ -57,6 +57,9 @@ all: setup
 $(BUILD_DIR):
 	cp -r -u $(LIB_DIR)/build $@
 
+$(BUILD_VSRC_DIR)/%.vh: $(LIB_DIR)/hardware/include/%.vh
+	cp $< $(BUILD_VSRC_DIR)
+
 # import core hardware and simulation files
 include $(CORE_HW_DIR)/hardware.mk
 include $(CORE_SIM_DIR)/sim_setup.mk
@@ -133,6 +136,7 @@ endif
 clean:
 	@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
 	@rm -rf $(BUILD_DIR)
+	@rm -f *.v *.vh *.c *.h
 
 debug: $(BUILD_DIR) $(VHDR) 
 	@echo $(TOP_MODULE)
