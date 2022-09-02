@@ -133,6 +133,7 @@ endif
 clean:
 	@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
 	@rm -rf $(BUILD_DIR)
+	@rm -rf software/python/__pycache__
 
 debug: $(BUILD_DIR) $(VHDR) 
 	@echo $(NAME)
