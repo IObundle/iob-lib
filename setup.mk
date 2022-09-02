@@ -26,6 +26,7 @@ SETUP_DOC ?=1
 CORE_SW_DIR=$(CORE_DIR)/software
 CORE_EMB_DIR=$(CORE_SW_DIR)/embedded
 CORE_PC_DIR=$(CORE_SW_DIR)/pc-emul
+
 CORE_HW_DIR=$(CORE_DIR)/hardware
 CORE_SIM_DIR=$(CORE_HW_DIR)/simulation
 CORE_FPGA_DIR=$(CORE_HW_DIR)/fpga
@@ -53,8 +54,6 @@ BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
 all: setup
 
-# make version headers
-
 # create build directory
 $(BUILD_DIR):
 	cp -r -u $(LIB_DIR)/build $@
@@ -74,17 +73,13 @@ include $(CORE_SIM_DIR)/sim_setup.mk
 # import core software files
 include $(CORE_SW_DIR)/software.mk
 
-# copy core version header files
+# create and copy core version header files
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
-$(BUILD_VSRC_DIR)/$(NAME)_version.vh: $(NAME)_version.vh
-	mv -u $< $@
-
-SRC+=$(BUILD_DOC_DIR)/tsrc/$(NAME)_version.tex
-$(BUILD_DOC_DIR)/tsrc/$(NAME)_version.tex: $(NAME)_version.tex
-	mv -u $< $@
-
-$(NAME)_version.vh $(NAME)_version.tex:
+$(BUILD_VSRC_DIR)/$(NAME)_version.vh $(BUILD_DOC_DIR)/tsrc/$(NAME)_version.tex:
 	$(LIB_DIR)/software/python/version.py $(NAME) $(VERSION)
+	mv $(NAME)_version.vh $(BUILD_VSRC_DIR)
+	mv $(NAME)_version.tex $(BUILD_DOC_DIR)
+
 
 setup: $(BUILD_DIR) $(SRC)
 ifneq ($(SETUP_SW),0)
