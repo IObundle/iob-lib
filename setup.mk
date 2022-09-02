@@ -56,6 +56,14 @@ all: setup
 # create build directory
 $(BUILD_DIR):
 	cp -r -u $(LIB_DIR)/build $@
+	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
+	cp -u $(CORE_DIR)/config_setup.mk $(BUILD_DIR)
+ifneq ($(wildcard $(CORE_DIR)/config.mk),)
+	cp -u $(CORE_DIR)/config.mk $(BUILD_DIR)
+endif
+ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
+	cp -u $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
+endif
 
 # import core hardware and simulation files
 include $(CORE_HW_DIR)/hardware.mk
@@ -77,14 +85,6 @@ $(NAME)_version.vh $(NAME)_version.tex:
 	$(LIB_DIR)/software/python/version.py $(NAME) $(VERSION)
 
 setup: $(BUILD_DIR) $(SRC)
-	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
-	cp -u $(CORE_DIR)/config_setup.mk $(BUILD_DIR)
-ifneq ($(wildcard $(CORE_DIR)/config.mk),)
-	cp -u $(CORE_DIR)/config.mk $(BUILD_DIR)
-endif
-ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
-	cp -u $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
-endif
 ifneq ($(SETUP_SW),0)
 ifneq ($(wildcard $(CORE_PC_DIR)/*.expected),)
 	cp -u $(CORE_PC_DIR)/*.expected $(BUILD_SW_PC_DIR)
