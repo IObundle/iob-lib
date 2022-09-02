@@ -118,6 +118,7 @@ test: $(TEST_TYPE_LIST)
 #
 
 clean: fw-clean pc-emul-clean sim-clean fpga-clean doc-clean
+	@rm -f ../*.v ../*.vh ../*.c ../*.h
 
 
 .PHONY:	sim-build sim-run sim-test sim-debug sim-clean \
