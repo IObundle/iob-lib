@@ -1,4 +1,4 @@
-ifneq (iob_split,$(filter iob_split, $(HW_MODULES)),)
+ifeq ($(filter iob_split, $(HW_MODULES)),)
 
 # Add to modules list
 HW_MODULES+=iob_split
