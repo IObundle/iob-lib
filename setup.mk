@@ -135,17 +135,13 @@ clean:
 	@rm -rf $(BUILD_DIR)
 
 debug: $(BUILD_DIR) $(VHDR) 
+	@echo $(NAME)
 	@echo $(TOP_MODULE)
 	@echo $(VERSION)
 	@echo $(VERSION_STR)
 	@echo $(BUILD_DIR)
 	@echo $(BUILD_VSRC_DIR)
-	@echo $(VHDR)
-	@echo $(VSRC1)
-	@echo $(VSRC2)
-	@echo $(VSRC)
-	@echo $(MODULE) $(MODULE_DIR)
-	@echo $(IS_ASYM)
-	@echo $(MAKECMDGOALS)
+	@echo $(BUILD_SW_SRC_DIR)
+	@echo $(SRC)
 
 .PHONY: all setup clean debug
