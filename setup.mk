@@ -68,14 +68,15 @@ ifeq ($(SETUP_FPGA),0)
 endif
 ifeq ($(SETUP_DOC),0)
 	rm -rf $(BUILD_DOC_DIR)
+else
+ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
+	cp -u $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
+endif
 endif
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
 	cp -u $(CORE_DIR)/config_setup.mk $(BUILD_DIR)
 ifneq ($(wildcard $(CORE_DIR)/config.mk),)
 	cp -u $(CORE_DIR)/config.mk $(BUILD_DIR)
-endif
-ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
-	cp -u $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
 endif
 
 # import core hardware and simulation files
