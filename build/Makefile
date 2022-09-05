@@ -1,26 +1,23 @@
 SHELL:=/bin/bash
 export
 
-include config_setup.mk
-
-
 # 
 # EMBEDDED SOFTWARE
 #
 EMB_DIR=sw/emb
-ifeq ($(SETUP_SW),1)
+ifneq ($(wildcard $(EMB_DIR)/.),)
 fw-build:
 	make -C $(EMB_DIR) build-all
-endif
 
 fw-clean:
 	make -C $(EMB_DIR) clean-all
+endif
 
 #
 # PC EMUL
 #
 PC_DIR=sw/pc
-ifeq ($(SETUP_SW),1)
+ifneq ($(wildcard $(PC_DIR)/.),)
 pc-emul-build: fw-build
 	make -C $(PC_DIR) build
 
@@ -29,17 +26,16 @@ pc-emul-run:
 
 pc-emul-test:
 	make -C $(PC_DIR) test
-endif
 
 pc-emul-clean:
 	make -C $(PC_DIR) clean
-
+endif
 
 #
 # SIMULATE
 #
 SIM_DIR=hw/sim
-ifeq ($(SETUP_SIM),1)
+ifneq ($(wildcard $(SIM_DIR)/.),)
 sim-build: 
 	make -C $(SIM_DIR) build
 
@@ -51,17 +47,17 @@ sim-test:
 
 sim-debug: 
 	make -C $(SIM_DIR) debug
-endif
 
 sim-clean: 
 	make -C $(SIM_DIR) clean
+endif
 
 
 #
 # FPGA
 #
 FPGA_DIR=hw/fpga
-ifeq ($(SETUP_FPGA),1)
+ifneq ($(wildcard $(FPGA_DIR)/.),)
 fpga-build: 
 	make -C $(FPGA_DIR) build
 
@@ -73,17 +69,17 @@ fpga-test:
 
 fpga-debug: 
 	make -C $(FPGA_DIR) debug
-endif
 
 fpga-clean: 
 	make -C $(FPGA_DIR) clean
+endif
 
 
 #
 # DOCUMENT
 #
 DOC_DIR=doc
-ifeq ($(SETUP_DOC),1)
+ifneq ($(wildcard $(DOC_DIR)/.),)
 doc-build: 
 	make -C $(DOC_DIR) build
 
@@ -92,23 +88,17 @@ doc-test:
 
 doc-debug: 
 	make -C $(DOC_DIR) debug
-endif
 
 doc-clean: 
 	make -C $(DOC_DIR) clean
+endif
 
 #
 # TEST
 #
-ifeq ($(SETUP_SIM),1)
 TEST_TYPE_LIST=sim-test
-endif
-ifeq ($(SETUP_FPGA),1)
 TEST_TYPE_LIST=fpga-test
-endif
-ifeq ($(SETUP_DOC),1)
 TEST_TYPE_LIST=doc-test
-endif
 
 test: $(TEST_TYPE_LIST)
 

@@ -57,13 +57,26 @@ all: setup
 # create build directory
 $(BUILD_DIR):
 	cp -r -u $(LIB_DIR)/build $@
+ifeq ($(SETUP_SW),0)
+	rm -rf $(BUILD_SW_DIR)
+endif
+ifeq ($(SETUP_SIM),0)
+	rm -rf $(BUILD_SIM_DIR)
+endif
+ifeq ($(SETUP_FPGA),0)
+	rm -rf $(BUILD_FPGA_DIR)
+endif
+ifeq ($(SETUP_DOC),0)
+	rm -rf $(BUILD_DOC_DIR)
+else
+ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
+	cp -u $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
+endif
+endif
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
 	cp -u $(CORE_DIR)/config_setup.mk $(BUILD_DIR)
 ifneq ($(wildcard $(CORE_DIR)/config.mk),)
 	cp -u $(CORE_DIR)/config.mk $(BUILD_DIR)
-endif
-ifneq ($(wildcard $(CORE_DIR)/mkregs.conf),)
-	cp -u $(CORE_DIR)/mkregs.conf $(BUILD_TSRC_DIR)
 endif
 
 # import core hardware and simulation files
