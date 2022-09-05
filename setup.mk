@@ -80,7 +80,9 @@ endif
 
 # import core hardware and simulation files
 include $(HW_DIR)/hardware.mk
+ifneq ($(wildcard $(SIM_DIR)/sim_setup.mk),)
 include $(SIM_DIR)/sim_setup.mk
+endif
 
 # import core software files
 include $(SW_DIR)/software.mk
