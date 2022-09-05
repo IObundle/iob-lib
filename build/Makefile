@@ -5,16 +5,19 @@ export
 # EMBEDDED SOFTWARE
 #
 EMB_DIR=sw/emb
+ifneq ($(wildcard $(EMB_DIR)/.),)
 fw-build:
 	make -C $(EMB_DIR) build-all
 
 fw-clean:
 	make -C $(EMB_DIR) clean-all
+endif
 
 #
 # PC EMUL
 #
 PC_DIR=sw/pc
+ifneq ($(wildcard $(PC_DIR)/.),)
 pc-emul-build: fw-build
 	make -C $(PC_DIR) build
 
@@ -26,12 +29,13 @@ pc-emul-test:
 
 pc-emul-clean:
 	make -C $(PC_DIR) clean
-
+endif
 
 #
 # SIMULATE
 #
 SIM_DIR=hw/sim
+ifneq ($(wildcard $(SIM_DIR)/.),)
 sim-build: 
 	make -C $(SIM_DIR) build
 
@@ -46,12 +50,14 @@ sim-debug:
 
 sim-clean: 
 	make -C $(SIM_DIR) clean
+endif
 
 
 #
 # FPGA
 #
 FPGA_DIR=hw/fpga
+ifneq ($(wildcard $(FPGA_DIR)/.),)
 fpga-build: 
 	make -C $(FPGA_DIR) build
 
@@ -66,12 +72,14 @@ fpga-debug:
 
 fpga-clean: 
 	make -C $(FPGA_DIR) clean
+endif
 
 
 #
 # DOCUMENT
 #
 DOC_DIR=doc
+ifneq ($(wildcard $(DOC_DIR)/.),)
 doc-build: 
 	make -C $(DOC_DIR) build
 
@@ -83,6 +91,7 @@ doc-debug:
 
 doc-clean: 
 	make -C $(DOC_DIR) clean
+endif
 
 #
 # TEST

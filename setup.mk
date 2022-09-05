@@ -57,6 +57,18 @@ all: setup
 # create build directory
 $(BUILD_DIR):
 	cp -r -u $(LIB_DIR)/build $@
+ifeq ($(SETUP_SW),0)
+	rm -rf $(BUILD_SW_DIR)
+endif
+ifeq ($(SETUP_SIM),0)
+	rm -rf $(BUILD_SIM_DIR)
+endif
+ifeq ($(SETUP_FPGA),0)
+	rm -rf $(BUILD_FPGA_DIR)
+endif
+ifeq ($(SETUP_DOC),0)
+	rm -rf $(BUILD_DOC_DIR)
+endif
 	cp -u $(CORE_DIR)/info.mk $(BUILD_DIR)
 	cp -u $(CORE_DIR)/config_setup.mk $(BUILD_DIR)
 ifneq ($(wildcard $(CORE_DIR)/config.mk),)
