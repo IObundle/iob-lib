@@ -34,7 +34,7 @@ CORE_DOC_DIR=$(CORE_DIR)/document
 
 
 # establish build dir paths
-VERSION_STR := $(shell $(LIB_DIR)/software/python/version.py -n $(NAME) $(VERSION))
+VERSION_STR := $(shell $(LIB_DIR)/software/python/version.py -i $(CORE_DIR))
 
 BUILD_DIR := $(CORE_DIR)/$(NAME)_$(VERSION_STR)
 BUILD_SW_DIR:=$(BUILD_DIR)/sw
@@ -73,13 +73,10 @@ include $(CORE_SIM_DIR)/sim_setup.mk
 # import core software files
 include $(CORE_SW_DIR)/software.mk
 
-# create and copy core version header files
-SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
-$(BUILD_VSRC_DIR)/$(NAME)_version.vh $(BUILD_DOC_DIR)/tsrc/$(NAME)_version.tex:
-	$(LIB_DIR)/software/python/version.py $(NAME) $(VERSION)
-	mv $(NAME)_version.vh $(BUILD_VSRC_DIR)
-	mv $(NAME)_version.tex $(BUILD_DOC_DIR)
-
+# import document files
+ifneq ($(SETUP_DOC),0)
+include $(CORE_DOC_DIR)/doc_setup.mk
+endif
 
 setup: $(BUILD_DIR) $(SRC)
 ifneq ($(SETUP_SW),0)
