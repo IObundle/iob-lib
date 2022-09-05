@@ -5,44 +5,67 @@
 # prints version stdout, verilog and latex header files
 #
 
-import sys
+import argparse
+import os
+import parse
 
-def print_usage():
-    usage_str ="""
-    Usage: ./version.py [-n] NAME VERSION
-      -n: do not output any files
-    NAME: core name
-    VERSION: core version. Format: 1234 -> V12.34
-    """
-    
-    print(usage_str, file=sys.stderr)
-    sys.exit()
+
+def parse_makefile_variable(lines, variable):
+    search_str = f"{variable}={{value}}\n"
+    for line in lines:
+        result = parse.search(search_str, line)
+        if result:
+            return result.named["value"]
+
+    return ""
+
+
+def parse_mk_file(mk_file):
+    with open(mk_file, "r") as mk_f:
+        lines = mk_f.readlines()
+        core_name = parse_makefile_variable(lines, "NAME")
+        core_version = parse_makefile_variable(lines, "VERSION")
+        return [core_name, core_version]
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Get core version from info.mk file")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-i", "--info", action="store_true", help="print version to stdout"
+    )
+    group.add_argument(
+        "-t", "--latex", action="store_true", help="generate latex version file"
+    )
+    group.add_argument(
+        "-v", "--verilog", action="store_true", help="generate verilog version file"
+    )
+    parser.add_argument(
+        "path",
+        help="""path to *.mk file with NAME and VERSION.
+            Assume info.mk if path is a directory""",
+    )
 
-    #process command line arguments
-    if len(sys.argv) < 3 or len(sys.argv) > 4:
-        print_usage()
+    args = parser.parse_args()
 
-    no_out_files = 0
-    name_idx = 1;
+    # makefile file name
+    if os.path.isfile(args.path):
+        mk_file = args.path
+    else:
+        mk_file = f"{args.path}/info.mk"
 
-    if len(sys.argv) == 4:
-        if sys.argv[1] == '-n':
-            no_out_files = 1
-            name_idx = 2
-        else:
-            print_usage()
-            
-    core_name = sys.argv[name_idx]
-    core_version = sys.argv[name_idx+1]
-
+    # get core name and version from file
+    [core_name, core_version] = parse_mk_file(mk_file)
     core_version_str = f"V{int(core_version[:2])}.{int(core_version[2:])}"
-    print(core_version_str)
 
-    if no_out_files == 0:
-        with open("./{}_version.vh".format(core_name), "w+") as f:
-            f.write("`define VERSION {}".format(core_version))
-        with open("./{}_version.tex".format(core_name), "w+") as h:
-            h.write(core_version_str)
+    # functionality: [tex file, vh file, stdout print]
+    if args.latex:
+        tex_file = f"./{core_name}_version.tex"
+        with open(tex_file, "w+") as tex_f:
+            tex_f.write(core_version_str)
+    elif args.verilog:
+        vh_file = f"./{core_name}_version.vh"
+        with open(vh_file, "w+") as vh_f:
+            vh_f.write(f"`define VERSION {core_version}")
+    else:
+        print(core_version_str)
