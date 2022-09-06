@@ -121,7 +121,7 @@ def header_parse(vh, defines):
 
         try:
             value = eval(eval_str)
-        except (ValueError, SyntaxError):
+        except (ValueError, SyntaxError, NameError):
             # eval_str has undefined parameters: use as is
             value = eval_str
 

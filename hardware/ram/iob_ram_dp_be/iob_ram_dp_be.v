@@ -30,7 +30,7 @@ module iob_ram_dp_be
    localparam COL_W = 8;
    localparam NUM_COL = DATA_W/COL_W;
 
-`ifdef IS_CYCLONEV
+`ifdef IOB_MEM_NO_READ_ON_WRITE
    localparam file_suffix = {"7","6","5","4","3","2","1","0"};
 
    genvar                    i;
@@ -61,7 +61,7 @@ module iob_ram_dp_be
             );
       end
    endgenerate
-`else // !IS_CYCLONEV
+`else // !IOB_MEM_NO_READ_ON_WRITE
    // this allow ISE 14.7 to work; do not remove
    localparam mem_init_file_int = {HEXFILE, ".hex"};
 

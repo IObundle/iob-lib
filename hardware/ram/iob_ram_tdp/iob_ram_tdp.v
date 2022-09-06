@@ -40,7 +40,7 @@ module iob_ram_tdp
       if (enA)
         if (weA)
 	        ram[addrA] <= dinA;
-      `ifdef IS_CYCLONEV
+      `ifdef IOB_MEM_NO_READ_ON_WRITE
         else
       `endif
       doutA <= ram[addrA];
@@ -51,7 +51,7 @@ module iob_ram_tdp
       if (enB)
         if (weB)
 	        ram[addrB] <= dinB;
-      `ifdef IS_CYCLONEV
+      `ifdef IOB_MEM_NO_READ_ON_WRITE
         else
       `endif
 	    doutB <= ram[addrB];
