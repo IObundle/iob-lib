@@ -105,7 +105,9 @@ ifneq ($(wildcard $(EMB_DIR)/embedded.mk),)
 endif
 endif
 ifneq ($(SETUP_SIM),0)
+ifneq ($(wildcard $(SIM_DIR)/*.expected),)
 	cp -u $(SIM_DIR)/*.expected $(BUILD_SIM_DIR)
+endif
 ifneq ($(wildcard $(SIM_DIR)/simulation.mk),)
 	cp -u $(SIM_DIR)/simulation.mk $(BUILD_SIM_DIR)
 endif
@@ -117,7 +119,9 @@ ifneq ($(wildcard $(SIM_DIR)/*.v),)
 endif
 endif
 ifneq ($(SETUP_FPGA),0)
+ifneq ($(wildcard $(FPGA_DIR)/*.expected),)
 	cp -u $(FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
+endif
 ifneq ($(wildcard $(FPGA_DIR)/*.mk),)
 	cp -u $(FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
 endif
@@ -129,7 +133,9 @@ ifneq ($(wildcard $(FPGA_DIR)/*.xdc),)
 endif
 endif
 ifneq ($(SETUP_DOC),0)
+ifneq ($(wildcard $(DOC_DIR)/*.expected),)
 	cp -u $(DOC_DIR)/*.expected $(BUILD_DOC_DIR)
+endif
 ifneq ($(wildcard $(DOC_DIR)/*.mk),)
 	cp -u $(DOC_DIR)/*.mk $(BUILD_DOC_DIR)
 endif
