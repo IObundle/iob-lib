@@ -15,12 +15,6 @@ include config_setup.mk
 LIB_PYTHON_DIR=software/python
 
 
-# enable all flows in setup by default
-SETUP_SW ?=1
-SETUP_SIM ?=1
-SETUP_FPGA ?=1
-SETUP_DOC ?=1
-
 # core internal paths
 SW_DIR=software
 EMB_DIR=$(SW_DIR)/embedded
@@ -53,24 +47,73 @@ BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
 all: setup
 
+EXCLUDE_BUILD+=--exclude sw
+EXCLUDE_BUILD+=--exclude hw/sim
+EXCLUDE_BUILD+=--exclude hw/fpga
+EXCLUDE_BUILD+=--exclude doc
+
 # create build directory
 $(BUILD_DIR):
-	cp -r -u $(LIB_DIR)/build $@
-ifeq ($(SETUP_SW),0)
-	rm -rf $(BUILD_SW_DIR)
+	rsync -a $(LIB_DIR)/build/* $@ $(EXCLUDE_BUILD)
+ifneq ($(wildcard software/.),)
+	cp -r $(LIB_DIR)/build/sw $(BUILD_SW_DIR)
+ifneq ($(wildcard $(PC_DIR)/*.expected),)
+	cp -u $(PC_DIR)/*.expected $(BUILD_SW_PC_DIR)
 endif
-ifeq ($(SETUP_SIM),0)
-	rm -rf $(BUILD_SIM_DIR)
+ifneq ($(wildcard $(PC_DIR)/pc-emul.mk),)
+	cp -u $(PC_DIR)/pc-emul.mk $(BUILD_SW_PC_DIR)
 endif
-ifeq ($(SETUP_FPGA),0)
-	rm -rf $(BUILD_FPGA_DIR)
+ifneq ($(wildcard $(EMB_DIR)/embedded.mk),)
+	cp -u $(EMB_DIR)/embedded.mk $(BUILD_SW_EMB_DIR)
 endif
-ifeq ($(SETUP_DOC),0)
-	rm -rf $(BUILD_DOC_DIR)
-else
+endif
+ifneq ($(wildcard hardware/simulation/.),)
+	cp -r $(LIB_DIR)/build/hw/sim $(BUILD_SIM_DIR)
+ifneq ($(wildcard $(SIM_DIR)/*.expected),)
+	cp -u $(SIM_DIR)/*.expected $(BUILD_SIM_DIR)
+endif
+ifneq ($(wildcard $(SIM_DIR)/simulation.mk),)
+	cp -u $(SIM_DIR)/simulation.mk $(BUILD_SIM_DIR)
+endif
+ifneq ($(wildcard $(SIM_DIR)/*.cpp),)
+	cp -u $(SIM_DIR)/*.cpp $(BUILD_SIM_DIR)
+endif
+ifneq ($(wildcard $(SIM_DIR)/*.v),)
+	cp -u $(SIM_DIR)/*.v $(BUILD_SIM_DIR)
+endif
+endif
+ifneq ($(wildcard hardware/fpga/.),)
+	cp -r $(LIB_DIR)/build/hw/fpga $(BUILD_FPGA_DIR)
+ifneq ($(wildcard $(FPGA_DIR)/*.expected),)
+	cp -u $(FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
+endif
+ifneq ($(wildcard $(FPGA_DIR)/*.mk),)
+	cp -u $(FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
+endif
+ifneq ($(wildcard $(FPGA_DIR)/*.sdc),)
+	cp -u $(FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR)
+endif
+ifneq ($(wildcard $(FPGA_DIR)/*.xdc),)
+	cp -u $(FPGA_DIR)/*.xdc $(BUILD_FPGA_DIR)
+endif
+endif
+ifneq ($(wildcard document/.),)
+	cp -r $(LIB_DIR)/build/doc $(BUILD_DOC_DIR)
 ifneq ($(wildcard mkregs.conf),)
 	cp -u mkregs.conf $(BUILD_TSRC_DIR)
 endif
+ifneq ($(wildcard $(DOC_DIR)/*.expected),)
+	cp -u $(DOC_DIR)/*.expected $(BUILD_DOC_DIR)
+endif
+ifneq ($(wildcard $(DOC_DIR)/*.mk),)
+	cp -u $(DOC_DIR)/*.mk $(BUILD_DOC_DIR)
+endif
+ifneq ($(wildcard $(DOC_DIR)/*.tex),)
+	cp -f $(DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
+endif
+	cp -u $(DOC_DIR)/figures/* $(BUILD_FIG_DIR)
+	cp -u $(LIB_DIR)/software/python/verilog2tex.py $(BUILD_SW_PYTHON_DIR)
+	cp -u $(LIB_DIR)/software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
 endif
 	cp -u info.mk $(BUILD_DIR)
 	cp -u config_setup.mk $(BUILD_DIR)
@@ -93,53 +136,6 @@ include $(DOC_DIR)/doc_setup.mk
 endif
 
 setup: $(BUILD_DIR) $(SRC)
-ifneq ($(SETUP_SW),0)
-ifneq ($(wildcard $(PC_DIR)/*.expected),)
-	cp -u $(PC_DIR)/*.expected $(BUILD_SW_PC_DIR)
-endif
-ifneq ($(wildcard $(PC_DIR)/pc-emul.mk),)
-	cp -u $(PC_DIR)/pc-emul.mk $(BUILD_SW_PC_DIR)
-endif
-ifneq ($(wildcard $(EMB_DIR)/embedded.mk),)
-	cp -u $(EMB_DIR)/embedded.mk $(BUILD_SW_EMB_DIR)
-endif
-endif
-ifneq ($(SETUP_SIM),0)
-	cp -u $(SIM_DIR)/*.expected $(BUILD_SIM_DIR)
-ifneq ($(wildcard $(SIM_DIR)/simulation.mk),)
-	cp -u $(SIM_DIR)/simulation.mk $(BUILD_SIM_DIR)
-endif
-ifneq ($(wildcard $(SIM_DIR)/*.cpp),)
-	cp -u $(SIM_DIR)/*.cpp $(BUILD_SIM_DIR)
-endif
-ifneq ($(wildcard $(SIM_DIR)/*.v),)
-	cp -u $(SIM_DIR)/*.v $(BUILD_SIM_DIR)
-endif
-endif
-ifneq ($(SETUP_FPGA),0)
-	cp -u $(FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
-ifneq ($(wildcard $(FPGA_DIR)/*.mk),)
-	cp -u $(FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
-endif
-ifneq ($(wildcard $(FPGA_DIR)/*.sdc),)
-	cp -u $(FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR)
-endif
-ifneq ($(wildcard $(FPGA_DIR)/*.xdc),)
-	cp -u $(FPGA_DIR)/*.xdc $(BUILD_FPGA_DIR)
-endif
-endif
-ifneq ($(SETUP_DOC),0)
-	cp -u $(DOC_DIR)/*.expected $(BUILD_DOC_DIR)
-ifneq ($(wildcard $(DOC_DIR)/*.mk),)
-	cp -u $(DOC_DIR)/*.mk $(BUILD_DOC_DIR)
-endif
-ifneq ($(wildcard $(DOC_DIR)/*.tex),)
-	cp -f $(DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
-endif
-	cp -u $(DOC_DIR)/figures/* $(BUILD_FIG_DIR)
-	cp -u $(LIB_DIR)/software/python/verilog2tex.py $(BUILD_SW_PYTHON_DIR)
-	cp -u $(LIB_DIR)/software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
-endif
 
 clean:
 	@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi

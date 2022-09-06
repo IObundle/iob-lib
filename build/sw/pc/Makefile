@@ -43,9 +43,8 @@ run: build
 test: clean $(TEST_LIST)
 	diff test.log test.expected
 
-ifneq ($(SETUP_SW),0)
-CLEAN_LIST+=kill-cnsl
-endif
+# TODO add to iob-soc custom clean list
+# CLEAN_LIST+=kill-cnsl
 
 clean: $(CLEAN_LIST)
 	@rm -rf fw_emul test.log soc2cnsl cnsl2soc
