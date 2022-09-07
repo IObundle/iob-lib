@@ -26,7 +26,7 @@ FPGA_DIR=$(HW_DIR)/fpga
 DOC_DIR=document
 
 # FPGA compiler
-FPGA_TOOL=$(shell find $(LIB_DIR)/hardware/boards -name $(BOARD) | cut -d"/" -f7)
+FPGA_TOOL=$(shell find $(LIB_DIR)/hardware/boards -name $(BOARD) | cut -d"/" -f5)
 
 # establish build dir paths
 VERSION_STR := $(shell $(LIB_DIR)/software/python/version.py -i .)
@@ -93,25 +93,13 @@ endif
 #--------------------- FPGA-----------------------
 ifneq ($(wildcard hardware/fpga/.),)
 	cp -r $(LIB_DIR)/build/hw/fpga $(BUILD_FPGA_DIR)
-	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/* $(BUILD_FPGA_DIR)
-ifneq ($(wildcard $(FPGA_DIR)/hardware/fpga/boards/$(BOARD)*.v),)
-	cp -r $(FPGA_DIR)/hardware/fpga/boards/$(BOARD)/*.v $(BUILD_FPGA_DIR)
-endif
-ifneq ($(wildcard $(FPGA_DIR)/hardware/fpga/boards/$(BOARD)*.tcl),)
-	cp -r $(FPGA_DIR)/hardware/fpga/boards/$(BOARD)/*.tcl $(BUILD_FPGA_DIR)
-endif
-ifneq ($(wildcard $(FPGA_DIR)/*.expected),)
-	cp -u $(FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
-endif
+	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(FPGA_TOOL).mk $(BUILD_FPGA_DIR)/fpga_tool.mk
+	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(FPGA_TOOL).tcl $(BUILD_FPGA_DIR)/fpga_tool.tcl
+	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(BOARD)/* $(BUILD_FPGA_DIR)
 ifneq ($(wildcard $(FPGA_DIR)/fpga.mk),)
 	cp -u $(FPGA_DIR)/fpga.mk $(BUILD_FPGA_DIR)
 endif
-ifneq ($(wildcard $(FPGA_DIR)/*.sdc),)
-	cp -u $(FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR)
-endif
-ifneq ($(wildcard $(FPGA_DIR)/*.xdc),)
-	cp -u $(FPGA_DIR)/*.xdc $(BUILD_FPGA_DIR)
-endif
+	cp -u $(FPGA_DIR)/$(FPGA_TOOL)/$(BOARD)/* $(BUILD_FPGA_DIR)
 endif
 #--------------------- DOCUMENT-----------------------
 ifneq ($(wildcard document/.),)
@@ -163,6 +151,8 @@ debug: $(BUILD_DIR) $(VHDR)
 	@echo $(BUILD_VSRC_DIR)
 	@echo $(BUILD_SW_SRC_DIR)
 	@echo $(SRC)
+	@echo $(SIMULATOR)
+	@echo $(BOARD)
 	@echo $(FPGA_TOOL)
 
 .PHONY: all setup clean debug

@@ -3,21 +3,20 @@ set NAME [lindex $argv 0]
 set TOP [lindex $argv 1]
 set VSRC [lindex $argv 2]
 set QIP [lindex $argv 3]
+set IS_FPGA [lindex $argv 4]
 
-set project_name $NAME
-
-project_new $TOP -overwrite
+project_new $NAME -overwrite
 
 
 #------ Create or open project ------#
-if [project_exists $project_name] {
+if [project_exists $NAME] {
 
     #------ Project already exists -- open project -------#
-    project_open $project_name -force
+    project_open $NAME -force
 } else {
 
     #------ Project does not exist -- create new project ------#
-    project_new $project_name
+    project_new $NAME
 }
 
 set_global_assignment -name TOP_LEVEL_ENTITY $TOP
@@ -25,8 +24,11 @@ set_global_assignment -name TOP_LEVEL_ENTITY $TOP
 #device data
 source device.tcl
 
-#user io data 
-source io.tcl
+#user io data
+
+if [ file exists "io.tcl" ] {
+    source io.tcl
+}
 
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
@@ -50,7 +52,7 @@ foreach file [split $VSRC \ ] {
 }
 
 
-if {$TARGET == "IP"} {
+if {$IS_FPGA != "1"} {
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
@@ -84,30 +86,31 @@ set_global_assignment -name SEED 23
 
 export_assignments
 
-if [catch {qexec "[file join $::quartus(binpath) quartus_map] $project_name"} result] {
+if [catch {qexec "[file join $::quartus(binpath) quartus_map] $NAME"} result] {
     qexit -error
 }
 
-if {file exists "postmap.tcl"} {
+if [file exists "postmap.tcl"] {
  source "postmap.tcl"
 }
 
-if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $project_name"} result] {
+if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $NAME"} result] {
     qexit -error
 }
 
-if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $project_name"} result] {
+if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $NAME"} result] {
     qexit -error
 }
 
 
-if {$TARGET == "IP"} {
-    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $project_name --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
+if {$IS_FPGA != "1"} {
+    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
         qexit -error
+    } else {
+        if [catch {qexec "[file join $::quartus(binpath) quartus_asm] $NAME"} result] {
+            qexit -error
+        }
     }
-    else {
-if [catch {qexec "[file join $::quartus(binpath) quartus_asm] $project_name"} result] {
-    qexit -error
-    }
+}
 
 project_close
