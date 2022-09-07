@@ -87,8 +87,8 @@ ifneq ($(wildcard hardware/fpga/.),)
 ifneq ($(wildcard $(FPGA_DIR)/*.expected),)
 	cp -u $(FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
 endif
-ifneq ($(wildcard $(FPGA_DIR)/*.mk),)
-	cp -u $(FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
+ifneq ($(wildcard $(FPGA_DIR)/fpga.mk),)
+	cp -u $(FPGA_DIR)/fpga.mk $(BUILD_FPGA_DIR)
 endif
 ifneq ($(wildcard $(FPGA_DIR)/*.sdc),)
 	cp -u $(FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR)
@@ -116,7 +116,6 @@ endif
 	cp -u $(LIB_DIR)/software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
 endif
 	cp -u info.mk $(BUILD_DIR)
-	cp -u config_setup.mk $(BUILD_DIR)
 ifneq ($(wildcard config.mk),)
 	cp -u config.mk $(BUILD_DIR)
 endif
