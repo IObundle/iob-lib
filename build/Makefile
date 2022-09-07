@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 export
-unexport CLEAN_LIST
+unexport TEST_LIST CLEAN_LIST
 
 # 
 # EMBEDDED SOFTWARE
@@ -100,11 +100,11 @@ endif
 #
 # TEST
 #
-TEST_TYPE_LIST=sim-test
-TEST_TYPE_LIST=fpga-test
-TEST_TYPE_LIST=doc-test
+TEST_LIST+=sim-test
+TEST_LIST+=fpga-test
+TEST_LIST+=doc-test
 
-test: $(TEST_TYPE_LIST)
+test: $(TEST_LIST)
 
 
 #
@@ -114,9 +114,10 @@ test: $(TEST_TYPE_LIST)
 clean: $(CLEAN_LIST)
 
 
-.PHONY: fw-build fw-clean \
-	pc-emul-build pc-emul-run pc-emul-test pc-emul-clean \
-	sim-build sim-run sim-test sim-debug sim-clean \
-	fpga-build fpga-test fpga-clean fpga-debug \
-	doc-build doc-test doc-clean doc-debug \
-	test clean
+.PHONY: fw-build \
+	pc-emul-build pc-emul-run \
+	sim-build sim-run sim-debug \
+	fpga-build fpga-debug \
+	doc-build doc-debug \
+	test clean \
+	$(TEST_LIST) $(CLEAN_LIST)
