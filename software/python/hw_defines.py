@@ -12,7 +12,7 @@ import pathlib
 def usage():
     print("Usage: ./hw_defines.py [output] {DEFINES}")
     print("\t[output]: output filename")
-    print("\t{DEFINES}: list of defines with the format -DMACRO=VALUE")
+    print("\t{DEFINES}: list of defines with the format MACRO=VALUE")
     quit()
 
 
