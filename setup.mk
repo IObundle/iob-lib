@@ -57,7 +57,12 @@ EXCLUDE_BUILD+=--exclude doc
 # create build directory
 $(BUILD_DIR):
 	rsync -a $(LIB_DIR)/build/* $@ $(EXCLUDE_BUILD)
+	cp -u info.mk $(BUILD_DIR)
+ifneq ($(wildcard config.mk),)
+	cp -u config.mk $(BUILD_DIR)
+endif
 ifneq ($(wildcard software/.),)
+#--------------------- PC-EMUL-----------------------
 	cp -r $(LIB_DIR)/build/sw $(BUILD_SW_DIR)
 ifneq ($(wildcard $(PC_DIR)/*.expected),)
 	cp -u $(PC_DIR)/*.expected $(BUILD_SW_PC_DIR)
@@ -69,6 +74,7 @@ ifneq ($(wildcard $(EMB_DIR)/embedded.mk),)
 	cp -u $(EMB_DIR)/embedded.mk $(BUILD_SW_EMB_DIR)
 endif
 endif
+#--------------------- SIMULATION-----------------------
 ifneq ($(wildcard hardware/simulation/.),)
 	cp -r $(LIB_DIR)/build/hw/sim $(BUILD_SIM_DIR)
 ifneq ($(wildcard $(SIM_DIR)/*.expected),)
@@ -84,6 +90,7 @@ ifneq ($(wildcard $(SIM_DIR)/*.v),)
 	cp -u $(SIM_DIR)/*.v $(BUILD_SIM_DIR)
 endif
 endif
+#--------------------- FPGA-----------------------
 ifneq ($(wildcard hardware/fpga/.),)
 	cp -r $(LIB_DIR)/build/hw/fpga $(BUILD_FPGA_DIR)
 	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/* $(BUILD_FPGA_DIR)
@@ -106,6 +113,7 @@ ifneq ($(wildcard $(FPGA_DIR)/*.xdc),)
 	cp -u $(FPGA_DIR)/*.xdc $(BUILD_FPGA_DIR)
 endif
 endif
+#--------------------- DOCUMENT-----------------------
 ifneq ($(wildcard document/.),)
 	cp -r $(LIB_DIR)/build/doc $(BUILD_DOC_DIR)
 ifneq ($(wildcard mkregs.conf),)
@@ -123,10 +131,6 @@ endif
 	cp -u $(DOC_DIR)/figures/* $(BUILD_FIG_DIR)
 	cp -u $(LIB_DIR)/software/python/verilog2tex.py $(BUILD_SW_PYTHON_DIR)
 	cp -u $(LIB_DIR)/software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
-endif
-	cp -u info.mk $(BUILD_DIR)
-ifneq ($(wildcard config.mk),)
-	cp -u config.mk $(BUILD_DIR)
 endif
 
 # import core hardware and simulation files
@@ -159,5 +163,6 @@ debug: $(BUILD_DIR) $(VHDR)
 	@echo $(BUILD_VSRC_DIR)
 	@echo $(BUILD_SW_SRC_DIR)
 	@echo $(SRC)
+	@echo $(FPGA_TOOL)
 
 .PHONY: all setup clean debug
