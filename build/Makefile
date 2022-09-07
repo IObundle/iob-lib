@@ -107,7 +107,22 @@ test: $(TEST_TYPE_LIST)
 # CLEAN
 #
 
-clean: fw-clean pc-emul-clean sim-clean fpga-clean doc-clean
+clean:
+ifneq ($(wildcard $(EMB_DIR)/.),)
+	make fw-clean
+endif
+ifneq ($(wildcard $(PC_DIR)/.),)
+	make pc-emul-clean
+endif
+ifneq ($(wildcard $(SIM_DIR)/.),)
+	make sim-clean
+endif
+ifneq ($(wildcard $(FPGA_DIR)/.),)
+	make fpga-clean
+endif
+ifneq ($(wildcard $(DOC_DIR)/.),)
+	make doc-clean
+endif
 
 
 .PHONY:	sim-build sim-run sim-test sim-debug sim-clean \
