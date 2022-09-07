@@ -25,6 +25,8 @@ SIM_DIR=$(HW_DIR)/simulation
 FPGA_DIR=$(HW_DIR)/fpga
 DOC_DIR=document
 
+# FPGA compiler
+FPGA_TOOL=$(shell find $(LIB_DIR)/hardware/boards -name $(BOARD) | cut -d"/" -f7)
 
 # establish build dir paths
 VERSION_STR := $(shell $(LIB_DIR)/software/python/version.py -i .)
@@ -84,6 +86,13 @@ endif
 endif
 ifneq ($(wildcard hardware/fpga/.),)
 	cp -r $(LIB_DIR)/build/hw/fpga $(BUILD_FPGA_DIR)
+	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/* $(BUILD_FPGA_DIR)
+ifneq ($(wildcard $(FPGA_DIR)/hardware/fpga/boards/$(BOARD)*.v),)
+	cp -r $(FPGA_DIR)/hardware/fpga/boards/$(BOARD)/*.v $(BUILD_FPGA_DIR)
+endif
+ifneq ($(wildcard $(FPGA_DIR)/hardware/fpga/boards/$(BOARD)*.tcl),)
+	cp -r $(FPGA_DIR)/hardware/fpga/boards/$(BOARD)/*.tcl $(BUILD_FPGA_DIR)
+endif
 ifneq ($(wildcard $(FPGA_DIR)/*.expected),)
 	cp -u $(FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
 endif
@@ -130,7 +139,7 @@ endif
 include $(SW_DIR)/software.mk
 
 # import document files
-ifneq ($(SETUP_DOC),0)
+ifneq ($(wildcard document/doc_setup.mk),)
 include $(DOC_DIR)/doc_setup.mk
 endif
 

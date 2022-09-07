@@ -21,11 +21,8 @@ REMOTE_BUILD_DIR=sandbox/$(NAME)
 VHDR=$(wildcard ../vsrc/*.vh)
 VSRC+=$(wildcard ../vsrc/*.v)
 
-#select FPGA part and family
-#default FPGA_FAMILY
-FPGA_FAMILY?=CYCLONEV-GT
-ifeq ($(FPGA_FAMILY),XCKU)
-FPGA_PART:=xcku040-fbva676-1-c
+#select FPGA compiler
+FPGA_TOOL?=quartus
 include vivado.mk
 else
 #default part
@@ -57,7 +54,7 @@ else
 	rsync -avz --delete --force --exclude .git $(ROOT_DIR) $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
 	bash -c "trap 'make queue-out-remote' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hardware/fpga/$(TOOL)/$(BOARD) $@ INIT_MEM=$(INIT_MEM) FORCE=$(FORCE) TEST_LOG=\"$(TEST_LOG)\"'"
 ifneq ($(TEST_LOG),)
-	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)/hardware/fpga/$(TOOL)/$(BOARD)/test.log .
+	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)/hardware/fpga/$(FPGA_TOOL)/test.log .
 endif
 endif
 endif
@@ -75,7 +72,7 @@ ifneq ($(FPGA_SERVER),)
 ifneq ($(BOARD_SERVER),)
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync -avz --delete --force --exclude .git $(ROOT_DIR) $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hardware/fpga/$(TOOL)/$(BOARD) clean'
+	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hardware/fpga/$(FPGA_TOOL) clean'
 endif
 endif
 
