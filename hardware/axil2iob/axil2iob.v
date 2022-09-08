@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
 
-`include "axi.vh"
 
 module axil2iob
   #(
