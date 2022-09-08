@@ -1,7 +1,6 @@
 `timescale 1ns / 1ps
 
 `include "iob_lib.vh"
-`include "axi.vh"
 
 module iob2axi
   #(
