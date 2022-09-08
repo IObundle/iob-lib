@@ -5,9 +5,6 @@ SHELL:=/bin/bash
 
 # include core basic info
 include ../../info.mk
-ifneq ($(wildcard ../../config.mk),)
-include ../../config.mk
-endif
 
 REMOTE_BUILD_DIR=sandbox/$(NAME)
 
@@ -52,7 +49,7 @@ endif
 
 clean:
 	@find . -maxdepth 1 -type d -not \( -name '.' \) -exec rm -rf {} \;
-	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "*.expected" -o -name "*.tcl" -o -name "*.sdc" -o -name "*.xdc" \) -delete
+	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "*.expected" -o -name "*.tcl" -o -name "*.sdc" -o -name "*.xdc" -o -name test.log \) -delete
 ifneq ($(FPGA_SERVER),)
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/hw/fpga/Makefile ]; then make -C $(REMOTE_BUILD_DIR)/hw/fpga clean; fi'
 ifneq ($(BOARD_SERVER),)

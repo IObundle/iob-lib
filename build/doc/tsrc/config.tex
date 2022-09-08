@@ -1,25 +1,19 @@
 \ifdefined\SM
 
 \subsubsection{Macros}
+\label{sec:cm}
 
 The configuration macros apply to all instances of the core, and are listed in
 Table~\ref{tab:sm}.
 
-\begin{table}[h]
-  \centering
-    \begin{tabularx}{\textwidth}{ | c | c | c | c | X | }
-    \hline
+\begin{longtable}{|l|c|c|c|p{9cm}|}
+    \caption{Configuration Macros}\\ \hline
     \rowcolor{iob-green}
-    {\bf Parameter} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description} \\\hline
-
-    \input{sm_tab}
-
-    \end{tabularx}
-  \caption{Configuration Macros}
-  \label{tab:sm}
-\end{table}
-
-\noindent
+    {\bf Macro} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description}
+    \\ \hline \hline
+    \input{sp_tab}
+    \label{tab:sp}
+\end{longtable}
 
 \fi
 
@@ -29,17 +23,15 @@ Table~\ref{tab:sm}.
 \label{sec:cp}
 
 The configuration parameters of the core are presented in
-Table~\ref{tab:sp}. Configuration parameters can vary from instance to instance. \\
+Table~\ref{tab:sp}. Configuration parameters can vary from instance to instance.
 
-\begin{longtable}{|l|c|c|c|p{9cm}|}
-    \hline
+\begin{longtable}{|l|c|c|c|P{9cm}|}
+    \caption{Configuration Parameters}\\ \hline
     \rowcolor{iob-green}
-    \multicolumn{1}{|c}{\bf Parameter} & \multicolumn{1}{|c|}{\bf Min} & \multicolumn{1}{c|}{\bf Typ} & \multicolumn{1}{c|}{\bf Max} & \multicolumn{1}{c|}{\bf Description}  \\ \hline \hline
-
+    {\bf Parameter} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description}
+    \\ \hline \hline
     \input{sp_tab}
-    
-\caption{Configuration Parameters}
-  \label{tab:sp}
+    \label{tab:sp}
 \end{longtable}
 
 \fi

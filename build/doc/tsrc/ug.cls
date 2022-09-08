@@ -16,10 +16,25 @@
 \RequirePackage{lipsum}
 \RequirePackage{catchfile}
 \RequirePackage[all]{nowidow}
-\widowpenalty10000
-\clubpenalty10000
 \RequirePackage{enumerate}
 \RequirePackage{enumitem}
+\RequirePackage{longtable}
+
+\RequirePackage{float}
+\RequirePackage{color, colortbl}
+\RequirePackage[section]{placeins}
+\RequirePackage{mathtools}
+\RequirePackage{amsthm}
+\RequirePackage[OT1]{fontenc} 
+\RequirePackage{array}
+\RequirePackage[binary-units=true]{siunitx}
+\RequirePackage[all]{nowidow}
+\RequirePackage{lscape}
+
+\widowpenalty10000
+\clubpenalty10000
+
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 
 \geometry{
  a4paper,
@@ -57,4 +72,6 @@
 \newcommand{\getenv}[2][]{%
   \CatchFileEdef{\temp}{"|kpsewhich --var-value #2"}{\endlinechar=-1}%
   \if\relax\detokenize{#1}\relax\temp\else\let#1\temp\fi}
+
+\graphicspath{ {./figures/} }
 

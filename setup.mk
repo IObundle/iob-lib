@@ -9,7 +9,6 @@ export
 LIB_DIR=submodules/LIB
 
 include info.mk
-include config_setup.mk
 
 # lib paths
 LIB_PYTHON_DIR=software/python
@@ -58,9 +57,6 @@ EXCLUDE_BUILD+=--exclude doc
 $(BUILD_DIR):
 	rsync -a $(LIB_DIR)/build/* $@ $(EXCLUDE_BUILD)
 	cp -u info.mk $(BUILD_DIR)
-ifneq ($(wildcard config.mk),)
-	cp -u config.mk $(BUILD_DIR)
-endif
 ifneq ($(wildcard software/.),)
 #--------------------- PC-EMUL-----------------------
 	cp -r $(LIB_DIR)/build/sw $(BUILD_SW_DIR)
@@ -105,6 +101,7 @@ endif
 #--------------------- DOCUMENT-----------------------
 ifneq ($(wildcard document/.),)
 	cp -r $(LIB_DIR)/build/doc $(BUILD_DOC_DIR)
+	git rev-parse --short HEAD > $(BUILD_TSRC_DIR)/shortHash.tex
 ifneq ($(wildcard mkregs.conf),)
 	cp -u mkregs.conf $(BUILD_TSRC_DIR)
 endif

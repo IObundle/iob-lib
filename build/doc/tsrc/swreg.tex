@@ -1,13 +1,9 @@
 %replace swreg_tab by the name of the table that has been generated for your ip core
 
 \begin{longtable}{|l|c|c|r|P{0.8cm}|p{5.5cm}|}
-    \hline
+    \caption{Software Accessible Registers} \\ \hline
     \rowcolor{iob-green}
-    
     {\bf Name} & {\bf R/W} & {\bf Addr} & {\bf Bits} & {\bf Initial Value} & {\bf Description} \\ \hline
-
-    \input{swreg_tab}
-    
-  \caption{Software Accessible Registers}
-  \label{tab:sw_tx}
+    \input{_swreg_tab}
+    \label{tab:sw_tx}
 \end{longtable}

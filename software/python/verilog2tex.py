@@ -226,7 +226,9 @@ def swreg_parse (vh, defines) :
                 table = [] #clear table
             table_found = 1
             flds = line.split()
-            table_name = flds[1]
+            table_name = ''
+            if len(flds) > 1:
+                table_name = flds[1]
             continue
 
         swreg_flds = []

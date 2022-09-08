@@ -5,9 +5,6 @@
 
 BUILD_DIR:=../..
 include $(BUILD_DIR)/info.mk
-ifneq ($(wildcard $(BUILD_DIR)/config.mk),)
-include $(BUILD_DIR)/config.mk
-endif
 
 # compiler flags
 CFLAGS=-Os -std=gnu99 -Wl,--strip-debug

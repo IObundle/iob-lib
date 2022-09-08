@@ -1,15 +1,11 @@
 # (c) 2022-Present IObundle, Lda, all rights reserved
 #
-# This makefile is used at build-time in $(BUILD_DIR)/hw/sim/Makefile
+# This makefile is used at build-time
 #
 
 SHELL:=/bin/bash
 
-BUILD_DIR:=../..
-include $(BUILD_DIR)/info.mk
-ifneq ($(wildcard $(BUILD_DIR)/config.mk),)
-include $(BUILD_DIR)/config.mk
-endif
+include ../../info.mk
 
 REMOTE_BUILD_DIR=sandbox/$(NAME)
 

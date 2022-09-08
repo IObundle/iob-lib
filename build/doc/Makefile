@@ -6,10 +6,7 @@
 SHELL = /bin/bash
 
 # include core basic info
-include ../../info.mk
-ifneq ($(wildcard ../../config.mk),)
-include ../../config.mk
-endif
+include ../info.mk
 
 #include local doc segment
 ifneq ($(wildcard document.mk),)
@@ -49,7 +46,6 @@ pbtop.tex: texfiles
 
 #build user guide document type
 ug.pdf: results ug_figs ugtop.tex
-	git rev-parse --short HEAD > shortHash.tex
 	pdflatex -jobname ug ugtop.tex
 	if [ -f *.bib ]; then bibtex ug; fi
 	pdflatex -jobname ug ugtop.tex
