@@ -93,11 +93,11 @@ texfiles:
 results:
 ifeq ($(RESULTS), 1)
 ifneq ($(INT_FAMILY),)
-	make  -C ../hw/fpga build FPGA_FAMILY=$(INT_FAMILY) TOP_MODULE=$(TOP_MODULE)
+	make  -C ../hw/fpga build TOP_MODULE=$(TOP_MODULE)
 	cp ../hw/fpga/quartus.tex .
 endif
 ifneq ($(XIL_FAMILY),)
-	make  -C ../hw/fpga build FPGA_FAMILY=$(XIL_FAMILY) TOP_MODULE=$(TOP_MODULE)
+	make  -C ../hw/fpga build TOP_MODULE=$(TOP_MODULE)
 	cp ../hw/fpga/vivado.tex .
 endif
 ifneq ($(ASIC_NODE),)

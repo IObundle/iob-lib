@@ -95,6 +95,7 @@ ifneq ($(wildcard hardware/fpga/.),)
 	cp -r $(LIB_DIR)/build/hw/fpga $(BUILD_FPGA_DIR)
 	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(FPGA_TOOL).mk $(BUILD_FPGA_DIR)/fpga_tool.mk
 	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(FPGA_TOOL).tcl $(BUILD_FPGA_DIR)/fpga_tool.tcl
+	cp -r $(LIB_DIR)/software/bash/$(FPGA_TOOL)2tex.sh $(BUILD_SW_DIR)/bash
 	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(BOARD)/* $(BUILD_FPGA_DIR)
 ifneq ($(wildcard $(FPGA_DIR)/fpga.mk),)
 	cp -u $(FPGA_DIR)/fpga.mk $(BUILD_FPGA_DIR)

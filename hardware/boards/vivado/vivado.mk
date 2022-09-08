@@ -14,4 +14,4 @@ export RDI_VERBOSE = False
 
 $(FPGA_OBJ): $(VSRC) $(VHDR) $(wildcard *.sdc)
 	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mode batch -source vivado.tcl -tclargs $(NAME) $(TOP_MODULE) "$(VSRC)" $(FPGA_PART)
-	LOG=vivado.log ../../sw/vivado2tex.sh
+	LOG=vivado.log ../../sw/bash/vivado2tex.sh
