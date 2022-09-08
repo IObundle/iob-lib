@@ -1,5 +1,6 @@
 SHELL:=/bin/bash
 export
+unexport TEST_LIST CLEAN_LIST
 
 # 
 # EMBEDDED SOFTWARE
@@ -9,6 +10,7 @@ ifneq ($(wildcard $(EMB_DIR)/.),)
 fw-build:
 	make -C $(EMB_DIR) build-all
 
+CLEAN_LIST+=fw-clean
 fw-clean:
 	make -C $(EMB_DIR) clean-all
 endif
@@ -27,6 +29,7 @@ pc-emul-run:
 pc-emul-test:
 	make -C $(PC_DIR) test
 
+CLEAN_LIST+=pc-emul-clean
 pc-emul-clean:
 	make -C $(PC_DIR) clean
 endif
@@ -35,7 +38,6 @@ endif
 # SIMULATE
 #
 SIM_DIR=hw/sim
-ifneq ($(wildcard $(SIM_DIR)/.),)
 sim-build: 
 	make -C $(SIM_DIR) build
 
@@ -48,9 +50,9 @@ sim-test:
 sim-debug: 
 	make -C $(SIM_DIR) debug
 
-sim-clean: 
+CLEAN_LIST+=sim-clean
+sim-clean:
 	make -C $(SIM_DIR) clean
-endif
 
 
 #
@@ -70,7 +72,8 @@ fpga-test:
 fpga-debug: 
 	make -C $(FPGA_DIR) debug
 
-fpga-clean: 
+CLEAN_LIST+=fpga-clean
+fpga-clean:
 	make -C $(FPGA_DIR) clean
 endif
 
@@ -89,28 +92,32 @@ doc-test:
 doc-debug: 
 	make -C $(DOC_DIR) debug
 
-doc-clean: 
+CLEAN_LIST+=doc-clean
+doc-clean:
 	make -C $(DOC_DIR) clean
 endif
 
 #
 # TEST
 #
-TEST_TYPE_LIST=sim-test
-TEST_TYPE_LIST=fpga-test
-TEST_TYPE_LIST=doc-test
+TEST_LIST+=sim-test
+TEST_LIST+=fpga-test
+TEST_LIST+=doc-test
 
-test: $(TEST_TYPE_LIST)
+test: $(TEST_LIST)
 
 
 #
 # CLEAN
 #
 
-clean: fw-clean pc-emul-clean sim-clean fpga-clean doc-clean
+clean: $(CLEAN_LIST)
 
 
-.PHONY:	sim-build sim-run sim-test sim-debug sim-clean \
-	fpga-build fpga-test fpga-clean fpga-debug \
-	doc-build doc-test doc-clean doc-debug \
-	test clean
+.PHONY: fw-build \
+	pc-emul-build pc-emul-run \
+	sim-build sim-run sim-debug \
+	fpga-build fpga-debug \
+	doc-build doc-debug \
+	test clean \
+	$(TEST_LIST) $(CLEAN_LIST)

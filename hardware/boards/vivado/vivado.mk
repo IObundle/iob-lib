@@ -1,0 +1,17 @@
+ifeq ($(IS_FPGA),1)
+FPGA_OBJ=$(NAME).bit
+else
+FPGA_OBJ=$(NAME).edif
+endif
+
+FPGA_TEX=vivado.tex
+FPGA_SERVER=$(VIVADO_SERVER)
+FPGA_USER=$(VIVADO_USER)
+FPGA_ENV:= bash $(VIVADOPATH)/settings64.sh
+
+# work-around for http://svn.clifford.at/handicraft/2016/vivadosig11
+export RDI_VERBOSE = False
+
+$(FPGA_OBJ): $(VSRC) $(VHDR) $(wildcard *.sdc)
+	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mode batch -source vivado.tcl -tclargs $(NAME) $(TOP_MODULE) "$(VSRC)" $(FPGA_PART)
+	LOG=vivado.log ../../sw/vivado2tex.sh

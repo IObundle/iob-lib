@@ -25,6 +25,8 @@ SIM_DIR=$(HW_DIR)/simulation
 FPGA_DIR=$(HW_DIR)/fpga
 DOC_DIR=document
 
+# FPGA compiler
+FPGA_TOOL=$(shell find $(LIB_DIR)/hardware/boards -name $(BOARD) | cut -d"/" -f5)
 
 # establish build dir paths
 VERSION_STR := $(shell $(LIB_DIR)/software/python/version.py -i .)
@@ -55,7 +57,12 @@ EXCLUDE_BUILD+=--exclude doc
 # create build directory
 $(BUILD_DIR):
 	rsync -a $(LIB_DIR)/build/* $@ $(EXCLUDE_BUILD)
+	cp -u info.mk $(BUILD_DIR)
+ifneq ($(wildcard config.mk),)
+	cp -u config.mk $(BUILD_DIR)
+endif
 ifneq ($(wildcard software/.),)
+#--------------------- PC-EMUL-----------------------
 	cp -r $(LIB_DIR)/build/sw $(BUILD_SW_DIR)
 ifneq ($(wildcard $(PC_DIR)/*.expected),)
 	cp -u $(PC_DIR)/*.expected $(BUILD_SW_PC_DIR)
@@ -67,6 +74,7 @@ ifneq ($(wildcard $(EMB_DIR)/embedded.mk),)
 	cp -u $(EMB_DIR)/embedded.mk $(BUILD_SW_EMB_DIR)
 endif
 endif
+#--------------------- SIMULATION-----------------------
 ifneq ($(wildcard hardware/simulation/.),)
 	cp -r $(LIB_DIR)/build/hw/sim $(BUILD_SIM_DIR)
 ifneq ($(wildcard $(SIM_DIR)/*.expected),)
@@ -82,21 +90,18 @@ ifneq ($(wildcard $(SIM_DIR)/*.v),)
 	cp -u $(SIM_DIR)/*.v $(BUILD_SIM_DIR)
 endif
 endif
+#--------------------- FPGA-----------------------
 ifneq ($(wildcard hardware/fpga/.),)
 	cp -r $(LIB_DIR)/build/hw/fpga $(BUILD_FPGA_DIR)
-ifneq ($(wildcard $(FPGA_DIR)/*.expected),)
-	cp -u $(FPGA_DIR)/*.expected $(BUILD_FPGA_DIR)
+	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(FPGA_TOOL).mk $(BUILD_FPGA_DIR)/fpga_tool.mk
+	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(FPGA_TOOL).tcl $(BUILD_FPGA_DIR)/fpga_tool.tcl
+	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(BOARD)/* $(BUILD_FPGA_DIR)
+ifneq ($(wildcard $(FPGA_DIR)/fpga.mk),)
+	cp -u $(FPGA_DIR)/fpga.mk $(BUILD_FPGA_DIR)
 endif
-ifneq ($(wildcard $(FPGA_DIR)/*.mk),)
-	cp -u $(FPGA_DIR)/*.mk $(BUILD_FPGA_DIR)
+	cp -u $(FPGA_DIR)/$(FPGA_TOOL)/$(BOARD)/* $(BUILD_FPGA_DIR)
 endif
-ifneq ($(wildcard $(FPGA_DIR)/*.sdc),)
-	cp -u $(FPGA_DIR)/*.sdc $(BUILD_FPGA_DIR)
-endif
-ifneq ($(wildcard $(FPGA_DIR)/*.xdc),)
-	cp -u $(FPGA_DIR)/*.xdc $(BUILD_FPGA_DIR)
-endif
-endif
+#--------------------- DOCUMENT-----------------------
 ifneq ($(wildcard document/.),)
 	cp -r $(LIB_DIR)/build/doc $(BUILD_DOC_DIR)
 ifneq ($(wildcard mkregs.conf),)
@@ -115,11 +120,6 @@ endif
 	cp -u $(LIB_DIR)/software/python/verilog2tex.py $(BUILD_SW_PYTHON_DIR)
 	cp -u $(LIB_DIR)/software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
 endif
-	cp -u info.mk $(BUILD_DIR)
-	cp -u config_setup.mk $(BUILD_DIR)
-ifneq ($(wildcard config.mk),)
-	cp -u config.mk $(BUILD_DIR)
-endif
 
 # import core hardware and simulation files
 include $(HW_DIR)/hardware.mk
@@ -131,7 +131,7 @@ endif
 include $(SW_DIR)/software.mk
 
 # import document files
-ifneq ($(SETUP_DOC),0)
+ifneq ($(wildcard document/doc_setup.mk),)
 include $(DOC_DIR)/doc_setup.mk
 endif
 
@@ -151,5 +151,8 @@ debug: $(BUILD_DIR) $(VHDR)
 	@echo $(BUILD_VSRC_DIR)
 	@echo $(BUILD_SW_SRC_DIR)
 	@echo $(SRC)
+	@echo $(SIMULATOR)
+	@echo $(BOARD)
+	@echo $(FPGA_TOOL)
 
 .PHONY: all setup clean debug
