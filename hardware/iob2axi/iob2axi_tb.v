@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
 
-`include "axi.vh"
 
 `define CLK_PER 10
 

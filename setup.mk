@@ -110,8 +110,8 @@ endif
 ifneq ($(wildcard $(DOC_DIR)/*.expected),)
 	cp -u $(DOC_DIR)/*.expected $(BUILD_DOC_DIR)
 endif
-ifneq ($(wildcard $(DOC_DIR)/*.mk),)
-	cp -u $(DOC_DIR)/*.mk $(BUILD_DOC_DIR)
+ifneq ($(wildcard $(DOC_DIR)/document.mk),)
+	cp -u $(DOC_DIR)/document.mk $(BUILD_DOC_DIR)
 endif
 ifneq ($(wildcard $(DOC_DIR)/*.tex),)
 	cp -f $(DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
