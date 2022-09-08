@@ -4,7 +4,8 @@
 module axil2iob
   #(
     parameter AXIL_ADDR_W = 32, // Width of address bus in bits
-    parameter AXIL_DATA_W = 32  // Width of data bus in bits
+    parameter AXIL_DATA_W = 32, // Width of data bus in bits
+    parameter AXI_ID_W = 1      // Width of id bus in bits
     )
    (
     // AXI-4 lite slave interface
@@ -26,12 +27,12 @@ module axil2iob
    assign axil_rdata = rdata;
 
    // AXI IDs
-   assign axil_bid = `AXI_ID_W'd0;
-   assign axil_rid = `AXI_ID_W'd0;
+   assign axil_bid = {(AXI_ID_W){1'd0}};
+   assign axil_rid = {(AXI_ID_W){1'd0}};
 
    // Response is always OK
-   assign axil_bresp = `AXI_RESP_W'd0;
-   assign axil_rresp = `AXI_RESP_W'd0;
+   assign axil_bresp = 2'd0;
+   assign axil_rresp = 2'd0;
 
    assign valid = (axil_wvalid | axil_arvalid) & ~ready;
    assign addr  = axil_wvalid? axil_awaddr: axil_araddr;
