@@ -53,11 +53,24 @@ $(BUILD_DIR)/info.mk:
 	echo "BOARD?=$(BOARD)" >> $@
 	echo "SIMULATOR?=$(SIMULATOR)" >> $@
 
-$(BUILD_DIR)/%: $(LIB_DIR)/optional-build/%
-	cp -r $< $@
 ifneq ($(wildcard software/.),)
 #--------------------- PC-EMUL-----------------------
-SRC+=$(patsubst $(LIB_DIR)/optional-build/%, $(BUILD_DIR)/%, $(shell find $(LIB_DIR)/optional-build/sw))
+SRC+=$(BUILD_DIR)/sw
+SRC+=$(BUILD_DIR)/sw/bash
+SRC+=$(BUILD_DIR)/sw/bsrc
+SRC+=$(BUILD_DIR)/sw/emb
+SRC+=$(BUILD_DIR)/sw/pc
+SRC+=$(BUILD_DIR)/sw/pcsrc
+SRC+=$(BUILD_DIR)/sw/python
+SRC+=$(BUILD_DIR)/sw/src
+# create BUILD_DIR/sw directories
+$(BUILD_DIR)/sw $(BUILD_DIR)/sw/bash $(BUILD_DIR)/sw/bsrc $(BUILD_DIR)/sw/emb $(BUILD_DIR)/sw/pc $(BUILD_DIR)/sw/pcsrc $(BUILD_DIR)/sw/python $(BUILD_DIR)/sw/src:
+	mkdir -p $@
+
+SRC+=$(BUILD_DIR)/sw/emb/Makefile
+SRC+=$(BUILD_DIR)/sw/pc/Makefile
+$(BUILD_DIR)/sw/%/Makefile: $(LIB_DIR)/software/%/Makefile
+	cp $< $@
 
 SRC+=$(patsubst $(PC_DIR)/%, $(BUILD_SW_PC_DIR)/%, $(wildcard $(PC_DIR)/*.expected))
 $(BUILD_SW_PC_DIR)/%.expected: $(PC_DIR)/%.expected
@@ -73,7 +86,13 @@ $(BUILD_SW_PC_DIR)/embedded.mk: $(EMB_DIR)/embedded.mk
 endif
 #--------------------- SIMULATION-----------------------
 ifneq ($(wildcard hardware/simulation/.),)
-SRC+=$(patsubst $(LIB_DIR)/optional-build/%, $(BUILD_DIR)/%, $(shell find $(LIB_DIR)/optional-build/hw/sim))
+SRC+=$(BUILD_SIM_DIR)
+$(BUILD_SIM_DIR): $(LIB_DIR)/hardware/simulation
+	cp -r $< $@
+
+SRC+=$(patsubst $(LIB_DIR)/hardware/simulation/%, $(BUILD_SIM_DIR)/%, $(shell find $(LIB_DIR)/hardware/simulation))
+$(BUILD_SIM_DIR)/%: $(LIB_DIR)/hardware/simulation/%
+	cp $< $@
 
 SRC+=$(patsubst $(SIM_DIR)/%, $(BUILD_SIM_DIR)/%, $(wildcard $(SIM_DIR)/*.expected))
 $(BUILD_SIM_DIR)/%.expected: $(SIM_DIR)/%.expected
@@ -93,7 +112,13 @@ $(BUILD_SIM_DIR)/%.v: $(SIM_DIR)/%.v
 endif
 #--------------------- FPGA-----------------------
 ifneq ($(wildcard hardware/fpga/.),)
-SRC+=$(patsubst $(LIB_DIR)/optional-build/%, $(BUILD_DIR)/%, $(shell find $(LIB_DIR)/optional-build/hw/fpga))
+SRC+=$(BUILD_FPGA_DIR)
+$(BUILD_FPGA_DIR): $(LIB_DIR)/hardware/fpga
+	cp -r $< $@
+
+SRC+=$(patsubst $(LIB_DIR)/hardware/fpga/%, $(BUILD_FPGA_DIR)/%, $(shell find $(LIB_DIR)/hardware/fpga))
+$(BUILD_FPGA_DIR)/%: $(LIB_DIR)/hardware/fpga/%
+	cp $< $@
 
 SRC+=$(patsubst $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/%, $(BUILD_FPGA_DIR)/fpga_tool.mk, $(wildcard $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(FPGA_TOOL).mk))
 $(BUILD_FPGA_DIR)/fpga_tool.mk: $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(FPGA_TOOL).mk
@@ -126,7 +151,13 @@ $(BUILD_FPGA_DIR)/%: $(FPGA_DIR)/$(FPGA_TOOL)/$(BOARD)/%
 endif
 #--------------------- DOCUMENT-----------------------
 ifneq ($(wildcard document/.),)
-SRC+=$(patsubst $(LIB_DIR)/optional-build/%, $(BUILD_DIR)/%, $(shell find $(LIB_DIR)/optional-build/doc))
+SRC+=$(BUILD_DOC_DIR)
+$(BUILD_DOC_DIR): $(LIB_DIR)/document
+	cp -r $< $@
+
+SRC+=$(patsubst $(LIB_DIR)/document/%, $(BUILD_DOC_DIR)/%, $(shell find $(LIB_DIR)/document))
+$(BUILD_DOC_DIR)/%: $(LIB_DIR)/document/%
+	cp $< $@
 
 SRC+=$(BUILD_TSRC_DIR)/shortHash.tex
 $(BUILD_TSRC_DIR)/shortHash.tex:
