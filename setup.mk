@@ -51,16 +51,14 @@ BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
 all: setup
 
-# EXCLUDE_BUILD+=--exclude sw
-# EXCLUDE_BUILD+=--exclude hw/sim
-# EXCLUDE_BUILD+=--exclude hw/fpga
-# EXCLUDE_BUILD+=--exclude doc
+SRC+=$(BUILD_DIR)/info_build.mk
+$(BUILD_DIR)/info_build.mk:
+	echo "NAME=$(NAME)" > $@
+	echo "TOP_MODULE?=$(TOP_MODULE)" >> $@
 
 # create build directory
 $(BUILD_DIR):
-	# rsync -a $(LIB_DIR)/build/* $@ $(EXCLUDE_BUILD)
 	cp -r $(LIB_DIR)/build $(BUILD_DIR)
-	cp info.mk $(BUILD_DIR)
 ifneq ($(wildcard software/.),)
 #--------------------- PC-EMUL-----------------------
 	cp -r $(LIB_DIR)/optional-build/sw $(BUILD_SW_DIR)

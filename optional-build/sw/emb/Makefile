@@ -3,8 +3,7 @@
 # This makefile is used at build-time in $(BUILD_DIR)/sw/emb/Makefile
 #
 
-BUILD_DIR:=../..
-include $(BUILD_DIR)/info.mk
+include ../../info_build.mk
 
 TEMPLATE_LDS=../src/template.lds
 
