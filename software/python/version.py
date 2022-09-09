@@ -29,7 +29,7 @@ def parse_mk_file(mk_file):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Get core version from info.mk file")
+    parser = argparse.ArgumentParser(description="Get core version from config_setup.mk file")
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "-i", "--info", action="store_true", help="print version to stdout"
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "path",
         help="""path to *.mk file with NAME and VERSION.
-            Assume info.mk if path is a directory""",
+            Assume config_setup.mk if path is a directory""",
     )
 
     args = parser.parse_args()
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     if os.path.isfile(args.path):
         mk_file = args.path
     else:
-        mk_file = f"{args.path}/info.mk"
+        mk_file = f"{args.path}/config_setup.mk"
 
     # get core name and version from file
     [core_name, core_version] = parse_mk_file(mk_file)

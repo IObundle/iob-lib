@@ -3,7 +3,7 @@
 # This makefile is used at build-time in $(BUILD_DIR)/sw/pc/Makefile
 #
 
-include ../../info_build.mk
+include ../../info.mk
 
 # compiler flags
 CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
