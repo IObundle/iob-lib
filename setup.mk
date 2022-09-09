@@ -48,75 +48,76 @@ BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
 all: setup
 
-EXCLUDE_BUILD+=--exclude sw
-EXCLUDE_BUILD+=--exclude hw/sim
-EXCLUDE_BUILD+=--exclude hw/fpga
-EXCLUDE_BUILD+=--exclude doc
+# EXCLUDE_BUILD+=--exclude sw
+# EXCLUDE_BUILD+=--exclude hw/sim
+# EXCLUDE_BUILD+=--exclude hw/fpga
+# EXCLUDE_BUILD+=--exclude doc
 
 # create build directory
 $(BUILD_DIR):
-	rsync -a $(LIB_DIR)/build/* $@ $(EXCLUDE_BUILD)
-	cp -u info.mk $(BUILD_DIR)
+	# rsync -a $(LIB_DIR)/build/* $@ $(EXCLUDE_BUILD)
+	cp -r $(LIB_DIR)/build $(BUILD_DIR)
+	cp info.mk $(BUILD_DIR)
 ifneq ($(wildcard software/.),)
 #--------------------- PC-EMUL-----------------------
-	cp -r $(LIB_DIR)/build/sw $(BUILD_SW_DIR)
+	cp -r $(LIB_DIR)/optional-build/sw $(BUILD_SW_DIR)
 ifneq ($(wildcard $(PC_DIR)/*.expected),)
-	cp -u $(PC_DIR)/*.expected $(BUILD_SW_PC_DIR)
+	cp $(PC_DIR)/*.expected $(BUILD_SW_PC_DIR)
 endif
 ifneq ($(wildcard $(PC_DIR)/pc-emul.mk),)
-	cp -u $(PC_DIR)/pc-emul.mk $(BUILD_SW_PC_DIR)
+	cp $(PC_DIR)/pc-emul.mk $(BUILD_SW_PC_DIR)
 endif
 ifneq ($(wildcard $(EMB_DIR)/embedded.mk),)
-	cp -u $(EMB_DIR)/embedded.mk $(BUILD_SW_EMB_DIR)
+	cp $(EMB_DIR)/embedded.mk $(BUILD_SW_EMB_DIR)
 endif
 endif
 #--------------------- SIMULATION-----------------------
 ifneq ($(wildcard hardware/simulation/.),)
-	cp -r $(LIB_DIR)/build/hw/sim $(BUILD_SIM_DIR)
+	cp -r $(LIB_DIR)/optional-build/hw/sim $(BUILD_SIM_DIR)
 ifneq ($(wildcard $(SIM_DIR)/*.expected),)
-	cp -u $(SIM_DIR)/*.expected $(BUILD_SIM_DIR)
+	cp $(SIM_DIR)/*.expected $(BUILD_SIM_DIR)
 endif
 ifneq ($(wildcard $(SIM_DIR)/simulation.mk),)
-	cp -u $(SIM_DIR)/simulation.mk $(BUILD_SIM_DIR)
+	cp $(SIM_DIR)/simulation.mk $(BUILD_SIM_DIR)
 endif
 ifneq ($(wildcard $(SIM_DIR)/*.cpp),)
-	cp -u $(SIM_DIR)/*.cpp $(BUILD_SIM_DIR)
+	cp $(SIM_DIR)/*.cpp $(BUILD_SIM_DIR)
 endif
 ifneq ($(wildcard $(SIM_DIR)/*.v),)
-	cp -u $(SIM_DIR)/*.v $(BUILD_SIM_DIR)
+	cp $(SIM_DIR)/*.v $(BUILD_SIM_DIR)
 endif
 endif
 #--------------------- FPGA-----------------------
 ifneq ($(wildcard hardware/fpga/.),)
-	cp -r $(LIB_DIR)/build/hw/fpga $(BUILD_FPGA_DIR)
+	cp -r $(LIB_DIR)/optional-build/hw/fpga $(BUILD_FPGA_DIR)
 	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(FPGA_TOOL).mk $(BUILD_FPGA_DIR)/fpga_tool.mk
 	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(FPGA_TOOL).tcl $(BUILD_FPGA_DIR)/fpga_tool.tcl
 	cp -r $(LIB_DIR)/software/bash/$(FPGA_TOOL)2tex.sh $(BUILD_SW_DIR)/bash
 	cp -r $(LIB_DIR)/hardware/boards/$(FPGA_TOOL)/$(BOARD)/* $(BUILD_FPGA_DIR)
 ifneq ($(wildcard $(FPGA_DIR)/fpga.mk),)
-	cp -u $(FPGA_DIR)/fpga.mk $(BUILD_FPGA_DIR)
+	cp $(FPGA_DIR)/fpga.mk $(BUILD_FPGA_DIR)
 endif
-	cp -u $(FPGA_DIR)/$(FPGA_TOOL)/$(BOARD)/* $(BUILD_FPGA_DIR)
+	cp $(FPGA_DIR)/$(FPGA_TOOL)/$(BOARD)/* $(BUILD_FPGA_DIR)
 endif
 #--------------------- DOCUMENT-----------------------
 ifneq ($(wildcard document/.),)
-	cp -r $(LIB_DIR)/build/doc $(BUILD_DOC_DIR)
+	cp -r $(LIB_DIR)/optional-build/doc $(BUILD_DOC_DIR)
 	git rev-parse --short HEAD > $(BUILD_TSRC_DIR)/shortHash.tex
 ifneq ($(wildcard mkregs.conf),)
-	cp -u mkregs.conf $(BUILD_TSRC_DIR)
+	cp mkregs.conf $(BUILD_TSRC_DIR)
 endif
 ifneq ($(wildcard $(DOC_DIR)/*.expected),)
-	cp -u $(DOC_DIR)/*.expected $(BUILD_DOC_DIR)
+	cp $(DOC_DIR)/*.expected $(BUILD_DOC_DIR)
 endif
 ifneq ($(wildcard $(DOC_DIR)/document.mk),)
-	cp -u $(DOC_DIR)/document.mk $(BUILD_DOC_DIR)
+	cp $(DOC_DIR)/document.mk $(BUILD_DOC_DIR)
 endif
 ifneq ($(wildcard $(DOC_DIR)/*.tex),)
 	cp -f $(DOC_DIR)/*.tex $(BUILD_TSRC_DIR)
 endif
-	cp -u $(DOC_DIR)/figures/* $(BUILD_FIG_DIR)
-	cp -u $(LIB_DIR)/software/python/verilog2tex.py $(BUILD_SW_PYTHON_DIR)
-	cp -u $(LIB_DIR)/software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
+	cp $(DOC_DIR)/figures/* $(BUILD_FIG_DIR)
+	cp $(LIB_DIR)/software/python/verilog2tex.py $(BUILD_SW_PYTHON_DIR)
+	cp $(LIB_DIR)/software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
 endif
 
 # import core hardware and simulation files
