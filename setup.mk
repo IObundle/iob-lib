@@ -8,10 +8,7 @@ export
 
 LIB_DIR=submodules/LIB
 
-include info.mk
-ifneq ($(wildcard info_setup.mk),)
-include info_setup.mk
-endif
+include config_setup.mk
 
 # lib paths
 LIB_PYTHON_DIR=software/python
@@ -51,8 +48,8 @@ BUILD_SYN_DIR:=$(BUILD_DIR)/hw/syn
 
 all: setup
 
-SRC+=$(BUILD_DIR)/info_build.mk
-$(BUILD_DIR)/info_build.mk:
+SRC+=$(BUILD_DIR)/info.mk
+$(BUILD_DIR)/info.mk:
 	echo "NAME=$(NAME)" > $@
 	echo "TOP_MODULE?=$(TOP_MODULE)" >> $@
 

@@ -4,7 +4,7 @@
 SHELL:=/bin/bash
 
 # include core basic info
-include ../../info_build.mk
+include ../../info.mk
 
 REMOTE_BUILD_DIR=sandbox/$(NAME)
 
