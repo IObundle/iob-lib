@@ -9,6 +9,9 @@ export
 LIB_DIR=submodules/LIB
 
 include info.mk
+ifneq ($(wildcard info_setup.mk),)
+include info_setup.mk
+endif
 
 # lib paths
 LIB_PYTHON_DIR=software/python
@@ -120,14 +123,20 @@ endif
 	cp $(LIB_DIR)/software/python/mkregs.py $(BUILD_SW_PYTHON_DIR)
 endif
 
-# import core hardware and simulation files
-include $(HW_DIR)/hardware.mk
+# import core hardware files
+ifneq ($(wildcard $(HW_DIR)/hw_setup.mk),)
+include $(HW_DIR)/hw_setup.mk
+endif
+
+# import core simulation files
 ifneq ($(wildcard $(SIM_DIR)/sim_setup.mk),)
 include $(SIM_DIR)/sim_setup.mk
 endif
 
 # import core software files
-include $(SW_DIR)/software.mk
+ifneq ($(wildcard $(SW_DIR)/sw_setup.mk),)
+include $(SW_DIR)/sw_setup.mk
+endif
 
 # import document files
 ifneq ($(wildcard document/doc_setup.mk),)
