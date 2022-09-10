@@ -1,6 +1,6 @@
+# (c) 2022-Present IObundle, Lda, all rights reserved
 #
-# This file becomes the document Makefile when copied to the build
-# directory
+# Makefile for creating documents in the build directory
 #
 
 SHELL = /bin/bash
@@ -64,9 +64,9 @@ ugtop.tex: texfiles
 doctop:
 	echo "\def\NAME{$(NAME)}" >> $(DOC)top.tex
 	if [ $(RESULTS) ]; then echo "\def\RESULTS{Y}" >> $(DOC)top.tex; fi
-	if [ $(INT_FAMILY)$(XIL_FAMILY) ]; then echo "\def\FPGA{Y}" >> $(DOC)top.tex; fi
-	if [ $(XIL_FAMILY) ]; then echo "\def\XILINX{Y}" >> $(DOC)top.tex; fi
-	if [ $(XIL_FAMILY) ]; then echo "\def\INTEL{Y}" >> $(DOC)top.tex; fi
+	if [ $(INTEL_FPGA)$(AMD_FPGA) ]; then echo "\def\FPGA{Y}" >> $(DOC)top.tex; fi
+	if [ $(AMD_FPGA) ]; then echo "\def\AMD{Y}" >> $(DOC)top.tex; fi
+	if [ $(INTEL_FPGA) ]; then echo "\def\INTEL{Y}" >> $(DOC)top.tex; fi
 	if [ $(ASIC_NODE) ]; then echo "\def\ASIC{Y}" >> $(DOC)top.tex; fi
 	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $(DOC)top.tex; fi
 	echo "\input{$(DOC).tex}" >> $(DOC)top.tex
@@ -88,11 +88,11 @@ texfiles:
 #run EDA tools to get results to include in document 
 results:
 ifeq ($(RESULTS), 1)
-ifneq ($(INT_FAMILY),)
+ifneq ($(INTEL_FPGA),)
 	make  -C ../hw/fpga build TOP_MODULE=$(TOP_MODULE)
 	cp ../hw/fpga/quartus.tex .
 endif
-ifneq ($(XIL_FAMILY),)
+ifneq ($(AMD_FPGA),)
 	make  -C ../hw/fpga build TOP_MODULE=$(TOP_MODULE)
 	cp ../hw/fpga/vivado.tex .
 endif
@@ -116,13 +116,13 @@ clean-test-log:
 	rm -f test.log
 
 debug:
-	@echo $(VHDR)
-	@echo $(VSRC)
-	@echo $(RESULTS)
-	@echo $(INT_FAMILY)
-	@echo $(XIL_FAMILY)
-	@echo $(ASIC_NODE)
-	@echo $(wildcard document.mk)
+	@echo VHDR=$(VHDR)
+	@echo VSRC=$(VSRC)
+	@echo RESULTS=$(RESULTS)
+	@echo FPGA=$(FPGA)
+	@echo INTEL_FPGA=$(INTEL_FPGA)
+	@echo AMD_FPGA=$(AMD_FPGA)
+	@echo ASIC_NODE=$(ASIC_NODE)
 
 .PHONY: view texfiles doctop figures results clean test clean-test-log debug
 

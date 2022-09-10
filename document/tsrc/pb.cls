@@ -6,10 +6,28 @@
 \RequirePackage{fancyhdr}
 \RequirePackage[includehead,includefoot,top=50pt,bottom=50pt,headheight=24pt]{geometry}
 \RequirePackage[hidelinks]{hyperref}
-%\RequirePackage{geometry}
+\RequirePackage{geometry}
 \RequirePackage{enumitem}
 \RequirePackage{titlesec}
 \RequirePackage{catchfile}
+\RequirePackage{color,soul}
+\RequirePackage{float}
+\RequirePackage{makecell}
+\RequirePackage{lipsum}
+\RequirePackage[table,xcdraw]{xcolor}
+\RequirePackage{calc}
+\RequirePackage{eso-pic}
+\RequirePackage[binary-units=true]{siunitx}
+\RequirePackage{subcaption}
+\RequirePackage{caption,tabularx,booktabs}
+\RequirePackage{longtable}
+\RequirePackage[all]{nowidow}
+\widowpenalty10000
+
+\RequirePackage{lscape}
+
+
+\graphicspath{{./figures/}}
 
 \setitemize{labelindent=2mm,labelsep=1mm,leftmargin=*}
 
@@ -25,7 +43,6 @@
  left=20mm,
  top=20mm,
 }
-
 
 \pagestyle{fancy}
 \graphicspath{{../figures/} {./}}
