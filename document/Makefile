@@ -108,7 +108,6 @@ clean:
 	@rm -rf $(PYTHON_DIR)/__pycache__
 
 test: clean $(TEST_LIST)
-	diff test.log test.expected
 
 debug:
 	@echo VHDR=$(VHDR)
