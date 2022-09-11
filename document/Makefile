@@ -102,18 +102,13 @@ ifneq ($(ASIC_NODE),)
 endif
 endif
 
-#clean
 clean:
 	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk -o -name "*.expected" \) -delete
 	make -C figures clean 
 	@rm -rf $(PYTHON_DIR)/__pycache__
 
-#test
-test: clean clean-test-log $(TEST_LIST)
+test: clean $(TEST_LIST)
 	diff test.log test.expected
-
-clean-test-log:
-	rm -f test.log
 
 debug:
 	@echo VHDR=$(VHDR)
@@ -124,5 +119,5 @@ debug:
 	@echo AMD_FPGA=$(AMD_FPGA)
 	@echo ASIC_NODE=$(ASIC_NODE)
 
-.PHONY: view texfiles doctop figures results clean test clean-test-log debug
+.PHONY: view texfiles doctop figures results clean test debug
 

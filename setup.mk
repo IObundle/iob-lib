@@ -152,10 +152,6 @@ SRC+=$(BUILD_DIR)/doc/tsrc/shortHash.tex
 $(BUILD_DIR)/doc/tsrc/shortHash.tex:
 	git rev-parse --short HEAD > $@
 
-SRC+=$(patsubst %, $(BUILD_DIR)/doc/tsrc/%, $(wildcard mkregs.conf))
-$(BUILD_DIR)/doc/tsrc/mkregs.conf: mkregs.conf
-	cp $< $@
-
 SRC+=$(patsubst $(DOC_DIR)/%, $(BUILD_DOC_DIR)/%, $(wildcard $(DOC_DIR)/*.expected))
 $(BUILD_DOC_DIR)/%.expected: $(DOC_DIR)/%.expected
 	cp $< $@
