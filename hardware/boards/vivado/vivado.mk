@@ -13,5 +13,5 @@ FPGA_ENV:= bash $(VIVADOPATH)/settings64.sh
 export RDI_VERBOSE = False
 
 $(FPGA_OBJ): $(VSRC) $(VHDR) $(wildcard *.sdc)
-	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mode batch -source fpga_tool.tcl -tclargs $(NAME) $(TOP_MODULE) "$(VSRC)" $(TARGET) $(USE_DDR)
+	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mode batch -source fpga_tool.tcl -tclargs $(NAME) $(TOP_MODULE) "$(VSRC)" $(IS_FPGA) $(USE_DDR)
 	LOG=vivado.log ../../sw/bash/vivado2tex.sh

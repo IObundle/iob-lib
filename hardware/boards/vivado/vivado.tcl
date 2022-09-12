@@ -2,7 +2,7 @@
 set NAME [lindex $argv 0]
 set TOP [lindex $argv 1]
 set VSRC [lindex $argv 2]
-set TARGET [lindex $argv 3]
+set IS_FPGA [lindex $argv 3]
 set USE_DDR [lindex $argv 4]
 
 
@@ -106,7 +106,7 @@ report_clocks
 report_clock_interaction
 report_cdc -details
 
-if { $TARGET eq "IP" } {
+if { $IS_FPGA != "1" } {
 write_edif -force $NAME.edif
 set TOP_STUB $NAME
 append TOP_STUB "_stub"
