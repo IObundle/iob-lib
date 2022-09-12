@@ -71,7 +71,7 @@ $(BUILD_DIR)/sw/pc/pc-emul.mk: $(PC_DIR)/pc-emul.mk
 	cp $< $@
 
 SRC+=$(patsubst $(EMB_DIR)/%, $(BUILD_DIR)/sw/emb/%, $(wildcard $(EMB_DIR)/embedded.mk))
-$(BUILD_DIR)/sw/pc/embedded.mk: $(EMB_DIR)/embedded.mk
+$(BUILD_DIR)/sw/emb/embedded.mk: $(EMB_DIR)/embedded.mk
 	cp $< $@
 endif
 

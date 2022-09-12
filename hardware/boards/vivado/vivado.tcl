@@ -2,9 +2,9 @@
 set NAME [lindex $argv 0]
 set TOP [lindex $argv 1]
 set VSRC [lindex $argv 2]
-set PART [lindex $argv 3]
+set IS_FPGA [lindex $argv 3]
 set USE_DDR [lindex $argv 4]
-set TARGET [lindex $argv 5]
+
 
 #verilog sources
 foreach file [split $VSRC \ ] {
@@ -14,7 +14,8 @@ foreach file [split $VSRC \ ] {
     }
 }
 
-set_property part $PART [current_project]
+#device data
+source device.tcl
 
 read_xdc ../fpga/$NAME.xdc
 
@@ -105,9 +106,9 @@ report_clocks
 report_clock_interaction
 report_cdc -details
 
-if { $TARGET == "IP" } {
-write_edif -force $TOP.edif
-set TOP_STUB $TOP
+if { $IS_FPGA != "1" } {
+write_edif -force $NAME.edif
+set TOP_STUB $NAME
 append TOP_STUB "_stub"
 write_verilog -force -mode synth_stub $TOP_STUB.v
 } else {
