@@ -1,16 +1,14 @@
 SHELL:=/bin/bash
 export
-unexport TEST_LIST CLEAN_LIST
 
 # 
 # EMBEDDED SOFTWARE
 #
-EMB_DIR=sw/emb
-ifneq ($(wildcard $(EMB_DIR)/.),)
+EMB_DIR=software/emb
+ifneq ($(wildcard $(EMB_DIR)),)
 fw-build:
 	make -C $(EMB_DIR) build-all
 
-CLEAN_LIST+=fw-clean
 fw-clean:
 	make -C $(EMB_DIR) clean-all
 endif
@@ -18,8 +16,8 @@ endif
 #
 # PC EMUL
 #
-PC_DIR=sw/pc
-ifneq ($(wildcard $(PC_DIR)/.),)
+PC_DIR=software/pc
+ifneq ($(wildcard $(PC_DIR)),)
 pc-emul-build: fw-build
 	make -C $(PC_DIR) build
 
@@ -29,7 +27,6 @@ pc-emul-run:
 pc-emul-test:
 	make -C $(PC_DIR) test
 
-CLEAN_LIST+=pc-emul-clean
 pc-emul-clean:
 	make -C $(PC_DIR) clean
 endif
@@ -37,7 +34,7 @@ endif
 #
 # SIMULATE
 #
-SIM_DIR=hw/sim
+SIM_DIR=hardware/simulation
 sim-build: 
 	make -C $(SIM_DIR) build
 
@@ -50,7 +47,6 @@ sim-test:
 sim-debug: 
 	make -C $(SIM_DIR) debug
 
-CLEAN_LIST+=sim-clean
 sim-clean:
 	make -C $(SIM_DIR) clean
 
@@ -58,8 +54,8 @@ sim-clean:
 #
 # FPGA
 #
-FPGA_DIR=hw/fpga
-ifneq ($(wildcard $(FPGA_DIR)/.),)
+FPGA_DIR=hardware/fpga
+ifneq ($(wildcard $(FPGA_DIR)),)
 fpga-build: 
 	make -C $(FPGA_DIR) build
 
@@ -72,7 +68,6 @@ fpga-test:
 fpga-debug: 
 	make -C $(FPGA_DIR) debug
 
-CLEAN_LIST+=fpga-clean
 fpga-clean:
 	make -C $(FPGA_DIR) clean
 endif
@@ -81,8 +76,8 @@ endif
 #
 # DOCUMENT
 #
-DOC_DIR=doc
-ifneq ($(wildcard $(DOC_DIR)/.),)
+DOC_DIR=document
+ifneq ($(wildcard $(DOC_DIR)),)
 doc-build: 
 	make -C $(DOC_DIR) build
 
@@ -92,7 +87,6 @@ doc-test:
 doc-debug: 
 	make -C $(DOC_DIR) debug
 
-CLEAN_LIST+=doc-clean
 doc-clean:
 	make -C $(DOC_DIR) clean
 endif
@@ -100,18 +94,15 @@ endif
 #
 # TEST
 #
-TEST_LIST+=sim-test
-TEST_LIST+=fpga-test
-TEST_LIST+=doc-test
+test: sim-test fpga-test doc-tes
 
-test: $(TEST_LIST)
 
 
 #
 # CLEAN
 #
 
-clean: $(CLEAN_LIST)
+clean: fw-clean pc-emul-clean sim-clean fpga-clean doc-clean
 
 
 .PHONY: fw-build \
@@ -120,4 +111,5 @@ clean: $(CLEAN_LIST)
 	fpga-build fpga-debug \
 	doc-build doc-debug \
 	test clean \
-	$(TEST_LIST) $(CLEAN_LIST)
+	sim-test fpga-test doc-test \
+	fw-clean pc-emul-clean sim-clean fpga-clean doc-clean

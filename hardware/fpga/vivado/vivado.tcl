@@ -17,7 +17,7 @@ foreach file [split $VSRC \ ] {
 #device data
 source device.tcl
 
-read_xdc ../fpga/$NAME.xdc
+read_xdc ../fpga/vivado/$NAME.xdc
 
 if { $USE_DDR == 1 } {
 
@@ -90,7 +90,7 @@ if { $USE_DDR == 1 } {
 }
 
 
-synth_design -include_dirs ../vsrc -part $PART -top $TOP -mode out_of_context -flatten_hierarchy none -verbose
+synth_design -include_dirs ../src -part $PART -top $TOP -mode out_of_context -flatten_hierarchy none -verbose
 
 opt_design
 

@@ -1,4 +1,4 @@
-VFLAGS+=-W all -g2005-sv -I. -I../vsrc $(VSRC)
+VFLAGS+=-W all -g2005-sv -I. -I../src $(VSRC)
 
 ifeq ($(VCD),1)
 VFLAGS+=-DVCD

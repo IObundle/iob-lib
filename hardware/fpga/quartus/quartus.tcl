@@ -34,7 +34,7 @@ set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 
 #verilog heders search path
-set_global_assignment -name SEARCH_PATH ../vsrc
+set_global_assignment -name SEARCH_PATH ../src
 
 #quartus IPs
 foreach file [split $QIP \ ] {

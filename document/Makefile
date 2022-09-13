@@ -80,25 +80,25 @@ view: $(DOC).pdf
 ifneq ($(wildcard tsrc/mkregs.conf),)
 MKREGS_CONF:=tsrc/mkregs.conf
 endif
-VHDR:=$(wildcard ../hw/vsrc/*_conf.vh) $(wildcard ../hw/vsrc/*.vh)
-VSRC:=$(wildcard ../hw/vsrc/*.v)
+VHDR:=$(wildcard ../hardware/src/*_conf.vh) $(wildcard ../hardware/src/*.vh)
+VSRC:=$(wildcard ../hardware/src/*.v)
 texfiles:
-	$(PYTHON_DIR)/verilog2tex.py ../hw/vsrc/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF) && cp tsrc/* .
+	$(PYTHON_DIR)/verilog2tex.py ../hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF) && cp tsrc/* .
 
 #run EDA tools to get results to include in document 
 results:
 ifeq ($(RESULTS), 1)
 ifneq ($(INTEL_FPGA),)
-	make  -C ../hw/fpga build TOP_MODULE=$(TOP_MODULE)
-	cp ../hw/fpga/quartus.tex .
+	make  -C ../hardware/fpga build TOP_MODULE=$(TOP_MODULE)
+	cp ../hardware/fpga/quartus.tex .
 endif
 ifneq ($(AMD_FPGA),)
-	make  -C ../hw/fpga build TOP_MODULE=$(TOP_MODULE)
-	cp ../hw/fpga/vivado.tex .
+	make  -C ../hardware/fpga build TOP_MODULE=$(TOP_MODULE)
+	cp ../hardware/fpga/vivado.tex .
 endif
 ifneq ($(ASIC_NODE),)
-	make  -C ../hw/syn build ASIC_NODE=$(ASIC_NODE)
-	cp ../hw/syn/genus.tex .
+	make  -C ../hardware/syn build ASIC_NODE=$(ASIC_NODE)
+	cp ../hardware/syn/genus.tex .
 endif
 endif
 
