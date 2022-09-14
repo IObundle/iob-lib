@@ -45,7 +45,7 @@
 }
 
 \pagestyle{fancy}
-\graphicspath{{../figures/} {./}}
+\graphicspath{{./figures/} {./}}
 
 
 \renewcommand{\headrulewidth}{.4pt}
