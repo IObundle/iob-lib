@@ -16,8 +16,7 @@ include fpga.mk
 endif
 
 
-BOARD ?= CYCLONEV-GT-DK
-FPGA_TOOL=$(shell find . -name $(BOARD) | cut -d"/" -f2)
+FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
 include $(FPGA_TOOL)/$(FPGA_TOOL).mk
 
 #include the module's headers and sources
@@ -35,6 +34,7 @@ else
 	rsync $(FPGA_SYNC_FLAGS) -avz --delete --force ../.. $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ TOP_MODULE=$(TOP_MODULE) BOARD=$(BOARD)'
 	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_OBJ) .
+	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_LOG) .
 endif
 
 

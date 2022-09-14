@@ -55,6 +55,7 @@ sim-clean:
 # FPGA
 #
 FPGA_DIR=hardware/fpga
+BOARD ?= CYCLONEV-GT-DK
 ifneq ($(wildcard $(FPGA_DIR)),)
 fpga-build: 
 	make -C $(FPGA_DIR) build

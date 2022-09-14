@@ -16,9 +16,6 @@ endif
 #default DOC
 DOC?=pb
 
-#path to verilog2python script
-PYTHON_DIR:=../sw/python
-
 #make product brief figures
 pb_figs:
 	make -C ./figures pb_figs
@@ -41,7 +38,7 @@ pb.pdf: results pb_figs pbtop.tex
 	pdflatex -jobname pb pbtop.tex
 
 #pb top file containing the definition of sections to include
-pbtop.tex: texfiles
+pbtop.tex:
 	make doctop DOC=pb
 
 #build user guide document type
@@ -53,7 +50,7 @@ ug.pdf: results ug_figs ugtop.tex
 
 
 #ug top file containing the definition of sections to include
-ugtop.tex: texfiles
+ugtop.tex:
 	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
 	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
 	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi
@@ -75,33 +72,6 @@ doctop:
 view: $(DOC).pdf
 	evince $< &
 
-
-#generate tex files from code comments
-ifneq ($(wildcard tsrc/mkregs.conf),)
-MKREGS_CONF:=tsrc/mkregs.conf
-endif
-VHDR:=$(wildcard ../hardware/src/*_conf.vh) $(wildcard ../hardware/src/*.vh)
-VSRC:=$(wildcard ../hardware/src/*.v)
-texfiles:
-	$(PYTHON_DIR)/verilog2tex.py ../hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF) && cp tsrc/* .
-
-#run EDA tools to get results to include in document 
-results:
-ifeq ($(RESULTS), 1)
-ifneq ($(INTEL_FPGA),)
-	make  -C ../hardware/fpga build TOP_MODULE=$(TOP_MODULE)
-	cp ../hardware/fpga/quartus.tex .
-endif
-ifneq ($(AMD_FPGA),)
-	make  -C ../hardware/fpga build TOP_MODULE=$(TOP_MODULE)
-	cp ../hardware/fpga/vivado.tex .
-endif
-ifneq ($(ASIC_NODE),)
-	make  -C ../hardware/syn build ASIC_NODE=$(ASIC_NODE)
-	cp ../hardware/syn/genus.tex .
-endif
-endif
-
 clean:
 	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk -o -name "*.expected" \) -delete
 	make -C figures clean 
@@ -118,5 +88,5 @@ debug:
 	@echo AMD_FPGA=$(AMD_FPGA)
 	@echo ASIC_NODE=$(ASIC_NODE)
 
-.PHONY: view texfiles doctop figures results clean test debug
+.PHONY: view doctop figures results clean test debug
 

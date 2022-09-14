@@ -4,6 +4,9 @@ else
 FPGA_OBJ=$(NAME).edif
 endif
 
+FPGA_LOG=vivado.log
+
+
 FPGA_SERVER=$(VIVADO_SERVER)
 FPGA_USER=$(VIVADO_USER)
 FPGA_ENV:= bash $(VIVADOPATH)/settings64.sh
