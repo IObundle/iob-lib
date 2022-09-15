@@ -26,6 +26,7 @@ BUILD_SIM_DIR := $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR := $(BUILD_DIR)/hardware/fpga
 BUILD_ESRC_DIR := $(BUILD_DIR)/software/emb
 BUILD_DOC_DIR := $(BUILD_DIR)/document
+BUILD_TSRC_DIR := $(BUILD_DOC_DIR)/tsrc
 
 
 setup: $(BUILD_DIR) sim-setup fpga-setup syn-setup software-setup doc-setup debug
@@ -43,6 +44,12 @@ SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
 	$(LIB_DIR)/scripts/version.py -v .
 	mv $(NAME)_version.vh $(BUILD_VSRC_DIR)
+
+# select core configuration
+SRC+=$(BUILD_VSRC_DIR)/$(NAME)_conf.vh
+$(BUILD_VSRC_DIR)/$(NAME)_conf.vh:
+	cp hardware/src/$(NAME)_conf_$(CACHE_CONFIG).vh $@
+
 
 ifneq ($(wildcard hardware/hw_setup.mk),)
 include hardware/hw_setup.mk
@@ -92,20 +99,20 @@ ifneq ($(wildcard document),)
 
 
 # create and copy core version header files
-SRC+=$(BUILD_DOC_DIR)/$(NAME)_version.tex
-$(BUILD_DOC_DIR)/$(NAME)_version.tex:
+SRC+=$(BUILD_TSRC_DIR)/$(NAME)_version.tex
+$(BUILD_TSRC_DIR)/$(NAME)_version.tex:
 	$(LIB_DIR)/scripts/version.py -t .
-	mv iob_cache_version.tex $(BUILD_DOC_DIR)
+	mv iob_cache_version.tex $(BUILD_TSRC_DIR)
+
+# create short git hash
+SRC+=$(BUILD_TSRC_DIR)/shortHash.tex
+$(BUILD_TSRC_DIR)/shortHash.tex:
+	git rev-parse --short HEAD > $@
 
 # include local setup stub
 ifneq ($(wildcard document/doc_setup.mk),)
 include document/doc_setup.mk
 endif
-
-# select core configuration
-SRC+=$(BUILD_VSRC_DIR)/$(NAME)_conf.vh
-$(BUILD_VSRC_DIR)/$(NAME)_conf.vh:
-	cp hardware/src/$(NAME)_conf_$(CACHE_CONFIG).vh $@
 
 #generate tex files from code comments
 ifneq ($(wildcard ../mkregs.conf),)
@@ -115,17 +122,17 @@ VHDR:=$(wildcard ../hardware/src/*.vh)
 VSRC:=$(wildcard ../hardware/src/*.v)
 
 #copy lib tex files if not present
-SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%.tex, $(BUILD_DOC_DIR)/tsrc/%.tex, $(wildcard $(LIB_DIR)/document/tsrc/*.tex))
-$(BUILD_DOC_DIR)/tsrc/%.tex: $(LIB_DIR)/document/tsrc/%.tex
+SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%.tex, $(BUILD_TSRC_DIR)/%.tex, $(wildcard $(LIB_DIR)/document/tsrc/*.tex))
+$(BUILD_TSRC_DIR)/%.tex: $(LIB_DIR)/document/tsrc/%.tex
 	if [ ! -f $@ ]; then cp $< $@; fi
 
-SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%.cls, $(BUILD_DOC_DIR)/tsrc/%.cls, $(wildcard $(LIB_DIR)/document/tsrc/*.cls))
-$(BUILD_DOC_DIR)/tsrc/%.cls: $(LIB_DIR)/document/tsrc/%.cls
+SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%.cls, $(BUILD_TSRC_DIR)/%.cls, $(wildcard $(LIB_DIR)/document/tsrc/*.cls))
+$(BUILD_TSRC_DIR)/%.cls: $(LIB_DIR)/document/tsrc/%.cls
 	if [ ! -f $@ ]; then cp $< $@; fi
 
 doc-setup: $(SRC)
 	$(PYTHON_DIR)/verilog2tex.py hardware/src/$(NAME).v $(VHDR) $(VSRC) $(MKREGS_CONF)
-	mv *.tex $(BUILD_DOC_DIR)/tsrc
+	mv *.tex $(BUILD_TSRC_DIR)
 	cp $(LIB_DIR)/document/Makefile $(BUILD_DOC_DIR)
 	cp $(LIB_DIR)/document/figures/* $(BUILD_DOC_DIR)/figures
 endif
