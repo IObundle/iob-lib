@@ -16,6 +16,12 @@ endif
 #default DOC
 DOC?=pb
 
+TSRC = $(patsubst tsrc/%, ./%, $(wildcard tsrc/*))
+%.tex: tsrc/%.tex
+	cp $< $@
+%.cls: tsrc/%.cls
+	cp $< $@
+
 #make product brief figures
 pb_figs:
 	make -C ./figures pb_figs
@@ -25,7 +31,7 @@ ug_figs:
 	make -C ./figures ug_figs
 
 #build document
-build: $(DOC).pdf
+build: debug $(DOC).pdf
 
 #build presentation document type
 presentation.pdf: presentation.tex
@@ -73,20 +79,19 @@ view: $(DOC).pdf
 	evince $< &
 
 clean:
-	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk -o -name "*.expected" \) -delete
+	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk \) -delete
 	make -C figures clean 
 	@rm -rf $(PYTHON_DIR)/__pycache__
 
 test: clean $(TEST_LIST)
 
-debug:
-	@echo VHDR=$(VHDR)
-	@echo VSRC=$(VSRC)
+debug: $(TSRC)
+	@echo TSRC=$(TSRC)
 	@echo RESULTS=$(RESULTS)
 	@echo FPGA=$(FPGA)
 	@echo INTEL_FPGA=$(INTEL_FPGA)
 	@echo AMD_FPGA=$(AMD_FPGA)
 	@echo ASIC_NODE=$(ASIC_NODE)
 
-.PHONY: view doctop figures results clean test debug
+.PHONY: view doctop figures results build clean test debug
 

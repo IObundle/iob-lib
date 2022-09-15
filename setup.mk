@@ -34,7 +34,6 @@ $(BUILD_DIR):
 	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $(BUILD_DIR)
 	echo "NAME=$(NAME)" > $(BUILD_DIR)/info.mk
 	echo "VERSION=$(VERSION)" >> $(BUILD_DIR)/info.mk
-	echo "TOP_MODULE?=$(TOP_MODULE)" >> $(BUILD_DIR)/info.mk
 	find $(BUILD_DIR) -name \*_setup.mk -delete
 	cp $(LIB_DIR)/build.mk $(BUILD_DIR)/Makefile
 
@@ -56,7 +55,7 @@ ifneq ($(wildcard hardware/simulation/sim_setup.mk),)
 include hardware/simulation/sim_setup.mk
 endif
 
-sim-setup:
+sim-setup: $(BUILD_DIR) debug
 	cp $(LIB_DIR)/hardware/simulation/* $(BUILD_SIM_DIR)
 
 endif
@@ -98,10 +97,15 @@ $(BUILD_DOC_DIR)/$(NAME)_version.tex:
 	$(LIB_DIR)/software/python/version.py -t .
 	mv iob_cache_version.tex $(BUILD_DOC_DIR)
 
-# include local doc setup stub
+# include local setup stub
 ifneq ($(wildcard document/doc_setup.mk),)
 include document/doc_setup.mk
 endif
+
+# select core configuration
+SRC+=$(BUILD_VSRC_DIR)/$(NAME)_conf.vh
+$(BUILD_VSRC_DIR)/$(NAME)_conf.vh:
+	cp hardware/src/$(NAME)_conf_$(CACHE_CONFIG).vh $@
 
 #generate tex files from code comments
 ifneq ($(wildcard ../mkregs.conf),)
@@ -110,9 +114,20 @@ endif
 VHDR:=$(wildcard ../hardware/src/*.vh)
 VSRC:=$(wildcard ../hardware/src/*.v)
 
-doc-setup:
-	cp -rn $(LIB_DIR)/document/* $(BUILD_DIR)/document
-	$(PYTHON_DIR)/verilog2tex.py hardware/src/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF) && mv *.tex $(BUILD_DOC_DIR)
+#copy lib tex files if not present
+SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%.tex, $(BUILD_DOC_DIR)/tsrc/%.tex, $(wildcard $(LIB_DIR)/document/tsrc/*.tex))
+$(BUILD_DOC_DIR)/tsrc/%.tex: $(LIB_DIR)/document/tsrc/%.tex
+	if [ ! -f $@ ]; then cp $< $@; fi
+
+SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%.cls, $(BUILD_DOC_DIR)/tsrc/%.cls, $(wildcard $(LIB_DIR)/document/tsrc/*.cls))
+$(BUILD_DOC_DIR)/tsrc/%.cls: $(LIB_DIR)/document/tsrc/%.cls
+	if [ ! -f $@ ]; then cp $< $@; fi
+
+doc-setup: $(SRC)
+	$(PYTHON_DIR)/verilog2tex.py hardware/src/$(NAME).v $(VHDR) $(VSRC) $(MKREGS_CONF)
+	mv *.tex $(BUILD_DOC_DIR)/tsrc
+	cp $(LIB_DIR)/document/Makefile $(BUILD_DOC_DIR)
+	cp $(LIB_DIR)/document/figures/* $(BUILD_DOC_DIR)/figures
 endif
 
 
@@ -121,6 +136,7 @@ clean:
 	@rm -rf software/python/__pycache__
 
 debug: $(BUILD_DIR) $(SRC)
-	echo $(SRC)
+	@echo SRC=$(SRC)
+	@echo $(filter iob_lib.vh, $(SRC))
 
-.PHONY: set-up sim-setup fpga-setup syn-setup sw-setup doc-setup debug
+.PHONY: setup sim-setup fpga-setup syn-setup sw-setup doc-setup debug
