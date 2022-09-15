@@ -33,7 +33,7 @@ setup: $(BUILD_DIR) sim-setup fpga-setup syn-setup software-setup doc-setup debu
 $(BUILD_DIR):
 	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $(BUILD_DIR)
 	echo "NAME=$(NAME)" > $(BUILD_DIR)/info.mk
-	echo "VERSION=$(VERSION)" > $(BUILD_DIR)/info.mk
+	echo "VERSION=$(VERSION)" >> $(BUILD_DIR)/info.mk
 	echo "TOP_MODULE?=$(TOP_MODULE)" >> $(BUILD_DIR)/info.mk
 	find $(BUILD_DIR) -name \*_setup.mk -delete
 	cp $(LIB_DIR)/build.mk $(BUILD_DIR)/Makefile
