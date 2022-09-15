@@ -14,7 +14,7 @@ include config_setup.mk
 #FPGA_TOOL=$(shell find $(LIB_DIR)/hardware/fpga -name $(BOARD) | cut -d"/" -f5)
 
 # python scripts directory
-PYTHON_DIR=$(LIB_DIR)/software/python
+PYTHON_DIR=$(LIB_DIR)/scripts
 
 # create version string
 VERSION_STR := $(shell $(PYTHON_DIR)/version.py -i .)
@@ -42,7 +42,7 @@ $(BUILD_DIR):
 
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
-	$(LIB_DIR)/software/python/version.py -v .
+	$(LIB_DIR)/scripts/version.py -v .
 	mv $(NAME)_version.vh $(BUILD_VSRC_DIR)
 
 ifneq ($(wildcard hardware/hw_setup.mk),)
@@ -95,7 +95,7 @@ ifneq ($(wildcard document),)
 # create and copy core version header files
 SRC+=$(BUILD_DOC_DIR)/$(NAME)_version.tex
 $(BUILD_DOC_DIR)/$(NAME)_version.tex:
-	$(LIB_DIR)/software/python/version.py -t .
+	$(LIB_DIR)/scripts/version.py -t .
 	mv iob_cache_version.tex $(BUILD_DOC_DIR)
 
 # include local doc setup stub
@@ -118,7 +118,7 @@ endif
 
 clean:
 	@rm -rf $(BUILD_DIR)
-	@rm -rf software/python/__pycache__
+	@rm -rf scripts/__pycache__
 
 debug: $(BUILD_DIR) $(SRC)
 	echo $(SRC)
