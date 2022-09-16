@@ -7,14 +7,12 @@
 ******************************************************************************/
 `timescale 1ns / 1ps
 
-`include "iob_lib.vh"
-
 module iob_clkmux
   (
-   `IOB_INPUT(clk_in0, 1),
-   `IOB_INPUT(clk_in1, 1),
-   `IOB_INPUT(clk_sel, 1),
-   `IOB_OUTPUT(clk_out, 1)
+   input  clk_in0,
+   input  clk_in1,
+   input  clk_sel,
+   output clk_out
    );
 
 `ifdef XILINX

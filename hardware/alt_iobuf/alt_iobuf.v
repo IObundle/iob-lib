@@ -7,14 +7,12 @@
 ******************************************************************************/
 `timescale 1ns / 1ps
 
-`include "iob_lib.vh"
-
 module alt_iobuf
   (
-   `IOB_INPUT(i, 1),
-   `IOB_INPUT(oe, 1),
-   `IOB_OUTPUT(o, 1),
-   `IOB_INOUT(io, 1)
+   input  i,
+   input  oe,
+   output o,
+   inout  io
    );
 
    assign io = oe? i : 1'bz;
