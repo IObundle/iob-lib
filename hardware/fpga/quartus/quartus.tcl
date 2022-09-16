@@ -1,9 +1,8 @@
 #extract cli args
 set NAME [lindex $argv 0]
-set TOP [lindex $argv 1]
-set VSRC [lindex $argv 2]
-set QIP [lindex $argv 3]
-set IS_FPGA [lindex $argv 4]
+set VSRC [lindex $argv 1]
+set QIP [lindex $argv 2]
+set IS_FPGA [lindex $argv 3]
 
 project_new $NAME -overwrite
 
@@ -19,7 +18,7 @@ if [project_exists $NAME] {
     project_new $NAME
 }
 
-set_global_assignment -name TOP_LEVEL_ENTITY $TOP
+set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 
 #device data
 source device.tcl
@@ -58,11 +57,11 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 
 
-set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id $TOP:$TOP
+set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id $NAME:$NAME
 
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id $TOP:$TOP
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id $NAME:$NAME
 
-set_global_assignment -name PARTITION_COLOR 39423 -section_id $TOP:$TOP
+set_global_assignment -name PARTITION_COLOR 39423 -section_id $NAME:$NAME
 
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 }

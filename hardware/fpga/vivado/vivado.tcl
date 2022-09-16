@@ -1,9 +1,8 @@
 #extract cli args
 set NAME [lindex $argv 0]
-set TOP [lindex $argv 1]
-set VSRC [lindex $argv 2]
-set IS_FPGA [lindex $argv 3]
-set USE_DDR [lindex $argv 4]
+set VSRC [lindex $argv 1]
+set IS_FPGA [lindex $argv 2]
+set USE_DDR [lindex $argv 3]
 
 
 #verilog sources
@@ -90,7 +89,7 @@ if { $USE_DDR == 1 } {
 }
 
 
-synth_design -include_dirs ../src -part $PART -top $TOP -mode out_of_context -flatten_hierarchy none -verbose
+synth_design -include_dirs ../src -part $PART -top $NAME -mode out_of_context -flatten_hierarchy none -verbose
 
 opt_design
 
