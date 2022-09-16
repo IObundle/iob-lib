@@ -3,14 +3,14 @@
 module iob_pulse_detect
   (
    input  clk,
-   input  rst,
+   input  arst,
    input  bit_in,
    output detected
    );
 
    reg bit_in_reg;
-   always @(posedge clk, posedge rst)
-     if (rst)
+   always @(posedge clk, posedge arst)
+     if (arst)
        bit_in_reg <= 1'b0;
      else if (bit_in)
        bit_in_reg <= 1'b1;

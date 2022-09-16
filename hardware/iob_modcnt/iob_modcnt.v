@@ -1,6 +1,4 @@
 `timescale 1ns / 1ps
-`include "iob_lib.vh"
-
 
 module iob_modcnt
   #(
@@ -15,10 +13,10 @@ module iob_modcnt
 
     input [DATA_W-1:0]      load_val,
 
-    //masters interface
+    // masters interface
     input [DATA_W-1:0]      mod,
 
-    //slave interface
+    // slave interface
     output reg [DATA_W-1:0] cnt
     );
 

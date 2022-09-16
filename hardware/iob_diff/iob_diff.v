@@ -2,10 +2,12 @@
 
 module iob_diff
   #(
-    parameter DATA_W = 32
+    parameter DATA_W = 32,
+    parameter RST_VAL = 0
     )
    (
     input               clk,
+    input               arst,
     input               rst,
 
     input               en,
@@ -13,10 +15,15 @@ module iob_diff
     output [DATA_W-1:0] data_out
     );
 
+   // prevent width mismatch
+   localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
+
    reg [DATA_W-1:0]     data_in_reg;
-   always @(posedge clk, posedge rst) begin
-      if (rst) begin
-         data_in_reg <= {DATA_W{1'b0}};
+   always @(posedge clk, posedge arst) begin
+      if (arst) begin
+         data_in_reg <= RST_VAL_INT;
+      end else if (rst) begin
+         data_in_reg <= RST_VAL_INT;
       end else if (en) begin
          data_in_reg <= data_in;
       end

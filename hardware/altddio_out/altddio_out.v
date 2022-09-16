@@ -5,28 +5,26 @@
 ******************************************************************************/
 `timescale 1ns / 1ps
 
-`include "iob_lib.vh"
-
 module altddio_out
   #(
-    parameter WIDTH=1
+    parameter DATA_W = 1
     )
   (
-   `IOB_INPUT(outclock, 1),
-   `IOB_INPUT(datain_l, WIDTH),
-   `IOB_INPUT(datain_h, WIDTH),
-   `IOB_OUTPUT(dataout, WIDTH)
+   input               clk,
+   input [DATA_W-1:0]  data_in_l,
+   input [DATA_W-1:0]  data_in_h,
+   output [DATA_W-1:0] data_out
    );
 
-   `IOB_VAR(datain_l_reg, WIDTH)
-   `IOB_VAR(datain_h_reg, WIDTH)
+   reg [DATA_W-1:0]    data_in_l_reg;
+   reg [DATA_W-1:0]    data_in_h_reg;
 
-   always @(posedge outclock)
-     datain_h_reg <= datain_h;
-   
-   always @(negedge outclock)
-     datain_l_reg <= datain_l;
-   
-   assign dataout = outclock ? datain_h_reg: datain_l_reg;
-   
+   always @(posedge clk)
+     data_in_h_reg <= data_in_h;
+
+   always @(negedge clk)
+     data_in_l_reg <= data_in_l;
+
+   assign data_out = clk? data_in_h_reg: data_in_l_reg;
+
 endmodule

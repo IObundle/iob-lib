@@ -7,18 +7,16 @@
 ******************************************************************************/
 `timescale 1ns / 1ps
 
-`include "iob_lib.vh"
-
 module iob_iobuf
   (
-   `IOB_INPUT(I, 1), //from core
-   `IOB_INPUT(T, 1), //from core: tristate control
-   `IOB_INPUT(N, 1), //from core: inversion control
-   `IOB_OUTPUT(O, 1),//to core
-   `IOB_INOUT(IO, 1) //to device IO
+   input  I,  // from core
+   input  T,  // from core: tristate control
+   input  N,  // from core: inversion control
+   output O,  // to core
+   inout  IO, // to device IO
    );
 
-   `IOB_WIRE(O_int, 1)
+   wire   O_int;
 
 `ifdef XILINX
    IOBUF IOBUF_inst

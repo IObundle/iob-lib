@@ -14,7 +14,7 @@ module iob_reg
     output reg [DATA_W-1:0] data_out
     );
 
-   //prevent width mismatch
+   // prevent width mismatch
    localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
    
    always @(posedge clk, posedge arst) begin
