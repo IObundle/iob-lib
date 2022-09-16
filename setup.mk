@@ -24,7 +24,8 @@ BUILD_DIR := ../$(NAME)_$(VERSION_STR)
 BUILD_VSRC_DIR := $(BUILD_DIR)/hardware/src
 BUILD_SIM_DIR := $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR := $(BUILD_DIR)/hardware/fpga
-BUILD_ESRC_DIR := $(BUILD_DIR)/software/emb
+BUILD_SW_SRC_DIR := $(BUILD_DIR)/software/src
+BUILD_ESRC_DIR := $(BUILD_DIR)/software/esrc
 BUILD_DOC_DIR := $(BUILD_DIR)/document
 BUILD_TSRC_DIR := $(BUILD_DOC_DIR)/tsrc
 
@@ -87,7 +88,9 @@ include software/sw_setup.mk
 endif
 
 software-setup:
+ifneq ($(wildcard software/emb),)
 	cp -rn $(LIB_DIR)/software/emb/* $(BUILD_DIR)/software/emb
+endif
 ifneq ($(wildcard software/pc-emul),)
 	cp -rn $(LIB_DIR)/software/pc-emul/* $(BUILD_DIR)/software/pc-emul
 endif
