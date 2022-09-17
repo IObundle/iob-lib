@@ -10,9 +10,6 @@ export
 LIB_DIR=submodules/LIB
 include config_setup.mk
 
-# FPGA compiler
-#FPGA_TOOL=$(shell find $(LIB_DIR)/hardware/fpga -name $(BOARD) | cut -d"/" -f5)
-
 # python scripts directory
 PYTHON_DIR=$(LIB_DIR)/scripts
 
@@ -21,26 +18,27 @@ VERSION_STR := $(shell $(PYTHON_DIR)/version.py -i .)
 
 # establish build dir paths
 BUILD_DIR := ../$(NAME)_$(VERSION_STR)
-BUILD_VSRC_DIR := $(BUILD_DIR)/hardware/src
-BUILD_SIM_DIR := $(BUILD_DIR)/hardware/simulation
-BUILD_FPGA_DIR := $(BUILD_DIR)/hardware/fpga
-BUILD_SW_SRC_DIR := $(BUILD_DIR)/software/src
-BUILD_ESRC_DIR := $(BUILD_DIR)/software/esrc
-BUILD_DOC_DIR := $(BUILD_DIR)/document
-BUILD_TSRC_DIR := $(BUILD_DOC_DIR)/tsrc
+BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
+BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
+BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
+BUILD_SW_SRC_DIR = $(BUILD_DIR)/software/src
+BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
+BUILD_DOC_DIR = $(BUILD_DIR)/document
+BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 
 
-setup: $(BUILD_DIR) sim-setup fpga-setup syn-setup software-setup doc-setup debug
+setup: debug sim-setup fpga-setup syn-setup software-setup doc-setup
 
 $(BUILD_DIR):
-	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $(BUILD_DIR)
-	echo "NAME=$(NAME)" > $(BUILD_DIR)/info.mk
-	echo "VERSION=$(VERSION)" >> $(BUILD_DIR)/info.mk
-	find $(BUILD_DIR) -name \*_setup.mk -delete
-	cp $(LIB_DIR)/build.mk $(BUILD_DIR)/Makefile
+	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $@
+	echo "NAME=$(NAME)" > $@/info.mk
+	echo "VERSION=$(VERSION)" >> $@/info.mk
+	find $@ -name \*_setup.mk -delete
+	cp $(LIB_DIR)/build.mk $@/Makefile
 
-#hardware
-
+#
+#HARDWARE
+#
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
 	$(LIB_DIR)/scripts/version.py -v .
@@ -50,6 +48,16 @@ $(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_conf.vh
 $(BUILD_VSRC_DIR)/$(NAME)_conf.vh:
 	cp hardware/src/$(NAME)_conf_$(CACHE_CONFIG).vh $@
+
+# header files
+SRC+=$(patsubst hardware/src/%.vh, $(BUILD_VSRC_DIR)/%.vh, $(wildcard hardware/src/*.vh))
+$(BUILD_vSRC_DIR)/%.vh: hardware/src/%.vh
+	cp $< $@
+
+# source files
+SRC+=$(patsubst hardware/src/%.v, $(BUILD_VSRC_DIR)/%.v, $(wildcard hardware/src/*.v))
+$(BUILD_vSRC_DIR)/%.v: hardware/src/%.v
+	cp $< $@
 
 
 ifneq ($(wildcard hardware/hw_setup.mk),)
@@ -63,7 +71,7 @@ ifneq ($(wildcard hardware/simulation/sim_setup.mk),)
 include hardware/simulation/sim_setup.mk
 endif
 
-sim-setup: $(BUILD_DIR) debug
+sim-setup:
 	cp $(LIB_DIR)/hardware/simulation/* $(BUILD_SIM_DIR)
 
 endif
@@ -101,13 +109,13 @@ endif
 ifneq ($(wildcard document),)
 
 
-# create and copy core version header files
+# core version file
 SRC+=$(BUILD_TSRC_DIR)/$(NAME)_version.tex
 $(BUILD_TSRC_DIR)/$(NAME)_version.tex:
 	$(LIB_DIR)/scripts/version.py -t .
 	mv iob_cache_version.tex $(BUILD_TSRC_DIR)
 
-# create short git hash
+# short git hash file
 SRC+=$(BUILD_TSRC_DIR)/shortHash.tex
 $(BUILD_TSRC_DIR)/shortHash.tex:
 	git rev-parse --short HEAD > $@
@@ -118,11 +126,12 @@ include document/doc_setup.mk
 endif
 
 #generate tex files from code comments
-ifneq ($(wildcard ../mkregs.conf),)
+ifneq ($(wildcard mkregs.conf),)
 MKREGS_CONF:=mkregs.conf
 endif
-VHDR:=$(wildcard ../hardware/src/*.vh)
-VSRC:=$(wildcard ../hardware/src/*.v)
+VHDR:=$(wildcard $(BUILD_VSRC_DIR)/*.vh)
+VSRC:=$(wildcard $(BUILD_VSRC_DIR)/*.v)
+
 
 #copy lib tex files if not present
 SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%.tex, $(BUILD_TSRC_DIR)/%.tex, $(wildcard $(LIB_DIR)/document/tsrc/*.tex))
@@ -134,7 +143,7 @@ $(BUILD_TSRC_DIR)/%.cls: $(LIB_DIR)/document/tsrc/%.cls
 	if [ ! -f $@ ]; then cp $< $@; fi
 
 doc-setup: $(SRC)
-	$(PYTHON_DIR)/verilog2tex.py hardware/src/$(NAME).v $(VHDR) $(VSRC) $(MKREGS_CONF)
+	$(PYTHON_DIR)/verilog2tex.py hardware/src/$(NAME).v $(SRC) $(MKREGS_CONF)
 	mv *.tex $(BUILD_TSRC_DIR)
 	cp $(LIB_DIR)/document/Makefile $(BUILD_DOC_DIR)
 	cp $(LIB_DIR)/document/figures/* $(BUILD_DOC_DIR)/figures
@@ -147,6 +156,8 @@ clean:
 
 debug: $(BUILD_DIR) $(SRC)
 	@echo SRC=$(SRC)
-	@echo $(filter iob_lib.vh, $(SRC))
+	@echo VHDR=$(VHDR)
+	@echo VSRC=$(VSRC)
+
 
 .PHONY: setup sim-setup fpga-setup syn-setup sw-setup doc-setup debug

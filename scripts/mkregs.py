@@ -16,8 +16,8 @@ def print_usage():
         PATH:       Path to mkregs.conf file
         {HW|SW}:    HW: generate the hardware files
                     SW: generate the software files
-        [vh_files]: (SW only) paths to .vh files used to extract macro values
-        [--help]:   (optional) display detailed help information"""
+        [vh_files]: paths to .vh files used to import HW macros to SW macros
+        [--help]:   display detailed help information"""
 
     print(usage_str)
 
