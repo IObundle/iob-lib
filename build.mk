@@ -41,6 +41,9 @@ sim-build:
 sim-run: sim-build
 	make -C $(SIM_DIR) run
 
+sim-waves:
+	make -C $(SIM_DIR) waves
+
 sim-test: 
 	make -C $(SIM_DIR) test
 

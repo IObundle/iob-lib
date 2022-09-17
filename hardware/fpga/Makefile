@@ -68,12 +68,12 @@ test: $(TEST_LIST)
 	diff test.log test.expected
 
 debug:
-	@echo $(SIMULATOR)
-	@echo $(BOARD)
-	@echo $(VHDR)
-	@echo $(VSRC)
-	@echo $(FPGA_SERVER)
-	@echo $(FPGA_OBJ)
+	@echo SIMULATOR=$(SIMULATOR)
+	@echo BOARD=$(BOARD)
+	@echo VHDR=$(VHDR)
+	@echo VSRC=$(VSRC)
+	@echo FPGA_SERVER=$(FPGA_SERVER)
+	@echo FPGA_OBJ=$(FPGA_OBJ)
 
 #
 # Running parameters

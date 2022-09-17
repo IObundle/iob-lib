@@ -29,7 +29,7 @@ ifneq ($(wildcard simulation.mk),)
 include simulation.mk
 endif
 
-build: $(VHDR) $(VSRC)
+build:
 ifeq ($(SIM_SERVER),)
 	make comp
 else
@@ -56,8 +56,12 @@ ifeq ($(DO_COV),1)
 endif
 endif
 ifeq ($(VCD),1)
-	if [ ! `pgrep -u $(USER) gtkwave` ]; then gtkwave uut.vcd; fi &
-endif
+	if [ "`pgrep -u $(USER) gtkwave`" ]; then killall -q -9 gtkwave; fi
+	gtkwave uut.vcd &
+endif	
+
+waves:
+	gtkwave uut.vcd &
 
 kill-sim:
 	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
@@ -85,10 +89,10 @@ clean-test-log:
 	rm -f test.log
 
 debug:
-	@echo $(NAME)
-	@echo $(VHDR)
-	@echo $(VSRC)
-	@echo $(VFLAGS)
+	@echo NAME=$(NAME)
+	@echo VHDR=$(VHDR)
+	@echo VSRC=$(VSRC)
+	@echo VFLAGS=$(VFLAGS)
 
 .PHONY: build run clean kill-sim kill-remote-sim debug test $(TEST_LIST)
 
