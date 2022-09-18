@@ -21,7 +21,6 @@ BUILD_DIR := ../$(NAME)_$(VERSION_STR)
 BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
 BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
-BUILD_SW_SRC_DIR = $(BUILD_DIR)/software/src
 BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
 BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
