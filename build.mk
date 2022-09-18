@@ -35,6 +35,7 @@ endif
 # SIMULATE
 #
 SIM_DIR=hardware/simulation
+SIMULATOR ?= icarus
 sim-build: 
 	make -C $(SIM_DIR) build
 

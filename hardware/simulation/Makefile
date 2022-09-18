@@ -77,6 +77,7 @@ endif
 
 clean:
 	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" -o -name "*_tb.*" $(NOCLEAN) \) -delete
+	@rm -rf obj_dir
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_SIM_DIR) clean; fi'
 endif

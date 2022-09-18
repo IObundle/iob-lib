@@ -15,7 +15,6 @@ ifneq ($(wildcard fpga.mk),)
 include fpga.mk
 endif
 
-
 FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
 include $(FPGA_TOOL)/$(FPGA_TOOL).mk
 
@@ -53,19 +52,15 @@ endif
 endif
 
 clean:
-	@find . -maxdepth 1 -type d -not \( -name '.' \) -exec rm -rf {} \;
-	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "*.expected" -o -name "*.tcl" -o -name "*.sdc" -o -name "*.xdc" -o -name test.log \) -delete
+	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga.mk" -name "quartus" -o -name "vivado" \) -delete
 ifneq ($(FPGA_SERVER),)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) clean; fi'
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) clean BOARD=$(BOARD); fi'
 ifneq ($(BOARD_SERVER),)
-	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
-	rsync -avz --delete --force --exclude .git $(ROOT_DIR) $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR)/$(FPGA_TOOL) clean'
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(BOARD_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) clean BOARD=$(BOARD); fi'
 endif
 endif
 
 test: $(TEST_LIST)
-	diff test.log test.expected
 
 debug:
 	@echo SIMULATOR=$(SIMULATOR)
@@ -74,6 +69,7 @@ debug:
 	@echo VSRC=$(VSRC)
 	@echo FPGA_SERVER=$(FPGA_SERVER)
 	@echo FPGA_OBJ=$(FPGA_OBJ)
+	@echo TEST_LIST=$(TEST_LIST)
 
 #
 # Running parameters
