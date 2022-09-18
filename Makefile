@@ -1,15 +1,7 @@
 # (c) 2022-Present IObundle, Lda, all rights reserved
 #
-# This makefile is used to setup a build directory for an IP core or to
-# simulate the modules in this repository
+# This makefile simulates the hardware modules in this repo
 #
-# To create a build directory from any directory:
-# > make -C /path/to/iob-lib setup
-#
-# To simulate a module in this:
-# > make -C /path/to/iob-lib sim MODULE=<some module in the hardware directory>
-#
-
 
 SHELL=/bin/bash
 export
@@ -42,7 +34,7 @@ INCLUDE=-Ibuild/hw/vsrc
 # asymmetric memory present
 IS_ASYM=$(shell echo $(SRC) | grep asym)
 
-AXI_GEN:=./software/python/axi_gen.py
+AXI_GEN:=./scripts/axi_gen.py
 
 #
 # Simulate with Icarus Verilog

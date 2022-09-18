@@ -16,8 +16,11 @@ endif
 #default DOC
 DOC?=pb
 
-#path to verilog2python script
-PYTHON_DIR:=../sw/python
+TSRC = $(patsubst tsrc/%, ./%, $(wildcard tsrc/*))
+%.tex: tsrc/%.tex
+	cp $< $@
+%.cls: tsrc/%.cls
+	cp $< $@
 
 #make product brief figures
 pb_figs:
@@ -28,7 +31,7 @@ ug_figs:
 	make -C ./figures ug_figs
 
 #build document
-build: $(DOC).pdf
+build: debug $(DOC).pdf
 
 #build presentation document type
 presentation.pdf: presentation.tex
@@ -41,7 +44,7 @@ pb.pdf: results pb_figs pbtop.tex
 	pdflatex -jobname pb pbtop.tex
 
 #pb top file containing the definition of sections to include
-pbtop.tex: texfiles
+pbtop.tex:
 	make doctop DOC=pb
 
 #build user guide document type
@@ -53,7 +56,7 @@ ug.pdf: results ug_figs ugtop.tex
 
 
 #ug top file containing the definition of sections to include
-ugtop.tex: texfiles
+ugtop.tex:
 	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
 	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
 	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi
@@ -75,48 +78,20 @@ doctop:
 view: $(DOC).pdf
 	evince $< &
 
-
-#generate tex files from code comments
-ifneq ($(wildcard tsrc/mkregs.conf),)
-MKREGS_CONF:=tsrc/mkregs.conf
-endif
-VHDR:=$(wildcard ../hw/vsrc/*_conf.vh) $(wildcard ../hw/vsrc/*.vh)
-VSRC:=$(wildcard ../hw/vsrc/*.v)
-texfiles:
-	$(PYTHON_DIR)/verilog2tex.py ../hw/vsrc/$(TOP_MODULE).v $(VHDR) $(VSRC) $(MKREGS_CONF) && cp tsrc/* .
-
-#run EDA tools to get results to include in document 
-results:
-ifeq ($(RESULTS), 1)
-ifneq ($(INTEL_FPGA),)
-	make  -C ../hw/fpga build TOP_MODULE=$(TOP_MODULE)
-	cp ../hw/fpga/quartus.tex .
-endif
-ifneq ($(AMD_FPGA),)
-	make  -C ../hw/fpga build TOP_MODULE=$(TOP_MODULE)
-	cp ../hw/fpga/vivado.tex .
-endif
-ifneq ($(ASIC_NODE),)
-	make  -C ../hw/syn build ASIC_NODE=$(ASIC_NODE)
-	cp ../hw/syn/genus.tex .
-endif
-endif
-
 clean:
-	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk -o -name "*.expected" \) -delete
+	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk \) -delete
 	make -C figures clean 
 	@rm -rf $(PYTHON_DIR)/__pycache__
 
-test: clean $(TEST_LIST)
+test: clean debug $(TEST_LIST)
 
-debug:
-	@echo VHDR=$(VHDR)
-	@echo VSRC=$(VSRC)
+debug: $(TSRC)
+	@echo TSRC=$(TSRC)
 	@echo RESULTS=$(RESULTS)
 	@echo FPGA=$(FPGA)
 	@echo INTEL_FPGA=$(INTEL_FPGA)
 	@echo AMD_FPGA=$(AMD_FPGA)
 	@echo ASIC_NODE=$(ASIC_NODE)
 
-.PHONY: view texfiles doctop figures results clean test debug
+.PHONY: view doctop figures results build clean test debug
 

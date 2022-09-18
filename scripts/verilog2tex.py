@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-'''
- Verilog2Tex: extract user guide documentation from Verilog sources
+'''Verilog2Tex: extract user guide documentation from Verilog sources and
+        register configuration file (mkregs.conf)
+
+   Usage: verilog2tex.py path/to/top_level.v [verilog_files] [mkregs.conf]
+        print("verilog_files: paths to .v and .vh files
+        print("mkregs_conf: path/to/mkregs.conf
 '''
 import sys
 import os
@@ -277,10 +281,9 @@ def swreg_parse (vh, defines) :
 def main () :
     #parse command line
     if len(sys.argv) < 2:
-        print("Usage: param2tex.py path/to/top_level.v [vh_files] [v_files] [mkregs.conf]")
-        print("vh_files: paths to .vh files used to extract macro values")
-        print("v_files: paths to .v files used to extract blocks info")
-        print("mkregs_conf: path to mkregs.conf file with SW accessible regs and mems")
+        print("Usage: verilog2tex.py path/to/top_level.v [verilog_files] [mkregs.conf]")
+        print("verilog_files: paths to .v and .vh files")
+        print("mkregs_conf: path/to/mkregs.conf")
         exit()
 
     #top-level verilog file
@@ -299,6 +302,7 @@ def main () :
     conf = [] # mkregs.conf list
 
     if(len(sys.argv) > 2):
+
         #read and parse header files if any
         i=2
         while i<len(sys.argv) and sys.argv[i].find('.vh') > -1:
@@ -309,6 +313,7 @@ def main () :
         header_parse(vh, defines)
 
         #read source files
+        i=2
         while i<len(sys.argv) and sys.argv[i].find('.v') > -1:
             fv =  open (sys.argv[i], 'r')
             v = [*v, *fv.readlines()]
@@ -316,17 +321,17 @@ def main () :
             i = i+1
 
         # read mkregs.conf file
-        if i!=len(sys.argv) and sys.argv[i].find('mkregs.conf'):
-            fconf =  open (sys.argv[i], 'r')
+        conf_idx = len(sys.argv)-1
+        if sys.argv[conf_idx] == 'mkregs.conf':
+            fconf =  open (sys.argv[conf_idx], 'r')
             conf = [*conf, *fconf.readlines()]
             fconf.close()
-            i = i+1
 
 
 
     #PARSE TOP-LEVEL PARAMETERS AND MACROS
 
-    #get the DEFINE environment variable
+    #get the DEFINE environment variable (deprecated)
     param_defaults = {}
     DEFINE = os.getenv('DEFINE')
     if DEFINE is not None:
@@ -339,7 +344,7 @@ def main () :
     params = param_parse (topv_lines, param_defaults, defines)
 
     #PARSE BLOCK DIAGRAM MODULES
-    block_parse([*topv_lines])
+    block_parse([*v])
 
     #PARSE INTERFACE SIGNALS
     io_parse ([*topv_lines, *v, *vh], params, defines)

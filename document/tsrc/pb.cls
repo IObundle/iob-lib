@@ -27,8 +27,6 @@
 \RequirePackage{lscape}
 
 
-\graphicspath{{./figures/}}
-
 \setitemize{labelindent=2mm,labelsep=1mm,leftmargin=*}
 
 \setlength{\parindent}{1.0ex}
@@ -44,9 +42,7 @@
  top=20mm,
 }
 
-\pagestyle{fancy}
-\graphicspath{{./figures/} {./}}
-
+\graphicspath{ {./figures} }
 
 \renewcommand{\headrulewidth}{.4pt}
 \fancyhead{}
