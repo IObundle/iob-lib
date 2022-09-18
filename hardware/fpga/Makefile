@@ -60,7 +60,7 @@ ifneq ($(BOARD_SERVER),)
 endif
 endif
 
-test: $(TEST_LIST)
+test: debug $(TEST_LIST)
 
 debug:
 	@echo SIMULATOR=$(SIMULATOR)
