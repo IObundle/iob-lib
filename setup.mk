@@ -51,12 +51,12 @@ $(BUILD_VSRC_DIR)/$(NAME)_conf.vh:
 
 # header files
 SRC+=$(patsubst hardware/src/%.vh, $(BUILD_VSRC_DIR)/%.vh, $(wildcard hardware/src/*.vh))
-$(BUILD_vSRC_DIR)/%.vh: hardware/src/%.vh
+$(BUILD_VSRC_DIR)/%.vh: hardware/src/%.vh
 	cp $< $@
 
 # source files
 SRC+=$(patsubst hardware/src/%.v, $(BUILD_VSRC_DIR)/%.v, $(wildcard hardware/src/*.v))
-$(BUILD_vSRC_DIR)/%.v: hardware/src/%.v
+$(BUILD_VSRC_DIR)/%.v: hardware/src/%.v
 	cp $< $@
 
 

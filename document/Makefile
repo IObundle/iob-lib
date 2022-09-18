@@ -83,7 +83,7 @@ clean:
 	make -C figures clean 
 	@rm -rf $(PYTHON_DIR)/__pycache__
 
-test: clean $(TEST_LIST)
+test: clean debug $(TEST_LIST)
 
 debug: $(TSRC)
 	@echo TSRC=$(TSRC)
