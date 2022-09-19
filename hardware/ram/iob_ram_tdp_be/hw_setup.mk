@@ -4,7 +4,7 @@ ifeq ($(filter iob_ram_tdp_be, $(HW_MODULES)),)
 HW_MODULES+=iob_ram_tdp_be
 
 # Submodules
-include $(LIB_DIR)/hardware/ram/iob_ram_tdp/hardware.mk
+include $(LIB_DIR)/hardware/ram/iob_ram_tdp/hw_setup.mk
 
 # Sources
 SRC+=$(BUILD_VSRC_DIR)/iob_ram_tdp_be.v

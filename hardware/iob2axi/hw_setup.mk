@@ -3,7 +3,7 @@ ifeq ($(filter iob2axi, $(HW_MODULES)),)
 # Add to modules list
 HW_MODULES+=iob2axi
 
-include $(LIB_DIR)/hardware/fifo/iob_fifo_sync/hardware.mk
+include $(LIB_DIR)/hardware/fifo/iob_fifo_sync/hw_setup.mk
 
 # SRC+=m_axi_m_port.vh \
 # m_axi_write_m_port.vh \

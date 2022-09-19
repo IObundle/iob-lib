@@ -4,7 +4,7 @@ ifeq ($(filter iob_ram_2p_tiled, $(HW_MODULES)),)
 HW_MODULES+=iob_ram_2p_tiled
 
 # Submodules
-include $(LIB_DIR)/hardware/ram/iob_ram_2p/hardware.mk
+include $(LIB_DIR)/hardware/ram/iob_ram_2p/hw_setup.mk
 
 # Sources
 SRC+=$(BUILD_VSRC_DIR)/iob_ram_2p_tiled.v
