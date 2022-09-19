@@ -11,8 +11,8 @@ from submodule_utils import *
 # Automatically include *swreg_def.vh verilog headers in system.v
 def insert_header_files(template_contents, root_dir):
     # get path to build_lib
-    build_path = get_build_lib(root_dir)
-    header_path = f"{build_path}/hw/vsrc/"
+    build_path = get_build_lib(root_dir+"/..")
+    header_path = f"{build_path}/hardware/src/"
     vsrc_files = os.listdir(header_path)
     header_index = find_idx(template_contents, "PHEADER")
 
@@ -26,6 +26,7 @@ def create_systemv(root_dir, directories_str, peripherals_str):
     # Get peripherals, directories and signals
     instances_amount, instances_parameters = get_peripherals(peripherals_str)
     submodule_directories = get_submodule_directories(directories_str)
+    print("BLA", submodule_directories, directories_str)
     peripheral_signals, peripheral_parameters = get_peripherals_signals(instances_amount,submodule_directories)
     print(f'peripheral_signals: {peripheral_signals}')
     print(f'peripheral_parameters: {peripheral_parameters}')

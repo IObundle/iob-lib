@@ -45,8 +45,8 @@ $(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
 
 # select core configuration
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_conf.vh
-$(BUILD_VSRC_DIR)/$(NAME)_conf.vh:
-	cp hardware/src/$(NAME)_conf_$(CACHE_CONFIG).vh $@
+$(BUILD_VSRC_DIR)/$(NAME)_conf.vh: hardware/src/$(NAME)_conf_$(CONFIG).vh
+	cp hardware/src/$(NAME)_conf_$(CONFIG).vh $@
 
 # header files
 SRC+=$(patsubst hardware/src/%.vh, $(BUILD_VSRC_DIR)/%.vh, $(wildcard hardware/src/*.vh))
