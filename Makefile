@@ -14,7 +14,7 @@ BUILD_VSRC_DIR:=.
 MODULE ?= iob_ram_2p
 MODULE_DIR ?= $(shell find hardware -name $(MODULE))
 ifneq ($(MODULE_DIR),)
-include $(MODULE_DIR)/hardware.mk
+include $(MODULE_DIR)/hw_setup.mk
 else
 $(info No such module $(MODULE))
 endif
