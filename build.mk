@@ -99,7 +99,7 @@ endif
 #
 # TEST
 #
-test: sim-test fpga-test doc-tes
+test: sim-test fpga-test doc-test
 
 
 
