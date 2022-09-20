@@ -24,6 +24,7 @@ BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
 BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
+BUILD_SW_PYTHON_DIR = $(BUILD_DIR)/scripts
 
 
 setup: debug sim-setup fpga-setup syn-setup software-setup doc-setup

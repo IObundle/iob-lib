@@ -8,7 +8,7 @@ import submodule_utils
 from submodule_utils import *
 import createSystem
 
-def create_top_system(root_dir, directories_str, peripherals_str):
+def create_top_system(root_dir, directories_str, peripherals_str, file_path):
     # Get peripherals, directories and signals
     instances_amount, instances_parameters = get_peripherals(peripherals_str)
     submodule_directories = get_submodule_directories(directories_str)
@@ -40,17 +40,17 @@ def create_top_system(root_dir, directories_str, peripherals_str):
             for signal in pio_signals:
                 template_contents.insert(start_index, '               .{signal}({signal}),\n'.format(signal=corename+str(i)+"_"+signal))
 
-    # Write system.v
-    systemv_file = open("system_top.v", "w")
-    systemv_file.writelines(template_contents)
-    systemv_file.close()
+    # Write output file
+    output_file = open(file_path, "w")
+    output_file.writelines(template_contents)
+    output_file.close()
 
 
 if __name__ == "__main__":
     # Parse arguments
-    if len(sys.argv)<4:
-        print("Usage: {} <root_dir> <directories_defined_in_info.mk> <peripherals>\n".format(sys.argv[0]))
+    if len(sys.argv)<5:
+        print("Usage: {} <root_dir> <directories_defined_in_config.mk> <peripherals> <path of file to be created>\n".format(sys.argv[0]))
         exit(-1)
     root_dir=sys.argv[1]
     submodule_utils.root_dir = root_dir
-    create_top_system(root_dir, sys.argv[2], sys.argv[3]) 
+    create_top_system(root_dir, sys.argv[2], sys.argv[3], sys.argv[4]) 
