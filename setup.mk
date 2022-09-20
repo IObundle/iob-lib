@@ -38,6 +38,11 @@ $(BUILD_DIR):
 #
 #HARDWARE
 #
+
+ifneq ($(wildcard hardware/hw_setup.mk),)
+include hardware/hw_setup.mk
+endif
+
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
 	$(LIB_DIR)/scripts/version.py -v .
@@ -49,19 +54,22 @@ $(BUILD_VSRC_DIR)/$(NAME)_conf.vh: hardware/src/$(NAME)_conf_$(CONFIG).vh
 	cp hardware/src/$(NAME)_conf_$(CONFIG).vh $@
 
 # header files
-SRC+=$(patsubst hardware/src/%.vh, $(BUILD_VSRC_DIR)/%.vh, $(wildcard hardware/src/*.vh))
-$(BUILD_VSRC_DIR)/%.vh: hardware/src/%.vh
+define copy_verilog_headers
+SRC+=$(patsubst $(1)/hardware/src/%.vh, $(BUILD_VSRC_DIR)/%.vh, $(wildcard $(1)/hardware/src/*.vh))
+
+$(BUILD_VSRC_DIR)/%.vh: $(1)/hardware/src/%.vh
 	cp $< $@
+endef
 
 # source files
-SRC+=$(patsubst hardware/src/%.v, $(BUILD_VSRC_DIR)/%.v, $(wildcard hardware/src/*.v))
-$(BUILD_VSRC_DIR)/%.v: hardware/src/%.v
+define copy_verilog_sources
+SRC+=$(patsubst $(1)/hardware/src/%, $(BUILD_VSRC_DIR)/%, $(wildcard $(1)/hardware/src/*))
+
+$(BUILD_VSRC_DIR)/%: $(1)/hardware/src/%
 	cp $< $@
+endef
 
 
-ifneq ($(wildcard hardware/hw_setup.mk),)
-include hardware/hw_setup.mk
-endif
 
 #simulation
 ifneq ($(wildcard hardware/simulation),)
@@ -70,20 +78,34 @@ ifneq ($(wildcard hardware/simulation/sim_setup.mk),)
 include hardware/simulation/sim_setup.mk
 endif
 
+SRC+=$(patsubst $(LIB_DIR)/hardware/simulation/%, $(BUILD_SIM_DIR)/%, $(wildcard $(LIB_DIR)/hardware/simulation/*))
+$(BUILD_SIM_DIR)/%: $(LIB_DIR)/hardware/simulation/%
+	cp $< $@
+
 sim-setup:
-	cp $(LIB_DIR)/hardware/simulation/* $(BUILD_SIM_DIR)
+#	cp $(LIB_DIR)/hardware/simulation/* $(BUILD_SIM_DIR)
 
 endif
 
 #fpga
-fpga-setup:
 ifneq ($(wildcard hardware/fpga),)
+
+ifneq ($(wildcard hardware/fpga/fpga_setup.mk),)
+include hardware/fpga/fpga_setup.mk
+endif
+
+fpga-setup:
 	cp -rn $(LIB_DIR)/hardware/fpga/* $(BUILD_FPGA_DIR)
 endif
 
 #synthesis
-syn-setup:
 ifneq ($(wildcard hardware/synthesis),)
+
+ifneq ($(wildcard hardware/syn/syn_setup.mk),)
+include hardware/syn/syn_setup.mk
+endif
+
+syn-setup:
 	cp -rn $(LIB_DIR)/hardware/synthesis/* $(BUILD_DIR)/hardware/synthesis
 endif
 
