@@ -94,9 +94,17 @@ ifneq ($(wildcard hardware/fpga/fpga_setup.mk),)
 include hardware/fpga/fpga_setup.mk
 endif
 
-SRC+=$(patsubst $(LIB_DIR)/hardware/fpga/%, $(BUILD_FPGA_DIR)/%, $(wildcard $(LIB_DIR)/hardware/fpga/*))
-$(BUILD_FPGA_DIR)/%: $(LIB_DIR)/hardware/fpga/%
+SRC+=$(patsubst $(LIB_DIR)/hardware/fpga/quartus/%, $(BUILD_FPGA_DIR)/quartus/%, $(wildcard $(LIB_DIR)/hardware/fpga/quartus/*))
+$(BUILD_FPGA_DIR)/quartus/%: $(LIB_DIR)/hardware/fpga/quartus/%
 	cp -r $< $@
+
+SRC+=$(patsubst $(LIB_DIR)/hardware/fpga/vivado/%, $(BUILD_FPGA_DIR)/vivado/%, $(wildcard $(LIB_DIR)/hardware/fpga/vivado/*))
+$(BUILD_FPGA_DIR)/vivado/%: $(LIB_DIR)/hardware/fpga/vivado/%
+	cp -r $< $@
+
+SRC+=$(BUILD_FPGA_DIR)/Makefile
+$(BUILD_FPGA_DIR)/Makefile: $(LIB_DIR)/hardware/fpga/Makefile
+	cp $< $@
 
 endif
 
