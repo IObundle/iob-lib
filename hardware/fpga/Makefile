@@ -53,6 +53,7 @@ endif
 
 clean:
 	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga.mk" -name "quartus" -o -name "vivado" \) -delete
+	rm -f ../../*.vh
 ifneq ($(FPGA_SERVER),)
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) clean BOARD=$(BOARD); fi'
 ifneq ($(BOARD_SERVER),)

@@ -53,20 +53,19 @@ $(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
 	$(LIB_DIR)/scripts/version.py -v .
 	mv $(NAME)_version.vh $(BUILD_VSRC_DIR)
 
-# select core configuration
+#select core configuration
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_conf.vh
 $(BUILD_VSRC_DIR)/$(NAME)_conf.vh: hardware/src/$(NAME)_conf_$(CONFIG).vh
 	cp hardware/src/$(NAME)_conf_$(CONFIG).vh $@
 
-# header files
+#copy header files macro
 define copy_verilog_headers
 SRC+=$(patsubst $(1)/hardware/src/%.vh, $(BUILD_VSRC_DIR)/%.vh, $(wildcard $(1)/hardware/src/*.vh))
-
 $(BUILD_VSRC_DIR)/%.vh: $(1)/hardware/src/%.vh
 	cp $< $@
 endef
 
-# source files
+#copy source files function
 define copy_verilog_sources
 SRC+=$(patsubst $(1)/hardware/src/%, $(BUILD_VSRC_DIR)/%, $(wildcard $(1)/hardware/src/*))
 $(BUILD_VSRC_DIR)/%: $(1)/hardware/src/%
@@ -78,10 +77,12 @@ endef
 #simulation
 ifneq ($(wildcard hardware/simulation),)
 
+#include local simulation makefile segment
 ifneq ($(wildcard hardware/simulation/sim_setup.mk),)
 include hardware/simulation/sim_setup.mk
 endif
 
+#copy simulation files from LIB 
 SRC+=$(patsubst $(LIB_DIR)/hardware/simulation/%, $(BUILD_SIM_DIR)/%, $(wildcard $(LIB_DIR)/hardware/simulation/*))
 $(BUILD_SIM_DIR)/%: $(LIB_DIR)/hardware/simulation/%
 	cp $< $@
@@ -90,18 +91,22 @@ endif
 #fpga
 ifneq ($(wildcard hardware/fpga),)
 
+#include local fpga makefile segment
 ifneq ($(wildcard hardware/fpga/fpga_setup.mk),)
 include hardware/fpga/fpga_setup.mk
 endif
 
+#copy quartus files from LIB 
 SRC+=$(patsubst $(LIB_DIR)/hardware/fpga/quartus/%, $(BUILD_FPGA_DIR)/quartus/%, $(wildcard $(LIB_DIR)/hardware/fpga/quartus/*))
 $(BUILD_FPGA_DIR)/quartus/%: $(LIB_DIR)/hardware/fpga/quartus/%
 	cp -r $< $@
 
+#copy vivado files from LIB 
 SRC+=$(patsubst $(LIB_DIR)/hardware/fpga/vivado/%, $(BUILD_FPGA_DIR)/vivado/%, $(wildcard $(LIB_DIR)/hardware/fpga/vivado/*))
 $(BUILD_FPGA_DIR)/vivado/%: $(LIB_DIR)/hardware/fpga/vivado/%
 	cp -r $< $@
 
+#copy fpga makefile
 SRC+=$(BUILD_FPGA_DIR)/Makefile
 $(BUILD_FPGA_DIR)/Makefile: $(LIB_DIR)/hardware/fpga/Makefile
 	cp $< $@
@@ -111,10 +116,12 @@ endif
 #synthesis
 ifneq ($(wildcard hardware/synthesis),)
 
+#include  local asic synthesis makefile segment
 ifneq ($(wildcard hardware/syn/syn_setup.mk),)
 include hardware/syn/syn_setup.mk
 endif
 
+#copy asic synthesis files from LIB
 SRC+=$(patsubst $(LIB_DIR)/hardware/syn/%, $(BUILD_FPGA_DIR)/%, $(wildcard $(LIB_DIR)/hardware/syn/*))
 $(BUILD_SYN_DIR)/%: $(LIB_DIR)/hardware/syn/%
 	cp $< $@
@@ -128,10 +135,12 @@ endif
 
 ifneq ($(wildcard software),)
 
+#include software makefile segment
 ifneq ($(wildcard software/sw_setup.mk),)
 include software/sw_setup.mk
 endif
 
+#copy source files from LIB 
 SRC+=$(patsubst $(LIB_DIR)/software/src/%, $(BUILD_ESRC_DIR)/%, $(wildcard $(LIB_DIR)/software/src/%))
 $(BUILD_ESRC_DIR)/%: $(LIB_DIR)/software/src/%
 	cp $< $@
@@ -144,24 +153,24 @@ endif
 
 ifneq ($(wildcard document),)
 
-# include local setup stub
+#include local fpga makefile segment
 ifneq ($(wildcard document/doc_setup.mk),)
 include document/doc_setup.mk
 endif
 
-# core version file
+#make and install core version file
 SRC+=$(BUILD_TSRC_DIR)/$(NAME)_version.tex
 $(BUILD_TSRC_DIR)/$(NAME)_version.tex:
 	$(LIB_DIR)/scripts/version.py -t .
 	mv iob_cache_version.tex $(BUILD_TSRC_DIR)
 
-# short git hash file
+#make short git hash file
 SRC+=$(BUILD_TSRC_DIR)/shortHash.tex
 $(BUILD_TSRC_DIR)/shortHash.tex:
 	git rev-parse --short HEAD > $@
 
 
-#generate tex files from code comments
+#set mkregs variable to non empty if file exists
 ifneq ($(wildcard mkregs.conf),)
 MKREGS_CONF:=mkregs.conf
 endif
@@ -171,19 +180,21 @@ SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%, $(BUILD_TSRC_DIR)/%, $(wildcard $(LI
 $(BUILD_TSRC_DIR)/%: $(LIB_DIR)/document/tsrc/%
 	if [ ! -f $@ ]; then cp $< $@; fi
 
-#copy figures
+#copy figures from LIB
 SRC+=$(patsubst $(LIB_DIR)/document/figures/%, $(BUILD_FIG_DIR)/%, $(wildcard $(LIB_DIR)/document/figures/*))
 $(BUILD_FIG_DIR)/%: $(LIB_DIR)/document/figures/%
 	cp $< $@
 
+#copy document Makefile
 SRC+=$(BUILD_DOC_DIR)/Makefile
 $(BUILD_DOC_DIR)/Makefile: $(LIB_DIR)/document/Makefile
 	cp $< $@
 
+#make tex files from verilog sources
 v2tex: $(SRC)
 ifeq ($(wildcard *.tex),)
 	$(PYTHON_DIR)/verilog2tex.py hardware/src/$(NAME).v hardware/src/* $(LIB_DIR)/hardware/include/*.vh *.vh $(MKREGS_CONF)
-	cp *.tex $(BUILD_DOC_DIR)
+	cp *.tex $(BUILD_TSRC_DIR)
 endif
 
 endif

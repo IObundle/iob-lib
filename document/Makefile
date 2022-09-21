@@ -8,7 +8,7 @@ SHELL = /bin/bash
 # include core basic info
 include ../info.mk
 
-#include local doc segment
+#include local doc makefile segment
 ifneq ($(wildcard document.mk),)
 include document.mk
 endif
@@ -39,7 +39,7 @@ presentation.pdf: presentation.tex
 	pdflatex $<
 
 #build product brief document type
-pb.pdf: results pb_figs pbtop.tex
+pb.pdf: debug results pb_figs pbtop.tex
 	pdflatex -jobname pb pbtop.tex
 	pdflatex -jobname pb pbtop.tex
 
@@ -48,7 +48,7 @@ pbtop.tex:
 	make doctop DOC=pb
 
 #build user guide document type
-ug.pdf: results ug_figs ugtop.tex
+ug.pdf: debug results ug_figs ugtop.tex
 	pdflatex -jobname ug ugtop.tex
 	if [ -f *.bib ]; then bibtex ug; fi
 	pdflatex -jobname ug ugtop.tex
@@ -81,7 +81,7 @@ view: $(DOC).pdf
 clean:
 	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk \) -delete
 	make -C figures clean 
-	@rm -rf $(PYTHON_DIR)/__pycache__
+	@rm -rf $(PYTHON_DIR)/__pycache__ ../*.tex
 
 test: clean debug $(TEST_LIST)
 
