@@ -275,14 +275,14 @@ def get_pio_signals(peripheral_signals):
         if signal in pio_signals: pio_signals.pop(signal)
     return pio_signals
 
-# Given a path to a file containing the TOP_MODULE makefile variable declaration, return the value of that variable.
+# Given a path to a file containing the "NAME" makefile variable declaration, return the value of that variable.
 def get_top_module(file_path):
     config_file = open(file_path, "r")
     config_contents = config_file.readlines()
     config_file.close()
     top_module = ""
     for line in config_contents:
-        top_module_search = re.search("^\s*TOP_MODULE\s*:?\??=\s*([^\s]+)", line)
+        top_module_search = re.search("^\s*NAME\s*:?\??=\s*([^\s]+)", line)
         if top_module_search is not None:
             top_module = top_module_search.group(1)
             break;
@@ -303,12 +303,11 @@ def get_top_module_from_dir(core_dir):
 def get_peripherals_signals(list_of_peripherals, submodule_directories):
     peripheral_signals = {}
     peripheral_parameters = {}
-    vsrc_dir = f'{get_build_lib(root_dir)}/hardware/src'
     # Get signals of each peripheral
     for i in list_of_peripherals:
         # Find top module verilog file of peripheral
         module_filename = get_top_module(f'{root_dir}/{submodule_directories[i]}/config_setup.mk')+".v";
-        module_path=os.path.join(vsrc_dir,module_filename)
+        module_path=os.path.join(f'{root_dir}/{submodule_directories[i]}/hardware/src',module_filename)
         # Skip iteration if peripheral does not have top module
         if not os.path.isfile(module_path):
             continue

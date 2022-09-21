@@ -28,6 +28,7 @@ BUILD_PSRC_DIR = $(BUILD_DIR)/software/esrc
 BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
+BUILD_SW_PYTHON_DIR = $(BUILD_DIR)/scripts
 
 
 setup: debug

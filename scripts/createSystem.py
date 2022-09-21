@@ -22,7 +22,7 @@ def insert_header_files(template_contents, root_dir):
             template_contents.insert(header_index, f'`include "{file}"\n')
 
 
-def create_systemv(root_dir, directories_str, peripherals_str):
+def create_systemv(root_dir, directories_str, peripherals_str, file_path):
     # Get peripherals, directories and signals
     instances_amount, instances_parameters = get_peripherals(peripherals_str)
     submodule_directories = get_submodule_directories(directories_str)
@@ -88,17 +88,16 @@ def create_systemv(root_dir, directories_str, peripherals_str):
             template_contents.insert(start_index, "\n")
 
     # Write system.v
-    systemv_file = open("system.v", "w")
+    systemv_file = open(file_path, "w")
     systemv_file.writelines(template_contents)
     systemv_file.close()
 
 
 if __name__ == "__main__":
     # Parse arguments
-    if len(sys.argv)<4:
-        print("Usage: {} <root_dir> <directories_defined_in_info.mk> <peripherals>\n".format(sys.argv[0]))
+    if len(sys.argv)<5:
+        print("Usage: {} <root_dir> <directories_defined_in_config.mk> <peripherals> <path of file to be created>\n".format(sys.argv[0]))
         exit(-1)
     root_dir=sys.argv[1]
     submodule_utils.root_dir = root_dir
-
-    create_systemv(root_dir, sys.argv[2], sys.argv[3]) 
+    create_systemv(root_dir, sys.argv[2], sys.argv[3], sys.argv[4]) 
