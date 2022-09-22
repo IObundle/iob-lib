@@ -8,11 +8,11 @@ import submodule_utils
 from submodule_utils import *
 import createSystem
 
-def create_top_system(root_dir, directories_str, peripherals_str, file_path):
+def create_top_system(root_dir, peripherals_str, file_path):
     # Get peripherals, directories and signals
     instances_amount, instances_parameters = get_peripherals(peripherals_str)
-    submodule_directories = get_submodule_directories(directories_str)
-    peripheral_signals, peripheral_parameters = get_peripherals_signals(instances_amount,submodule_directories)
+    submodule_directories = get_submodule_directories(root_dir)
+    peripheral_signals, peripheral_parameters = get_peripherals_signals(root_dir, instances_amount,submodule_directories)
 
     # Read template file
     template_file = open(root_dir+"/hardware/simulation/system_top.vt", "r")
@@ -48,9 +48,7 @@ def create_top_system(root_dir, directories_str, peripherals_str, file_path):
 
 if __name__ == "__main__":
     # Parse arguments
-    if len(sys.argv)<5:
-        print("Usage: {} <root_dir> <directories_defined_in_config.mk> <peripherals> <path of file to be created>\n".format(sys.argv[0]))
+    if len(sys.argv)<4:
+        print("Usage: {} <root_dir> <peripherals> <path of file to be created>\n".format(sys.argv[0]))
         exit(-1)
-    root_dir=sys.argv[1]
-    submodule_utils.root_dir = root_dir
-    create_top_system(root_dir, sys.argv[2], sys.argv[3], sys.argv[4]) 
+    create_top_system(sys.argv[1], sys.argv[2], sys.argv[3]) 
