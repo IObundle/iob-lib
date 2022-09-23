@@ -105,9 +105,9 @@ report_clocks
 report_clock_interaction
 report_cdc -details
 
-if { $IS_FPGA == "1" }
+if { $IS_FPGA == "1" } {
     write_bitstream -force $NAME.bit
-else {
+} else {
     write_edif -force $NAME.edif
     write_verilog -force -mode synth_stub $NAME_stub.v
 }
