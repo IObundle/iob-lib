@@ -105,12 +105,9 @@ report_clocks
 report_clock_interaction
 report_cdc -details
 
-if { $IS_FPGA != "1" } {
-write_edif -force $NAME.edif
-set TOP_STUB $NAME
-append TOP_STUB "_stub"
-write_verilog -force -mode synth_stub $TOP_STUB.v
-} else {
-    write_bitstream -force top_system.bit
-    write_verilog -force top_system.v
+if { $IS_FPGA == "1" }
+    write_bitstream -force $NAME.bit
+else {
+    write_edif -force $NAME.edif
+    write_verilog -force -mode synth_stub $NAME_stub.v
 }
