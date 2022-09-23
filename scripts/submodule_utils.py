@@ -73,25 +73,20 @@ def get_build_lib(directory):
             return d.path
     return ""
 
-# Parameter: string with directories separated by ';'
-# Returns dictionary with every directory defined in <root_dir>/config.mk
-def get_directories(directories_str):
-    # Get directories for each submodule
-    directories = {}
-    list_dirs_str = directories_str.split(';')
-    list_dirs_str.pop(-1)
-    for line in list_dirs_str:
-        var_name, path  = line.strip().split("=", 1)
-        directories[var_name] = path
-    return directories
 
-# Convert keys from format "CORENAME_DIR" to "CORENAME"
-# (Removes "_DIR" sufix from every key in the directories dictionary)
-def get_submodule_directories(directories_str):
-    directories = get_directories(directories_str)
-    keys = list(directories.keys())
-    for key in keys:
-        directories[key.replace("_DIR","")] = directories.pop(key)
+# Get submodule directories from variables defined in config_setup.mk
+# This function replaces "$(SOC_DIR)" by "." in the directories
+# Returns dictionary with the directory for each variable found in config_setup.mk with suffix "_DIR"
+def get_submodule_directories(root_dir):
+    with open(root_dir+"/config_setup.mk", "r") as file:
+        lines = file.readlines()
+
+    directories = {}
+    for line in lines:
+        result = re.search("^\s*(\w+)_DIR\s*.?=\s*([^\s]+)", line)
+        if result is not None:
+            directories[result.group(1)] = result.group(2).replace("$(SOC_DIR)",".")
+
     return directories
 
 # Replaces a verilog parameter in a string with its value.
@@ -300,7 +295,7 @@ def get_top_module_from_dir(core_dir):
 #            - submodule_directories: dictionary with directory location of each peripheral given
 # Returns: - dictionary with signals from port list in top module of each peripheral
 #          - dictionary with parameters in top module of each peripheral
-def get_peripherals_signals(list_of_peripherals, submodule_directories):
+def get_peripherals_signals(root_dir, list_of_peripherals, submodule_directories):
     peripheral_signals = {}
     peripheral_parameters = {}
     # Get signals of each peripheral
@@ -396,14 +391,14 @@ if __name__ == "__main__":
             print("Usage: {} get_instances <peripherals>\n".format(sys.argv[0]))
             exit(-1)
         print_instances(sys.argv[2])
-    elif sys.argv[1] == "get_n_slaves":
+    elif sys.argv[1] == "get_n_periphs":
         if len(sys.argv)<3:
-            print("Usage: {} get_n_slaves <peripherals>\n".format(sys.argv[0]))
+            print("Usage: {} get_n_periphs <peripherals>\n".format(sys.argv[0]))
             exit(-1)
         print_nslaves(sys.argv[2])
-    elif sys.argv[1] == "get_n_slaves_w":
+    elif sys.argv[1] == "get_n_periphs_w":
         if len(sys.argv)<3:
-            print("Usage: {} get_n_slaves_w <peripherals>\n".format(sys.argv[0]))
+            print("Usage: {} get_n_periphs_w <peripherals>\n".format(sys.argv[0]))
             exit(-1)
         print_nslaves_w(sys.argv[2])
     elif sys.argv[1] == "remove_duplicates_and_params":
@@ -411,14 +406,14 @@ if __name__ == "__main__":
             print("Usage: {} remove_duplicates_and_params <peripherals>\n".format(sys.argv[0]))
             exit(-1)
         remove_duplicates_and_params(sys.argv[2])
-    elif sys.argv[1] == "get_defines":
+    elif sys.argv[1] == "get_periphs_id":
         if len(sys.argv)<3:
-            print("Usage: {} get_defines <peripherals> <optional:defmacro>\n".format(sys.argv[0]))
+            print("Usage: {} get_periphs_id <peripherals> <optional:defmacro>\n".format(sys.argv[0]))
             exit(-1)
         if len(sys.argv)<4:
             print_peripheral_defines("",sys.argv[2])
         else:
             print_peripheral_defines(sys.argv[3],sys.argv[2])
     else:
-        print("Unknown command.\nUsage: {} <command> <parameters>\n Commands: get_peripherals get_instances get_n_slaves get_n_slaves_w get_defines print_peripheral_defines".format(sys.argv[0]))
+        print("Unknown command.\nUsage: {} <command> <parameters>\n Commands: get_peripherals get_instances get_n_periphs get_n_periphs_w get_periphs_id print_peripheral_defines".format(sys.argv[0]))
         exit(-1)
