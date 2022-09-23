@@ -109,5 +109,5 @@ if { $IS_FPGA == "1" } {
     write_bitstream -force $NAME.bit
 } else {
     write_edif -force $NAME.edif
-    write_verilog -force -mode synth_stub $NAME_stub.v
+    write_verilog -force -mode synth_stub ${NAME}_stub.v
 }
