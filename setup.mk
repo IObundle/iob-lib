@@ -162,7 +162,7 @@ endif
 SRC+=$(BUILD_TSRC_DIR)/$(NAME)_version.tex
 $(BUILD_TSRC_DIR)/$(NAME)_version.tex:
 	$(LIB_DIR)/scripts/version.py -t .
-	mv iob_cache_version.tex $(BUILD_TSRC_DIR)
+	mv $(NAME)_version.tex $(BUILD_TSRC_DIR)
 
 #make short git hash file
 SRC+=$(BUILD_TSRC_DIR)/shortHash.tex
