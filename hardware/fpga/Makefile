@@ -9,6 +9,9 @@ include ../../info.mk
 REMOTE_BUILD_DIR=sandbox/$(NAME)
 REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
 
+#select board
+#default board
+BOARD?=CYCLONEV-GT-DK
 
 #include local fpga segment
 ifneq ($(wildcard fpga.mk),)
