@@ -186,7 +186,11 @@ def init_serial():
     # configure the serial connections (the parameters differs on the device connected to)
     ser = serial.Serial()
     ser.port = "/dev/usb-uart"         # serial port
-    ser.baudrate = 115200              # baudrate
+    if ('-b' in sys.argv):
+        if (len(sys.argv)<5): usage("PROGNAME: not enough program arguments")
+        ser.baudrate = sys.argv[sys.argv.index('-b')+1]              # baudrate
+    else:
+        ser.baudrate = 115200              # baudrate
     ser.bytesize = serial.EIGHTBITS    # number of bits per bytes
     ser.parity = serial.PARITY_NONE    # set parity check: no parity
     ser.stopbits = serial.STOPBITS_ONE # number of stop bits
