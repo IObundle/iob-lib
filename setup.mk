@@ -20,11 +20,12 @@ VERSION_STR := $(shell $(PYTHON_DIR)/version.py -i .)
 BUILD_DIR := ../$(NAME)_$(VERSION_STR)
 
 BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
+BUILD_PC_DIR = $(BUILD_DIR)/software/pc-emul
 BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 
 BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
-BUILD_PSRC_DIR = $(BUILD_DIR)/software/esrc
+BUILD_PSRC_DIR = $(BUILD_DIR)/software/psrc
 BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
@@ -72,6 +73,12 @@ $(BUILD_VSRC_DIR)/%: $(1)/hardware/src/%
 	cp $< $@
 endef
 
+#copy pc-emul files from LIB
+ifneq ($(wildcard software/pc-emul),)
+SRC+=$(patsubst $(LIB_DIR)/software/pc-emul/%, $(BUILD_PC_DIR)/%, $(wildcard $(LIB_DIR)/software/pc-emul/*))
+$(BUILD_PC_DIR)/%: $(LIB_DIR)/software/pc-emul/%
+	cp $< $@
+endif
 
 
 #simulation
