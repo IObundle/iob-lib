@@ -212,7 +212,7 @@ endif
 
 
 clean:
-	@rm -rf $(BUILD_DIR) *.tex *.v *.vh
+	@rm -rf $(BUILD_DIR) *.tex *.v *.vh *.h
 	@rm -rf scripts/__pycache__
 
 debug: $(BUILD_DIR) $(SRC) v2tex
