@@ -8,16 +8,16 @@ include ../../info.mk
 # compiler flags
 CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
 
-CONSOLE_CMD=../python/console -L
+CONSOLE_CMD=../../scripts/console -L
 
 INCLUDE=-I.
 INCLUDE+=-I../src
 
 HDR=$(wildcard *.h)
-HDR+=$(wildcard ../src/*.h)
+HDR+=$(wildcard ../psrc/*.h)
 
 SRC=$(wildcard *.c)
-SRC+=$(wildcard ../src/*.c)
+SRC+=$(wildcard ../psrc/*.c)
 
 # include local pc-emul segment
 # all previously defined variables can be overwritten in this file

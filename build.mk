@@ -16,7 +16,7 @@ endif
 #
 # PC EMUL
 #
-PC_DIR=software/pc
+PC_DIR=software/pc-emul
 ifneq ($(wildcard $(PC_DIR)),)
 pc-emul-build: fw-build
 	make -C $(PC_DIR) build
