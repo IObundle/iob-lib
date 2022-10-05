@@ -8,7 +8,7 @@ SHELL:=/bin/bash
 include ../../info.mk
 
 REMOTE_BUILD_DIR=sandbox/$(NAME)
-REMOTE_SIM_DIR=$(REMOTE_BUILD_DIR)/hardware/sim
+REMOTE_SIM_DIR=$(REMOTE_BUILD_DIR)/hardware/simulation
 
 #include the module's headers and sources
 VHDR+=$(wildcard ../src/*.vh)
@@ -47,7 +47,7 @@ endif
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make exec"
 else
 	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR)'"
-	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/sim.log .
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
 ifeq ($(VCD),1)
 	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
 endif
