@@ -1,11 +1,13 @@
 SHELL:=/bin/bash
 export
 
+include info.mk
+
 # 
 # EMBEDDED SOFTWARE
 #
+ifneq ($(filter emb, $(FLOWS)),)
 EMB_DIR=software/emb
-ifneq ($(wildcard $(EMB_DIR)),)
 fw-build:
 	make -C $(EMB_DIR) build-all
 
@@ -16,8 +18,8 @@ endif
 #
 # PC EMUL
 #
+ifneq ($(filter pc-emul, $(FLOWS)),)
 PC_DIR=software/pc-emul
-ifneq ($(wildcard $(PC_DIR)),)
 pc-emul-build: fw-build
 	make -C $(PC_DIR) build
 
@@ -34,6 +36,9 @@ endif
 #
 # SIMULATE
 #
+
+
+ifneq ($(filter sim, $(FLOWS)),)
 SIM_DIR=hardware/simulation
 sim-build: 
 	make -C $(SIM_DIR) build
@@ -52,13 +57,13 @@ sim-debug:
 
 sim-clean:
 	make -C $(SIM_DIR) clean
-
+endif
 
 #
 # FPGA
 #
+ifneq ($(filter fpga, $(FLOWS)),)
 FPGA_DIR=hardware/fpga
-ifneq ($(wildcard $(FPGA_DIR)),)
 fpga-build: 
 	make -C $(FPGA_DIR) build
 
@@ -79,8 +84,8 @@ endif
 #
 # DOCUMENT
 #
+ifneq ($(filter doc, $(FLOWS)),)
 DOC_DIR=document
-ifneq ($(wildcard $(DOC_DIR)),)
 doc-build: 
 	make -C $(DOC_DIR) build
 
@@ -99,7 +104,11 @@ endif
 #
 test: sim-test fpga-test doc-test
 
-
+#
+# DEBUG
+#
+debug:
+	@echo $(FLOWS)
 
 #
 # CLEAN
@@ -113,6 +122,6 @@ clean: fw-clean pc-emul-clean sim-clean fpga-clean doc-clean
 	sim-build sim-run sim-debug \
 	fpga-build fpga-debug \
 	doc-build doc-debug \
-	test clean \
+	test clean debug \
 	sim-test fpga-test doc-test \
 	fw-clean pc-emul-clean sim-clean fpga-clean doc-clean
