@@ -64,6 +64,10 @@ ugtop.tex:
 	if [ $(ASICSYNTH) == 1 ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
 	make doctop DOC=ug
 
+#include implementation results if available
+RESULTS = $(INTEL_FPGA)$(AMD_FPGA)$(UMC130_ASIC)
+ASICSYNTH?=$(UMC130_ASIC)
+
 doctop:
 	echo "\def\NAME{$(NAME)}" >> $(DOC)top.tex
 	if [ $(RESULTS) ]; then echo "\def\RESULTS{Y}" >> $(DOC)top.tex; fi
@@ -73,6 +77,29 @@ doctop:
 	if [ $(ASIC_NODE) ]; then echo "\def\ASIC{Y}" >> $(DOC)top.tex; fi
 	if [ -f custom.tex ]; then echo "\def\CUSTOM{Y}" >> $(DOC)top.tex; fi
 	echo "\input{$(DOC).tex}" >> $(DOC)top.tex
+
+
+ifeq ($(INTEL_FPGA),1)
+SRC+=$(BUILD_DIR)/doc/quartus.tex
+endif
+
+ifeq ($(AMD_FPGA),1)
+$(BUILD_DIR)/doc/vivado.tex
+endif
+
+
+# generate quartus fitting results 
+$(BUILD_DIR)/doc/quartus.tex:
+	make -C $(BUILD_DIR) fpga-build BOARD=CYCLONEV-GT-DK
+	LOG=$(BUILD_FPGA_DIR)/quartus.log $(LIB_DIR)/scripts/quartus2tex.sh
+	mv `basename $@` $(BUILD_DOC_DIR)
+
+# generate vivado fitting results 
+$(BUILD_DIR)/doc/vivado.tex:
+	make -C $(BUILD_DIR) fpga-build BOARD=AES-KU040-DB-G
+	LOG=$(BUILD_FPGA_DIR)/vivado.log $(LIB_DIR)/scripts/vivado2tex.sh
+	mv `basename $@` $(BUILD_DOC_DIR)
+
 
 #view document
 view: $(DOC).pdf
