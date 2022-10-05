@@ -46,6 +46,7 @@ $(BUILD_DIR):
 #HARDWARE
 #
 
+# include local setup makefile segment
 ifneq ($(wildcard hardware/hw_setup.mk),)
 include hardware/hw_setup.mk
 endif
@@ -53,33 +54,13 @@ endif
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
 	$(LIB_DIR)/scripts/version.py -v .
-	mv $(NAME)_version.vh $(BUILD_VSRC_DIR)
+	cp $(NAME)_version.vh $(BUILD_VSRC_DIR)
 
 #select core configuration
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_conf.vh
 $(BUILD_VSRC_DIR)/$(NAME)_conf.vh: hardware/src/$(NAME)_conf_$(CONFIG).vh
 	cp hardware/src/$(NAME)_conf_$(CONFIG).vh $@
 
-#copy header files macro
-define copy_verilog_headers
-SRC+=$(patsubst $(1)/hardware/src/%.vh, $(BUILD_VSRC_DIR)/%.vh, $(wildcard $(1)/hardware/src/*.vh))
-$(BUILD_VSRC_DIR)/%.vh: $(1)/hardware/src/%.vh
-	cp $< $@
-endef
-
-#copy source files function
-define copy_verilog_sources
-SRC+=$(patsubst $(1)/hardware/src/%, $(BUILD_VSRC_DIR)/%, $(wildcard $(1)/hardware/src/*))
-$(BUILD_VSRC_DIR)/%: $(1)/hardware/src/%
-	cp $< $@
-endef
-
-#copy pc-emul files from LIB
-ifneq ($(wildcard software/pc-emul),)
-SRC+=$(patsubst $(LIB_DIR)/software/pc-emul/%, $(BUILD_PC_DIR)/%, $(wildcard $(LIB_DIR)/software/pc-emul/*))
-$(BUILD_PC_DIR)/%: $(LIB_DIR)/software/pc-emul/%
-	cp $< $@
-endif
 
 
 #simulation
@@ -156,6 +137,13 @@ endif
 SRC+=$(patsubst $(LIB_DIR)/software/src/%, $(BUILD_ESRC_DIR)/%, $(wildcard $(LIB_DIR)/software/src/%))
 $(BUILD_ESRC_DIR)/%: $(LIB_DIR)/software/src/%
 	cp $< $@
+
+#copy pc-emul files from LIB
+ifneq ($(wildcard software/pc-emul),)
+SRC+=$(patsubst $(LIB_DIR)/software/pc-emul/%, $(BUILD_PC_DIR)/%, $(wildcard $(LIB_DIR)/software/pc-emul/*))
+$(BUILD_PC_DIR)/%: $(LIB_DIR)/software/pc-emul/%
+	cp $< $@
+endif
 
 endif
 
