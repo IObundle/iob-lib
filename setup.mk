@@ -209,6 +209,27 @@ ifeq ($(wildcard *.tex),)
 	cp *.tex $(BUILD_TSRC_DIR)
 endif
 
+ifeq ($(INTEL_FPGA),1)
+SRC+=$(BUILD_DIR)/doc/quartus.tex
+endif
+
+ifeq ($(AMD_FPGA),1)
+$(BUILD_DIR)/doc/vivado.tex
+endif
+
+
+# generate quartus fitting results 
+$(BUILD_DIR)/doc/quartus.tex:
+	make -C $(BUILD_DIR) fpga-build BOARD=CYCLONEV-GT-DK
+	LOG=$(BUILD_FPGA_DIR)/quartus.log $(LIB_DIR)/scripts/quartus2tex.sh
+	mv `basename $@` $(BUILD_DOC_DIR)
+
+# generate vivado fitting results 
+$(BUILD_DIR)/doc/vivado.tex:
+	make -C $(BUILD_DIR) fpga-build BOARD=AES-KU040-DB-G
+	LOG=$(BUILD_FPGA_DIR)/vivado.log $(LIB_DIR)/scripts/vivado2tex.sh
+	mv `basename $@` $(BUILD_DOC_DIR)
+
 endif
 
 
