@@ -56,13 +56,6 @@ $(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
 	$(LIB_DIR)/scripts/version.py -v .
 	cp $(NAME)_version.vh $(BUILD_VSRC_DIR)
 
-#select core configuration
-SRC+=$(BUILD_VSRC_DIR)/$(NAME)_conf.vh
-$(BUILD_VSRC_DIR)/$(NAME)_conf.vh: hardware/src/$(NAME)_conf_$(CONFIG).vh
-	cp hardware/src/$(NAME)_conf_$(CONFIG).vh $@
-
-
-
 #simulation
 ifneq ($(wildcard hardware/simulation),)
 
