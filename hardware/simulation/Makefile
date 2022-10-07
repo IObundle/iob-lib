@@ -29,7 +29,7 @@ ifneq ($(wildcard simulation.mk),)
 include simulation.mk
 endif
 
-build:
+build: $(VHDR) $(VSRC)
 ifeq ($(SIM_SERVER),)
 	make comp
 else
