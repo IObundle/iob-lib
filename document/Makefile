@@ -22,6 +22,10 @@ TSRC = $(patsubst tsrc/%, ./%, $(wildcard tsrc/*))
 %.cls: tsrc/%.cls
 	cp $< $@
 
+TSRC+=signature.tex
+signature.tex:
+	 @echo `cat name.tex`-USG-`cat version.tex`-`cat shortHash.tex` > signature.tex
+
 #make product brief figures
 pb_figs:
 	make -C ./figures pb_figs
