@@ -54,7 +54,7 @@ module axil2iob
    //axil write address valid register
    `IOB_WIRE(axil_awvalid_reg, 1)
    iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
-   iob_reg_awaddr
+   iob_reg_awvalid
      (
       .clk        (clk),
       .arst       (rst),
@@ -82,7 +82,7 @@ module axil2iob
    //axil read address valid register
    `IOB_WIRE(axil_arvalid_reg, 1)
    iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
-   iob_reg_araddr
+   iob_reg_arvalid
      (
       .clk        (clk),
       .arst       (rst),
