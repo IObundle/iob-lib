@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 
+`include "iob_lib.vh"
 
 module axil2iob
   #(
@@ -11,10 +12,10 @@ module axil2iob
     )
    (
     // AXI-4 lite slave interface
-`include "axil_s_port.vh"
+`include "iob_axil_s_port.vh"
 
     // IOb master interface
-`include "iob_m_if.vh"
+`include "iob_m_port.vh"
 
     //Global signals
 `include "iob_gen_if.vh"
@@ -119,7 +120,7 @@ module axil2iob
       .data_out   (addr_reg)
       );
 
-   `COMB begin
+   `IOB_COMB begin
       if(axil_awvalid_reg)
         addr_nxt = axil_awaddr_reg;
       else if(axil_arvalid_reg)
@@ -132,7 +133,7 @@ module axil2iob
    `IOB_WIRE(addr_int, ADDR_W)
    assign addr = addr_int;
    
-   `COMB begin
+   `IOB_COMB begin
       addr = 1'b0;
       if(axil_awvalid)
         addr_int = awaddr;
