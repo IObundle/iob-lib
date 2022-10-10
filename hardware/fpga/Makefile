@@ -6,6 +6,10 @@ SHELL:=/bin/bash
 # include core basic info
 include ../../info.mk
 
+ifneq ($(wildcard ../../console.mk),)
+include ../../console.mk
+endif
+
 REMOTE_BUILD_DIR=sandbox/$(NAME)
 REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
 
