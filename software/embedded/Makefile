@@ -30,6 +30,7 @@ HDR+=$(wildcard ../esrc/*.h)
 
 BOOT_SRC=$(wildcard ../bootloader/*)
 BOOT_SRC+=../esrc/iob-uart.c  ../esrc/iob_uart_swreg_emb.c
+BOOT_SRC+=../esrc/iob-cache.c  ../esrc/iob_cache_swreg_emb.c
 
 #FW_SRC=$(wildcard *.c)
 FW_SRC=$(wildcard ../firmware/*)

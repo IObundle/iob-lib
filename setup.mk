@@ -194,7 +194,7 @@ $(BUILD_DOC_DIR)/Makefile: $(LIB_DIR)/document/Makefile
 #make tex files from verilog sources
 v2tex: $(SRC)
 ifeq ($(wildcard *.tex),)
-	$(PYTHON_DIR)/verilog2tex.py $(BUILD_VSRC_DIR)/$(NAME).v $(BUILD_VSRC_DIR)/$(NAME)_conf.vh $(BUILD_VSRC_DIR)/* $(MKREGS_CONF)
+	$(PYTHON_DIR)/verilog2tex.py $(BUILD_VSRC_DIR)/$(NAME).v $(wildcard $(BUILD_VSRC_DIR)/*) $(MKREGS_CONF)
 	cp *.tex $(BUILD_TSRC_DIR)
 endif
 
