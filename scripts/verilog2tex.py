@@ -7,7 +7,6 @@
         print("mkregs_conf: path/to/mkregs.conf
 '''
 import sys
-import os
 from parse import parse
 
 from mkregs import calc_swreg_addr, swreg_get_fields, header_parse
@@ -333,14 +332,6 @@ def main () :
 
     #get the DEFINE environment variable (deprecated)
     param_defaults = {}
-    DEFINE = os.getenv('DEFINE')
-    if DEFINE is not None:
-        DEFINE = DEFINE.split()
-        #store param defaults in dictionary
-        for i in range(len(DEFINE)):
-            MACRO=DEFINE[i].split('=')
-            param_defaults[MACRO[0]]=eval(MACRO[1])
-
     params = param_parse (topv_lines, param_defaults, defines)
 
     #PARSE BLOCK DIAGRAM MODULES
