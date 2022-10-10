@@ -20,6 +20,7 @@ VERSION_STR := $(shell $(PYTHON_DIR)/version.py -i .)
 BUILD_DIR := ../$(NAME)_$(VERSION_STR)
 
 BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
+BUILD_EMB_DIR = $(BUILD_DIR)/software/embedded
 BUILD_PC_DIR = $(BUILD_DIR)/software/pc-emul
 BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
@@ -130,6 +131,13 @@ endif
 SRC+=$(patsubst $(LIB_DIR)/software/src/%, $(BUILD_ESRC_DIR)/%, $(wildcard $(LIB_DIR)/software/src/%))
 $(BUILD_ESRC_DIR)/%: $(LIB_DIR)/software/src/%
 	cp $< $@
+
+#copy embedded files from LIB
+ifneq ($(wildcard software/embedded),)
+SRC+=$(patsubst $(LIB_DIR)/software/embedded/%, $(BUILD_EMB_DIR)/%, $(wildcard $(LIB_DIR)/software/embedded/*))
+$(BUILD_EMB_DIR)/%: $(LIB_DIR)/software/embedded/%
+	cp $< $@
+endif
 
 #copy pc-emul files from LIB
 ifneq ($(wildcard software/pc-emul),)
