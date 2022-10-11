@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 
+`include "iob_lib.vh"
 
 module axil2iob
   #(
@@ -11,14 +12,18 @@ module axil2iob
     )
    (
     // AXI-4 lite slave interface
-`include "axil_s_port.vh"
+`include "iob_axil_s_port.vh"
 
     // IOb master interface
-`include "iob_m_if.vh"
+`include "iob_m_port.vh"
 
     //Global signals
-`include "iob_gen_if.vh"
+    `IOB_INPUT(clk, 1),
+    `IOB_INPUT(rst, 1)
     );
+
+   `IOB_WIRE(wvalid, 1)
+   assign wvalid = valid & |wstrb;
 
    //COMPUTE AXIL OUTPUTS
    //write address  
@@ -52,8 +57,8 @@ module axil2iob
 
    //axil write address valid register
    `IOB_WIRE(axil_awvalid_reg, 1)
-   iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
-   iob_reg_awaddr
+   iob_reg #(.DATA_W(1), .RST_VAL(0))
+   iob_reg_awvalid
      (
       .clk        (clk),
       .arst       (rst),
@@ -80,8 +85,8 @@ module axil2iob
    
    //axil read address valid register
    `IOB_WIRE(axil_arvalid_reg, 1)
-   iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
-   iob_reg_araddr
+   iob_reg #(.DATA_W(1), .RST_VAL(0))
+   iob_reg_arvalid
      (
       .clk        (clk),
       .arst       (rst),
@@ -119,7 +124,7 @@ module axil2iob
       .data_out   (addr_reg)
       );
 
-   `COMB begin
+   `IOB_COMB begin
       if(axil_awvalid_reg)
         addr_nxt = axil_awaddr_reg;
       else if(axil_arvalid_reg)
@@ -129,15 +134,15 @@ module axil2iob
    end
 
    //output address
-   `IOB_WIRE(addr_int, ADDR_W)
+   `IOB_VAR(addr_int, ADDR_W)
    assign addr = addr_int;
    
-   `COMB begin
-      addr = 1'b0;
-      if(axil_awvalid)
-        addr_int = awaddr;
+   `IOB_COMB begin
+      addr_int = {ADDR_W{1'b0}};
+      if (axil_awvalid)
+        addr_int = axil_awaddr;
       else if (axil_arvalid)
-        addr_int = araddr;
+        addr_int = axil_araddr;
       else
         addr_int = addr_reg;
    end

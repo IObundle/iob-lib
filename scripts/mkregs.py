@@ -177,7 +177,7 @@ def gen_mem_write_hw(table, fout, cpu_nbytes=4):
         if reg["reg_type"] == "MEM" and reg['rw_type'] == "W":
             # cpu word addressing
             mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
-            fout.write(f"`IOB_WIRE2WIRE((address - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
+            fout.write(f"`IOB_WIRE2WIRE((addr - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
             if mem_addr_w > 0:
                 fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{mem_addr_w}-1:0], {reg['name']}_addr)\n")
             # get correct bytes from aligned wdata
@@ -194,7 +194,7 @@ def gen_mem_read_hw(table, fout, cpu_nbytes=4):
     for reg in table:
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
             mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
-            fout.write(f"`IOB_WIRE2WIRE((address - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
+            fout.write(f"`IOB_WIRE2WIRE((addr - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
             if mem_addr_w > 0:
                 fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{mem_addr_w}-1:0], {reg['name']}_addr)\n")
             fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & ~(|wstrb)), {reg['name']}_ren)\n")
@@ -215,7 +215,7 @@ def gen_mem_read_hw(table, fout, cpu_nbytes=4):
     mem_read_en_concat_str = "{" + mem_read_en_concat_str
     fout.write(f"`IOB_WIRE2WIRE( {mem_read_en_concat_str}, mem_switch)\n")
     # Delay SWMEM_R address 1 cycle to wait for rdata
-    fout.write(f"iob_reg #({num_read_mems}, 0) mem_switch_ (clk, rst, 1'b0, 1'b1, mem_switch, mem_switch_reg);\n")
+    fout.write(f"iob_reg #({num_read_mems}, 0) mem_switch_ (clk_i, rst_i, 1'b0, 1'b1, mem_switch, mem_switch_reg);\n")
     mem_switch_val = 1
     fout.write("always @* begin\n")
     fout.write("\tcase(mem_switch_reg)\n")
@@ -291,14 +291,14 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
             reg_addr = math.floor(int(row['addr'])/cpu_nbytes)
             reg_w = int(row['nbytes']) * 8
             fout.write(f"`IOB_WIRE({row['name']}_en, 1)\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (address == {reg_addr})), {row['name']}_en)\n")
+            fout.write(f"`IOB_WIRE2WIRE((valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (addr == {reg_addr})), {row['name']}_en)\n")
             fout.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
             fout.write(f"`IOB_WIRE2WIRE(wdata[{8*addr_offset}+:{reg_w}], {row['name']}_wdata)\n\n")
 
     fout.write("\n\n//read register logic\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
-    fout.write("`IOB_WIRE(address_reg, ADDR_W)\n")
-    fout.write("iob_reg #(ADDR_W, 0) addr_reg (clk, rst, 1'b0, valid, address, address_reg);\n")
+    fout.write("`IOB_WIRE(addr_reg, ADDR_W)\n")
+    fout.write("iob_reg #(ADDR_W, 0) addr_reg (clk_i, rst_i, 1'b0, valid, addr, addr_reg);\n")
 
     # if read memory present then add mem_rdata_int
     if has_mem_type(table, ["R"]):
@@ -308,7 +308,7 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
         num_read_mems = get_num_mem_type(table, "R")
         fout.write(f"\n`IOB_WIRE(mem_switch, {num_read_mems})\n")
         # Register condition for SWMEM_R access
-        fout.write("iob_reg #(1, 0) mem_read_sel_ (clk, rst, 1'b0, 1'b1, (valid & (wstrb == 0) & |mem_switch), mem_read_sel_reg);\n")
+        fout.write("iob_reg #(1, 0) mem_read_sel_ (clk_i, rst_i, 1'b0, 1'b1, (valid & (wstrb == 0) & |mem_switch), mem_read_sel_reg);\n")
         # choose between register or memory read data
         fout.write("`IOB_VAR2WIRE((mem_read_sel_reg) ? mem_rdata_int : rdata_int, rdata)\n\n")
     else:
@@ -319,7 +319,7 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
             fout.write(f"`IOB_WIRE({row['name']}_rdata, {int(row['nbytes']) * 8})\n")
 
     fout.write("\nalways @* begin\n")
-    fout.write("   case(address_reg)\n")
+    fout.write("   case(addr_reg)\n")
 
     # concatenate rdata wires with same 32 bit address
     rdata_cases = get_rdata_cases(table, cpu_nbytes)
@@ -331,7 +331,7 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
     fout.write("end\n")
 
     # ready signal
-    fout.write("iob_reg #(1, 0) valid_reg (clk, rst, 1'b0, 1'b1, valid, ready);\n")
+    fout.write("iob_reg #(1, 0) valid_reg (clk_i, rst_i, 1'b0, 1'b1, valid, ready);\n")
 
     # memory section
     if has_mem_type(table):

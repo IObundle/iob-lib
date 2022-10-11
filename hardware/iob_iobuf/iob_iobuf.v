@@ -13,7 +13,7 @@ module iob_iobuf
    input  T,  // from core: tristate control
    input  N,  // from core: inversion control
    output O,  // to core
-   inout  IO, // to device IO
+   inout  IO  // to device IO
    );
 
    wire   O_int;
