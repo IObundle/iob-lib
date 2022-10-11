@@ -21,6 +21,9 @@ module axil2iob
 `include "iob_gen_if.vh"
     );
 
+   `IOB_WIRE(wvalid, 1)
+   assign wvalid = valid & |wstrb;
+
    //COMPUTE AXIL OUTPUTS
    //write address  
    assign axil_awready = ready;
@@ -53,7 +56,7 @@ module axil2iob
 
    //axil write address valid register
    `IOB_WIRE(axil_awvalid_reg, 1)
-   iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
+   iob_reg #(.DATA_W(1), .RST_VAL(0))
    iob_reg_awvalid
      (
       .clk        (clk),
@@ -81,7 +84,7 @@ module axil2iob
    
    //axil read address valid register
    `IOB_WIRE(axil_arvalid_reg, 1)
-   iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
+   iob_reg #(.DATA_W(1), .RST_VAL(0))
    iob_reg_arvalid
      (
       .clk        (clk),
@@ -130,15 +133,15 @@ module axil2iob
    end
 
    //output address
-   `IOB_WIRE(addr_int, ADDR_W)
+   `IOB_VAR(addr_int, ADDR_W)
    assign addr = addr_int;
    
    `IOB_COMB begin
-      addr = 1'b0;
-      if(axil_awvalid)
-        addr_int = awaddr;
+      addr_int = {ADDR_W{1'b0}};
+      if (axil_awvalid)
+        addr_int = axil_awaddr;
       else if (axil_arvalid)
-        addr_int = araddr;
+        addr_int = axil_araddr;
       else
         addr_int = addr_reg;
    end
