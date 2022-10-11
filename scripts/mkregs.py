@@ -85,9 +85,9 @@ def print_help():
     Example mkregs.conf file:
     //START_SWREG_TABLE example_core
     IOB_SWREG_W(CORE_RUN, 1, 0, 2, 0) //Run write register at address 2
-    IOB_SWMEM_W(CORE_WR_BUF, 2, 0, 4, 12) //2^12 x 16 bit write mem at addr 4
+    IOB_SWREG_W(CORE_WR_BUF, 2, 0, 4, 12) //2^12 x 16 bit write mem at addr 4
     IOB_SWREG_R(CORE_DONE, 1, 0, 1, 0) //Done read register at address 1
-    IOB_SWMEM_R(CORE_RD_BUF, 4, 0, 4, 10) //2^10 x 4 bit read mem at addr 4
+    IOB_SWREG_R(CORE_RD_BUF, 4, 0, 4, 10) //2^10 x 4 bit read mem at addr 4
     """
 
     print(help_str)
