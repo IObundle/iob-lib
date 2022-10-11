@@ -18,7 +18,8 @@ module axil2iob
 `include "iob_m_port.vh"
 
     //Global signals
-`include "iob_gen_if.vh"
+    `IOB_INPUT(clk, 1),
+    `IOB_INPUT(rst, 1)
     );
 
    `IOB_WIRE(wvalid, 1)
