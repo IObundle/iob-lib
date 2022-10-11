@@ -7,9 +7,9 @@ include info.mk
 # EMBEDDED SOFTWARE
 #
 ifneq ($(filter emb, $(FLOWS)),)
-EMB_DIR=software/emb
+EMB_DIR=software/embedded
 fw-build:
-	make -C $(EMB_DIR) build-all
+	make -C $(EMB_DIR) fw-build
 
 fw-clean:
 	make -C $(EMB_DIR) clean-all

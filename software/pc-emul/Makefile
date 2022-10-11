@@ -5,6 +5,10 @@
 
 include ../../info.mk
 
+ifneq ($(wildcard ../../console.mk),)
+include ../../console.mk
+endif
+
 # compiler flags
 CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
 
