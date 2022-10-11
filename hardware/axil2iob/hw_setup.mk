@@ -6,11 +6,6 @@ HW_MODULES+=axil2iob
 # import lib hardware
 include $(LIB_DIR)/hardware/iob_reg/hw_setup.mk
 
-# Headers
-SRC+=$(BUILD_VSRC_DIR)/iob_gen_if.vh
-$(BUILD_VSRC_DIR)/iob_gen_if.vh: $(LIB_DIR)/hardware/include/iob_gen_if.vh
-	cp $< $@
-
 # Sources
 SRC+=$(BUILD_VSRC_DIR)/axil2iob.v
 $(BUILD_VSRC_DIR)/axil2iob.v: $(LIB_DIR)/hardware/axil2iob/axil2iob.v
