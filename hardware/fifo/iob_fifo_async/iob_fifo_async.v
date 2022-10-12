@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+
 `include "iob_lib.vh"
 
 module iob_fifo_async
@@ -80,12 +81,34 @@ module iob_fifo_async
    //sync write gray address to read domain
    wire [W_ADDR_W-1:0]        w_waddr_gray;
    wire [W_ADDR_W-1:0]        r_waddr_gray;
-   `IOB_SYNC(r_clk, rst, 1'b0, W_ADDR_W, w_waddr_gray,  w_waddr_gray_sync0, w_waddr_gray_sync1, r_waddr_gray)
+   iob_sync
+     #(
+       .DATA_W(W_ADDR_W),
+       .RST_VAL(0)
+       )
+   w_waddr_gray_sync0
+     (
+      .clk        (r_clk),
+      .arst       (rst),
+      .signal_in  (w_waddr_gray),
+      .signal_out (r_waddr_gray)
+      );
 
    //sync read gray address to write domain
    wire [R_ADDR_W-1:0]        r_raddr_gray;
    wire [R_ADDR_W-1:0]        w_raddr_gray;
-   `IOB_SYNC(w_clk, rst, 1'b0, R_ADDR_W, r_raddr_gray,  r_raddr_gray_sync0, r_raddr_gray_sync1, w_raddr_gray)
+   iob_sync
+     #(
+       .DATA_W(R_ADDR_W),
+       .RST_VAL(0)
+       )
+   r_raddr_gray_sync0
+     (
+      .clk        (w_clk),
+      .arst       (rst),
+      .signal_in  (r_raddr_gray),
+      .signal_out (w_raddr_gray)
+      );
 
 
    //READ DOMAIN FIFO LEVEL
@@ -98,8 +121,22 @@ module iob_fifo_async
    
    //read state
    localparam INIT=0, EMPTY=1, DEFAULT=2, FULL=3;
-   reg [1:0]                  r_st, r_st_nxt;
-   `IOB_REG_AR(r_clk, rst, INIT, r_st, r_st_nxt)
+   reg [1:0]                  r_st_nxt;
+   wire [1:0]                 r_st;
+   iob_reg
+     #(
+       .DATA_W(2),
+       .RST_VAL(INIT)
+       )
+   r_st_reg0
+     (
+      .clk      (r_clk),
+      .arst     (rst),
+      .rst      (1'b0),
+      .en       (1'b1),
+      .data_in  (r_st_nxt),
+      .data_out (r_st)
+      );
 
    `IOB_COMB begin
       r_level = r_level_int; //note rhs has 1 bit less
@@ -138,8 +175,22 @@ module iob_fifo_async
    wire [ADDR_W-1:0]      w_level_int = w_waddr_bin_n - w_raddr_bin_n;
 
    //WRITE STATE MACHINE
-   reg [1:0]              w_st, w_st_nxt;
-   `IOB_REG_AR(w_clk, rst, INIT, w_st, w_st_nxt)
+   reg [1:0]              w_st_nxt;
+   wire [1:0]             w_st;
+   iob_reg
+     #(
+       .DATA_W(2),
+       .RST_VAL(INIT)
+       )
+   w_st_reg0
+     (
+      .clk      (w_clk),
+      .arst     (rst),
+      .rst      (1'b0),
+      .en       (1'b1),
+      .data_in  (w_st_nxt),
+      .data_out (w_st)
+      );
 
    `IOB_COMB begin
       w_level = w_level_int; //note rhs has 1 bit less
