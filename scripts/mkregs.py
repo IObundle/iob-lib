@@ -177,12 +177,12 @@ def gen_mem_write_hw(table, fout, cpu_nbytes=4):
         if reg["reg_type"] == "MEM" and reg['rw_type'] == "W":
             # cpu word addressing
             mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
-            fout.write(f"`IOB_WIRE2WIRE((addr - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
+            fout.write(f"assign {reg['name']}_addr_int = addr - {reg['name']}_ADDR_OFFSET;\n")
             if mem_addr_w > 0:
-                fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{mem_addr_w}-1:0], {reg['name']}_addr)\n")
+                fout.write(f"assign {reg['name']}_addr = {reg['name']}_addr_int[{mem_addr_w}-1:0];\n")
             # get correct bytes from aligned wdata
-            fout.write(f"`IOB_WIRE2WIRE(wdata, {reg['name']}_wdata)\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & (|wstrb)) ? wstrb : {{(DATA_W/8){{1'b0}}}}, {reg['name']}_wstrb)\n")
+            fout.write(f"assign {reg['name']}_wdata = wdata;\n")
+            fout.write(f"assign {reg['name']}_wstrb = (valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & (|wstrb))? wstrb: {{(DATA_W/8){{1'b0}}}};\n")
 
 
 def gen_mem_read_hw(table, fout, cpu_nbytes=4):
@@ -194,10 +194,10 @@ def gen_mem_read_hw(table, fout, cpu_nbytes=4):
     for reg in table:
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
             mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
-            fout.write(f"`IOB_WIRE2WIRE((addr - {reg['name']}_ADDR_OFFSET), {reg['name']}_addr_int)\n")
+            fout.write(f"assign {reg['name']}_addr_int = addr - {reg['name']}_ADDR_OFFSET;\n")
             if mem_addr_w > 0:
-                fout.write(f"`IOB_WIRE2WIRE({reg['name']}_addr_int[{mem_addr_w}-1:0], {reg['name']}_addr)\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & ~(|wstrb)), {reg['name']}_ren)\n")
+                fout.write(f"assign {reg['name']}_addr = {reg['name']}_addr_int[{mem_addr_w}-1:0];\n")
+            fout.write(f"assign {reg['name']}_ren = valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & ~(|wstrb);\n")
 
     # switch case for mem reads
     num_read_mems = get_num_mem_type(table, "R")
@@ -213,7 +213,7 @@ def gen_mem_read_hw(table, fout, cpu_nbytes=4):
                 mem_read_en_concat_str = f"{reg['name']}_ren,{mem_read_en_concat_str}"
 
     mem_read_en_concat_str = "{" + mem_read_en_concat_str
-    fout.write(f"`IOB_WIRE2WIRE( {mem_read_en_concat_str}, mem_switch)\n")
+    fout.write(f"assign mem_switch = {mem_read_en_concat_str};\n")
     # Delay SWMEM_R address 1 cycle to wait for rdata
     fout.write(f"iob_reg #({num_read_mems}, 0) mem_switch0 (clk_i, rst_i, 1'b0, 1'b1, mem_switch, mem_switch_reg);\n")
     mem_switch_val = 1
@@ -291,9 +291,9 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
             reg_addr = math.floor(int(row['addr'])/cpu_nbytes)
             reg_w = int(row['nbytes']) * 8
             fout.write(f"`IOB_WIRE({row['name']}_en, 1)\n")
-            fout.write(f"`IOB_WIRE2WIRE((valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (addr == {reg_addr})), {row['name']}_en)\n")
+            fout.write(f"assign {row['name']}_en = valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (addr == {reg_addr});\n")
             fout.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
-            fout.write(f"`IOB_WIRE2WIRE(wdata[{8*addr_offset}+:{reg_w}], {row['name']}_wdata)\n\n")
+            fout.write(f"assign {row['name']}_wdata = wdata[{8*addr_offset}+:{reg_w}];\n\n")
 
     fout.write("\n\n//read register logic\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")

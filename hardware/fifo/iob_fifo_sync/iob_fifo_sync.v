@@ -32,14 +32,14 @@ module iob_fifo_sync
     //read port
     `IOB_INPUT(r_en, 1),
     `IOB_OUTPUT(r_data, R_DATA_W),
-    `IOB_OUTPUT_VAR(r_empty, 1),
+    `IOB_OUTPUT(r_empty, 1),
     //write port
     `IOB_INPUT(w_en, 1),
     `IOB_INPUT(w_data, W_DATA_W),
-    `IOB_OUTPUT_VAR(w_full, 1),
+    `IOB_OUTPUT(w_full, 1),
 
     //FIFO level
-    `IOB_OUTPUT_VAR(level, (ADDR_W+1))
+    `IOB_OUTPUT(level, (ADDR_W+1))
     );
 
    localparam ADDR_W_DIFF = $clog2(N);
@@ -49,15 +49,43 @@ module iob_fifo_sync
    wire                   w_en_int = w_en & ~w_full;
 
    //write address
-   `IOB_VAR(w_addr, W_ADDR_W)
-   `IOB_COUNTER_ARRE(clk, arst, rst, w_en_int, w_addr)
+   `IOB_WIRE(w_addr, W_ADDR_W)
+   iob_counter
+     #(
+       .DATA_W(W_ADDR_W),
+       .RST_VAL(0)
+       )
+   w_addr_cnt0
+     (
+      .clk      (clk),
+      .arst     (arst),
+      .rst      (rst),
+      .ld       (1'b0),
+      .ld_val   ({W_ADDR_W{1'b0}}),
+      .en       (w_en_int),
+      .data_out (w_addr)
+      );
 
    //effective read enable
    wire                   r_en_int  = r_en & ~r_empty;
 
    //read address
-   `IOB_VAR(r_addr, R_ADDR_W)
-   `IOB_COUNTER_ARRE(clk, arst, rst, r_en_int, r_addr)
+   `IOB_WIRE(r_addr, R_ADDR_W)
+   iob_counter
+     #(
+       .DATA_W(R_ADDR_W),
+       .RST_VAL(0)
+       )
+   r_addr_cnt0
+     (
+      .clk      (clk),
+      .arst     (arst),
+      .rst      (rst),
+      .ld       (1'b0),
+      .ld_val   ({R_ADDR_W{1'b0}}),
+      .en       (r_en_int),
+      .data_out (r_addr)
+      );
 
    //assign according to assymetry type
    localparam [ADDR_W:0] w_incr = (W_DATA_W > R_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
@@ -65,7 +93,20 @@ module iob_fifo_sync
    
    //FIFO level
    reg [ADDR_W+1:0]         level_nxt;
-   `IOB_REG_ARR(clk, arst, 1'b0, rst, 1'b0, level, level_nxt[0+:ADDR_W+1])
+   iob_reg
+     #(
+       .DATA_W(ADDR_W+1),
+       .RST_VAL(0)
+       )
+   level_reg0
+     (
+      .clk      (clk),
+      .arst     (arst),
+      .rst      (rst),
+      .en       (1'b1),
+      .data_in  (level_nxt[0+:ADDR_W+1]),
+      .data_out (level)
+      );
 
    `IOB_COMB begin
       level_nxt = {1'd0,level};
@@ -80,12 +121,38 @@ module iob_fifo_sync
    //FIFO empty
    `IOB_WIRE(r_empty_nxt, 1)
    assign r_empty_nxt = level_nxt[0+:ADDR_W+1] < r_incr;
-   `IOB_REG_AR(clk, arst, 1'd1, r_empty, r_empty_nxt)
+   iob_reg
+     #(
+       .DATA_W(1),
+       .RST_VAL(1)
+       )
+   r_empty_reg0
+     (
+      .clk      (clk),
+      .arst     (arst),
+      .rst      (1'b0),
+      .en       (1'b1),
+      .data_in  (r_empty_nxt),
+      .data_out (r_empty)
+      );
 
    //FIFO full
    `IOB_WIRE(w_full_nxt, 1)
    assign w_full_nxt = level_nxt[0+:ADDR_W+1] > (FIFO_SIZE -w_incr);
-   `IOB_REG_AR(clk, arst, 1'd0, w_full, w_full_nxt)
+   iob_reg
+     #(
+       .DATA_W(1),
+       .RST_VAL(0)
+       )
+   w_full_reg0
+     (
+      .clk      (clk),
+      .arst     (arst),
+      .rst      (1'b0),
+      .en       (1'b1),
+      .data_in  (w_full_nxt),
+      .data_out (w_full)
+      );
 
    //FIFO memory
    iob_ram_2p_asym
