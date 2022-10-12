@@ -19,11 +19,11 @@ iob_axil_s_port.vh:
 	$(LIB_DIR)/scripts/axi_gen.py axil_s_port 'iob_' ''
 
 #axil portmap
-SRC+=$(BUILD_VSRC_DIR)/iob_axi_portmap.vh
-$(BUILD_VSRC_DIR)/iob_axi_portmap.vh: iob_axi_portmap.vh
+SRC+=$(BUILD_VSRC_DIR)/iob_axil_portmap.vh
+$(BUILD_VSRC_DIR)/iob_axil_portmap.vh: iob_axil_portmap.vh
 	cp $< $@
-iob_axi_portmap.vh:
-	$(LIB_DIR)/scripts/axi_gen.py axi_portmap 'iob_' '' ''
+iob_axil_portmap.vh:
+	$(LIB_DIR)/scripts/axi_gen.py axil_portmap 'iob_' '' ''
 
 #iob master port
 SRC+=$(BUILD_VSRC_DIR)/iob_m_port.vh
