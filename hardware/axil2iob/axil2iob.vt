@@ -1,4 +1,4 @@
-axil2iob
+   axil2iob
      #(
        .AXIL_ADDR_W(AXIL_ADDR_W),
        .AXIL_DATA_W(AXIL_DATA_W),
@@ -6,15 +6,12 @@ axil2iob
        )
    axil2iob0
      (
-      // AXI-4 lite slave  i/f
-`include "<core name>_axil_portmap.vh"
+      // AXI4 Lite slave  interface
+`include "<core name prefix>axil_portmap.vh"
 
       // IOb master interface
-`include "<core name>_portmap.vh"
+`include "<core name prefix>portmap.vh"
 
-      // AXI-4 full master i/f
-`include "<core name>_axi_portmap.vh"
-
-      .clk(clk),
-      .rst(rst)
+      .clk(clk_i),
+      .rst(rst_i)
       );
