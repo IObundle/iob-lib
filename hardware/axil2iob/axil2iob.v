@@ -22,10 +22,10 @@ module axil2iob
     `IOB_INPUT(rst, 1)
     );
 
-   `IOB_WIRE(wvalid, 1)
-   assign wvalid = valid & |wstrb;
-
+   //
    //COMPUTE AXIL OUTPUTS
+   //
+   
    //write address  
    assign axil_awready = ready;
 
@@ -46,111 +46,73 @@ module axil2iob
    assign axil_bresp = 2'b0;
    assign axil_rvalid = rvalid;
 
-   
+
+   //
    //COMPUTE IOb OUTPUTS
+   //
 
-   //valid 
-   assign valid = axil_wvalid | axil_rvalid;
+   `IOB_WIRE(wvalid_reg, q)
+   assign valid = wvalid_reg | axil_arvalid;
 
-
-   //address
-
-   //axil write address valid register
-   `IOB_WIRE(axil_awvalid_reg, 1)
-   iob_reg #(.DATA_W(1), .RST_VAL(0))
-   iob_reg_awvalid
+   `IOB_WIRE(addr_reg, ADDR_W)
+   assign addr = addr_reg;
+ 
+   `IOB_WIRE(wdata_reg, ADDR_W)
+   assign addr = wdata_reg;
+ 
+   `IOB_WIRE(wstrb_reg, DATA_W/8)
+   assign wstrb = wstrb_reg;
+ 
+   //write valid register
+   iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
+   iob_reg_wvalid
      (
       .clk        (clk),
       .arst       (rst),
       .rst        (1'b0),
       .en         (1'b1),
-      .data_in    (axil_awvalid),
-      .data_out   (axil_awvalid_reg)
-      );
-
-   
-   //axil write address register
-   `IOB_WIRE(axil_awaddr_reg, ADDR_W)
-   iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
-   iob_reg_awaddr
-     (
-      .clk        (clk),
-      .arst       (rst),
-      .rst        (1'b0),
-      .en         (axil_awvalid),
-      .data_in    (axil_awaddr),
-      .data_out   (axil_awaddr_reg)
-      );
-
-   
-   //axil read address valid register
-   `IOB_WIRE(axil_arvalid_reg, 1)
-   iob_reg #(.DATA_W(1), .RST_VAL(0))
-   iob_reg_arvalid
-     (
-      .clk        (clk),
-      .arst       (rst),
-      .rst        (1'b0),
-      .en         (1'b1),
-      .data_in    (axil_arvalid),
-      .data_out   (axil_arvalid_reg)
-      );
-
-   
-   //axil read address register
-   `IOB_WIRE(axil_araddr_reg, ADDR_W)
-   iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
-   iob_reg_araddr
-     (
-      .clk        (clk),
-      .arst       (rst),
-      .rst        (1'b0),
-      .en         (axil_arvalid),
-      .data_in    (axil_araddr),
-      .data_out   (axil_araddr_reg)
+      .data_in    (axil_wvalid),
+      .data_out   (wvalid_reg)
       );
 
    //address register
-   `IOB_WIRE(addr_reg, ADDR_W)
-   `IOB_VAR(addr_nxt, ADDR_W)
+   `IOB_WIRE(addr_reg_en, 1)
+   assign addr_reg_en = axil_awvalid | axil_arvalid;
+
    iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
    iob_reg_addr
      (
       .clk        (clk),
       .arst       (rst),
       .rst        (1'b0),
-      .en         (1'b1),
-      .data_in    (addr_nxt),
+      .en         (addr_reg_en),
+      .data_in    (axil_awaddr),
       .data_out   (addr_reg)
       );
 
-   `IOB_COMB begin
-      if(axil_awvalid_reg)
-        addr_nxt = axil_awaddr_reg;
-      else if(axil_arvalid_reg)
-        addr_nxt = axil_araddr_reg;
-      else
-        addr_nxt = addr_reg;
-   end
+   //wdata register
+   iob_reg #(.DATA_W(DATA_W), .RST_VAL(0))
+   iob_reg_wdata
+     (
+      .clk        (clk),
+      .arst       (rst),
+      .rst        (1'b0),
+      .en         (axil_wvalid),
+      .data_in    (axil_wdata),
+      .data_out   (wdata_reg)
+      );
 
-   //output address
-   `IOB_VAR(addr_int, ADDR_W)
-   assign addr = addr_int;
-   
-   `IOB_COMB begin
-      addr_int = {ADDR_W{1'b0}};
-      if (axil_awvalid)
-        addr_int = axil_awaddr;
-      else if (axil_arvalid)
-        addr_int = axil_araddr;
-      else
-        addr_int = addr_reg;
-   end
 
-   //write strobe
-   assign wstrb = axil_wstrb;
-   
-   //write data
-   assign wdata = axil_wdata;
+   //wstrb register
+   iob_reg #(.DATA_W(DATA_W), .RST_VAL(0))
+   iob_reg_wstrb
+     (
+      .clk        (clk),
+      .arst       (rst),
+      .rst        (1'b0),
+      .en         (axil_wvalid),
+      .data_in    (axil_wstrb),
+      .data_out   (wstrb_reg)
+      );
 
 endmodule
