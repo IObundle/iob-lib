@@ -35,7 +35,7 @@ module axil2iob
    //write response
    assign axil_bid = 1'b0;
    assign axil_bresp = 2'b0;
-   assign axil_bvalid = wvalid;
+   assign axil_bvalid = 1'b1;
 
    //read address
    assign axil_arready = ready;
@@ -51,20 +51,20 @@ module axil2iob
    //COMPUTE IOb OUTPUTS
    //
 
-   `IOB_WIRE(wvalid_reg, q)
+   `IOB_WIRE(wvalid_reg, 1)
    assign valid = wvalid_reg | axil_arvalid;
 
    `IOB_WIRE(addr_reg, ADDR_W)
    assign addr = addr_reg;
  
-   `IOB_WIRE(wdata_reg, ADDR_W)
+   `IOB_WIRE(wdata_reg, DATA_W)
    assign addr = wdata_reg;
  
    `IOB_WIRE(wstrb_reg, DATA_W/8)
    assign wstrb = wstrb_reg;
  
    //write valid register
-   iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
+   iob_reg #(.DATA_W(1), .RST_VAL(0))
    iob_reg_wvalid
      (
       .clk        (clk),
@@ -104,7 +104,7 @@ module axil2iob
 
 
    //wstrb register
-   iob_reg #(.DATA_W(DATA_W), .RST_VAL(0))
+   iob_reg #(.DATA_W(DATA_W/8), .RST_VAL(0))
    iob_reg_wstrb
      (
       .clk        (clk),

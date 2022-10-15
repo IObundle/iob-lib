@@ -161,11 +161,13 @@ def gen_mem_wires(table, fout, cpu_nbytes=4):
             if mem_addr_w > 0:
                 fout.write(f"`IOB_WIRE({reg['name']}_addr, {mem_addr_w})\n")
             fout.write(f"`IOB_WIRE({reg['name']}_addr_int, DATA_W+1)\n")
+            fout.write(f"`IOB_WIRE({reg['name']}_ready_int, DATA_W+1)\n")
             if reg["rw_type"] == "W":
                 fout.write(f"`IOB_WIRE({reg['name']}_wdata, DATA_W)\n")
                 fout.write(f"`IOB_WIRE({reg['name']}_wstrb, (DATA_W/8))\n")
             else:
                 fout.write(f"`IOB_WIRE({reg['name']}_rdata, DATA_W)\n")
+                fout.write(f"`IOB_WIRE({reg['name']}_rvalid, 1)\n")
                 fout.write(f"`IOB_WIRE({reg['name']}_ren, 1)\n")
             fout.write("\n")
     fout.write("\n")
@@ -221,9 +223,9 @@ def gen_mem_read_hw(table, fout, cpu_nbytes=4):
     fout.write("\tcase(mem_switch_reg)\n")
     for reg in table:
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
-            fout.write(f"\t\t{mem_switch_val}: mem_rdata_int = {reg['name']}_rdata;\n")
+            fout.write(f"\t\t{mem_switch_val}: begin\n\t\t\tmem_rdata_int = {reg['name']}_rdata;\n\t\t\tmem_rvalid_int = {reg['name']}_rvalid;\n\t\tend\n")
             mem_switch_val = int(mem_switch_val * 2)
-    fout.write("\t\tdefault: mem_rdata_int = 1'b0;\n")
+    fout.write("\t\tdefault: begin\n\t\t\tmem_rdata_int = 1'b0;\n\t\t\tmem_rvalid_int = 1'b0;\n\t\tend\n")
     fout.write("\tendcase\n")
     fout.write("end\n")
 
@@ -272,10 +274,35 @@ def get_rdata_cases(table, cpu_nbytes=4):
                 case_str = f"{reg['name']}_rdata, " + case_str
             byte_cnt = byte_cnt + int(reg['nbytes'])
 
-        case_str = f"        {reg_addr}: rdata_int = {{" + case_str
+        case_str = f"\t{reg_addr}: begin\n\t\trdata_int = {{" + case_str
         case_strings.append(case_str)
+        case_strings.append("\t\trvalid_int="+f"{reg['name']}_rvalid;\n\tend\n")
 
     return case_strings
+
+
+
+
+def get_ready_cases(table, cpu_nbytes=4):
+    """Get ready_int case lines for registers
+    """
+    regs = table
+
+    # sort regs by start address
+    regs.sort(key=lambda i: int(i['addr']))
+
+    # create ready_int case strings
+    case_strings = []
+    for reg in regs:
+        case_strings.append(f"\t\t{reg['addr']}: ready_int = {reg['name']}_ready;\n")
+  
+    return case_strings
+
+
+
+
+
+
 
 
 def write_hw(table, regfile_name, cpu_nbytes=4):
@@ -295,8 +322,12 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
             fout.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
             fout.write(f"assign {row['name']}_wdata = wdata[{8*addr_offset}+:{reg_w}];\n\n")
 
+    fout.write("\n\n//ready variable\n")
+    fout.write("`IOB_VAR(ready_int, 1)\n\n")
+
     fout.write("\n\n//read register logic\n")
     fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
+    fout.write("`IOB_VAR(rvalid_int, 1)\n")
     fout.write("`IOB_WIRE(addr_reg, ADDR_W)\n")
     fout.write("iob_reg #(ADDR_W, 0) addr_reg0 (clk_i, rst_i, 1'b0, valid, addr, addr_reg);\n")
 
@@ -304,6 +335,8 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
     if has_mem_type(table, ["R"]):
         fout.write("//Select read data from registers or memory\n")
         fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
+        fout.write("`IOB_VAR(mem_rvalid_int, 1)\n")
+        fout.write("`IOB_VAR(mem_ready_int, 1)\n")
         fout.write("`IOB_WIRE(mem_read_sel_reg, 1)\n")
         num_read_mems = get_num_mem_type(table, "R")
         fout.write(f"\n`IOB_WIRE(mem_switch, {num_read_mems})\n")
@@ -311,12 +344,17 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
         fout.write("iob_reg #(1, 0) mem_read_sel0 (clk_i, rst_i, 1'b0, 1'b1, (valid & (wstrb == 0) & |mem_switch), mem_read_sel_reg);\n")
         # choose between register or memory read data
         fout.write("`IOB_VAR2WIRE((mem_read_sel_reg) ? mem_rdata_int : rdata_int, rdata)\n\n")
+        fout.write("`IOB_VAR2WIRE((mem_read_sel_reg) ? mem_rvalid_int : rvalid_int, rvalid)\n\n")
     else:
         fout.write("`IOB_VAR2WIRE(rdata_int, rdata)\n\n")
+        fout.write("`IOB_VAR2WIRE(rvalid_int, rvalid)\n\n")
+        fout.write("`IOB_VAR2WIRE(ready_int, ready)\n\n")
 
     for row in table:
+        fout.write(f"`IOB_WIRE({row['name']}_ready, 1)\n")
         if row["reg_type"] == "REG" and row['rw_type'] == "R":
             fout.write(f"`IOB_WIRE({row['name']}_rdata, {int(row['nbytes']) * 8})\n")
+            fout.write(f"`IOB_WIRE({row['name']}_rvalid, 1)\n")
 
     fout.write("\nalways @* begin\n")
     fout.write("   case(addr_reg)\n")
@@ -326,12 +364,20 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
     for rdata_case in rdata_cases:
         fout.write(rdata_case)
 
-    fout.write("     default: rdata_int = 1'b0;\n")
-    fout.write("   endcase\n")
+    fout.write("\tdefault: begin\n\t\trdata_int = 1'b0;\n\t\trvalid_int = 1'b0;\n\tend\n")
+    fout.write("\tendcase\n")
     fout.write("end\n")
 
     # ready signal
-    fout.write("iob_reg #(1, 0) valid_reg0 (clk_i, rst_i, 1'b0, 1'b1, valid, ready);\n")
+    fout.write("\nalways @* begin\n")
+    fout.write("\tcase(addr)\n")
+
+    # concatenate rdata wires with same 32 bit address
+    ready_cases = get_ready_cases(table, cpu_nbytes)
+    for ready_case in ready_cases:
+        fout.write(ready_case)
+    fout.write("\tendcase\n")
+    fout.write("end\n")
 
     # memory section
     if has_mem_type(table):
