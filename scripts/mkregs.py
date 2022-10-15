@@ -137,6 +137,13 @@ def has_mem_type(table, mem_type_list=["W", "R"]):
                 return 1
     return 0
 
+def has_reg_type(table, reg_type_list=["W", "R"]):
+    for reg in table:
+        if reg["reg_type"] == "REG":
+            if reg["rw_type"] in reg_type_list:
+                return 1
+    return 0
+
 
 def get_num_mem_type(table, rw_type):
     num_regs = 0
@@ -165,8 +172,10 @@ def gen_mem_wires(table, fout, cpu_nbytes=4):
                 fout.write(f"`IOB_WIRE({reg['name']}_wdata, DATA_W)\n")
                 fout.write(f"`IOB_WIRE({reg['name']}_wstrb, (DATA_W/8))\n")
             else:
-                fout.write(f"`IOB_WIRE({reg['name']}_rdata, DATA_W)\n")
                 fout.write(f"`IOB_WIRE({reg['name']}_ren, 1)\n")
+                fout.write(f"`IOB_WIRE({reg['name']}_rdata, DATA_W)\n")
+                fout.write(f"`IOB_WIRE({reg['name']}_rvalid, 1)\n")
+            fout.write(f"`IOB_WIRE({reg['name']}_ready, 1)\n")
             fout.write("\n")
     fout.write("\n")
 
@@ -184,13 +193,57 @@ def gen_mem_write_hw(table, fout, cpu_nbytes=4):
             fout.write(f"assign {reg['name']}_wdata = wdata;\n")
             fout.write(f"assign {reg['name']}_wstrb = (valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & (|wstrb))? wstrb: {{(DATA_W/8){{1'b0}}}};\n")
 
+    fout.write("\n// memory write ready\n")
+    gen_mem_switch_wires(table, fout, "W", "wr_mem_switch")
+    gen_mem_switch(table, fout, "wr_mem_switch", "wr_mem_ready_int", "W", "ready")
+
+
+def gen_mem_switch_wires(table, fout, type, switch_name, gen_reg=0, switch_reg_name=""):
+    num_mems = get_num_mem_type(table, type)
+    mem_concat_str = "}"
+    first_reg = 1
+    for reg in table:
+        if reg['reg_type'] == "MEM" and reg['rw_type'] == type:
+            if first_reg:
+                if type == "W":
+                    mem_concat_str = f"(|{reg['name']}_wstrb){mem_concat_str}"
+                else:
+                    mem_concat_str = f"{reg['name']}_ren{mem_concat_str}"
+                first_reg = 0
+            else:
+                if type == "W":
+                    mem_concat_str = f"(|{reg['name']}_wstrb),{mem_concat_str}"
+                else:
+                    mem_concat_str = f"{reg['name']}_ren,{mem_concat_str}"
+
+    mem_concat_str = "{" + mem_concat_str
+    fout.write(f"assign {switch_name} = {mem_concat_str};\n")
+    # Delay SWMEM_R address 1 cycle to wait for rdata
+    if gen_reg:
+        fout.write(f"iob_reg #({num_mems}, 0) {switch_name}0 (clk_i, rst_i, 1'b0, 1'b1, {switch_name}, {switch_reg_name});\n")
+    return
+
+
+def gen_mem_switch(table, fout, switch_name, assign_signal, type, rhs_sufix="rdata"):
+    mem_switch_val = 1
+    fout.write("always @* begin\n")
+    fout.write(f"\tcase({switch_name})\n")
+    for reg in table:
+        if reg["reg_type"] == "MEM" and reg["rw_type"] == type:
+            fout.write(f"\t\t{mem_switch_val}: {assign_signal} = {reg['name']}_{rhs_sufix};\n")
+            mem_switch_val = int(mem_switch_val * 2)
+    fout.write(f"\t\tdefault: {assign_signal} = 1'b0;\n")
+    fout.write("\tendcase\n")
+    fout.write("end\n")
+    return
+
 
 def gen_mem_read_hw(table, fout, cpu_nbytes=4):
     # Do nothing if there are no read memories
     if has_mem_type(table, ["R"]) == 0:
         return
 
-    fout.write("\n//mem read logic\n")
+    fout.write("\n// memory read logic\n")
     for reg in table:
         if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
             mem_addr_w = calc_mem_addr_w(reg, cpu_nbytes)
@@ -198,62 +251,52 @@ def gen_mem_read_hw(table, fout, cpu_nbytes=4):
             if mem_addr_w > 0:
                 fout.write(f"assign {reg['name']}_addr = {reg['name']}_addr_int[{mem_addr_w}-1:0];\n")
             fout.write(f"assign {reg['name']}_ren = valid & ( {reg['name']}_addr_int[ADDR_W-1:{mem_addr_w}] == 0 ) & ~(|wstrb);\n")
+    gen_mem_switch_wires(table, fout, "R", "rd_mem_switch", 1, "rd_mem_switch_reg")
 
-    # switch case for mem reads
-    num_read_mems = get_num_mem_type(table, "R")
-    fout.write(f"`IOB_WIRE(mem_switch_reg, {num_read_mems})\n")
-    mem_read_en_concat_str = "}"
-    first_reg = 1
-    for reg in table:
-        if reg['reg_type'] == "MEM" and reg['rw_type'] == "R":
-            if first_reg:
-                mem_read_en_concat_str = f"{reg['name']}_ren{mem_read_en_concat_str}"
-                first_reg = 0
-            else:
-                mem_read_en_concat_str = f"{reg['name']}_ren,{mem_read_en_concat_str}"
+    fout.write("\n// memory read rdata\n")
+    gen_mem_switch(table, fout, "rd_mem_switch_reg", "rd_mem_rdata_int", "R", "rdata")
 
-    mem_read_en_concat_str = "{" + mem_read_en_concat_str
-    fout.write(f"assign mem_switch = {mem_read_en_concat_str};\n")
-    # Delay SWMEM_R address 1 cycle to wait for rdata
-    fout.write(f"iob_reg #({num_read_mems}, 0) mem_switch0 (clk_i, rst_i, 1'b0, 1'b1, mem_switch, mem_switch_reg);\n")
-    mem_switch_val = 1
-    fout.write("always @* begin\n")
-    fout.write("\tcase(mem_switch_reg)\n")
+    fout.write("\n// memory read rvalid\n")
+    gen_mem_switch(table, fout, "rd_mem_switch_reg", "rd_mem_rvalid_int", "R", "rvalid")
+
+    fout.write("\n// memory read ready\n")
+    gen_mem_switch(table, fout, "rd_mem_switch", "rd_mem_ready_int", "R", "ready")
+    return
+
+
+def group_reg_by_cpu_addr(table, type, cpu_nbytes=4):
+    """Group registers with the same CPU address.
+    """
+    type_regs = []
+    reg_groups = {}
     for reg in table:
-        if reg["reg_type"] == "MEM" and reg["rw_type"] == "R":
-            fout.write(f"\t\t{mem_switch_val}: mem_rdata_int = {reg['name']}_rdata;\n")
-            mem_switch_val = int(mem_switch_val * 2)
-    fout.write("\t\tdefault: mem_rdata_int = 1'b0;\n")
-    fout.write("\tendcase\n")
-    fout.write("end\n")
+        if reg['reg_type'] == "REG" and reg['rw_type'] == type:
+            type_regs.append(reg)
+
+    # sort regs by start address
+    type_regs.sort(key=lambda i: int(i['addr']))
+
+    # group regs with same 32 bit address
+    for reg in type_regs:
+        addr = int(reg['addr'])
+        reg_addr = str(math.floor(addr/cpu_nbytes))
+        if reg_addr in reg_groups:
+            reg_groups[reg_addr].append(reg)
+        else:
+            reg_groups[reg_addr] = [reg]
+
+    return reg_groups
 
 
 def get_rdata_cases(table, cpu_nbytes=4):
     """Get rdata_int case lines for read registers
 
-    Concatenates all read registers with the same 32bit address.
+    Concatenates all read registers with the same CPU address.
     """
-    read_regs = []
-    rdata_cases = {}
-    for reg in table:
-        if reg['reg_type'] == "REG" and reg['rw_type'] == "R":
-            read_regs.append(reg)
-
-    # sort regs by start address
-    read_regs.sort(key=lambda i: int(i['addr']))
-
-    # group regs with same 32 bit address
-    for reg in read_regs:
-        addr = int(reg['addr'])
-        reg_addr = str(math.floor(addr/cpu_nbytes))
-        if reg_addr in rdata_cases:
-            rdata_cases[reg_addr].append(reg)
-        else:
-            rdata_cases[reg_addr] = [reg]
-
+    rdata_groups = group_reg_by_cpu_addr(table, "R", cpu_nbytes)
     # create rdata_int case strings
     case_strings = []
-    for reg_addr, reg_list in rdata_cases.items():
+    for reg_addr, reg_list in rdata_groups.items():
         byte_cnt = 0
         case_str = ""
         for reg in reg_list:
@@ -272,18 +315,147 @@ def get_rdata_cases(table, cpu_nbytes=4):
                 case_str = f"{reg['name']}_rdata, " + case_str
             byte_cnt = byte_cnt + int(reg['nbytes'])
 
-        case_str = f"        {reg_addr}: rdata_int = {{" + case_str
+        case_str = f"        {reg_addr}: rd_reg_rdata_int = {{" + case_str
         case_strings.append(case_str)
 
     return case_strings
 
 
-def write_hw(table, regfile_name, cpu_nbytes=4):
+def get_rvalid_cases(table, cpu_nbytes=4):
+    """Get rvalid_int case lines for read registers
 
-    fout = open(regfile_name + "_gen.vh", "w")
+    Concatenates all read registers with the same CPU address.
+    """
+    rvalid_groups = group_reg_by_cpu_addr(table, "R", cpu_nbytes)
+    # create rvalid_int case strings
+    case_strings = []
+    for reg_addr, reg_list in rvalid_groups.items():
+        byte_cnt = 0
+        case_str = ""
+        # append reg rvalid
+        for reg in reg_list:
+            if not case_str:
+                case_str = f"{reg['name']}_rvalid}};\n"
+            else:
+                case_str = f"{reg['name']}_rvalid, " + case_str
+            byte_cnt = byte_cnt + int(reg['nbytes'])
 
-    fout.write("//This file was generated by script mkregs.py\n\n")
+        case_str = f"        {reg_addr}: rd_reg_rvalid_int = &{{" + case_str
+        case_strings.append(case_str)
 
+    return case_strings
+
+
+def gen_ready_logic(table, fout):
+    fout.write("// ready logic\n")
+    fout.write("`IOB_WIRE(wr_ready_int, 1)\n")
+    fout.write("`IOB_WIRE(rd_ready_int, 1)\n")
+    fout.write("assign ready = (|wstrb) ? wr_ready_int : rd_ready_int;\n")
+    fout.write("`IOB_WIRE(wr_reg_ready_int, 1)\n")
+    if not has_reg_type(table, ["W"]):
+        fout.write("assign wr_reg_ready_int = 1'b0\n")
+    fout.write("`IOB_WIRE(wr_mem_ready_int, 1)\n")
+    if not has_mem_type(table, ["W"]):
+        fout.write("assign wr_mem_ready_int = 1'b0\n")
+    else:
+        num_write_mems = get_num_mem_type(table, "W")
+        fout.write(f"`IOB_WIRE(wr_mem_switch, {num_write_mems})\n")
+    fout.write("assign wr_ready_int = (|wr_mem_switch) ? wr_mem_ready_int : wr_reg_ready_int;\n")
+    fout.write("`IOB_WIRE(rd_reg_ready_int, 1)\n")
+    if not has_reg_type(table, ["R"]):
+        fout.write("assign rd_reg_ready_int = 1'b0\n")
+    fout.write("`IOB_WIRE(rd_mem_ready_int, 1)\n")
+    if not has_mem_type(table, ["R"]):
+        fout.write("assign rd_mem_ready_int = 1'b0\n")
+    else:
+        num_read_mems = get_num_mem_type(table, "R")
+        fout.write(f"`IOB_WIRE(rd_mem_switch, {num_write_mems})\n")
+    fout.write("assign rd_ready_int = (|rd_mem_switch) ? rd_mem_ready_int : rd_reg_ready_int;\n\n")
+    return
+
+
+def gen_rdata_logic(table, fout):
+    fout.write("// rdata logic\n")
+    fout.write("`IOB_WIRE(rd_reg_rdata_int, DATA_W)\n")
+    if not has_reg_type(table, ["R"]):
+        fout.write("assign rd_reg_rdata_int = {DATA_W{1'b0}};\n")
+    fout.write("`IOB_WIRE(rd_mem_rdata_int, DATA_W)\n")
+    if not has_mem_type(table, ["R"]):
+        fout.write("assign rd_mem_rdata_int = {DATA_W{1'b0}};\n")
+    else:
+        num_read_mems = get_num_mem_type(table, "R")
+        fout.write(f"`IOB_WIRE(rd_mem_switch_reg, {num_read_mems})\n")
+    fout.write("assign rdata = (|rd_mem_switch_reg) ? rd_mem_rdata_int : rd_reg_rdata_int;\n\n")
+    return
+
+
+def gen_rvalid_logic(table, fout):
+    fout.write("// rvalid logic\n")
+    fout.write("`IOB_WIRE(rd_reg_rvalid_int, 1)\n")
+    if not has_reg_type(table, ["R"]):
+        fout.write("assign rd_reg_rvalid_int = 1'b0;\n")
+    fout.write("`IOB_WIRE(rd_mem_rvalid_int, 1)\n")
+    if not has_mem_type(table, ["R"]):
+        fout.write("assign rd_mem_rvalid_int = 1'b0;\n")
+    fout.write("assign rvalid = (|rd_mem_switch_reg) ? rd_mem_rvalid_int : rd_reg_rvalid_int;\n\n")
+    return
+
+
+def gen_addr_reg_logic(table, fout):
+    fout.write("// register address\n")
+    fout.write("`IOB_WIRE(addr_reg, ADDR_W)\n")
+    fout.write("iob_reg #(ADDR_W, 0) addr_reg0 (clk_i, rst_i, 1'b0, valid, addr, addr_reg);\n\n")
+    return
+
+
+def gen_output_logic(table, fout):
+    gen_ready_logic(table, fout)
+    gen_rdata_logic(table, fout)
+    gen_rvalid_logic(table, fout)
+    gen_addr_reg_logic(table, fout)
+    return
+
+
+def get_ready_cases(table, type, assign_signal, cpu_nbytes=4):
+    """Get ready_int case lines for type registers
+
+    Concatenates all type registers with the same CPU address.
+    """
+    ready_groups = group_reg_by_cpu_addr(table, type, cpu_nbytes)
+    # create rdata_int case strings
+    case_strings = []
+    for reg_addr, reg_list in ready_groups.items():
+        byte_cnt = 0
+        case_str = ""
+        # concatenate reg _ready wires
+        for reg in reg_list:
+            if not case_str:
+                case_str = f"{reg['name']}_ready}};\n"
+            else:
+                case_str = f"{reg['name']}_ready, " + case_str
+
+        case_str = f"        {reg_addr}: {assign_signal} = &{{" + case_str
+        case_strings.append(case_str)
+
+    return case_strings
+
+
+def gen_reg_ready_switch(table, fout, type, assign_signal, cpu_nbytes=4):
+    fout.write("always @* begin\n")
+    fout.write("   case(addr)\n")
+
+    # concatenate ready wires with same CPU address
+    ready_cases = get_ready_cases(table, type, assign_signal, cpu_nbytes)
+    for ready_case in ready_cases:
+        fout.write(ready_case)
+
+    fout.write(f"     default: {assign_signal} = 1'b0;\n")
+    fout.write("   endcase\n")
+    fout.write("end\n")
+    return
+
+
+def gen_wr_reg(table, fout, cpu_nbytes=4):
     fout.write("\n\n//write registers\n")
     for row in table:
         if row["reg_type"] == "REG" and row['rw_type'] == "W":
@@ -293,45 +465,71 @@ def write_hw(table, regfile_name, cpu_nbytes=4):
             fout.write(f"`IOB_WIRE({row['name']}_en, 1)\n")
             fout.write(f"assign {row['name']}_en = valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (addr == {reg_addr});\n")
             fout.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
-            fout.write(f"assign {row['name']}_wdata = wdata[{8*addr_offset}+:{reg_w}];\n\n")
+            fout.write(f"assign {row['name']}_wdata = wdata[{8*addr_offset}+:{reg_w}];\n")
+            fout.write(f"`IOB_WIRE({row['name']}_ready, 1)\n\n")
 
-    fout.write("\n\n//read register logic\n")
-    fout.write("`IOB_VAR(rdata_int, DATA_W)\n")
-    fout.write("`IOB_WIRE(addr_reg, ADDR_W)\n")
-    fout.write("iob_reg #(ADDR_W, 0) addr_reg0 (clk_i, rst_i, 1'b0, valid, addr, addr_reg);\n")
+    fout.write("// register write ready\n")
+    gen_reg_ready_switch(table, fout, "W", "wr_reg_ready_int", cpu_nbytes)
+    return
 
-    # if read memory present then add mem_rdata_int
-    if has_mem_type(table, ["R"]):
-        fout.write("//Select read data from registers or memory\n")
-        fout.write("`IOB_VAR(mem_rdata_int, DATA_W)\n")
-        fout.write("`IOB_WIRE(mem_read_sel_reg, 1)\n")
-        num_read_mems = get_num_mem_type(table, "R")
-        fout.write(f"\n`IOB_WIRE(mem_switch, {num_read_mems})\n")
-        # Register condition for SWMEM_R access
-        fout.write("iob_reg #(1, 0) mem_read_sel0 (clk_i, rst_i, 1'b0, 1'b1, (valid & (wstrb == 0) & |mem_switch), mem_read_sel_reg);\n")
-        # choose between register or memory read data
-        fout.write("`IOB_VAR2WIRE((mem_read_sel_reg) ? mem_rdata_int : rdata_int, rdata)\n\n")
-    else:
-        fout.write("`IOB_VAR2WIRE(rdata_int, rdata)\n\n")
+
+def gen_rd_reg(table, fout, cpu_nbytes):
+    fout.write("\n//read register logic\n")
 
     for row in table:
         if row["reg_type"] == "REG" and row['rw_type'] == "R":
             fout.write(f"`IOB_WIRE({row['name']}_rdata, {int(row['nbytes']) * 8})\n")
+            fout.write(f"`IOB_WIRE({row['name']}_rvalid, 1)\n")
+            fout.write(f"`IOB_WIRE({row['name']}_ready, 1)\n")
 
-    fout.write("\nalways @* begin\n")
+    # register read data switch
+    fout.write("\n// register read rdata\n")
+    fout.write("always @* begin\n")
     fout.write("   case(addr_reg)\n")
 
-    # concatenate rdata wires with same 32 bit address
+    # concatenate rdata wires with same CPU address
     rdata_cases = get_rdata_cases(table, cpu_nbytes)
     for rdata_case in rdata_cases:
         fout.write(rdata_case)
 
-    fout.write("     default: rdata_int = 1'b0;\n")
+    fout.write("     default: rd_reg_rdata_int = 1'b0;\n")
     fout.write("   endcase\n")
     fout.write("end\n")
 
-    # ready signal
-    fout.write("iob_reg #(1, 0) valid_reg0 (clk_i, rst_i, 1'b0, 1'b1, valid, ready);\n")
+    # register read valid switch
+    fout.write("\n// register read rvalid\n")
+    fout.write("always @* begin\n")
+    fout.write("   case(addr_reg)\n")
+
+    # concatenate rvalid wires with same CPU address
+    rvalid_cases = get_rvalid_cases(table, cpu_nbytes)
+    for rvalid_case in rvalid_cases:
+        fout.write(rvalid_case)
+
+    fout.write("     default: rd_reg_rvalid_int = 1'b0;\n")
+    fout.write("   endcase\n")
+    fout.write("end\n")
+
+    # register read ready switch
+    fout.write("\n// register read ready\n")
+    gen_reg_ready_switch(table, fout, "R", "rd_reg_ready_int", cpu_nbytes)
+    return
+
+
+def write_hw(table, regfile_name, cpu_nbytes=4):
+
+    fout = open(regfile_name + "_gen.vh", "w")
+
+    fout.write("//This file was generated by script mkregs.py\n\n")
+
+    gen_output_logic(table, fout)
+
+    # register section
+    if has_reg_type(table, ["W"]):
+        gen_wr_reg(table, fout, cpu_nbytes)
+
+    if has_reg_type(table, ["R"]):
+        gen_rd_reg(table, fout, cpu_nbytes)
 
     # memory section
     if has_mem_type(table):
