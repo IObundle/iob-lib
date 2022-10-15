@@ -789,7 +789,7 @@ def check_overlapped_addresses(table, rw_type, cpu_nbytes=4):
     for i in range(len(type_regs) - 1):
         reg_addr_end = int(type_regs[i]['addr']) + calc_reg_addr_space(type_regs[i], cpu_nbytes) - 1
         if reg_addr_end >= int(type_regs[i+1]['addr']):
-            print(f"ERROR: {type_regs[i]['name']} and {type_regs[i+1]['name']} registers are overlapped for {rw_type} type")
+            print(f"Warning: {type_regs[i]['name']} and {type_regs[i+1]['name']} registers are overlapped for {rw_type} type")
 
 
 def check_addresses(table, cpu_nbytes=4):
@@ -797,12 +797,12 @@ def check_addresses(table, cpu_nbytes=4):
     for reg in table:
         if reg['reg_type'] == "REG":
             if int(reg['addr']) % int(reg['nbytes']) != 0:
-                print(f"ERROR: {reg['name']} register not aligned")
+                sys.exit(f"ERROR: {reg['name']} register not aligned")
         elif reg['reg_type'] == "MEM":
             if int(reg['addr']) % cpu_nbytes != 0:
-                print(f"ERROR: {reg['name']} memory not aligned with cpu data width")
+                sys.exit(f"ERROR: {reg['name']} memory not aligned with cpu data width")
         else:
-            print(f"Error: invalid REG type for {reg['name']}")
+            sys.exit(f"ERROR: invalid REG type for {reg['name']}")
 
     check_overlapped_addresses(table, "R", cpu_nbytes)
     check_overlapped_addresses(table, "W", cpu_nbytes)
