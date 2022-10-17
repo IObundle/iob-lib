@@ -59,7 +59,7 @@ def parse_arguments():
         The ADDR field needs to be a multiple of NBYTES.
         For memories, the ADDR needs to be a multiple of CPU data width in
         bytes.
-        ADDR = -1 assigns automatic address to register/memory. The automatic
+        ADDR = A: assigns automatic address to register/memory. The automatic
         addresses are always higher than the manually assigned addresses.
         The read and write addresses are independent. A read register and
         another write register can have the same address.
@@ -73,6 +73,7 @@ def parse_arguments():
     IOB_SWREG_W(WR_BUF, 2, 0, 4, 12) //2^12 x 16 bit write mem at addr 4
     IOB_SWREG_R(DONE, 1, 0, 1, 0) //Done read register at address 1
     IOB_SWREG_R(RD_BUF, 4, 0, 4, 10) //2^10 x 4 bit read mem at addr 4
+    IOB_SWREG_W(AUTO_REG, 2, 0, A, R) //2 Byte register in automatic address
     """
 
     parser = argparse.ArgumentParser(
@@ -855,7 +856,7 @@ def calc_swreg_addr(table, cpu_nbytes=4):
 
     # Get largest manual address for read and write
     for reg in table:
-        if int(reg['addr']) >= 0:
+        if reg['addr'].isdigit() and int(reg['addr']) >= 0:
             reg_addr = int(reg['addr'])
             reg_nbytes = int(reg['nbytes'])
             if reg['rw_type'] == "R" and read_addr <= reg_addr:
@@ -866,7 +867,7 @@ def calc_swreg_addr(table, cpu_nbytes=4):
     # Assign automatic addresses
     reg_addr = 0
     for reg in table:
-        if int(reg['addr']) == -1:
+        if reg['addr'] == "A":
             # get rw_type address
             if reg['rw_type'] == "R":
                 reg_addr = read_addr
@@ -890,6 +891,8 @@ def calc_swreg_addr(table, cpu_nbytes=4):
             else:
                 print(f"Error: invalid RW type for {reg['name']}")
                 continue
+        elif not reg['addr'].isdigit():
+            sys.exit(f"Error: Invalid addr field {reg['addr']}")
 
     # Check for valid addresses
     check_addresses(table, cpu_nbytes)
