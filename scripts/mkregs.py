@@ -4,29 +4,14 @@
 #
 
 import sys
+import argparse
 from parse import parse, search
 import math
 import re
 
 
-def print_usage():
-
-    usage_str = """Usage: ./mkregs.py TOP PATH {HW|SW} [vh_files] [--help]
-        TOP:        Top/core module name
-        PATH:       Path to mkregs.conf file
-        {HW|SW}:    HW: generate the hardware files
-                    SW: generate the software files
-        [vh_files]: paths to .vh files used to import HW macros to SW macros
-        [--help]:   display detailed help information"""
-
-    print(usage_str)
-
-
-def print_help():
-    help_str = """Detailed Help:
-        mkregs.py script generates hardware logic and software drivers to
-        interface core with CPU.
-
+def parse_arguments():
+    help_str = """
     General operation:
         1. Read ./<PATH>/mkregs.conf file with information about the software
         accessible registers and memories.
@@ -90,7 +75,24 @@ def print_help():
     IOB_SWREG_R(CORE_RD_BUF, 4, 0, 4, 10) //2^10 x 4 bit read mem at addr 4
     """
 
-    print(help_str)
+    parser = argparse.ArgumentParser(
+            description="mkregs.py script generates hardware logic and software drivers to interface core with CPU.",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog=help_str
+            )
+
+    parser.add_argument("TOP", help="""Top/core module name""")
+    parser.add_argument("PATH", help="""Path to mkregs.conf file""")
+    parser.add_argument("hwsw", choices=['HW', 'SW'],
+                        help="""HW: generate the hardware files
+                        SW: generate the software files"""
+                        )
+    parser.add_argument("vh_files", 
+                        nargs='*',
+                        help="""paths to .vh files used to import HW macros to SW macros"""
+                        )
+
+    return parser.parse_args()
 
 
 def clog2(x):
@@ -589,17 +591,15 @@ def write_hwheader(table, regfile_name, cpu_nbytes=4):
 
 
 # Read vh files to get non-literal widths
-def get_defines():
+def get_defines(vh_files):
     # .vh file lines
     vh = []
 
-    if len(sys.argv) > 4:
-        i = 4
-        while i < len(sys.argv) and -1 < sys.argv[i].find(".vh"):
-            fvh = open(sys.argv[i], "r")
+    for vh_file in vh_files:
+        if vh_file.find(".vh"):
+            fvh = open(vh_file, "r")
             vh = [*vh, *fvh.readlines()]
-            fvh.close()
-            i = i + 1
+            fvh = close()
 
     defines = {}
     # parse headers if any
@@ -943,7 +943,7 @@ def swreg_get_fields(line):
     return swreg_flds
 
 
-def swreg_parse(code, hwsw, top, cpu_nbytes=4):
+def swreg_parse(code, hwsw, top, vh_files, cpu_nbytes=4):
     table = []  # list of swreg dictionaries
 
     for line in code:
@@ -964,7 +964,7 @@ def swreg_parse(code, hwsw, top, cpu_nbytes=4):
 
     elif hwsw == "SW":
         core_prefix = top.upper()
-        defines = get_defines()
+        defines = get_defines(vh_files)
         write_swheader(table, regfile_name, core_prefix, defines)
         write_sw_emb(table, regfile_name, core_prefix, defines)
 
@@ -972,18 +972,16 @@ def swreg_parse(code, hwsw, top, cpu_nbytes=4):
 def main():
 
     # parse command line
-    if len(sys.argv) < 3:
-        print_usage()
-        if "--help" in sys.argv:
-            print_help()
-        quit()
-    else:
-        top = sys.argv[1]
-        path = sys.argv[2]
-        hwsw = sys.argv[3]
+    args = parse_arguments()
+
+    print(args)
+    print(f"TOP: {args.TOP}")
+    print(f"PATH: {args.PATH}")
+    print(f"hwsw: {args.hwsw}")
+    print(f"vh_files: {args.vh_files}")
 
     # parse input file
-    config_file_name = f"{path}/mkregs.conf"
+    config_file_name = f"{args.PATH}/mkregs.conf"
     try:
         fin = open(config_file_name, "r")
     except FileNotFoundError:
@@ -992,7 +990,7 @@ def main():
     defsfile = fin.readlines()
     fin.close()
 
-    swreg_parse(defsfile, hwsw, top)
+    swreg_parse(defsfile, args.hwsw, args.TOP, args.vh_files)
 
 
 if __name__ == "__main__":
