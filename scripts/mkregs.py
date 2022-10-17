@@ -346,71 +346,49 @@ def get_rvalid_cases(table, cpu_nbytes=4):
     return case_strings
 
 
+def gen_reg_mem_switch(table, fout, type, assign_var, switch_var, mem_var, reg_var, var_width):
+    gen_reg = has_reg_type(table, [type])
+    gen_mem = has_mem_type(table, [type])
+    # generate switch for register and memory
+    if gen_reg and gen_mem:
+        fout.write(f"`IOB_VAR({reg_var}, {var_width})\n")
+        fout.write(f"`IOB_VAR({mem_var}, {var_width})\n")
+        fout.write(f"assign {assign_var} = (|{switch_var}) ? {mem_var} : {reg_var};\n")
+    # generate only register logic
+    elif gen_reg and not gen_mem:
+        fout.write(f"`IOB_VAR({reg_var}, {var_width})\n")
+        fout.write(f"assign {assign_var} = {reg_var};\n")
+    # generate only memory logic
+    elif not gen_reg and gen_mem:
+        fout.write(f"`IOB_VAR({mem_var}, {var_width})\n")
+        fout.write(f"assign {assign_var} = {mem_var};\n")
+    # generate no logic
+    else:
+        fout.write(f"assign {assign_var} = {{{var_width}{{1'b0}}}};\n")
+    return
+    
+
 def gen_ready_logic(table, fout):
     fout.write("// ready logic\n")
     fout.write("`IOB_WIRE(wr_ready_int, 1)\n")
     fout.write("`IOB_WIRE(rd_ready_int, 1)\n")
     fout.write("assign ready = (|wstrb) ? wr_ready_int : rd_ready_int;\n")
-    if has_reg_type(table, ["W"]):
-        fout.write("`IOB_VAR(wr_reg_ready_int, 1)\n")
-    else:
-        fout.write("`IOB_WIRE(wr_reg_ready_int, 1)\n")
-        fout.write("assign wr_reg_ready_int = 1'b0\n")
-    if has_mem_type(table, ["W"]):
-        fout.write("`IOB_VAR(wr_mem_ready_int, 1)\n")
-        num_write_mems = get_num_mem_type(table, "W")
-        fout.write(f"`IOB_WIRE(wr_mem_switch, {num_write_mems})\n")
-    else:
-        fout.write("`IOB_WIRE(wr_mem_ready_int, 1)\n")
-        fout.write("assign wr_mem_ready_int = 1'b0\n")
-    fout.write("assign wr_ready_int = (|wr_mem_switch) ? wr_mem_ready_int : wr_reg_ready_int;\n")
-    if has_reg_type(table, ["R"]):
-        fout.write("`IOB_VAR(rd_reg_ready_int, 1)\n")
-    else:
-        fout.write("`IOB_WIRE(rd_reg_ready_int, 1)\n")
-        fout.write("assign rd_reg_ready_int = 1'b0\n")
-    if has_mem_type(table, ["R"]):
-        fout.write("`IOB_VAR(rd_mem_ready_int, 1)\n")
-        num_read_mems = get_num_mem_type(table, "R")
-        fout.write(f"`IOB_WIRE(rd_mem_switch, {num_write_mems})\n")
-    else:
-        fout.write("`IOB_WIRE(rd_mem_ready_int, 1)\n")
-        fout.write("assign rd_mem_ready_int = 1'b0\n")
-    fout.write("assign rd_ready_int = (|rd_mem_switch) ? rd_mem_ready_int : rd_reg_ready_int;\n\n")
+
+    gen_reg_mem_switch(table, fout, "W", "wr_ready_int", "wr_mem_switch", "wr_mem_ready_int", "wr_reg_ready_int", 1)
+
+    gen_reg_mem_switch(table, fout, "R", "rd_ready_int", "rd_mem_switch", "rd_mem_ready_int", "rd_reg_ready_int", 1)
     return
 
 
 def gen_rdata_logic(table, fout):
     fout.write("// rdata logic\n")
-    if has_reg_type(table, ["R"]):
-        fout.write("`IOB_VAR(rd_reg_rdata_int, DATA_W)\n")
-    else:
-        fout.write("`IOB_WIRE(rd_reg_rdata_int, DATA_W)\n")
-        fout.write("assign rd_reg_rdata_int = {DATA_W{1'b0}};\n")
-    if has_mem_type(table, ["R"]):
-        fout.write("`IOB_VAR(rd_mem_rdata_int, DATA_W)\n")
-        num_read_mems = get_num_mem_type(table, "R")
-        fout.write(f"`IOB_WIRE(rd_mem_switch_reg, {num_read_mems})\n")
-    else:
-        fout.write("`IOB_WIRE(rd_mem_rdata_int, DATA_W)\n")
-        fout.write("assign rd_mem_rdata_int = {DATA_W{1'b0}};\n")
-    fout.write("assign rdata = (|rd_mem_switch_reg) ? rd_mem_rdata_int : rd_reg_rdata_int;\n\n")
+    gen_reg_mem_switch(table, fout, "R", "rdata", "rd_mem_switch_reg", "rd_mem_rdata_int", "rd_reg_rdata_int", "DATA_W")
     return
 
 
 def gen_rvalid_logic(table, fout):
     fout.write("// rvalid logic\n")
-    if has_reg_type(table, ["R"]):
-        fout.write("`IOB_VAR(rd_reg_rvalid_int, 1)\n")
-    else:
-        fout.write("`IOB_WIRE(rd_reg_rvalid_int, 1)\n")
-        fout.write("assign rd_reg_rvalid_int = 1'b0;\n")
-    if has_mem_type(table, ["R"]):
-        fout.write("`IOB_VAR(rd_mem_rvalid_int, 1)\n")
-    else:
-        fout.write("`IOB_WIRE(rd_mem_rvalid_int, 1)\n")
-        fout.write("assign rd_mem_rvalid_int = 1'b0;\n")
-    fout.write("assign rvalid = (|rd_mem_switch_reg) ? rd_mem_rvalid_int : rd_reg_rvalid_int;\n\n")
+    gen_reg_mem_switch(table, fout, "R", "rvalid", "rd_mem_switch_reg", "rd_mem_rvalid_int", "rd_reg_rvalid_int", 1)
     return
 
 
