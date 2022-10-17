@@ -7,17 +7,17 @@ module iob_ram_2p
      parameter ADDR_W = 0
      ) 
    (
-    input                   clk,
+    input                   clk_i,
 
     //write port
-    input                   w_en,
-    input [ADDR_W-1:0]      w_addr,
-    input [DATA_W-1:0]      w_data,
+    input                   w_en_i,
+    input [ADDR_W-1:0]      w_addr_i,
+    input [DATA_W-1:0]      w_data_i,
 
     //read port
-    input                   r_en,
-    input [ADDR_W-1:0]      r_addr,
-    output reg [DATA_W-1:0] r_data
+    input                   r_en_i,
+    input [ADDR_W-1:0]      r_addr_i,
+    output reg [DATA_W-1:0] r_data_o
     );
 
    //this allows ISE 14.7 to work; do not remove
@@ -32,13 +32,13 @@ module iob_ram_2p
        $readmemh(mem_init_file_int, mem, 0, (2**ADDR_W) - 1);
 
    //read port
-   always @(posedge clk)
-      if(r_en)
-        r_data <= mem[r_addr];
+   always @(posedge clk_i)
+      if (r_en_i)
+        r_data_o <= mem[r_addr_i];
 
    //write port
-   always @(posedge clk)
-     if(w_en)
-       mem[w_addr] <= w_data;
+   always @(posedge clk_i)
+     if (w_en_i)
+       mem[w_addr_i] <= w_data_i;
 
 endmodule   

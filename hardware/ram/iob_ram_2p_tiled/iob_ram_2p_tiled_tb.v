@@ -30,12 +30,12 @@ module iob_ram_2p_tiled_tb;
        ) 
    uut 
      (
-      .clk(clk), 
-      .w_en(w_en),
-      .r_en(r_en), 
-      .w_data(w_data), 
-      .addr(addr), 
-      .r_data(r_data)
+      .clk_i    (clk), 
+      .w_en_i   (w_en),
+      .r_en_i   (r_en), 
+      .w_data_i (w_data), 
+      .addr_i   (addr), 
+      .r_data_o (r_data)
       );
 
    // system clock

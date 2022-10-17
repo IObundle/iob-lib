@@ -68,10 +68,10 @@ module iob_rom_sp_tb;
        )
    uut
      (
-      .clk(clk),
-      .r_en(r_en),
-      .addr(addr),
-      .r_data(r_data)
+      .clk_i    (clk),
+      .r_en_i   (r_en),
+      .addr_i   (addr),
+      .r_data_o (r_data)
       );
 
    // system clock

@@ -6,29 +6,29 @@ module iob_piso_reg_are
     )
    (
 
-    input              clk,
-    input              arst,
+    input              clk_i,
+    input              arst_i,
 
-    input              ld,
-    input              en,
+    input              ld_i,
+    input              en_i,
 
     // parallel input
-    input [DATA_W-1:0] p_in,
+    input [DATA_W-1:0] p_i,
 
     // serial output
-    output             s_out
+    output             s_o
     );
 
    reg [DATA_W-1:0]    data_reg;
    
-   always @(posedge clk, posedge arst)
-     if (arst)
+   always @(posedge clk_i, posedge arst_i)
+     if (arst_i)
        data_reg <= 1'b0;
-     else if (ld)
-       data_reg <= p_in;
-     else if (en)
+     else if (ld_i)
+       data_reg <= p_i;
+     else if (en_i)
        data_reg <= data_reg << 1;
 
-   assign s_out = data_reg[DATA_W-1];
+   assign s_o = data_reg[DATA_W-1];
    
 endmodule

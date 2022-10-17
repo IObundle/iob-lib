@@ -6,36 +6,34 @@ module iob_modcnt
     )
    (
 
-    input                   clk,
-    input                   arst,
-    input                   rst,
-    input                   en,
+    input                   clk_i,
+    input                   arst_i,
+    input                   rst_i,
+    input                   en_i,
 
-    input [DATA_W-1:0]      load_val,
+    input [DATA_W-1:0]      ld_val_i,
 
-    // masters interface
-    input [DATA_W-1:0]      mod,
+    input [DATA_W-1:0]      mod_i,
 
-    // slave interface
-    output reg [DATA_W-1:0] cnt
+    output reg [DATA_W-1:0] cnt_o
     );
 
    reg                      loaded;
    
-   always @(posedge clk, posedge arst) 
-      if(arst) begin
-         cnt <= -1'b1;
+   always @(posedge clk_i, posedge arst_i) 
+      if (arst_i) begin
+         cnt_o <= -1'b1;
          loaded <= 1'b0;
-      end else if (rst) begin 
-         cnt <= -1'b1;
+      end else if (rst_i) begin 
+         cnt_o <= -1'b1;
          loaded <= 1'b0;
       end else if (!loaded) begin
-          cnt <= load_val;
+          cnt_o <= ld_val_i;
           loaded <= 1'b1;
-      end else if (en)
-        if (cnt == (mod-1'b1))
-          cnt <= 1'b0;
+      end else if (en_i)
+        if (cnt_o == (mod_i-1'b1))
+          cnt_o <= 1'b0;
         else
-          cnt <= cnt + 1'b1;
+          cnt_o <= cnt_o + 1'b1;
    
 endmodule

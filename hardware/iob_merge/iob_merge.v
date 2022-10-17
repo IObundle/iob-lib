@@ -10,16 +10,16 @@ module iob_merge
     )
    (
 
-    input                              clk,
-    input                              rst,
+    input                              clk_i,
+    input                              rst_i,
 
     //masters interface
-    input [N_MASTERS*`REQ_W-1:0]       m_req,
-    output reg [N_MASTERS*`RESP_W-1:0] m_resp,
+    input [N_MASTERS*`REQ_W-1:0]       m_req_i,
+    output reg [N_MASTERS*`RESP_W-1:0] m_resp_o,
 
     //slave interface
-    output reg [`REQ_W-1:0]            s_req,
-    input [`RESP_W-1:0]                s_resp
+    output reg [`REQ_W-1:0]            s_req_o,
+    input [`RESP_W-1:0]                s_resp_i
     );
 
 
@@ -33,13 +33,13 @@ module iob_merge
    
    //select enable
    reg                                 sel_en; 
-   always @(posedge clk, posedge rst)
-     if(rst)
+   always @(posedge clk_i, posedge rst_i)
+     if(rst_i)
        sel_en <= 1'b1;
-     else if(s_req[`valid(0)])
+     else if(s_req_o[`valid(0)])
        sel_en <= 1'b0;
-     else if(s_resp[`ready(0)])
-       sel_en <= ~s_req[`valid(0)];
+     else if(s_resp_i[`ready(0)])
+       sel_en <= ~s_req_o[`valid(0)];
 
    
    //select master
@@ -49,7 +49,7 @@ module iob_merge
       for (k=0; k<N_MASTERS; k=k+1)
         if (~sel_en)
           sel = sel_reg;
-        else if( m_req[`valid(k)] )
+        else if( m_req_i[`valid(k)] )
           sel = k[Nb-1:0];          
    end
    
@@ -58,10 +58,10 @@ module iob_merge
    //  
    integer                             i;
    always @* begin
-      s_req = {`REQ_W{1'b0}};
+      s_req_o = {`REQ_W{1'b0}};
       for (i=0; i<N_MASTERS; i=i+1)
         if( i == sel )
-          s_req = m_req[`req(i)];
+          s_req_o = m_req_i[`req(i)];
    end
 
    //
@@ -69,8 +69,8 @@ module iob_merge
    //
 
    //register master selection
-   always @( posedge clk, posedge rst ) begin
-      if( rst )
+   always @( posedge clk_i, posedge rst_i ) begin
+      if( rst_i )
         sel_reg <= {Nb{1'b0}};
       else
         sel_reg <= sel;
@@ -81,9 +81,9 @@ module iob_merge
    always @* begin
       for (j=0; j<N_MASTERS; j=j+1)
         if( j == sel_reg )
-          m_resp[`resp(j)] = s_resp;
+          m_resp_o[`resp(j)] = s_resp_i;
         else
-          m_resp[`resp(j)] = {`RESP_W{1'b0}};
+          m_resp_o[`resp(j)] = {`RESP_W{1'b0}};
    end
 
    

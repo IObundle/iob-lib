@@ -10,12 +10,12 @@ module iob_ram_sp_be
     parameter DATA_W = 32  // Data Width in bits
     ) 
    ( 
-     input                clk,
-     input                en,
-     input [DATA_W/8-1:0] we,
-     input [ADDR_W-1:0]   addr,
-     input [DATA_W-1:0]   din,
-     output [DATA_W-1:0]  dout
+     input                clk_i,
+     input                en_i,
+     input [DATA_W/8-1:0] we_i,
+     input [ADDR_W-1:0]   addr_i,
+     input [DATA_W-1:0]   d_i,
+     output [DATA_W-1:0]  d_o
      );
 
    localparam COL_W = 8;
@@ -37,13 +37,13 @@ module iob_ram_sp_be
                .DATA_W(COL_W)
                ) ram
            (
-            .clk  (clk),
+            .clk_i  (clk_i),
 
-            .en   (en),
-            .addr (addr),
-            .din  (din[i*COL_W +: COL_W]),
-            .we   (we[i]),
-            .dout (dout[i*COL_W +: COL_W])
+            .en_i   (en_i),
+            .addr_i (addr_i),
+            .d_i    (d_i[i*COL_W +: COL_W]),
+            .we_i   (we_i[i]),
+            .d_o    (d_o[i*COL_W +: COL_W])
             );
       end
    endgenerate
@@ -59,20 +59,20 @@ module iob_ram_sp_be
      if(mem_init_file_int != "none.hex")
        $readmemh(mem_init_file_int, ram_block, 0, 2**ADDR_W - 1);
 
-   reg [DATA_W-1:0]       dout_int;
+   reg [DATA_W-1:0]       d_o_int;
    integer                    i;
-   always @ (posedge clk) begin
-      if(en) begin
+   always @ (posedge clk_i) begin
+      if (en_i) begin
          for(i=0; i < NUM_COL; i=i+1) begin
-            if(we[i]) begin
-               ram_block[addr][i*COL_W +: COL_W] <= din[i*COL_W +: COL_W];
+            if(we_i[i]) begin
+               ram_block[addr_i][i*COL_W +: COL_W] <= d_i[i*COL_W +: COL_W];
             end
          end
-         dout_int <= ram_block[addr]; // Send Feedback
+         d_o_int <= ram_block[addr_i]; // Send Feedback
       end
    end
 
-   assign dout = dout_int;
+   assign d_o = d_o_int;
 `endif
 
 endmodule

@@ -8,14 +8,14 @@ module iob_ram_2p_tiled
     )
    (
     // Inputs
-    input                   clk,
-    input                   w_en,
-    input                   r_en,
-    input [DATA_W-1:0]      w_data, // input data to write port
-    input [ADDR_W-1:0]      addr, // address for write/read port
+    input                   clk_i,
+    input                   w_en_i,
+    input                   r_en_i,
+    input [DATA_W-1:0]      w_data_i, // input data to write port
+    input [ADDR_W-1:0]      addr_i, // address for write/read port
 
     // Outputs
-    output reg [DATA_W-1:0] r_data  //output port
+    output reg [DATA_W-1:0] r_data_o  //output port
     );
 
    // Number of BRAMs to generate, each containing 2048 bytes maximum
@@ -29,8 +29,8 @@ module iob_ram_2p_tiled
        )
    addr_dec
      (
-      .dec_in(addr[ADDR_W-1:ADDR_W-$clog2(K)]), // only the first clog2(K) MSBs select the BRAM
-      .dec_out(addr_en)
+      .dec_i(addr_i[ADDR_W-1:ADDR_W-$clog2(K)]), // only the first clog2(K) MSBs select the BRAM
+      .dec_o(addr_en)
       );
 
    // Generate K BRAMs
@@ -46,15 +46,15 @@ module iob_ram_2p_tiled
                 )
          bram
               (
-               .clk(clk),
+               .clk_i(clk),
 
-               .w_en(w_en & addr_en[i]),
-               .w_addr(addr[ADDR_W-$clog2(K)-1:0]),
-               .w_data(w_data),
+               .w_en_i(w_en_i & addr_en[i]),
+               .w_addr_i(addr_i[ADDR_W-$clog2(K)-1:0]),
+               .w_data_i(w_data_i),
 
-               .r_en(r_en & addr_en[i]),
-               .r_addr(addr[ADDR_W-$clog2(K)-1:0]),
-               .r_data(r_data_vec[i])
+               .r_en_i(r_en_i & addr_en[i]),
+               .r_addr_i(addr_i[ADDR_W-$clog2(K)-1:0]),
+               .r_data_o(r_data_vec[i])
                );
       end
    endgenerate
@@ -67,9 +67,9 @@ module iob_ram_2p_tiled
        )
    bram_out_sel
      (
-      .data_in(r_data_vec),
-      .sel(addr[ADDR_W-1:ADDR_W-$clog2(K)]),
-      .data_out(r_data)
+      .data_i (r_data_vec),
+      .sel_i  (addr[ADDR_W-1:ADDR_W-$clog2(K)]),
+      .data_o (r_data_o)
       );
 
 endmodule
@@ -80,13 +80,13 @@ module decN
     parameter N_OUTPUTS = 16
     )
    (
-    input [$clog2(N_OUTPUTS)-1:0] dec_in,
-    output reg [N_OUTPUTS-1:0]    dec_out
+    input [$clog2(N_OUTPUTS)-1:0] dec_i,
+    output reg [N_OUTPUTS-1:0]    dec_o
     );
 
    always @* begin
-      dec_out  = 0;
-      dec_out[dec_in] = 1'b1;
+      dec_o  = 0;
+      dec_o[dec_i] = 1'b1;
    end
 endmodule
 
@@ -100,14 +100,14 @@ module muxN
     )
    (
     // Inputs
-    input [INPUT_W-1:0]      data_in [N_INPUTS-1:0], // input port
-    input [S-1:0]            sel, // selection port
+    input [INPUT_W-1:0]      data_i [N_INPUTS-1:0], // input port
+    input [S-1:0]            sel_i, // selection port
 
     // Outputs
-    output reg [INPUT_W-1:0] data_out  // output port
+    output reg [INPUT_W-1:0] data_o  // output port
     );
    
    always @* begin
-      data_out = data_in[sel];
+      data_o = data_i[sel_i];
    end
 endmodule

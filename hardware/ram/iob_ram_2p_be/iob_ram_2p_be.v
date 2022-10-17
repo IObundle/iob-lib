@@ -9,17 +9,17 @@ module iob_ram_2p_be
      parameter ADDR_W = 0
      ) 
    (
-    input                   clk,
+    input                   clk_i,
 
     //write port
-    input [DATA_W/8-1:0]    w_en,
-    input [ADDR_W-1:0]      w_addr,
-    input [DATA_W-1:0]      w_data,
+    input [DATA_W/8-1:0]    w_en_i,
+    input [ADDR_W-1:0]      w_addr_i,
+    input [DATA_W-1:0]      w_data_i,
 
     //read port
-    input                   r_en,
-    input [ADDR_W-1:0]      r_addr,
-    output reg [DATA_W-1:0] r_data
+    input                   r_en_i,
+    input [ADDR_W-1:0]      r_addr_i,
+    output reg [DATA_W-1:0] r_data_o
     );
 
    localparam COL_W = 8;
@@ -40,14 +40,14 @@ module iob_ram_2p_be
                .DATA_W(COL_W)
                ) ram
            (
-            .clk   (clk),
+            .clk_i   (clk_i),
 
-            .w_en   (w_en[i]),
-            .w_addr (w_addr),
-            .w_data (w_data[i*COL_W +: COL_W]),
-            .r_en   (r_en),
-            .r_addr (r_addr),
-            .r_data (r_data[i*COL_W +: COL_W])
+            .w_en_i   (w_en_i[i]),
+            .w_addr_i (w_addr_i),
+            .w_data_i (w_data_i[i*COL_W +: COL_W]),
+            .r_en_i   (r_en_i),
+            .r_addr_i (r_addr_i),
+            .r_data_o (r_data_o[i*COL_W +: COL_W])
             );
       end
    endgenerate
@@ -64,16 +64,16 @@ module iob_ram_2p_be
        $readmemh(mem_init_file_int, mem, 0, (2**ADDR_W) - 1);
 
    //read port
-   always @(posedge clk)
-      if(r_en)
-        r_data <= mem[r_addr];
+   always @(posedge clk_i)
+      if (r_en_i)
+        r_data_o <= mem[r_addr_i];
 
    //write port
    integer                   i;
-   always @(posedge clk) begin
+   always @(posedge clk_i) begin
       for (i=0; i < NUM_COL; i=i+1) begin
-         if (w_en[i]) begin
-            mem[w_addr][i*COL_W +: COL_W] <= w_data[i*COL_W +: COL_W];
+         if (w_en_i[i]) begin
+            mem[w_addr_i][i*COL_W +: COL_W] <= w_data_i[i*COL_W +: COL_W];
          end
       end
    end

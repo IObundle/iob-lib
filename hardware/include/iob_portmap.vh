@@ -1,7 +1,0 @@
-      .valid(valid),
-      .ready(ready),
-      .addr(addr),
-      .wdata(wdata),
-      .wstrb(wstrb),
-      .rvalid(rvalid),
-      .rdata(rdata),

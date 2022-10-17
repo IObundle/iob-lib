@@ -9,28 +9,28 @@
 
 module iob_iobuf
   (
-   input  I,  // from core
-   input  T,  // from core: tristate control
-   input  N,  // from core: inversion control
-   output O,  // to core
-   inout  IO  // to device IO
+   input  i,   // from core
+   input  t_i, // from core: tristate control
+   input  n_i, // from core: inversion control
+   output o,   // to core
+   inout  io   // to device IO
    );
 
-   wire   O_int;
+   wire   o_int;
 
 `ifdef XILINX
    IOBUF IOBUF_inst
      (
-      .I(I),
-      .T(T),
-      .O(O_int),
-      .IO(IO)
+      .I(i),
+      .T(t_i),
+      .O(o_int),
+      .IO(io)
       );
 `else
-   assign IO = T? 1'bz : I;
-   assign O_int = IO;
+   assign io = t_i? 1'bz : i;
+   assign o_int = io;
 `endif
 
-   assign O = N^O_int;
+   assign o = n_i^o_int;
 
 endmodule

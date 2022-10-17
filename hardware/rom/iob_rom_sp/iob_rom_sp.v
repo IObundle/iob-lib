@@ -7,10 +7,10 @@ module iob_rom_sp
     parameter HEXFILE = "none"
 	)
    (
-    input                    clk,
-    input                    r_en,
-    input [ADDR_W-1:0]       addr,
-    output reg [DATA_W-1:0]  r_data
+    input                    clk_i,
+    input                    r_en_i,
+    input [ADDR_W-1:0]       addr_i,
+    output reg [DATA_W-1:0]  r_data_o
     );
    
    // this allows ISE 14.7 to work; do not remove
@@ -25,8 +25,8 @@ module iob_rom_sp
        $readmemh(mem_init_file_int, rom, 0, (2**ADDR_W)-1);
 
    // Operate the ROM
-   always @(posedge clk)
-     if(r_en)
-       r_data <= rom[addr];
+   always @(posedge clk_i)
+     if (r_en_i)
+       r_data_o <= rom[addr_i];
    
 endmodule

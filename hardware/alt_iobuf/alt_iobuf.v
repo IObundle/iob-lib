@@ -10,12 +10,12 @@
 module alt_iobuf
   (
    input  i,
-   input  oe,
+   input  oe_i,
    output o,
    inout  io
    );
 
-   assign io = oe? i : 1'bz;
+   assign io = oe_i? i : 1'bz;
    assign o = io;
 
 endmodule

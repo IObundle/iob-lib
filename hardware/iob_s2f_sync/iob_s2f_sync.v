@@ -6,34 +6,34 @@ module iob_s2f_sync
     parameter RST_VAL = 0
     )
    (
-    input                   clk,
-    input                   arst,
-    input                   rst,
+    input                   clk_i,
+    input                   arst_i,
+    input                   rst_i,
 
-    input                   ld,
-    input [DATA_W-1:0]      ld_val,
+    input                   ld_i,
+    input [DATA_W-1:0]      ld_val_i,
 
-    input [DATA_W-1:0]      data_in,
-    output reg [DATA_W-1:0] data_out
+    input [DATA_W-1:0]      data_i,
+    output reg [DATA_W-1:0] data_o
     );
 
    // prevent width mismatch
    localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
 
    reg [DATA_W-1:0]         sync;
-   always @(posedge clk, posedge arst) begin
-      if (arst) begin
+   always @(posedge clk_i, posedge arst_i) begin
+      if (arst_i) begin
          sync <= RST_VAL_INT;
-         data_out <= RST_VAL_INT;
-      end else if (rst) begin
+         data_o <= RST_VAL_INT;
+      end else if (rst_i) begin
          sync <= RST_VAL_INT;
-         data_out <= RST_VAL_INT;
-      end else if (ld) begin
-         sync <= ld_val;
-         data_out <= ld_val;
+         data_o <= RST_VAL_INT;
+      end else if (ld_i) begin
+         sync <= ld_val_i;
+         data_o <= ld_val_i;
       end else begin
-         sync <= data_in;
-         data_out <= sync;
+         sync <= data_i;
+         data_o <= sync;
       end
    end
 
