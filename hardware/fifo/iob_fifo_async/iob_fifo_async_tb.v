@@ -189,21 +189,21 @@ module iob_fifo_async_tb;
        )
    uut
      (
-      .rst(reset),
+      .rst_i     (reset),
 
-      .r_clk(r_clk),
-      .r_en(r_en),
-      .r_data(r_data),
-      .r_empty(r_empty),
-      .r_full(r_full),
-      .r_level(r_level),
+      .r_clk_i   (r_clk),
+      .r_en_i    (r_en),
+      .r_data_o  (r_data),
+      .r_empty_o (r_empty),
+      .r_full_o  (r_full),
+      .r_level_o (r_level),
 
-      .w_clk(w_clk),
-      .w_en(w_en),
-      .w_data(w_data),
-      .w_empty(w_empty),
-      .w_full(w_full),
-      .w_level(w_level)
+      .w_clk_i   (w_clk),
+      .w_en_i    (w_en),
+      .w_data_i  (w_data),
+      .w_empty_o (w_empty),
+      .w_full_o  (w_full),
+      .w_level_o (w_level)
       );
 
 endmodule

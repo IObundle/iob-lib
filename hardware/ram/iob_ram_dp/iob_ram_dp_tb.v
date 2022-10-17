@@ -125,19 +125,19 @@ module iob_ram_dp_tb;
        )
    uut
      (
-      .clk(clk),
+      .clk_i   (clk),
 
-      .dinA(data_a),
-      .addrA(addr_a),
-      .enA(en_a),
-      .weA(we_a),
-      .doutA(q_a),
+      .dA_i    (data_a),
+      .addrA_i (addr_a),
+      .enA_i   (en_a),
+      .weA_i   (we_a),
+      .dA_o    (q_a),
 
-      .dinB(data_b),
-      .addrB(addr_b),
-      .enB(en_b),
-      .weB(we_b),
-      .doutB(q_b)
+      .dB_i    (data_b),
+      .addrB_i (addr_b),
+      .enB_i   (en_b),
+      .weB_i   (we_b),
+      .dB_o    (q_b)
       );
 
    // system clock

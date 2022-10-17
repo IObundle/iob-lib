@@ -2,18 +2,18 @@
 
 module iob_clkbuf
   (
-   input  clk_in,
-   output clk_out
+   input  clk_i,
+   output clk_o
    );
 
 `ifdef XILINX
    BUFG BUFG_inst
      (
-      .I(clk_in),
-      .O(clk_out)
+      .I(clk_i),
+      .O(clk_o)
       );
 `else
-   assign clk_out = clk_in;
+   assign clk_o = clk_i;
 `endif
 
 endmodule

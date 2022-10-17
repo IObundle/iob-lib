@@ -82,12 +82,12 @@ module iob_ram_sp_tb;
        ) 
    uut 
      (
-      .clk(clk), 
-      .en(en),
-      .we(we),
-      .addr(addr),
-      .din(data_in),
-      .dout(data_out)
+      .clk_i  (clk), 
+      .en_i   (en),
+      .we_i   (we),
+      .addr_i (addr),
+      .d_i    (data_in),
+      .d_o    (data_out)
       );
    
    // system clock

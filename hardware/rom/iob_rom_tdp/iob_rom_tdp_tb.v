@@ -86,15 +86,15 @@ module iob_rom_tdp_tb;
        )
    uut
      (
-      .clk_a(clk_a),
-      .r_en_a(r_en_a),
-      .addr_a(addr_a),
-      .r_data_a(r_data_a),
+      .clk_a_i    (clk_a),
+      .r_en_a_i   (r_en_a),
+      .addr_a_i   (addr_a),
+      .r_data_a_o (r_data_a),
 
-      .clk_b(clk_b),
-      .r_en_b(r_en_b),
-      .addr_b(addr_b),
-      .r_data_b(r_data_b)
+      .clk_b_i    (clk_b),
+      .r_en_b_i   (r_en_b),
+      .addr_b_i   (addr_b),
+      .r_data_b_o (r_data_b)
       );
 
    // system clock

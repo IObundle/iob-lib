@@ -7,15 +7,15 @@ module iob_reverse
     parameter DATA_W = 32
     )
    (
-    input [DATA_W-1:0]      data_in,
-    output reg [DATA_W-1:0] data_out
+    input [DATA_W-1:0]      data_i,
+    output reg [DATA_W-1:0] data_o
     );
 
    integer i;
 
    always @* begin
       for (i=0; i < DATA_W; i=i+1) begin : reverse
-         data_out[i] = data_in[DATA_W-1-i];
+         data_o[i] = data_i[DATA_W-1-i];
       end
    end
 

@@ -8,16 +8,16 @@ module iob_ram_t2p
      ) 
    (
     // Write port
-    input                   w_clk,
-    input                   w_en,
-    input [ADDR_W-1:0]      w_addr,
-    input [DATA_W-1:0]      w_data,
+    input                   w_clk_i,
+    input                   w_en_i,
+    input [ADDR_W-1:0]      w_addr_i,
+    input [DATA_W-1:0]      w_data_i,
 
     // Read port
-    input                   r_clk,
-    input                   r_en,
-    input [ADDR_W-1:0]      r_addr,
-    output reg [DATA_W-1:0] r_data
+    input                   r_clk_i,
+    input                   r_en_i,
+    input [ADDR_W-1:0]      r_addr_i,
+    output reg [DATA_W-1:0] r_data_o
     );
 
    //this allows ISE 14.7 to work; do not remove
@@ -32,14 +32,15 @@ module iob_ram_t2p
        $readmemh(mem_init_file_int, ram, 0, 2**ADDR_W - 1);
 
    //write
-   always@(posedge w_clk)
-     if(w_en)
-       ram[w_addr] <= w_data;
+   always @(posedge w_clk_i) begin
+      if (w_en_i)
+        ram[w_addr_i] <= w_data_i;
+   end
 
    //read mode depends on mem implementation, as ram or reg
-   always@(posedge r_clk)  begin
-      if(r_en)
-        r_data <= ram[r_addr];
+   always @(posedge r_clk_i) begin
+      if (r_en_i)
+        r_data_o <= ram[r_addr_i];
    end
 
 endmodule   

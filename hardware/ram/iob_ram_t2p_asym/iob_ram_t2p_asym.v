@@ -15,16 +15,16 @@ module iob_ram_t2p_asym
     )
    (
     //write port
-    input                     w_clk,
-    input                     w_en,
-    input [W_DATA_W-1:0]      w_data,
-    input [W_ADDR_W-1:0]      w_addr,
+    input                     w_clk_i,
+    input                     w_en_i,
+    input [W_DATA_W-1:0]      w_data_i,
+    input [W_ADDR_W-1:0]      w_addr_i,
 
     //read port
-    input                     r_clk,
-    input                     r_en,
-    input [R_ADDR_W-1:0]      r_addr,
-    output reg [R_DATA_W-1:0] r_data
+    input                     r_clk_i,
+    input                     r_en_i,
+    input [R_ADDR_W-1:0]      r_addr_i,
+    output reg [R_DATA_W-1:0] r_data_o
     );
 
    //determine the number of blocks N
@@ -51,15 +51,15 @@ module iob_ram_t2p_asym
                )
          iob_ram_t2p_inst
              (
-              .w_clk(w_clk),
-              .w_en(en_wr[i]),
-              .w_addr(addr_wr[i]),
-              .w_data(data_wr[i]),
+              .w_clk_i  (w_clk_i),
+              .w_en_i   (en_wr[i]),
+              .w_addr_i (addr_wr[i]),
+              .w_data_i (data_wr[i]),
 
-              .r_clk(r_clk),
-              .r_en(r_en),
-              .r_addr(addr_rd[i]),
-              .r_data(data_rd[i])              
+              .r_clk_i  (r_clk_i),
+              .r_en_i   (r_en_i),
+              .r_addr_i (addr_rd[i]),
+              .r_data_o (data_rd[i])              
               );
          
       end
@@ -73,30 +73,30 @@ module iob_ram_t2p_asym
           //write parallel
          always @* begin
             for (j=0; j < N; j= j+1) begin
-               en_wr[j] = w_en;
-               data_wr[j] = w_data[j*MINDATA_W +: MINDATA_W];
-               addr_wr[j] = w_addr;
+               en_wr[j] = w_en_i;
+               data_wr[j] = w_data_i[j*MINDATA_W +: MINDATA_W];
+               addr_wr[j] = w_addr_i;
             end
          end
          
          //read serial
          always @* begin
             for (k=0; k < N; k= k+1) begin
-               addr_rd[k] = r_addr[R_ADDR_W-1-:W_ADDR_W];
+               addr_rd[k] = r_addr_i[R_ADDR_W-1-:W_ADDR_W];
             end
          end
 
          //read address register
          reg [R_ADDR_W-W_ADDR_W-1:0] r_addr_lsbs_reg;
-         always @(posedge r_clk)
-           if (r_en)
-             r_addr_lsbs_reg <= r_addr[R_ADDR_W-W_ADDR_W-1:0];
+         always @(posedge r_clk_i)
+           if (r_en_i)
+             r_addr_lsbs_reg <= r_addr_i[R_ADDR_W-W_ADDR_W-1:0];
            
          //read mux
          always @* begin
-            r_data = 1'b0;
+            r_data_o = 1'b0;
             for (l=0; l < N; l= l+1) begin
-               r_data = data_rd[r_addr_lsbs_reg];
+               r_data_o = data_rd[r_addr_lsbs_reg];
             end
          end
  
@@ -104,31 +104,31 @@ module iob_ram_t2p_asym
          //write serial
          always @* begin
             for (j=0; j < N; j= j+1) begin
-               en_wr[j] = w_en & (w_addr[W_ADDR_W-R_ADDR_W-1:0] == j);
-               data_wr[j] = w_data;
-               addr_wr[j] = w_addr[W_ADDR_W-1 -: R_ADDR_W];
+               en_wr[j] = w_en_i & (w_addr_i[W_ADDR_W-R_ADDR_W-1:0] == j);
+               data_wr[j] = w_data_i;
+               addr_wr[j] = w_addr_i[W_ADDR_W-1 -: R_ADDR_W];
             end
          end
          //read parallel
          always @* begin
-            r_data = 1'b0;
+            r_data_o = 1'b0;
             for (k=0; k < N; k= k+1) begin
-               addr_rd[k] = r_addr;
-               r_data[k*MINDATA_W +: MINDATA_W] = data_rd[k];
+               addr_rd[k] = r_addr_i;
+               r_data_o[k*MINDATA_W +: MINDATA_W] = data_rd[k];
             end
          end
 
       end else begin //W_DATA_W = R_DATA_W
          //write serial
          always @* begin
-            en_wr = w_en;
-            data_wr[0] = w_data;
-            addr_wr[0] = w_addr;
+            en_wr = w_en_i;
+            data_wr[0] = w_data_i;
+            addr_wr[0] = w_addr_i;
          end
          //read parallel
-         always @(r_addr, data_rd[0]) begin
-            addr_rd[0] = r_addr;
-            r_data = data_rd[0];
+         always @(r_addr_i, data_rd[0]) begin
+            addr_rd[0] = r_addr_i;
+            r_data_o = data_rd[0];
          end
 
       end 

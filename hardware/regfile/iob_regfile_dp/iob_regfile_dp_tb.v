@@ -162,18 +162,18 @@ module iob_regfile_dp_tb;
        .DATA_W(`DATA_W)
        )
    uut (
-        .clk(clk),
-        .rst(rst),
+        .clk_i    (clk),
+        .rst_i    (rst),
 
-        .wdataA(wdataA),
-        .addrA(addrA),
-        .weA(enA),
-        .rdataA(rdataA),
+        .wdataA_i (wdataA),
+        .addrA_i  (addrA),
+        .weA_i    (enA),
+        .rdataA_o (rdataA),
 
-        .wdataB(wdataB),
-        .addrB(addrB),
-        .weB(enB),
-        .rdataB(rdataB)
+        .wdataB_i (wdataB),
+        .addrB_i  (addrB),
+        .weB_i    (enB),
+        .rdataB_o (rdataB)
         );
 
    // system clock

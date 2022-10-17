@@ -6,24 +6,24 @@ module iob_reg
     parameter RST_VAL = 0
     )
    (
-    input                   clk,
-    input                   arst,
-    input                   rst,
-    input                   en,
-    input [DATA_W-1:0]      data_in,
-    output reg [DATA_W-1:0] data_out
+    input                   clk_i,
+    input                   arst_i,
+    input                   rst_i,
+    input                   en_i,
+    input [DATA_W-1:0]      data_i,
+    output reg [DATA_W-1:0] data_o
     );
 
    // prevent width mismatch
    localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
    
-   always @(posedge clk, posedge arst) begin
-      if (arst) begin
-         data_out <= RST_VAL_INT;
-      end else if (rst) begin
-         data_out <= RST_VAL_INT;
-      end else if (en) begin
-         data_out <= data_in;
+   always @(posedge clk_i, posedge arst_i) begin
+      if (arst_i) begin
+         data_o <= RST_VAL_INT;
+      end else if (rst_i) begin
+         data_o <= RST_VAL_INT;
+      end else if (en_i) begin
+         data_o <= data_i;
       end
    end
 

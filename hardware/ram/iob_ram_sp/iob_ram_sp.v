@@ -7,12 +7,12 @@ module iob_ram_sp
     parameter ADDR_W=14
     )
    (
-    input                     clk,
-    input                     en, 
-    input                     we, 
-    input [(ADDR_W-1):0]      addr,
-    output reg [(DATA_W-1):0] dout,
-    input [(DATA_W-1):0]      din
+    input                     clk_i,
+    input                     en_i, 
+    input                     we_i, 
+    input [(ADDR_W-1):0]      addr_i,
+    output reg [(DATA_W-1):0] d_o,
+    input [(DATA_W-1):0]      d_i
     );
 
    //this allows ISE 14.7 to work; do not remove
@@ -27,11 +27,11 @@ module iob_ram_sp
        $readmemh(mem_init_file_int, ram, 0, 2**ADDR_W - 1);
 
    // Operate the RAM
-   always @ (posedge clk)
-     if(en)
-       if (we)
-         ram[addr] <= din;
+   always @ (posedge clk_i)
+     if (en_i)
+       if (we_i)
+         ram[addr_i] <= d_i;
        else
-         dout <= ram[addr];
+         d_o <= ram[addr_i];
 
 endmodule

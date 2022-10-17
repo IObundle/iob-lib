@@ -17,25 +17,25 @@ module iob_ram_2p_asym
     N = MAXDATA_W/MINDATA_W
     )
    (
-    input                     clk,
+    input                      clk_i,
 
     //write port
-    output [N-1:0]            ext_mem_w_en,
-    output [(MINDATA_W*N)-1:0]     ext_mem_w_data,
-    output [(MINADDR_W*N)-1:0]     ext_mem_w_addr,
+    output [N-1:0]             ext_mem_w_en_o,
+    output [(MINDATA_W*N)-1:0] ext_mem_w_data_o,
+    output [(MINADDR_W*N)-1:0] ext_mem_w_addr_o,
     //read port
-    output                    ext_mem_r_en,
-    output [(MINADDR_W*N)-1:0]     ext_mem_r_addr,
-    input [(MINDATA_W*N)-1:0]      ext_mem_r_data,
+    output                     ext_mem_r_en_o,
+    output [(MINADDR_W*N)-1:0] ext_mem_r_addr_o,
+    input [(MINDATA_W*N)-1:0]  ext_mem_r_data_i,
 
     //write port
-    input                     w_en,
-    input [W_DATA_W-1:0]      w_data,
-    input [W_ADDR_W-1:0]      w_addr,
+    input                      w_en_i,
+    input [W_ADDR_W-1:0]       w_addr_i,
+    input [W_DATA_W-1:0]       w_data_i,
     //read port
-    input                     r_en,
-    input [R_ADDR_W-1:0]      r_addr,
-    output reg [R_DATA_W-1:0] r_data
+    input                      r_en_i,
+    input [R_ADDR_W-1:0]       r_addr_i,
+    output reg [R_DATA_W-1:0]  r_data_o
     );
 
    //symmetric memory block buses
@@ -48,7 +48,8 @@ module iob_ram_2p_asym
    wire [MINDATA_W-1:0]       data_rd [N-1:0];
    reg [MINADDR_W-1:0]        addr_rd [N-1:0];
 
-   wire [MINDATA_W-1:0]   data_rd_0 = data_rd[0];
+   wire [MINDATA_W-1:0]       data_rd_0;
+   assign data_rd_0 = data_rd[0];
 
    //connect the buses
    integer j,k,l;
@@ -59,30 +60,30 @@ module iob_ram_2p_asym
          //write parallel
          always @* begin
             for (j=0; j < N; j= j+1) begin
-               en_wr[j] = w_en;
-               data_wr[j] = w_data[j*MINDATA_W +: MINDATA_W];
-               addr_wr[j] = w_addr;
+               en_wr[j] = w_en_i;
+               data_wr[j] = w_data_i[j*MINDATA_W +: MINDATA_W];
+               addr_wr[j] = w_addr_i;
             end
          end
 
          //read serial
          always @* begin
             for (k=0; k < N; k= k+1) begin
-               addr_rd[k] = r_addr[R_ADDR_W-1-:W_ADDR_W];
+               addr_rd[k] = r_addr_i[R_ADDR_W-1-:W_ADDR_W];
             end
          end
 
          //read address register
          reg [(R_ADDR_W-W_ADDR_W)-1:0] r_addr_lsbs_reg;
-         always @(posedge clk)
-           if (r_en)
-             r_addr_lsbs_reg <= r_addr[(R_ADDR_W-W_ADDR_W)-1:0];
+         always @(posedge clk_i)
+           if (r_en_i)
+             r_addr_lsbs_reg <= r_addr_i[(R_ADDR_W-W_ADDR_W)-1:0];
 
          //read mux
          always @* begin
-            r_data = 1'b0;
+            r_data_o = 1'b0;
             for (l=0; l < N; l= l+1) begin
-               r_data = data_rd[r_addr_lsbs_reg];
+               r_data_o = data_rd[r_addr_lsbs_reg];
             end
          end
 
@@ -90,31 +91,31 @@ module iob_ram_2p_asym
          //write serial
          always @* begin
             for (j=0; j < N; j= j+1) begin
-               en_wr[j] = w_en & (w_addr[(W_ADDR_W-R_ADDR_W)-1:0] == j);
-               data_wr[j] = w_data;
-               addr_wr[j] = w_addr[W_ADDR_W-1 -: R_ADDR_W];
+               en_wr[j] = w_en_i & (w_addr_i[(W_ADDR_W-R_ADDR_W)-1:0] == j);
+               data_wr[j] = w_data_i;
+               addr_wr[j] = w_addr_i[W_ADDR_W-1 -: R_ADDR_W];
             end
          end
          //read parallel
          always @* begin
-            r_data = 1'b0;
+            r_data_o = 1'b0;
             for (k=0; k < N; k= k+1) begin
-               addr_rd[k] = r_addr;
-               r_data[k*MINDATA_W +: MINDATA_W] = data_rd[k];
+               addr_rd[k] = r_addr_i;
+               r_data_o[k*MINDATA_W +: MINDATA_W] = data_rd[k];
             end
          end
 
       end else begin //W_DATA_W = R_DATA_W
          //write serial
          always @* begin
-            en_wr[0] = w_en;
-            data_wr[0] = w_data;
-            addr_wr[0] = w_addr;
+            en_wr[0] = w_en_i;
+            data_wr[0] = w_data_i;
+            addr_wr[0] = w_addr_i;
          end
          //read parallel
          always @* begin
-            addr_rd[0] = r_addr;
-            r_data = data_rd_0;
+            addr_rd[0] = r_addr_i;
+            r_data_o = data_rd_0;
          end
       end
    endgenerate
@@ -122,13 +123,13 @@ module iob_ram_2p_asym
    genvar  p;
    generate
       for(p=0; p < N; p= p+1) begin : ext_mem_interface_gen
-         assign ext_mem_w_en[p] = en_wr[p];
-         assign ext_mem_w_addr[p*MINADDR_W+:MINADDR_W] = addr_wr[p];
-         assign ext_mem_w_data[p*MINDATA_W+:MINDATA_W] = data_wr[p];
-         assign ext_mem_r_addr[p*MINADDR_W+:MINADDR_W] = addr_rd[p];
-         assign data_rd[p] = ext_mem_r_data[p*MINDATA_W+:MINDATA_W];
+         assign ext_mem_w_en_o[p] = en_wr[p];
+         assign ext_mem_w_addr_o[p*MINADDR_W+:MINADDR_W] = addr_wr[p];
+         assign ext_mem_w_data_o[p*MINDATA_W+:MINDATA_W] = data_wr[p];
+         assign ext_mem_r_addr_o[p*MINADDR_W+:MINADDR_W] = addr_rd[p];
+         assign data_rd[p] = ext_mem_r_data_i[p*MINDATA_W+:MINDATA_W];
       end
    endgenerate
-   assign ext_mem_r_en = r_en;
+   assign ext_mem_r_en_o = r_en_i;
 
 endmodule

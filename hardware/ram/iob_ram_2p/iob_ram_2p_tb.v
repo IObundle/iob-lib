@@ -96,15 +96,15 @@ module iob_ram_2p_tb;
        )
    uut
      (
-      .clk(clk),
+      .clk_i    (clk),
 
-      .w_en(w_en),
-      .w_addr(w_addr),
-      .w_data(w_data),
+      .w_en_i   (w_en),
+      .w_addr_i (w_addr),
+      .w_data_i (w_data),
 
-      .r_en(r_en),
-      .r_addr(r_addr),
-      .r_data(r_data)
+      .r_en_i   (r_en),
+      .r_addr_i (r_addr),
+      .r_data_o (r_data)
       );
 
    // Clock

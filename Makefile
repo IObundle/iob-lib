@@ -29,7 +29,7 @@ DEFINE+= -DVCD
 endif
 
 # Includes
-INCLUDE=-Ibuild/hw/vsrc
+INCLUDE=-Ihardware/include
 
 # asymmetric memory present
 IS_ASYM=$(shell echo $(SRC) | grep asym)

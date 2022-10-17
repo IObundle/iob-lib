@@ -8,20 +8,20 @@ module iob_ram_tdp
     )
    (
     // Port A
-    input                     clkA,
-    input [(DATA_W-1):0]      dinA,
-    input [(ADDR_W-1):0]      addrA,
-    input                     enA,
-    input                     weA,
-    output reg [(DATA_W-1):0] doutA,
+    input                     clkA_i,
+    input [(DATA_W-1):0]      dA_i,
+    input [(ADDR_W-1):0]      addrA_i,
+    input                     enA_i,
+    input                     weA_i,
+    output reg [(DATA_W-1):0] dA_o,
 
     // Port B
-    input                     clkB,
-    input [(DATA_W-1):0]      dinB,
-    input [(ADDR_W-1):0]      addrB,
-    input                     enB,
-    input                     weB,
-    output reg [(DATA_W-1):0] doutB
+    input                     clkB_i,
+    input [(DATA_W-1):0]      dB_i,
+    input [(ADDR_W-1):0]      addrB_i,
+    input                     enB_i,
+    input                     weB_i,
+    output reg [(DATA_W-1):0] dB_o
     );
 
    //this allows ISE 14.7 to work; do not remove
@@ -36,24 +36,24 @@ module iob_ram_tdp
        $readmemh(mem_init_file_int, ram, 0, 2**ADDR_W - 1);
 
    //read port
-   always @ (posedge clkA) begin// Port A
-      if (enA)
-        if (weA)
-	        ram[addrA] <= dinA;
+   always @ (posedge clkA_i) begin// Port A
+      if (enA_i)
+        if (weA_i)
+	        ram[addrA_i] <= dA_i;
       `ifdef IOB_MEM_NO_READ_ON_WRITE
         else
       `endif
-      doutA <= ram[addrA];
+      dA_o <= ram[addrA_i];
     end
 
    //write port
-   always @ (posedge clkB) begin // Port B
-      if (enB)
-        if (weB)
-	        ram[addrB] <= dinB;
+   always @ (posedge clkB_i) begin // Port B
+      if (enB_i)
+        if (weB_i)
+	        ram[addrB_i] <= dB_i;
       `ifdef IOB_MEM_NO_READ_ON_WRITE
         else
       `endif
-	    doutB <= ram[addrB];
+	    dB_o <= ram[addrB_i];
     end
  endmodule

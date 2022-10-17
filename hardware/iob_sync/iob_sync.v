@@ -6,10 +6,10 @@ module iob_sync
     parameter RST_VAL = 0
     )
   (
-   input                   clk,
-   input                   arst,
-   input [DATA_W-1:0]      signal_in,
-   output reg [DATA_W-1:0] signal_out
+   input                   clk_i,
+   input                   arst_i,
+   input [DATA_W-1:0]      signal_i,
+   output reg [DATA_W-1:0] signal_o
    );
 
    // prevent width mismatch
@@ -17,13 +17,13 @@ module iob_sync
 
    reg [DATA_W-1:0]        sync_reg;
 
-   always @(posedge clk, posedge arst) begin
-      if (arst) begin
+   always @(posedge clk_i, posedge arst_i) begin
+      if (arst_i) begin
          sync_reg <= RST_VAL_INT;
-         signal_out <= RST_VAL_INT;
+         signal_o <= RST_VAL_INT;
       end else begin
-         sync_reg <= signal_in;
-         signal_out <= sync_reg;
+         sync_reg <= signal_i;
+         signal_o <= sync_reg;
       end
    end
    

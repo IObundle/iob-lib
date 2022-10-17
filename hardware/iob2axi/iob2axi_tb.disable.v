@@ -145,17 +145,17 @@ module iob2axi_tb;
        )
    uut
      (
-      .clk       (clk),
-      .rst       (rst),
+      .clk_i       (clk),
+      .rst_i       (rst),
 
       //
       // Control I/F
       //
-      .run       (run),
-      .direction (direction),
-      .addr      (start_addr),
-      .ready     (ready),
-      .error     (error),
+      .run_i       (run),
+      .direction_i (direction),
+      .addr_i      (start_addr),
+      .ready_o     (ready),
+      .error_o     (error),
 
       //
       // AXI-4 full master I/F
@@ -165,12 +165,12 @@ module iob2axi_tb;
       //
       // Native slave I/F
       //
-      .s_valid (s_valid),
-      .s_addr  (s_addr),
-      .s_wdata (s_wdata),
-      .s_wstrb (s_wstrb),
-      .s_rdata (s_rdata),
-      .s_ready (s_ready)
+      .s_valid_i (s_valid),
+      .s_addr_i  (s_addr),
+      .s_wdata_i (s_wdata),
+      .s_wstrb_i (s_wstrb),
+      .s_rdata_o (s_rdata),
+      .s_ready_o (s_ready)
       );
 
    axi_ram

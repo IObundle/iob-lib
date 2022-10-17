@@ -9,23 +9,23 @@ module iob_fifo_async
     ADDR_W = 0 //higher ADDR_W lower DATA_W
     )
    (
-    input                     rst,
+    input                     rst_i,
 
     //read port
-    input                     r_clk,
-    input                     r_en,
-    output reg [R_DATA_W-1:0] r_data,
-    output reg                r_empty,
-    output reg                r_full,
-    output reg [ADDR_W:0]     r_level,
+    input                     r_clk_i,
+    input                     r_en_i,
+    output reg [R_DATA_W-1:0] r_data_o,
+    output reg                r_empty_o,
+    output reg                r_full_o,
+    output reg [ADDR_W:0]     r_level_o,
 
     //write port
-    input                     w_clk,
-    input                     w_en,
-    input [W_DATA_W-1:0]      w_data,
-    output reg                w_empty,
-    output reg                w_full,
-    output reg [ADDR_W:0]     w_level
+    input                     w_clk_i,
+    input                     w_en_i,
+    input [W_DATA_W-1:0]      w_data_i,
+    output reg                w_empty_o,
+    output reg                w_full_o,
+    output reg [ADDR_W:0]     w_level_o
 
     );
 
@@ -88,10 +88,10 @@ module iob_fifo_async
        )
    w_waddr_gray_sync0
      (
-      .clk        (r_clk),
-      .arst       (rst),
-      .signal_in  (w_waddr_gray),
-      .signal_out (r_waddr_gray)
+      .clk_i    (r_clk_i),
+      .arst_i   (rst_i),
+      .signal_i (w_waddr_gray),
+      .signal_o (r_waddr_gray)
       );
 
    //sync read gray address to write domain
@@ -104,10 +104,10 @@ module iob_fifo_async
        )
    r_raddr_gray_sync0
      (
-      .clk        (w_clk),
-      .arst       (rst),
-      .signal_in  (r_raddr_gray),
-      .signal_out (w_raddr_gray)
+      .clk_i    (w_clk_i),
+      .arst_i   (rst_i),
+      .signal_i (r_raddr_gray),
+      .signal_o (w_raddr_gray)
       );
 
 
@@ -130,40 +130,40 @@ module iob_fifo_async
        )
    r_st_reg0
      (
-      .clk      (r_clk),
-      .arst     (rst),
-      .rst      (1'b0),
-      .en       (1'b1),
-      .data_in  (r_st_nxt),
-      .data_out (r_st)
+      .clk_i  (r_clk_i),
+      .arst_i (rst_i),
+      .rst_i  (1'b0),
+      .en_i   (1'b1),
+      .data_i (r_st_nxt),
+      .data_o (r_st)
       );
 
    `IOB_COMB begin
-      r_level = r_level_int; //note rhs has 1 bit less
-      r_full = 1'b0;
-      r_empty = 1'b0;
+      r_level_o = r_level_int; //note rhs has 1 bit less
+      r_full_o = 1'b0;
+      r_empty_o = 1'b0;
       r_st_nxt = r_st;
 
       case (r_st)
 
         INIT: begin //reset state: ensures usability only in the next state
-           r_full = 1'b1;
-           r_empty = 1'b1;
+           r_full_o = 1'b1;
+           r_empty_o = 1'b1;
            r_st_nxt = EMPTY;
         end
         
         EMPTY: begin
-           r_empty = 1'b1;
+           r_empty_o = 1'b1;
            if(r_level_int >= r_incr)
              r_st_nxt = DEFAULT;
         end
 
         default: begin
-           if(r_en && (r_level_int-r_incr) < r_incr)
+           if(r_en_i && (r_level_int-r_incr) < r_incr)
              r_st_nxt = EMPTY;
            if(r_level_int == 0) begin
-              r_full = 1'b1;
-              r_level = FIFO_SIZE;
+              r_full_o = 1'b1;
+              r_level_o = FIFO_SIZE;
            end
         end
 
@@ -184,39 +184,39 @@ module iob_fifo_async
        )
    w_st_reg0
      (
-      .clk      (w_clk),
-      .arst     (rst),
-      .rst      (1'b0),
-      .en       (1'b1),
-      .data_in  (w_st_nxt),
-      .data_out (w_st)
+      .clk_i  (w_clk_i),
+      .arst_i (rst_i),
+      .rst_i  (1'b0),
+      .en_i   (1'b1),
+      .data_i (w_st_nxt),
+      .data_o (w_st)
       );
 
    `IOB_COMB begin
-      w_level = w_level_int; //note rhs has 1 bit less
-      w_full = 1'b0;
-      w_empty = 1'b0;
+      w_level_o = w_level_int; //note rhs has 1 bit less
+      w_full_o = 1'b0;
+      w_empty_o = 1'b0;
       w_st_nxt = w_st;
 
       case (w_st)
 
         INIT: begin //reset state: ensures usability only in the next state
-           w_full = 1'b1;
-           w_empty = 1'b1;
+           w_full_o = 1'b1;
+           w_empty_o = 1'b1;
            w_st_nxt = DEFAULT;
         end
         
         default: begin
            if( w_level_int == 0 )
-             w_empty = 1'b1;
-           if(w_en && (w_level_int + w_incr) > (FIFO_SIZE-w_incr))
+             w_empty_o = 1'b1;
+           if(w_en_i && (w_level_int + w_incr) > (FIFO_SIZE-w_incr))
              w_st_nxt = FULL;
         end
 
         FULL: begin
-           w_full = 1'b1;
+           w_full_o = 1'b1;
            if(w_level_int == 0)
-             w_level = FIFO_SIZE;
+             w_level_o = FIFO_SIZE;
            else if(w_level_int <= (FIFO_SIZE-w_incr))
              w_st_nxt = DEFAULT;
         end
@@ -225,31 +225,31 @@ module iob_fifo_async
    end
 
    //read address gray code counter
-   wire r_en_int  = r_en & ~r_empty;
+   wire r_en_int  = r_en_i & ~r_empty_o;
    iob_gray_counter
      #(
        .W(R_ADDR_W)
        )
    r_raddr_gray_counter
      (
-      .clk(r_clk),
-      .rst(rst),
-      .en(r_en_int),
-      .data_out(r_raddr_gray)
+      .clk_i  (r_clk_i),
+      .rst_i  (rst_i),
+      .en_i   (r_en_int),
+      .data_o (r_raddr_gray)
       );
 
    //write address gray code counter
-   wire w_en_int = w_en & ~w_full;
+   wire w_en_int = w_en_i & ~w_full_o;
    iob_gray_counter
      #(
        .W(W_ADDR_W)
        )
    w_waddr_gray_counter
      (
-      .clk(w_clk),
-      .rst(rst),
-      .en(w_en_int),
-      .data_out(w_waddr_gray)
+      .clk_i  (w_clk_i),
+      .rst_i  (rst_i),
+      .en_i   (w_en_int),
+      .data_o (w_waddr_gray)
       );
 
    //convert gray read address to binary
@@ -259,8 +259,8 @@ module iob_fifo_async
        )
    gray2bin_r_raddr
      (
-      .gr(r_raddr_gray),
-      .bin(r_raddr_bin)
+      .gr_i  (r_raddr_gray),
+      .bin_o (r_raddr_bin)
       );
 
    //convert synced gray write address to binary
@@ -270,8 +270,8 @@ module iob_fifo_async
        )
    gray2bin_r_raddr_sync
      (
-      .gr(r_waddr_gray),
-      .bin(r_waddr_bin)
+      .gr_i  (r_waddr_gray),
+      .bin_o (r_waddr_bin)
       );
 
    //convert gray write address to binary
@@ -281,8 +281,8 @@ module iob_fifo_async
        )
    gray2bin_w_waddr
      (
-      .gr(w_waddr_gray),
-      .bin(w_waddr_bin)
+      .gr_i  (w_waddr_gray),
+      .bin_o (w_waddr_bin)
       );
 
    //convert synced gray read address to binary
@@ -292,8 +292,8 @@ module iob_fifo_async
        )
    gray2bin_w_raddr_sync
      (
-      .gr(w_raddr_gray),
-      .bin(w_raddr_bin)
+      .gr_i  (w_raddr_gray),
+      .bin_o (w_raddr_bin)
       );
 
    // FIFO memory
@@ -305,15 +305,15 @@ module iob_fifo_async
        )
    t2p_asym_ram
      (
-      .w_clk(w_clk),
-      .w_en(w_en_int),
-      .w_data(w_data),
-      .w_addr(w_waddr_bin),
+      .w_clk_i  (w_clk_i),
+      .w_en_i   (w_en_int),
+      .w_data_i (w_data_i),
+      .w_addr_i (w_waddr_bin),
 
-      .r_clk(r_clk),
-      .r_addr(r_raddr_bin),
-      .r_en(r_en_int),
-      .r_data(r_data)
+      .r_clk_i  (r_clk_i),
+      .r_addr_i (r_raddr_bin),
+      .r_en_i   (r_en_int),
+      .r_data_o (r_data_o)
       );
 
 endmodule

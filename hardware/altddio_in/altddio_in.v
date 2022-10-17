@@ -10,16 +10,16 @@ module altddio_in
     parameter DATA_W = 1
     )
   (
-   input                   clk,
-   input [DATA_W-1:0]      data_in,
-   output reg [DATA_W-1:0] data_out_l,
-   output reg [DATA_W-1:0] data_out_h
+   input                   clk_i,
+   input [DATA_W-1:0]      data_i,
+   output reg [DATA_W-1:0] data_l_o,
+   output reg [DATA_W-1:0] data_h_o
    );
 
-   always @(posedge clk)
-     data_out_h <= data_in;
+   always @(posedge clk_i)
+     data_h_o <= data_i;
 
-   always @(negedge clk)
-     data_out_l <= data_in;
+   always @(negedge clk_i)
+     data_l_o <= data_i;
 
 endmodule

@@ -109,22 +109,22 @@ module iob_ram_2p_asym_tb;
        )
    uut
      (
-      .clk(clk),
+      .clk_i            (clk),
 
-      .ext_mem_w_en(ext_mem_w_en),
-      .ext_mem_w_data(ext_mem_w_data),
-      .ext_mem_w_addr(ext_mem_w_addr),
-      .ext_mem_r_en(ext_mem_r_en),
-      .ext_mem_r_addr(ext_mem_r_addr),
-      .ext_mem_r_data(ext_mem_r_data),
+      .ext_mem_w_en_o   (ext_mem_w_en),
+      .ext_mem_w_data_o (ext_mem_w_data),
+      .ext_mem_w_addr_o (ext_mem_w_addr),
+      .ext_mem_r_en_o   (ext_mem_r_en),
+      .ext_mem_r_addr_o (ext_mem_r_addr),
+      .ext_mem_r_data_i (ext_mem_r_data),
       
-      .w_en(w_en),
-      .w_addr(w_addr),
-      .w_data(w_data),
+      .w_en_i           (w_en),
+      .w_addr_i         (w_addr),
+      .w_data_i         (w_data),
 
-      .r_en(r_en),
-      .r_addr(r_addr),
-      .r_data(r_data)
+      .r_en_i           (r_en),
+      .r_addr_i         (r_addr),
+      .r_data_o         (r_data)
       );
 
    genvar p;
@@ -149,13 +149,13 @@ module iob_ram_2p_asym_tb;
           )
       iob_ram_2p_inst
         (
-         .clk     (clk),
-         .w_en    (mem_w_en),
-         .w_addr  (mem_w_addr),
-         .w_data  (mem_w_data),
-         .r_en    (mem_r_en),
-         .r_addr  (mem_r_addr),
-         .r_data  (mem_r_data)
+         .clk_i     (clk),
+         .w_en_i    (mem_w_en),
+         .w_addr_i  (mem_w_addr),
+         .w_data_i  (mem_w_data),
+         .r_en_i    (mem_r_en),
+         .r_addr_i  (mem_r_addr),
+         .r_data_o  (mem_r_data)
          );
 
       assign ext_mem_r_data[p*MINDATA_W +: MINDATA_W] = mem_r_data;

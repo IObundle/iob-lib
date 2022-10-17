@@ -6,26 +6,26 @@ module iob_sipo_reg_are
     )
    (
 
-    input               clk,
-    input               arst,
+    input               clk_i,
+    input               arst_i,
 
-    input               en,
+    input               en_i,
 
     // parallel input
-    input               s_in,
+    input               s_i,
 
     // serial output
-    output [DATA_W-1:0] p_out
+    output [DATA_W-1:0] p_o
     );
 
    reg [DATA_W-1:0]  data_reg;
    
-   always @(posedge clk, posedge arst)
-     if (arst)
+   always @(posedge clk_i, posedge arst_i)
+     if (arst_i)
        data_reg <= 1'b0;
      else if (en)
-       data_reg <= (data_reg<<1)|s_in;
+       data_reg <= (data_reg << 1) | s_i;
 
-   assign p_out = data_reg;
+   assign p_o = data_reg;
    
 endmodule

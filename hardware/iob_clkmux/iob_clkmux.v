@@ -9,10 +9,10 @@
 
 module iob_clkmux
   (
-   input  clk_in0,
-   input  clk_in1,
-   input  clk_sel,
-   output clk_out
+   input  clk0_i,
+   input  clk1_i,
+   input  clk_sel_i,
+   output clk_o
    );
 
 `ifdef XILINX
@@ -22,13 +22,13 @@ module iob_clkmux
 	   )
    BUFGMUX_inst
      (
-	  .I0(clk_in0), 
-	  .I1(clk_in1), 
-	  .S(clk_sel), 
-	  .O(clk_out)
+	  .I0(clk0_i), 
+	  .I1(clk1_i), 
+	  .S(clk_sel_i), 
+	  .O(clk_o)
 	  );
 `else
-   assign clk_out = clk_sel ? clk_in1 : clk_in0;
+   assign clk_o = clk_sel_i ? clk1_i : clk0_i;
 `endif
 
 endmodule
