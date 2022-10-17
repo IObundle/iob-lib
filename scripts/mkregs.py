@@ -974,12 +974,6 @@ def main():
     # parse command line
     args = parse_arguments()
 
-    print(args)
-    print(f"TOP: {args.TOP}")
-    print(f"PATH: {args.PATH}")
-    print(f"hwsw: {args.hwsw}")
-    print(f"vh_files: {args.vh_files}")
-
     # parse input file
     config_file_name = f"{args.PATH}/mkregs.conf"
     try:
