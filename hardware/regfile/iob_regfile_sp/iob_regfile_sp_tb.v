@@ -104,12 +104,12 @@ module iob_regfile_sp_tb;
        )
    uut
      (
-      .clk(clk), 
-      .rst(rst),
-      .we(en),
-      .addr(addr),
-      .w_data(w_data),
-      .r_data(r_data)
+      .clk_i    (clk),
+      .rst_i    (rst),
+      .we_i     (en),
+      .addr_i   (addr),
+      .w_data_i (w_data),
+      .r_data_o (r_data)
       );
 
    // system clock

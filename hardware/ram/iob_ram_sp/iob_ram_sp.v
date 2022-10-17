@@ -32,6 +32,6 @@ module iob_ram_sp
        if (we_i)
          ram[addr_i] <= d_i;
        else
-         d_o <= ram[addr_o];
+         d_o <= ram[addr_i];
 
 endmodule

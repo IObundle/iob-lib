@@ -83,7 +83,7 @@ module iob_ram_dp_be
                ram_block[addrA_i][i*COL_W +: COL_W] <= dA_i[i*COL_W +: COL_W];
             end
          end
-         dA_int <= ram_block[addrA_i]; // Send Feedback
+         dA_o_int <= ram_block[addrA_i]; // Send Feedback
       end
    end
 

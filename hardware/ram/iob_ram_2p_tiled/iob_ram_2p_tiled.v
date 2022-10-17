@@ -46,7 +46,7 @@ module iob_ram_2p_tiled
                 )
          bram
               (
-               .clk_i(clk),
+               .clk_i(clk_i),
 
                .w_en_i(w_en_i & addr_en[i]),
                .w_addr_i(addr_i[ADDR_W-$clog2(K)-1:0]),
@@ -68,7 +68,7 @@ module iob_ram_2p_tiled
    bram_out_sel
      (
       .data_i (r_data_vec),
-      .sel_i  (addr[ADDR_W-1:ADDR_W-$clog2(K)]),
+      .sel_i  (addr_i[ADDR_W-1:ADDR_W-$clog2(K)]),
       .data_o (r_data_o)
       );
 

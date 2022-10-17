@@ -116,7 +116,7 @@ module iob_ram_2p_asym_tb;
       .ext_mem_w_addr_o (ext_mem_w_addr),
       .ext_mem_r_en_o   (ext_mem_r_en),
       .ext_mem_r_addr_o (ext_mem_r_addr),
-      .ext_mem_r_data_o (ext_mem_r_data),
+      .ext_mem_r_data_i (ext_mem_r_data),
       
       .w_en_i           (w_en),
       .w_addr_i         (w_addr),
