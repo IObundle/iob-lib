@@ -453,8 +453,8 @@ def gen_wr_reg(table, fout, cpu_nbytes=4):
             addr_offset = int(row['addr']) % 4
             reg_addr = math.floor(int(row['addr'])/cpu_nbytes)
             reg_w = int(row['nbytes']) * 8
-            fout.write(f"`IOB_WIRE({row['name']}_en, 1)\n")
-            fout.write(f"assign {row['name']}_en = valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (addr == {reg_addr});\n")
+            fout.write(f"`IOB_WIRE({row['name']}_wen, 1)\n")
+            fout.write(f"assign {row['name']}_wen = valid & (|wstrb[{addr_offset}+:{row['nbytes']}]) & (addr == {reg_addr});\n")
             fout.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
             fout.write(f"assign {row['name']}_wdata = wdata[{8*addr_offset}+:{reg_w}];\n")
             fout.write(f"`IOB_WIRE({row['name']}_ready, 1)\n\n")
