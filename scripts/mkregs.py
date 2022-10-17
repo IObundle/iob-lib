@@ -469,9 +469,12 @@ def gen_rd_reg(table, fout, cpu_nbytes):
 
     for row in table:
         if row["reg_type"] == "REG" and row['rw_type'] == "R":
+            fout.write(f"`IOB_WIRE({row['name']}_ren, 1)\n")
             fout.write(f"`IOB_WIRE({row['name']}_rdata, {int(row['nbytes']) * 8})\n")
             fout.write(f"`IOB_WIRE({row['name']}_rvalid, 1)\n")
             fout.write(f"`IOB_WIRE({row['name']}_ready, 1)\n")
+            cpu_reg_addr = math.floor(int(row['addr'])/cpu_nbytes)
+            fout.write(f"assign {row['name']}_ren = valid & ( addr == {cpu_reg_addr} ) & ~(|wstrb);\n")
 
     # register read data switch
     fout.write("\n// register read rdata\n")
