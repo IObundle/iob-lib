@@ -63,8 +63,8 @@ def parse_arguments():
         addresses are always higher than the manually assigned addresses.
         The read and write addresses are independent. A read register and
         another write register can have the same address.
-    - ADDR_W: Address width in bits for register.
-        ADDR_W = 0: generates register;
+    - ADDR_W: Address width in bits for memory.
+        ADDR_W = R: generates register;
         ADDR_W > 0: generates memory;
 
     Example mkregs.conf file:
@@ -927,17 +927,18 @@ def swreg_get_fields(line):
     # Get dictionary of named fields from parse.Result object
     if result:
         swreg_flds = result.named
+
+        # Remove whitespace
+        for key in swreg_flds:
+            swreg_flds[key] = swreg_flds[key].strip(" ").strip("\t")
+
         # Set reg_type
-        if int(swreg_flds["addr_w"]) == 0:
+        if swreg_flds["addr_w"] == "R":
             swreg_flds["reg_type"] = "REG"
         elif int(swreg_flds["addr_w"]) > 0:
             swreg_flds["reg_type"] = "MEM"
         else:
-            print("ADDR_W Field: invalid value")
-            swreg_flds["reg_type"] = ""
-        # Remove whitespace
-        for key in swreg_flds:
-            swreg_flds[key] = swreg_flds[key].strip(" ").strip("\t")
+            sys.exit(f"ADDR_W Field: invalid value {swreg_flds['addr_w']}.\nCheck --help for more details")
     else:
         swreg_flds = None
 
