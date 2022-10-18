@@ -462,7 +462,7 @@ def gen_wr_reg(table, fout, cpu_nbytes=4):
             fout.write(f"assign {row['name']}_wdata = wdata[{8*addr_offset}+:{reg_w}];\n")
             fout.write(f"`IOB_WIRE({row['name']}_ready, 1)\n\n")
 
-    fout.write("// register write ready\n")
+    fout.write("//select register write ready\n")
     gen_reg_ready_switch(table, fout, "W", "wr_reg_ready_int", cpu_nbytes)
     return
 
@@ -936,7 +936,7 @@ def swreg_get_fields(line):
             swreg_flds[key] = swreg_flds[key].strip(" ").strip("\t")
 
         # Set reg_type
-        if swreg_flds["addr_w"] == "R":
+        if int(swreg_flds["addr_w"]) == 0:
             swreg_flds["reg_type"] = "REG"
         elif int(swreg_flds["addr_w"]) > 0:
             swreg_flds["reg_type"] = "MEM"
