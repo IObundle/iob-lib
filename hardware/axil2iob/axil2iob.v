@@ -55,7 +55,7 @@ module axil2iob
    assign valid_o = axil_wvalid_i | axil_arvalid_i;
    assign addr_o  = axil_avalid? axil_addr: axil_addr_reg;
    assign wdata_o = axil_wdata_i;
-   assign wstrb_o = axil_wstrb_i;
+   assign wstrb_o = axil_wvalid_i? axil_wstrb_i: {DATA_W{1'b0}};
 
    // Address register
    assign axil_avalid = axil_awvalid_i | axil_arvalid_i;
