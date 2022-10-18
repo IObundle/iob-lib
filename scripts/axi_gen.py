@@ -18,54 +18,64 @@ AXI_RESP_W = '2'
 
 table = []
 
+axi_write=[ \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ID_W',       'name':'axi_awid',    'default':'0', 'description':'Address write channel ID.'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ADDR_W',     'name':'axi_awaddr',  'default':'0', 'description':'Address write channel address.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width':'AXI_LEN_W',      'name':'axi_awlen',   'default':'0', 'description':'Address write channel burst length.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width': AXI_SIZE_W,      'name':'axi_awsize',  'default':'2', 'description':'Address write channel burst size. This signal indicates the size of each transfer in the burst.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width': AXI_BURST_W,     'name':'axi_awburst', 'default':'1', 'description':'Address write channel burst type.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width': AXI_LOCK_W,      'name':'axi_awlock',  'default':'0', 'description':'Address write channel lock type.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width': AXI_CACHE_W,     'name':'axi_awcache', 'default':'2', 'description':'Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_PROT_W,      'name':'axi_awprot',  'default':'2', 'description':'Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_QOS_W,       'name':'axi_awqos',   'default':'0', 'description':'Address write channel quality of service.'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_awvalid', 'default':'0', 'description':'Address write channel valid.'}, \
+{'lite':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_awready', 'default':'0', 'description':'Address write channel ready.'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_DATA_W',     'name':'axi_wdata',   'default':'0', 'description':'Write channel data.'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'(AXI_DATA_W/8)', 'name':'axi_wstrb',   'default':'0', 'description':'Write channel write strobe.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_wlast',   'default':'0', 'description':'Write channel last word flag.'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_wvalid',  'default':'0', 'description':'Write channel valid.'}, \
+{'lite':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_wready',  'default':'0', 'description':'Write channel ready.'}, \
+{'lite':1, 'signal':'`IOB_INPUT(',  'width':'AXI_ID_W',       'name':'axi_bid',     'default':'0', 'description':'Write response channel ID.'}, \
+{'lite':1, 'signal':'`IOB_INPUT(',  'width': AXI_RESP_W,      'name':'axi_bresp',   'default':'0', 'description':'Write response channel response.'}, \
+{'lite':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_bvalid',  'default':'0', 'description':'Write response channel valid.'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_bready',  'default':'0', 'description':'Write response channel ready.'} \
+]
+
+axi_read=[ \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ID_W',       'name':'axi_arid',    'default':'0', 'description':'Address read channel ID.'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ADDR_W',     'name':'axi_araddr',  'default':'0', 'description':'Address read channel address.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width':'AXI_LEN_W',      'name':'axi_arlen',   'default':'0', 'description':'Address read channel burst length.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width': AXI_SIZE_W,      'name':'axi_arsize',  'default':'2', 'description':'Address read channel burst size. This signal indicates the size of each transfer in the burst.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width': AXI_BURST_W,     'name':'axi_arburst', 'default':'1', 'description':'Address read channel burst type.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width': AXI_LOCK_W,      'name':'axi_arlock',  'default':'0', 'description':'Address read channel lock type.'}, \
+{'lite':0, 'signal':'`IOB_OUTPUT(', 'width': AXI_CACHE_W,     'name':'axi_arcache', 'default':'2', 'description':'Address read channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_PROT_W,      'name':'axi_arprot',  'default':'2', 'description':'Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_QOS_W,       'name':'axi_arqos',   'default':'0', 'description':'Address read channel quality of service.'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_arvalid', 'default':'0', 'description':'Address read channel valid.'}, \
+{'lite':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_arready', 'default':'0', 'description':'Address read channel ready.'}, \
+{'lite':1, 'signal':'`IOB_INPUT(',  'width':'AXI_ID_W',       'name':'axi_rid',     'default':'0', 'description':'Read channel ID.'}, \
+{'lite':1, 'signal':'`IOB_INPUT(',  'width':'AXI_DATA_W',     'name':'axi_rdata',   'default':'0', 'description':'Read channel data.'}, \
+{'lite':1, 'signal':'`IOB_INPUT(',  'width': AXI_RESP_W,      'name':'axi_rresp',   'default':'0', 'description':'Read channel response.'}, \
+{'lite':0, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_rlast',   'default':'0', 'description':'Read channel last word.'}, \
+{'lite':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_rvalid',  'default':'0', 'description':'Read channel valid.'}, \
+{'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_rready' , 'default':'0', 'description':'Read channel ready.'} \
+]
+
 #
 # AXI-4 Full
 #
 
 def make_axi_write():
-    return [ \
-['`IOB_OUTPUT(', 'AXI_ID_W',        'axi_awid',    'Address write channel ID.'], \
-['`IOB_OUTPUT(', 'AXI_ADDR_W',    'axi_awaddr',  'Address write channel address.'], \
-['`IOB_OUTPUT(', 'AXI_LEN_W',       'axi_awlen',   'Address write channel burst length.'], \
-['`IOB_OUTPUT(', AXI_SIZE_W,      'axi_awsize',  'Address write channel burst size. This signal indicates the size of each transfer in the burst.'], \
-['`IOB_OUTPUT(', AXI_BURST_W,     'axi_awburst', 'Address write channel burst type.'], \
-['`IOB_OUTPUT(', AXI_LOCK_W,      'axi_awlock',  'Address write channel lock type.'], \
-['`IOB_OUTPUT(', AXI_CACHE_W,     'axi_awcache', 'Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).'], \
-['`IOB_OUTPUT(', AXI_PROT_W,      'axi_awprot',  'Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'], \
-['`IOB_OUTPUT(', AXI_QOS_W,       'axi_awqos',   'Address write channel quality of service.'], \
-['`IOB_OUTPUT(', '1',             'axi_awvalid', 'Address write channel valid.'], \
-['`IOB_INPUT(',  '1',             'axi_awready', 'Address write channel ready.'], \
-['`IOB_OUTPUT(', 'AXI_DATA_W',    'axi_wdata',   'Write channel data.'], \
-['`IOB_OUTPUT(', '(AXI_DATA_W/8)', 'axi_wstrb',   'Write channel write strobe.'], \
-['`IOB_OUTPUT(', '1',             'axi_wlast',   'Write channel last word flag.'], \
-['`IOB_OUTPUT(', '1',             'axi_wvalid',  'Write channel valid.'], \
-['`IOB_INPUT(',  '1',             'axi_wready',  'Write channel ready.'], \
-['`IOB_INPUT(',  'AXI_ID_W',        'axi_bid',     'Write response channel ID.'], \
-['`IOB_INPUT(',  AXI_RESP_W,      'axi_bresp',   'Write response channel response.'], \
-['`IOB_INPUT(',  '1',             'axi_bvalid',  'Write response channel valid.'], \
-['`IOB_OUTPUT(', '1',             'axi_bready',  'Write response channel ready.'] \
-]
+    bus=[]
+    for i in range(len(axi_write)):
+        bus.append(axi_write[i])
+    return bus
 
 def make_axi_read():
-    return [ \
-['`IOB_OUTPUT(', 'AXI_ID_W',        'axi_arid',    'Address read channel ID.'], \
-['`IOB_OUTPUT(', 'AXI_ADDR_W',    'axi_araddr',  'Address read channel address.'], \
-['`IOB_OUTPUT(', 'AXI_LEN_W',       'axi_arlen',   'Address read channel burst length.'], \
-['`IOB_OUTPUT(', AXI_SIZE_W,      'axi_arsize',  'Address read channel burst size. This signal indicates the size of each transfer in the burst.'], \
-['`IOB_OUTPUT(', AXI_BURST_W,     'axi_arburst', 'Address read channel burst type.'], \
-['`IOB_OUTPUT(', AXI_LOCK_W,      'axi_arlock',  'Address read channel lock type.'], \
-['`IOB_OUTPUT(', AXI_CACHE_W,     'axi_arcache', 'Address read channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).'], \
-['`IOB_OUTPUT(', AXI_PROT_W,      'axi_arprot',  'Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'], \
-['`IOB_OUTPUT(', AXI_QOS_W,       'axi_arqos',   'Address read channel quality of service.'], \
-['`IOB_OUTPUT(', '1',             'axi_arvalid', 'Address read channel valid.'], \
-['`IOB_INPUT(',  '1',             'axi_arready', 'Address read channel ready.'], \
-['`IOB_INPUT(',  'AXI_ID_W',        'axi_rid',     'Read channel ID.'], \
-['`IOB_INPUT(', 'AXI_DATA_W',     'axi_rdata',   'Read channel data.'], \
-['`IOB_INPUT(',  AXI_RESP_W,      'axi_rresp',   'Read channel response.'], \
-['`IOB_INPUT(',  '1',             'axi_rlast',   'Read channel last word.'], \
-['`IOB_INPUT(',  '1',             'axi_rvalid',  'Read channel valid.'], \
-['`IOB_OUTPUT(', '1',             'axi_rready' , 'Read channel ready.'] \
-]
+    bus=[]
+    for i in range(len(axi_read)):
+        bus.append(axi_read[i])
+    return bus
 
 def make_axi():
     return make_axi_write() + make_axi_read()
@@ -75,37 +85,22 @@ def make_axi():
 #
 
 def make_axil_write():
-    return [ \
-['`IOB_OUTPUT(', 'AXI_ID_W',       'axil_awid',    'Address write channel ID'], \
-['`IOB_OUTPUT(', 'AXIL_ADDR_W',    'axil_awaddr',  'Address write channel address'], \
-['`IOB_OUTPUT(', AXI_PROT_W,       'axil_awprot',  'Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'], \
-['`IOB_OUTPUT(', AXI_QOS_W,        'axil_awqos',   'Address write channel quality of service'], \
-['`IOB_OUTPUT(', '1',              'axil_awvalid', 'Address write channel valid'], \
-['`IOB_INPUT(',  '1',              'axil_awready', 'Address write channel ready'], \
-['`IOB_OUTPUT(', 'AXIL_DATA_W',    'axil_wdata',   'Write channel data'], \
-['`IOB_OUTPUT(', '(AXIL_DATA_W/8)','axil_wstrb',   'Write channel write strobe'], \
-['`IOB_OUTPUT(', '1',              'axil_wvalid',  'Write channel valid'], \
-['`IOB_INPUT(',  '1',              'axil_wready',  'Write channel ready'], \
-['`IOB_INPUT(',  'AXI_ID_W',         'axil_bid',     'Write response channel ID'], \
-['`IOB_INPUT(',  AXI_RESP_W,       'axil_bresp',   'Write response channel response'], \
-['`IOB_INPUT(',  '1',              'axil_bvalid',  'Write response channel valid'], \
-['`IOB_OUTPUT(', '1',              'axil_bready',  'Write response channel ready'] \
-]
+    bus=[]
+    for i in range(len(axi_write)):
+        if axi_write[i]['lite'] == 1:
+            bus.append(axi_write[i])
+            bus[-1]['name'] = bus[-1]['name'].replace('axi_', 'axil_')
+            bus[-1]['width'] = bus[-1]['width'].replace('AXI_', 'AXIL_')
+    return bus
 
 def make_axil_read():
-    return [ \
-['`IOB_OUTPUT(', 'AXI_ID_W',         'axil_arid',    'Address read channel ID'], \
-['`IOB_OUTPUT(', 'AXIL_ADDR_W',    'axil_araddr',  'Address read channel address'], \
-['`IOB_OUTPUT(', AXI_PROT_W,       'axil_arprot',  'Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'], \
-['`IOB_OUTPUT(', AXI_QOS_W,        'axil_arqos',   'Address read channel quality of service'], \
-['`IOB_OUTPUT(', '1',              'axil_arvalid', 'Address read channel valid'], \
-['`IOB_INPUT(',  '1',              'axil_arready', 'Address read channel ready'], \
-['`IOB_INPUT(',  'AXI_ID_W',         'axil_rid',     'Read channel ID'], \
-['`IOB_INPUT(',  'AXIL_DATA_W',    'axil_rdata',   'Read channel data'], \
-['`IOB_INPUT(',  AXI_RESP_W,       'axil_rresp',   'Read channel response'], \
-['`IOB_INPUT(',  '1',              'axil_rvalid',  'Read channel valid' ], \
-['`IOB_OUTPUT(', '1',              'axil_rready',  'Read channel ready'] \
-]
+    bus=[]
+    for i in range(len(axi_read)):
+        if axi_read[i]['lite'] == 1:
+            bus.append(axi_read[i])
+            bus[-1]['name'] = bus[-1]['name'].replace('axi_', 'axil_')
+            bus[-1]['width'] = bus[-1]['width'].replace('AXI_', 'AXIL_')
+    return bus
 
 def make_axil():
     return make_axil_write() + make_axil_read()
@@ -135,27 +130,27 @@ def tbsignal(direction):
 
 def axi_m_port(prefix, fout):
     for i in range(len(table)):
-        fout.write(' '+table[i][0]+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
+        fout.write(' '+table[i]['signal']+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
     
 def axi_s_port(prefix, fout):
     for i in range(len(table)):
-        fout.write(' '+reverse(table[i][0])+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
+        fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
 
 def axi_m_write_port(prefix, fout):
     for i in range(len(table)):
-        fout.write(' '+table[i][0]+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
+        fout.write(' '+table[i]['signal']+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
     
 def axi_s_write_port(prefix, fout):
     for i in range(len(table)):
-        fout.write(' '+reverse(table[i][0])+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
+        fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
 
 def axi_m_read_port(prefix, fout):
     for i in range(len(table)):
-        fout.write(' '+table[i][0]+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
+        fout.write(' '+table[i]['signal']+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
     
 def axi_s_read_port(prefix, fout):
     for i in range(len(table)):
-        fout.write(' '+reverse(table[i][0])+prefix+table[i][2]+', '+table[i][1]+'), //'+table[i][3]+'\n')
+        fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
 
 #
 # Portmap
@@ -163,15 +158,15 @@ def axi_s_read_port(prefix, fout):
 
 def axi_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i][2]+'('+wire_prefix+table[i][2]+'), //'+table[i][3]+'\n')
+        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
 
 def axi_write_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i][2]+'('+wire_prefix+table[i][2]+'), //'+table[i][3]+'\n')
+        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
 
 def axi_read_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i][2]+'('+wire_prefix+table[i][2]+'), //'+table[i][3]+'\n')
+        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
 
 #
 # Wire
@@ -179,15 +174,33 @@ def axi_read_portmap(port_prefix, wire_prefix, fout):
 
 def axi_m_tb(prefix, fout):
     for i in range(len(table)):
-        fout.write(tbsignal(table[i][0])+prefix+table[i][2]+', '+table[i][1]+') //'+table[i][3]+'\n')
+        fout.write(tbsignal(table[i]['signal'])+prefix+table[i]['name']+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+    fout.write('\n')
+    axi_m_tb_initial(prefix, fout)
     
 def axi_s_tb(prefix, fout):
     for i in range(len(table)):
-        fout.write(tbsignal(reverse(table[i][0]))+prefix+table[i][2]+', '+table[i][1]+') //'+table[i][3]+'\n')
+        fout.write(tbsignal(reverse(table[i]['signal']))+prefix+table[i]['name']+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+    fout.write('\n')
+    axi_s_tb_initial(prefix, fout)
 
 def axi_wire(prefix, fout):
     for i in range(len(table)):
-        fout.write('`IOB_WIRE('+prefix+table[i][2]+', '+table[i][1]+') //'+table[i][3]+'\n')
+        fout.write('`IOB_WIRE('+prefix+table[i]['name']+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+
+def axi_m_tb_initial(prefix, fout):
+    fout.write('initial begin\n')
+    for i in range(len(table)):
+        if tbsignal(table[i]['signal']) == '`IOB_VAR(':
+            fout.write('    '+prefix+table[i]['name']+' = '+table[i]['default']+';\n')
+    fout.write('end\n')
+
+def axi_s_tb_initial(prefix, fout):
+    fout.write('initial begin\n')
+    for i in range(len(table)):
+        if tbsignal(reverse(table[i]['signal'])) == '`IOB_VAR(':
+            fout.write('    '+prefix+table[i]['name']+' = '+table[i]['default']+';\n')
+    fout.write('end\n')
 
 #
 # Main
