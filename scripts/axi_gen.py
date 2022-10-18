@@ -90,8 +90,7 @@ def make_axil_write():
         if axi_write[i]['lite'] == 1:
             bus.append(axi_write[i])
             bus[-1]['name'] = bus[-1]['name'].replace('axi_', 'axil_')
-            if type(bus[-1]['width']) == 'string':
-                bus[-1]['width'] = bus[-1]['width'].replace('AXI_', 'AXIL_')
+            bus[-1]['width'] = bus[-1]['width'].replace('AXI_', 'AXIL_')
     return bus
 
 def make_axil_read():
@@ -100,8 +99,7 @@ def make_axil_read():
         if axi_read[i]['lite'] == 1:
             bus.append(axi_read[i])
             bus[-1]['name'] = bus[-1]['name'].replace('axi_', 'axil_')
-            if type(bus[-1]['width']) == 'string':
-                bus[-1]['width'] = bus[-1]['width'].replace('AXI_', 'AXIL_')
+            bus[-1]['width'] = bus[-1]['width'].replace('AXI_', 'AXIL_')
     return bus
 
 def make_axil():
