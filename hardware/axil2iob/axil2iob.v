@@ -42,7 +42,7 @@ module axil2iob
    // read
    assign axil_rid_o = 1'b0;
    assign axil_rdata_o = rdata_i;
-   assign axil_bresp_o = 2'b0;
+   assign axil_rresp_o = 2'b0;
    assign axil_rvalid_o = rvalid_i;
 
    //
