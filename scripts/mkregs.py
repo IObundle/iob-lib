@@ -388,13 +388,22 @@ def calc_swreg_addr(table):
         if row['addr'].isdigit():
             #manual adress
             reg_addr = int(row['addr'])
+            if row['rw_type'] == "R" and reg_addr >= read_addr:
+                read_addr = reg_addr+reg_offset
+            elif row['rw_type'] == "W" and reg_addr >= write_addr:
+                write_addr = reg_addr+reg_offset
+            else:
+                sys.exit(f"Error: Overlapped address {row['name']} {row['rw_type']} addr={row['addr']} addr_w={row['addr_w']} wa={write_addr} ra={read_addr} ro={reg_offset}")
         else:
             #auto address
             if row['rw_type'] == "R" and reg_addr >= read_addr:
-                reg_addr = read_addr + reg_offset
+                read_addr = read_addr+reg_nbytes-read_addr%reg_w
+                row['addr'] = read_addr
+                read_addr = read_addr + reg_offset
             elif row['rw_type'] == "W" and reg_addr >= write_addr:
-                reg_addr = write_addr + reg_offset
-            row['addr'] = str(reg_addr)
+                write_addr = write_addr+reg_nbytes-write_addr%reg_w
+                row['addr'] = write_addr
+                write_addr = write_addr + reg_offset
     max_addr = max(read_addr, write_addr)
     core_addr_w = max(int(math.ceil(math.log(max_addr, 2))), 1)
     print (max_addr)
