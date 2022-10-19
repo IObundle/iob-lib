@@ -5,3 +5,10 @@
 `IOB_VAR(wstrb_v, DATA_W/8) //Write strobe.
 `IOB_WIRE(rvalid, 1)        //Read data valid.
 `IOB_WIRE(rdata,  DATA_W)   //Read data.
+
+initial begin
+   valid_v = 0;
+   addr_v = 0;
+   wdata_v = 0;
+   wstrb_v = 0;
+end
