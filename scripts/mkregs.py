@@ -9,6 +9,7 @@ from parse import parse, search
 import math
 
 cpu_nbytes = 4
+core_addr_w = None
 
 def parse_arguments():
     help_str = """
@@ -16,30 +17,11 @@ def parse_arguments():
         The configuration file supports the following register/memory
         declarations:
             IOB_SWREG_R(NAME, NBYTES, RST_VAL, ADDR, ADDR_W) // Description
-                sw can read:
-                    NAME[0-(2^ADDR_W-1)]
-                hw can read:
-                    wire NAME_addr;
-                    wire NAME_ren;
-                    wire NAME_wen;
-                hw can write:
-                    wire NAME_rdata;
-                    wire NAME_rvalid;
-                    wire NAME_ready;
             IOB_SWREG_W(NAME, NBYTES, RST_VAL, ADDR, ADDR_W) // Description
-                sw can write:
-                    NAME[0-(2^ADDR_W-1)]
-                hw can read:
-                    wire NAME_wdata;
-                    wire NAME_wen;
-                    wire NAME_addr;
-                    wire NAME_wstrb;
-                hw can write:
-                    wire NAME_ready;
     """
 
     parser = argparse.ArgumentParser(
-            description="mkregs.py script generates hardware logic and software drivers to interface core with CPU.",
+            description="mkregs.py script generates hardware logic and bare-metal software drivers to interface core with CPU.",
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog=help_str
             )
@@ -60,88 +42,74 @@ def parse_arguments():
 def header_parse(vh, defines):
     """ Parse header files
     """
-
     for line in vh:
         d_flds = parse('`define {} {}\n', line.lstrip(' '))
-
         if d_flds is None:
             continue  # not a macro
-
         # NAME
         name = d_flds[0].lstrip(' ')
-
         # VALUE
         eval_str = d_flds[1].replace('`', '').lstrip(' ').replace("$", "")
-
         # split string into alphanumeric words
         existing_define_candidates = re.split('\W+', eval_str)
         for define_candidate in existing_define_candidates:
             if defines.get(define_candidate):
                 eval_str = eval_str.replace(str(define_candidate), str(defines[define_candidate]))
-
         try:
             value = eval(eval_str)
         except (ValueError, SyntaxError, NameError):
             # eval_str has undefined parameters: use as is
             value = eval_str
-
         # insert in dictionary
         if name not in defines:
             defines[name] = value
 
 def gen_wr_reg(row, f):
-
     byte_offset = int(row['addr']) % 4
     reg_addr = math.floor(int(row['addr'])/cpu_nbytes)
     reg_w = int(row['nbytes']) * 8
     f.write(f"`IOB_WIRE({row['name']}_wen, 1)\n")
     f.write(f"assign {row['name']}_wen = valid & (|wstrb[{byte_offset}+:{row['nbytes']}]) & (addr == {reg_addr});\n")
     f.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
-    f.write(f"assign {row['name']}_wdata = wdata[{8*byte_offset}+:{reg_w}];\n")
-    f.write(f"`IOB_WIRE({row['name']}_ready, 1)\n\n")
-
+    f.write(f"assign {row['name']}_wdata = wdata_i[{8*byte_offset}+:{reg_w}];\n")
     if row['autologic']:
-        f.write(f"assign {row['name']}_ready == 1'b1)\n")
-        f.write(f"iob_reg {row['name']}_datareg (clk_i, rst_i, 1'b0, {row['name']}_wen, {row['name']}_wdata, {row['name']})")
+        f.write(f"`IOB_WIRE({row['name']}_ready_i, 1)\n")
+        f.write(f"assign {row['name']}_ready_i = |wstrb_i;\n")
+        f.write(f"iob_reg {row['name']}_datareg (clk_i, rst_i, 1'b0, {row['name']}_wen, {row['name']}_wdata, {row['name']}_o);\n\n")
 
 def gen_rd_reg(row, f):
-
     f.write(f"`IOB_WIRE({row['name']}_ren, 1)\n")
-    f.write(f"`IOB_WIRE({row['name']}_rdata, {int(row['nbytes']) * 8})\n")
-    f.write(f"`IOB_WIRE({row['name']}_rvalid, 1)\n")
-    f.write(f"`IOB_WIRE({row['name']}_ready, 1)\n")
-    cpu_reg_addr = math.floor(int(row['addr'])/cpu_nbytes)
-    f.write(f"assign {row['name']}_ren = valid & ( addr == {cpu_reg_addr} ) & ~(|wstrb);\n")
-    f.write("default: rd_reg_rdata_int = 1'b0;\n")
-    f.write("endcase\n")
-    f.write("end\n")
-
-    #ready logic
+    reg_word_addr = math.floor(int(row['addr'])/cpu_nbytes)
+    f.write(f"assign {row['name']}_ren = valid_i & ( addr_i == {reg_word_addr} ) & ~(|wstrb_i);\n")
     if row['autologic']:
-            f.write("assign {row['name']}_ready = !wstrb;\n")
-
-
+        f.write(f"`IOB_WIRE({row['name']}_ready_i, 1)\n")
+        f.write(f"assign {row['name']}_ready_i = !wstrb;\n")
+        f.write(f"`IOB_WIRE({row['name']}_rvalid_i, 1)\n")
+        f.write(f"iob_reg {row['name']}_rvalid (clk_i, rst_i, 1'b0, 1'b1, {row['name']}_ren, {row['name']}_rvalid_i);\n\n")
     
 def gen_port(table, f):
     for row in table:
         if row['rw_type'] == 'W':
-            f.write(f"`IOB_OUTPUT({row['name']}_o, {str(8*int(row['nbytes']))}),\n")
+            f.write(f"\t`IOB_OUTPUT({row['name']}_o, {str(8*int(row['nbytes']))}),\n")
+            if not int(row['autologic']):
+                f.write(f"\t`IOB_OUTPUT({row['name']}_wen_o, 1),\n")
+
         else:
-            f.write(f"`IOB_INPUT({row['name']}_i, {str(8*int(row['nbytes']))}),\n")
-            if row['autologic']:
-                f.write(f"`IOB_OUTPUT({row['name']}_rvalid_o);\n")
-        if row['autologic']:
-            f.write(f"`IOB_OUTPUT({row['name']}_ready_o);\n")
-    f.write("\n")
-            
+            f.write(f"\t`IOB_INPUT({row['name']}_i, {str(8*int(row['nbytes']))}),\n")
+            if not int(row['autologic']):
+                f.write(f"\t`IOB_INPUT({row['name']}_rvalid_i, 1),\n")
+        if not row['autologic']:
+            f.write(f"\t`IOB_INPUT({row['name']}_ready_i, 1),\n")
         
 def gen_wire(table, f):
     for row in table:
         if row['rw_type'] == 'W':
             f.write(f"`IOB_WIRE({row['name']}, {str(8*int(row['nbytes']))})\n")
+            if not int(row['autologic']):
+                f.write(f"`IOB_WIRE({row['name']}_wen, 1)\n")
         else:
             f.write(f"`IOB_WIRE({row['name']}, {str(8*int(row['nbytes']))})\n")
-            if row['autologic']:
+            if not int(row['autologic']):
                 f.write(f"`IOB_WIRE({row['name']}_rvalid, 1)\n")
         if row['autologic']:
             f.write(f"`IOB_WIRE({row['name']}_ready, 1)\n")
@@ -152,16 +120,21 @@ def gen_portmap(table, f):
     for row in table:
         if row['rw_type'] == 'W':
             f.write(f"\t.{row['name']}_o({row['name']}),\n")
+            if not int(row['autologic']):
+                f.write(f"\t.{row['name']}_wen_o({row['name']}_wen),\n")
         else:
             f.write(f"\t.{row['name']}_i({row['name']}),\n")
-            if row['autologic']:
+            if not int(row['autologic']):
                 f.write(f"\t.{row['name']}_rvalid_i({row['name']}_rvalid),\n")
-        if row['autologic']:
+        if not int(row['autologic']):
             f.write(f"\t.{row['name']}_ready_i({row['name']}_ready),\n")
         
 def write_hwcode(table, top):
 
-    #top-level instance
+    #
+    #SWREG INSTANCE
+    #
+    
     fswreg_inst = open(f"{top}_swreg_inst.vh", "w")
     gen_wire(table, fswreg_inst)
 
@@ -169,17 +142,23 @@ def write_hwcode(table, top):
     gen_portmap(table, fswreg_inst)
     fswreg_inst.write('\t`include "iob_s_portmap.vh"\n')
     fswreg_inst.write('\t`include "iob_clkrst_portmap.vh"')
-    fswreg_inst.write("\n)\n")
+    fswreg_inst.write("\n);\n")
 
-    #swreg module
+    #
+    #SWREG MODULE
+    #
+    
     fswreg_gen = open(f"{top}_swreg_gen.v", "w")
     fswreg_gen.write("module swreg (\n")
-    gen_port(table, fswreg_gen)
-    fswreg_gen.write('`include "iob_s_port.vh"')
-    fswreg_gen.write('`include "iob_clkrst_port.vh"\n')    
-    fswreg_gen.write(");\n")
 
-    has_addr_reg = 0
+    #ports
+    gen_port(table, fswreg_gen)
+    fswreg_gen.write('\t`include "iob_s_port.vh"\n')
+    fswreg_gen.write('\t`include "iob_clkrst_port.vh"\n')    
+    fswreg_gen.write(");\n\n")
+
+    #register logic
+    has_addr_r = 0
     for row in table:
         if row['rw_type'] == 'W':
             #write register 
@@ -188,90 +167,84 @@ def write_hwcode(table, top):
             #read register 
             gen_rd_reg(row, fswreg_gen)
             #address register
-            if not has_addr_reg:
-                has_addr_reg = 1
+            if not has_addr_r:
+                has_addr_r = 1
                 fswreg_gen.write("//address register\n")
-                fswreg_gen.write("`IOB_WIRE(addr_reg, ADDR_W)\n")
-                fswreg_gen.write("iob_reg #(ADDR_W, 0) addr_reg0 (clk_i, rst_i, 1'b0, valid, addr, addr_reg);\n\n")
+                fswreg_gen.write(f"`IOB_WIRE(addr_r, {core_addr_w})\n")
+                fswreg_gen.write(f"iob_reg #({core_addr_w}, 0) addr_r0 (clk_i, rst_i, 1'b0, valid_i, addr_i, addr_r);\n\n")
 
+    #
+    #response switch
+    #
 
-    #select response
+    #use variables to compute response
     fswreg_gen.write(f"`IOB_VAR(rdata_int, {str(8*cpu_nbytes)})\n")
     fswreg_gen.write("`IOB_VAR(rvalid_int, 1)\n")
-    fswreg_gen.write("`IOB_VAR(ready_int, 1)\n")
+    fswreg_gen.write("`IOB_VAR(ready_int, 1)\n\n")
 
-    fswreg_gen.write("`IOB_COMB begin\n")
+    fswreg_gen.write("`IOB_COMB begin\n\n")
 
-    #defaults
-    fswreg_gen.write("rdata_int = 0;\n")    
-    fswreg_gen.write("rvalid_int = 1'b0;\n")
-    fswreg_gen.write("ready_int = 1'b0;\n")
+    #response defaults
+    fswreg_gen.write("\tready_int = 1'b0;\n")
+    fswreg_gen.write("\trdata_int = 0;\n")
+    fswreg_gen.write("\trvalid_int = 1'b0;\n\n")
 
+    #update responses
     for row in table:
         #compute ready 
-        fswreg_gen.write(f"if( (addr>>2) == ({row['addr']}>>2) )\n")
-        fswreg_gen.write(f"\tready_int = ready_int | {row['name']}_ready;\n")
+        fswreg_gen.write(f"\tif( (addr>>2) == ({row['addr']}>>2) )\n")
+        fswreg_gen.write(f"\t\tready_int = ready_int | {row['name']}_ready_i;\n")
 
         #compute rdata and rvalid
         if row['rw_type'] == 'R':
-            fswreg_gen.write("rdata_int = 0;\n")
-            fswreg_gen.write(f"if( (addr_reg>>2) == ({row['addr']}>>2) )"+"\}\n")
-            fswreg_gen.write(f"rdata_int = rdata_int | ({row['name']}_rdata << (8*(int({row['addr']})%4));\n")
-            fswreg_gen.write(f"rvalid_int = rvalid_int | {row['name']}_rvalid;\n"+"\}\n")
-            fswreg_gen.write("end\n")
+            fswreg_gen.write(f"\tif( (addr_r>>2) == ({row['addr']}>>2) )"+" begin\n")
+            fswreg_gen.write(f"\t\trdata_int = rdata_int | ({row['name']}_rdata_i << {8*(int(row['addr'])%4)});\n")
+            fswreg_gen.write(f"\t\trvalid_int = rvalid_int | {row['name']}_rvalid_i;\n")
+            fswreg_gen.write("\tend\n\n")
 
-    fswreg_gen.write("`IOB_VAR2WIRE(ready_int, ready)\n")
-    fswreg_gen.write("`IOB_VAR2WIRE(rdata_int, rdata)\n")
-    fswreg_gen.write("`IOB_VAR2WIRE(rvalid_int, rvalid)\n")
+    fswreg_gen.write("end\n\n")
+
+    #convert computed variables to signals
+    fswreg_gen.write("`IOB_VAR2WIRE(ready_int, ready_o)\n")
+    fswreg_gen.write("`IOB_VAR2WIRE(rdata_int, rdata_o)\n")
+    fswreg_gen.write("`IOB_VAR2WIRE(rvalid_int, rvalid_o)\n\n")
 
     fswreg_gen.write("endmodule\n")
     fswreg_gen.close()
     fswreg_inst.close()
 
 
-def write_hwheader(table, top, core_addr_w):
-
+def write_hwheader(table, top):
     fswreg_def = open(f"{top}_swreg_def.vh", "w")
-
     fswreg_def.write("//This file was generated by script mkregs.py\n\n")
-
     fswreg_def.write("//used address space width\n")
     addr_w_prefix = f"{top}_swreg".upper()
     fswreg_def.write(f"`define {addr_w_prefix}_ADDR_W {core_addr_w}\n\n")
-
     fswreg_def.write("//address macros\n")
     macro_prefix = f"{top}_".upper()
-
     fswreg_def.write("//addresses\n")
     for row in table:
         fswreg_def.write(f"`define {macro_prefix}{row['name']}_ADDR {row['addr']}\n")
         fswreg_def.write(f"`define {macro_prefix}{row['name']}_W {int(row['nbytes'])*8}\n\n")
-
     fswreg_def.close()
-
 
 # Read vh files to get non-literal widths
 def get_defines(vh_files):
     # .vh file lines
     vh = []
-
     for vh_file in vh_files:
         if vh_file.find(".vh"):
             fvh = open(vh_file, "r")
             vh = [*vh, *fvh.readlines()]
             fvh = close()
-
     defines = {}
     # parse headers if any
     if vh:
         header_parse(vh, defines)
-
     return defines
 
-
-# Get C type from swreg width
+# Get C type from swreg nbytes
 # uses unsigned int types from C stdint library
-# nbytes: SWREG nbytes
 def swreg_type(nbytes, defines):
     # Check if nbytes is a number string (1, 2, 4, etc)
     try:
@@ -405,9 +378,9 @@ def calc_swreg_addr(table):
                 row['addr'] = write_addr
                 write_addr = write_addr + reg_offset
     max_addr = max(read_addr, write_addr)
+    global core_addr_w
     core_addr_w = max(int(math.ceil(math.log(max_addr, 2))), 1)
-    print (max_addr)
-    return table, core_addr_w
+    return table
 
 def swreg_get_fields(line):
     # Parse IOB_SWREG_{R|W}(NAME, NBYTES, RST_VAL, ADDR, ADDR_W) // Comment
@@ -432,9 +405,9 @@ def swreg_parse(code, hwsw, top, vh_files):
             continue
         table.append(swreg_flds)
     # calculate address field
-    table, core_addr_w = calc_swreg_addr(table)
+    table = calc_swreg_addr(table)
     if hwsw == "HW":
-        write_hwheader(table, top, core_addr_w)
+        write_hwheader(table, top)
         write_hwcode(table, top)
     elif hwsw == "SW":
         core_prefix = top.upper()

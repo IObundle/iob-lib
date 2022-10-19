@@ -199,10 +199,9 @@ def get_swreg_by_name(swreg_list, name):
     for swreg in swreg_list:
         if 'name' in swreg and swreg['name'] == name:
             return swreg
-
     return None
 
-def swreg_parse (vh, defines) :
+def swreg_parse (conf, defines) :
 
     swreg_cnt = 0
     table_found = 0
@@ -210,18 +209,16 @@ def swreg_parse (vh, defines) :
 
     # get all swregs from mkregs_conf with addresses pre calculated
     swreg_list = []
-    for line in vh:
+    for line in conf:
         swreg_flds = swreg_get_fields(line)
         if swreg_flds is None:
             continue
-
         swreg_list.append(swreg_flds)
 
     # calculate address field
     swreg_list = calc_swreg_addr(swreg_list)
 
-    for line in vh:
-
+    for line in conf:
         #find table start
         if '//START_SWREG_TABLE' in line:
             if table_found == 1:
@@ -236,8 +233,12 @@ def swreg_parse (vh, defines) :
 
         swreg_flds = []
         swreg_dict = swreg_get_fields(line)
+
         if swreg_dict is None:
             continue
+
+        print(swreg_list)
+        print(swreg_dict)
 
         swreg_dict = get_swreg_by_name(swreg_list, swreg_dict['name'])
         if swreg_dict is None:
@@ -265,7 +266,7 @@ def swreg_parse (vh, defines) :
             swreg_flds.append(eval_str.replace('_','\_').strip(' '))
 
         #DEFAULT VALUE
-        swreg_flds.append(swreg_dict['default_value'])
+        swreg_flds.append(swreg_dict['rst_val'])
 
         #DESCRIPTION
         swreg_flds.append(swreg_dict['description'].replace('_','\_'))
@@ -280,9 +281,10 @@ def swreg_parse (vh, defines) :
 def main () :
     #parse command line
     if len(sys.argv) < 2:
-        print("Usage: verilog2tex.py path/to/top_level.v [verilog_files] [mkregs.conf]")
-        print("verilog_files: paths to .v and .vh files")
-        print("mkregs_conf: path/to/mkregs.conf")
+        print("Usage: verilog2tex.py top [verilog_files] [conf]")
+        print("top: top-level verilog file")
+        print("verilog_files: list of .v and .vh files")
+        print("conf: mkregs.conf file")
         exit()
 
     #top-level verilog file
