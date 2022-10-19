@@ -129,34 +129,35 @@ def gen_port(table, f):
         else:
             f.write(f"`IOB_INPUT({row['name']}_i, {str(8*int(row['nbytes']))}),\n")
             if row['autologic']:
-                f.write(f"`IOB_OUTPUT({row['name']}_rvalid);\n")
+                f.write(f"`IOB_OUTPUT({row['name']}_rvalid_o);\n")
         if row['autologic']:
-            f.write(f"`IOB_OUTPUT({row['name']}_ready);\n")
+            f.write(f"`IOB_OUTPUT({row['name']}_ready_o);\n")
+    f.write("\n")
             
         
 def gen_wire(table, f):
     for row in table:
         if row['rw_type'] == 'W':
-            f.write(f"`IOB_WIRE({row['name']}_o, {str(8*int(row['nbytes']))}),\n")
+            f.write(f"`IOB_WIRE({row['name']}, {str(8*int(row['nbytes']))})\n")
         else:
-            f.write(f"`IOB_WIRE({row['name']}_i, {str(8*int(row['nbytes']))}),\n")
+            f.write(f"`IOB_WIRE({row['name']}, {str(8*int(row['nbytes']))})\n")
             if row['autologic']:
-                f.write(f"`IOB_WIRE({row['name']}_rvalid);\n")
+                f.write(f"`IOB_WIRE({row['name']}_rvalid, 1)\n")
         if row['autologic']:
-            f.write(f"`IOB_WIRE({row['name']}_ready);\n")
+            f.write(f"`IOB_WIRE({row['name']}_ready, 1)\n")
+    f.write("\n")
             
         
 def gen_portmap(table, f):
     for row in table:
         if row['rw_type'] == 'W':
-            f.write(f".{row['name']}_o({row['name']})\n")
+            f.write(f"\t.{row['name']}_o({row['name']}),\n")
         else:
-            f.write(f".{row['name']}_i({row['name']})\n")
+            f.write(f"\t.{row['name']}_i({row['name']}),\n")
             if row['autologic']:
-                f.write(f"`IOB_OUTPUT({row['name']}_rvalid);\n")
+                f.write(f"\t.{row['name']}_rvalid_i({row['name']}_rvalid),\n")
         if row['autologic']:
-            f.write(f"`IOB_OUTPUT({row['name']}_ready);\n")
-            
+            f.write(f"\t.{row['name']}_ready_i({row['name']}_ready),\n")
         
 def write_hwcode(table, top):
 
@@ -166,16 +167,16 @@ def write_hwcode(table, top):
 
     fswreg_inst.write("swreg swreg_inst (\n")
     gen_portmap(table, fswreg_inst)
-    fswreg_inst.write('\t`include "iob_s_portmap.vh"')
-    fswreg_inst.write('\t`include "iob_clkrst_s_portmap.vh"')
-    fswreg_inst.write(")\n")
+    fswreg_inst.write('\t`include "iob_s_portmap.vh"\n')
+    fswreg_inst.write('\t`include "iob_clkrst_portmap.vh"')
+    fswreg_inst.write("\n)\n")
 
     #swreg module
     fswreg_gen = open(f"{top}_swreg_gen.v", "w")
     fswreg_gen.write("module swreg (\n")
     gen_port(table, fswreg_gen)
     fswreg_gen.write('`include "iob_s_port.vh"')
-    fswreg_gen.write('`include "iob_clkrst_s_port.vh"')    
+    fswreg_gen.write('`include "iob_clkrst_port.vh"\n')    
     fswreg_gen.write(");\n")
 
     has_addr_reg = 0
@@ -224,7 +225,6 @@ def write_hwcode(table, top):
     fswreg_gen.write("`IOB_VAR2WIRE(rvalid_int, rvalid)\n")
 
     fswreg_gen.write("endmodule\n")
-    fswreg_inst.write(");\n")
     fswreg_gen.close()
     fswreg_inst.close()
 
