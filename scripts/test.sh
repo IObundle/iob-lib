@@ -3,7 +3,7 @@
 set -e
 
 #find directories containing testbenches
-TBS=`find hardware | grep _tb.v`
+TBS=`find hardware | grep _tb.v | grep -v include`
 
 #extract respective directories
 for i in $TBS; do TB_DIRS+=" `dirname $i`" ; done

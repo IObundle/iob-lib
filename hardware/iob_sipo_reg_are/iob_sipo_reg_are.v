@@ -23,7 +23,7 @@ module iob_sipo_reg_are
    always @(posedge clk_i, posedge arst_i)
      if (arst_i)
        data_reg <= 1'b0;
-     else if (en)
+     else if (en_i)
        data_reg <= (data_reg << 1) | s_i;
 
    assign p_o = data_reg;
