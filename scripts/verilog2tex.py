@@ -237,9 +237,6 @@ def swreg_parse (conf, defines) :
         if swreg_dict is None:
             continue
 
-        print(swreg_list)
-        print(swreg_dict)
-
         swreg_dict = get_swreg_by_name(swreg_list, swreg_dict['name'])
         if swreg_dict is None:
             continue

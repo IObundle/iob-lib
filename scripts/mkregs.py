@@ -65,71 +65,106 @@ def header_parse(vh, defines):
             defines[name] = value
 
 def gen_wr_reg(row, f):
-    byte_offset = int(row['addr']) % 4
-    reg_addr = math.floor(int(row['addr'])/cpu_nbytes)
-    reg_w = int(row['nbytes']) * 8
-    f.write(f"`IOB_WIRE({row['name']}_wen, 1)\n")
-    f.write(f"assign {row['name']}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & (addr_i == {reg_addr});\n")
-    f.write(f"`IOB_WIRE({row['name']}_wdata, {reg_w})\n")
-    f.write(f"assign {row['name']}_wdata = wdata_i[{8*byte_offset}+:{reg_w}];\n")
-    if int(row['autologic']):
-        f.write(f"`IOB_WIRE({row['name']}_ready_i, 1)\n")
-        f.write(f"assign {row['name']}_ready_i = |wstrb_i;\n")
-        f.write(f"iob_reg #({8*int(row['nbytes'])},0) {row['name']}_datareg (clk_i, rst_i, 1'b0, {row['name']}_wen, {row['name']}_wdata, {row['name']}_o);\n\n")
+    reg = row['name']
+    reg_w = row['nbits']
+    byte_offset = row['addr'] % 4
+    reg_addr_w = row['addr_w']
+    reg_word_addr = math.floor(row['addr']/cpu_nbytes)
+    f.write(f"`IOB_WIRE({reg}_wen, 1)\n")
+    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & ((addr_i>>2) == {(reg_word_addr>>2)});\n")
+    f.write(f"`IOB_WIRE({reg}_wdata, {reg_w})\n")
+    f.write(f"assign {reg}_wdata = wdata_i[{8*byte_offset}+:{reg_w}];\n")
+    if row['autologic']:
+        f.write(f"`IOB_WIRE({reg}_ready_i, 1)\n")
+        f.write(f"assign {reg}_ready_i = |wstrb_i;\n")
+        f.write(f"iob_reg #({reg_w},0) {reg}_datareg (clk_i, rst_i, 1'b0, {reg}_wen, {reg}_wdata, {reg}_o);\n\n")
     else:
-        f.write(f"assign {row['name']}_o = {row['name']}_wdata;\n")
+        f.write(f"assign {reg}_o = {reg}_wdata;\n")
+    if row['addr_w'] > cpu_nbytes:
+        f.write(f"assign {reg}_addr_o = addr_i[{reg_addr_w}-1:0];\n")
         
 def gen_rd_reg(row, f):
-    f.write(f"`IOB_WIRE({row['name']}_ren, 1)\n")
-    reg_word_addr = math.floor(int(row['addr'])/cpu_nbytes)
-    f.write(f"assign {row['name']}_ren = valid_i & ( addr_i == {reg_word_addr} ) & ~(|wstrb_i);\n")
-    if int(row['autologic']):
-        f.write(f"`IOB_WIRE({row['name']}_ready_i, 1)\n")
-        f.write(f"assign {row['name']}_ready_i = !wstrb_i;\n")
-        f.write(f"`IOB_WIRE({row['name']}_rvalid_i, 1)\n")
-        f.write(f"iob_reg #(1,0) {row['name']}_rvalid (clk_i, rst_i, 1'b0, 1'b1, {row['name']}_ren, {row['name']}_rvalid_i);\n\n")
+    reg = row['name']
+    reg_w = row['nbits']
+    reg_addr_w = row['addr_w']
+    reg_word_addr = math.floor(row['addr']/cpu_nbytes)
+    f.write(f"`IOB_WIRE({reg}_ren, 1)\n")
+    f.write(f"assign {reg}_ren = valid_i & ( addr_i == {reg_word_addr} ) & ~(|wstrb_i);\n")
+    if row['autologic']:
+        f.write(f"`IOB_WIRE({reg}_ready_i, 1)\n")
+        f.write(f"assign {reg}_ready_i = !wstrb_i;\n")
+        f.write(f"`IOB_WIRE({reg}_rvalid_i, 1)\n")
+        f.write(f"iob_reg #(1,0) {reg}_rvalid (clk_i, rst_i, 1'b0, 1'b1, {reg}_ren, {reg}_rvalid_i);\n\n")
+        f.write(f"`IOB_WIRE({reg}_r, {reg_w})\n")
+        f.write(f"iob_reg #({reg_w},0) {reg}_datareg (clk_i, rst_i, 1'b0, {reg}_ren, {reg}_i, {reg}_r);\n\n")
+        f.write(f"assign {reg}_int_o = {reg}_r;\n")
+    else:
+        f.write(f"assign {reg}_ren_o = {reg}_ren;\n")
+    if row['addr_w'] > cpu_nbytes:
+        f.write(f"assign {reg}_addr_o = addr_i[{reg_addr_w}-1:0];\n")
     
 def gen_port(table, f):
     for row in table:
+        reg = row['name']
+        reg_w = row['nbits']
+        reg_addr_w = row['addr_w']
         if row['rw_type'] == 'W':
-            f.write(f"\t`IOB_OUTPUT({row['name']}_o, {str(8*int(row['nbytes']))}),\n")
-            if not int(row['autologic']):
-                f.write(f"\t`IOB_OUTPUT({row['name']}_wen_o, 1),\n")
+            f.write(f"\t`IOB_OUTPUT({reg}_o, {reg_w}),\n")
+            if not row['autologic']:
+                f.write(f"\t`IOB_OUTPUT({reg}_wen_o, 1),\n")
         else:
-            f.write(f"\t`IOB_INPUT({row['name']}_i, {str(8*int(row['nbytes']))}),\n")
-            if not int(row['autologic']):
-                f.write(f"\t`IOB_OUTPUT({row['name']}_ren_o, 1),\n")
-                f.write(f"\t`IOB_INPUT({row['name']}_rvalid_i, 1),\n")
-        if not int(row['autologic']):
-            f.write(f"\t`IOB_INPUT({row['name']}_ready_i, 1),\n")
+            f.write(f"\t`IOB_INPUT({reg}_i, {reg_w}),\n")
+            if not row['autologic']:
+                f.write(f"\t`IOB_OUTPUT({reg}_ren_o, 1),\n")
+                f.write(f"\t`IOB_INPUT({reg}_rvalid_i, 1),\n")
+            else:
+                f.write(f"\t`IOB_OUTPUT({reg}_int_o, {reg_w}),\n")
+        if not row['autologic']:
+            f.write(f"\t`IOB_INPUT({reg}_ready_i, 1),\n")
+        if row['addr_w'] > cpu_nbytes:
+            f.write(f"\t`IOB_OUTPUT({reg}_addr_o, {reg_addr_w}),\n")
         
-def gen_wire(table, f):
+def gen_inst_wire(table, f):
     for row in table:
+        reg = row['name']
+        reg_w = row['nbits']
+        reg_addr_w = row['addr_w']
         if row['rw_type'] == 'W':
-            f.write(f"`IOB_WIRE({row['name']}, {str(8*int(row['nbytes']))})\n")
-            if not int(row['autologic']):
-                f.write(f"`IOB_WIRE({row['name']}_wen, 1)\n")
+            f.write(f"`IOB_WIRE({reg}, {reg_w})\n")
+            if not row['autologic']:
+                f.write(f"`IOB_WIRE({reg}_wen, 1)\n")
         else:
-            f.write(f"`IOB_WIRE({row['name']}, {str(8*int(row['nbytes']))})\n")
-            if not int(row['autologic']):
-                f.write(f"`IOB_WIRE({row['name']}_rvalid, 1)\n")
-        if not int(row['autologic']):
-            f.write(f"`IOB_WIRE({row['name']}_ready, 1)\n")
+            f.write(f"`IOB_WIRE({reg}, {reg_w})\n")
+            if not row['autologic']:
+                f.write(f"`IOB_WIRE({reg}_rvalid, 1)\n")
+                f.write(f"`IOB_WIRE({reg}_ren, 1)\n")
+            else:
+                f.write(f"`IOB_WIRE({reg}_int, {reg_w})\n")
+        if not row['autologic']:
+            f.write(f"`IOB_WIRE({reg}_ready, 1)\n")
+        if row['addr_w'] > cpu_nbytes:
+            f.write(f"`IOB_WIRE({reg}_addr, {reg_addr_w})\n")
     f.write("\n")
             
         
 def gen_portmap(table, f):
     for row in table:
+        reg = row['name']
         if row['rw_type'] == 'W':
-            f.write(f"\t.{row['name']}_o({row['name']}),\n")
-            if not int(row['autologic']):
-                f.write(f"\t.{row['name']}_wen_o({row['name']}_wen),\n")
+            f.write(f"\t.{reg}_o({reg}),\n")
+            if not row['autologic']:
+                f.write(f"\t.{reg}_wen_o({reg}_wen),\n")
         else:
-            f.write(f"\t.{row['name']}_i({row['name']}),\n")
-            if not int(row['autologic']):
-                f.write(f"\t.{row['name']}_rvalid_i({row['name']}_rvalid),\n")
-        if not int(row['autologic']):
-            f.write(f"\t.{row['name']}_ready_i({row['name']}_ready),\n")
+            f.write(f"\t.{reg}_i({reg}),\n")
+            if not row['autologic']:
+                f.write(f"\t.{reg}_rvalid_i({reg}_rvalid),\n")
+                f.write(f"\t.{reg}_ren_o({reg}_ren),\n")
+            else:
+                f.write(f"\t.{reg}_int_o({reg}_int),\n")
+        if not row['autologic']:
+            f.write(f"\t.{reg}_ready_i({reg}_ready),\n")
+        if row['addr_w'] > cpu_nbytes:
+            f.write(f"\t.{reg}_addr_o({reg}_addr),\n")
         
 def write_hwcode(table, top):
 
@@ -141,7 +176,7 @@ def write_hwcode(table, top):
     fswreg_inst.write("//This file was generated by script mkregs.py\n\n")
 
     #connection wires
-    gen_wire(table, fswreg_inst)
+    gen_inst_wire(table, fswreg_inst)
 
     fswreg_inst.write("swreg #(ADDR_W, DATA_W) swreg_inst (\n")
     gen_portmap(table, fswreg_inst)
@@ -206,15 +241,19 @@ def write_hwcode(table, top):
 
     #update responses
     for row in table:
+        reg = row['name']
         #compute ready 
         fswreg_gen.write(f"\tif( (addr_i>>2) == ({row['addr']}>>2) )\n")
-        fswreg_gen.write(f"\t\tready_int = ready_int | {row['name']}_ready_i;\n")
+        fswreg_gen.write(f"\t\tready_int = ready_int | {reg}_ready_i;\n")
 
         #compute rdata and rvalid
         if row['rw_type'] == 'R':
             fswreg_gen.write(f"\tif( (addr_r>>2) == ({row['addr']}>>2) )"+" begin\n")
-            fswreg_gen.write(f"\t\trdata_int = rdata_int | ({row['name']}_i << {8*(int(row['addr'])%4)});\n")
-            fswreg_gen.write(f"\t\trvalid_int = rvalid_int | {row['name']}_rvalid_i;\n")
+            if row['autologic']:
+                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << {8*row['addr']%4});\n")
+            else:
+                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_i << {8*row['addr']%4});\n")
+            fswreg_gen.write(f"\t\trvalid_int = rvalid_int | {reg}_rvalid_i;\n")
             fswreg_gen.write("\tend\n\n")
 
     fswreg_gen.write("end\n\n")
@@ -239,8 +278,10 @@ def write_hwheader(table, top):
     macro_prefix = f"{top}_".upper()
     fswreg_def.write("//addresses\n")
     for row in table:
-        fswreg_def.write(f"`define {macro_prefix}{row['name']}_ADDR {row['addr']}\n")
-        fswreg_def.write(f"`define {macro_prefix}{row['name']}_W {int(row['nbytes'])*8}\n\n")
+        reg = row['name']
+        reg_w = row['nbits']
+        fswreg_def.write(f"`define {macro_prefix}{reg}_ADDR {row['addr']}\n")
+        fswreg_def.write(f"`define {macro_prefix}{reg}_W {reg_w}\n\n")
     fswreg_def.close()
 
 # Read vh files to get non-literal widths
@@ -260,33 +301,16 @@ def get_defines(vh_files):
 
 # Get C type from swreg nbytes
 # uses unsigned int types from C stdint library
-def swreg_type(nbytes, defines):
-    # Check if nbytes is a number string (1, 2, 4, etc)
-    try:
-        nbytes_int = int(nbytes)
-    except ValueError:
-        # width is a parameter or macro (example: DATA_W, ADDR_W)
-        eval_str = nbytes.replace("`", "").replace(",", "")
-        for key, val in defines.items():
-            eval_str = eval_str.replace(str(key), str(val))
-        try:
-            nbytes_int = int(eval_str)
-        except ValueError:
-            # eval_str has undefined parameters: use default value
-            nbytes_int = 4
-
-    if nbytes_int < 1:
-        print(f"MKREGS: invalid SWREG nbytes value {nbytes}.")
-        nbytes_int = 4
-
+def swreg_type(reg, nbytes):
     type_dict = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t", 8: "uint64_t"}
-    default_width = "uint64_t"
-
-    return type_dict.get(nbytes_int, default_width)
+    try:
+        type_try = type_dict[nbytes]
+    except:
+        print(f"Error: register {reg} has invalid number of bytes {nbytes}.")
+    return type_try
 
 
 def write_swheader(table, top, defines):
-
     fswhdr = open(f"{top}_swreg.h", "w")
 
     core_prefix = f"{top}_".upper()
@@ -300,40 +324,46 @@ def write_swheader(table, top, defines):
 
     fswhdr.write("//Write Addresses\n")
     for row in table:
+        reg = row['name']
         if row["rw_type"] == "W":
-            fswhdr.write(f"#define {core_prefix}{row['name']} {row['addr']}\n")
+            fswhdr.write(f"#define {core_prefix}{reg} {row['addr']}\n")
 
     fswhdr.write("//Read Addresses\n")
     for row in table:
+        reg = row['name']
         if row["rw_type"] == "R":
-            fswhdr.write(f"#define {core_prefix}{row['name']} {row['addr']}\n")
+            fswhdr.write(f"#define {core_prefix}{reg} {row['addr']}\n")
 
     fswhdr.write("\n//register/memory data widths (bit)\n")
 
     fswhdr.write("//Write Register/Memory\n")
     for row in table:
+        reg = row['name']
         if row["rw_type"] == "W":
-            fswhdr.write(f"#define {core_prefix}{row['name']}_W {int(row['nbytes'])*8}\n")
+            fswhdr.write(f"#define {core_prefix}{reg}_W {row['nbytes']*8}\n")
 
     fswhdr.write("//Read Register/Memory\n")
     for row in table:
+        reg = row['name']
         if row["rw_type"] == "R":
-            fswhdr.write(f"#define {core_prefix}{row['name']}_W {int(row['nbytes'])*8}\n")
+            fswhdr.write(f"#define {core_prefix}{reg}_W {row['nbytes']*8}\n")
 
     fswhdr.write("\n// Base Address\n")
     fswhdr.write(f"void {core_prefix}INIT_BASEADDR(uint32_t addr);\n")
 
     fswhdr.write("\n// Core Setters\n")
     for row in table:
+        reg = row['name']
         if row["rw_type"] == "W":
-            sw_type = swreg_type(row['nbytes'], defines)
-            fswhdr.write(f"void {core_prefix}SET_{row['name']}({sw_type} value);\n")
+            sw_type = swreg_type(reg, row['nbytes'])
+            fswhdr.write(f"void {core_prefix}SET_{reg}({sw_type} value);\n")
 
     fswhdr.write("\n// Core Getters\n")
     for row in table:
+        reg = row['name']
         if row["rw_type"] == "R":
-            sw_type = swreg_type(row['nbytes'], defines)
-            fswhdr.write(f"{sw_type} {core_prefix}GET_{row['name']}();\n")
+            sw_type = swreg_type(reg, row['nbytes'])
+            fswhdr.write(f"{sw_type} {core_prefix}GET_{reg}();\n")
 
     fswhdr.write(f"\n#endif // H_{core_prefix}_SWREG_H\n")
 
@@ -352,17 +382,19 @@ def write_sw_emb(table, top, defines):
     fsw.write("}\n")
     fsw.write("\n// Core Setters\n")
     for row in table:
+        reg = row['name']
         if row["rw_type"] == "W":
-            sw_type = swreg_type(row['nbytes'], defines)
-            fsw.write(f"void {core_prefix}SET_{row['name']}({sw_type} value) {{\n")
-            fsw.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({core_prefix}{row['name']}) ) ) = (value));\n")
+            sw_type = swreg_type(reg, row['nbytes'])
+            fsw.write(f"void {core_prefix}SET_{reg}({sw_type} value) {{\n")
+            fsw.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({core_prefix}{reg}) ) ) = (value));\n")
             fsw.write("}\n\n")
     fsw.write("\n// Core Getters\n")
     for row in table:
+        reg = row['name']
         if row["rw_type"] == "R":
-            sw_type = swreg_type(row['nbytes'], defines)
-            fsw.write(f"{sw_type} {core_prefix}GET_{row['name']}() {{\n")
-            fsw.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({core_prefix}{row['name']}) ) ));\n")
+            sw_type = swreg_type(reg, row['nbytes'])
+            fsw.write(f"{sw_type} {core_prefix}GET_{reg}() {{\n")
+            fsw.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({core_prefix}{reg}) ) ));\n")
             fsw.write("}\n\n")
     fsw.close()
 
@@ -370,18 +402,22 @@ def write_sw_emb(table, top, defines):
 def calc_swreg_addr(table):
     read_addr = 0
     write_addr = 0
+
     for row in table:
-        reg_nbytes = int(row['nbytes'])
-        reg_offset = 2**int(row['addr_w'])
-        if row['addr'].isdigit():
+        reg = row['name']
+        reg_addr = row['addr']
+        reg_addr_w = row['addr_w']
+        reg_w = row['nbits']
+        reg_nbytes = row['nbytes']
+        reg_offset = 2**row['addr_w']
+        if row['addr'] < 0:
             #manual adress
-            reg_addr = int(row['addr'])
             if row['rw_type'] == "R" and reg_addr >= read_addr:
                 read_addr = reg_addr+reg_offset
             elif row['rw_type'] == "W" and reg_addr >= write_addr:
                 write_addr = reg_addr+reg_offset
             else:
-                sys.exit(f"Error: Overlapped address {row['name']} {row['rw_type']} addr={row['addr']} addr_w={row['addr_w']} wa={write_addr} ra={read_addr} ro={reg_offset}")
+                sys.exit(f"Error: Overlapped address {reg} {row['rw_type']} addr={reg_addr} addr_w={reg_addr_w} wa={write_addr} ra={read_addr} ro={reg_offset}")
         else:
             #auto address
             if row['rw_type'] == "R" and reg_addr >= read_addr:
@@ -398,8 +434,8 @@ def calc_swreg_addr(table):
     return table
 
 def swreg_get_fields(line):
-    # Parse IOB_SWREG_{R|W}(NAME, NBYTES, RST_VAL, ADDR, ADDR_W) // Comment
-    result = search("IOB_SWREG_{rw_type}({name},{nbytes},{rst_val},{addr},{addr_w},{autologic}){wspace}//{description}\n", line)
+    # Parse IOB_SWREG_{R|W}(NAME, NBITS, RST_VAL, ADDR, ADDR_W) // Comment
+    result = search("IOB_SWREG_{rw_type}({name},{nbits},{rst_val},{addr},{addr_w},{autologic}){wspace}//{description}\n", line)
     # Get dictionary of named fields from parse.Result object
     if result:
         swreg_flds = result.named
@@ -408,17 +444,34 @@ def swreg_get_fields(line):
             swreg_flds[key] = swreg_flds[key].strip(" ").strip("\t")
     else:
         swreg_flds = None
-    return swreg_flds
+
+    row = {'rw_type': '', 'name': '', 'nbits': 0, 'nbytes': 0, 'rst_val': 0, 'addr': 0, 'addr_w': 0, 'autologic': True}
+
+    if swreg_flds is None:
+        row = None
+    else:
+        row['rw_type'] =  swreg_flds['rw_type']
+        row['name'] =  swreg_flds['name']
+        row['nbits'] =  int(swreg_flds['nbits'])
+        row['nbytes'] = int(int(swreg_flds['nbits'])/8) + (int(swreg_flds['nbits'])%8 > 0)
+        row['rst_val'] =  int(swreg_flds['rst_val'])
+        row['addr'] =  int(swreg_flds['addr'])
+        row['addr_w'] =  int(swreg_flds['addr_w'])
+        row['autologic'] =  bool(int(swreg_flds['autologic']))
+        row['wspace'] =  swreg_flds['wspace']
+        row['description'] =  swreg_flds['description']
+    
+    return row
 
 
 def swreg_parse(code, hwsw, top, vh_files):
     # build table: list of swreg dictionaries
     table = []
     for line in code:
-        swreg_flds = swreg_get_fields(line)
-        if swreg_flds is None:
+        row = swreg_get_fields(line)
+        if row is None:
             continue
-        table.append(swreg_flds)
+        table.append(row)
     # calculate address field
     table = calc_swreg_addr(table)
     if hwsw == "HW":
@@ -431,6 +484,7 @@ def swreg_parse(code, hwsw, top, vh_files):
         write_sw_emb(table, top, defines)
 
 def main():
+    quit
     # parse command line
     args = parse_arguments()
     # parse input file
