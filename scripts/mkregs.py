@@ -407,6 +407,13 @@ def write_sw_emb(table, top, defines):
             fsw.write("}\n\n")
     fsw.close()
 
+# Calculate next aligned address
+def calc_next_aligned_addr(current_addr, reg_nbytes):
+    if current_addr%reg_nbytes != 0:
+        current_addr = current_addr + (reg_nbytes - (current_addr % reg_nbytes))
+    return current_addr
+
+
 # Calculate address
 def calc_swreg_addr(table):
     read_addr = 0
@@ -416,7 +423,6 @@ def calc_swreg_addr(table):
         reg = row['name']
         reg_addr = row['addr']
         reg_addr_w = row['addr_w']
-        reg_w = row['nbits']
         reg_nbytes = row['nbytes']
         reg_offset = 2**row['addr_w']
         if reg_addr >= 0:
@@ -431,12 +437,12 @@ def calc_swreg_addr(table):
                 sys.exit(f"Error: Overlapped address {reg} {row['rw_type']} addr={reg_addr} addr_w={reg_addr_w} wa={write_addr} ra={read_addr} ro={reg_offset}")
         else:
             #auto address
-            if row['rw_type'] == "R" and reg_addr >= read_addr:
-                read_addr = read_addr+reg_nbytes-read_addr%reg_w
+            if row['rw_type'] == "R":
+                read_addr = calc_next_aligned_addr(read_addr, reg_nbytes)
                 row['addr'] = read_addr
                 read_addr = read_addr + reg_offset
-            elif row['rw_type'] == "W" and reg_addr >= write_addr:
-                write_addr = write_addr+reg_nbytes-write_addr%reg_w
+            elif row['rw_type'] == "W":
+                write_addr = calc_next_aligned_addr(write_addr, reg_nbytes)
                 row['addr'] = write_addr
                 write_addr = write_addr + reg_offset
     max_addr = max(read_addr, write_addr)
@@ -464,7 +470,7 @@ def swreg_get_fields(line):
         row['rw_type'] =  swreg_flds['rw_type']
         row['name'] =  swreg_flds['name']
         row['nbits'] =  int(swreg_flds['nbits'])
-        row['nbytes'] = int(int(swreg_flds['nbits'])/8) + (int(swreg_flds['nbits'])%8 > 0)
+        row['nbytes'] = math.ceil(int(swreg_flds['nbits'])/8)
         row['rst_val'] =  int(swreg_flds['rst_val'])
         row['addr'] =  int(swreg_flds['addr'])
         row['addr_w'] =  int(swreg_flds['addr_w'])
