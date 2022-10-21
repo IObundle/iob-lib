@@ -414,29 +414,53 @@ def calc_next_aligned_addr(current_addr, reg_nbytes):
     return current_addr
 
 
+def check_aligned_addresses(table):
+    for row in table:
+        if row['addr']%row['nbytes'] != 0:
+            sys.exit(f"Error: address {row['addr']} for {row['nbytes']}-byte data {row['name']} is not aligned")
+    return
+
+
+def check_overlapped_addresses(table, rw_type):
+    # get registers of specific type
+    type_regs = []
+    for reg in table:
+        if reg['rw_type'] == rw_type:
+            type_regs.append(reg)
+    if not type_regs:
+        return
+
+    # sort regs by address
+    type_regs.sort(key=lambda i: i['addr'])
+    for i in range(len(type_regs) - 1):
+        reg_addr_end = type_regs[i]['addr'] + 2**type_regs[i]['addr_w'] - 1
+        if reg_addr_end >= type_regs[i+1]['addr']:
+            sys.exit(f"Error: {type_regs[i]['name']} and {type_regs[i+1]['name']} registers are overlapped for {rw_type} type")
+
 # Calculate address
 def calc_swreg_addr(table):
     read_addr = 0
     write_addr = 0
 
+    # Get largest manual address for read and write
     for row in table:
+        if row['addr'] >= 0:
+            reg_addr = row['addr']
+            reg_offset = 2**row['nbytes']
+            if row['rw_type'] == "R" and read_addr <= reg_addr:
+                read_addr = reg_addr + reg_offset
+            elif row['rw_type'] == "W" and write_addr <= reg_addr:
+                write_addr = reg_addr + reg_offset
+
+    # Assign automatic addresses
+    for row in table:
+        print(f"DEBUG: {row}")
         reg = row['name']
         reg_addr = row['addr']
         reg_addr_w = row['addr_w']
         reg_nbytes = row['nbytes']
         reg_offset = 2**row['addr_w']
-        if reg_addr >= 0:
-            #manual adress
-            if reg_addr%reg_nbytes != 0:
-                sys.exit(f"Error: adress {reg_addr} for {reg_nbytes}-byte data {reg} is not aligned")
-            if row['rw_type'] == "R" and reg_addr >= read_addr:
-                read_addr = reg_addr+reg_offset
-            elif row['rw_type'] == "W" and reg_addr >= write_addr:
-                write_addr = reg_addr+reg_offset
-            else:
-                sys.exit(f"Error: Overlapped address {reg} {row['rw_type']} addr={reg_addr} addr_w={reg_addr_w} wa={write_addr} ra={read_addr} ro={reg_offset}")
-        else:
-            #auto address
+        if reg_addr < 0:
             if row['rw_type'] == "R":
                 read_addr = calc_next_aligned_addr(read_addr, reg_nbytes)
                 row['addr'] = read_addr
@@ -448,6 +472,11 @@ def calc_swreg_addr(table):
     max_addr = max(read_addr, write_addr)
     global core_addr_w
     core_addr_w = max(int(math.ceil(math.log(max_addr, 2))), 1)
+
+    check_aligned_addresses(table)
+    check_overlapped_addresses(table, "R")
+    check_overlapped_addresses(table, "W")
+
     return table
 
 def swreg_get_fields(line):
