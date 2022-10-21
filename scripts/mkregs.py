@@ -9,6 +9,7 @@ from parse import parse, search
 import math
 
 cpu_nbytes = 4
+cpu_nbytes_w = int(math.log(cpu_nbytes, 2))
 core_addr_w = None
 
 def parse_arguments():
@@ -66,11 +67,11 @@ def header_parse(vh, defines):
 def gen_wr_reg(row, f):
     reg = row['name']
     reg_w = row['nbits']
-    byte_offset = row['addr'] % 4
+    byte_offset = row['addr'] % cpu_nbytes
     reg_addr_w = row['addr_w']
     reg_word_addr = math.floor(row['addr']/cpu_nbytes)
     f.write(f"\n`IOB_WIRE({reg}_wen, 1)\n")
-    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & ((addr_i>>2) == {(reg_word_addr>>2)});\n")
+    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & ((addr_i>>{cpu_nbytes_w}) == {(reg_word_addr>>cpu_nbytes_w)});\n")
     f.write(f"`IOB_WIRE({reg}_wdata, {reg_w})\n")
     f.write(f"assign {reg}_wdata = wdata_i[{8*byte_offset}+:{reg_w}];\n")
     if row['autologic']:
@@ -247,21 +248,21 @@ def write_hwcode(table, top):
         #compute rdata and rvalid
         if row['rw_type'] == 'R':
             #get rdata and rvalid
-            fswreg_gen.write(f"\tif( (addr_r>>2) == ({row['addr']}>>2) )"+" begin\n")
+            fswreg_gen.write(f"\tif( (addr_r>>{cpu_nbytes_w}) == ({row['addr']}>>{cpu_nbytes_w}) )"+" begin\n")
             # get rdata
             if row['autologic']:
-                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << {8*row['addr']%4});\n")
+                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << {8*row['addr']%cpu_nbytes});\n")
             else:
-                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_i << {8*row['addr']%4});\n")
+                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_i << {8*row['addr']%cpu_nbytes});\n")
             # get rvalid
             fswreg_gen.write(f"\t\trvalid_int = rvalid_int | {reg}_rvalid_i;\n")
             fswreg_gen.write("\tend\n")
             #get rready
-            fswreg_gen.write(f"\tif( (addr_i>>2) == ({row['addr']}>>2) )\n")
+            fswreg_gen.write(f"\tif( (addr_i>>{cpu_nbytes_w}) == ({row['addr']}>>{cpu_nbytes_w}) )\n")
             fswreg_gen.write(f"\t\trready_int = ready_int | {reg}_ready_i;\n")
         else:
             #get wready
-            fswreg_gen.write(f"\tif( (addr_i>>2) == ({row['addr']}>>2) )\n")
+            fswreg_gen.write(f"\tif( (addr_i>>{cpu_nbytes_w}) == ({row['addr']}>>{cpu_nbytes_w}) )\n")
             fswreg_gen.write(f"\t\twready_int = ready_int | {reg}_ready_i;\n")
 
     fswreg_gen.write("end\n\n")
