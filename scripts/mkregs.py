@@ -447,7 +447,7 @@ def calc_swreg_addr(table):
     for row in table:
         if row['addr'] >= 0:
             reg_addr = row['addr']
-            reg_offset = 2**row['nbytes']
+            reg_offset = 2**row['addr_w']
             if row['rw_type'] == "R" and read_addr <= reg_addr:
                 read_addr = reg_addr + reg_offset
             elif row['rw_type'] == "W" and write_addr <= reg_addr:
