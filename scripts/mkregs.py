@@ -14,10 +14,9 @@ core_addr_w = None
 def parse_arguments():
     help_str = """
     mkregs.conf file:
-        The configuration file supports the following register/memory
-        declarations:
-            IOB_SWREG_R(NAME, NBYTES, RST_VAL, ADDR, ADDR_W) // Description
-            IOB_SWREG_W(NAME, NBYTES, RST_VAL, ADDR, ADDR_W) // Description
+        The configuration file supports the following formats:
+            IOB_SWREG_R(NAME, NBITS, RST_VAL, ADDR, ADDR_W, AUTOLOGIC) // Description
+            IOB_SWREG_W(NAME, NBITS, RST_VAL, ADDR, ADDR_W, AUTOLOGIC) // Description
     """
 
     parser = argparse.ArgumentParser(
@@ -70,14 +69,14 @@ def gen_wr_reg(row, f):
     byte_offset = row['addr'] % 4
     reg_addr_w = row['addr_w']
     reg_word_addr = math.floor(row['addr']/cpu_nbytes)
-    f.write(f"`IOB_WIRE({reg}_wen, 1)\n")
+    f.write(f"\n`IOB_WIRE({reg}_wen, 1)\n")
     f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & ((addr_i>>2) == {(reg_word_addr>>2)});\n")
     f.write(f"`IOB_WIRE({reg}_wdata, {reg_w})\n")
     f.write(f"assign {reg}_wdata = wdata_i[{8*byte_offset}+:{reg_w}];\n")
     if row['autologic']:
         f.write(f"`IOB_WIRE({reg}_ready_i, 1)\n")
         f.write(f"assign {reg}_ready_i = |wstrb_i;\n")
-        f.write(f"iob_reg #({reg_w},0) {reg}_datareg (clk_i, rst_i, 1'b0, {reg}_wen, {reg}_wdata, {reg}_o);\n\n")
+        f.write(f"iob_reg #({reg_w},0) {reg}_datareg (clk_i, rst_i, 1'b0, {reg}_wen, {reg}_wdata, {reg}_o);\n")
     else:
         f.write(f"assign {reg}_o = {reg}_wdata;\n")
     if row['addr_w'] > cpu_nbytes:
@@ -88,15 +87,15 @@ def gen_rd_reg(row, f):
     reg_w = row['nbits']
     reg_addr_w = row['addr_w']
     reg_word_addr = math.floor(row['addr']/cpu_nbytes)
-    f.write(f"`IOB_WIRE({reg}_ren, 1)\n")
+    f.write(f"\n`IOB_WIRE({reg}_ren, 1)\n")
     f.write(f"assign {reg}_ren = valid_i & ( addr_i == {reg_word_addr} ) & ~(|wstrb_i);\n")
     if row['autologic']:
         f.write(f"`IOB_WIRE({reg}_ready_i, 1)\n")
         f.write(f"assign {reg}_ready_i = !wstrb_i;\n")
         f.write(f"`IOB_WIRE({reg}_rvalid_i, 1)\n")
-        f.write(f"iob_reg #(1,0) {reg}_rvalid (clk_i, rst_i, 1'b0, 1'b1, {reg}_ren, {reg}_rvalid_i);\n\n")
+        f.write(f"iob_reg #(1,0) {reg}_rvalid (clk_i, rst_i, 1'b0, 1'b1, {reg}_ren, {reg}_rvalid_i);\n")
         f.write(f"`IOB_WIRE({reg}_r, {reg_w})\n")
-        f.write(f"iob_reg #({reg_w},0) {reg}_datareg (clk_i, rst_i, 1'b0, {reg}_ren, {reg}_i, {reg}_r);\n\n")
+        f.write(f"iob_reg #({reg_w},0) {reg}_datareg (clk_i, rst_i, 1'b0, {reg}_ren, {reg}_i, {reg}_r);\n")
         f.write(f"assign {reg}_int_o = {reg}_r;\n")
     else:
         f.write(f"assign {reg}_ren_o = {reg}_ren;\n")
@@ -224,41 +223,51 @@ def write_hwcode(table, top):
                 fswreg_gen.write(f"iob_reg #({core_addr_w}, 0) addr_r0 (clk_i, rst_i, 1'b0, valid_i, addr_i, addr_r);\n\n")
 
     #
-    #response switch
+    # COMBINATORIAL RESPONSE SWITCH
     #
 
     #use variables to compute response
-    fswreg_gen.write(f"`IOB_VAR(rdata_int, {str(8*cpu_nbytes)})\n")
+    fswreg_gen.write(f"\n`IOB_VAR(rdata_int, {str(8*cpu_nbytes)})\n")
     fswreg_gen.write("`IOB_VAR(rvalid_int, 1)\n")
-    fswreg_gen.write("`IOB_VAR(ready_int, 1)\n\n")
+    fswreg_gen.write("`IOB_VAR(wready_int, 1)\n")
+    fswreg_gen.write("`IOB_VAR(rready_int, 1)\n")
+    fswreg_gen.write("`IOB_WIRE(ready_int, 1)\n\n")
 
     fswreg_gen.write("`IOB_COMB begin\n\n")
 
     #response defaults
-    fswreg_gen.write("\tready_int = 1'b0;\n")
+    fswreg_gen.write("\twready_int = 1'b0;\n")
+    fswreg_gen.write("\trready_int = 1'b0;\n")
     fswreg_gen.write("\trdata_int = 0;\n")
     fswreg_gen.write("\trvalid_int = 1'b0;\n\n")
 
     #update responses
     for row in table:
         reg = row['name']
-        #compute ready 
-        fswreg_gen.write(f"\tif( (addr_i>>2) == ({row['addr']}>>2) )\n")
-        fswreg_gen.write(f"\t\tready_int = ready_int | {reg}_ready_i;\n")
-
         #compute rdata and rvalid
         if row['rw_type'] == 'R':
+            #get rdata and rvalid
             fswreg_gen.write(f"\tif( (addr_r>>2) == ({row['addr']}>>2) )"+" begin\n")
+            # get rdata
             if row['autologic']:
                 fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << {8*row['addr']%4});\n")
             else:
                 fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_i << {8*row['addr']%4});\n")
+            # get rvalid
             fswreg_gen.write(f"\t\trvalid_int = rvalid_int | {reg}_rvalid_i;\n")
-            fswreg_gen.write("\tend\n\n")
+            fswreg_gen.write("\tend\n")
+            #get rready
+            fswreg_gen.write(f"\tif( (addr_i>>2) == ({row['addr']}>>2) )\n")
+            fswreg_gen.write(f"\t\trready_int = ready_int | {reg}_ready_i;\n")
+        else:
+            #get wready
+            fswreg_gen.write(f"\tif( (addr_i>>2) == ({row['addr']}>>2) )\n")
+            fswreg_gen.write(f"\t\twready_int = ready_int | {reg}_ready_i;\n")
 
     fswreg_gen.write("end\n\n")
 
     #convert computed variables to signals
+    fswreg_gen.write("assign ready_int = wstrb_i? wready_int: rready_int;\n")
     fswreg_gen.write("`IOB_VAR2WIRE(ready_int, ready_o)\n")
     fswreg_gen.write("`IOB_VAR2WIRE(rdata_int, rdata_o)\n")
     fswreg_gen.write("`IOB_VAR2WIRE(rvalid_int, rvalid_o)\n\n")
@@ -410,8 +419,10 @@ def calc_swreg_addr(table):
         reg_w = row['nbits']
         reg_nbytes = row['nbytes']
         reg_offset = 2**row['addr_w']
-        if row['addr'] < 0:
+        if reg_addr >= 0:
             #manual adress
+            if reg_addr%reg_nbytes != 0:
+                sys.exit(f"Error: adress {reg_addr} for {reg_nbytes}-byte data {reg} is not aligned")
             if row['rw_type'] == "R" and reg_addr >= read_addr:
                 read_addr = reg_addr+reg_offset
             elif row['rw_type'] == "W" and reg_addr >= write_addr:
