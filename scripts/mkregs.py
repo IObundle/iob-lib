@@ -9,6 +9,7 @@ from parse import parse, search
 import math
 
 cpu_nbytes = 4
+cpu_nbytes_w = int(math.log(cpu_nbytes, 2))
 core_addr_w = None
 
 def parse_arguments():
@@ -66,11 +67,11 @@ def header_parse(vh, defines):
 def gen_wr_reg(row, f):
     reg = row['name']
     reg_w = row['nbits']
-    byte_offset = row['addr'] % 4
+    byte_offset = row['addr'] % cpu_nbytes
     reg_addr_w = row['addr_w']
     reg_word_addr = math.floor(row['addr']/cpu_nbytes)
     f.write(f"\n`IOB_WIRE({reg}_wen, 1)\n")
-    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & ((addr_i>>2) == {(reg_word_addr>>2)});\n")
+    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & ((addr_i>>{cpu_nbytes_w}) == {(reg_word_addr>>cpu_nbytes_w)});\n")
     f.write(f"`IOB_WIRE({reg}_wdata, {reg_w})\n")
     f.write(f"assign {reg}_wdata = wdata_i[{8*byte_offset}+:{reg_w}];\n")
     if row['autologic']:
@@ -247,21 +248,21 @@ def write_hwcode(table, top):
         #compute rdata and rvalid
         if row['rw_type'] == 'R':
             #get rdata and rvalid
-            fswreg_gen.write(f"\tif( (addr_r>>2) == ({row['addr']}>>2) )"+" begin\n")
+            fswreg_gen.write(f"\tif( (addr_r>>{cpu_nbytes_w}) == ({row['addr']}>>{cpu_nbytes_w}) )"+" begin\n")
             # get rdata
             if row['autologic']:
-                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << {8*row['addr']%4});\n")
+                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << {8*row['addr']%cpu_nbytes});\n")
             else:
-                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_i << {8*row['addr']%4});\n")
+                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_i << {8*row['addr']%cpu_nbytes});\n")
             # get rvalid
             fswreg_gen.write(f"\t\trvalid_int = rvalid_int | {reg}_rvalid_i;\n")
             fswreg_gen.write("\tend\n")
             #get rready
-            fswreg_gen.write(f"\tif( (addr_i>>2) == ({row['addr']}>>2) )\n")
+            fswreg_gen.write(f"\tif( (addr_i>>{cpu_nbytes_w}) == ({row['addr']}>>{cpu_nbytes_w}) )\n")
             fswreg_gen.write(f"\t\trready_int = ready_int | {reg}_ready_i;\n")
         else:
             #get wready
-            fswreg_gen.write(f"\tif( (addr_i>>2) == ({row['addr']}>>2) )\n")
+            fswreg_gen.write(f"\tif( (addr_i>>{cpu_nbytes_w}) == ({row['addr']}>>{cpu_nbytes_w}) )\n")
             fswreg_gen.write(f"\t\twready_int = ready_int | {reg}_ready_i;\n")
 
     fswreg_gen.write("end\n\n")
@@ -407,41 +408,76 @@ def write_sw_emb(table, top, defines):
             fsw.write("}\n\n")
     fsw.close()
 
+# Calculate next aligned address
+def calc_next_aligned_addr(current_addr, reg_nbytes):
+    if current_addr%reg_nbytes != 0:
+        current_addr = current_addr + (reg_nbytes - (current_addr % reg_nbytes))
+    return current_addr
+
+
+def check_aligned_addresses(table):
+    for row in table:
+        if row['addr']%row['nbytes'] != 0:
+            sys.exit(f"Error: address {row['addr']} for {row['nbytes']}-byte data {row['name']} is not aligned")
+    return
+
+
+def check_overlapped_addresses(table, rw_type):
+    # get registers of specific type
+    type_regs = []
+    for reg in table:
+        if reg['rw_type'] == rw_type:
+            type_regs.append(reg)
+    if not type_regs:
+        return
+
+    # sort regs by address
+    type_regs.sort(key=lambda i: i['addr'])
+    for i in range(len(type_regs) - 1):
+        reg_addr_end = type_regs[i]['addr'] + 2**type_regs[i]['addr_w'] - 1
+        if reg_addr_end >= type_regs[i+1]['addr']:
+            sys.exit(f"Error: {type_regs[i]['name']} and {type_regs[i+1]['name']} registers are overlapped for {rw_type} type")
+
 # Calculate address
 def calc_swreg_addr(table):
     read_addr = 0
     write_addr = 0
 
+    # Get largest manual address for read and write
     for row in table:
+        if row['addr'] >= 0:
+            reg_addr = row['addr']
+            reg_offset = 2**row['nbytes']
+            if row['rw_type'] == "R" and read_addr <= reg_addr:
+                read_addr = reg_addr + reg_offset
+            elif row['rw_type'] == "W" and write_addr <= reg_addr:
+                write_addr = reg_addr + reg_offset
+
+    # Assign automatic addresses
+    for row in table:
+        print(f"DEBUG: {row}")
         reg = row['name']
         reg_addr = row['addr']
         reg_addr_w = row['addr_w']
-        reg_w = row['nbits']
         reg_nbytes = row['nbytes']
         reg_offset = 2**row['addr_w']
-        if reg_addr >= 0:
-            #manual adress
-            if reg_addr%reg_nbytes != 0:
-                sys.exit(f"Error: adress {reg_addr} for {reg_nbytes}-byte data {reg} is not aligned")
-            if row['rw_type'] == "R" and reg_addr >= read_addr:
-                read_addr = reg_addr+reg_offset
-            elif row['rw_type'] == "W" and reg_addr >= write_addr:
-                write_addr = reg_addr+reg_offset
-            else:
-                sys.exit(f"Error: Overlapped address {reg} {row['rw_type']} addr={reg_addr} addr_w={reg_addr_w} wa={write_addr} ra={read_addr} ro={reg_offset}")
-        else:
-            #auto address
-            if row['rw_type'] == "R" and reg_addr >= read_addr:
-                read_addr = read_addr+reg_nbytes-read_addr%reg_w
+        if reg_addr < 0:
+            if row['rw_type'] == "R":
+                read_addr = calc_next_aligned_addr(read_addr, reg_nbytes)
                 row['addr'] = read_addr
                 read_addr = read_addr + reg_offset
-            elif row['rw_type'] == "W" and reg_addr >= write_addr:
-                write_addr = write_addr+reg_nbytes-write_addr%reg_w
+            elif row['rw_type'] == "W":
+                write_addr = calc_next_aligned_addr(write_addr, reg_nbytes)
                 row['addr'] = write_addr
                 write_addr = write_addr + reg_offset
     max_addr = max(read_addr, write_addr)
     global core_addr_w
     core_addr_w = max(int(math.ceil(math.log(max_addr, 2))), 1)
+
+    check_aligned_addresses(table)
+    check_overlapped_addresses(table, "R")
+    check_overlapped_addresses(table, "W")
+
     return table
 
 def swreg_get_fields(line):
@@ -464,7 +500,7 @@ def swreg_get_fields(line):
         row['rw_type'] =  swreg_flds['rw_type']
         row['name'] =  swreg_flds['name']
         row['nbits'] =  int(swreg_flds['nbits'])
-        row['nbytes'] = int(int(swreg_flds['nbits'])/8) + (int(swreg_flds['nbits'])%8 > 0)
+        row['nbytes'] = math.ceil(int(swreg_flds['nbits'])/8)
         row['rst_val'] =  int(swreg_flds['rst_val'])
         row['addr'] =  int(swreg_flds['addr'])
         row['addr_w'] =  int(swreg_flds['addr_w'])
