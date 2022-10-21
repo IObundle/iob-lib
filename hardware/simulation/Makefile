@@ -35,7 +35,7 @@ ifeq ($(SIM_SERVER),)
 else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(SIM_SYNC_FLAGS) -avz --force ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR)'
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) VCD=$(VCD)'
 endif
 
 run: build
@@ -78,7 +78,7 @@ clean:
 	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" -o -name "*_tb.*" $(NOCLEAN) \) -delete
 	@rm -rf obj_dir ../../*.vh
 ifneq ($(SIM_SERVER),)
-	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_BUILD_DIR)/fpga/Makefile ]; then make -C $(REMOTE_SIM_DIR) clean; fi'
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_SIM_DIR)/Makefile ]; then make -C $(REMOTE_SIM_DIR) $@; fi'
 endif
 
 
