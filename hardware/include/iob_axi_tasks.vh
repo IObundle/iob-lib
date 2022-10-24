@@ -1,21 +1,26 @@
 //
-// Tasks for the AXI-4 protocol
+// Tasks for the AXI4 protocol
 //
 
 // Write data to AXI-4 lite slave
 task write_data_axil;
    input [AXIL_ADDR_W-1:0]       axilAddress;
    input [AXIL_DATA_W-1:0]       axilData;
+   input [$clog2(AXIL_DATA_W):0] axilWidth;
+
+   localparam ADDR_W = AXIL_ADDR_W;
+   localparam DATA_W = AXIL_DATA_W;
+
    reg                           axil_wready_int;
 
    begin
       // Write address
-      axil_awaddr  = axilAddress;
+      axil_awaddr  = `IOB_WORD_ADDR(axilAddress);
       axil_awvalid = 1'b1;
 
       // Write data
-      axil_wdata  = axilData;
-      axil_wstrb  = {(AXIL_DATA_W/8){1'b1}};
+      axil_wdata  = axilData << (8 * `IOB_BYTE_OFFSET(axilAddress));
+      axil_wstrb  = ((1 << `IOB_GET_NBYTES(axilWidth)) - 1) << `IOB_BYTE_OFFSET(axilAddress);
       axil_wvalid = 1'b1;
 
       while (!axil_awready) begin
@@ -55,13 +60,18 @@ endtask
 
 // Read data from AXI-4 lite slave
 task read_data_axil;
-   input [AXIL_ADDR_W-1:0]      axilAddress;
-   output [AXIL_DATA_W-1:0]     axilData;
-   reg                          axil_rvalid_int;
+   input [AXIL_ADDR_W-1:0]       axilAddress;
+   output [AXIL_DATA_W-1:0]      axilData;
+   input [$clog2(AXIL_DATA_W):0] axilWidth;
+
+   localparam ADDR_W = AXIL_ADDR_W;
+   localparam DATA_W = AXIL_DATA_W;
+
+   reg                           axil_rvalid_int;
 
    begin
       // Read address
-      axil_araddr  = axilAddress;
+      axil_araddr  = `IOB_WORD_ADDR(axilAddress);
       axil_arvalid = 1'b1;
 
       while (!axil_arready) begin
@@ -84,7 +94,7 @@ task read_data_axil;
 
       axil_rready = 1'b1;
 
-      axilData = axil_rdata;
+      axilData = (axil_rdata >> (8 * `IOB_BYTE_OFFSET(axilAddress))) & ((1 << axilWidth) - 1);
 
       @(posedge clk) #1;
 
