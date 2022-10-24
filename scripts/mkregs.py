@@ -396,20 +396,20 @@ def write_sw_emb(table, top):
 
 
 # Calculate next aligned address
-def calc_next_aligned_addr(current_addr, reg_nbytes):
+def align_addr(current_addr, reg_nbytes):
     if current_addr % reg_nbytes != 0:
         current_addr = current_addr + (reg_nbytes - (current_addr % reg_nbytes))
     return current_addr
 
 
-def check_aligned_addresses(table):
+def check_address_alignment(table):
     for row in table:
         if row['addr'] % row['nbytes'] != 0:
             sys.exit(f"Error: address {row['addr']} for {row['nbytes']}-byte data {row['name']} is not aligned")
     return
 
 
-def check_overlapped_addresses(table, rw_type):
+def check_address_overlapping(table, rw_type):
     # get registers of specific type
     type_regs = []
     for reg in table:
@@ -431,7 +431,7 @@ def calc_swreg_addr(table):
     read_addr = 0
     write_addr = 0
 
-    # Get largest manual address for read and write
+    # Assign manual addresses
     for row in table:
         if row['addr'] >= 0:
             reg_addr = row['addr']
@@ -448,20 +448,20 @@ def calc_swreg_addr(table):
         reg_offset = 2**row['addr_w']
         if reg_addr < 0:
             if row['rw_type'] == "R":
-                read_addr = calc_next_aligned_addr(read_addr, reg_nbytes)
+                read_addr = align_addr(read_addr, reg_nbytes)
                 row['addr'] = read_addr
                 read_addr = read_addr + reg_offset
             elif row['rw_type'] == "W":
-                write_addr = calc_next_aligned_addr(write_addr, reg_nbytes)
+                write_addr = align_addr(write_addr, reg_nbytes)
                 row['addr'] = write_addr
                 write_addr = write_addr + reg_offset
     max_addr = max(read_addr, write_addr)
     global core_addr_w
     core_addr_w = max(int(ceil(log(max_addr, 2))), 1)
 
-    check_aligned_addresses(table)
-    check_overlapped_addresses(table, "R")
-    check_overlapped_addresses(table, "W")
+    check_address_alignment(table)
+    check_address_overlapping(table, "R")
+    check_address_overlapping(table, "W")
 
     return table
 
