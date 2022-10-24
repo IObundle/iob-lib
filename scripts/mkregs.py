@@ -6,10 +6,9 @@
 import sys
 import argparse
 from parse import search
-import math
+from math import ceil, log
 
 cpu_nbytes = 4
-cpu_nbytes_w = int(math.log(cpu_nbytes, 2))
 core_addr_w = None
 
 
@@ -48,7 +47,7 @@ def gen_wr_reg(row, f):
     reg_addr = row['addr']
     reg_addr_w = row['addr_w']
     f.write(f"\n`IOB_WIRE({reg}_wen, 1)\n")
-    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & (`IOB_BYTEFLOOR(addr_i, DATA_W) >= `IOB_BYTEFLOOR({reg_addr}, DATA_W)) & (`IOB_BYTEFLOOR(addr_i, DATA_W) < `IOB_BYTECEIL({reg_addr + 2**reg_addr_w -1}, DATA_W));\n")
+    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & (`IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({reg_addr})) & (`IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({reg_addr + (1'b1<<reg_addr_w)}));\n")
     f.write(f"`IOB_WIRE({reg}_wdata, {reg_w})\n")
     f.write(f"assign {reg}_wdata = wdata_i[{8*byte_offset}+:{reg_w}];\n")
     if row['autologic']:
@@ -67,7 +66,7 @@ def gen_rd_reg(row, f):
     reg_addr = row['addr']
     reg_addr_w = row['addr_w']
     f.write(f"\n`IOB_WIRE({reg}_ren, 1)\n")
-    f.write(f"assign {reg}_ren = valid_i & ( `IOB_BYTEFLOOR(addr_i, DATA_W) >= `IOB_BYTEFLOOR({reg_addr}, DATA_W) ) & ( `IOB_BYTEFLOOR(addr_i, DATA_W) < `IOB_BYTECEIL({reg_addr + 2**reg_addr_w -1}, DATA_W) ) & ~(|wstrb_i);\n")
+    f.write(f"assign {reg}_ren = valid_i & ( `IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({reg_addr}) ) & ( `IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({reg_addr + (1'b1<<reg_addr_w)}) ) & ~(|wstrb_i);\n")
     if row['autologic']:
         f.write(f"`IOB_WIRE({reg}_ready_i, 1)\n")
         f.write(f"assign {reg}_ready_i = !wstrb_i;\n")
@@ -212,7 +211,7 @@ def write_hwcode(table, top):
     #
 
     # use variables to compute response
-    fswreg_gen.write(f"\n`IOB_VAR(rdata_int, {str(8*cpu_nbytes)})\n")
+    fswreg_gen.write(f"\n`IOB_VAR(rdata_int, 8*`IOB_NBYTES)\n")
     fswreg_gen.write("`IOB_VAR(rvalid_int, 1)\n")
     fswreg_gen.write("`IOB_VAR(wready_int, 1)\n")
     fswreg_gen.write("`IOB_VAR(rready_int, 1)\n")
@@ -232,21 +231,21 @@ def write_hwcode(table, top):
         # compute rdata and rvalid
         if row['rw_type'] == 'R':
             # get rdata and rvalid
-            fswreg_gen.write(f"\tif( (`IOB_BYTEFLOOR(addr_r, DATA_W) >= `IOB_BYTEFLOOR({row['addr']}, DATA_W)) & (`IOB_BYTEFLOOR(addr_r, DATA_W) < `IOB_BYTECEIL({row['addr'] + 2**row['addr_w'] -1}, DATA_W) )"+" begin\n")
+            fswreg_gen.write(f"\tif( (`IOB_WORD_ADDR(addr_r) >= `IOB_WORD_ADDR({row['addr']})) & (`IOB_WORD_ADDR(addr_r) < `IOB_WORD_CADDR({row['addr']} + (1'b1<<{row['addr_w']}))"+" begin\n")
             # get rdata
             if row['autologic']:
-                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << {8*row['addr']%cpu_nbytes});\n")
+                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << (8*`IOB_BYTE_OFFSET({addr})));\n")
             else:
-                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_i << {8*row['addr']%cpu_nbytes});\n")
+                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_i << (8*`IOB_BYTE_OFFSET({addr})));\n")
             # get rvalid
             fswreg_gen.write(f"\t\trvalid_int = rvalid_int | {reg}_rvalid_i;\n")
             fswreg_gen.write("\tend\n")
             # get rready
-            fswreg_gen.write(f"\tif( (`IOB_BYTEFLOOR(addr_i, DATA_W) >= `IOB_BYTEFLOOR({row['addr']}, DATA_W)) & (`IOB_BYTEFLOOR(addr_i, DATA_W) < `IOB_BYTECEIL({row['addr'] + 2**row['addr_w'] -1}, DATA_W))\n")
+            fswreg_gen.write(f"\tif( (`IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({row['addr']})) & (`IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({row['addr']} + (1'b1<<{row['addr_w']}))"+" begin\n")
             fswreg_gen.write(f"\t\trready_int = ready_int | {reg}_ready_i;\n")
         else:
             # get wready
-            fswreg_gen.write(f"\tif( (`IOB_BYTEFLOOR(addr_i, DATA_W) >= `IOB_BYTEFLOOR({row['addr']}, DATA_W)) & (`IOB_BYTEFLOOR(addr_i, DATA_W) < `IOB_BYTECEIL({row['addr'] + 2**row['addr_w'] -1}, DATA_W))\n")
+            fswreg_gen.write(f"\tif( (`IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({row['addr']})) & (`IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({row['addr']} + (1'b1<<{row['addr_w']}))"+" begin\n")
             fswreg_gen.write(f"\t\twready_int = ready_int | {reg}_ready_i;\n")
 
     fswreg_gen.write("end\n\n")
@@ -376,7 +375,7 @@ def write_sw_emb(table, top):
             addr_shift = ""
             if row['addr_w'] / row['nbytes'] > 1:
                 addr_arg = ", int addr"
-                addr_shift = f" + (addr << {int(math.log(row['nbytes'], 2))})"
+                addr_shift = f" + (addr << {int(log(row['nbytes'], 2))})"
             fsw.write(f"void {core_prefix}SET_{reg}({sw_type} value{addr_arg}) {{\n")
             fsw.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({core_prefix}{reg}){addr_shift}) ) = (value));\n")
             fsw.write("}\n\n")
@@ -389,7 +388,7 @@ def write_sw_emb(table, top):
             addr_shift = ""
             if row['addr_w'] / row['nbytes'] > 1:
                 addr_arg = "int addr"
-                addr_shift = f" + (addr << {int(math.log(row['nbytes'], 2))})"
+                addr_shift = f" + (addr << {int(log(row['nbytes'], 2))})"
             fsw.write(f"{sw_type} {core_prefix}GET_{reg}({addr_arg}) {{\n")
             fsw.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({core_prefix}{reg}){addr_shift}) ));\n")
             fsw.write("}\n\n")
@@ -458,7 +457,7 @@ def calc_swreg_addr(table):
                 write_addr = write_addr + reg_offset
     max_addr = max(read_addr, write_addr)
     global core_addr_w
-    core_addr_w = max(int(math.ceil(math.log(max_addr, 2))), 1)
+    core_addr_w = max(int(ceil(log(max_addr, 2))), 1)
 
     check_aligned_addresses(table)
     check_overlapped_addresses(table, "R")
@@ -487,7 +486,7 @@ def swreg_get_fields(line):
         row['rw_type'] = swreg_flds['rw_type']
         row['name'] = swreg_flds['name']
         row['nbits'] = int(swreg_flds['nbits'])
-        row['nbytes'] = math.ceil(int(swreg_flds['nbits'])/8)
+        row['nbytes'] = ceil(int(swreg_flds['nbits'])/8)
         row['rst_val'] = int(swreg_flds['rst_val'])
         row['addr'] = int(swreg_flds['addr'])
         row['addr_w'] = int(swreg_flds['addr_w'])
