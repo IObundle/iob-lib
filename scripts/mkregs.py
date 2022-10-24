@@ -72,7 +72,7 @@ def gen_wr_reg(row, f):
     reg_addr = row['addr']
     reg_addr_w = row['addr_w']
     f.write(f"\n`IOB_WIRE({reg}_wen, 1)\n")
-    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & ((addr_i >> {cpu_nbytes_w}) >= {reg_addr >> cpu_nbytes_w}) & ((addr_i >> {cpu_nbytes_w}) <= {reg_addr + 2**reg_addr_w -1 >> cpu_nbytes_w}));\n")
+    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & (`IOB_BYTEFLOOR(addr_i, DATA_W) >= `IOB_BYTEFLOOR({reg_addr}, DATA_W)) & (`IOB_BYTEFLOOR(addr_i, DATA_W) < `IOB_BYTECEIL({reg_addr + 2**reg_addr_w -1}, DATA_W));\n")
     f.write(f"`IOB_WIRE({reg}_wdata, {reg_w})\n")
     f.write(f"assign {reg}_wdata = wdata_i[{8*byte_offset}+:{reg_w}];\n")
     if row['autologic']:
@@ -90,7 +90,7 @@ def gen_rd_reg(row, f):
     reg_addr = row['addr']
     reg_addr_w = row['addr_w']
     f.write(f"\n`IOB_WIRE({reg}_ren, 1)\n")
-    f.write(f"assign {reg}_ren = valid_i & ( (addr_i >> {cpu_nbytes_w}) >= {reg_addr >> cpu_nbytes_w} ) & ( (addr_i >> {cpu_nbytes_w}) <= {(reg_addr + 2**reg_addr_w -1) >> cpu_nbytes_w} ) & ~(|wstrb_i);\n")
+    f.write(f"assign {reg}_ren = valid_i & ( `IOB_BYTEFLOOR(addr_i, DATA_W) >= `IOB_BYTEFLOOR({reg_addr}, DATA_W) ) & ( `IOB_BYTEFLOOR(addr_i, DATA_W) < `IOB_BYTECEIL({reg_addr + 2**reg_addr_w -1}, DATA_W) ) & ~(|wstrb_i);\n")
     if row['autologic']:
         f.write(f"`IOB_WIRE({reg}_ready_i, 1)\n")
         f.write(f"assign {reg}_ready_i = !wstrb_i;\n")
@@ -252,7 +252,7 @@ def write_hwcode(table, top):
         #compute rdata and rvalid
         if row['rw_type'] == 'R':
             #get rdata and rvalid
-            fswreg_gen.write(f"\tif( ((addr_r >> {cpu_nbytes_w}) >= {row['addr'] >> cpu_nbytes_w}) & ((addr_r >> {cpu_nbytes_w}) <= {(row['addr'] + 2**row['addr_w'] -1) >> cpu_nbytes_w}) )"+" begin\n")
+            fswreg_gen.write(f"\tif( (`IOB_BYTEFLOOR(addr_r, DATA_W) >= `IOB_BYTEFLOOR({row['addr']}, DATA_W)) & (`IOB_BYTEFLOOR(addr_r, DATA_W) < `IOB_BYTECEIL({row['addr'] + 2**row['addr_w'] -1}, DATA_W) )"+" begin\n")
             # get rdata
             if row['autologic']:
                 fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << {8*row['addr']%cpu_nbytes});\n")
@@ -262,11 +262,11 @@ def write_hwcode(table, top):
             fswreg_gen.write(f"\t\trvalid_int = rvalid_int | {reg}_rvalid_i;\n")
             fswreg_gen.write("\tend\n")
             #get rready
-            fswreg_gen.write(f"\tif( ((addr_i >> {cpu_nbytes_w}) >= {row['addr'] >> cpu_nbytes_w}) & ((addr_i >> {cpu_nbytes_w}) <= {(row['addr'] + 2**row['addr_w'] -1) >> cpu_nbytes_w})\n")
+            fswreg_gen.write(f"\tif( (`IOB_BYTEFLOOR(addr_i, DATA_W) >= `IOB_BYTEFLOOR({row['addr']}, DATA_W)) & (`IOB_BYTEFLOOR(addr_i, DATA_W) < `IOB_BYTECEIL({row['addr'] + 2**row['addr_w'] -1}, DATA_W))\n")
             fswreg_gen.write(f"\t\trready_int = ready_int | {reg}_ready_i;\n")
         else:
             #get wready
-            fswreg_gen.write(f"\tif( ((addr_i >> {cpu_nbytes_w}) >= {row['addr'] >> cpu_nbytes_w}) & ((addr_i >> {cpu_nbytes_w}) <= {(row['addr'] + 2**row['addr_w'] -1) >> cpu_nbytes_w})\n")
+            fswreg_gen.write(f"\tif( (`IOB_BYTEFLOOR(addr_i, DATA_W) >= `IOB_BYTEFLOOR({row['addr']}, DATA_W)) & (`IOB_BYTEFLOOR(addr_i, DATA_W) < `IOB_BYTECEIL({row['addr'] + 2**row['addr_w'] -1}, DATA_W))\n")
             fswreg_gen.write(f"\t\twready_int = ready_int | {reg}_ready_i;\n")
 
     fswreg_gen.write("end\n\n")
