@@ -336,14 +336,20 @@ def write_swheader(table, top):
         reg = row['name']
         if row["rw_type"] == "W":
             sw_type = swreg_type(reg, row['nbytes'])
-            fswhdr.write(f"void {core_prefix}SET_{reg}({sw_type} value);\n")
+            addr_arg = ""
+            if row['addr_w'] / row['nbytes'] > 1:
+                addr_arg = ", int addr"
+            fswhdr.write(f"void {core_prefix}SET_{reg}({sw_type} value{addr_arg});\n")
 
     fswhdr.write("\n// Core Getters\n")
     for row in table:
         reg = row['name']
         if row["rw_type"] == "R":
             sw_type = swreg_type(reg, row['nbytes'])
-            fswhdr.write(f"{sw_type} {core_prefix}GET_{reg}();\n")
+            addr_arg = ""
+            if row['addr_w'] / row['nbytes'] > 1:
+                addr_arg = "int addr"
+            fswhdr.write(f"{sw_type} {core_prefix}GET_{reg}({addr_arg});\n")
 
     fswhdr.write(f"\n#endif // H_{core_prefix}_SWREG_H\n")
 
@@ -365,16 +371,27 @@ def write_sw_emb(table, top):
         reg = row['name']
         if row["rw_type"] == "W":
             sw_type = swreg_type(reg, row['nbytes'])
-            fsw.write(f"void {core_prefix}SET_{reg}({sw_type} value) {{\n")
-            fsw.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({core_prefix}{reg}) ) ) = (value));\n")
+            addr_arg = ""
+            addr_arg = ""
+            addr_shift = ""
+            if row['addr_w'] / row['nbytes'] > 1:
+                addr_arg = ", int addr"
+                addr_shift = f" + (addr << {int(math.log(row['nbytes'], 2))})"
+            fsw.write(f"void {core_prefix}SET_{reg}({sw_type} value{addr_arg}) {{\n")
+            fsw.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({core_prefix}{reg}){addr_shift}) ) = (value));\n")
             fsw.write("}\n\n")
     fsw.write("\n// Core Getters\n")
     for row in table:
         reg = row['name']
         if row["rw_type"] == "R":
             sw_type = swreg_type(reg, row['nbytes'])
-            fsw.write(f"{sw_type} {core_prefix}GET_{reg}() {{\n")
-            fsw.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({core_prefix}{reg}) ) ));\n")
+            addr_arg = ""
+            addr_shift = ""
+            if row['addr_w'] / row['nbytes'] > 1:
+                addr_arg = "int addr"
+                addr_shift = f" + (addr << {int(math.log(row['nbytes'], 2))})"
+            fsw.write(f"{sw_type} {core_prefix}GET_{reg}({addr_arg}) {{\n")
+            fsw.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({core_prefix}{reg}){addr_shift}) ));\n")
             fsw.write("}\n\n")
     fsw.close()
 
@@ -427,7 +444,6 @@ def calc_swreg_addr(table):
 
     # Assign automatic addresses
     for row in table:
-        print(f"DEBUG: {row}")
         reg_addr = row['addr']
         reg_nbytes = row['nbytes']
         reg_offset = 2**row['addr_w']
