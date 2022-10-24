@@ -65,21 +65,14 @@ def header_parse(vh, defines):
             defines[name] = value
 
 
-def calc_reg_word_addr_start_end(reg):
-    reg_addr_offset = 2**reg['addr_w']
-    reg_word_addr_start = math.floor(reg['addr']/cpu_nbytes)
-    reg_word_addr_end = math.floor((reg['addr']+reg_addr_offset-1)/cpu_nbytes)
-    return (reg_word_addr_start, reg_word_addr_end)
-
-
 def gen_wr_reg(row, f):
     reg = row['name']
     reg_w = row['nbits']
     byte_offset = row['addr'] % cpu_nbytes
+    reg_addr = row['addr']
     reg_addr_w = row['addr_w']
-    reg_word_addr_start, reg_word_addr_end = calc_reg_word_addr_start_end(row)
     f.write(f"\n`IOB_WIRE({reg}_wen, 1)\n")
-    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & (addr_i >= {reg_word_addr_start}) & (addr_i <= {reg_word_addr_end});\n")
+    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & ((addr_i >> {cpu_nbytes_w}) >= {reg_addr >> cpu_nbytes_w}) & ((addr_i >> {cpu_nbytes_w}) <= {reg_addr + 2**reg_addr_w -1 >> cpu_nbytes_w}));\n")
     f.write(f"`IOB_WIRE({reg}_wdata, {reg_w})\n")
     f.write(f"assign {reg}_wdata = wdata_i[{8*byte_offset}+:{reg_w}];\n")
     if row['autologic']:
@@ -90,14 +83,14 @@ def gen_wr_reg(row, f):
         f.write(f"assign {reg}_o = {reg}_wdata;\n")
     if row['addr_w'] > cpu_nbytes:
         f.write(f"assign {reg}_addr_o = addr_i[{reg_addr_w}-1:0];\n")
-        
+
 def gen_rd_reg(row, f):
     reg = row['name']
     reg_w = row['nbits']
+    reg_addr = row['addr']
     reg_addr_w = row['addr_w']
-    reg_word_addr_start, reg_word_addr_end = calc_reg_word_addr_start_end(row)
     f.write(f"\n`IOB_WIRE({reg}_ren, 1)\n")
-    f.write(f"assign {reg}_ren = valid_i & ( addr_i >= {reg_word_addr_start} ) & ( addr_i <= {reg_word_addr_end} ) & ~(|wstrb_i);\n")
+    f.write(f"assign {reg}_ren = valid_i & ( (addr_i >> {cpu_nbytes_w}) >= {reg_addr >> cpu_nbytes_w} ) & ( (addr_i >> {cpu_nbytes_w}) <= {(reg_addr + 2**reg_addr_w -1) >> cpu_nbytes_w} ) & ~(|wstrb_i);\n")
     if row['autologic']:
         f.write(f"`IOB_WIRE({reg}_ready_i, 1)\n")
         f.write(f"assign {reg}_ready_i = !wstrb_i;\n")
@@ -110,7 +103,7 @@ def gen_rd_reg(row, f):
         f.write(f"assign {reg}_ren_o = {reg}_ren;\n")
     if row['addr_w'] > cpu_nbytes:
         f.write(f"assign {reg}_addr_o = addr_i[{reg_addr_w}-1:0];\n")
-    
+
 def gen_port(table, f):
     for row in table:
         reg = row['name']
@@ -154,7 +147,7 @@ def gen_inst_wire(table, f):
             f.write(f"`IOB_WIRE({reg}_addr, {reg_addr_w})\n")
     f.write("\n")
             
-        
+
 def gen_portmap(table, f):
     for row in table:
         reg = row['name']
@@ -256,11 +249,10 @@ def write_hwcode(table, top):
     #update responses
     for row in table:
         reg = row['name']
-        reg_word_addr_start, reg_word_addr_end = calc_reg_word_addr_start_end(row)
         #compute rdata and rvalid
         if row['rw_type'] == 'R':
             #get rdata and rvalid
-            fswreg_gen.write(f"\tif( (addr_r >= {reg_word_addr_start}) & (addr_r <= {reg_word_addr_end}) )"+" begin\n")
+            fswreg_gen.write(f"\tif( ((addr_r >> {cpu_nbytes_w}) >= {row['addr'] >> cpu_nbytes_w}) & ((addr_r >> {cpu_nbytes_w}) <= {(row['addr'] + 2**row['addr_w'] -1) >> cpu_nbytes_w}) )"+" begin\n")
             # get rdata
             if row['autologic']:
                 fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << {8*row['addr']%cpu_nbytes});\n")
@@ -270,11 +262,11 @@ def write_hwcode(table, top):
             fswreg_gen.write(f"\t\trvalid_int = rvalid_int | {reg}_rvalid_i;\n")
             fswreg_gen.write("\tend\n")
             #get rready
-            fswreg_gen.write(f"\tif( (addr_i >= {reg_word_addr_start}) & (addr_i <= {reg_word_addr_end})\n")
+            fswreg_gen.write(f"\tif( ((addr_i >> {cpu_nbytes_w}) >= {row['addr'] >> cpu_nbytes_w}) & ((addr_i >> {cpu_nbytes_w}) <= {(row['addr'] + 2**row['addr_w'] -1) >> cpu_nbytes_w})\n")
             fswreg_gen.write(f"\t\trready_int = ready_int | {reg}_ready_i;\n")
         else:
             #get wready
-            fswreg_gen.write(f"\tif( (addr_i >= {reg_word_addr_start}) & (addr_i <= {reg_word_addr_end})\n")
+            fswreg_gen.write(f"\tif( ((addr_i >> {cpu_nbytes_w}) >= {row['addr'] >> cpu_nbytes_w}) & ((addr_i >> {cpu_nbytes_w}) <= {(row['addr'] + 2**row['addr_w'] -1) >> cpu_nbytes_w})\n")
             fswreg_gen.write(f"\t\twready_int = ready_int | {reg}_ready_i;\n")
 
     fswreg_gen.write("end\n\n")
