@@ -23,6 +23,9 @@ task write_data_axil;
       axil_wstrb  = `IOB_GET_WSTRB(axil_addr_task, axil_width_task);
       axil_wvalid = 1'b1;
 
+      // Write response
+      axil_bready = 1'b1;
+
       while (!axil_awready) begin
          @(negedge clk);
       end
@@ -49,9 +52,6 @@ task write_data_axil;
       end
 
       @(posedge clk) #1;
-      axil_bready = 1'b1;
-
-      @(posedge clk) #1;
       axil_bready = 1'b0;
 
       @(posedge clk) #1;
@@ -74,6 +74,9 @@ task read_data_axil;
       axil_araddr  = `IOB_WORD_ADDR(axil_addr_task);
       axil_arvalid = 1'b1;
 
+      // Read data
+      axil_rready = 1'b1;
+
       while (!axil_arready) begin
          @(negedge clk);
       end
@@ -92,12 +95,7 @@ task read_data_axil;
          @(posedge clk) #1;
       end
 
-      axil_rready = 1'b1;
-
       axil_data_task = `IOB_GET_RDATA(axil_addr_task, axil_rdata, axil_width_task);
-
-      @(posedge clk) #1;
-
       axil_rready = 1'b0;
 
       @(posedge clk) #1;
