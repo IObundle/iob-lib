@@ -24,7 +24,7 @@ task axil_write;
       axil_wstrb  = `IOB_GET_WSTRB(axil_addr_task, axil_width_task);
       axil_wvalid = 1'b1;
 
-      while (!axil_awready && !axil_wready);
+      while (!axil_awready);
       while(!axil_wready)
          @(posedge clk) #1;
 
@@ -49,7 +49,7 @@ task axil_read;
 
       // Read data
       axil_rready = 1'b1;
-      while (!axil_arready && !axil_rvalid);
+      while (!axil_arready);
 
       while (!axil_rvalid)
          @(posedge clk) axil_data_task = `IOB_GET_RDATA(axil_addr_task, axil_rdata, axil_width_task);
