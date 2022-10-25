@@ -19,8 +19,8 @@ task write_data_axil;
       axil_awvalid = 1'b1;
 
       // Write data
-      axil_wdata  = axilData << (8 * `IOB_BYTE_OFFSET(axilAddress));
-      axil_wstrb  = ((1 << `IOB_GET_NBYTES(axilWidth)) - 1) << `IOB_BYTE_OFFSET(axilAddress);
+      axil_wdata  = `IOB_GET_WDATA(axilAddress, axilData);
+      axil_wstrb  = `IOB_GET_WSTRB(axilAddress, axilWidth);
       axil_wvalid = 1'b1;
 
       while (!axil_awready) begin
@@ -94,7 +94,7 @@ task read_data_axil;
 
       axil_rready = 1'b1;
 
-      axilData = (axil_rdata >> (8 * `IOB_BYTE_OFFSET(axilAddress))) & ((1 << axilWidth) - 1);
+      axilData = `IOB_GET_RDATA(axilAddress, axil_rdata, axilWidth);
 
       @(posedge clk) #1;
 
