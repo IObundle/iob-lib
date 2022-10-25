@@ -47,7 +47,7 @@ def gen_wr_reg(row, f):
     reg_addr = row['addr']
     reg_addr_w = row['addr_w']
     f.write(f"\n`IOB_WIRE({reg}_wen, 1)\n")
-    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & (`IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({reg_addr})) & (`IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({reg_addr + (1'b1<<reg_addr_w)}));\n")
+    f.write(f"assign {reg}_wen = valid_i & (|wstrb_i[{byte_offset}+:{row['nbytes']}]) & `IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({reg_addr}) & `IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({reg_addr} + (1'b1<<{reg_addr_w}));\n")
     f.write(f"`IOB_WIRE({reg}_wdata, {reg_w})\n")
     f.write(f"assign {reg}_wdata = wdata_i[{8*byte_offset}+:{reg_w}];\n")
     if row['autologic']:
@@ -66,7 +66,7 @@ def gen_rd_reg(row, f):
     reg_addr = row['addr']
     reg_addr_w = row['addr_w']
     f.write(f"\n`IOB_WIRE({reg}_ren, 1)\n")
-    f.write(f"assign {reg}_ren = valid_i & ( `IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({reg_addr}) ) & ( `IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({reg_addr + (1'b1<<reg_addr_w)}) ) & ~(|wstrb_i);\n")
+    f.write(f"assign {reg}_ren = valid_i && !wstrb_i && `IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({reg_addr}) && `IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({reg_addr} + (1'b1<<{reg_addr_w}));\n")
     if row['autologic']:
         f.write(f"`IOB_WIRE({reg}_ready_i, 1)\n")
         f.write(f"assign {reg}_ready_i = !wstrb_i;\n")
@@ -228,24 +228,24 @@ def write_hwcode(table, top):
     # update responses
     for row in table:
         reg = row['name']
+        reg_addr = row['addr']
         # compute rdata and rvalid
         if row['rw_type'] == 'R':
             # get rdata and rvalid
-            fswreg_gen.write(f"\tif( (`IOB_WORD_ADDR(addr_r) >= `IOB_WORD_ADDR({row['addr']})) & (`IOB_WORD_ADDR(addr_r) < `IOB_WORD_CADDR({row['addr']} + (1'b1<<{row['addr_w']}))"+" begin\n")
+            fswreg_gen.write(f"\tif( `IOB_WORD_ADDR(addr_r) >= `IOB_WORD_ADDR({reg_addr}) && `IOB_WORD_ADDR(addr_r) < `IOB_WORD_CADDR({reg_addr} + (1'b1<<{row['addr_w']})) )\n")
             # get rdata
             if row['autologic']:
-                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << (8*`IOB_BYTE_OFFSET({addr})));\n")
+                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_r << (8*`IOB_BYTE_OFFSET({reg_addr})));\n")
             else:
-                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_i << (8*`IOB_BYTE_OFFSET({addr})));\n")
+                fswreg_gen.write(f"\t\trdata_int = rdata_int | ({reg}_i << (8*`IOB_BYTE_OFFSET({reg_addr})));\n")
             # get rvalid
             fswreg_gen.write(f"\t\trvalid_int = rvalid_int | {reg}_rvalid_i;\n")
-            fswreg_gen.write("\tend\n")
             # get rready
-            fswreg_gen.write(f"\tif( (`IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({row['addr']})) & (`IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({row['addr']} + (1'b1<<{row['addr_w']}))"+" begin\n")
+            fswreg_gen.write(f"\tif( `IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({reg_addr}) && `IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({reg_addr} + (1'b1<<{row['addr_w']})) ) \n")
             fswreg_gen.write(f"\t\trready_int = ready_int | {reg}_ready_i;\n")
         else:
             # get wready
-            fswreg_gen.write(f"\tif( (`IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({row['addr']})) & (`IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({row['addr']} + (1'b1<<{row['addr_w']}))"+" begin\n")
+            fswreg_gen.write(f"\tif( `IOB_WORD_ADDR(addr_i) >= `IOB_WORD_ADDR({reg_addr}) && `IOB_WORD_ADDR(addr_i) < `IOB_WORD_CADDR({reg_addr} + (1'b1<<{row['addr_w']})) ) \n")
             fswreg_gen.write(f"\t\twready_int = ready_int | {reg}_ready_i;\n")
 
     fswreg_gen.write("end\n\n")

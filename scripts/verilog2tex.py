@@ -9,7 +9,7 @@
 import sys
 from parse import parse
 
-from mkregs import calc_swreg_addr, swreg_get_fields, header_parse
+from mkregs import calc_swreg_addr, swreg_get_fields
 
 
 '''
@@ -273,6 +273,32 @@ def swreg_parse (conf, defines) :
     #write last table
     if table_found == 1:
         write_table(table_name + '_swreg', table)
+
+        
+def header_parse(vh, defines):
+    """ Parse header files
+    """
+    for line in vh:
+        d_flds = parse('`define {} {}\n', line.lstrip(' '))
+        if d_flds is None:
+            continue  # not a macro
+        # NAME
+        name = d_flds[0].lstrip(' ')
+        # VALUE
+        eval_str = d_flds[1].replace('`', '').lstrip(' ').replace("$", "")
+        # split string into alphanumeric words
+        existing_define_candidates = re.split('\W+', eval_str)
+        for define_candidate in existing_define_candidates:
+            if defines.get(define_candidate):
+                eval_str = eval_str.replace(str(define_candidate), str(defines[define_candidate]))
+        try:
+            value = eval(eval_str)
+        except (ValueError, SyntaxError, NameError):
+            # eval_str has undefined parameters: use as is
+            value = eval_str
+        # insert in dictionary
+        if name not in defines:
+            defines[name] = value
 
 
 def main () :
