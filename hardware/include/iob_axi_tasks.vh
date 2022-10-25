@@ -34,7 +34,7 @@ task axil_write;
 endtask
 
 // Read data from AXI-4 lite slave
-task read_data_axil;
+task axil_read;
    input [AXIL_ADDR_W-1:0]       axil_addr_task;
    output [AXIL_DATA_W-1:0]      axil_data_task;
    input [$clog2(AXIL_DATA_W):0] axil_width_task;
