@@ -11,8 +11,6 @@ task write_data_axil;
    localparam ADDR_W = AXIL_ADDR_W;
    localparam DATA_W = AXIL_DATA_W;
 
-   reg                           axil_wready_int;
-
    begin
       // Write address
       axil_awaddr  = `IOB_WORD_ADDR(axil_addr_task);
@@ -27,19 +25,12 @@ task write_data_axil;
       axil_bready = 1'b1;
 
       while (!axil_awready) begin
-         @(negedge clk);
+         @(posedge clk) #1;
       end
 
-      axil_wready_int = axil_wready;
-
-      @(posedge clk) #1;
       axil_awvalid = 1'b0;
 
-      if (!axil_wready_int) begin
-         while (!axil_wready) begin
-            @(negedge clk);
-         end
-
+      while (!axil_wready) begin
          @(posedge clk) #1;
       end
 
@@ -48,10 +39,9 @@ task write_data_axil;
 
       // Write response
       if (!axil_bvalid) begin
-         @(negedge clk);
+         @(posedge clk) #1;
       end
 
-      @(posedge clk) #1;
       axil_bready = 1'b0;
 
       @(posedge clk) #1;
@@ -67,8 +57,6 @@ task read_data_axil;
    localparam ADDR_W = AXIL_ADDR_W;
    localparam DATA_W = AXIL_DATA_W;
 
-   reg                           axil_rvalid_int;
-
    begin
       // Read address
       axil_araddr  = `IOB_WORD_ADDR(axil_addr_task);
@@ -78,20 +66,13 @@ task read_data_axil;
       axil_rready = 1'b1;
 
       while (!axil_arready) begin
-         @(negedge clk);
+         @(posedge clk) #1;
       end
 
-      axil_rvalid_int = axil_rvalid;
-
-      @(posedge clk) #1;
       axil_arvalid = 1'b0;
 
       // Read data
-      if (!axil_rvalid_int) begin
-         while (!axil_rvalid) begin
-            @(negedge clk);
-         end
-
+      while (!axil_rvalid) begin
          @(posedge clk) #1;
       end
 
