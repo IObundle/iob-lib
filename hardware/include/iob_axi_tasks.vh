@@ -26,7 +26,7 @@ task axil_write;
 
       @(posedge clk) #1;
 
-      while (!axil_awready) @(posedge clk);
+      while (!axil_awready) @(posedge clk) #1;
       while (!axil_wready) @(posedge clk) #1;
 
       axil_awvalid = 1'b0;
