@@ -2,7 +2,7 @@
 // Tasks for the AXI4 protocol
 //
 
-// Write data to AXI-4 lite slave
+// Write data to AXI4 Lite slave
 task axil_write;
    input [AXIL_ADDR_W-1:0]       axil_addr_task;
    input [AXIL_DATA_W-1:0]       axil_data_task;
@@ -24,6 +24,8 @@ task axil_write;
       axil_wstrb  = `IOB_GET_WSTRB(axil_addr_task, axil_width_task);
       axil_wvalid = 1'b1;
 
+      @(posedge clk) #1;
+
       while (!axil_awready) @(posedge clk);
       while (!axil_wready) @(posedge clk) #1;
 
@@ -32,7 +34,7 @@ task axil_write;
    end
 endtask
 
-// Read data from AXI-4 lite slave
+// Read data from AXI4 Lite slave
 task axil_read;
    input [AXIL_ADDR_W-1:0]       axil_addr_task;
    output [AXIL_DATA_W-1:0]      axil_data_task;
@@ -48,6 +50,8 @@ task axil_read;
 
       // Read data
       axil_rready = 1'b1;
+
+      @(posedge clk);
 
       while (!axil_arready) @(posedge clk);
       while (!axil_rvalid) @(posedge clk);
