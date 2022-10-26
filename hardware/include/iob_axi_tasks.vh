@@ -50,9 +50,10 @@ task axil_read;
       axil_rready = 1'b1;
 
       while (!axil_arready) @(posedge clk);
-      while (!axil_rvalid) @(posedge clk) #1;
-
-      axil_arvalid = 1'b0;
+      while (!axil_rvalid) @(posedge clk);
       axil_data_task = `IOB_GET_RDATA(axil_addr_task, axil_rdata, axil_width_task);
+
+      #1;
+      axil_arvalid = 1'b0;
    end
 endtask
