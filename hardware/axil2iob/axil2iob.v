@@ -4,11 +4,11 @@
 
 module axil2iob
   #(
-    parameter AXIL_ADDR_W = 32, // AXI Lite address bus width in bits
-    parameter AXIL_DATA_W = 32, // AXI Lite data bus width in bits
-    parameter AXIL_ID_W = 1,     // AXI Lite ID bus width in bits
+    parameter AXIL_ADDR_W = 32,     // AXI Lite address bus width in bits
+    parameter AXIL_DATA_W = 32,     // AXI Lite data bus width in bits
+    parameter AXIL_ID_W = 1,        // AXI Lite ID bus width in bits
     parameter ADDR_W = AXIL_ADDR_W, // IOb address bus width in bits
-    parameter DATA_W = AXIL_DATA_W // IOb data bus width in bits
+    parameter DATA_W = AXIL_DATA_W  // IOb data bus width in bits
     )
    (
     // AXI-4 lite slave interface

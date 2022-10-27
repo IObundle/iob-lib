@@ -14,23 +14,21 @@ task axil_write;
    begin
       // Write address
       axil_awaddr  = `IOB_WORD_ADDR(axil_addr_task);
-      axil_awvalid = 1'b1;
+      axil_awvalid = 1;
       
       // Write response
-      axil_bready = 1'b1;
+      axil_bready = 1;
 
       // Write data
       axil_wdata  = `IOB_GET_WDATA(axil_addr_task, axil_data_task);
       axil_wstrb  = `IOB_GET_WSTRB(axil_addr_task, axil_width_task);
-      axil_wvalid = 1'b1;
+      axil_wvalid = 1;
 
-      @(posedge clk) #1;
-
-      while (!axil_awready) @(posedge clk) #1;
+      while (!axil_awready) #1;
       while (!axil_wready) @(posedge clk) #1;
 
-      axil_awvalid = 1'b0;
-      axil_wvalid = 1'b0;
+      @(posedge clk) axil_awvalid = 0;
+      axil_wvalid = 0;
    end
 endtask
 
@@ -44,20 +42,21 @@ task axil_read;
    localparam DATA_W = AXIL_DATA_W;
 
    begin
+      axil_wstrb  = 0;
+
       // Read address
       axil_araddr  = `IOB_WORD_ADDR(axil_addr_task);
-      axil_arvalid = 1'b1;
+      axil_arvalid = 1;
 
       // Read data
-      axil_rready = 1'b1;
+      axil_rready = 1;
 
-      @(posedge clk);
+      while (!axil_arready) @(posedge clk) #1;
+      axil_arvalid = 0;
 
-      while (!axil_arready) @(posedge clk);
-      while (!axil_rvalid) @(posedge clk);
-      axil_data_task = `IOB_GET_RDATA(axil_addr_task, axil_rdata, axil_width_task);
+      while (!axil_rvalid) #1;
+        
+      @(posedge clk) axil_data_task <= `IOB_GET_RDATA(axil_addr_task, axil_rdata, axil_width_task);
 
-      #1;
-      axil_arvalid = 1'b0;
    end
 endtask

@@ -94,5 +94,7 @@ debug:
 	@echo VSRC=$(VSRC)
 	@echo VFLAGS=$(VFLAGS)
 
+.PRECIOUS: uut.vcd
+
 .PHONY: build run clean kill-sim kill-remote-sim debug test $(TEST_LIST)
 
