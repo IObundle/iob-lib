@@ -55,8 +55,7 @@ task axil_read;
       axil_arvalid = 0;
 
       while (!axil_rvalid) #1;
-        
-      @(posedge clk) axil_data_task <= `IOB_GET_RDATA(axil_addr_task, axil_rdata, axil_width_task);
+      #1 axil_data_task = `IOB_GET_RDATA(axil_addr_task, axil_rdata, axil_width_task);
 
    end
 endtask
