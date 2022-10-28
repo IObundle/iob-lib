@@ -315,4 +315,6 @@ def main ():
     else:
         eval(func_name+"('"+port_prefix+"', fout)")
 
+    fout.close()
+
 if __name__ == "__main__" : main ()
