@@ -56,11 +56,11 @@ ifeq ($(DO_COV),1)
 endif
 endif
 ifeq ($(VCD),1)
-	if [ ! "`pgrep -u $(USER) gtkwave`" ]; then gtkwave uut.vcd; fi &
+	if [ ! "`pgrep -u $(USER) gtkwave`" ]; then gtkwave -a uut.gtkw uut.vcd; fi &
 endif	
 
 waves:
-	gtkwave uut.vcd &
+	gtkwave  -a uut.gtkw uut.vcd &
 
 kill-sim:
 	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
