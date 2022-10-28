@@ -37,7 +37,7 @@ module axil2iob
    assign axil_bvalid_o = 1'b1;
 
    // read address
-   assign axil_arready_o = axil_arvalid_i & ready_i;
+   assign axil_arready_o = ready_i;
 
    // read
    assign axil_rid_o = 1'b0;
@@ -48,28 +48,9 @@ module axil2iob
    //
    // COMPUTE IOb OUTPUTS
    //
-   `IOB_WIRE(axil_avalid, 1)
-   `IOB_WIRE(axil_addr, ADDR_W)
-   `IOB_WIRE(axil_addr_reg, ADDR_W)
-
-   assign valid_o = axil_wvalid_i | axil_arvalid_i;
+   assign valid_o = axil_awvalid_i | axil_wvalid_i | axil_arvalid_i;
    assign addr_o  = axil_avalid? axil_addr: axil_addr_reg;
    assign wdata_o = axil_wdata_i;
-   assign wstrb_o = axil_wvalid_i? axil_wstrb_i: {DATA_W{1'b0}};
-
-   // Address register
-   assign axil_avalid = axil_awvalid_i | axil_arvalid_i;
-   assign axil_addr   = axil_awvalid_i? axil_awaddr_i: axil_araddr_i;
-
-   iob_reg #(.DATA_W(ADDR_W), .RST_VAL(0))
-   iob_reg_addr
-     (
-      .clk_i  (clk_i),
-      .arst_i (rst_i),
-      .rst_i  (1'b0),
-      .en_i   (axil_avalid),
-      .data_i (axil_addr),
-      .data_o (axil_addr_reg)
-      );
+   assign wstrb_o = axil_wvalid_i? axil_wstrb_i: {DATA_W/8{1'b0}};
 
 endmodule

@@ -229,9 +229,12 @@ def main ():
         print("            axil_s_write_port: axi lite slave write port")
         print("            axil_m_read_port: axi lite master read port")
         print("            axil_s_read_port: axi lite slave read port")
-        print("            axil_portmap: axi lite portmap")
-        print("            axil_write_portmap: axi lite portmap")
-        print("            axil_read_portmap: axi lite portmap")
+        print("            axil_m_portmap: axi lite portmap")
+        print("            axil_s_portmap: axi lite portmap")
+        print("            axil_m_write_portmap: axi lite portmap")
+        print("            axil_s_write_portmap: axi lite portmap")
+        print("            axil_m_read_portmap: axi lite portmap")
+        print("            axil_s_read_portmap: axi lite portmap")
         print("            axi_wire: axi full wires for interconnection")
         print("            axi_m_tb: axi full master wires for testbench")
         print("            axi_s_tb: axi full slave wires for testbench")
@@ -279,7 +282,9 @@ def main ():
 
     # call function func to generate .vh file
     func_name = port_name.replace("axil_","axi_")
-    if (port_name.find("portmap")+1): eval(func_name+"('"+port_prefix+"','"+wire_prefix+"', fout)")
-    else: eval(func_name+"('"+port_prefix+"', fout)")
+    if (port_name.find("portmap")+1):
+        eval(func_name+"('"+port_prefix+"','"+wire_prefix+"', fout)")
+    else:
+        eval(func_name+"('"+port_prefix+"', fout)")
 
 if __name__ == "__main__" : main ()
