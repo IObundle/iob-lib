@@ -124,33 +124,42 @@ def tbsignal(direction):
         print("ERROR: tb_reciprocal : invalid argument")
         quit()
 
+def suffix(direction):
+    if direction == '`IOB_INPUT(':
+        return '_i'
+    elif direction == '`IOB_OUTPUT(':
+        return '_o'
+    elif direction == '`IOB_WIRE(':
+        return '_w'
+    elif direction == '`IOB_VAR(':
+        return '_v'
+    else:
+        print("ERROR: get_signal_suffix : invalid argument")
+        quit()
+
 #
 # Port
 #
 
 def axi_m_port(prefix, fout):
     for i in range(len(table)):
-        fout.write(' '+table[i]['signal']+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
+        fout.write(' '+table[i]['signal']+prefix+table[i]['name']+suffix(table[i]['signal'])+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
     
 def axi_s_port(prefix, fout):
     for i in range(len(table)):
-        fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
+        fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
 
 def axi_m_write_port(prefix, fout):
-    for i in range(len(table)):
-        fout.write(' '+table[i]['signal']+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
+    axi_m_port(prefix, fout)
     
 def axi_s_write_port(prefix, fout):
-    for i in range(len(table)):
-        fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
+    axi_s_port(prefix, fout)
 
 def axi_m_read_port(prefix, fout):
-    for i in range(len(table)):
-        fout.write(' '+table[i]['signal']+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
+    axi_m_port(prefix, fout)
     
 def axi_s_read_port(prefix, fout):
-    for i in range(len(table)):
-        fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
+    axi_s_port(prefix, fout)
 
 #
 # Portmap
@@ -160,46 +169,58 @@ def axi_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
         fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
 
-def axi_write_portmap(port_prefix, wire_prefix, fout):
+def axi_m_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
+        fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
 
-def axi_read_portmap(port_prefix, wire_prefix, fout):
+def axi_s_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
+        fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
+
+def axi_m_write_portmap(port_prefix, wire_prefix, fout):
+    axi_m_portmap(port_prefix, wire_prefix, fout)
+
+def axi_s_write_portmap(port_prefix, wire_prefix, fout):
+    axi_s_portmap(port_prefix, wire_prefix, fout)
+
+def axi_m_read_portmap(port_prefix, wire_prefix, fout):
+    axi_m_portmap(port_prefix, wire_prefix, fout)
+
+def axi_s_read_portmap(port_prefix, wire_prefix, fout):
+    axi_s_portmap(port_prefix, wire_prefix, fout)
 
 #
 # Wire
 #
 
+def axi_wire(prefix, fout):
+    for i in range(len(table)):
+        fout.write('`IOB_WIRE('+prefix+table[i]['name']+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+
 def axi_m_tb(prefix, fout):
     for i in range(len(table)):
-        fout.write(tbsignal(table[i]['signal'])+prefix+table[i]['name']+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+        fout.write(tbsignal(table[i]['signal'])+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
     fout.write('\n')
     axi_m_tb_initial(prefix, fout)
     
 def axi_s_tb(prefix, fout):
     for i in range(len(table)):
-        fout.write(tbsignal(reverse(table[i]['signal']))+prefix+table[i]['name']+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+        fout.write(tbsignal(reverse(table[i]['signal']))+prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
     fout.write('\n')
     axi_s_tb_initial(prefix, fout)
-
-def axi_wire(prefix, fout):
-    for i in range(len(table)):
-        fout.write('`IOB_WIRE('+prefix+table[i]['name']+', '+table[i]['width']+') //'+table[i]['description']+'\n')
 
 def axi_m_tb_initial(prefix, fout):
     fout.write('initial begin\n')
     for i in range(len(table)):
         if tbsignal(table[i]['signal']) == '`IOB_VAR(':
-            fout.write('    '+prefix+table[i]['name']+' = '+table[i]['default']+';\n')
+            fout.write('    '+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+' = '+table[i]['default']+';\n')
     fout.write('end\n')
 
 def axi_s_tb_initial(prefix, fout):
     fout.write('initial begin\n')
     for i in range(len(table)):
         if tbsignal(reverse(table[i]['signal'])) == '`IOB_VAR(':
-            fout.write('    '+prefix+table[i]['name']+' = '+table[i]['default']+';\n')
+            fout.write('    '+prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+' = '+table[i]['default']+';\n')
     fout.write('end\n')
 
 #
@@ -217,27 +238,35 @@ def main ():
         print("            axi_m_port: axi full master port")
         print("            axi_s_port: axi full slave port")
         print("            axi_m_write_port: axi full master write port")
-        print("            axi_s_write_port: axi slave write port")
+        print("            axi_s_write_port: axi full slave write port")
         print("            axi_m_read_port: axi full master read port")
-        print("            axi_s_read_port: axi slave read port")
+        print("            axi_s_read_port: axi full slave read port")
         print("            axi_portmap: axi full portmap")
-        print("            axi_write_portmap: axi full portmap")
-        print("            axi_read_portmap: axi full portmap")
+        print("            axi_m_portmap: axi full master portmap")
+        print("            axi_s_portmap: axi full slave portmap")
+        print("            axi_m_write_portmap: axi full master write portmap")
+        print("            axi_s_write_portmap: axi full slave write portmap")
+        print("            axi_m_read_portmap: axi full master read portmap")
+        print("            axi_s_read_portmap: axi full slave read portmap")
+        print("            axi_wire: axi full wires for interconnection")
+        print("            axi_m_tb: axi full master wires for testbench")
+        print("            axi_s_tb: axi full slave wires for testbench")
         print("            axil_m_port: axi lite master port")
         print("            axil_s_port: axi lite slave port")
         print("            axil_m_write_port: axi lite master write port")
         print("            axil_s_write_port: axi lite slave write port")
         print("            axil_m_read_port: axi lite master read port")
         print("            axil_s_read_port: axi lite slave read port")
-        print("            axil_m_portmap: axi lite portmap")
-        print("            axil_s_portmap: axi lite portmap")
-        print("            axil_m_write_portmap: axi lite portmap")
-        print("            axil_s_write_portmap: axi lite portmap")
-        print("            axil_m_read_portmap: axi lite portmap")
-        print("            axil_s_read_portmap: axi lite portmap")
-        print("            axi_wire: axi full wires for interconnection")
-        print("            axi_m_tb: axi full master wires for testbench")
-        print("            axi_s_tb: axi full slave wires for testbench")
+        print("            axil_portmap: axi lite portmap")
+        print("            axil_m_portmap: axi lite master portmap")
+        print("            axil_s_portmap: axi lite slave portmap")
+        print("            axil_m_write_portmap: axi lite master write portmap")
+        print("            axil_s_write_portmap: axi lite slave write portmap")
+        print("            axil_m_read_portmap: axi lite master read portmap")
+        print("            axil_s_read_portmap: axi lite slave read portmap")
+        print("            axil_wire: axi lite wires for interconnection")
+        print("            axil_m_tb: axi lite master wires for testbench")
+        print("            axil_s_tb: axi lite slave wires for testbench")
         quit()
 
     #axi bus type
@@ -273,7 +302,6 @@ def main ():
     elif (typ.find("axil_write_")>=0): table = make_axi_write()
     elif (typ.find("axil_")>=0): table = make_axil()
 
-    #port_name = typ.replace("write_","").replace("read_","")
     port_name = typ
     
     #write pragma for doc production
