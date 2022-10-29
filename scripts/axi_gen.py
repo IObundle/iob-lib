@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Generates AXI4 and AXI$ Lite ports, port maps and signals
+# Generates AXI4 and AXI4 Lite ports, port maps and signals
 #
 #   See "Usage" below
 #
@@ -177,17 +177,45 @@ def axi_s_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
         fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
 
+def axi_m_m_portmap(port_prefix, wire_prefix, fout):
+    for i in range(len(table)):
+        fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+suffix(table[i]['signal'])+'), //'+table[i]['description']+'\n')
+
+def axi_s_s_portmap(port_prefix, wire_prefix, fout):
+    for i in range(len(table)):
+        fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'), //'+table[i]['description']+'\n')
+
+def axi_m_tb_portmap(port_prefix, wire_prefix, fout):
+    for i in range(len(table)):
+        fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+'), //'+table[i]['description']+'\n')
+
+def axi_s_tb_portmap(port_prefix, wire_prefix, fout):
+    for i in range(len(table)):
+        fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+'), //'+table[i]['description']+'\n')
+
 def axi_m_write_portmap(port_prefix, wire_prefix, fout):
     axi_m_portmap(port_prefix, wire_prefix, fout)
 
 def axi_s_write_portmap(port_prefix, wire_prefix, fout):
     axi_s_portmap(port_prefix, wire_prefix, fout)
 
+def axi_m_m_write_portmap(port_prefix, wire_prefix, fout):
+    axi_m_m_portmap(port_prefix, wire_prefix, fout)
+
+def axi_s_s_write_portmap(port_prefix, wire_prefix, fout):
+    axi_s_s_portmap(port_prefix, wire_prefix, fout)
+
 def axi_m_read_portmap(port_prefix, wire_prefix, fout):
     axi_m_portmap(port_prefix, wire_prefix, fout)
 
 def axi_s_read_portmap(port_prefix, wire_prefix, fout):
     axi_s_portmap(port_prefix, wire_prefix, fout)
+
+def axi_m_m_read_portmap(port_prefix, wire_prefix, fout):
+    axi_m_m_portmap(port_prefix, wire_prefix, fout)
+
+def axi_s_s_read_portmap(port_prefix, wire_prefix, fout):
+    axi_s_s_portmap(port_prefix, wire_prefix, fout)
 
 #
 # Wire
@@ -197,13 +225,13 @@ def axi_wire(prefix, fout):
     for i in range(len(table)):
         fout.write('`IOB_WIRE('+prefix+table[i]['name']+', '+table[i]['width']+') //'+table[i]['description']+'\n')
 
-def axi_m_tb(prefix, fout):
+def axi_m_tb_wire(prefix, fout):
     for i in range(len(table)):
         fout.write(tbsignal(table[i]['signal'])+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
     fout.write('\n')
     axi_m_tb_initial(prefix, fout)
     
-def axi_s_tb(prefix, fout):
+def axi_s_tb_wire(prefix, fout):
     for i in range(len(table)):
         fout.write(tbsignal(reverse(table[i]['signal']))+prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
     fout.write('\n')
@@ -244,13 +272,21 @@ def main ():
         print("            axi_portmap: axi full portmap")
         print("            axi_m_portmap: axi full master portmap")
         print("            axi_s_portmap: axi full slave portmap")
+        print("            axi_m_m_portmap: axi full master to master portmap")
+        print("            axi_s_s_portmap: axi full slave to slave portmap")
+        print("            axi_m_tb_portmap: axi full master to testbench portmap")
+        print("            axi_s_tb_portmap: axi full slave to testbench portmap")
         print("            axi_m_write_portmap: axi full master write portmap")
         print("            axi_s_write_portmap: axi full slave write portmap")
+        print("            axi_m_m_write_portmap: axi full master to master write portmap")
+        print("            axi_s_s_write_portmap: axi full slave to slave write portmap")
         print("            axi_m_read_portmap: axi full master read portmap")
         print("            axi_s_read_portmap: axi full slave read portmap")
+        print("            axi_m_m_read_portmap: axi full master to master read portmap")
+        print("            axi_s_s_read_portmap: axi full slave to slave read portmap")
         print("            axi_wire: axi full wires for interconnection")
-        print("            axi_m_tb: axi full master wires for testbench")
-        print("            axi_s_tb: axi full slave wires for testbench")
+        print("            axi_m_tb_wire: axi full master wires for testbench")
+        print("            axi_s_tb_wire: axi full slave wires for testbench")
         print("            axil_m_port: axi lite master port")
         print("            axil_s_port: axi lite slave port")
         print("            axil_m_write_port: axi lite master write port")
@@ -260,13 +296,21 @@ def main ():
         print("            axil_portmap: axi lite portmap")
         print("            axil_m_portmap: axi lite master portmap")
         print("            axil_s_portmap: axi lite slave portmap")
+        print("            axil_m_m_portmap: axi lite master to master portmap")
+        print("            axil_s_s_portmap: axi lite slave to slave portmap")
+        print("            axil_m_tb_portmap: axi lite master to testbench portmap")
+        print("            axil_s_tb_portmap: axi lite slave to testbench portmap")
         print("            axil_m_write_portmap: axi lite master write portmap")
         print("            axil_s_write_portmap: axi lite slave write portmap")
+        print("            axil_m_m_write_portmap: axi lite master to master write portmap")
+        print("            axil_s_s_write_portmap: axi lite slave to slave write portmap")
         print("            axil_m_read_portmap: axi lite master read portmap")
         print("            axil_s_read_portmap: axi lite slave read portmap")
+        print("            axil_m_m_read_portmap: axi lite master to master read portmap")
+        print("            axil_s_s_read_portmap: axi lite slave to slave read portmap")
         print("            axil_wire: axi lite wires for interconnection")
-        print("            axil_m_tb: axi lite master wires for testbench")
-        print("            axil_s_tb: axi lite slave wires for testbench")
+        print("            axil_m_tb_wire: axi lite master wires for testbench")
+        print("            axil_s_tb_wire: axi lite slave wires for testbench")
         quit()
 
     #axi bus type
