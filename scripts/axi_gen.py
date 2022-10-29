@@ -125,14 +125,10 @@ def tbsignal(direction):
         quit()
 
 def suffix(direction):
-    if direction == '`IOB_INPUT(':
+    if direction == '`IOB_INPUT(' or direction == '`IOB_VAR(':
         return '_i'
-    elif direction == '`IOB_OUTPUT(':
+    elif direction == '`IOB_OUTPUT(' or direction == '`IOB_WIRE(':
         return '_o'
-    elif direction == '`IOB_WIRE(':
-        return '_w'
-    elif direction == '`IOB_VAR(':
-        return '_v'
     else:
         print("ERROR: get_signal_suffix : invalid argument")
         quit()
@@ -186,12 +182,10 @@ def axi_s_s_portmap(port_prefix, wire_prefix, fout):
         fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'), //'+table[i]['description']+'\n')
 
 def axi_m_tb_portmap(port_prefix, wire_prefix, fout):
-    for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+'), //'+table[i]['description']+'\n')
+    axi_m_m_portmap(port_prefix, wire_prefix, fout)
 
 def axi_s_tb_portmap(port_prefix, wire_prefix, fout):
-    for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+'), //'+table[i]['description']+'\n')
+    axi_s_s_portmap(port_prefix, wire_prefix, fout)
 
 def axi_m_write_portmap(port_prefix, wire_prefix, fout):
     axi_m_portmap(port_prefix, wire_prefix, fout)
