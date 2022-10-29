@@ -181,12 +181,6 @@ def axi_s_s_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
         fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'), //'+table[i]['description']+'\n')
 
-def axi_m_tb_portmap(port_prefix, wire_prefix, fout):
-    axi_m_m_portmap(port_prefix, wire_prefix, fout)
-
-def axi_s_tb_portmap(port_prefix, wire_prefix, fout):
-    axi_s_s_portmap(port_prefix, wire_prefix, fout)
-
 def axi_m_write_portmap(port_prefix, wire_prefix, fout):
     axi_m_portmap(port_prefix, wire_prefix, fout)
 
@@ -268,8 +262,6 @@ def main ():
         print("            axi_s_portmap: axi full slave portmap")
         print("            axi_m_m_portmap: axi full master to master portmap")
         print("            axi_s_s_portmap: axi full slave to slave portmap")
-        print("            axi_m_tb_portmap: axi full master to testbench portmap")
-        print("            axi_s_tb_portmap: axi full slave to testbench portmap")
         print("            axi_m_write_portmap: axi full master write portmap")
         print("            axi_s_write_portmap: axi full slave write portmap")
         print("            axi_m_m_write_portmap: axi full master to master write portmap")
@@ -292,8 +284,6 @@ def main ():
         print("            axil_s_portmap: axi lite slave portmap")
         print("            axil_m_m_portmap: axi lite master to master portmap")
         print("            axil_s_s_portmap: axi lite slave to slave portmap")
-        print("            axil_m_tb_portmap: axi lite master to testbench portmap")
-        print("            axil_s_tb_portmap: axi lite slave to testbench portmap")
         print("            axil_m_write_portmap: axi lite master write portmap")
         print("            axil_s_write_portmap: axi lite slave write portmap")
         print("            axil_m_m_write_portmap: axi lite master to master write portmap")
