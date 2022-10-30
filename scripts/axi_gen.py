@@ -315,20 +315,15 @@ def main ():
 
     global table
     
-    if (typ.find("axi_m_write_")>=0): table = make_axi_write()
-    elif (typ.find("axi_s_write_")>=0): table = make_axi_write()
-    elif (typ.find("axi_m_read_")>=0): table = make_axi_read()
-    elif (typ.find("axi_s_read_")>=0): table = make_axi_read()
-    elif (typ.find("axi_read_")>=0): table = make_axi_read()
-    elif (typ.find("axi_write_")>=0): table = make_axi_write()
-    elif (typ.find("axi_")>=0): table = make_axi()
-    elif (typ.find("axil_m_write_")>=0): table = make_axil_write()
-    elif (typ.find("axil_s_write_")>=0): table = make_axil_write()
-    elif (typ.find("axil_m_read_")>=0): table = make_axil_read()
-    elif (typ.find("axil_s_read_")>=0): table = make_axil_read()
-    elif (typ.find("axil_read_")>=0): table = make_axi_read()
-    elif (typ.find("axil_write_")>=0): table = make_axi_write()
-    elif (typ.find("axil_")>=0): table = make_axil()
+    if (typ.find("axi_")>=0):
+        if (typ.find("write_")>=0): table = make_axi_write()
+        elif (typ.find("read_")>=0): table = make_axi_read()
+        else: table = make_axi()
+
+    if (typ.find("axil_")>=0):
+        if (typ.find("write_")>=0): table = make_axil_write()
+        elif (typ.find("read_")>=0): table = make_axil_read()
+        else: table = make_axil()
 
     port_name = typ
     
