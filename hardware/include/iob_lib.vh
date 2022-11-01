@@ -47,15 +47,22 @@
 // COMMON TESTBENCH UTILS
 //
 
-//IOB_CLOCK GENERATOR
+//declare and init var
+`define IOB_VAR_INIT(NAME, WIDTH, VAL) reg [WIDTH-1:0] NAME = VAL;
+
+//CLOCK GENERATOR
 `define IOB_CLOCK(CLK, PER) reg CLK=1; always #(PER/2) CLK = ~CLK;
 
-
-//IOB_RESET GENERATOR
-`define IOB_RESET(RST, RISE_TIME, DURATION) reg RST=0; \
-initial begin #RISE_TIME RST=1; #DURATION RST=0; end
-
+//PULSE 
+`define IOB_PULSE(VAR, DURATION) VAR=1; #DURATION VAR=0;
+   
+//RESET SYNCHRONIZER
+`define IOB_RESET_SYNC(CLK, RST_IN, RST_OUT) \
+   always @(posedge CLK, posedge RST_IN) \
+   if(RST_IN) RST_OUT = 1; else RST_OUT = #1 RST_IN;
+   
 
 `endif //  `ifndef LIBINC
            
+   
    

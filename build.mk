@@ -43,7 +43,7 @@ SIM_DIR=hardware/simulation
 sim-build: 
 	make -C $(SIM_DIR) build
 
-sim-run: sim-build
+sim-run:
 	make -C $(SIM_DIR) run
 
 sim-waves:

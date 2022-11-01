@@ -3,6 +3,10 @@ ifeq ($(filter iob_pulse_gen, $(HW_MODULES)),)
 # Add to modules list
 HW_MODULES+=iob_pulse_gen
 
+# Subcomponents
+include $(LIB_DIR)/hardware/iob_pulse_detect/hw_setup.mk
+include $(LIB_DIR)/hardware/iob_counter/hw_setup.mk
+
 # Sources
 SRC+=$(BUILD_VSRC_DIR)/iob_pulse_gen.v
 
