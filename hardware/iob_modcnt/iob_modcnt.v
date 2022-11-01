@@ -1,39 +1,30 @@
 `timescale 1ns / 1ps
+`include "iob_lib.vh"
 
 module iob_modcnt
   #(
-    parameter DATA_W = 32
+    parameter DATA_W = 32,
+    parameter RST_VAL = 0
     )
    (
 
-    input                   clk_i,
-    input                   arst_i,
-    input                   rst_i,
-    input                   en_i,
+    input               clk_i,
+    input               arst_i,
+    input               rst_i,
+    input               en_i,
 
-    input [DATA_W-1:0]      ld_val_i,
+    input               ld_i,
+    input [DATA_W-1:0]  ld_val_i,
 
-    input [DATA_W-1:0]      mod_i,
+    input [DATA_W-1:0]  mod_i,
 
-    output reg [DATA_W-1:0] cnt_o
+    output [DATA_W-1:0] data_o
     );
 
-   reg                      loaded;
+   `IOB_WIRE(cnt_rst, 1)
+   assign cnt_rst = rst_i | (data_o == mod_i-1'b1);
    
-   always @(posedge clk_i, posedge arst_i) 
-      if (arst_i) begin
-         cnt_o <= -1'b1;
-         loaded <= 1'b0;
-      end else if (rst_i) begin 
-         cnt_o <= -1'b1;
-         loaded <= 1'b0;
-      end else if (!loaded) begin
-          cnt_o <= ld_val_i;
-          loaded <= 1'b1;
-      end else if (en_i)
-        if (cnt_o == (mod_i-1'b1))
-          cnt_o <= 1'b0;
-        else
-          cnt_o <= cnt_o + 1'b1;
+   iob_counter #(DATA_W, RST_VAL ) cnt0 
+     (clk_i, arst_i, cnt_rst, en_i, ld_i, ld_val_i, data_o);
    
 endmodule
