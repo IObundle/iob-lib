@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
-`include "iob_intercon.vh"
 
+`include "iob_lib.vh"
 
 module iob_merge
   #(
