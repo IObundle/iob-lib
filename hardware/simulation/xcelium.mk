@@ -1,5 +1,5 @@
 SFLAGS =-errormax 15 -status
-VFLAGS+=$(SFLAGS) -update -linedebug -sv
+VFLAGS+=$(SFLAGS) -update -linedebug -sv -incdir . -incdir ../src
 EFLAGS =$(SFLAGS) -access +wc
 
 ifeq ($(VCD),1)

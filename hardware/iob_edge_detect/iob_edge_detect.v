@@ -1,9 +1,6 @@
 `timescale 1ns / 1ps
 
 module iob_edge_detect
-  #(
-    parameter RST_VAL = 0
-    )
   (
    input  clk_i,
    input  arst_i,
@@ -14,7 +11,7 @@ module iob_edge_detect
    reg bit_i_reg;
    always @(posedge clk_i, posedge arst_i)
      if (arst_i)
-       bit_i_reg <= RST_VAL;
+       bit_i_reg <= 1'b1;
      else
        bit_i_reg <= bit_i;
 

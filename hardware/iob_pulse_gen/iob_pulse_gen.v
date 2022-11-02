@@ -3,8 +3,8 @@
 
 module iob_pulse_gen
   #(
-    parameter START=5,
-    parameter DURATION=5
+    parameter START=0,
+    parameter DURATION=0
     )
   (
    input  clk_i,
@@ -17,17 +17,19 @@ module iob_pulse_gen
    `IOB_WIRE(restart_detect, 1)
    iob_pulse_detect pulse_detect (clk_i, arst_i, restart_i, restart_detect);
 
-   //counter enable
-   `IOB_WIRE(cnt_en, 1)
-   assign cnt_en = restart_detect & (cnt < (START+DURATION));
-
    //counter
+   `IOB_WIRE(cnt_en, 1)
    localparam WIDTH = $clog2(START+DURATION+2);
    `IOB_WIRE(cnt, WIDTH)   
-   iob_counter #(WIDTH,0) cnt0 (clk_i, arst_i, restart_i, 1'b0, 1'b0, cnt_en, cnt);
+
+   //counter enable
+   assign cnt_en = restart_detect & (cnt <= (START+DURATION));
+
+   //counter
+   iob_counter #(WIDTH,0) cnt0 
+     (clk_i, arst_i, restart_i, cnt_en, 1'b0, {WIDTH{1'b0}}, cnt);
 
    //pulse
-   assign pulse_o = cnt_en;
+   assign pulse_o = cnt_en & |cnt;
    
-
 endmodule
