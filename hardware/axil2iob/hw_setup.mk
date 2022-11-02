@@ -11,8 +11,8 @@ SRC+=$(BUILD_VSRC_DIR)/axil2iob.v
 $(BUILD_VSRC_DIR)/axil2iob.v: $(LIB_DIR)/hardware/axil2iob/axil2iob.v
 	cp $< $(BUILD_VSRC_DIR)
 
-SRC+=$(BUILD_VSRC_DIR)/iob_axil_tasks.v
-$(BUILD_VSRC_DIR)/iob_axil_tasks.v: $(LIB_DIR)/hardware/axil2iob/iob_axil_tasks.v
+SRC+=$(BUILD_VSRC_DIR)/iob_axil_tasks.vh
+$(BUILD_VSRC_DIR)/iob_axil_tasks.vh: $(LIB_DIR)/hardware/axil2iob/iob_axil_tasks.vh
 	cp $< $(BUILD_VSRC_DIR)
 
 endif
