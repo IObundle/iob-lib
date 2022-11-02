@@ -7,9 +7,10 @@
         print("mkregs_conf: path/to/mkregs.conf
 '''
 import sys
-from parse import parse
+from parse import parse, search
 
 from mkregs import calc_swreg_addr, swreg_get_fields
+import re
 
 
 '''
@@ -53,17 +54,23 @@ def param_parse (topv, param_defaults, defines):
 
     for line in topv:
         p_flds = []
-        p_flds_tmp = parse('{}parameter {} = {}//{}&{}&{}&{}', line)
+        # p_flds_tmp = parse('{}parameter {} = {}//{}&{}&{}&{}', line)
+        result = search('{wspace}parameter {name} = {default_value}//{macroparam}&{min}&{max}&{description}\n', line)
         #spc, name, typ, macroparam, min, max, desc
-        if p_flds_tmp is None:
+        if result is None:
             continue #not a parameter or macro
-
+        else:
+            p_flds_tmp = result.named
+            # Remove whitespace
+            for key in p_flds_tmp:
+                p_flds_tmp[key] = p_flds_tmp[key].strip(" ").strip("\t")
+            
         #NAME
-        p_flds.append(p_flds_tmp[1].replace('_','\_').strip(' '))
+        p_flds.append(p_flds_tmp['name'].replace('_','\_'))
 
         #MINIMUM VALUE
         #may be defined using macros: replace and evaluate
-        eval_str = p_flds_tmp[4].replace('`','').replace(',','')
+        eval_str = p_flds_tmp['min'].replace('`','').replace(',','')
 
         for key, val in param_defaults.items():
             eval_str = eval_str.replace(str(key),str(val))
@@ -71,11 +78,11 @@ def param_parse (topv, param_defaults, defines):
             p_flds.append(eval(eval_exp))
         except:
             #eval_str has undefined parameters: use as is
-            p_flds.append(eval_str.replace('_','\_').strip(' '))
+            p_flds.append(eval_str.replace('_','\_'))
 
         #DEFAULT VALUE
         #may be defined using macros: replace and evaluate
-        eval_str = p_flds_tmp[2].replace('`','').replace(',','').replace("$","")
+        eval_str = p_flds_tmp['default_value'].replace('`','').replace(',','').replace("$","")
 
         eval_str = str(param_defaults.get(eval_str.strip()))
         
@@ -83,27 +90,27 @@ def param_parse (topv, param_defaults, defines):
             p_flds.append(eval(eval_str))
         except:
             #eval_str has undefined parameters: use as is
-            p_flds.append(eval_str.replace('_','\_').strip(' '))
+            p_flds.append(eval_str.replace('_','\_'))
 
         #MAXIMUM VALUE
         #may be defined using macros: replace and evaluate
-        eval_str = p_flds_tmp[5].replace('`','').replace(',','')
+        eval_str = p_flds_tmp['max'].replace('`','').replace(',','')
         for key, val in param_defaults.items():
             eval_str = eval_str.replace(str(key),str(val))
         try:
             p_flds.append(eval(eval_exp))
         except:
             #eval_str has undefined parameters: use as is
-            p_flds.append(eval_str.replace('_','\_').strip(' '))
+            p_flds.append(eval_str.replace('_','\_'))
 
         #DESCRIPTION
-        if p_flds_tmp[3].find('PARAM')>=0:
-            p_flds.append(p_flds_tmp[6].replace('_','\_').strip('PARAM'))
+        if p_flds_tmp['macroparam'].find('PARAM')>=0:
+            p_flds.append(p_flds_tmp['description'].replace('_','\_').strip('PARAM'))
             params.append(p_flds)
         else:
-            p_flds.append(p_flds_tmp[6].replace('_','\_').strip('MACRO'))
+            p_flds.append(p_flds_tmp['description'].replace('_','\_').strip('MACRO'))
             macros.append(p_flds)
-
+    
     #write out params
     if params != []:
         write_table("sp", params)
@@ -328,21 +335,19 @@ def main () :
     if(len(sys.argv) > 2):
 
         #read and parse header files if any
-        i=2
-        while i<len(sys.argv) and sys.argv[i].find('.vh') > -1:
-            fvh =  open (sys.argv[i], 'r')
-            vh = [*vh, *fvh.readlines()]
-            fvh.close()
-            i = i+1
+        for arg in sys.argv:
+            if arg.endswith('.vh'):
+                fvh =  open (arg, 'r')
+                vh = [*vh, *fvh.readlines()]
+                fvh.close()
         header_parse(vh, defines)
 
         #read source files
-        i=2
-        while i<len(sys.argv) and sys.argv[i].find('.v') > -1:
-            fv =  open (sys.argv[i], 'r')
-            v = [*v, *fv.readlines()]
-            fv.close()
-            i = i+1
+        for arg in sys.argv:
+            if arg.endswith('.v'):
+                fv =  open (arg, 'r')
+                v = [*v, *fv.readlines()]
+                fv.close()
 
         # read mkregs.conf file
         conf_idx = len(sys.argv)-1

@@ -1,7 +1,0 @@
-      .valid_o  (valid),
-      .ready_i  (ready),
-      .addr_o   (addr),
-      .wdata_o  (wdata),
-      .wstrb_o  (wstrb),
-      .rvalid_i (rvalid),
-      .rdata_i  (rdata),

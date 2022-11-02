@@ -1,13 +1,33 @@
 #!/usr/bin/env python3
 
-# Generates AXI4 and AXI4 Lite ports, port maps and signals
+# Generates IOb Native, AXI4 Full and AXI4 Lite ports, port maps and signals
 #
 #   See "Usage" below
 #
 
 import sys
 
-#bus constants
+table = []
+
+#
+# IOb Native Bus Signals
+#
+
+iob=[ \
+{'signal':'`IOB_OUTPUT(', 'width':'1',          'name':'iob_valid', 'default':'0', 'description':'Request valid.'}, \
+{'signal':'`IOB_OUTPUT(', 'width':'ADDR_W',     'name':'iob_addr',  'default':'0', 'description':'Address.'}, \
+{'signal':'`IOB_OUTPUT(', 'width':'DATA_W',     'name':'iob_wdata', 'default':'0', 'description':'Write data.'}, \
+{'signal':'`IOB_OUTPUT(', 'width':'(DATA_W/8)', 'name':'iob_wstrb', 'default':'0', 'description':'Write strobe.'}, \
+{'signal':'`IOB_INPUT(',  'width':'1',          'name':'iob_rvalid','default':'0', 'description':'Read data valid.'}, \
+{'signal':'`IOB_INPUT(',  'width':'DATA_W',     'name':'iob_rdata', 'default':'0', 'description':'Read data.'}, \
+{'signal':'`IOB_INPUT(',  'width':'1',          'name':'iob_ready', 'default':'0', 'description':'Interface ready.'}, \
+]
+
+#
+# AXI4 Bus Signals
+#
+
+# bus constants
 AXI_SIZE_W = '3'
 AXI_BURST_W = '2'
 AXI_LOCK_W = '2'
@@ -15,8 +35,6 @@ AXI_CACHE_W = '4'
 AXI_PROT_W = '3'
 AXI_QOS_W = '4'
 AXI_RESP_W = '2'
-
-table = []
 
 axi_write=[ \
 {'lite':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ID_W',       'name':'axi_awid',    'default':'0', 'description':'Address write channel ID.'}, \
@@ -62,7 +80,17 @@ axi_read=[ \
 ]
 
 #
-# AXI-4 Full
+# IOb Native
+#
+
+def make_iob():
+    bus = []
+    for i in range(len(iob)):
+        bus.append(iob[i])
+    return bus
+
+#
+# AXI4 Full
 #
 
 def make_axi_write():
@@ -81,7 +109,7 @@ def make_axi():
     return make_axi_write() + make_axi_read()
 
 #
-# AXI-4 Lite
+# AXI4 Lite
 #
 
 def make_axil_write():
@@ -105,6 +133,9 @@ def make_axil_read():
 def make_axil():
     return make_axil_write() + make_axil_read()
 
+#
+# Auxiliary Functions
+#
 
 def reverse(direction):
     if direction == '`IOB_INPUT(':
@@ -137,102 +168,72 @@ def suffix(direction):
 # Port
 #
 
-def axi_m_port(prefix, fout):
+# Generic
+
+def m_port(prefix, fout):
     for i in range(len(table)):
         fout.write(' '+table[i]['signal']+prefix+table[i]['name']+suffix(table[i]['signal'])+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
     
-def axi_s_port(prefix, fout):
+def s_port(prefix, fout):
     for i in range(len(table)):
         fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
-
-def axi_m_write_port(prefix, fout):
-    axi_m_port(prefix, fout)
-    
-def axi_s_write_port(prefix, fout):
-    axi_s_port(prefix, fout)
-
-def axi_m_read_port(prefix, fout):
-    axi_m_port(prefix, fout)
-    
-def axi_s_read_port(prefix, fout):
-    axi_s_port(prefix, fout)
 
 #
 # Portmap
 #
 
-def axi_portmap(port_prefix, wire_prefix, fout):
+# Generic
+
+def portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
         fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
 
-def axi_m_portmap(port_prefix, wire_prefix, fout):
+def m_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
         fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
 
-def axi_s_portmap(port_prefix, wire_prefix, fout):
+def s_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
         fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
 
-def axi_m_m_portmap(port_prefix, wire_prefix, fout):
+def m_m_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
         fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+suffix(table[i]['signal'])+'), //'+table[i]['description']+'\n')
 
-def axi_s_s_portmap(port_prefix, wire_prefix, fout):
+def s_s_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
         fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'), //'+table[i]['description']+'\n')
-
-def axi_m_write_portmap(port_prefix, wire_prefix, fout):
-    axi_m_portmap(port_prefix, wire_prefix, fout)
-
-def axi_s_write_portmap(port_prefix, wire_prefix, fout):
-    axi_s_portmap(port_prefix, wire_prefix, fout)
-
-def axi_m_m_write_portmap(port_prefix, wire_prefix, fout):
-    axi_m_m_portmap(port_prefix, wire_prefix, fout)
-
-def axi_s_s_write_portmap(port_prefix, wire_prefix, fout):
-    axi_s_s_portmap(port_prefix, wire_prefix, fout)
-
-def axi_m_read_portmap(port_prefix, wire_prefix, fout):
-    axi_m_portmap(port_prefix, wire_prefix, fout)
-
-def axi_s_read_portmap(port_prefix, wire_prefix, fout):
-    axi_s_portmap(port_prefix, wire_prefix, fout)
-
-def axi_m_m_read_portmap(port_prefix, wire_prefix, fout):
-    axi_m_m_portmap(port_prefix, wire_prefix, fout)
-
-def axi_s_s_read_portmap(port_prefix, wire_prefix, fout):
-    axi_s_s_portmap(port_prefix, wire_prefix, fout)
 
 #
 # Wire
 #
 
-def axi_wire(prefix, fout):
+# Generic
+
+def wire(prefix, fout):
     for i in range(len(table)):
         fout.write('`IOB_WIRE('+prefix+table[i]['name']+', '+table[i]['width']+') //'+table[i]['description']+'\n')
 
-def axi_m_tb_wire(prefix, fout):
+def m_tb_wire(prefix, fout):
     for i in range(len(table)):
         fout.write(tbsignal(table[i]['signal'])+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
     fout.write('\n')
-    axi_m_tb_initial(prefix, fout)
+    m_tb_initial(prefix, fout)
     
-def axi_s_tb_wire(prefix, fout):
+def s_tb_wire(prefix, fout):
     for i in range(len(table)):
         fout.write(tbsignal(reverse(table[i]['signal']))+prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
     fout.write('\n')
-    axi_s_tb_initial(prefix, fout)
+    s_tb_initial(prefix, fout)
 
-def axi_m_tb_initial(prefix, fout):
+def m_tb_initial(prefix, fout):
     fout.write('initial begin\n')
     for i in range(len(table)):
         if tbsignal(table[i]['signal']) == '`IOB_VAR(':
             fout.write('    '+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+' = '+table[i]['default']+';\n')
     fout.write('end\n')
 
-def axi_s_tb_initial(prefix, fout):
+def s_tb_initial(prefix, fout):
     fout.write('initial begin\n')
     for i in range(len(table)):
         if tbsignal(reverse(table[i]['signal'])) == '`IOB_VAR(':
@@ -248,9 +249,20 @@ def main ():
     # parse command line arguments
     if len(sys.argv) < 2 or len(sys.argv) > 5:
         print(len(sys.argv))
-        print("Usage: ./axi_gen.py type [file_prefix port_prefix wire_prefix]")
+        print("Usage: ./if_gen.py type [file_prefix port_prefix wire_prefix]")
         print(len(sys.argv))
         print("       where type can defined as")
+        print("            iob_m_port: iob native master port")
+        print("            iob_s_port: iob native slave port")
+        print("            iob_portmap: iob native portmap")
+        print("            iob_m_portmap: iob native master portmap")
+        print("            iob_s_portmap: iob native slave portmap")
+        print("            iob_m_m_portmap: iob native master to master portmap")
+        print("            iob_s_s_portmap: iob native slave to slave portmap")
+        print("            iob_wire: iob native wires for interconnection")
+        print("            iob_m_tb_wire: iob native master wires for testbench")
+        print("            iob_s_tb_wire: iob native slave wires for testbench")
+        print("")
         print("            axi_m_port: axi full master port")
         print("            axi_s_port: axi full slave port")
         print("            axi_m_write_port: axi full master write port")
@@ -273,6 +285,7 @@ def main ():
         print("            axi_wire: axi full wires for interconnection")
         print("            axi_m_tb_wire: axi full master wires for testbench")
         print("            axi_s_tb_wire: axi full slave wires for testbench")
+        print("")
         print("            axil_m_port: axi lite master port")
         print("            axil_s_port: axi lite slave port")
         print("            axil_m_write_port: axi lite master write port")
@@ -297,10 +310,10 @@ def main ():
         print("            axil_s_tb_wire: axi lite slave wires for testbench")
         quit()
 
-    #axi bus type
+    # bus type
     typ = sys.argv[1]
 
-    #port and wire prefix
+    # port and wire prefix
     file_prefix = ''
     port_prefix = ''
     wire_prefix = ''
@@ -314,7 +327,10 @@ def main ():
     # make AXI bus
 
     global table
-    
+
+    if (typ.find("iob_")>=0):
+        table = make_iob()
+
     if (typ.find("axi_")>=0):
         if (typ.find("write_")>=0): table = make_axi_write()
         elif (typ.find("read_")>=0): table = make_axi_read()
@@ -326,13 +342,13 @@ def main ():
         else: table = make_axil()
 
     port_name = typ
-    
-    #write pragma for doc production
+
+    # write pragma for doc production
     if (port_name.find("port")+1 and not port_name.find("portmap")+1):
         fout.write('  //START_IO_TABLE '+port_prefix+port_name+'\n')
 
     # call function func to generate .vh file
-    func_name = port_name.replace("axil_","axi_")
+    func_name = port_name.replace("axil_", "").replace("axi_", "").replace("write_", "").replace("read_", "").replace("iob_", "")
     if (port_name.find("portmap")+1):
         eval(func_name+"('"+port_prefix+"','"+wire_prefix+"', fout)")
     else:
