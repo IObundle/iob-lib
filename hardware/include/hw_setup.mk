@@ -10,4 +10,18 @@ SRC+=$(subst $(LIB_DIR)/hardware/include, $(BUILD_VSRC_DIR), $(wildcard $(LIB_DI
 $(BUILD_VSRC_DIR)/%.vh: $(LIB_DIR)/hardware/include/%.vh
 	cp $< $(BUILD_VSRC_DIR)
 
+# iob slave port for swreg files
+SRC+=$(BUILD_VSRC_DIR)/iob_s_port.vh
+$(BUILD_VSRC_DIR)/iob_s_port.vh: iob_s_port.vh
+	cp $< $@
+iob_s_port.vh:
+	$(LIB_DIR)/scripts/if_gen.py iob_s_port '' ''
+
+# iob slave portmap for swreg files
+SRC+=$(BUILD_VSRC_DIR)/iob_s_portmap.vh
+$(BUILD_VSRC_DIR)/iob_s_portmap.vh: iob_s_portmap.vh
+	cp $< $@
+iob_s_portmap.vh:
+	$(LIB_DIR)/scripts/if_gen.py iob_s_portmap '' ''
+
 endif
