@@ -41,13 +41,13 @@ module axil2iob
 
     // IOb master interface
     //START_IO_TABLE iob_m
-    `IOB_OUTPUT(valid_o, 1),        //Request valid.
-    `IOB_INPUT(ready_i,  1),        //Interface ready.
-    `IOB_OUTPUT(addr_o,  ADDR_W),   //Address.
-    `IOB_OUTPUT(wdata_o, DATA_W),   //Write data.
-    `IOB_OUTPUT(wstrb_o, DATA_W/8), //Write strobe.
-    `IOB_INPUT(rvalid_i, 1),        //Read data valid.
-    `IOB_INPUT(rdata_i,  DATA_W),   //Read data.
+    `IOB_OUTPUT(iob_valid_o, 1),        //Request valid.
+    `IOB_INPUT(iob_ready_i,  1),        //Interface ready.
+    `IOB_OUTPUT(iob_addr_o,  ADDR_W),   //Address.
+    `IOB_OUTPUT(iob_wdata_o, DATA_W),   //Write data.
+    `IOB_OUTPUT(iob_wstrb_o, DATA_W/8), //Write strobe.
+    `IOB_INPUT(iob_rvalid_i, 1),        //Read data valid.
+    `IOB_INPUT(iob_rdata_i,  DATA_W),   //Read data.
 
     // Global signals
     //START_IO_TABLE global
@@ -60,10 +60,10 @@ module axil2iob
    //
    
    // write address
-   assign axil_awready_o = ready_i;
+   assign axil_awready_o = iob_ready_i;
 
    // write
-   assign axil_wready_o = ready_i;
+   assign axil_wready_o = iob_ready_i;
 
    // write response
    assign axil_bid_o = 1'b0;
@@ -71,20 +71,20 @@ module axil2iob
    assign axil_bvalid_o = 1'b1;
 
    // read address
-   assign axil_arready_o = ready_i;
+   assign axil_arready_o = iob_ready_i;
 
    // read
    assign axil_rid_o = 1'b0;
-   assign axil_rdata_o = rdata_i;
+   assign axil_rdata_o = iob_rdata_i;
    assign axil_rresp_o = 2'b0;
-   assign axil_rvalid_o = rvalid_i;
+   assign axil_rvalid_o = iob_rvalid_i;
 
    //
    // COMPUTE IOb OUTPUTS
    //
-   assign valid_o = axil_awvalid_i | axil_wvalid_i | axil_arvalid_i;
-   assign addr_o  = axil_awvalid_i? axil_awaddr_i: axil_araddr_i;
-   assign wdata_o = axil_wdata_i;
-   assign wstrb_o = axil_wvalid_i? axil_wstrb_i: {DATA_W/8{1'b0}};
+   assign iob_valid_o = axil_awvalid_i | axil_wvalid_i | axil_arvalid_i;
+   assign iob_addr_o  = axil_awvalid_i? axil_awaddr_i: axil_araddr_i;
+   assign iob_wdata_o = axil_wdata_i;
+   assign iob_wstrb_o = axil_wvalid_i? axil_wstrb_i: {DATA_W/8{1'b0}};
 
 endmodule
