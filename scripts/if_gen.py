@@ -178,20 +178,6 @@ def s_port(prefix, fout):
     for i in range(len(table)):
         fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
 
-# AXI4
-
-def m_write_port(prefix, fout):
-    m_port(prefix, fout)
-    
-def s_write_port(prefix, fout):
-    s_port(prefix, fout)
-
-def m_read_port(prefix, fout):
-    m_port(prefix, fout)
-    
-def s_read_port(prefix, fout):
-    s_port(prefix, fout)
-
 #
 # Portmap
 #
@@ -217,32 +203,6 @@ def m_m_portmap(port_prefix, wire_prefix, fout):
 def s_s_portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
         fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'), //'+table[i]['description']+'\n')
-
-# AXI4
-
-def m_write_portmap(port_prefix, wire_prefix, fout):
-    m_portmap(port_prefix, wire_prefix, fout)
-
-def s_write_portmap(port_prefix, wire_prefix, fout):
-    s_portmap(port_prefix, wire_prefix, fout)
-
-def m_m_write_portmap(port_prefix, wire_prefix, fout):
-    m_m_portmap(port_prefix, wire_prefix, fout)
-
-def s_s_write_portmap(port_prefix, wire_prefix, fout):
-    s_s_portmap(port_prefix, wire_prefix, fout)
-
-def m_read_portmap(port_prefix, wire_prefix, fout):
-    m_portmap(port_prefix, wire_prefix, fout)
-
-def s_read_portmap(port_prefix, wire_prefix, fout):
-    s_portmap(port_prefix, wire_prefix, fout)
-
-def m_m_read_portmap(port_prefix, wire_prefix, fout):
-    m_m_portmap(port_prefix, wire_prefix, fout)
-
-def s_s_read_portmap(port_prefix, wire_prefix, fout):
-    s_s_portmap(port_prefix, wire_prefix, fout)
 
 #
 # Wire
@@ -388,7 +348,7 @@ def main ():
         fout.write('  //START_IO_TABLE '+port_prefix+port_name+'\n')
 
     # call function func to generate .vh file
-    func_name = port_name.replace("axil_", "").replace("axi_", "").replace("iob_", "")
+    func_name = port_name.replace("axil_", "").replace("axi_", "").replace("write_", "").replace("read_", "").replace("iob_", "")
     if (port_name.find("portmap")+1):
         eval(func_name+"('"+port_prefix+"','"+wire_prefix+"', fout)")
     else:
