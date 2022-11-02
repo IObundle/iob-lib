@@ -34,7 +34,7 @@ INCLUDE=-Ihardware/include
 # asymmetric memory present
 IS_ASYM=$(shell echo $(SRC) | grep asym)
 
-AXI_GEN:=./scripts/axi_gen.py
+AXI_GEN:=./scripts/if_gen.py
 
 #
 # Simulate with Icarus Verilog
