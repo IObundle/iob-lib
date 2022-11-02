@@ -168,8 +168,6 @@ def suffix(direction):
 # Port
 #
 
-# Generic
-
 def m_port(prefix, fout):
     for i in range(len(table)):
         fout.write(' '+table[i]['signal']+prefix+table[i]['name']+suffix(table[i]['signal'])+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
@@ -181,8 +179,6 @@ def s_port(prefix, fout):
 #
 # Portmap
 #
-
-# Generic
 
 def portmap(port_prefix, wire_prefix, fout):
     for i in range(len(table)):
@@ -207,8 +203,6 @@ def s_s_portmap(port_prefix, wire_prefix, fout):
 #
 # Wire
 #
-
-# Generic
 
 def wire(prefix, fout):
     for i in range(len(table)):
