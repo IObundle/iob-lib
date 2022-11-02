@@ -80,6 +80,32 @@ axi_read=[ \
 ]
 
 #
+# AMBA Bus Signals
+#
+
+amba=[ \
+{'ahb':1, 'apb':1, 'signal':'`IOB_OUTPUT(', 'width':'AHB_ADDR_W',     'name':'ahb_addr',     'default':'0', 'description':'Address write channel address.'}, \
+{'ahb':1, 'apb':0, 'signal':'`IOB_OUTPUT(', 'width': AHB_BURST_W,     'name':'ahb_burst',    'default':'1', 'description':'Address write channel burst type.'}, \
+{'ahb':1, 'apb':0, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_mastlock', 'default':'0', 'description':'Address write channel lock type.'}, \
+{'ahb':1, 'apb':1, 'signal':'`IOB_OUTPUT(', 'width': AHB_PROT_W,      'name':'ahb_prot',     'default':'2', 'description':'Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'}, \
+{'ahb':1, 'apb':0, 'signal':'`IOB_OUTPUT(', 'width': AHB_SIZE_W,      'name':'ahb_size',     'default':'2', 'description':'Address write channel burst size. This signal indicates the size of each transfer in the burst.'}, \
+{'ahb':1, 'apb':0, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_nonsec',   'default':'0', 'description':'Address write channel quality of service.'}, \
+{'ahb':1, 'apb':0, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_excl',     'default':'0', 'description':'Address write channel valid.'}, \
+{'ahb':1, 'apb':0, 'signal':'`IOB_OUTPUT(', 'width':'AHB_MASTER_W',   'name':'ahb_master',   'default':'0', 'description':'Address write channel ID.'}, \
+{'ahb':1, 'apb':0, 'signal':'`IOB_OUTPUT(', 'width': AHB_TRANS_W,     'name':'ahb_trans',    'default':'2', 'description':'Address write channel burst size. This signal indicates the size of each transfer in the burst.'}, \
+{'ahb':0, 'apb':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_psel',     'default':'0', 'description':'Address write channel ready.'}, \
+{'ahb':0, 'apb':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_enable',   'default':'0', 'description':'Address write channel ready.'}, \
+{'ahb':1, 'apb':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_write',    'default':'0', 'description':'Address write channel ready.'}, \
+{'ahb':1, 'apb':1, 'signal':'`IOB_OUTPUT(', 'width':'AHB_DATA_W',     'name':'ahb_wdata',    'default':'0', 'description':'Write channel data.'}, \
+{'ahb':1, 'apb':1, 'signal':'`IOB_OUTPUT(', 'width':'(AHB_DATA_W/8)', 'name':'ahb_wstrb',    'default':'0', 'description':'Write channel write strobe.'}, \
+{'ahb':1, 'apb':1, 'signal':'`IOB_INPUT(',  'width':'AHB_DATA_W',     'name':'ahb_rdata',    'default':'0', 'description':'Write channel data.'}, \
+{'ahb':1, 'apb':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_ready',    'default':'0', 'description':'Write channel last word flag.'}, \
+{'ahb':1, 'apb':0, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_resp',     'default':'0', 'description':'Write channel valid.'}, \
+{'ahb':1, 'apb':0, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_exokay',   'default':'0', 'description':'Write channel ready.'}, \
+{'ahb':0, 'apb':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_slverr',   'default':'0', 'description':'Write channel ready.'}, \
+]
+
+#
 # IOb Native
 #
 
