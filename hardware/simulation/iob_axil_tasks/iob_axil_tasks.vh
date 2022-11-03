@@ -53,7 +53,7 @@ task axil_read;
 
       @(posedge clk) #1;
       while (!axil_arready_o) @(posedge clk) #1;
-       @(posedge clk) axil_arvalid_i = #1 0;
+      @(posedge clk) axil_arvalid_i = #1 0;
 
       while (!axil_rvalid_o) #1;
       axil_data_task = #1 `IOB_GET_RDATA(axil_addr_task, axil_rdata_o, axil_width_task);
