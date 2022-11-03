@@ -5,7 +5,7 @@
 
 import sys
 import argparse
-from parse import search
+import tomli
 from math import ceil, log
 
 cpu_nbytes = 4
@@ -14,10 +14,11 @@ core_addr_w = None
 
 def parse_arguments():
     help_str = """
-    mkregs.conf file:
-        The configuration file supports the following formats:
-            IOB_SWREG_R(NAME, NBITS, RST_VAL, ADDR, ADDR_W, AUTOLOGIC) // Description
-            IOB_SWREG_W(NAME, NBITS, RST_VAL, ADDR, ADDR_W, AUTOLOGIC) // Description
+    mkregs.toml file:
+        The configuration file supports the following toml format:
+            [[latex_table_name]]
+            REG1_NAME = {type="W", nbits=1, reset_value=0, address=-1, address_w=0, autologic=true} # Description
+            REG2_NAME = {type="R", nbits=1, reset_value=0, address=-1, address_w=0, autologic=true} # Description
     """
 
     parser = argparse.ArgumentParser(
@@ -27,7 +28,7 @@ def parse_arguments():
             )
 
     parser.add_argument("TOP", help="""Top/core module name""")
-    parser.add_argument("PATH", help="""Path to mkregs.conf file""")
+    parser.add_argument("PATH", help="""Path to mkregs.toml file""")
     parser.add_argument("hwsw", choices=['HW', 'SW'],
                         help="""HW: generate the hardware files
                         SW: generate the software files"""
@@ -467,48 +468,21 @@ def calc_swreg_addr(table):
 
     return table
 
-
-def swreg_get_fields(line):
-    # Parse IOB_SWREG_{R|W}(NAME, NBITS, RST_VAL, ADDR, ADDR_W) // Comment
-    result = search("IOB_SWREG_{rw_type}({name},{nbits},{rst_val},{addr},{addr_w},{autologic}){wspace}//{description}\n", line)
-    # Get dictionary of named fields from parse.Result object
-    if result:
-        swreg_flds = result.named
-        # Remove whitespace
-        for key in swreg_flds:
-            swreg_flds[key] = swreg_flds[key].strip(" ").strip("\t")
-    else:
-        swreg_flds = None
-
-    row = {'rw_type': '', 'name': '', 'nbits': 0, 'nbytes': 0, 'rst_val': 0, 'addr': 0, 'addr_w': 0, 'autologic': True}
-
-    if swreg_flds is None:
-        row = None
-    else:
-        row['rw_type'] = swreg_flds['rw_type']
-        row['name'] = swreg_flds['name']
-        row['nbits'] = int(swreg_flds['nbits'])
-        row['nbytes'] = ceil(int(swreg_flds['nbits'])/8)
-        row['rst_val'] = int(swreg_flds['rst_val'])
-        row['addr'] = int(swreg_flds['addr'])
-        row['addr_w'] = int(swreg_flds['addr_w'])
-        row['autologic'] = bool(int(swreg_flds['autologic']))
-        row['wspace'] = swreg_flds['wspace']
-        row['description'] = swreg_flds['description']
-
-    return row
-
-
-def swreg_parse(code, hwsw, top, vh_files):
-    # build table: list of swreg dictionaries
+# return table: list of swreg dictionaries based on toml configuration
+def swreg_list(toml_dict):
     table = []
-    for line in code:
-        row = swreg_get_fields(line)
-        if row is None:
-            continue
-        table.append(row)
+    for __, regs in toml_dict.items():
+        for reg in regs[0].items():
+            table.append({"name":reg[0], "nbytes":ceil(int(reg[1]['nbits'])/8)} | reg[1])
+
     # calculate address field
     table = calc_swreg_addr(table)
+
+    return table
+
+# process swreg configuration
+def swreg_proc(toml_dict, hwsw, top, vh_files):
+    table = swreg_list(toml_dict)
     if hwsw == "HW":
         write_hwheader(table, top)
         write_hwcode(table, top)
@@ -522,15 +496,15 @@ def main():
     # parse command line
     args = parse_arguments()
     # parse input file
-    config_file_name = f"{args.PATH}/mkregs.conf"
+    config_file_name = f"{args.PATH}/mkregs.toml"
     try:
-        fin = open(config_file_name, "r")
+        fin = open(config_file_name, "rb")
     except FileNotFoundError:
         print(f"Could not open {config_file_name}")
         quit()
-    defsfile = fin.readlines()
+    toml_dict = tomli.load(fin)
     fin.close()
-    swreg_parse(defsfile, args.hwsw, args.TOP, args.vh_files)
+    swreg_proc(toml_dict, args.hwsw, args.TOP, args.vh_files)
 
 
 if __name__ == "__main__":
