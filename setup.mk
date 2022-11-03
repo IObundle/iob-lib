@@ -172,7 +172,7 @@ $(BUILD_TSRC_DIR)/shortHash.tex:
 
 
 #software accessible registers
-ifneq ($(wildcard mkregs.conf),)
+ifneq ($(wildcard mkregs.toml),)
 
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_swreg_gen.v $(BUILD_VSRC_DIR)/$(NAME)_swreg_def.vh $(BUILD_VSRC_DIR)/$(NAME)_swreg_inst.vh
 $(BUILD_VSRC_DIR)/$(NAME)_swreg_gen.v: $(NAME)_swreg_gen.v
@@ -181,7 +181,7 @@ $(BUILD_VSRC_DIR)/$(NAME)_swreg_gen.v: $(NAME)_swreg_gen.v
 $(BUILD_VSRC_DIR)/$(NAME)_swreg_%.vh: $(NAME)_swreg_%.vh
 	cp $< $@
 
-$(NAME)_swreg_def.vh $(NAME)_swreg_inst.vh $(NAME)_swreg_gen.v: mkregs.conf
+$(NAME)_swreg_def.vh $(NAME)_swreg_inst.vh $(NAME)_swreg_gen.v: mkregs.toml
 	$(LIB_DIR)/scripts/mkregs.py $(NAME) . HW
 
 endif
@@ -204,7 +204,7 @@ $(BUILD_DOC_DIR)/Makefile: $(LIB_DIR)/document/Makefile
 #make tex files from verilog sources
 v2tex: $(SRC)
 ifeq ($(wildcard *.tex),)
-	$(PYTHON_DIR)/verilog2tex.py $(BUILD_VSRC_DIR)/$(NAME).v $(wildcard $(BUILD_VSRC_DIR)/*) mkregs.conf
+	$(PYTHON_DIR)/verilog2tex.py $(BUILD_VSRC_DIR)/$(NAME).v $(wildcard $(BUILD_VSRC_DIR)/*) mkregs.toml
 	cp *.tex $(BUILD_TSRC_DIR)
 endif
 
