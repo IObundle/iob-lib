@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 '''Verilog2Tex: extract user guide documentation from Verilog sources and
-        register configuration file (mkregs.conf)
+        register configuration file (mkregs.toml)
 
-   Usage: verilog2tex.py path/to/top_level.v [verilog_files] [mkregs.conf]
+   Usage: verilog2tex.py path/to/top_level.v [verilog_files] [mkregs.toml]
         print("verilog_files: paths to .v and .vh files
-        print("mkregs_conf: path/to/mkregs.conf
+        print("mkregs_conf: path/to/mkregs.toml
 '''
 import sys
 from parse import parse, search
 
-from mkregs import calc_swreg_addr, swreg_get_fields
+from mkregs import calc_swreg_addr
 import re
+import tomli
+from math import ceil
 
 
 '''
@@ -208,79 +210,40 @@ def get_swreg_by_name(swreg_list, name):
             return swreg
     return None
 
-def swreg_parse (conf, defines) :
+#nbytes may be defined using macros: replace and evaluate
+def replace_width_macro(nbytes,defines):
+    tmp_width = f"{int(nbytes)*8}"
+    eval_str = tmp_width.replace('`','').replace(',','')
+    for key, val in defines.items():
+        eval_str = eval_str.replace(str(key),str(val))
+    try:
+        return eval(eval_str)
+    except:
+        #eval_str has undefined parameters: use as is
+        return eval_str.replace('_','\_').strip(' ')
 
-    swreg_cnt = 0
-    table_found = 0
+def swreg_parse (toml_dict, defines) :
+
     table = []
-
-    # get all swregs from mkregs_conf with addresses pre calculated
-    swreg_list = []
-    for line in conf:
-        swreg_flds = swreg_get_fields(line)
-        if swreg_flds is None:
-            continue
-        swreg_list.append(swreg_flds)
+    table_names = []
+    for table_name, regs in toml_dict.items():
+        table_names.append(table_name)
+        for reg in regs[0].items():
+            table.append({"tablename":table_name, "name":reg[0], "nbytes":ceil(int(reg[1]['nbits'])/8)} | reg[1])
 
     # calculate address field
-    swreg_list = calc_swreg_addr(swreg_list)
+    table = calc_swreg_addr(table)
 
-    for line in conf:
-        #find table start
-        if '//START_SWREG_TABLE' in line:
-            if table_found == 1:
-                write_table(table_name + '_swreg', table)
-                table = [] #clear table
-            table_found = 1
-            flds = line.split()
-            table_name = ''
-            if len(flds) > 1:
-                table_name = flds[1]
-            continue
-
-        swreg_flds = []
-        swreg_dict = swreg_get_fields(line)
-
-        if swreg_dict is None:
-            continue
-
-        swreg_dict = get_swreg_by_name(swreg_list, swreg_dict['name'])
-        if swreg_dict is None:
-            continue
-
-        #NAME
-        swreg_flds.append(swreg_dict['name'].replace('_','\_'))
-
-        #TYPE
-        swreg_flds.append(swreg_dict['rw_type'])
-
-        #ADDRESS
-        swreg_flds.append(swreg_dict['addr'])
-
-        #WIDTH
-        #may be defined using macros: replace and evaluate
-        tmp_width = f"{int(swreg_dict['nbytes'])*8}"
-        eval_str = tmp_width.replace('`','').replace(',','')
-        for key, val in defines.items():
-            eval_str = eval_str.replace(str(key),str(val))
-        try:
-            swreg_flds.append(eval(eval_str))
-        except:
-            #eval_str has undefined parameters: use as is
-            swreg_flds.append(eval_str.replace('_','\_').strip(' '))
-
-        #DEFAULT VALUE
-        swreg_flds.append(swreg_dict['rst_val'])
-
-        #DESCRIPTION
-        swreg_flds.append(swreg_dict['description'].replace('_','\_'))
-
-        table.append(swreg_flds)
-
-    #write last table
-    if table_found == 1:
-        write_table(table_name + '_swreg', table)
-
+    for table_name in table_names:
+        #nbytes cannot contain macros because it is automatically calculated above, from the nbits field.
+        #table_list = [[a['name'],a['rw_type'],a['addr'],replace_width_macro(a['nbytes'],defines),a['rst_val'],a['description']]\
+        table_list = [[a['name'],a['rw_type'],a['addr'],a['nbytes']*8,a['rst_val'],a['description']]\
+                        for a in table if a["tablename"] == table_name]
+        # Escape underscores in register names and descriptions
+        for a in table_list:
+            a[0]=a[0].replace('_','\_') # Register name at index 0 of list
+            a[5]=a[5].replace('_','\_') # Register description at index 5 of list
+        write_table(table_name + '_swreg', table_list)
         
 def header_parse(vh, defines):
     """ Parse header files
@@ -314,7 +277,7 @@ def main () :
         print("Usage: verilog2tex.py top [verilog_files] [conf]")
         print("top: top-level verilog file")
         print("verilog_files: list of .v and .vh files")
-        print("conf: mkregs.conf file")
+        print("conf: mkregs.toml file")
         exit()
 
     #top-level verilog file
@@ -330,7 +293,7 @@ def main () :
 
     vh = [] #header list
     v = [] #source list
-    conf = [] # mkregs.conf list
+    toml_dict = {} # mkregs.toml dictionary
 
     if(len(sys.argv) > 2):
 
@@ -349,11 +312,11 @@ def main () :
                 v = [*v, *fv.readlines()]
                 fv.close()
 
-        # read mkregs.conf file
+        # read mkregs.toml file
         conf_idx = len(sys.argv)-1
-        if sys.argv[conf_idx] == 'mkregs.conf':
-            fconf =  open (sys.argv[conf_idx], 'r')
-            conf = [*conf, *fconf.readlines()]
+        if sys.argv[conf_idx] == 'mkregs.toml':
+            fconf =  open (sys.argv[conf_idx], 'rb')
+            toml_dict = tomli.load(fconf)
             fconf.close()
 
 
@@ -371,7 +334,7 @@ def main () :
     io_parse ([*topv_lines, *v, *vh], params, defines)
 
     #PARSE SOFTWARE ACCESSIBLE REGISTERS
-    if conf != []:
-        swreg_parse (conf, defines)
+    if toml_dict != {}:
+        swreg_parse (toml_dict, defines)
 
 if __name__ == "__main__" : main ()
