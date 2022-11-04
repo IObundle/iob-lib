@@ -23,6 +23,7 @@
 `define IOB_WIRE(NAME, WIDTH) wire [WIDTH-1:0] NAME;
 `define IOB_WIRE_SIGNED(NAME, WIDTH) wire signed [WIDTH-1:0] NAME;
 `define IOB_VAR(NAME, WIDTH) reg [WIDTH-1:0] NAME;
+`define IOB_VAR_INIT(NAME, WIDTH, INIT) reg [WIDTH-1:0] NAME = INIT;
 `define IOB_VAR_SIGNED(NAME, WIDTH) reg signed [WIDTH-1:0] NAME;
 `define IOB_VAR2WIRE(IN, OUT) assign OUT = IN;//convert IOB_VAR to IOB_WIRE
 //2d arrays
