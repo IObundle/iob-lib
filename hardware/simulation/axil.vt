@@ -1,0 +1,23 @@
+//
+// AXI4 protocol templates
+//
+
+// Write data to AXI4 Lite slave
+@(posedge clk) #1 axil_awvalid_i = 1;
+axil_awaddr_i  = `IOB_WORD_ADDR(<addr>);   
+axil_wdata_i  = `IOB_GET_WDATA(<addr>, <value>);
+axil_wstrb_i  = `IOB_GET_WSTRB(<addr>, <width>);
+axil_wvalid_i = 1;
+while (!axil_awready_o) #1;
+while (!axil_wready_o) #1;
+@(posedge clk) #1 axil_awvalid_i = 0;
+axil_wvalid_i = 0;
+
+
+// Read data from AXI4 Lite slave
+@(posedge clk) #1 axil_arvalid_i = 1;
+axil_araddr_i  = `IOB_WORD_ADDR(<addr>);
+while (!axil_arready_o) #1;
+@(posedge clk) #1 axil_arvalid_i = 0;
+while (!axil_rvalid_o) #1;
+@(posedge clk) #1 rdata_i = `IOB_GET_RDATA(<addr>, axil_rdata_o, <width>);
