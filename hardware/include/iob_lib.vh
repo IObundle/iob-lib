@@ -23,6 +23,7 @@
 `define IOB_WIRE(NAME, WIDTH) wire [WIDTH-1:0] NAME;
 `define IOB_WIRE_SIGNED(NAME, WIDTH) wire signed [WIDTH-1:0] NAME;
 `define IOB_VAR(NAME, WIDTH) reg [WIDTH-1:0] NAME;
+`define IOB_VAR_INIT(NAME, WIDTH, INIT) reg [WIDTH-1:0] NAME = INIT;
 `define IOB_VAR_SIGNED(NAME, WIDTH) reg signed [WIDTH-1:0] NAME;
 `define IOB_VAR2WIRE(IN, OUT) assign OUT = IN;//convert IOB_VAR to IOB_WIRE
 //2d arrays
@@ -54,7 +55,7 @@
 `define IOB_CLOCK(CLK, PER) reg CLK=1; always #(PER/2) CLK = ~CLK;
 
 //PULSE 
-`define IOB_PULSE(VAR, DURATION) VAR=1; #DURATION VAR=0;
+`define IOB_PULSE(VAR, PRE, DURATION, POST) #PRE VAR=1; #DURATION VAR=0; #POST;
    
 //RESET SYNCHRONIZER
 `define IOB_RESET_SYNC(CLK, RST_IN, RST_OUT) \

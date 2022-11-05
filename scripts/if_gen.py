@@ -47,16 +47,16 @@ axi_write=[ \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_PROT_W,      'name':'axi_awprot',  'default':'2', 'description':'Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_QOS_W,       'name':'axi_awqos',   'default':'0', 'description':'Address write channel quality of service.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_awvalid', 'default':'0', 'description':'Address write channel valid.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_awready', 'default':'0', 'description':'Address write channel ready.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_awready', 'default':'1', 'description':'Address write channel ready.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_DATA_W',     'name':'axi_wdata',   'default':'0', 'description':'Write channel data.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'(AXI_DATA_W/8)', 'name':'axi_wstrb',   'default':'0', 'description':'Write channel write strobe.'}, \
 {'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_wlast',   'default':'0', 'description':'Write channel last word flag.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_wvalid',  'default':'0', 'description':'Write channel valid.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_wready',  'default':'0', 'description':'Write channel ready.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_wready',  'default':'1', 'description':'Write channel ready.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_ID_W',       'name':'axi_bid',     'default':'0', 'description':'Write response channel ID.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width': AXI_RESP_W,      'name':'axi_bresp',   'default':'0', 'description':'Write response channel response.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_bvalid',  'default':'0', 'description':'Write response channel valid.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_bready',  'default':'0', 'description':'Write response channel ready.'} \
+{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_bready',  'default':'1', 'description':'Write response channel ready.'} \
 ]
 
 axi_read=[ \
@@ -70,13 +70,13 @@ axi_read=[ \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_PROT_W,      'name':'axi_arprot',  'default':'2', 'description':'Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_QOS_W,       'name':'axi_arqos',   'default':'0', 'description':'Address read channel quality of service.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_arvalid', 'default':'0', 'description':'Address read channel valid.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_arready', 'default':'0', 'description':'Address read channel ready.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_arready', 'default':'1', 'description':'Address read channel ready.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_ID_W',       'name':'axi_rid',     'default':'0', 'description':'Read channel ID.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_DATA_W',     'name':'axi_rdata',   'default':'0', 'description':'Read channel data.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width': AXI_RESP_W,      'name':'axi_rresp',   'default':'0', 'description':'Read channel response.'}, \
 {'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_rlast',   'default':'0', 'description':'Read channel last word.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_rvalid',  'default':'0', 'description':'Read channel valid.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_rready' , 'default':'0', 'description':'Read channel ready.'} \
+{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_rready' , 'default':'1', 'description':'Read channel ready.'} \
 ]
 
 #
@@ -210,13 +210,13 @@ def tbsignal(direction):
     if direction == '`IOB_INPUT(':
         return '`IOB_WIRE('
     elif direction == '`IOB_OUTPUT(':
-        return '`IOB_VAR('
+        return '`IOB_VAR_INIT('
     else:
         print("ERROR: tb_reciprocal : invalid argument")
         quit()
 
 def suffix(direction):
-    if direction == '`IOB_INPUT(' or direction == '`IOB_VAR(':
+    if direction == '`IOB_INPUT(' or direction == '`IOB_VAR_INIT(':
         return '_i'
     elif direction == '`IOB_OUTPUT(' or direction == '`IOB_WIRE(':
         return '_o'
@@ -277,32 +277,20 @@ def wire(prefix, fout):
 def m_tb_wire(prefix, fout):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write(tbsignal(table[i]['signal'])+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+            if tbsignal(table[i]['signal']) == '`IOB_VAR_INIT(':
+                fout.write(tbsignal(table[i]['signal'])+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+', '+table[i]['width']+', '+table[i]['default']+') //'+table[i]['description']+'\n')
+            else:
+                fout.write(tbsignal(table[i]['signal'])+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
     fout.write('\n')
-    m_tb_initial(prefix, fout)
     
 def s_tb_wire(prefix, fout):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write(tbsignal(reverse(table[i]['signal']))+prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+            if tbsignal(reverse(table[i]['signal'])) == '`IOB_VAR_INIT(':
+                fout.write(tbsignal(reverse(table[i]['signal']))+prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+', '+table[i]['width']+', '+table[i]['default']+') //'+table[i]['description']+'\n')
+            else:
+                fout.write(tbsignal(reverse(table[i]['signal']))+prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
     fout.write('\n')
-    s_tb_initial(prefix, fout)
-
-def m_tb_initial(prefix, fout):
-    fout.write('initial begin\n')
-    for i in range(len(table)):
-        if table[i]['slave'] == 1:
-            if tbsignal(table[i]['signal']) == '`IOB_VAR(':
-                fout.write('    '+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+' = '+table[i]['default']+';\n')
-    fout.write('end\n')
-
-def s_tb_initial(prefix, fout):
-    fout.write('initial begin\n')
-    for i in range(len(table)):
-        if table[i]['master'] == 1:
-            if tbsignal(reverse(table[i]['signal'])) == '`IOB_VAR(':
-                fout.write('    '+prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+' = '+table[i]['default']+';\n')
-    fout.write('end\n')
 
 #
 # Main

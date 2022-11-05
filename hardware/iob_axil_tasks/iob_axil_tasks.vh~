@@ -1,0 +1,78 @@
+//
+// AXI-Lite write and read 
+//
+
+//axil_address_write(addr, data, width, awvalid, wvalid, awaddr, wdata, wstrb)
+task axil_address_write;
+   input [AXIL_ADDR_W-1:0] addr;
+   output [AXIL_DATA_W-1:0] data;
+   input [$clog2(AXIL_DATA_W):0] width;
+
+   output awvalid;
+   output wvalid;
+   output [AXIL_ADDR_W-1:0] awaddr;
+   output [AXIL_DATA_W-1:0] wdata;
+   output [AXIL_DATA_W/8-1:0] wstrb;
+
+   localparam DATA_W = AXIL_DATA_W;
+
+   begin
+      @(posedge clk) #1 awvalid = 1; wvalid = 1; //sync and assign
+      awaddr = `IOB_WORD_ADDR(addr);
+      wdata = `IOB_GET_WDATA(addr, data);
+      wstrb = `IOB_GET_WSTRB(addr, width);
+   end
+endtask
+
+//axil_write(awready, wready, awvalid, wvalid)
+task axil_write; 
+   input awready;
+   input wready;
+   output awvalid;
+   output wvalid;
+
+   begin
+      while (!awready) #1; 
+      if(wready)
+        @(posedge clk) #1 awvalid = 0; wvalid = 0; //awvalid must remain high one cycle before low     
+      else begin
+         @(posedge clk) #1 awvalid = 0; //awvalid must remain high one cycle before low     
+         while (!wready) #1; @(posedge clk) #1 wvalid = 0;
+      end
+end
+endtask
+
+//axil_address_read (addr, width, arvalid, wstrb, araddr)
+task axil_address_read;
+   input [AXIL_ADDR_W-1:0] addr;
+   input [$clog2(AXIL_DATA_W):0] width;
+   output                        arvalid;
+   output                        wstrb;
+   output [AXIL_ADDR_W-1:0]      araddr;
+
+   begin
+      @(posedge clk) #1 arvalid_i = 1; wstrb_i  = 0; //sync and assign
+      araddr  = `IOB_WORD_ADDR(addr);
+   end
+endtask
+
+// axil_read(addr, width, data, arready, arvalid, rvalid, rdata)
+task axil_read;
+   input [AXIL_ADDR_W-1:0] addr;
+   input [$clog2(AXIL_DATA_W):0] width;
+   output [AXIL_DATA_W-1:0] data;
+   input arready;
+   output arvalid;
+   input rvalid; 
+   input [AXIL_DATA_W-1:0] rdata;
+
+   localparam DATA_W = AXIL_DATA_W;
+
+   begin
+      while (!arready) #1;
+      @(posedge clk) #1 arvalid = 0; rready = 1; //arvalid must remain high one cycle before low
+      while (!rvalid) #1; 
+      data = `IOB_GET_RDATA(addr, rdata, width); //sample data
+      @(posedge clk) #1;
+   end
+endtask
