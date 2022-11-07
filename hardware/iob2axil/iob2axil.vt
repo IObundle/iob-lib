@@ -1,15 +1,15 @@
-   axil2iob
+   iob2axil
      #(
        .AXIL_ADDR_W(AXIL_ADDR_W),
        .AXIL_DATA_W(AXIL_DATA_W),
        .AXIL_ID_W(1)
        )
-   axil2iob0
+   iob2axil
      (
-      // AXI4 Lite slave interface
+      // AXI4 Lite master interface
 `include "<core name prefix>axil_portmap.vh"
 
-      // IOb master interface
+      // IOb slave interface
 `include "<core name prefix>portmap.vh"
 
       // Global signals

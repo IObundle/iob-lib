@@ -1,129 +1,65 @@
 `timescale 1ns / 1ps
 
+`include "iob_lib.vh"
 
-module iob2axil #
-  (
-   parameter AXIL_ADDR_W = 32, // Width of address bus in bits
-   parameter AXIL_DATA_W = 32  // Width of data bus in bits
+module iob2axil
+  #(
+    parameter AXIL_ADDR_W = 32,     // AXI Lite address bus width in bits
+    parameter AXIL_DATA_W = 32,     // AXI Lite data bus width in bits
+    parameter AXIL_ID_W = 1,        // AXI Lite ID bus width in bits
+    parameter ADDR_W = AXIL_ADDR_W, // IOb address bus width in bits
+    parameter DATA_W = AXIL_DATA_W  // IOb data bus width in bits
    )
    (
-    input                        clk,
-    input                        rst,
-
     //
-    // AXI-4 lite master interface
+    // AXI4 Lite master interface
     //
 `include "axil_m_port.vh"
 
     //
-    // Native slave interface
+    // IOb slave interface
     //
-    input                        valid_i,
-    input [AXIL_ADDR_W-1:0]      addr_i,
-    input [AXIL_DATA_W-1:0]      wdata_i,
-    input [AXIL_DATA_W/8-1:0]    wstrb_i,
-    output reg [AXIL_DATA_W-1:0] rdata_o,
-    output                       ready_o
+`include "iob_s_port.vh"
+
+    // Global signals
+`include "iob_clkrst_port.vh"
     );
 
-   assign axil_awaddr_o = addr_i;
-   assign axil_araddr_o = addr_i;
-   assign axil_wdata_o  = wdata_i;
-   assign axil_wstrb_o  = wstrb_i;
+   //
+   // COMPUTE AXIL OUTPUTS
+   //
 
-   // AXI IDs
-   assign axil_awid_o = `AXI_ID_W'd0;
-   assign axil_wid_o  = `AXI_ID_W'd0;
-   assign axil_arid_o = `AXI_ID_W'd0;
+   // write address
+   assign axil_awid_o    = {AXIL_ID_W{1'b0}};
+   assign axil_awvalid_o = iob_valid_i & |iob_wstrb_i;
+   assign axil_awaddr_o  = iob_addr_i;
+   assign axil_awprot_o  = 3'd2;
+   assign axil_awqos_o   = 4'd0;
 
-   // Protection types
-   assign axil_awprot_o = `AXI_PROT_W'd2;
-   assign axil_arprot_o = `AXI_PROT_W'd2;
+   // write
+   assign axil_wid_o    = {AXIL_ID_W{1'b0}};
+   assign axil_wvalid_o = iob_valid_i & |iob_wstrb_i;
+   assign axil_wdata_o  = iob_wdata_i;
+   assign axil_wstrb_o  = iob_wstrb_i;
 
-   // Quality of services
-   assign axil_awqos_o = `AXI_QOS_W'd0;
-   assign axil_arqos_o = `AXI_QOS_W'd0;
-
-   always @(posedge clk_i, posedge rst_i) begin
-      if (rst_i) begin
-         rdata_o <= {AXIL_DATA_W{1'b0}};
-      end else begin
-         rdata_o <= axil_rdata_i;
-      end
-   end
-
-   wire                          wr = valid_i & |wstrb_i;
-   wire                          rd = valid_i & ~|wstrb_i;
-   reg                           wr_reg, rd_reg;
-   always @(posedge clk_i, posedge rst_i) begin
-      if (rst_i) begin
-         wr_reg <= 1'b0;
-         rd_reg <= 1'b0;
-      end else begin
-         wr_reg <= wr;
-         rd_reg <= rd;
-      end
-   end
-
-   reg                           awvalid_ack;
-   assign axil_awvalid_o = (wr | wr_reg) & ~awvalid_ack;
-   always @(posedge clk_i, posedge rst_i) begin
-      if (rst_i) begin
-         awvalid_ack <= 1'b0;
-      end else if (axil_awvalid_i & axil_awready_i) begin
-         awvalid_ack <= 1'b1;
-      end else if (axil_bvalid_i) begin
-         awvalid_ack <= 1'b0;
-      end
-   end
-
-   reg                           wvalid_ack;
-   assign axil_wvalid_o = (wr | wr_reg)  & ~wvalid_ack;
-   always @(posedge clk_i, posedge rst_i) begin
-      if (rst_i) begin
-         wvalid_ack <= 1'b0;
-      end else if (axil_wvalid_i & axil_wready_i) begin
-         wvalid_ack <= 1'b1;
-      end else begin
-         wvalid_ack <= 1'b0;
-      end
-   end
-
+   // write response
    assign axil_bready_o = 1'b1;
 
-   reg                           axil_rvalid_reg;
-   always @(posedge clk_i, posedge rst_i) begin
-      if (rst_i) begin
-         axil_rvalid_reg <= 1'b0;
-      end else begin
-         axil_rvalid_reg <= axil_rvalid_i;
-      end
-   end
+   // read address
+   assign axil_arid_o    = {AXIL_ID_W{1'b0}};
+   assign axil_arvalid_o = iob_valid_i & ~|iob_wstrb_i;
+   assign axil_araddr_o  = iob_addr_i;
+   assign axil_arprot_o  = 3'd2;
+   assign axil_arqos_o   = 4'd0;
 
-   reg                           arvalid_ack;
-   assign axil_arvalid_o = (rd | rd_reg) & ~arvalid_ack;
-   always @(posedge clk_i, posedge rst_i) begin
-      if (rst_i) begin
-         arvalid_ack <= 1'b0;
-      end else if (axil_arvalid_i & axil_arready_i) begin
-         arvalid_ack <= 1'b1;
-      end else if (axil_rvalid_i | axil_rvalid_reg) begin
-         arvalid_ack <= 1'b0;
-      end
-   end
+   // read
+   assign axil_rready_o = 1'b1;
 
-   reg                           rready_ack;
-   assign axil_rready_o = (rd | rd_reg) & ~rready_ack;
-   always @(posedge clk_i, posedge rst_i) begin
-      if (rst_i) begin
-         rready_ack <= 1'b0;
-      end else if (axil_rvalid_i & axil_rready_i) begin
-         rready_ack <= 1'b1;
-      end else begin
-         rready_ack <= 1'b0;
-      end
-   end
-
-   assign ready_o = axil_bvalid_i | rready_ack;
+   //
+   // COMPUTE IOb OUTPUTS
+   //
+   assign iob_rvalid_o = axil_rvalid_i;
+   assign iob_rdata_o  = axil_rdata_i;
+   assign iob_ready_o  = axil_wready_i | axil_arready_i;
 
 endmodule
