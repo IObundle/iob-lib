@@ -9,11 +9,11 @@ module iob_acc
     input                   clk_i,
     input                   arst_i,
     input                   rst_i,
+    input                   en_i,
 
     input                   ld_i,
     input [DATA_W-1:0]      ld_val_i,
 
-    input                   en_i,
     input [DATA_W-1:0]      incr_i,
     output reg [DATA_W-1:0] data_o
     );
