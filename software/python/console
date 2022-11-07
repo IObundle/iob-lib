@@ -205,7 +205,7 @@ def init_serial():
     ser.bytesize = serial.EIGHTBITS    # number of bits per bytes
     ser.parity = serial.PARITY_NONE    # set parity check: no parity
     ser.stopbits = serial.STOPBITS_ONE # number of stop bits
-    ser.timeout = 1                    # block read
+    ser.timeout = None                 # block read
     ser.xonxoff = False                # disable software flow control
     ser.rtscts = False                 # disable hardware (RTS/CTS) flow control
     ser.dsrdtr = False                 # disable hardware (DSR/DTR) flow control
@@ -257,8 +257,6 @@ def main():
     load_fw = init_console()
     gotENQ = False
     input_thread = Thread(target=getUserInput, args=[], daemon=True)
-
-    stdin = sys.stdin
 
     # Reading the data from the serial port or FIFO files. This will be running in an infinite loop.
     while(True):
