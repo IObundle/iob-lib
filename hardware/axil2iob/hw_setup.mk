@@ -11,4 +11,18 @@ SRC+=$(BUILD_VSRC_DIR)/axil2iob.v
 $(BUILD_VSRC_DIR)/axil2iob.v: $(LIB_DIR)/hardware/axil2iob/axil2iob.v
 	cp $< $(BUILD_VSRC_DIR)
 
+# AXI4 Lite slave port
+SRC+=$(BUILD_VSRC_DIR)/axil_s_port.vh
+$(BUILD_VSRC_DIR)/axil_s_port.vh: axil_s_port.vh
+	cp $< $@
+axil_s_port.vh:
+	$(LIB_DIR)/scripts/if_gen.py axil_s_port '' ''
+
+# iob master port
+SRC+=$(BUILD_VSRC_DIR)/iob_m_port.vh
+$(BUILD_VSRC_DIR)/iob_m_port.vh: iob_m_port.vh
+	cp $< $@
+iob_m_port.vh:
+	$(LIB_DIR)/scripts/if_gen.py iob_m_port '' ''
+
 endif

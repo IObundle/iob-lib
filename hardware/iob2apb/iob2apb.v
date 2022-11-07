@@ -40,12 +40,12 @@ module iob2apb
    // write
    assign apb_write_o = |iob_wstrb_i;
    assign apb_wdata_o = iob_wdata_i;
-   assign apb_wstrb_o = |iob_wstrb_i? iob_wstrb_i: {APB_DATA_W/8{1'b0}};
+   assign apb_wstrb_o = iob_wstrb_i;
 
    //
    // COMPUTE IOb OUTPUTS
    //
-   assign iob_rvalid_o = |iob_wstrb_i & apb_enable_o & apb_ready_i;
+   assign iob_rvalid_o = apb_write_o & apb_enable_o & apb_ready_i;
    assign iob_rdata_o  = apb_rdata_i;
    assign iob_ready_o  = apb_enable_o & apb_ready_i;
 
