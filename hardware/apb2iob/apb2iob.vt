@@ -1,0 +1,16 @@
+   apb2iob
+     #(
+       .APB_ADDR_W(APB_ADDR_W),
+       .APB_DATA_W(APB_DATA_W)
+       )
+   apb2iob0
+     (
+      // APB slave interface
+`include "<core name prefix>apb_portmap.vh"
+
+      // IOb master interface
+`include "<core name prefix>portmap.vh"
+
+      .clk(clk_i),
+      .rst(rst_i)
+      );
