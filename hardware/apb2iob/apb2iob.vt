@@ -11,6 +11,6 @@
       // IOb master interface
 `include "<core name prefix>portmap.vh"
 
-      .clk(clk_i),
-      .rst(rst_i)
+      // Global signals
+`include "iob_clkrst_portmap.vh"
       );
