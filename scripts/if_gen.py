@@ -232,12 +232,12 @@ def suffix(direction):
 def m_port(prefix, fout):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write(' '+table[i]['signal']+prefix+table[i]['name']+suffix(table[i]['signal'])+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
+            fout.write(' '+table[i]['signal']+prefix+table[i]['name']+suffix(table[i]['signal'])+', '+table[i]['width']+'), //'+top_macro+table[i]['description']+'\n')
     
 def s_port(prefix, fout):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', '+table[i]['width']+'), //'+table[i]['description']+'\n')
+            fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', '+table[i]['width']+'), //'+top_macro+table[i]['description']+'\n')
 
 #
 # Portmap
@@ -465,6 +465,7 @@ def parse_arguments():
     parser.add_argument("file_prefix", nargs='?', help="""Output file prefix.""", default='')
     parser.add_argument("port_prefix", nargs='?', help="""Port prefix.""", default='')
     parser.add_argument("wire_prefix", nargs='?', help="""Wire prefix.""", default='')
+    parser.add_argument("--top", help="""Top Module interface.""", action='store_true')
 
     return parser.parse_args()
 
@@ -483,6 +484,14 @@ def main ():
     file_prefix = args.file_prefix
     port_prefix = args.port_prefix
     wire_prefix = args.wire_prefix
+
+    # top flag
+    top = args.top
+    global top_macro
+    top_macro = ''
+    if top:
+        top_macro = 'V2TEX_IO '
+
 
     # open output .vh file
     fout = open (file_prefix+typ+".vh", 'w')
