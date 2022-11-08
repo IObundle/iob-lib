@@ -172,30 +172,38 @@ def io_parse (io_lines, params, defines):
             table_name = line.split()[1]
             continue
 
-        io_flds = []
-        io_flds_tmp = parse('{}`{}({},{}){}//{}', line)
+        # skip lines without V2TEX_IO
+        if not 'V2TEX_IO' in line:
+            continue
 
-        if io_flds_tmp is None or 'PUT' not in io_flds_tmp[1]:
-            continue #not an io
+        io_flds = []
+        result = search('{wspace}`IOB_{type}({name},{width}){wspace2}//V2TEX_IO{description}\n', line)
+        if result is None:
+            continue # not an input/output
+        else:
+            io_flds_tmp = result.named
+            # remove whitespace
+            for key in io_flds_tmp:
+                io_flds_tmp[key] = io_flds_tmp[key].strip(" ").strip("\t")
 
         #NAME
-        io_flds.append(io_flds_tmp[2].replace('_','\_').strip(' '))
+        io_flds.append(io_flds_tmp['name'].replace('_','\_'))
 
         #TYPE
-        io_flds.append(io_flds_tmp[1].replace('_VAR','').replace('IOB_','').strip(' '))
+        io_flds.append(io_flds_tmp['type'].replace('_VAR',''))
 
         #WIDTH
         #may be defined using macros: replace and evaluate
-        eval_str = io_flds_tmp[3].replace('`','').replace(',','').replace('(','')
+        eval_str = io_flds_tmp['width'].replace('`','').replace(',','').replace('(','')
         
         try:
             io_flds.append(eval(eval_str))
         except:
             #eval_str has undefined parameters: use as is
-            io_flds.append(eval_str.replace('_','\_').strip(' '))
+            io_flds.append(eval_str.replace('_','\_'))
 
         #DESCRIPTION
-        io_flds.append(io_flds_tmp[5].replace('_','\_'))
+        io_flds.append(io_flds_tmp['description'].replace('_','\_'))
 
         table.append(io_flds)
 
@@ -331,7 +339,7 @@ def main () :
     block_parse([*v])
 
     #PARSE INTERFACE SIGNALS
-    io_parse ([*topv_lines, *v, *vh], params, defines)
+    io_parse ([*topv_lines, *vh], params, defines)
 
     #PARSE SOFTWARE ACCESSIBLE REGISTERS
     if toml_dict != {}:
