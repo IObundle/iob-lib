@@ -6,6 +6,7 @@
 #
 
 import sys
+import argparse
 
 table = []
 
@@ -293,107 +294,195 @@ def s_tb_wire(prefix, fout):
     fout.write('\n')
 
 #
+# Parse Arguments
+#
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+            description="if_gen.py verilog interface generation.",
+            formatter_class=argparse.RawDescriptionHelpFormatter
+            )
+    
+    parser.add_argument("type",
+                        choices=[
+                            'iob_m_port',
+                            'iob_s_port',
+                            'iob_portmap',
+                            'iob_m_portmap',
+                            'iob_s_portmap',
+                            'iob_m_m_portmap',
+                            'iob_s_s_portmap',
+                            'iob_wire',
+                            'iob_m_tb_wire',
+                            'iob_s_tb_wire',
+                            'axi_m_port',
+                            'axi_s_port',
+                            'axi_m_write_port',
+                            'axi_s_write_port',
+                            'axi_m_read_port',
+                            'axi_s_read_port',
+                            'axi_portmap',
+                            'axi_m_portmap',
+                            'axi_s_portmap',
+                            'axi_m_m_portmap',
+                            'axi_s_s_portmap',
+                            'axi_m_write_portmap',
+                            'axi_s_write_portmap',
+                            'axi_m_m_write_portmap',
+                            'axi_s_s_write_portmap',
+                            'axi_m_read_portmap',
+                            'axi_s_read_portmap',
+                            'axi_m_m_read_portmap',
+                            'axi_s_s_read_portmap',
+                            'axi_wire',
+                            'axi_m_tb_wire',
+                            'axi_s_tb_wire',
+                            'axil_m_port',
+                            'axil_s_port',
+                            'axil_m_write_port',
+                            'axil_s_write_port',
+                            'axil_m_read_port',
+                            'axil_s_read_port',
+                            'axil_portmap',
+                            'axil_m_portmap',
+                            'axil_s_portmap',
+                            'axil_m_m_portmap',
+                            'axil_s_s_portmap',
+                            'axil_m_write_portmap',
+                            'axil_s_write_portmap',
+                            'axil_m_m_write_portmap',
+                            'axil_s_s_write_portmap',
+                            'axil_m_read_portmap',
+                            'axil_s_read_portmap',
+                            'axil_m_m_read_portmap',
+                            'axil_s_s_read_portmap',
+                            'axil_wire',
+                            'axil_m_tb_wire',
+                            'axil_s_tb_wire',
+                            'ahb_m_port',
+                            'ahb_s_port',
+                            'ahb_portmap',
+                            'ahb_m_portmap',
+                            'ahb_s_portmap',
+                            'ahb_m_m_portmap',
+                            'ahb_s_s_portmap',
+                            'ahb_wire',
+                            'ahb_m_tb_wire',
+                            'ahb_s_tb_wire',
+                            'apb_m_port',
+                            'apb_s_port',
+                            'apb_portmap',
+                            'apb_m_portmap',
+                            'apb_s_portmap',
+                            'apb_m_m_portmap',
+                            'apb_s_s_portmap',
+                            'apb_wire',
+                            'apb_m_tb_wire',
+                            'apb_s_tb_wire'
+                            ],
+                        help="""
+                            type can defined as one of the following:
+                            iob_m_port: iob native master port
+                            iob_s_port: iob native slave port
+                            iob_portmap: iob native portmap
+                            iob_m_portmap: iob native master portmap
+                            iob_s_portmap: iob native slave portmap
+                            iob_m_m_portmap: iob native master to master portmap
+                            iob_s_s_portmap: iob native slave to slave portmap
+                            iob_wire: iob native wires for interconnection
+                            iob_m_tb_wire: iob native master wires for testbench
+                            iob_s_tb_wire: iob native slave wires for testbench
+
+                            axi_m_port: axi full master port
+                            axi_s_port: axi full slave port
+                            axi_m_write_port: axi full master write port
+                            axi_s_write_port: axi full slave write port
+                            axi_m_read_port: axi full master read port
+                            axi_s_read_port: axi full slave read port
+                            axi_portmap: axi full portmap
+                            axi_m_portmap: axi full master portmap
+                            axi_s_portmap: axi full slave portmap
+                            axi_m_m_portmap: axi full master to master portmap
+                            axi_s_s_portmap: axi full slave to slave portmap
+                            axi_m_write_portmap: axi full master write portmap
+                            axi_s_write_portmap: axi full slave write portmap
+                            axi_m_m_write_portmap: axi full master to master write portmap
+                            axi_s_s_write_portmap: axi full slave to slave write portmap
+                            axi_m_read_portmap: axi full master read portmap
+                            axi_s_read_portmap: axi full slave read portmap
+                            axi_m_m_read_portmap: axi full master to master read portmap
+                            axi_s_s_read_portmap: axi full slave to slave read portmap
+                            axi_wire: axi full wires for interconnection
+                            axi_m_tb_wire: axi full master wires for testbench
+                            axi_s_tb_wire: axi full slave wires for testbench
+
+                            axil_m_port: axi lite master port
+                            axil_s_port: axi lite slave port
+                            axil_m_write_port: axi lite master write port
+                            axil_s_write_port: axi lite slave write port
+                            axil_m_read_port: axi lite master read port
+                            axil_s_read_port: axi lite slave read port
+                            axil_portmap: axi lite portmap
+                            axil_m_portmap: axi lite master portmap
+                            axil_s_portmap: axi lite slave portmap
+                            axil_m_m_portmap: axi lite master to master portmap
+                            axil_s_s_portmap: axi lite slave to slave portmap
+                            axil_m_write_portmap: axi lite master write portmap
+                            axil_s_write_portmap: axi lite slave write portmap
+                            axil_m_m_write_portmap: axi lite master to master write portmap
+                            axil_s_s_write_portmap: axi lite slave to slave write portmap
+                            axil_m_read_portmap: axi lite master read portmap
+                            axil_s_read_portmap: axi lite slave read portmap
+                            axil_m_m_read_portmap: axi lite master to master read portmap
+                            axil_s_s_read_portmap: axi lite slave to slave read portmap
+                            axil_wire: axi lite wires for interconnection
+                            axil_m_tb_wire: axi lite master wires for testbench
+                            axil_s_tb_wire: axi lite slave wires for testbench
+
+                            ahb_m_port: ahb master port
+                            ahb_s_port: ahb slave port
+                            ahb_portmap: ahb portmap
+                            ahb_m_portmap: ahb master portmap
+                            ahb_s_portmap: ahb slave portmap
+                            ahb_m_m_portmap: ahb master to master portmap
+                            ahb_s_s_portmap: ahb slave to slave portmap
+                            ahb_wire: ahb wires for interconnection
+                            ahb_m_tb_wire: ahb master wires for testbench
+                            ahb_s_tb_wire: ahb slave wires for testbench
+
+                            apb_m_port: apb master port
+                            apb_s_port: apb slave port
+                            apb_portmap: apb portmap
+                            apb_m_portmap: apb master portmap
+                            apb_s_portmap: apb slave portmap
+                            apb_m_m_portmap: apb master to master portmap
+                            apb_s_s_portmap: apb slave to slave portmap
+                            apb_wire: apb wires for interconnection
+                            apb_m_tb_wire: apb master wires for testbench
+                            apb_s_tb_wire: apb slave wires for testbench
+                        """
+                        )
+
+    parser.add_argument("file_prefix", nargs='?', help="""Output file prefix.""", default='')
+    parser.add_argument("port_prefix", nargs='?', help="""Port prefix.""", default='')
+    parser.add_argument("wire_prefix", nargs='?', help="""Wire prefix.""", default='')
+
+    return parser.parse_args()
+
+#
 # Main
 #
         
 def main ():
 
-    # parse command line arguments
-    if len(sys.argv) < 2 or len(sys.argv) > 5:
-        print(len(sys.argv))
-        print("Usage: ./if_gen.py type [file_prefix port_prefix wire_prefix]")
-        print(len(sys.argv))
-        print("       where type can defined as")
-        print("            iob_m_port: iob native master port")
-        print("            iob_s_port: iob native slave port")
-        print("            iob_portmap: iob native portmap")
-        print("            iob_m_portmap: iob native master portmap")
-        print("            iob_s_portmap: iob native slave portmap")
-        print("            iob_m_m_portmap: iob native master to master portmap")
-        print("            iob_s_s_portmap: iob native slave to slave portmap")
-        print("            iob_wire: iob native wires for interconnection")
-        print("            iob_m_tb_wire: iob native master wires for testbench")
-        print("            iob_s_tb_wire: iob native slave wires for testbench")
-        print("")
-        print("            axi_m_port: axi full master port")
-        print("            axi_s_port: axi full slave port")
-        print("            axi_m_write_port: axi full master write port")
-        print("            axi_s_write_port: axi full slave write port")
-        print("            axi_m_read_port: axi full master read port")
-        print("            axi_s_read_port: axi full slave read port")
-        print("            axi_portmap: axi full portmap")
-        print("            axi_m_portmap: axi full master portmap")
-        print("            axi_s_portmap: axi full slave portmap")
-        print("            axi_m_m_portmap: axi full master to master portmap")
-        print("            axi_s_s_portmap: axi full slave to slave portmap")
-        print("            axi_m_write_portmap: axi full master write portmap")
-        print("            axi_s_write_portmap: axi full slave write portmap")
-        print("            axi_m_m_write_portmap: axi full master to master write portmap")
-        print("            axi_s_s_write_portmap: axi full slave to slave write portmap")
-        print("            axi_m_read_portmap: axi full master read portmap")
-        print("            axi_s_read_portmap: axi full slave read portmap")
-        print("            axi_m_m_read_portmap: axi full master to master read portmap")
-        print("            axi_s_s_read_portmap: axi full slave to slave read portmap")
-        print("            axi_wire: axi full wires for interconnection")
-        print("            axi_m_tb_wire: axi full master wires for testbench")
-        print("            axi_s_tb_wire: axi full slave wires for testbench")
-        print("")
-        print("            axil_m_port: axi lite master port")
-        print("            axil_s_port: axi lite slave port")
-        print("            axil_m_write_port: axi lite master write port")
-        print("            axil_s_write_port: axi lite slave write port")
-        print("            axil_m_read_port: axi lite master read port")
-        print("            axil_s_read_port: axi lite slave read port")
-        print("            axil_portmap: axi lite portmap")
-        print("            axil_m_portmap: axi lite master portmap")
-        print("            axil_s_portmap: axi lite slave portmap")
-        print("            axil_m_m_portmap: axi lite master to master portmap")
-        print("            axil_s_s_portmap: axi lite slave to slave portmap")
-        print("            axil_m_write_portmap: axi lite master write portmap")
-        print("            axil_s_write_portmap: axi lite slave write portmap")
-        print("            axil_m_m_write_portmap: axi lite master to master write portmap")
-        print("            axil_s_s_write_portmap: axi lite slave to slave write portmap")
-        print("            axil_m_read_portmap: axi lite master read portmap")
-        print("            axil_s_read_portmap: axi lite slave read portmap")
-        print("            axil_m_m_read_portmap: axi lite master to master read portmap")
-        print("            axil_s_s_read_portmap: axi lite slave to slave read portmap")
-        print("            axil_wire: axi lite wires for interconnection")
-        print("            axil_m_tb_wire: axi lite master wires for testbench")
-        print("            axil_s_tb_wire: axi lite slave wires for testbench")
-        print("")
-        print("            ahb_m_port: ahb master port")
-        print("            ahb_s_port: ahb slave port")
-        print("            ahb_portmap: ahb portmap")
-        print("            ahb_m_portmap: ahb master portmap")
-        print("            ahb_s_portmap: ahb slave portmap")
-        print("            ahb_m_m_portmap: ahb master to master portmap")
-        print("            ahb_s_s_portmap: ahb slave to slave portmap")
-        print("            ahb_wire: ahb wires for interconnection")
-        print("            ahb_m_tb_wire: ahb master wires for testbench")
-        print("            ahb_s_tb_wire: ahb slave wires for testbench")
-        print("")
-        print("            apb_m_port: apb master port")
-        print("            apb_s_port: apb slave port")
-        print("            apb_portmap: apb portmap")
-        print("            apb_m_portmap: apb master portmap")
-        print("            apb_s_portmap: apb slave portmap")
-        print("            apb_m_m_portmap: apb master to master portmap")
-        print("            apb_s_s_portmap: apb slave to slave portmap")
-        print("            apb_wire: apb wires for interconnection")
-        print("            apb_m_tb_wire: apb master wires for testbench")
-        print("            apb_s_tb_wire: apb slave wires for testbench")
-        quit()
+    args = parse_arguments()
 
     # bus type
-    typ = sys.argv[1]
+    typ = args.type
 
     # port and wire prefix
-    file_prefix = ''
-    port_prefix = ''
-    wire_prefix = ''
-    if len(sys.argv) > 2: file_prefix = sys.argv[2]
-    if len(sys.argv) > 3: port_prefix = sys.argv[3]
-    if len(sys.argv) > 4: wire_prefix = sys.argv[4]
+    file_prefix = args.file_prefix
+    port_prefix = args.port_prefix
+    wire_prefix = args.wire_prefix
 
     # open output .vh file
     fout = open (file_prefix+typ+".vh", 'w')
