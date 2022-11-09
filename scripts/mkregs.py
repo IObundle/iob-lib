@@ -17,8 +17,8 @@ def parse_arguments():
     mkregs.toml file:
         The configuration file supports the following toml format:
             [[latex_table_name]]
-            REG1_NAME = {type="W", nbits=1, reset_value=0, address=-1, address_w=0, autologic=true} # Description
-            REG2_NAME = {type="R", nbits=1, reset_value=0, address=-1, address_w=0, autologic=true} # Description
+            REG1_NAME = {rw_type="W", nbits=1, rst_val=0, addr=-1, addr_w=0, autologic=true, description="Description comment."}
+            REG2_NAME = {rw_type="R", nbits=1, rst_val=0, addr=-1, addr_w=0, autologic=true, description="Description comment."}
     """
 
     parser = argparse.ArgumentParser(
