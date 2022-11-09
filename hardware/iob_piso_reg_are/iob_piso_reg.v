@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module iob_piso_reg_are
+module iob_piso_reg
   #(
     parameter DATA_W = 32
     )

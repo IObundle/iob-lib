@@ -10,8 +10,8 @@
 `define IOB_ABS(a, w) {a[w-1]? (-a): (a)}
 `define IOB_MUX2(SEL, OUT, IN1, IN2) assign OUT = SEL==1'b0? IN1 : IN2;
 `define IOB_COMB always @*
-`define IOB_MUX(SEL, OUT, IN) assign OUT = IN[SEL];
-`define IOB_DEMUX(SEL, OUT) assign OUT = 1'b1 << SEL;
+`define IOB_MUX(SEL, IN, OUT) assign OUT = IN[SEL];
+`define IOB_DEMUX(SEL, IN, OUT) assign OUT = IN << SEL;
 
 //IO
 `define IOB_INPUT(NAME, WIDTH) input [WIDTH-1:0] NAME
