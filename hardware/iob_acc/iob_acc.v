@@ -24,7 +24,7 @@ module iob_acc
    always @(posedge clk_i, posedge arst_i) begin
       if (arst_i) begin
          data_o <= RST_VAL_INT;
-      end else if (rst) begin
+      end else if (rst_i) begin
          data_o <= RST_VAL_INT;
       end else if (ld_i) begin
          data_o <= ld_val_i;
