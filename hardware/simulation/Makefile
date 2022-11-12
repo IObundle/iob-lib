@@ -11,12 +11,12 @@ REMOTE_BUILD_DIR=sandbox/$(NAME)
 REMOTE_SIM_DIR=$(REMOTE_BUILD_DIR)/hardware/simulation
 
 #include the module's headers and sources
-VHDR+=$(wildcard ../src/*.vh)
-VSRC+=$(wildcard ../src/*.v) $(wildcard ./*.v)
+VHDR+=$(wildcard ../src/*.vh) $(wildcard ./src/*.vh)
+VSRC+=$(wildcard ../src/*.v) $(wildcard ./src/*.v)
 
 #exclude verilog testbench when using Verilator
 ifeq ($(SIMULATOR), verilator)
-VSRC:=$(filter-out $(wildcard *_tb.v), $(VSRC))
+VSRC:=$(filter-out $(wildcard ./src/*_tb.v), $(VSRC))
 endif
 
 #select simulator
