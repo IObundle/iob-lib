@@ -18,8 +18,8 @@ REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
 BOARD?=CYCLONEV-GT-DK
 
 #include local fpga segment
-ifneq ($(wildcard fpga.mk),)
-include fpga.mk
+ifneq ($(wildcard fpga_build.mk),)
+include fpga_build.mk
 endif
 
 FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)

@@ -25,8 +25,8 @@ SRC+=$(wildcard ../psrc/*.c)
 
 # include local pc-emul segment
 # all previously defined variables can be overwritten in this file
-ifneq ($(wildcard pc-emul.mk),)
-include pc-emul.mk
+ifneq ($(wildcard pc_build.mk),)
+include pcemul_build.mk
 endif
 
 fw_emul: $(HDR) $(SRC)

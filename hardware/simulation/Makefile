@@ -25,8 +25,8 @@ SIMULATOR?=icarus
 include $(SIMULATOR).mk
 
 #include local simulation segment
-ifneq ($(wildcard simulation.mk),)
-include simulation.mk
+ifneq ($(wildcard sim_build.mk),)
+include sim_build.mk
 endif
 
 build: $(VHDR) $(VSRC)

@@ -1,5 +1,3 @@
-# VTOP = NAME by default, to change overwrite in 
-# CORE/hardware/simulation/simulation.mk
 VTOP?=$(NAME)
 
 VFLAGS+=--cc --exe -I. -I../src --top-module $(VTOP)

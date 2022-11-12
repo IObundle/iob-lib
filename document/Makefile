@@ -9,8 +9,8 @@ SHELL = /bin/bash
 include ../info.mk
 
 #include local doc makefile segment
-ifneq ($(wildcard document.mk),)
-include document.mk
+ifneq ($(wildcard doc_build.mk),)
+include doc_build.mk
 endif
 
 #default DOC

@@ -68,7 +68,7 @@ endif
 #copy simulation files from LIB 
 SRC+=$(patsubst $(LIB_DIR)/hardware/simulation/%, $(BUILD_SIM_DIR)/%, $(wildcard $(LIB_DIR)/hardware/simulation/*))
 $(BUILD_SIM_DIR)/%: $(LIB_DIR)/hardware/simulation/%
-	cp $< $@
+	cp -r $< $@
 endif
 
 #fpga
