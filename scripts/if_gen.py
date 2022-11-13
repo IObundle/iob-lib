@@ -38,7 +38,7 @@ AXI_QOS_W = '4'
 AXI_RESP_W = '2'
 
 axi_write=[ \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ID_W',       'name':'axi_awid',    'default':'0', 'description':'Address write channel ID.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ID_W',       'name':'axi_awid',    'default':'0', 'description':'Address write channel ID.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ADDR_W',     'name':'axi_awaddr',  'default':'0', 'description':'Address write channel address.'}, \
 {'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_LEN_W',      'name':'axi_awlen',   'default':'0', 'description':'Address write channel burst length.'}, \
 {'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_SIZE_W,      'name':'axi_awsize',  'default':'2', 'description':'Address write channel burst size. This signal indicates the size of each transfer in the burst.'}, \
@@ -54,14 +54,14 @@ axi_write=[ \
 {'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_wlast',   'default':'0', 'description':'Write channel last word flag.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_wvalid',  'default':'0', 'description':'Write channel valid.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_wready',  'default':'1', 'description':'Write channel ready.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_ID_W',       'name':'axi_bid',     'default':'0', 'description':'Write response channel ID.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_ID_W',       'name':'axi_bid',     'default':'0', 'description':'Write response channel ID.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width': AXI_RESP_W,      'name':'axi_bresp',   'default':'0', 'description':'Write response channel response.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_bvalid',  'default':'0', 'description':'Write response channel valid.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_bready',  'default':'1', 'description':'Write response channel ready.'} \
 ]
 
 axi_read=[ \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ID_W',       'name':'axi_arid',    'default':'0', 'description':'Address read channel ID.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ID_W',       'name':'axi_arid',    'default':'0', 'description':'Address read channel ID.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ADDR_W',     'name':'axi_araddr',  'default':'0', 'description':'Address read channel address.'}, \
 {'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_LEN_W',      'name':'axi_arlen',   'default':'0', 'description':'Address read channel burst length.'}, \
 {'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_SIZE_W,      'name':'axi_arsize',  'default':'2', 'description':'Address read channel burst size. This signal indicates the size of each transfer in the burst.'}, \
@@ -72,7 +72,7 @@ axi_read=[ \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_QOS_W,       'name':'axi_arqos',   'default':'0', 'description':'Address read channel quality of service.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_arvalid', 'default':'0', 'description':'Address read channel valid.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_arready', 'default':'1', 'description':'Address read channel ready.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_ID_W',       'name':'axi_rid',     'default':'0', 'description':'Read channel ID.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_ID_W',       'name':'axi_rid',     'default':'0', 'description':'Read channel ID.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_DATA_W',     'name':'axi_rdata',   'default':'0', 'description':'Read channel data.'}, \
 {'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width': AXI_RESP_W,      'name':'axi_rresp',   'default':'0', 'description':'Read channel response.'}, \
 {'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_rlast',   'default':'0', 'description':'Read channel last word.'}, \
