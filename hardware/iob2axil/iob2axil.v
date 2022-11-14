@@ -25,6 +25,13 @@ module iob2axil
     );
 
    //
+   // COMPUTE IOb OUTPUTS
+   //
+   assign iob_rvalid_o = axil_rvalid_i;
+   assign iob_rdata_o  = axil_rdata_i;
+   assign iob_ready_o  = iob_wstrb_i? axil_wready_i : axil_arready_i;
+
+   //
    // COMPUTE AXIL OUTPUTS
    //
 
@@ -48,12 +55,5 @@ module iob2axil
 
    // read
    assign axil_rready_o = 1'b1;
-
-   //
-   // COMPUTE IOb OUTPUTS
-   //
-   assign iob_rvalid_o = axil_rvalid_i;
-   assign iob_rdata_o  = axil_rdata_i;
-   assign iob_ready_o  = axil_wready_i | axil_arready_i;
 
 endmodule

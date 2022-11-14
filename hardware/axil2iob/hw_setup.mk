@@ -18,7 +18,7 @@ $(BUILD_VSRC_DIR)/axil_s_port.vh: axil_s_port.vh
 axil_s_port.vh:
 	$(LIB_DIR)/scripts/if_gen.py axil_s_port '' ''
 
-# axil slave portmap
+# axil slave portmap for instance
 SRC+=$(BUILD_VSRC_DIR)/axil_s_s_portmap.vh
 $(BUILD_VSRC_DIR)/axil_s_s_portmap.vh: axil_s_s_portmap.vh
 	cp $< $@
@@ -33,7 +33,7 @@ $(BUILD_VSRC_DIR)/iob_m_port.vh: iob_m_port.vh
 iob_m_port.vh:
 	$(LIB_DIR)/scripts/if_gen.py iob_m_port '' ''
 
-#iob master portmap
+#iob master portmap for instance
 SRC+=$(BUILD_VSRC_DIR)/iob_m_portmap.vh
 $(BUILD_VSRC_DIR)/iob_m_portmap.vh: iob_m_portmap.vh
 	cp $< $@
@@ -46,5 +46,12 @@ $(BUILD_SIM_DIR)/iob_wire.vh: iob_wire.vh
 	cp $< $@
 iob_wire.vh:
 	$(LIB_DIR)/scripts/if_gen.py iob_wire ''
+
+#iob slave portmap for swreg instance
+SRC+=$(BUILD_VSRC_DIR)/iob_s_portmap.vh
+$(BUILD_VSRC_DIR)/iob_s_portmap.vh: iob_s_portmap.vh
+	cp $< $@
+iob_s_portmap.vh:
+	$(LIB_DIR)/scripts/if_gen.py iob_s_portmap '' ''
 
 endif
