@@ -32,7 +32,6 @@ module iob2axil
    assign axil_awvalid_o = iob_valid_i & |iob_wstrb_i;
    assign axil_awaddr_o  = iob_addr_i;
    assign axil_awprot_o  = 3'd2;
-   assign axil_awqos_o   = 4'd0;
 
    // write
    assign axil_wvalid_o = iob_valid_i & |iob_wstrb_i;
@@ -46,7 +45,6 @@ module iob2axil
    assign axil_arvalid_o = iob_valid_i & ~|iob_wstrb_i;
    assign axil_araddr_o  = iob_addr_i;
    assign axil_arprot_o  = 3'd2;
-   assign axil_arqos_o   = 4'd0;
 
    // read
    assign axil_rready_o = 1'b1;
