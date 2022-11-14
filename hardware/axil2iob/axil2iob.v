@@ -6,7 +6,6 @@ module axil2iob
   #(
     parameter AXIL_ADDR_W = 32,     // AXI Lite address bus width in bits
     parameter AXIL_DATA_W = 32,     // AXI Lite data bus width in bits
-    parameter AXIL_ID_W = 1,        // AXI Lite ID bus width in bits
     parameter ADDR_W = AXIL_ADDR_W, // IOb address bus width in bits
     parameter DATA_W = AXIL_DATA_W  // IOb data bus width in bits
     )
@@ -32,7 +31,6 @@ module axil2iob
    assign axil_wready_o = iob_ready_i;
 
    // write response
-   assign axil_bid_o = 1'b0;
    assign axil_bresp_o = 2'b0;
    assign axil_bvalid_o = 1'b1;
 
@@ -40,7 +38,6 @@ module axil2iob
    assign axil_arready_o = iob_ready_i;
 
    // read
-   assign axil_rid_o = 1'b0;
    assign axil_rdata_o = iob_rdata_i;
    assign axil_rresp_o = 2'b0;
    assign axil_rvalid_o = iob_rvalid_i;

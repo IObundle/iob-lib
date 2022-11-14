@@ -4,11 +4,10 @@
 
 module iob2axil
   #(
-    parameter AXIL_ADDR_W = 32,     // AXI Lite address bus width in bits
-    parameter AXIL_DATA_W = 32,     // AXI Lite data bus width in bits
-    parameter AXIL_ID_W = 1,        // AXI Lite ID bus width in bits
-    parameter ADDR_W = AXIL_ADDR_W, // IOb address bus width in bits
-    parameter DATA_W = AXIL_DATA_W  // IOb data bus width in bits
+    parameter ADDR_W = 32, // IOb address bus width in bits
+    parameter DATA_W = 32,  // IOb data bus width in bits
+    parameter AXIL_ADDR_W = ADDR_W,     // AXI Lite address bus width in bits
+    parameter AXIL_DATA_W = DATA_W     // AXI Lite data bus width in bits
    )
    (
     //
@@ -30,14 +29,12 @@ module iob2axil
    //
 
    // write address
-   assign axil_awid_o    = {AXIL_ID_W{1'b0}};
    assign axil_awvalid_o = iob_valid_i & |iob_wstrb_i;
    assign axil_awaddr_o  = iob_addr_i;
    assign axil_awprot_o  = 3'd2;
    assign axil_awqos_o   = 4'd0;
 
    // write
-   assign axil_wid_o    = {AXIL_ID_W{1'b0}};
    assign axil_wvalid_o = iob_valid_i & |iob_wstrb_i;
    assign axil_wdata_o  = iob_wdata_i;
    assign axil_wstrb_o  = iob_wstrb_i;
@@ -46,7 +43,6 @@ module iob2axil
    assign axil_bready_o = 1'b1;
 
    // read address
-   assign axil_arid_o    = {AXIL_ID_W{1'b0}};
    assign axil_arvalid_o = iob_valid_i & ~|iob_wstrb_i;
    assign axil_araddr_o  = iob_addr_i;
    assign axil_arprot_o  = 3'd2;
