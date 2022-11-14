@@ -19,12 +19,12 @@ iob_s_port.vh:
 	$(LIB_DIR)/scripts/if_gen.py iob_s_port '' ''
 
 
-#iob slave portmap for instance
-SRC+=$(BUILD_VSRC_DIR)/iob_s_portmap.vh
-$(BUILD_VSRC_DIR)/iob_s_portmap.vh: iob_s_portmap.vh
+# iob slave portmap for instance
+SRC+=$(BUILD_VSRC_DIR)/iob_s_s_portmap.vh
+$(BUILD_VSRC_DIR)/iob_s_s_portmap.vh: iob_s_s_portmap.vh
 	cp $< $@
-iob_s_portmap.vh:
-	$(LIB_DIR)/scripts/if_gen.py iob_s_portmap '' '' ''
+iob_s_s_portmap.vh:
+	$(LIB_DIR)/scripts/if_gen.py iob_s_s_portmap '' '' ''
 
 
 # axil master port
@@ -41,14 +41,14 @@ $(BUILD_VSRC_DIR)/axil_m_portmap.vh: axil_m_portmap.vh
 axil_m_portmap.vh:
 	$(LIB_DIR)/scripts/if_gen.py axil_m_portmap '' '' ''
 
-# iob testbench signals to drive the wrapper
+# iob wires for testbench
 SRC+=$(BUILD_SIM_DIR)/iob_m_tb_wire.vh
 $(BUILD_SIM_DIR)/iob_m_tb_wire.vh: iob_m_tb_wire.vh
 	cp $< $@
 iob_m_tb_wire.vh:
 	$(LIB_DIR)/scripts/if_gen.py iob_m_tb_wire ''
 
-#axil wires for portmap
+# axil wires for instance portmap
 SRC+=$(BUILD_VSRC_DIR)/axil_wire.vh
 $(BUILD_VSRC_DIR)/axil_wire.vh: axil_wire.vh
 	cp $< $@

@@ -495,7 +495,8 @@ def main():
     quit
     # parse command line
     args = parse_arguments()
-    # parse input file
+
+    # load input file
     config_file_name = f"{args.PATH}/mkregs.toml"
     try:
         fin = open(config_file_name, "rb")

@@ -11,10 +11,12 @@ task axil_write;
    localparam DATA_W = AXIL_DATA_W;
 
    begin
-      @(posedge clk) #1 axil_awvalid_i = 1; axil_wvalid_i = 1; //sync and assign
+      @(posedge clk) #1 axil_awvalid_i = 1;  //sync and assign
+      axil_wvalid_i = 1;
       axil_awaddr_i = `IOB_WORD_ADDR(addr);
       axil_wdata_i = `IOB_GET_WDATA(addr, data);
       axil_wstrb_i = `IOB_GET_WSTRB(addr, width);
+      
       while (!axil_awready_o) #1; 
       if(axil_wready_o) begin
          @(posedge clk) #1 axil_awvalid_i = 0; 
@@ -37,10 +39,13 @@ task axil_read;
    localparam DATA_W = AXIL_DATA_W;
 
    begin
-      @(posedge clk) #1 axil_arvalid_i = 1; axil_wstrb_i = 0; //sync and assign
+      @(posedge clk) #1 axil_arvalid_i = 1;  //sync and assign
       axil_araddr_i  = `IOB_WORD_ADDR(addr);
+      axil_wstrb_i = 0;
+
       while (!axil_arready_o) #1;
       @(posedge clk) #1 axil_arvalid_i = 0; //arvalid must remain high one cycle before low
+      
       while (!axil_rvalid_o) #1; 
       data = `IOB_GET_RDATA(addr, axil_rdata_o, width); //sample data
       @(posedge clk) #1;
