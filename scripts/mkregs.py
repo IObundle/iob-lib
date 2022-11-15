@@ -48,8 +48,12 @@ def gen_wr_reg(row, f):
     reg_addr = row['addr']
     reg_addr_w = row['addr_w']
     reg_rst_val = row['rst_val']
+    f.write(f"\n`IOB_WIRE({reg}_addr, ADDR_W)\n")
+    f.write(f"\n`IOB_WIRE({reg}_byte_offset, $clog2({cpu_nbytes}))\n")
+    f.write(f"\niob_byte_offset #({cpu_nbytes}) {reg}_bo_inst (iob_wstrb_i, {reg}_byte_offset);\n")
+    f.write(f"assign {reg}_addr = iob_addr_i + {reg}_byte_offset;\n")
     f.write(f"\n`IOB_WIRE({reg}_wen, 1)\n")
-    f.write(f"assign {reg}_wen = iob_valid_i & (|iob_wstrb_i[{byte_offset}+:{row['nbytes']}]) & `IOB_WORD_ADDR(iob_addr_i) >= `IOB_WORD_ADDR({reg_addr}) & `IOB_WORD_ADDR(iob_addr_i) < `IOB_WORD_CADDR({reg_addr} + (1'b1<<{reg_addr_w}));\n")
+    f.write(f"assign {reg}_wen = iob_valid_i && iob_wstrb_i && {reg}_addr >= {reg_addr} && {reg}_addr < ({reg_addr}+(1'b1<<{reg_addr_w})) ;\n")
     f.write(f"`IOB_WIRE({reg}_wdata, {reg_w})\n")
     f.write(f"assign {reg}_wdata = iob_wdata_i[{8*byte_offset}+:{reg_w}];\n")
     if row['autologic']:
@@ -58,6 +62,7 @@ def gen_wr_reg(row, f):
         f.write(f"iob_reg #({reg_w},{reg_rst_val}) {reg}_datareg (clk_i, rst_i, 1'b0, {reg}_wen, {reg}_wdata, {reg}_o);\n")
     else:
         f.write(f"assign {reg}_o = {reg}_wdata;\n")
+        f.write(f"assign {reg}_wen_o = {reg}_wen;\n")
     if row['addr_w'] > cpu_nbytes:
         f.write(f"assign {reg}_addr_o = iob_addr_i[{reg_addr_w}-1:0];\n")
 
