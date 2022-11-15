@@ -3,16 +3,20 @@
 #    mkregs.py: build Verilog software accessible registers and software getters and setters
 #
 
+import os
 import sys
 import argparse
-import tomli
+import importlib
 from math import ceil, log
+
+# CSR module
+csr = None
 
 cpu_nbytes = 4
 core_addr_w = None
 
 
-def parse_arguments():
+def parse_arguments(inputs):
     help_str = """
     mkregs.toml file:
         The configuration file supports the following toml format:
@@ -476,10 +480,10 @@ def calc_swreg_addr(table):
 
     return table
 
-# return table: list of swreg dictionaries based on toml configuration
-def swreg_list(toml_dict):
+# return table: list of swreg dictionaries based on csr.py configuration
+def swreg_list(csr_dict):
     table = []
-    for __, regs in toml_dict.items():
+    for __, regs in csr_dict.items():
         for reg in regs[0].items():
             table.append({"name":reg[0], "nbytes":ceil(int(reg[1]['nbits'])/8)} | reg[1])
 
@@ -489,8 +493,8 @@ def swreg_list(toml_dict):
     return table
 
 # process swreg configuration
-def swreg_proc(toml_dict, hwsw, top, out_dir):
-    table = swreg_list(toml_dict)
+def swreg_proc(csr_dict, hwsw, top, out_dir):
+    table = swreg_list(csr_dict)
     if hwsw == "HW":
         write_hwheader(table, out_dir, top)
         write_hwcode(table, out_dir, top)
@@ -498,23 +502,24 @@ def swreg_proc(toml_dict, hwsw, top, out_dir):
         write_swheader(table, out_dir, top)
         write_sw_emb(table, out_dir, top)
 
+#
+# Main
+#
 
-def main():
-    quit
-    # parse command line
-    args = parse_arguments()
+def mkregs(inputs):
+    global csr
+
+    # parse inputs
+    args = parse_arguments(inputs)
 
     # load input file
-    config_file_name = f"{args.PATH}/mkregs.toml"
-    try:
-        fin = open(config_file_name, "rb")
-    except FileNotFoundError:
-        print(f"Could not open {config_file_name}")
-        quit()
-    toml_dict = tomli.load(fin)
-    fin.close()
-    swreg_proc(toml_dict, args.hwsw, args.TOP, args.out_dir)
+    config_file_name = f"{args.PATH}/csr"
+    if (not os.path.exists(config_file_name+".py")):
+        print(f"Could not open {config_file_name}.py")
+        return -1
 
+    csr = importlib.import_module(config_file_name)
 
-if __name__ == "__main__":
-    main()
+    swreg_proc(csr.pregs, args.hwsw, args.TOP, args.out_dir)
+
+    return 0
