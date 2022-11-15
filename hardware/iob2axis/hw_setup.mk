@@ -8,4 +8,12 @@ SRC+=$(BUILD_SIM_DIR)/src/iob2axis.v
 $(BUILD_SIM_DIR)/src/iob2axis.v: $(LIB_DIR)/hardware/iob2axis/iob2axis.v
 	cp $< $@
 
+# iob wires for host
+SRC+=$(BUILD_SIM_DIR)/stream_iob_wire.vh
+$(BUILD_SIM_DIR)/stream_iob_wire.vh: stream_iob_wire.vh
+	cp $< $@
+stream_iob_wire.vh:
+	$(LIB_DIR)/scripts/if_gen.py iob_wire 'stream_' 'stream_'
+
 endif
+
