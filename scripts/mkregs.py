@@ -6,47 +6,10 @@
 import os
 import sys
 import argparse
-import importlib
 from math import ceil, log
-
-# CSR module
-csr = None
 
 cpu_nbytes = 4
 core_addr_w = None
-
-
-def parse_arguments(inputs):
-    help_str = """
-    mkregs.toml file:
-        The configuration file supports the following toml format:
-            [[latex_table_name]]
-            REG1_NAME = {rw_type="W", nbits=1, rst_val=0, addr=-1, addr_w=0, autologic=true, description="Description comment."}
-            REG2_NAME = {rw_type="R", nbits=1, rst_val=0, addr=-1, addr_w=0, autologic=true, description="Description comment."}
-    """
-
-    parser = argparse.ArgumentParser(
-            description="mkregs.py script generates hardware logic and bare-metal software drivers to interface core with CPU.",
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-            epilog=help_str
-            )
-
-    parser.add_argument("TOP", help="""Top/core module name""")
-    parser.add_argument("PATH", help="""Path to mkregs.toml file""")
-    parser.add_argument("hwsw", choices=['HW', 'SW'],
-                        help="""HW: generate the hardware files
-                        SW: generate the software files"""
-                        )
-    parser.add_argument("--out_dir",
-                        default=".",
-                        help="""Output file directory""")
-    parser.add_argument("vh_files",
-                        nargs='*',
-                        help="""paths to .vh files used to import HW macros to SW macros"""
-                        )
-
-    return parser.parse_args()
-
 
 def gen_wr_reg(row, f):
     reg = row['name']
@@ -506,20 +469,6 @@ def swreg_proc(csr_dict, hwsw, top, out_dir):
 # Main
 #
 
-def mkregs(inputs):
-    global csr
-
-    # parse inputs
-    args = parse_arguments(inputs)
-
-    # load input file
-    config_file_name = f"{args.PATH}/csr"
-    if (not os.path.exists(config_file_name+".py")):
-        print(f"Could not open {config_file_name}.py")
-        return -1
-
-    csr = importlib.import_module(config_file_name)
-
-    swreg_proc(csr.pregs, args.hwsw, args.TOP, args.out_dir)
-
+def mkregs(pregs):
+    swreg_proc(pregs, args.hwsw, args.TOP, args.out_dir)
     return 0
