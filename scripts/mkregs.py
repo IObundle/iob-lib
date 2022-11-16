@@ -3,9 +3,7 @@
 #    mkregs.py: build Verilog software accessible registers and software getters and setters
 #
 
-import os
 import sys
-import argparse
 from math import ceil, log
 
 cpu_nbytes = 4
