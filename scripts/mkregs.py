@@ -443,8 +443,19 @@ def calc_swreg_addr(table):
 
     return table
 
+# return table: list of swreg dictionaries based on toml configuration
+def swreg_list(regs):
+    for i in range(len(regs)):
+        regs[i]['nbytes'] = ceil(int(regs[i]['nbits'])/8)
+
+    # calculate address field
+    table = calc_swreg_addr(regs)
+
+    return table
+
 # process swreg configuration
-def swreg_proc(table, hwsw, top, out_dir):
+def swreg_proc(regs, hwsw, top, out_dir):
+    table = swreg_list(regs)
     if hwsw == "HW":
         write_hwheader(table, out_dir, top)
         write_hwcode(table, out_dir, top)
