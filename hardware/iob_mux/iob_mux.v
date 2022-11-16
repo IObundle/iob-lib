@@ -7,9 +7,9 @@ module iob_mux
     parameter N = 0
     )
    (
-    input [N*DATA_W-1:0]    data_i,
-    input [$clog2(1+N)-1:0] sel_i,
-    output [DATA_W-1:0]     data_o
+    `IOB_INPUT(data_i, N*DATA_W),
+    `IOB_INPUT(sel_i, $clog2(1+N)),
+    `IOB_OUTPUT(data_o, DATA_W)
     );
 
    `IOB_WIRE(data_int, N*DATA_W)
