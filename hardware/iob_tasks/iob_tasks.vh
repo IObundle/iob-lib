@@ -17,6 +17,7 @@ task iob_write;
       while (!iob_ready_o) #1;
 
       @(posedge clk) iob_valid_i = 0;
+      iob_wstrb_i = 0;
    end
 endtask
 
