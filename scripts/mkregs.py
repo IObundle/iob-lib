@@ -64,7 +64,7 @@ def gen_port(table, f):
         reg = row['name']
         reg_w = row['nbits']
         reg_addr_w = row['addr_w']
-        if row['rw_type'] == 'W':
+        if row['type'] == 'W':
             f.write(f"\t`IOB_OUTPUT({reg}_o, {reg_w}),\n")
             if not row['autologic']:
                 f.write(f"\t`IOB_OUTPUT({reg}_wen_o, 1),\n")
@@ -86,7 +86,7 @@ def gen_inst_wire(table, f):
         reg = row['name']
         reg_w = row['nbits']
         reg_addr_w = row['addr_w']
-        if row['rw_type'] == 'W':
+        if row['type'] == 'W':
             f.write(f"`IOB_WIRE({reg}, {reg_w})\n")
             if not row['autologic']:
                 f.write(f"`IOB_WIRE({reg}_wen, 1)\n")
@@ -107,7 +107,7 @@ def gen_inst_wire(table, f):
 def gen_portmap(table, f):
     for row in table:
         reg = row['name']
-        if row['rw_type'] == 'W':
+        if row['type'] == 'W':
             f.write(f"\t.{reg}_o({reg}),\n")
             if not row['autologic']:
                 f.write(f"\t.{reg}_wen_o({reg}_wen),\n")
@@ -171,7 +171,7 @@ def write_hwcode(table, out_dir, top):
     # register logic
     has_addr_r = 0
     for row in table:
-        if row['rw_type'] == 'W':
+        if row['type'] == 'W':
             # write register
             gen_wr_reg(row, fswreg_gen)
         else:
@@ -208,7 +208,7 @@ def write_hwcode(table, out_dir, top):
         reg = row['name']
         reg_addr = row['addr']
         # compute rdata and rvalid
-        if row['rw_type'] == 'R':
+        if row['type'] == 'R':
             # get rdata and rvalid
             fswreg_gen.write(f"\tif( `IOB_WORD_ADDR(addr_r) >= `IOB_WORD_ADDR({reg_addr}) && `IOB_WORD_ADDR(addr_r) < `IOB_WORD_CADDR({reg_addr} + (1'b1<<{row['addr_w']})) )\n")
             # get rdata
@@ -282,13 +282,13 @@ def write_swheader(table, out_dir, top):
     fswhdr.write("//Write Addresses\n")
     for row in table:
         reg = row['name']
-        if row["rw_type"] == "W":
+        if row["type"] == "W":
             fswhdr.write(f"#define {core_prefix}{reg} {row['addr']}\n")
 
     fswhdr.write("//Read Addresses\n")
     for row in table:
         reg = row['name']
-        if row["rw_type"] == "R":
+        if row["type"] == "R":
             fswhdr.write(f"#define {core_prefix}{reg} {row['addr']}\n")
 
     fswhdr.write("\n//register/memory data widths (bit)\n")
@@ -296,13 +296,13 @@ def write_swheader(table, out_dir, top):
     fswhdr.write("//Write Register/Memory\n")
     for row in table:
         reg = row['name']
-        if row["rw_type"] == "W":
+        if row["type"] == "W":
             fswhdr.write(f"#define {core_prefix}{reg}_W {row['nbytes']*8}\n")
 
     fswhdr.write("//Read Register/Memory\n")
     for row in table:
         reg = row['name']
-        if row["rw_type"] == "R":
+        if row["type"] == "R":
             fswhdr.write(f"#define {core_prefix}{reg}_W {row['nbytes']*8}\n")
 
     fswhdr.write("\n// Base Address\n")
@@ -311,7 +311,7 @@ def write_swheader(table, out_dir, top):
     fswhdr.write("\n// Core Setters\n")
     for row in table:
         reg = row['name']
-        if row["rw_type"] == "W":
+        if row["type"] == "W":
             sw_type = swreg_type(reg, row['nbytes'])
             addr_arg = ""
             if row['addr_w'] / row['nbytes'] > 1:
@@ -321,7 +321,7 @@ def write_swheader(table, out_dir, top):
     fswhdr.write("\n// Core Getters\n")
     for row in table:
         reg = row['name']
-        if row["rw_type"] == "R":
+        if row["type"] == "R":
             sw_type = swreg_type(reg, row['nbytes'])
             addr_arg = ""
             if row['addr_w'] / row['nbytes'] > 1:
@@ -346,7 +346,7 @@ def write_sw_emb(table, out_dir, top):
     fsw.write("\n// Core Setters\n")
     for row in table:
         reg = row['name']
-        if row["rw_type"] == "W":
+        if row["type"] == "W":
             sw_type = swreg_type(reg, row['nbytes'])
             addr_arg = ""
             addr_arg = ""
@@ -360,7 +360,7 @@ def write_sw_emb(table, out_dir, top):
     fsw.write("\n// Core Getters\n")
     for row in table:
         reg = row['name']
-        if row["rw_type"] == "R":
+        if row["type"] == "R":
             sw_type = swreg_type(reg, row['nbytes'])
             addr_arg = ""
             addr_shift = ""
@@ -391,7 +391,7 @@ def check_address_overlapping(table, rw_type):
     # get registers of specific type
     type_regs = []
     for reg in table:
-        if reg['rw_type'] == rw_type:
+        if reg['type'] == rw_type:
             type_regs.append(reg)
     if not type_regs:
         return
@@ -414,9 +414,9 @@ def calc_swreg_addr(table):
         if row['addr'] >= 0:
             reg_addr = row['addr']
             reg_offset = 2**row['addr_w']
-            if row['rw_type'] == "R" and read_addr <= reg_addr:
+            if row['type'] == "R" and read_addr <= reg_addr:
                 read_addr = reg_addr + reg_offset
-            elif row['rw_type'] == "W" and write_addr <= reg_addr:
+            elif row['type'] == "W" and write_addr <= reg_addr:
                 write_addr = reg_addr + reg_offset
 
     # Assign automatic addresses
@@ -425,11 +425,11 @@ def calc_swreg_addr(table):
         reg_nbytes = row['nbytes']
         reg_offset = 2**row['addr_w']
         if reg_addr < 0:
-            if row['rw_type'] == "R":
+            if row['type'] == "R":
                 read_addr = align_addr(read_addr, reg_nbytes)
                 row['addr'] = read_addr
                 read_addr = read_addr + reg_offset
-            elif row['rw_type'] == "W":
+            elif row['type'] == "W":
                 write_addr = align_addr(write_addr, reg_nbytes)
                 row['addr'] = write_addr
                 write_addr = write_addr + reg_offset
@@ -443,21 +443,19 @@ def calc_swreg_addr(table):
 
     return table
 
-# return table: list of swreg dictionaries based on csr.py configuration
-def swreg_list(csr_dict):
-    table = []
-    for __, regs in csr_dict.items():
-        for reg in regs[0].items():
-            table.append({"name":reg[0], "nbytes":ceil(int(reg[1]['nbits'])/8)} | reg[1])
+# return table: list of swreg dictionaries based on toml configuration
+def swreg_list(regs):
+    for i in range(len(regs)):
+        regs[i]['nbytes'] = ceil(int(regs[i]['nbits'])/8)
 
     # calculate address field
-    table = calc_swreg_addr(table)
+    table = calc_swreg_addr(regs)
 
     return table
 
 # process swreg configuration
-def swreg_proc(csr_dict, hwsw, top, out_dir):
-    table = swreg_list(csr_dict)
+def swreg_proc(regs, hwsw, top, out_dir):
+    table = swreg_list(regs)
     if hwsw == "HW":
         write_hwheader(table, out_dir, top)
         write_hwcode(table, out_dir, top)
@@ -469,6 +467,6 @@ def swreg_proc(csr_dict, hwsw, top, out_dir):
 # Main
 #
 
-def mkregs(pregs):
-    swreg_proc(pregs, args.hwsw, args.TOP, args.out_dir)
+def mkregs(args):
+    swreg_proc(args['regs'], args['hwsw'], args['TOP'], args['out_dir'])
     return 0
