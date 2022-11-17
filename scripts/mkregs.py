@@ -465,6 +465,5 @@ def swreg_proc(regs, hwsw, top, out_dir):
 # Main
 #
 
-def mkregs(args):
-    swreg_proc(args['regs'], args['hwsw'], args['TOP'], args['out_dir'])
-    return 0
+def mkregs(regs, hwsw, top, out_dir):
+    swreg_proc(regs, hwsw, top, out_dir)

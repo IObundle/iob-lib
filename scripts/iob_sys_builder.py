@@ -1,24 +1,34 @@
 #!/usr/bin/env python3
 
 from mkregs import mkregs
+from verilog2tex import verilog2tex
 
-def build(pregs, params, top):
+src_path = './hardware/src/'
+
+def build(pregs, params, top, vh, v):
     #
     # Generate hw
     #
-    args = {'regs': [], 'hwsw': '','TOP':'', 'out_dir':'.'}
-
+    regs = []
     for i in range(len(pregs)):
-        args['regs'] += pregs[i]['regs']
+        regs += pregs[i]['regs']
 
-    args['hwsw'] = 'HW'
-    args['TOP'] = top
-
-    mkregs(args)
+    mkregs(regs, 'HW', top, '.')
 
     #
     # Generate sw
     #
-    args['hwsw'] = 'SW'
+    mkregs(regs, 'SW', top, '.')
 
-    mkregs(args)
+    #
+    # Generate Tex
+    #
+    for i in range(len(vh)):
+        vh[i] = src_path + vh[i]
+
+    for i in range(len(v)):
+        v[i] = src_path + v[i]
+
+    v.insert(0, src_path+top+'.v')
+
+    verilog2tex(pregs, v[0], vh, v)
