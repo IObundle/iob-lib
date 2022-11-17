@@ -296,7 +296,7 @@ def s_tb_wire(prefix, fout):
 #
 # Parse Arguments
 #
-def parse_arguments(inputs):
+def parse_arguments():
     parser = argparse.ArgumentParser(
             description="if_gen.py verilog interface generation.",
             formatter_class=argparse.RawDescriptionHelpFormatter
@@ -473,9 +473,9 @@ def parse_arguments(inputs):
 # Main
 #
         
-def if_gen(inputs):
+def main ():
 
-    args = parse_arguments(inputs)
+    args = parse_arguments()
 
     # bus type
     typ = args.type
@@ -534,4 +534,4 @@ def if_gen(inputs):
 
     fout.close()
 
-    return 0
+if __name__ == "__main__" : main ()
