@@ -30,7 +30,6 @@ task iob_read;
    begin
       @(posedge clk) #1 iob_valid_i = 1;
       iob_addr_i  = `IOB_WORD_ADDR(addr);
-      iob_wstrb_i = 0;
 
       while (!iob_ready_o) #1;
       @(posedge clk) #1 iob_valid_i = 0;
