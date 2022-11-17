@@ -3,9 +3,7 @@
 #    mkregs.py: build Verilog software accessible registers and software getters and setters
 #
 
-import os
 import sys
-import argparse
 from math import ceil, log
 
 cpu_nbytes = 4
@@ -467,6 +465,5 @@ def swreg_proc(regs, hwsw, top, out_dir):
 # Main
 #
 
-def mkregs(args):
-    swreg_proc(args['regs'], args['hwsw'], args['TOP'], args['out_dir'])
-    return 0
+def mkregs(regs, hwsw, top, out_dir):
+    swreg_proc(regs, hwsw, top, out_dir)
