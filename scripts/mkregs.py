@@ -4,8 +4,6 @@
 #
 
 import sys
-import argparse
-import tomli
 from math import ceil, log
 
 cpu_nbytes = 4
@@ -243,7 +241,7 @@ def write_hwcode(table, out_dir, top):
     # register logic
     has_addr_r = 0
     for row in table:
-        if row['rw_type'] == 'W':
+        if row['type'] == 'W':
             # write register
             gen_wr_reg(row, f_gen)
         else:
@@ -280,7 +278,7 @@ def write_hwcode(table, out_dir, top):
         name = row['name']
         addr = row['addr']
         # compute rdata and rvalid
-        if row['rw_type'] == 'R':
+        if row['type'] == 'R':
             # get rdata and rvalid
             f_gen.write(f"\tif( `IOB_WORD_ADDR(addr_r) >= {bfloor(addr, addr_w)} && `IOB_WORD_ADDR(addr_r) < {bfloor(addr+2**addr_w)})\n")
             # get rdata
@@ -480,11 +478,9 @@ def compute_addr(table, no_overlap):
     core_addr_w = int(ceil(log(max(read_addr, write_addr), 2)))
 
 # return table: list of swreg dictionaries based on toml configuration
-def swreg_list(toml_dict):
-    table = []
-    for __, regs in toml_dict.items():
-        for reg in regs[0].items():
-            table.append({"name":reg[0], "nbytes":ceil(reg[1]['nbits']/8.0)} | reg[1])
+def swreg_list(regs):
+    for i in range(len(regs)):
+        regs[i]['nbytes'] = ceil(regs[i]['nbits']/8.0)
 
     # calculate address field
     table = compute_addr(table, True)
@@ -502,23 +498,9 @@ def swreg_proc(toml_dict, hwsw, top, out_dir):
         write_swheader(table, out_dir, top)
         write_swcode(table, out_dir, top)
 
+#
+# Main
+#
 
-def main():
-    quit
-    # parse command line
-    args = parse_arguments()
-
-    # load input file
-    config_file_name = f"{args.PATH}/mkregs.toml"
-    try:
-        fin = open(config_file_name, "rb")
-    except FileNotFoundError:
-        print(f"Could not open {config_file_name}")
-        quit()
-    toml_dict = tomli.load(fin)
-    fin.close()
-    swreg_proc(toml_dict, args.hwsw, args.TOP, args.out_dir)
-
-
-if __name__ == "__main__":
-    main()
+def mkregs(regs, hwsw, top, out_dir):
+    swreg_proc(regs, hwsw, top, out_dir)

@@ -6,12 +6,10 @@
         print("verilog_files: paths to .v and .vh files
         print("mkregs_conf: path/to/mkregs.toml
 '''
-import sys
 from parse import parse, search
 
 from mkregs import calc_swreg_addr
 import re
-import tomli
 from math import ceil
 
 
@@ -56,7 +54,6 @@ def param_parse (topv, param_defaults, defines):
 
     for line in topv:
         p_flds = []
-        # p_flds_tmp = parse('{}parameter {} = {}//{}&{}&{}&{}', line)
         result = search('{wspace}parameter {name} = {default_value}//{macroparam}&{min}&{max}&{description}\n', line)
         #spc, name, typ, macroparam, min, max, desc
         if result is None:
@@ -230,28 +227,27 @@ def replace_width_macro(nbytes,defines):
         #eval_str has undefined parameters: use as is
         return eval_str.replace('_','\_').strip(' ')
 
-def swreg_parse (toml_dict, defines) :
+def swreg_parse (pregs) :
 
     table = []
-    table_names = []
-    for table_name, regs in toml_dict.items():
-        table_names.append(table_name)
-        for reg in regs[0].items():
-            table.append({"tablename":table_name, "name":reg[0], "nbytes":ceil(int(reg[1]['nbits'])/8)} | reg[1])
+    for i in range(len(pregs)):
+        for j in range(len(pregs[i]['regs'])):
+            table.append(pregs[i]['regs'][j])
+            table[-1]['tablename'] = pregs[i]['name']
+            table[-1]['nbytes'] = ceil(int(table[-1]['nbits'])/8)
 
     # calculate address field
     table = calc_swreg_addr(table)
 
-    for table_name in table_names:
+    for i in range(len(pregs)):
         #nbytes cannot contain macros because it is automatically calculated above, from the nbits field.
-        #table_list = [[a['name'],a['rw_type'],a['addr'],replace_width_macro(a['nbytes'],defines),a['rst_val'],a['description']]\
-        table_list = [[a['name'],a['rw_type'],a['addr'],a['nbytes']*8,a['rst_val'],a['description']]\
-                        for a in table if a["tablename"] == table_name]
+        table_list = [[a['name'],a['type'],a['addr'],a['nbytes']*8,a['rst_val'],a['descr']]\
+                        for a in table if a["tablename"] == pregs[i]['name']]
         # Escape underscores in register names and descriptions
         for a in table_list:
             a[0]=a[0].replace('_','\_') # Register name at index 0 of list
             a[5]=a[5].replace('_','\_') # Register description at index 5 of list
-        write_table(table_name + '_swreg', table_list)
+        write_table(pregs[i]['name'] + '_swreg', table_list)
         
 def header_parse(vh, defines):
     """ Parse header files
@@ -278,71 +274,47 @@ def header_parse(vh, defines):
         if name not in defines:
             defines[name] = value
 
+#
+# Main
+#
 
-def main () :
-    #parse command line
-    if len(sys.argv) < 2:
-        print("Usage: verilog2tex.py top [verilog_files] [conf]")
-        print("top: top-level verilog file")
-        print("verilog_files: list of .v and .vh files")
-        print("conf: mkregs.toml file")
-        exit()
+def verilog2tex(pregs, top, vh, v):
 
-    #top-level verilog file
-    topv = sys.argv[1]
-    #macro dictionary
+    # macro dictionary
     defines = {}
 
+    # read top-level Verilog file
+    fp = open(top, 'r')
+    top_lines = fp.readlines()
+    fp.close()
 
-    #read top-level Verilog file
-    fv =  open (topv, 'r')
-    topv_lines = fv.readlines()
-    fv.close()
+    vh_lines = [] # header list
+    v_lines = [] # source list
 
-    vh = [] #header list
-    v = [] #source list
-    toml_dict = {} # mkregs.toml dictionary
+    # read and parse header files
+    for f in vh:
+        fp = open(f, 'r')
+        vh_lines += fp.readlines()
+        fp.close()
+    header_parse(vh_lines, defines)
 
-    if(len(sys.argv) > 2):
+    # read source files
+    for f in v:
+        fp = open(f, 'r')
+        v_lines += fp.readlines()
+        fp.close()
 
-        #read and parse header files if any
-        for arg in sys.argv:
-            if arg.endswith('.vh'):
-                fvh =  open (arg, 'r')
-                vh = [*vh, *fvh.readlines()]
-                fvh.close()
-        header_parse(vh, defines)
+    # PARSE TOP-LEVEL PARAMETERS AND MACROS
 
-        #read source files
-        for arg in sys.argv:
-            if arg.endswith('.v'):
-                fv =  open (arg, 'r')
-                v = [*v, *fv.readlines()]
-                fv.close()
-
-        # read mkregs.toml file
-        conf_idx = len(sys.argv)-1
-        if sys.argv[conf_idx] == 'mkregs.toml':
-            fconf =  open (sys.argv[conf_idx], 'rb')
-            toml_dict = tomli.load(fconf)
-            fconf.close()
-
-
-
-    #PARSE TOP-LEVEL PARAMETERS AND MACROS
-
-    #get the DEFINE environment variable (deprecated)
+    # get the DEFINE environment variable (deprecated)
     param_defaults = {}
-    params = param_parse (topv_lines, param_defaults, defines)
+    params = param_parse(top_lines, param_defaults, defines)
 
-    #PARSE BLOCK DIAGRAM MODULES
-    block_parse([*v])
+    # PARSE BLOCK DIAGRAM MODULES
+    block_parse(v_lines)
 
-    #PARSE INTERFACE SIGNALS
-    io_parse ([*topv_lines, *vh], params, defines)
+    # PARSE INTERFACE SIGNALS
+    io_parse(top_lines + vh_lines, params, defines)
 
-    #PARSE SOFTWARE ACCESSIBLE REGISTERS
-    if toml_dict != {}:
-        swreg_parse (toml_dict, defines)
-
-if __name__ == "__main__" : main ()
+    # PARSE SOFTWARE ACCESSIBLE REGISTERS
+    if pregs != []: swreg_parse(pregs)
