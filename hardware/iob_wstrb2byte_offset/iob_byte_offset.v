@@ -1,13 +1,13 @@
 `timescale 1ns / 1ps
 `include "iob_lib.vh"
 
-module iob_byte_offset
+module iob_wstrb2byte_offset
   #(
     parameter N = 0
     )
    (
     input [N-1:0]          wstrb_i,
-    output [$clog2(N)-1:0] byte_offset_o
+    output [$clog2(N)-1:0] wstrb2byte_offset_o
     );
 
    integer                 i;
@@ -24,6 +24,6 @@ module iob_byte_offset
         end
    end
 
-   `IOB_VAR2WIRE(cnt, byte_offset_o)
+   `IOB_VAR2WIRE(cnt, wstrb2byte_offset_o)
 
 endmodule
