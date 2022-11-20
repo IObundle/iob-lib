@@ -34,6 +34,7 @@ BUILD_SW_PYTHON_DIR = $(BUILD_DIR)/scripts
 
 
 setup: debug
+	./$(NAME)_setup.py
 
 $(BUILD_DIR):
 	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $@
@@ -171,21 +172,6 @@ $(BUILD_TSRC_DIR)/shortHash.tex:
 	git rev-parse --short HEAD > $@
 
 
-#software accessible registers
-ifneq ($(wildcard mkregs.toml),)
-
-SRC+=$(BUILD_VSRC_DIR)/$(NAME)_swreg_gen.v $(BUILD_VSRC_DIR)/$(NAME)_swreg_def.vh $(BUILD_VSRC_DIR)/$(NAME)_swreg_inst.vh
-$(BUILD_VSRC_DIR)/$(NAME)_swreg_gen.v: $(NAME)_swreg_gen.v
-	cp $< $@
-
-$(BUILD_VSRC_DIR)/$(NAME)_swreg_%.vh: $(NAME)_swreg_%.vh
-	cp $< $@
-
-$(NAME)_swreg_def.vh $(NAME)_swreg_inst.vh $(NAME)_swreg_gen.v: mkregs.toml
-	$(LIB_DIR)/scripts/mkregs.py $(NAME) . HW
-
-endif
-
 #copy lib tex files if not present
 SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%, $(BUILD_TSRC_DIR)/%, $(wildcard $(LIB_DIR)/document/tsrc/*))
 $(BUILD_TSRC_DIR)/%: $(LIB_DIR)/document/tsrc/%
@@ -200,13 +186,6 @@ $(BUILD_FIG_DIR)/%: $(LIB_DIR)/document/figures/%
 SRC+=$(BUILD_DOC_DIR)/Makefile
 $(BUILD_DOC_DIR)/Makefile: $(LIB_DIR)/document/Makefile
 	cp $< $@
-
-#make tex files from verilog sources
-v2tex: $(SRC)
-ifeq ($(wildcard *.tex),)
-	$(PYTHON_DIR)/verilog2tex.py $(BUILD_VSRC_DIR)/$(NAME).v $(wildcard $(BUILD_VSRC_DIR)/*) mkregs.toml
-	cp *.tex $(BUILD_TSRC_DIR)
-endif
 
 ifeq ($(INTEL_FPGA),1)
 SRC+=$(BUILD_DIR)/doc/quartus.tex
@@ -236,8 +215,8 @@ clean:
 	@rm -rf $(BUILD_DIR) *.tex *.v *.vh *.h
 	@rm -rf scripts/__pycache__
 
-debug: $(BUILD_DIR) $(SRC) v2tex
+debug: $(BUILD_DIR) $(SRC)
 	@echo SRC=$(SRC)
 
 
-.PHONY: setup debug v2tex
+.PHONY: setup debug

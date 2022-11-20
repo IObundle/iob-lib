@@ -8,7 +8,7 @@
 '''
 from parse import parse, search
 
-from mkregs import calc_swreg_addr
+from mkregs import compute_addr
 import re
 from math import ceil
 
@@ -209,45 +209,22 @@ def io_parse (io_lines, params, defines):
         write_table(table_name + '_if', table)
 
 
-def get_swreg_by_name(swreg_list, name):
-    for swreg in swreg_list:
-        if 'name' in swreg and swreg['name'] == name:
-            return swreg
-    return None
-
-#nbytes may be defined using macros: replace and evaluate
-def replace_width_macro(nbytes,defines):
-    tmp_width = f"{int(nbytes)*8}"
-    eval_str = tmp_width.replace('`','').replace(',','')
-    for key, val in defines.items():
-        eval_str = eval_str.replace(str(key),str(val))
-    try:
-        return eval(eval_str)
-    except:
-        #eval_str has undefined parameters: use as is
-        return eval_str.replace('_','\_').strip(' ')
-
 def swreg_parse (pregs) :
 
     table = []
     for i in range(len(pregs)):
-        for j in range(len(pregs[i]['regs'])):
-            table.append(pregs[i]['regs'][j])
-            table[-1]['tablename'] = pregs[i]['name']
-            table[-1]['nbytes'] = ceil(int(table[-1]['nbits'])/8)
+        table.append(pregs[i]['regs'])
+
+    print(table)
 
     # calculate address field
-    table = calc_swreg_addr(table)
+    table = compute_addr(table, True)
+
+    print(len(table))
+
 
     for i in range(len(pregs)):
-        #nbytes cannot contain macros because it is automatically calculated above, from the nbits field.
-        table_list = [[a['name'],a['type'],a['addr'],a['nbytes']*8,a['rst_val'],a['descr']]\
-                        for a in table if a["tablename"] == pregs[i]['name']]
-        # Escape underscores in register names and descriptions
-        for a in table_list:
-            a[0]=a[0].replace('_','\_') # Register name at index 0 of list
-            a[5]=a[5].replace('_','\_') # Register description at index 5 of list
-        write_table(pregs[i]['name'] + '_swreg', table_list)
+        write_table(pregs[i]['name'] + '_swreg', table)
         
 def header_parse(vh, defines):
     """ Parse header files
