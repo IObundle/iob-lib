@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import param_conf as p_conf
 from mkregs import mkregs
 from verilog2tex import verilog2tex
 
@@ -22,6 +23,8 @@ def setup(top, version, params, ios, regs, blocks):
     #
 
     mkregs(table, 'HW', top, build_dir+'/hardware/src')
+    p_conf.params_vh(params, top, build_dir+'/hardware/src')
+    #p_conf.conf_vh(params, top, build_dir+'/hardware/src')
 
     #
     # Generate sw

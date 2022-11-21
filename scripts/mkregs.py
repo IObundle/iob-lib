@@ -221,7 +221,8 @@ def write_hwcode(table, out_dir, top):
     # parameters
     f_gen.write("#(\n")
     f_gen.write("\tparameter ADDR_W = 0,\n")
-    f_gen.write("\tparameter DATA_W = 0\n")
+    f_gen.write("\tparameter DATA_W = 0,\n")
+    f_gen.write(f'\t`include "{top}_params.vh"\n')
     f_gen.write(")\n")
     f_gen.write("(\n")
 
