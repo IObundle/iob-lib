@@ -3,6 +3,7 @@
 import sys
 from mkregs import mkregs
 from verilog2tex import verilog2tex
+from ios import generate_ios_header, generate_ios_tex
 
 src_path = './hardware/src/'
 
@@ -23,6 +24,8 @@ def setup(top, version, confs, ios, regs, blocks):
 
     mkregs(table, 'HW', top, build_dir+'/hardware/src')
 
+    generate_ios_header(ios, build_dir+'/hardware/src')
+
     #
     # Generate sw
     #
@@ -40,3 +43,5 @@ def setup(top, version, confs, ios, regs, blocks):
     #v.insert(0, src_path+top+'.v')
 
     #verilog2tex(regs, v[0], vh, v)
+
+    generate_ios_tex(ios, build_dir+"/document/tsrc")
