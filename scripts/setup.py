@@ -23,7 +23,7 @@ def setup(top, version, confs, ios, regs, blocks):
     #
 
     mkregs(table, 'HW', top, build_dir+'/hardware/src')
-    p_conf.params_vh(params, top, build_dir+'/hardware/src')
+    p_conf.params_vh(confs, top, build_dir+'/hardware/src')
     #p_conf.conf_vh(params, top, build_dir+'/hardware/src')
 
     #
