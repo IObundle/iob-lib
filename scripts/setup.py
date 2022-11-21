@@ -7,7 +7,7 @@ from verilog2tex import verilog2tex
 
 src_path = './hardware/src/'
 
-def setup(top, version, params, ios, regs, blocks):
+def setup(top, version, confs, ios, regs, blocks):
 
     #build directory
     build_dir = f"../{top+'_'+version}";
