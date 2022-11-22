@@ -35,8 +35,8 @@ def setup(top, version, confs, ios, regs, blocks):
     # Generate sw
     #
     mkregs.write_swheader(reg_table, build_dir+'/software/esrc', top)
+    mkregs.write_swcode(reg_table, build_dir+'/software/esrc', top)
     mkregs.write_swheader(reg_table, build_dir+'/software/psrc', top)
-    mkregs.write_swcode(reg_table, build_dir+'/software/psrc', top)
 
     #
     # Generate Tex
