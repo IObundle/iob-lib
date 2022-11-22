@@ -199,8 +199,9 @@ def write_hwcode(table, out_dir, top):
     # connection wires
     gen_inst_wire(table, f_inst)
 
-    f_inst.write("swreg #(\n\t.ADDR_W(ADDR_W), \n\t.DATA_W(ADDR_W)\n")
+    f_inst.write("swreg #(\n")
     f_inst.write(f'\t`include "{top}_inst_params.vh"\n')
+    f_inst.write("\t.ADDR_W(ADDR_W), \n\t.DATA_W(ADDR_W)")
     f_inst.write("\n) swreg_inst (\n")
     gen_portmap(table, f_inst)
     f_inst.write('\t`include "iob_s_portmap.vh"\n')
