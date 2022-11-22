@@ -32,7 +32,8 @@ def setup(top, version, confs, ios, regs, blocks):
     #
     # Generate sw
     #
-    #mkregs(table, 'SW', top, '.')
+    mkregs(table, 'SW', top, build_dir+'/software/esrc')
+    mkregs(table, 'SW', top, build_dir+'/software/psrc')
 
     #
     # Generate Tex
