@@ -10,6 +10,83 @@ import argparse
 
 table = []
 
+interfaces=[
+    'iob_m_port',
+    'iob_s_port',
+    'iob_portmap',
+    'iob_m_portmap',
+    'iob_s_portmap',
+    'iob_m_m_portmap',
+    'iob_s_s_portmap',
+    'iob_wire',
+    'iob_m_tb_wire',
+    'iob_s_tb_wire',
+    'axi_m_port',
+    'axi_s_port',
+    'axi_m_write_port',
+    'axi_s_write_port',
+    'axi_m_read_port',
+    'axi_s_read_port',
+    'axi_portmap',
+    'axi_m_portmap',
+    'axi_s_portmap',
+    'axi_m_m_portmap',
+    'axi_s_s_portmap',
+    'axi_m_write_portmap',
+    'axi_s_write_portmap',
+    'axi_m_m_write_portmap',
+    'axi_s_s_write_portmap',
+    'axi_m_read_portmap',
+    'axi_s_read_portmap',
+    'axi_m_m_read_portmap',
+    'axi_s_s_read_portmap',
+    'axi_wire',
+    'axi_m_tb_wire',
+    'axi_s_tb_wire',
+    'axil_m_port',
+    'axil_s_port',
+    'axil_m_write_port',
+    'axil_s_write_port',
+    'axil_m_read_port',
+    'axil_s_read_port',
+    'axil_portmap',
+    'axil_m_portmap',
+    'axil_s_portmap',
+    'axil_m_m_portmap',
+    'axil_s_s_portmap',
+    'axil_m_write_portmap',
+    'axil_s_write_portmap',
+    'axil_m_m_write_portmap',
+    'axil_s_s_write_portmap',
+    'axil_m_read_portmap',
+    'axil_s_read_portmap',
+    'axil_m_m_read_portmap',
+    'axil_s_s_read_portmap',
+    'axil_wire',
+    'axil_m_tb_wire',
+    'axil_s_tb_wire',
+    'ahb_m_port',
+    'ahb_s_port',
+    'ahb_portmap',
+    'ahb_m_portmap',
+    'ahb_s_portmap',
+    'ahb_m_m_portmap',
+    'ahb_s_s_portmap',
+    'ahb_wire',
+    'ahb_m_tb_wire',
+    'ahb_s_tb_wire',
+    'apb_m_port',
+    'apb_s_port',
+    'apb_portmap',
+    'apb_m_portmap',
+    'apb_s_portmap',
+    'apb_m_m_portmap',
+    'apb_s_s_portmap',
+    'apb_wire',
+    'apb_m_tb_wire',
+    'apb_s_tb_wire'
+    ]
+
 #
 # IOb Native Bus Signals
 #
@@ -115,6 +192,8 @@ amba=[ \
 {'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_exokay',   'default':'1', 'description':'Exclusive transfer response.'}, \
 {'ahb':0, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_slverr',   'default':'0', 'description':'Slave error. This signal indicates if the transfer has falied.'}, \
 ]
+
+top_macro = ''
 
 #
 # IOb Native
@@ -303,82 +382,7 @@ def parse_arguments():
             )
     
     parser.add_argument("type",
-                        choices=[
-                            'iob_m_port',
-                            'iob_s_port',
-                            'iob_portmap',
-                            'iob_m_portmap',
-                            'iob_s_portmap',
-                            'iob_m_m_portmap',
-                            'iob_s_s_portmap',
-                            'iob_wire',
-                            'iob_m_tb_wire',
-                            'iob_s_tb_wire',
-                            'axi_m_port',
-                            'axi_s_port',
-                            'axi_m_write_port',
-                            'axi_s_write_port',
-                            'axi_m_read_port',
-                            'axi_s_read_port',
-                            'axi_portmap',
-                            'axi_m_portmap',
-                            'axi_s_portmap',
-                            'axi_m_m_portmap',
-                            'axi_s_s_portmap',
-                            'axi_m_write_portmap',
-                            'axi_s_write_portmap',
-                            'axi_m_m_write_portmap',
-                            'axi_s_s_write_portmap',
-                            'axi_m_read_portmap',
-                            'axi_s_read_portmap',
-                            'axi_m_m_read_portmap',
-                            'axi_s_s_read_portmap',
-                            'axi_wire',
-                            'axi_m_tb_wire',
-                            'axi_s_tb_wire',
-                            'axil_m_port',
-                            'axil_s_port',
-                            'axil_m_write_port',
-                            'axil_s_write_port',
-                            'axil_m_read_port',
-                            'axil_s_read_port',
-                            'axil_portmap',
-                            'axil_m_portmap',
-                            'axil_s_portmap',
-                            'axil_m_m_portmap',
-                            'axil_s_s_portmap',
-                            'axil_m_write_portmap',
-                            'axil_s_write_portmap',
-                            'axil_m_m_write_portmap',
-                            'axil_s_s_write_portmap',
-                            'axil_m_read_portmap',
-                            'axil_s_read_portmap',
-                            'axil_m_m_read_portmap',
-                            'axil_s_s_read_portmap',
-                            'axil_wire',
-                            'axil_m_tb_wire',
-                            'axil_s_tb_wire',
-                            'ahb_m_port',
-                            'ahb_s_port',
-                            'ahb_portmap',
-                            'ahb_m_portmap',
-                            'ahb_s_portmap',
-                            'ahb_m_m_portmap',
-                            'ahb_s_s_portmap',
-                            'ahb_wire',
-                            'ahb_m_tb_wire',
-                            'ahb_s_tb_wire',
-                            'apb_m_port',
-                            'apb_s_port',
-                            'apb_portmap',
-                            'apb_m_portmap',
-                            'apb_s_portmap',
-                            'apb_m_m_portmap',
-                            'apb_s_s_portmap',
-                            'apb_wire',
-                            'apb_m_tb_wire',
-                            'apb_s_tb_wire'
-                            ],
+                        choices=interfaces,
                         help="""
                             type can defined as one of the following:
                             iob_m_port: iob native master port
@@ -470,6 +474,42 @@ def parse_arguments():
     return parser.parse_args()
 
 #
+# Create signal table
+#
+def create_signal_table(interface_name):
+    global table
+
+    if (interface_name.find("iob_")>=0):
+        table = make_iob()
+
+    if (interface_name.find("axi_")>=0):
+        if (interface_name.find("write_")>=0): table = make_axi_write()
+        elif (interface_name.find("read_")>=0): table = make_axi_read()
+        else: table = make_axi()
+
+    if (interface_name.find("axil_")>=0):
+        if (interface_name.find("write_")>=0): table = make_axil_write()
+        elif (interface_name.find("read_")>=0): table = make_axil_read()
+        else: table = make_axil()
+
+    if (interface_name.find("ahb_")>=0):
+        table = make_ahb()
+
+    if (interface_name.find("apb_")>=0):
+        table = make_apb()
+
+#
+# Write to .vh file
+#
+
+def write_vh_contents(interface_name, port_prefix, wire_prefix, file_object):
+    func_name = interface_name.replace("axil_", "").replace("axi_", "").replace("write_", "").replace("read_", "").replace("iob_", "").replace("apb_", "").replace("ahb_", "")
+    if (interface_name.find("portmap")+1):
+        eval(func_name+"('"+port_prefix+"','"+wire_prefix+"', file_object)")
+    else:
+        eval(func_name+"('"+port_prefix+"', file_object)")
+
+#
 # Main
 #
         
@@ -478,7 +518,7 @@ def main ():
     args = parse_arguments()
 
     # bus type
-    typ = args.type
+    interface_name = args.type
 
     # port and wire prefix
     file_prefix = args.file_prefix
@@ -487,50 +527,22 @@ def main ():
 
     # top flag
     top = args.top
-    global top_macro
-    top_macro = ''
     if top:
         top_macro = 'V2TEX_IO '
 
 
-    # open output .vh file
-    fout = open (file_prefix+typ+".vh", 'w')
-
     # make AXI bus
+    create_signal_table(interface_name)
 
-    global table
-
-    if (typ.find("iob_")>=0):
-        table = make_iob()
-
-    if (typ.find("axi_")>=0):
-        if (typ.find("write_")>=0): table = make_axi_write()
-        elif (typ.find("read_")>=0): table = make_axi_read()
-        else: table = make_axi()
-
-    if (typ.find("axil_")>=0):
-        if (typ.find("write_")>=0): table = make_axil_write()
-        elif (typ.find("read_")>=0): table = make_axil_read()
-        else: table = make_axil()
-
-    if (typ.find("ahb_")>=0):
-        table = make_ahb()
-
-    if (typ.find("apb_")>=0):
-        table = make_apb()
-
-    port_name = typ
+    # open output .vh file
+    fout = open (file_prefix+interface_name+".vh", 'w')
 
     # write pragma for doc production
-    if (port_name.find("port")+1 and not port_name.find("portmap")+1):
-        fout.write('  //START_IO_TABLE '+port_prefix+port_name+'\n')
+    if (interface_name.find("port")+1 and not interface_name.find("portmap")+1):
+        fout.write('  //START_IO_TABLE '+port_prefix+interface_name+'\n')
 
     # call function func to generate .vh file
-    func_name = port_name.replace("axil_", "").replace("axi_", "").replace("write_", "").replace("read_", "").replace("iob_", "").replace("apb_", "").replace("ahb_", "")
-    if (port_name.find("portmap")+1):
-        eval(func_name+"('"+port_prefix+"','"+wire_prefix+"', fout)")
-    else:
-        eval(func_name+"('"+port_prefix+"', fout)")
+    write_vh_contents(interface_name, port_prefix, wire_prefix, fout)
 
     fout.close()
 
