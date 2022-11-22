@@ -199,7 +199,10 @@ def write_hwcode(table, out_dir, top):
     # connection wires
     gen_inst_wire(table, f_inst)
 
-    f_inst.write("swreg #(ADDR_W, DATA_W) swreg_inst (\n")
+    f_inst.write("swreg #(\n")
+    f_inst.write(f'\t`include "{top}_inst_params.vh"\n')
+    f_inst.write("\t.ADDR_W(ADDR_W), \n\t.DATA_W(DATA_W)")
+    f_inst.write("\n) swreg_inst (\n")
     gen_portmap(table, f_inst)
     f_inst.write('\t`include "iob_s_portmap.vh"\n')
     f_inst.write('\t`include "iob_clkrst_portmap.vh"')
@@ -215,11 +218,15 @@ def write_hwcode(table, out_dir, top):
     # time scale
     f_gen.write("`timescale 1ns / 1ps\n\n")
 
+    # macros
+    f_gen.write(f'`include "{top}_conf.vh"\n')
+
     # declaration
     f_gen.write("module swreg\n")
 
     # parameters
     f_gen.write("#(\n")
+    f_gen.write(f'\t`include "{top}_params.vh"\n')
     f_gen.write("\tparameter ADDR_W = 0,\n")
     f_gen.write("\tparameter DATA_W = 0\n")
     f_gen.write(")\n")

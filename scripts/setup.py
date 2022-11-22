@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import param_conf as p_conf
 from mkregs import mkregs
 from verilog2tex import verilog2tex
 from ios import generate_ios_header, generate_ios_tex
@@ -23,13 +24,16 @@ def setup(top, version, confs, ios, regs, blocks):
     #
 
     mkregs(table, 'HW', top, build_dir+'/hardware/src')
+    p_conf.params_vh(confs, top, build_dir+'/hardware/src')
+    p_conf.conf_vh(confs, top, build_dir+'/hardware/src')
 
     generate_ios_header(ios, build_dir+'/hardware/src')
 
     #
     # Generate sw
     #
-    #mkregs(table, 'SW', top, '.')
+    mkregs(table, 'SW', top, build_dir+'/software/esrc')
+    mkregs(table, 'SW', top, build_dir+'/software/psrc')
 
     #
     # Generate Tex
