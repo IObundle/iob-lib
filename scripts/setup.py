@@ -2,7 +2,7 @@
 
 import sys
 import param_conf as p_conf
-from mkregs import mkregs
+import mkregs
 from verilog2tex import verilog2tex
 from ios import generate_ios_header, generate_ios_tex
 
@@ -11,19 +11,21 @@ src_path = './hardware/src/'
 def setup(top, version, confs, ios, regs, blocks):
 
     #build directory
-    build_dir = f"../{top+'_'+version}";
+    build_dir = f"../{top+'_'+version}"
     
     #build registers table
-    table = []
-    for i in range(len(regs)):
-        table += regs[i]['regs'];
+    reg_table = []
+    for i_regs in regs:
+        reg_table += i_regs['regs']
+
+    reg_table = mkregs.compute_addr(reg_table, True)
 
         
     #
     # Generate hw
     #
-
-    mkregs(table, 'HW', top, build_dir+'/hardware/src')
+    mkregs.write_hwheader(reg_table, build_dir+'/hardware/src', top)
+    mkregs.write_hwcode(reg_table, build_dir+'/hardware/src', top)
     p_conf.params_vh(confs, top, build_dir+'/hardware/src')
     p_conf.conf_vh(confs, top, build_dir+'/hardware/src')
 
@@ -32,8 +34,9 @@ def setup(top, version, confs, ios, regs, blocks):
     #
     # Generate sw
     #
-    mkregs(table, 'SW', top, build_dir+'/software/esrc')
-    mkregs(table, 'SW', top, build_dir+'/software/psrc')
+    mkregs.write_swheader(reg_table, build_dir+'/software/esrc', top)
+    mkregs.write_swheader(reg_table, build_dir+'/software/psrc', top)
+    mkregs.write_swcode(reg_table, build_dir+'/software/psrc', top)
 
     #
     # Generate Tex

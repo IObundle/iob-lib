@@ -492,8 +492,6 @@ def compute_addr(table, no_overlap):
             addr_tmp = write_addr
         if no_overlap:
             addr_tmp = max(read_addr, write_addr)
-            write_addr = addr_tmp
-            write_addr = addr_tmp
 
         #save address temporarily in list
         tmp.append(addr_tmp);
@@ -518,14 +516,3 @@ def compute_addr(table, no_overlap):
     core_addr_w = int(ceil(log(max(read_addr, write_addr), 2)))
 
     return table
-
-
-# top function
-def mkregs(table, hwsw, top, out_dir):
-    table = compute_addr(table, True)
-    if hwsw == "HW":
-        write_hwheader(table, out_dir, top)
-        write_hwcode(table, out_dir, top)
-    elif hwsw == "SW":
-        write_swheader(table, out_dir, top)
-        write_swcode(table, out_dir, top)
