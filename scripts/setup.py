@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+from os import path
 import param_conf as p_conf
 import mkregs
 from verilog2tex import verilog2tex
@@ -36,7 +37,7 @@ def setup(top, version, confs, ios, regs, blocks):
     #
     mkregs.write_swheader(reg_table, build_dir+'/software/esrc', top)
     mkregs.write_swcode(reg_table, build_dir+'/software/esrc', top)
-    mkregs.write_swheader(reg_table, build_dir+'/software/psrc', top)
+    if path.isdir(build_dir+'/software/psrc'): mkregs.write_swheader(reg_table, build_dir+'/software/psrc', top)
 
     #
     # Generate Tex
