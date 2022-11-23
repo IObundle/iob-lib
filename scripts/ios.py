@@ -3,7 +3,8 @@
 #    ios.py: build Verilog module IO and documentation
 #
 
-from verilog2tex import write_table
+from latex import write_table
+import if_gen
 
 # Return full port type string based on given types: "I", "O" and "IO"
 # Maps "I", "O" and "IO" to "INPUT", "OUTPUT" and "INOUT", respectively.
@@ -22,14 +23,16 @@ def get_port_type(port_type):
 def generate_ios_header(ios, out_dir):
     f_io = open(f"{out_dir}/io.vh", "w")
 
-    last_table = False
-    last_port = False
-
-    for table_idx, table in enumerate(ios):
-        last_table = (len(ios)-table_idx == 1)
-        for port_idx, port in enumerate(table['ports']):
-            last_port = (len(table['ports'])-port_idx == 1)
-            f_io.write(f"`IOB_{get_port_type(port['type'])}({port['name']}, {port['n_bits']}){'' if last_table and last_port else ','} //{port['descr']}\n")
+    for table in ios:
+        # Check if this table is a standard interface (from if_gen.py)
+        if table['name'] in if_gen.interfaces:
+            # Interface is standard, generate ports
+            if_gen.create_signal_table(table['name'])
+            if_gen.write_vh_contents(table['name'], '', '', f_io)
+        else:
+            # Interface is not standard, read ports
+            for port in table['ports']:
+                f_io.write(f"`IOB_{get_port_type(port['type'])}({port['name']}, {port['n_bits']}), //{port['descr']}\n")
 
     f_io.close()
 
@@ -37,7 +40,19 @@ def generate_ios_header(ios, out_dir):
 def generate_ios_tex(ios, out_dir):
     for table in ios:
         tex_table = []
-        for port in table['ports']:
-            tex_table.append([port['name'].replace('_','\_'),get_port_type(port['type']),port['n_bits'].replace('_','\_'),port['descr']])
+        # Check if this table is a standard interface (from if_gen.py)
+        if table['name'] in if_gen.interfaces:
+            # Interface is standard, generate ports
+            if_gen.create_signal_table(table['name'])
+            for port in if_gen.table:
+                port_direction = port['signal'] if 'm_' in port['name'] else if_gen.reverse(port['signal']) # Reverse port direction if it is a slave interface
+                tex_table.append([(port['name']+if_gen.suffix(port_direction)).replace('_','\_'),
+                                  port_direction.replace('`IOB_','').replace('(',''),
+                                  port['width'].replace('_','\_'),
+                                  port['description']])
+        else:
+            # Interface is not standard, read ports
+            for port in table['ports']:
+                tex_table.append([port['name'].replace('_','\_'),get_port_type(port['type']),port['n_bits'].replace('_','\_'),port['descr']])
 
-        write_table(f"{out_dir}/{table['name']}",tex_table)
+        write_table(f"{out_dir}/{table['name']}_if",tex_table)
