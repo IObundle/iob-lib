@@ -5,6 +5,7 @@
 
 import sys
 from math import ceil, log
+from latex import write_table
 
 cpu_n_bytes = 4
 core_addr_w = None
@@ -516,3 +517,18 @@ def compute_addr(table, no_overlap):
     core_addr_w = int(ceil(log(max(read_addr, write_addr), 2)))
 
     return table
+
+
+# Generate TeX tables of registers
+# regs: list of tables containing registers, as defined in <corename>_setup.py
+# regs_with_addr: list of all registers, where 'addr' field has already been computed
+def generate_regs_tex(regs, regs_with_addr, out_dir):
+    for table in regs:
+        tex_table = []
+        for reg in table['regs']:
+            tex_table.append([reg['name'].replace('_','\_'), reg['type'],
+                             # Find address of matching register in regs_with_addr list
+                             next(register['addr'] for register in regs_with_addr if register['name'] == reg['name']),
+                             reg['n_bits'], reg['rst_val'], reg['descr']])
+
+        write_table(f"{out_dir}/{table['name']}_swreg",tex_table)

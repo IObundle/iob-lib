@@ -3,7 +3,7 @@
 #    ios.py: build Verilog module IO and documentation
 #
 
-from verilog2tex import write_table
+from latex import write_table
 import if_gen
 
 # Return full port type string based on given types: "I", "O" and "IO"
@@ -55,4 +55,4 @@ def generate_ios_tex(ios, out_dir):
             for port in table['ports']:
                 tex_table.append([port['name'].replace('_','\_'),get_port_type(port['type']),port['n_bits'].replace('_','\_'),port['descr']])
 
-        write_table(f"{out_dir}/{table['name']}",tex_table)
+        write_table(f"{out_dir}/{table['name']}_if",tex_table)
