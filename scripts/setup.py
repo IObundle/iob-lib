@@ -19,6 +19,7 @@ def setup(top, version, confs, ios, regs, blocks):
     for i_regs in regs:
         reg_table += i_regs['regs']
 
+    mkregs.config = confs
     reg_table = mkregs.compute_addr(reg_table, True)
 
         

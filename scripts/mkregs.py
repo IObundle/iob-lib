@@ -8,6 +8,7 @@ from math import ceil, log
 
 cpu_n_bytes = 4
 core_addr_w = None
+config = None
 
 def boffset(n, n_bytes):
     return 8*(n%n_bytes)
@@ -20,6 +21,8 @@ def bfloor(n, log2base):
 
 def bceil(n, log2base):
     base = int(2**log2base)
+    n = compute_n_bits_value(n, config)
+    #print(f"{n} of {type(n)} and {base}")
     if n%base == 0:
         return n
     else:
@@ -467,6 +470,18 @@ def check_overlap(addr, addr_type, read_addr, write_addr):
     elif addr_type == "W" and addr < write_addr:
         sys.exit(f"Error: write address {addr} overlaps with previous addresses")
 
+def compute_n_bits_value(n_bits, config):
+        n_bits_value = -1
+        if type(n_bits)==int:
+            n_bits_value = n_bits
+        else:
+            for param in config:
+                if param['name']==n_bits:
+                    n_bits_value = int(param['val'])
+        if n_bits_value == -1:
+            sys.exit(f"Error: register 'n_bits':'{n_bits}' is not well defined.")
+        else: return n_bits_value
+
 # compute address
 def compute_addr(table, no_overlap):
     read_addr = 0
@@ -487,7 +502,7 @@ def compute_addr(table, no_overlap):
         elif addr_type == 'R': #auto address
             read_addr = bceil(read_addr, addr_w)
             addr_tmp = read_addr
-        elif row['type'] == 'W':
+        elif addr_type == 'W':
             write_addr = bceil(write_addr, addr_w)
             addr_tmp = write_addr
         if no_overlap:
