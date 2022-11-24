@@ -35,7 +35,7 @@ module iob_fifo_sync_tb;
    wire                r_empty;
 
    //FIFO level
-   wire [ADDR_W:0]     level;
+   wire [ADDR_W-1:0]     level;
 
    parameter clk_per = 10; // clk period = 10 timeticks
    always
@@ -108,11 +108,11 @@ module iob_fifo_sync_tb;
       end
       $display("INFO: here w_full=1 as expected");
 
-      if(level != 2**ADDR_W) begin
-        $display("ERROR: expecting level = 2**ADDR_W ,but got level=%d", level);
+      if(level != 0) begin
+        $display("ERROR: expecting level = 0 ,but got level=%d", level);
          $finish;
       end
-      $display("INFO: level = 2**ADDR_W as expected");
+      $display("INFO: level = 0 as expected");
 
       //enable reads and wait for empty
       w_r_en = 1;
