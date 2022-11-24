@@ -304,6 +304,15 @@ def suffix(direction):
         print("ERROR: get_signal_suffix : invalid argument")
         quit()
 
+def remove_iob_macro(direction):
+    if direction == '`IOB_INPUT(':
+        return 'input'
+    elif direction == '`IOB_OUTPUT(':
+        return 'output'
+    else:
+        print("ERROR: remove_iob_macro : invalid argument")
+        quit()
+
 #
 # Port
 #
@@ -311,12 +320,12 @@ def suffix(direction):
 def m_port(prefix, fout):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write(' '+table[i]['signal']+prefix+table[i]['name']+suffix(table[i]['signal'])+', '+table[i]['width']+'), //'+top_macro+table[i]['description']+'\n')
+            fout.write(remove_iob_macro(table[i]['signal'])+' ['+table[i]['width']+'-1:0] '+prefix+table[i]['name']+suffix(table[i]['signal'])+', //'+top_macro+table[i]['description']+'\n')
     
 def s_port(prefix, fout):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write(' '+reverse(table[i]['signal'])+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', '+table[i]['width']+'), //'+top_macro+table[i]['description']+'\n')
+            fout.write(remove_iob_macro(reverse(table[i]['signal']))+' ['+table[i]['width']+'-1:0] '+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', //'+top_macro+table[i]['description']+'\n')
 
 #
 # Portmap
