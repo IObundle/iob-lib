@@ -22,7 +22,7 @@ def bfloor(n, log2base):
 
 def bceil(n, log2base):
     base = int(2**log2base)
-    n = compute_n_bits_value(n, config)
+    n = compute_n_bits_value(n)
     #print(f"{n} of {type(n)} and {base}")
     if n%base == 0:
         return n
@@ -474,7 +474,7 @@ def check_overlap(addr, addr_type, read_addr, write_addr):
     elif addr_type == "W" and addr < write_addr:
         sys.exit(f"Error: write address {addr} overlaps with previous addresses")
 
-def compute_n_bits_value(n_bits, config):
+def compute_n_bits_value(n_bits):
         if type(n_bits)==int:
             return n_bits
         else:
