@@ -18,6 +18,7 @@ def setup(top, version, confs, ios, regs, blocks):
     for i_regs in regs:
         reg_table += i_regs['regs']
 
+    mkregs.config = confs
     reg_table = mkregs.compute_addr(reg_table, True)
 
         
@@ -41,7 +42,8 @@ def setup(top, version, confs, ios, regs, blocks):
     #
     # Generate Tex
     #
-    p_conf.generate_macros_tex(confs, build_dir+"/document/tsrc")
-    p_conf.generate_params_tex(confs, build_dir+"/document/tsrc")
-    ios_lib.generate_ios_tex(ios, build_dir+"/document/tsrc")
-    mkregs.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
+    if path.isdir(build_dir+"/document/tsrc"):
+        p_conf.generate_macros_tex(confs, build_dir+"/document/tsrc")
+        p_conf.generate_params_tex(confs, build_dir+"/document/tsrc")
+        ios_lib.generate_ios_tex(ios, build_dir+"/document/tsrc")
+        mkregs.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")

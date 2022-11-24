@@ -9,6 +9,7 @@ from latex import write_table
 
 cpu_n_bytes = 4
 core_addr_w = None
+config = None
 
 def boffset(n, n_bytes):
     return 8*(n%n_bytes)
@@ -21,6 +22,8 @@ def bfloor(n, log2base):
 
 def bceil(n, log2base):
     base = int(2**log2base)
+    n = compute_n_bits_value(n)
+    #print(f"{n} of {type(n)} and {base}")
     if n%base == 0:
         return n
     else:
@@ -202,7 +205,6 @@ def write_hwcode(table, out_dir, top):
 
     f_inst.write("swreg #(\n")
     f_inst.write(f'\t`include "{top}_inst_params.vh"\n')
-    f_inst.write("\t.ADDR_W(ADDR_W), \n\t.DATA_W(DATA_W)")
     f_inst.write("\n) swreg_inst (\n")
     gen_portmap(table, f_inst)
     f_inst.write('\t`include "iob_s_portmap.vh"\n')
@@ -221,15 +223,14 @@ def write_hwcode(table, out_dir, top):
 
     # macros
     f_gen.write(f'`include "{top}_conf.vh"\n')
+    f_gen.write(f'`include "{top}_swreg_def.vh"\n')
 
     # declaration
     f_gen.write("module swreg\n")
 
     # parameters
     f_gen.write("#(\n")
-    f_gen.write(f'\t`include "{top}_params.vh"\n')
-    f_gen.write("\tparameter ADDR_W = 0,\n")
-    f_gen.write("\tparameter DATA_W = 0\n")
+    f_gen.write(f'`include "{top}_params.vh"\n')
     f_gen.write(")\n")
     f_gen.write("(\n")
 
@@ -343,7 +344,12 @@ def write_hwheader(table, out_dir, top):
         name = row['name']
         n_bits = row['n_bits']
         f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
-        f_def.write(f"`define {macro_prefix}{name}_W {n_bits}\n\n")
+        if type(n_bits)==int:
+            f_def.write(f"`define {macro_prefix}{name}_W {n_bits}\n\n")
+        elif n_bits != f"{name}_W":
+            f_def.write(f"`define {macro_prefix}{name}_W `{macro_prefix}{n_bits}\n\n")
+        else:
+            f_def.write("\n")
     f_def.close()
 
 
@@ -468,6 +474,18 @@ def check_overlap(addr, addr_type, read_addr, write_addr):
     elif addr_type == "W" and addr < write_addr:
         sys.exit(f"Error: write address {addr} overlaps with previous addresses")
 
+def compute_n_bits_value(n_bits):
+        if type(n_bits)==int:
+            return n_bits
+        else:
+            for param in config:
+                if param['name']==n_bits:
+                    try:
+                        return int(param['val'])
+                    except:
+                        return int(param['max'])
+        sys.exit(f"Error: register 'n_bits':'{n_bits}' is not well defined.")
+
 # compute address
 def compute_addr(table, no_overlap):
     read_addr = 0
@@ -488,7 +506,7 @@ def compute_addr(table, no_overlap):
         elif addr_type == 'R': #auto address
             read_addr = bceil(read_addr, addr_w)
             addr_tmp = read_addr
-        elif row['type'] == 'W':
+        elif addr_type == 'W':
             write_addr = bceil(write_addr, addr_w)
             addr_tmp = write_addr
         if no_overlap:
