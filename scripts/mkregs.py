@@ -475,16 +475,16 @@ def check_overlap(addr, addr_type, read_addr, write_addr):
         sys.exit(f"Error: write address {addr} overlaps with previous addresses")
 
 def compute_n_bits_value(n_bits, config):
-        n_bits_value = -1
         if type(n_bits)==int:
-            n_bits_value = n_bits
+            return n_bits
         else:
             for param in config:
                 if param['name']==n_bits:
-                    n_bits_value = int(param['val'])
-        if n_bits_value == -1:
-            sys.exit(f"Error: register 'n_bits':'{n_bits}' is not well defined.")
-        else: return n_bits_value
+                    try:
+                        return int(param['val'])
+                    except:
+                        return int(param['max'])
+        sys.exit(f"Error: register 'n_bits':'{n_bits}' is not well defined.")
 
 # compute address
 def compute_addr(table, no_overlap):
