@@ -17,7 +17,7 @@ module iob_fifo_async
     output reg [R_DATA_W-1:0] r_data_o,
     output reg                r_empty_o,
     output reg                r_full_o,
-    output reg [ADDR_W:0]     r_level_o,
+    output reg [ADDR_W-1:0]   r_level_o,
 
     //write port
     input                     w_clk_i,
@@ -25,7 +25,7 @@ module iob_fifo_async
     input [W_DATA_W-1:0]      w_data_i,
     output reg                w_empty_o,
     output reg                w_full_o,
-    output reg [ADDR_W:0]     w_level_o
+    output reg [ADDR_W-1:0]   w_level_o
 
     );
 
@@ -139,7 +139,7 @@ module iob_fifo_async
       );
 
    `IOB_COMB begin
-      r_level_o = r_level_int; //note rhs has 1 bit less
+      r_level_o = r_level_int;
       r_full_o = 1'b0;
       r_empty_o = 1'b0;
       r_st_nxt = r_st;
@@ -154,7 +154,7 @@ module iob_fifo_async
         
         EMPTY: begin
            r_empty_o = 1'b1;
-           if(r_level_int >= r_incr)
+           if(r_level_int >= {1'b0, r_incr} )
              r_st_nxt = DEFAULT;
         end
 
@@ -193,7 +193,7 @@ module iob_fifo_async
       );
 
    `IOB_COMB begin
-      w_level_o = w_level_int; //note rhs has 1 bit less
+      w_level_o = w_level_int;
       w_full_o = 1'b0;
       w_empty_o = 1'b0;
       w_st_nxt = w_st;
@@ -217,7 +217,7 @@ module iob_fifo_async
            w_full_o = 1'b1;
            if(w_level_int == 0)
              w_level_o = FIFO_SIZE;
-           else if(w_level_int <= (FIFO_SIZE-w_incr))
+           else if( w_level_int <= (FIFO_SIZE-w_incr))
              w_st_nxt = DEFAULT;
         end
 
