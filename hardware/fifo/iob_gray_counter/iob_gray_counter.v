@@ -7,6 +7,7 @@ module iob_gray_counter
    (
     input          clk_i,
     input          arst_i,
+    input          rst_i,
     input          en_i,
     output [W-1:0] data_o
     );
@@ -17,7 +18,7 @@ module iob_gray_counter
    assign data_o = gray_counter;
        
    always @ (posedge clk_i, posedge arst_i)
-     if (arst_i) begin
+     if (arst_i || rst_i) begin
         bin_counter  <= 1;
         gray_counter <= 0; 
      end else if (en_i) begin

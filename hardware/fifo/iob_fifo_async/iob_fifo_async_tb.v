@@ -192,16 +192,18 @@ module iob_fifo_async_tb;
        )
    uut
      (
-      .r_arst_i  (r_arst),
       .r_clk_i   (r_clk),
+      .r_arst_i  (r_arst),
+      .r_rst_i   (1'd0),
       .r_en_i    (r_en),
       .r_data_o  (r_data),
       .r_empty_o (r_empty),
       .r_full_o  (r_full),
       .r_level_o (r_level),
 
-      .w_arst_i  (w_arst),
       .w_clk_i   (w_clk),
+      .w_arst_i  (w_arst),
+      .w_rst_i   (1'd0),
       .w_en_i    (w_en),
       .w_data_i  (w_data),
       .w_empty_o (w_empty),
