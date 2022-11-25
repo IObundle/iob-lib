@@ -44,12 +44,12 @@ module iob_fifo_async
    wire [ADDR_W-1:0]          r_incr, w_incr;
 
    //binary read addresses on both domains
-   wire [R_ADDR_W-1:0]        r_raddr_bin, w_raddr_bin;
-   wire [W_ADDR_W-1:0]        r_waddr_bin, w_waddr_bin;
+   wire [R_ADDR_W:0]          r_raddr_bin, w_raddr_bin;
+   wire [W_ADDR_W:0]          r_waddr_bin, w_waddr_bin;
 
    //normalized binary addresses
-   wire [ADDR_W-1:0]          r_raddr_bin_n, r_waddr_bin_n;
-   wire [ADDR_W-1:0]          w_waddr_bin_n, w_raddr_bin_n;
+   wire [ADDR_W:0]            r_raddr_bin_n, r_waddr_bin_n;
+   wire [ADDR_W:0]            w_waddr_bin_n, w_raddr_bin_n;
 
    //assign according to assymetry type
    generate
@@ -79,11 +79,11 @@ module iob_fifo_async
 
 
    //sync write gray address to read domain
-   wire [W_ADDR_W-1:0]        w_waddr_gray;
-   wire [W_ADDR_W-1:0]        r_waddr_gray;
+   wire [W_ADDR_W:0]          w_waddr_gray;
+   wire [W_ADDR_W:0]          r_waddr_gray;
    iob_sync
      #(
-       .DATA_W(W_ADDR_W),
+       .DATA_W(W_ADDR_W+1),
        .RST_VAL(0)
        )
    w_waddr_gray_sync0
@@ -95,11 +95,11 @@ module iob_fifo_async
       );
 
    //sync read gray address to write domain
-   wire [R_ADDR_W-1:0]        r_raddr_gray;
-   wire [R_ADDR_W-1:0]        w_raddr_gray;
+   wire [R_ADDR_W:0]          r_raddr_gray;
+   wire [R_ADDR_W:0]          w_raddr_gray;
    iob_sync
      #(
-       .DATA_W(R_ADDR_W),
+       .DATA_W(R_ADDR_W+1),
        .RST_VAL(0)
        )
    r_raddr_gray_sync0
@@ -112,7 +112,7 @@ module iob_fifo_async
 
 
    //READ DOMAIN FIFO LEVEL
-   wire [ADDR_W-1:0]          r_level_int = r_waddr_bin_n - r_raddr_bin_n;
+   wire [ADDR_W:0]            r_level_int = r_waddr_bin_n - r_raddr_bin_n;
 
    
    //
@@ -172,7 +172,7 @@ module iob_fifo_async
    end
 
    //WRITE DOMAIN FIFO LEVEL
-   wire [ADDR_W-1:0]      w_level_int = w_waddr_bin_n - w_raddr_bin_n;
+   wire [ADDR_W:0]        w_level_int = w_waddr_bin_n - w_raddr_bin_n;
 
    //WRITE STATE MACHINE
    reg [1:0]              w_st_nxt;
@@ -228,7 +228,7 @@ module iob_fifo_async
    wire r_en_int  = r_en_i & ~r_empty_o;
    iob_gray_counter
      #(
-       .W(R_ADDR_W)
+       .W(R_ADDR_W+1)
        )
    r_raddr_gray_counter
      (
@@ -242,7 +242,7 @@ module iob_fifo_async
    wire w_en_int = w_en_i & ~w_full_o;
    iob_gray_counter
      #(
-       .W(W_ADDR_W)
+       .W(W_ADDR_W+1)
        )
    w_waddr_gray_counter
      (
@@ -255,7 +255,7 @@ module iob_fifo_async
    //convert gray read address to binary
    iob_gray2bin
      #(
-       .DATA_W(R_ADDR_W)
+       .DATA_W(R_ADDR_W+1)
        )
    gray2bin_r_raddr
      (
@@ -266,7 +266,7 @@ module iob_fifo_async
    //convert synced gray write address to binary
    iob_gray2bin
      #(
-       .DATA_W(W_ADDR_W)
+       .DATA_W(W_ADDR_W+1)
        )
    gray2bin_r_raddr_sync
      (
@@ -277,7 +277,7 @@ module iob_fifo_async
    //convert gray write address to binary
    iob_gray2bin
      #(
-       .DATA_W(W_ADDR_W)
+       .DATA_W(W_ADDR_W+1)
        )
    gray2bin_w_waddr
      (
@@ -288,7 +288,7 @@ module iob_fifo_async
    //convert synced gray read address to binary
    iob_gray2bin
      #(
-       .DATA_W(R_ADDR_W)
+       .DATA_W(R_ADDR_W+1)
        )
    gray2bin_w_raddr_sync
      (
@@ -308,10 +308,10 @@ module iob_fifo_async
       .w_clk_i  (w_clk_i),
       .w_en_i   (w_en_int),
       .w_data_i (w_data_i),
-      .w_addr_i (w_waddr_bin),
+      .w_addr_i (w_waddr_bin[W_ADDR_W-1:0]),
 
       .r_clk_i  (r_clk_i),
-      .r_addr_i (r_raddr_bin),
+      .r_addr_i (r_raddr_bin[R_ADDR_W-1:0]),
       .r_en_i   (r_en_int),
       .r_data_o (r_data_o)
       );
