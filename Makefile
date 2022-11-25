@@ -10,6 +10,9 @@ export
 LIB_DIR:=.
 BUILD_VSRC_DIR:=.
 
+
+all: sim
+
 # Default module
 MODULE ?= iob_ram_2p
 MODULE_DIR ?= $(shell find hardware -name $(MODULE))
@@ -64,4 +67,4 @@ clean:
 
 debug:
 
-.PHONY: sim clean debug
+.PHONY: all sim clean debug

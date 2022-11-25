@@ -7,21 +7,21 @@ from latex import write_table
 import if_gen
 
 # Return full port type string based on given types: "I", "O" and "IO"
-# Maps "I", "O" and "IO" to "INPUT", "OUTPUT" and "INOUT", respectively.
+# Maps "I", "O" and "IO" to "input", "outpuT" and "inout", respectively.
 def get_port_type(port_type):
     if port_type == "I":
-        return "INPUT"
+        return "input"
     elif port_type == "O":
-        return "OUTPUT"
+        return "output"
     else:
-        return "INOUT"
+        return "inout"
 
 # Generate io.vh file
 # ios: list of tables, each of them containing a list of ports
 # Each table is a dictionary with fomat: {'name': '<table name>', 'descr':'<table description>', 'ports': [<list of ports>]}
 # Each port is a dictionary with fomat: {'name':"<port name>", 'type':"<port type>", 'n_bits':'<port width>', 'descr':"<port description>"},
 def generate_ios_header(ios, out_dir):
-    f_io = open(f"{out_dir}/io.vh", "w")
+    f_io = open(f"{out_dir}/io.vh", "w+")
 
     for table in ios:
         # Check if this table is a standard interface (from if_gen.py)
@@ -32,7 +32,15 @@ def generate_ios_header(ios, out_dir):
         else:
             # Interface is not standard, read ports
             for port in table['ports']:
-                f_io.write(f"`IOB_{get_port_type(port['type'])}({port['name']}, {port['n_bits']}), //{port['descr']}\n")
+                f_io.write(f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {port['name']}, //{port['descr']}\n")
+
+    # Find and remove last comma
+    while(f_io.read(1)!=',' and f_io.tell()>1):
+        f_io.seek(f_io.tell()-2)
+    f_io.seek(f_io.tell()-1)
+    if f_io.read(1)==',':
+        f_io.seek(f_io.tell()-1)
+        f_io.write(' ')
 
     f_io.close()
 

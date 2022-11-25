@@ -103,21 +103,21 @@ module iob_fifo_sync_tb;
       w_en = 0;
 
       if(w_full != 1) begin
-         $display("ERROR: expecting w_full=1");
+         $display("ERROR: write proc: expecting w_full=1");
          $finish;
       end
-      $display("INFO: here w_full=1 as expected");
+      $display("INFO: write proc: w_full=1 as expected");
 
       if(level != 0) begin
-        $display("ERROR: expecting level = 0 ,but got level=%d", level);
+        $display("ERROR: write proc: expecting level = 0, but got level=%d", level);
          $finish;
       end
-      $display("INFO: level = 0 as expected");
+      $display("INFO: write proc: level = 0 as expected");
 
       //enable reads and wait for empty
       w_r_en = 1;
       while (!r_empty) @(posedge clk) #1;
-      $display("INFO: here r_empty=1 as expected");
+      $display("INFO: write proc: r_empty=1 as expected");
 
       //write test data continuously to the FIFO
       for(i = 0; i < ((TESTSIZE*8)/W_DATA_W); i = i + 1) begin
@@ -128,6 +128,7 @@ module iob_fifo_sync_tb;
          w_en = 0;
       end
 
+      $display("INFO: write proc: test data written");
    end
 
    //
@@ -142,7 +143,7 @@ module iob_fifo_sync_tb;
 
       //wait for FIFO full
       while (!w_full)  @(posedge clk) #1;
-      $display("INFO: w_full=1 as expected");
+      $display("INFO: read proc: w_full=1 as expected");
 
       //read data from the entire FIFO
       for(j = 0; j < 2**R_ADDR_W; j = j + 1) begin
@@ -154,13 +155,13 @@ module iob_fifo_sync_tb;
       end
 
       while(!r_empty)  @(posedge clk) #1;
-      $display("INFO: r_empty = 1 as expected");
+      $display("INFO: read proc: r_empty = 1 as expected");
 
       if(level != 0) begin
-         $display("ERROR: expecting level = 0, but got level=%d", level);
+         $display("ERROR: read proc: expecting level = 0, but got level=%d", level);
          $finish;
       end
-      $display("INFO: level = 0 as expected");
+      $display("INFO: read proc: level = 0 as expected");
 
       //read data continuously from the FIFO
       for(j = 0; j < ((TESTSIZE*8)/R_DATA_W); j = j + 1) begin
@@ -172,10 +173,10 @@ module iob_fifo_sync_tb;
       end
 
       if(read !== test_data) begin
-        $display("ERROR: data read does not match the test data.");
-        $display("data read XOR test data: %x", read^test_data);
+        $display("ERROR: read proc: data read does not match the test data.");
+        $display("read proc: data read XOR test data: %x", read^test_data);
       end
-      $display("INFO: data read matches test data as expected");
+      $display("INFO: read proc: data read matches test data as expected");
 
       #(5*clk_per) $finish;
    end

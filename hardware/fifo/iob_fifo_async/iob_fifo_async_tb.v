@@ -27,7 +27,7 @@ module iob_fifo_async_tb;
    reg [W_DATA_W-1:0]  w_data;
    wire                w_empty;
    wire                w_full;
-   wire [ADDR_W:0]     w_level;
+   wire [ADDR_W-1:0]   w_level;
 
    //read port
    reg                 r_clk = 0;
@@ -35,7 +35,7 @@ module iob_fifo_async_tb;
    wire [R_DATA_W-1:0] r_data;
    wire                r_empty;
    wire                r_full;
-   wire [ADDR_W:0]     r_level;
+   wire [ADDR_W-1:0]   r_level;
 
 
    // clocks
@@ -99,22 +99,22 @@ module iob_fifo_async_tb;
       w_en = 0;
 
       if(w_full != 1) begin
-         $display("ERROR: expecting w_full=1");
+         $display("ERROR: write proc: expecting w_full=1");
          $finish;
       end
-      $display("INFO: w_full=1 as expected");
+      $display("INFO: write proc: w_full=1 as expected");
 
 
-      if(w_level != 2**ADDR_W) begin
-        $display("ERROR: expecting w_level = 2**ADDR, got %d", w_level);
+      if(w_level != 0) begin
+        $display("ERROR: write proc: expecting w_level = 0, got %d", w_level);
          $finish;
       end
-      $display("INFO: w_level = 2**ADDR as expected");
+      $display("INFO: write proc: w_level = 0 as expected");
 
       //enable reads and wait for empty
       w_r_en = 1;
       while (!w_empty) @(posedge w_clk) #1;
-      $display("INFO: w_empty=0 as expected");
+      $display("INFO: write proc: w_empty=0 as expected");
 
       //write test data continuously to the FIFO
       for(i = 0; i < ((TESTSIZE*8)/W_DATA_W); i = i + 1) begin
@@ -125,6 +125,7 @@ module iob_fifo_async_tb;
          w_en = 0;
       end
 
+      $display("INFO: write proc: test data written");
    end
 
    //
@@ -140,7 +141,7 @@ module iob_fifo_async_tb;
 
       //wait for FIFO full
       while (!r_full)  @(posedge r_clk) #1;
-      $display("INFO: r_full=1 as expected");
+      $display("INFO: read proc: r_full=1 as expected");
 
       //read data from the entire FIFO
       for(j = 0; j < 2**R_ADDR_W; j = j + 1) begin
@@ -152,14 +153,14 @@ module iob_fifo_async_tb;
       end
 
       while(!r_empty)  @(posedge r_clk) #1;
-      $display("INFO: r_empty = 1 as expected");
+      $display("INFO: read proc: r_empty = 1 as expected");
 
 
       if(r_level != 0) begin
-         $display("ERROR: expecting r_level = 0, but got r_level=%d", r_level);
+         $display("ERROR: read proc: expecting r_level = 0, but got r_level=%d", r_level);
          $finish;
       end
-      $display("INFO: r_level = 0 as expected");
+      $display("INFO: read proc: r_level = 0 as expected");
 
 
       //read data continuously from the FIFO
@@ -172,10 +173,10 @@ module iob_fifo_async_tb;
       end
 
       if(read !== test_data) begin
-        $display("ERROR: data read does not match the test data.");
-        $display("data read XOR test data: %x", read^test_data);
+        $display("ERROR: read proc: data read does not match the test data.");
+        $display("read proc: data read XOR test data: %x", read^test_data);
       end
-      $display("INFO: data read matches test data as expected");
+      $display("INFO: read proc: data read matches test data as expected");
 
       #(5*clk_per_r) $finish;
    end
