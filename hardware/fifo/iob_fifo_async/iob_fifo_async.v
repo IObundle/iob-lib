@@ -9,10 +9,11 @@ module iob_fifo_async
     ADDR_W = 0 //higher ADDR_W lower DATA_W
     )
    (
-    input                     rst_i,
-
+    
     //read port
     input                     r_clk_i,
+    input                     r_arst_i,
+    input                     r_rst_i,
     input                     r_en_i,
     output reg [R_DATA_W-1:0] r_data_o,
     output reg                r_empty_o,
@@ -21,6 +22,8 @@ module iob_fifo_async
 
     //write port
     input                     w_clk_i,
+    input                     w_arst_i,
+    input                     w_rst_i,
     input                     w_en_i,
     input [W_DATA_W-1:0]      w_data_i,
     output reg                w_empty_o,
@@ -89,7 +92,8 @@ module iob_fifo_async
    w_waddr_gray_sync0
      (
       .clk_i    (r_clk_i),
-      .arst_i   (rst_i),
+      .arst_i   (r_arst_i),
+      .rst_i    (r_rst_i),
       .signal_i (w_waddr_gray),
       .signal_o (r_waddr_gray)
       );
@@ -105,7 +109,8 @@ module iob_fifo_async
    r_raddr_gray_sync0
      (
       .clk_i    (w_clk_i),
-      .arst_i   (rst_i),
+      .arst_i   (w_arst_i),
+      .rst_i    (w_rst_i),
       .signal_i (r_raddr_gray),
       .signal_o (w_raddr_gray)
       );
@@ -131,8 +136,8 @@ module iob_fifo_async
    r_st_reg0
      (
       .clk_i  (r_clk_i),
-      .arst_i (rst_i),
-      .rst_i  (1'b0),
+      .arst_i (r_arst_i),
+      .rst_i  (r_rst_i),
       .en_i   (1'b1),
       .data_i (r_st_nxt),
       .data_o (r_st)
@@ -185,8 +190,8 @@ module iob_fifo_async
    w_st_reg0
      (
       .clk_i  (w_clk_i),
-      .arst_i (rst_i),
-      .rst_i  (1'b0),
+      .arst_i (w_arst_i),
+      .rst_i  (w_rst_i),
       .en_i   (1'b1),
       .data_i (w_st_nxt),
       .data_o (w_st)
@@ -233,7 +238,8 @@ module iob_fifo_async
    r_raddr_gray_counter
      (
       .clk_i  (r_clk_i),
-      .rst_i  (rst_i),
+      .arst_i (r_arst_i),
+      .rst_i  (r_rst_i),
       .en_i   (r_en_int),
       .data_o (r_raddr_gray)
       );
@@ -247,7 +253,8 @@ module iob_fifo_async
    w_waddr_gray_counter
      (
       .clk_i  (w_clk_i),
-      .rst_i  (rst_i),
+      .arst_i (w_arst_i),
+      .rst_i  (w_rst_i),
       .en_i   (w_en_int),
       .data_o (w_waddr_gray)
       );

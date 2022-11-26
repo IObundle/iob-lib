@@ -8,6 +8,7 @@ module iob_sync
   (
    input                   clk_i,
    input                   arst_i,
+   input                   rst_i,
    input [DATA_W-1:0]      signal_i,
    output reg [DATA_W-1:0] signal_o
    );
@@ -18,7 +19,7 @@ module iob_sync
    reg [DATA_W-1:0]        sync_reg;
 
    always @(posedge clk_i, posedge arst_i) begin
-      if (arst_i) begin
+      if (arst_i || rst_i) begin
          sync_reg <= RST_VAL_INT;
          signal_o <= RST_VAL_INT;
       end else begin

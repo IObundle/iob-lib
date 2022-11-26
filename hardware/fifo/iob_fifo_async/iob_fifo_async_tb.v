@@ -19,9 +19,8 @@ module iob_fifo_async_tb;
    localparam W_ADDR_W = W_DATA_W == MAXDATA_W? MINADDR_W : ADDR_W;
    localparam R_ADDR_W = R_DATA_W == MAXDATA_W? MINADDR_W : ADDR_W;
 
-   reg reset = 0;
-
    //write port
+   reg                 w_arst = 0;
    reg                 w_clk = 0;
    reg                 w_en = 0;
    reg [W_DATA_W-1:0]  w_data;
@@ -30,6 +29,7 @@ module iob_fifo_async_tb;
    wire [ADDR_W-1:0]   w_level;
 
    //read port
+   reg                 r_arst = 0;
    reg                 r_clk = 0;
    reg                 r_en = 0;
    wire [R_DATA_W-1:0] r_data;
@@ -83,9 +83,11 @@ module iob_fifo_async_tb;
       //reset FIFO
       #clk_per_w;
       @(posedge w_clk) #1;
-      reset = 1;
+      w_arst = 1;
+      r_arst = 1;
       repeat (4) @(posedge w_clk) #1;
-      reset = 0;
+      w_arst = 0;
+      r_arst = 0;
 
       //wait for FIFO ready (full = 0)
       while (w_full) @(posedge w_clk) #1;
@@ -135,7 +137,7 @@ module iob_fifo_async_tb;
    initial begin
 
       //wait for reset to be de-asserted
-      @(negedge reset) repeat(4) @(posedge r_clk) #1;
+      @(negedge r_arst) repeat(4) @(posedge r_clk) #1;
       while(!w_r_en) @(posedge r_clk) #1;
 
 
@@ -190,9 +192,9 @@ module iob_fifo_async_tb;
        )
    uut
      (
-      .rst_i     (reset),
-
       .r_clk_i   (r_clk),
+      .r_arst_i  (r_arst),
+      .r_rst_i   (1'd0),
       .r_en_i    (r_en),
       .r_data_o  (r_data),
       .r_empty_o (r_empty),
@@ -200,6 +202,8 @@ module iob_fifo_async_tb;
       .r_level_o (r_level),
 
       .w_clk_i   (w_clk),
+      .w_arst_i  (w_arst),
+      .w_rst_i   (1'd0),
       .w_en_i    (w_en),
       .w_data_i  (w_data),
       .w_empty_o (w_empty),
