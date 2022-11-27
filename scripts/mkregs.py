@@ -205,7 +205,7 @@ def write_hwcode(table, out_dir, top):
 
     f_inst.write("swreg #(\n")
     f_inst.write(f'\t`include "{top}_inst_params.vh"\n')
-    f_inst.write("\n) swreg_inst (\n")
+    f_inst.write("\n) swreg_0 (\n")
     gen_portmap(table, f_inst)
     f_inst.write('\t`include "iob_s_portmap.vh"\n')
     f_inst.write('\t`include "iob_clkrst_portmap.vh"')

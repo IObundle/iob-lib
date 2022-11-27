@@ -19,9 +19,26 @@ module iob_fifo_async_tb;
    localparam W_ADDR_W = W_DATA_W == MAXDATA_W? MINADDR_W : ADDR_W;
    localparam R_ADDR_W = R_DATA_W == MAXDATA_W? MINADDR_W : ADDR_W;
 
-   //write port
+
+   //global reset
+   reg arst = 0;
+
+   //write reset 
    reg                 w_arst = 0;
-   reg                 w_clk = 0;
+   `IOB_RESET_SYNC(w_clk, arst, w_arst)
+
+   //read reset 
+   reg                 r_arst = 0;
+   `IOB_RESET_SYNC(r_clk, arst, r_arst)
+
+   //write clock
+   `IOB_CLOCK(w_clk, 10)
+
+   //read clock
+   `IOB_CLOCK(r_clk, 13)
+
+   
+   //write port
    reg                 w_en = 0;
    reg [W_DATA_W-1:0]  w_data;
    wire                w_empty;
@@ -29,20 +46,11 @@ module iob_fifo_async_tb;
    wire [ADDR_W-1:0]   w_level;
 
    //read port
-   reg                 r_arst = 0;
-   reg                 r_clk = 0;
    reg                 r_en = 0;
    wire [R_DATA_W-1:0] r_data;
    wire                r_empty;
    wire                r_full;
    wire [ADDR_W-1:0]   r_level;
-
-
-   // clocks
-   parameter clk_per_w = 10; //ns
-   always #(clk_per_w/2) w_clk = ~w_clk;
-   parameter clk_per_r = 13; //ns
-   always #(clk_per_r/2) r_clk = ~r_clk;
 
    integer             i,j; //iterators
 
@@ -52,7 +60,6 @@ module iob_fifo_async_tb;
    //
    // WRITE PROCESS
    //
-   reg                  w_r_en = 0;//disable reads initially
 
    initial begin
 
@@ -77,23 +84,12 @@ module iob_fifo_async_tb;
       $dumpfile("uut.vcd");
       $dumpvars();
 `endif
-      repeat(4) @(posedge w_clk) #1;
 
-
-      //reset FIFO
-      #clk_per_w;
-      @(posedge w_clk) #1;
-      w_arst = 1;
-      r_arst = 1;
-      repeat (4) @(posedge w_clk) #1;
-      w_arst = 0;
-      r_arst = 0;
-
-      //wait for FIFO ready (full = 0)
-      while (w_full) @(posedge w_clk) #1;
+      #10 `IOB_PULSE(arst, 50, 50, 50)
 
       //fill up the FIFO
-      for(i = 0; i < 2**W_ADDR_W; i = i + 1) begin
+      @(posedge w_clk) #1;
+      for(i=0; i < 2**W_ADDR_W; i=i+1) begin
          w_en = 1;
          w_data = test_data[i*W_DATA_W +: W_DATA_W];
          @(posedge w_clk) #1;
@@ -101,24 +97,20 @@ module iob_fifo_async_tb;
       w_en = 0;
 
       if(w_full != 1) begin
-         $display("ERROR: write proc: expecting w_full=1");
+         $display("ERROR: write proc: w_full=1 expected");
          $finish;
       end
-      $display("INFO: write proc: w_full=1 as expected");
-
 
       if(w_level != 0) begin
-        $display("ERROR: write proc: expecting w_level = 0, got %d", w_level);
+         $display("ERROR: write proc: expecting w_level = 0, got %d", w_level);
          $finish;
       end
-      $display("INFO: write proc: w_level = 0 as expected");
 
-      //enable reads and wait for empty
-      w_r_en = 1;
       while (!w_empty) @(posedge w_clk) #1;
-      $display("INFO: write proc: w_empty=0 as expected");
+      $display("INFO: write proc: w_empty=1 as expected");
 
       //write test data continuously to the FIFO
+      @(posedge w_clk) #1;
       for(i = 0; i < ((TESTSIZE*8)/W_DATA_W); i = i + 1) begin
          while(w_full)  @(posedge w_clk) #1;
          w_en = 1;
@@ -126,8 +118,6 @@ module iob_fifo_async_tb;
          @(posedge w_clk) #1;
          w_en = 0;
       end
-
-      $display("INFO: write proc: test data written");
    end
 
    //
@@ -136,34 +126,28 @@ module iob_fifo_async_tb;
 
    initial begin
 
-      //wait for reset to be de-asserted
-      @(negedge r_arst) repeat(4) @(posedge r_clk) #1;
-      while(!w_r_en) @(posedge r_clk) #1;
-
-
-      //wait for FIFO full
-      while (!r_full)  @(posedge r_clk) #1;
-      $display("INFO: read proc: r_full=1 as expected");
-
-      //read data from the entire FIFO
+      //wait until fifo is full
+      while(r_full !== 1'b1) @(posedge r_clk) #1;
+      $display("INFO: read proc: r_full = 1 as expected");
+      
+      //read all data from full FIFO
+      @(posedge r_clk) #1;
       for(j = 0; j < 2**R_ADDR_W; j = j + 1) begin
-         while(r_empty) @(posedge r_clk) #1;
          r_en = 1;
          @(posedge r_clk) #1;
          read[j*R_DATA_W +: R_DATA_W] = r_data;
          r_en = 0;
       end
 
-      while(!r_empty)  @(posedge r_clk) #1;
-      $display("INFO: read proc: r_empty = 1 as expected");
-
-
-      if(r_level != 0) begin
-         $display("ERROR: read proc: expecting r_level = 0, but got r_level=%d", r_level);
+      if (!r_empty) begin
+         $display("ERROR: read proc: r_empty=1 expected");
          $finish;
       end
-      $display("INFO: read proc: r_level = 0 as expected");
 
+      if(r_level != 0) begin
+         $display("ERROR: read proc: expect r_level=0, got r_level=%d", r_level);
+         $finish;
+      end
 
       //read data continuously from the FIFO
       for(j = 0; j < ((TESTSIZE*8)/R_DATA_W); j = j + 1) begin
@@ -172,15 +156,12 @@ module iob_fifo_async_tb;
          @(posedge r_clk) #1;
          read[j*R_DATA_W +: R_DATA_W] = r_data;
          r_en = 0;
+         if(r_data != test_data[j*R_DATA_W +: R_DATA_W])
+            $display("ERROR: read proc: expected r_data=%d, got r_data=%d", test_data[j*R_DATA_W +: R_DATA_W], r_data);
       end
 
-      if(read !== test_data) begin
-        $display("ERROR: read proc: data read does not match the test data.");
-        $display("read proc: data read XOR test data: %x", read^test_data);
-      end
-      $display("INFO: read proc: data read matches test data as expected");
-
-      #(5*clk_per_r) $finish;
+      $display("INFO: TEST PASSED");
+      #100 $finish;
    end
 
    // Instantiate the Unit Under Test (UUT)
