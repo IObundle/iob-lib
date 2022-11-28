@@ -5,6 +5,7 @@ from os import path
 import param_conf as p_conf
 import mkregs
 import ios as ios_lib
+import blocks as blocks_lib
 
 src_path = './hardware/src/'
 
@@ -44,6 +45,8 @@ def setup(top, version, confs, ios, regs, blocks):
     #
     if path.isdir(build_dir+"/document/tsrc"):
         p_conf.generate_macros_tex(confs, build_dir+"/document/tsrc")
+        p_conf.generate_other_macros_tex(confs, build_dir+"/document/tsrc")
         p_conf.generate_params_tex(confs, build_dir+"/document/tsrc")
         ios_lib.generate_ios_tex(ios, build_dir+"/document/tsrc")
         mkregs.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
+        blocks_lib.generate_blocks_tex(blocks, build_dir+"/document/tsrc")
