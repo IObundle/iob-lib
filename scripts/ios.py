@@ -5,6 +5,7 @@
 
 from latex import write_table
 import if_gen
+from submodule_utils import get_peripherals
 
 # Return full port type string based on given types: "I", "O" and "IO"
 # Maps "I", "O" and "IO" to "input", "outpuT" and "inout", respectively.
@@ -43,6 +44,26 @@ def generate_ios_header(ios, out_dir):
         f_io.write(' ')
 
     f_io.close()
+
+# Generate list of dictionaries with interfaces for each peripheral
+# Each dictionary is follows the format of a dictionary table in the
+# 'ios' list of the <corename>_setup.py
+# Example dictionary of a peripheral instance with one port:
+#    {'name': 'instance_name', 'descr':'instance description', 'ports': [
+#        {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
+#    ]}
+def get_peripheral_ios(peripherals_str):
+    instances_amount, _ = get_peripherals(peripherals_str)
+    ios_list = []
+    for corename in instances_amount:
+        peripheral_portlist = get_peripheral_io(corename) #TODO
+        for i in range(instances_amount[corename]):
+            port_list = []
+            for port in peripheral_portlist:
+                port_list.append({'name':port['name'], 'type':port['type'], 'n_bits':port['width'], 'descr':port['descr']})
+            ios_list.append({'name':corename+str(i), 'descr':f'{corename+str(i)} interface signals', 'ports': port_list})
+    return ios_list
+
 
 # Generate if.tex file with list TeX tables of IOs
 def generate_if_tex(ios, out_dir):
