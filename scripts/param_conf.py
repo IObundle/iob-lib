@@ -52,6 +52,16 @@ def generate_macros_tex(confs, out_dir):
 
     write_table(f"{out_dir}/sm",tex_table)
 
+# Generate TeX table of other macros
+def generate_other_macros_tex(confs, out_dir):
+    tex_table = []
+    for conf in confs:
+        # Only insert macros
+        if conf['type'] == 'O':
+            tex_table.append([conf['name'].replace('_','\_'), conf['min'], conf['val'], conf['max'], conf['descr']])
+
+    write_table(f"{out_dir}/som",tex_table)
+
 # Generate TeX table of parameters
 def generate_params_tex(confs, out_dir):
     tex_table = []

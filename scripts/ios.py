@@ -44,8 +44,40 @@ def generate_ios_header(ios, out_dir):
 
     f_io.close()
 
+# Generate if.tex file with list TeX tables of IOs
+def generate_if_tex(ios, out_dir):
+    if_file = open(f"{out_dir}/if.tex", "w")
+
+    if_file.write("The interface signals of the core are described in the following tables.\n")
+
+    for table in ios:
+        if_file.write(\
+'''
+\\begin{table}[H]
+  \centering
+  \\begin{tabular}{|l|l|r|p{10.5cm}|}
+    
+    \hline
+    \\rowcolor{iob-green}
+    {\\bf Name} & {\\bf Direction} & {\\bf Width} & {\\bf Description}  \\\\ \hline \hline
+
+    \input '''+table['name']+'''_if_tab
+ 
+  \end{tabular}
+  \caption{'''+table['descr']+'''}
+  \label{'''+table['name']+'''_if_tab:is}
+\end{table}
+'''
+        )
+
+    if_file.write("\clearpage")
+    if_file.close()
+
 # Generate TeX tables of IOs
 def generate_ios_tex(ios, out_dir):
+    # Create if.tex file
+    generate_if_tex(ios,out_dir)
+
     for table in ios:
         tex_table = []
         # Check if this table is a standard interface (from if_gen.py)
@@ -57,10 +89,10 @@ def generate_ios_tex(ios, out_dir):
                 tex_table.append([(port['name']+if_gen.suffix(port_direction)).replace('_','\_'),
                                   port_direction.replace('`IOB_','').replace('(',''),
                                   port['width'].replace('_','\_'),
-                                  port['description']])
+                                  port['description'].replace('_','\_')])
         else:
             # Interface is not standard, read ports
             for port in table['ports']:
-                tex_table.append([port['name'].replace('_','\_'),get_port_type(port['type']),port['n_bits'].replace('_','\_'),port['descr']])
+                tex_table.append([port['name'].replace('_','\_'),get_port_type(port['type']),port['n_bits'].replace('_','\_'),port['descr'].replace('_','\_')])
 
         write_table(f"{out_dir}/{table['name']}_if",tex_table)
