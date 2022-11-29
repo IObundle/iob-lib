@@ -24,12 +24,12 @@ module iob_ram_t2p
    localparam mem_init_file_int = HEXFILE;
 
    // Declare the RAM
-   reg [DATA_W-1:0]         ram [2**ADDR_W-1:0];
+   reg [DATA_W-1:0]         ram [(2**ADDR_W)-1:0];
 
    // Initialize the RAM
    initial
      if(mem_init_file_int != "none")
-       $readmemh(mem_init_file_int, ram, 0, 2**ADDR_W - 1);
+       $readmemh(mem_init_file_int, ram, 0, (2**ADDR_W) - 1);
 
    //write
    always @(posedge w_clk_i) begin

@@ -116,24 +116,24 @@ module iob_fifo_async
 
 
    //READ DOMAIN FIFO LEVEL
-   `IOB_WIRE(r_level_int, ADDR_W+2)
+   `IOB_WIRE(r_level_int, (ADDR_W+2))
    assign r_level_int = r_waddr_bin_n - r_raddr_bin_n;
    assign r_level_o = r_level_int[ADDR_W-1:0];
    
    //READ DOMAIN EMPTY AND FULL FLAGS
    assign r_empty_o = (r_level_int < r_incr);
-   `IOB_WIRE(r_full_limit, ADDR_W+2)
+   `IOB_WIRE(r_full_limit, (ADDR_W+2))
    assign r_full_limit = (`IOB_FIFO_SIZE)-r_incr;
    assign r_full_o = (r_level_int > r_full_limit);
 
    //WRITE DOMAIN FIFO LEVEL
-   `IOB_WIRE(w_level_int, ADDR_W+2)
+   `IOB_WIRE(w_level_int, (ADDR_W+2))
    assign w_level_int = w_waddr_bin_n - w_raddr_bin_n;
    assign w_level_o = w_level_int[ADDR_W-1:0];
  
    //WRITE DOMAIN EMPTY AND FULL FLAGS
    assign w_empty_o = (w_level_int < w_incr);
-   `IOB_WIRE(w_full_limit, ADDR_W+2)
+   `IOB_WIRE(w_full_limit, (ADDR_W+2))
    assign w_full_limit = (`IOB_FIFO_SIZE)-w_incr;
    assign w_full_o = (w_level_int > w_full_limit);
 
