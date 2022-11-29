@@ -16,7 +16,7 @@ module iob_wstrb2byte_offset
    `IOB_VAR(found, 1)
    
    `IOB_COMB begin
-      found = 0;
+      found = 1'd0;
       for(i=0; i<N; i=i+1)
         if((!found) && wstrb_i[i]) begin
            found = 1'b1;
