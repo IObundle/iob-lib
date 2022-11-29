@@ -62,7 +62,7 @@ def gen_wr_reg(row, f):
         f.write(f"assign {name}_wen_o = {name}_wen;\n")
 
     #compute write enable
-    f.write(f"assign {name}_wen = ({name}_ready_i && iob_valid_i) && (iob_wstrb_i && {name}_addressed);\n")
+    f.write(f"assign {name}_wen = ({name}_ready_i & iob_valid_i) & (iob_wstrb_i & {name}_addressed);\n")
 
     #compute address for register range
     if n_items > 1:
@@ -89,7 +89,7 @@ def gen_rd_reg(row, f):
     if auto:#generate register, ready, rvalid signal
         #ready
         f.write(f"`IOB_WIRE({name}_ready_i, 1)\n")
-        f.write(f"assign {name}_ready_i = !iob_wstrb_i;\n")
+        f.write(f"assign {name}_ready_i = ~iob_wstrb_i;\n")
         #rvalid
         f.write(f"`IOB_WIRE({name}_rvalid_i, 1)\n")
         f.write(f"iob_reg #(1,0) {name}_rvalid (clk_i, arst_i, 1'b0, 1'b1, {name}_ren, {name}_rvalid_i);\n")
@@ -105,7 +105,7 @@ def gen_rd_reg(row, f):
     f.write(f"assign {name}_addressed = (`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_base)});\n")
 
     #compute the read enable signal
-    f.write(f"assign {name}_ren = ({name}_ready_i && iob_valid_i) && ((!iob_wstrb_i) && {name}_addressed);\n")
+    f.write(f"assign {name}_ren = ({name}_ready_i & iob_valid_i) & ((~iob_wstrb_i) & {name}_addressed);\n")
     if n_items > 1:
         f.write(f"assign {name}_addr_o = iob_addr_i[{addr_w}-1:0];\n")
 
