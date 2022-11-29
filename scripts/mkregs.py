@@ -47,7 +47,7 @@ def gen_wr_reg(row, f):
 
     #check if address in range
     f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
-    f.write(f"assign {name}_addressed = (waddr >= {addr} && waddr < {addr+2**addr_w});\n")
+    f.write(f"assign {name}_addressed = ((waddr >= {addr}) && (waddr < {addr+2**addr_w}));\n")
 
     #declare wen signal
     f.write(f"`IOB_WIRE({name}_wen, 1)\n")
@@ -62,7 +62,7 @@ def gen_wr_reg(row, f):
         f.write(f"assign {name}_wen_o = {name}_wen;\n")
 
     #compute write enable
-    f.write(f"assign {name}_wen = {name}_ready_i && iob_valid_i && iob_wstrb_i && {name}_addressed;\n")
+    f.write(f"assign {name}_wen = ({name}_ready_i && iob_valid_i) && (iob_wstrb_i && {name}_addressed);\n")
 
     #compute address for register range
     if n_items > 1:
@@ -102,10 +102,10 @@ def gen_rd_reg(row, f):
 
     #check if address in range
     f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
-    f.write(f"assign {name}_addressed = `IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_base)} && `IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_base)};\n")
+    f.write(f"assign {name}_addressed = (`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_base)});\n")
 
     #compute the read enable signal
-    f.write(f"assign {name}_ren = {name}_ready_i && iob_valid_i && !iob_wstrb_i && {name}_addressed;\n")
+    f.write(f"assign {name}_ren = ({name}_ready_i && iob_valid_i) && ((!iob_wstrb_i) && {name}_addressed);\n")
     if n_items > 1:
         f.write(f"assign {name}_addr_o = iob_addr_i[{addr_w}-1:0];\n")
 
@@ -274,7 +274,7 @@ def write_hwcode(table, out_dir, top):
     #
 
     # use variables to compute response
-    f_gen.write(f"\n`IOB_VAR(rdata_int, 8*`IOB_NBYTES)\n")
+    f_gen.write(f"\n`IOB_VAR(rdata_int, (8*`IOB_NBYTES))\n")
     f_gen.write("`IOB_VAR(rvalid_int, 1)\n")
     f_gen.write("`IOB_VAR(wready_int, 1)\n")
     f_gen.write("`IOB_VAR(rready_int, 1)\n")
@@ -302,7 +302,7 @@ def write_hwcode(table, out_dir, top):
         addr_base = max(log(cpu_n_bytes,2), addr_w)
 
         if row['type'] == 'R':
-            f_gen.write(f"\tif(`IOB_WORD_ADDR(raddr) >= {bfloor(addr, addr_base)} && `IOB_WORD_ADDR(raddr) <= {bfloor(addr_last, addr_base)}) begin\n")
+            f_gen.write(f"\tif((`IOB_WORD_ADDR(raddr) >= {bfloor(addr, addr_base)}) && (`IOB_WORD_ADDR(raddr) <= {bfloor(addr_last, addr_base)})) begin\n")
             # rdata
             if auto:
                 f_gen.write(f"\t\trdata_int = rdata_int | (({name}_r|{8*cpu_n_bytes}'d0) << {boffset(addr, cpu_n_bytes)});\n")
@@ -311,11 +311,11 @@ def write_hwcode(table, out_dir, top):
             # rvalid
             f_gen.write(f"\t\trvalid_int = rvalid_int | {name}_rvalid_i;\n\tend\n")
             # rready
-            f_gen.write(f"\tif(`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_base)} && `IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_base)})\n")
+            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_base)}))\n")
             f_gen.write(f"\t\trready_int = rready_int | {name}_ready_i;\n")
         else: #row['type'] == 'W'
             # get wready
-            f_gen.write(f"\tif(waddr >= {addr} && waddr < {addr + 2**addr_w})\n")
+            f_gen.write(f"\tif((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n")
             f_gen.write(f"\t\twready_int = wready_int | {name}_ready_i;\n")
 
     f_gen.write("end\n\n")
