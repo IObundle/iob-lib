@@ -46,7 +46,7 @@ def gen_wr_reg(row, f):
     f.write(f"assign {name}_wdata = iob_wdata_i[{boffset(addr,cpu_n_bytes)}+:{n_bits}];\n")
 
     #check if address in range
-    f.write(f"`IOB_WIRE({name}_addressed, )\n")
+    f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
     f.write(f"assign {name}_addressed = (waddr >= {addr} && waddr < {addr+2**addr_w});\n")
 
     #declare wen signal
@@ -101,7 +101,7 @@ def gen_rd_reg(row, f):
         f.write(f"assign {name}_ren_o = {name}_ren;\n")
 
     #check if address in range
-    f.write(f"`IOB_WIRE({name}_addressed, )\n")
+    f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
     f.write(f"assign {name}_addressed = `IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_base)} && `IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_base)};\n")
 
     #compute the read enable signal
