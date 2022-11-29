@@ -41,8 +41,8 @@ iob_m_portmap.vh:
 	$(LIB_DIR)/scripts/if_gen.py iob_m_portmap '' ''
 
 # iob wires to drive swreg instance
-SRC+=$(BUILD_SIM_DIR)/iob_wire.vh
-$(BUILD_SIM_DIR)/iob_wire.vh: iob_wire.vh
+SRC+=$(BUILD_VSRC_DIR)/iob_wire.vh
+$(BUILD_VSRC_DIR)/iob_wire.vh: iob_wire.vh
 	cp $< $@
 iob_wire.vh:
 	$(LIB_DIR)/scripts/if_gen.py iob_wire ''
