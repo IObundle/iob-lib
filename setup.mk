@@ -24,6 +24,7 @@ BUILD_EMB_DIR = $(BUILD_DIR)/software/embedded
 BUILD_PC_DIR = $(BUILD_DIR)/software/pc-emul
 BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
+BUILD_LINT_DIR = $(BUILD_DIR)/hardware/lint/spyglass
 
 BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
 BUILD_PSRC_DIR = $(BUILD_DIR)/software/psrc
@@ -115,6 +116,14 @@ $(BUILD_SYN_DIR)/%: $(LIB_DIR)/hardware/syn/%
 
 endif
 
+#lint
+#copy lint files from LIB 
+ifneq ($(wildcard hardware/lint/spyglass),)
+SRC+=$(patsubst $(LIB_DIR)/hardware/lint/spyglass/%, $(BUILD_LINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/spyglass/*))
+$(BUILD_LINT_DIR)/%: $(LIB_DIR)/hardware/lint/spyglass/%
+	sed 's/IOB_CORE_NAME/$(NAME)/g' $< > $@
+	
+endif
 
 #
 #SOFTWARE
