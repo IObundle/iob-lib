@@ -87,10 +87,10 @@ module iob_ram_t2p_asym
          end
 
          //read address register
-         reg [R_ADDR_W-W_ADDR_W-1:0] r_addr_lsbs_reg;
+         reg [(R_ADDR_W-W_ADDR_W)-1:0] r_addr_lsbs_reg;
          always @(posedge r_clk_i)
            if (r_en_i)
-             r_addr_lsbs_reg <= r_addr_i[R_ADDR_W-W_ADDR_W-1:0];
+             r_addr_lsbs_reg <= r_addr_i[(R_ADDR_W-W_ADDR_W)-1:0];
            
          //read mux
          always @* begin
@@ -104,7 +104,7 @@ module iob_ram_t2p_asym
          //write serial
          always @* begin
             for (j=0; j < N; j= j+1) begin
-               en_wr[j] = w_en_i & (w_addr_i[W_ADDR_W-R_ADDR_W-1:0] == j);
+               en_wr[j] = w_en_i & (w_addr_i[(W_ADDR_W-R_ADDR_W)-1:0] == j);
                data_wr[j] = w_data_i;
                addr_wr[j] = w_addr_i[W_ADDR_W-1 -: R_ADDR_W];
             end

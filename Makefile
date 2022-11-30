@@ -51,11 +51,11 @@ ifeq ($(IS_ASYM),)
 	@./a.out $(TEST_LOG)
 else
 	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(SRC) $(TB)
-	@./a.out $(TEST_LOG); if [ $$VCD ]; then mv uut.vcd uut1.vcd; fi
+	@./a.out $(TEST_LOG); if [ $$VCD != 0 ]; then mv uut.vcd uut1.vcd; fi
 	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(SRC) $(TB)
-	@./a.out $(TEST_LOG); if [ $$VCD ]; then mv uut.vcd uut2.vcd; fi
+	@./a.out $(TEST_LOG); if [ $$VCD != 0 ]; then mv uut.vcd uut2.vcd; fi
 	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(SRC) $(TB)
-	@./a.out $(TEST_LOG); if [ $$VCD ]; then mv uut.vcd uut3.vcd; fi
+	@./a.out $(TEST_LOG); if [ $$VCD != 0 ]; then mv uut.vcd uut3.vcd; fi
 endif
 ifeq ($(VCD),1)
 	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &

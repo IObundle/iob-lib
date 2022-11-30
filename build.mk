@@ -34,10 +34,20 @@ pc-emul-clean:
 endif
 
 #
+# LINTER
+#
+ifneq ($(filter lint, $(FLOWS)),)
+LINT_DIR=hardware/lint/spyglass
+lint-run:
+	make -C $(LINT_DIR) run
+
+lint-clean:
+	make -C $(LINT_DIR) clean
+endif
+
+#
 # SIMULATE
 #
-
-
 ifneq ($(filter sim, $(FLOWS)),)
 SIM_DIR=hardware/simulation
 sim-build: 
@@ -114,11 +124,12 @@ debug:
 # CLEAN
 #
 
-clean: fw-clean pc-emul-clean sim-clean fpga-clean doc-clean
+clean: fw-clean pc-emul-clean lint-clean sim-clean fpga-clean doc-clean
 
 
 .PHONY: fw-build \
 	pc-emul-build pc-emul-run \
+	lint-run lint-clean \
 	sim-build sim-run sim-debug \
 	fpga-build fpga-debug \
 	doc-build doc-debug \

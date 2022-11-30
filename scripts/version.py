@@ -45,6 +45,9 @@ if __name__ == "__main__":
         help="""path to *.mk file with NAME and VERSION.
             Assume config_setup.mk if path is a directory""",
     )
+    parser.add_argument(
+        "-o", help="output file directory"
+    )
 
     args = parser.parse_args()
 
@@ -54,17 +57,22 @@ if __name__ == "__main__":
     else:
         mk_file = f"{args.path}/config_setup.mk"
 
+    # output file directory
+    out_dir = '.'
+    if args.o:
+        out_dir = args.o
+
     # get core name and version from file
     [core_name, core_version] = parse_mk_file(mk_file)
     core_version_str = f"V{int(core_version[:2])}.{int(core_version[2:])}"
 
     # functionality: [tex file, vh file, stdout print]
     if args.latex:
-        tex_file = f"./{core_name}_version.tex"
+        tex_file = f"{out_dir}/{core_name}_version.tex"
         with open(tex_file, "w+") as tex_f:
             tex_f.write(core_version_str)
     elif args.verilog:
-        vh_file = f"./{core_name}_version.vh"
+        vh_file = f"{out_dir}/{core_name}_version.vh"
         with open(vh_file, "w+") as vh_f:
             vh_f.write(f"`define VERSION {core_version}")
     else:
