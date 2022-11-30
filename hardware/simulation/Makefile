@@ -35,7 +35,7 @@ ifeq ($(SIM_SERVER),)
 else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(SIM_SYNC_FLAGS) -avz --force --delete ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) VCD=$(VCD)'
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) VCD=$(VCD) COV=$(COV) COV_TEST=$(COV_TEST)'
 endif
 
 run: build
@@ -51,8 +51,10 @@ else
 ifeq ($(VCD),1)
 	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
 endif
-ifeq ($(DO_COV),1)
-	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/$(NAME)_cov.rpt .
+ifeq ($(COV),1)
+	scp -r $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/$(SIMULATOR)/cov_work .
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/$(SIMULATOR)/coverage_report_summary.rpt .
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/$(SIMULATOR)/coverage_report_detail.rpt .
 endif
 endif
 ifeq ($(VCD),1)
@@ -97,4 +99,3 @@ debug:
 .PRECIOUS: uut.vcd
 
 .PHONY: build run clean kill-sim kill-remote-sim debug test $(TEST_LIST)
-

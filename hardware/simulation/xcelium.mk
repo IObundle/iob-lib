@@ -1,6 +1,13 @@
-SFLAGS =-errormax 15 -status
+# Coverage test name
+COV_TEST?=test
+
+SFLAGS = -errormax 15 -status
+EFLAGS = $(SFLAGS) -access +wc
+ifeq ($(COV),1)
+COV_SFLAGS= -LICQUEUE -covoverwrite -covtest $(COV_TEST)
+COV_EFLAGS= -covdut $(NAME) -coverage A -covfile xcelium_cov_commands.ccf
+endif
 VFLAGS+=$(SFLAGS) -update -linedebug -sv -incdir . -incdir ../src
-EFLAGS =$(SFLAGS) -access +wc
 
 ifeq ($(VCD),1)
 VFLAGS+=-define VCD
@@ -13,10 +20,15 @@ SIM_SCP_FLAGS=$(CADENCE_SCP_FLAGS)
 SIM_SYNC_FLAGS=$(CADENCE_SYNC_FLAGS)
 
 comp: $(VHDR) $(VSRC)
-	xmvlog $(VFLAGS) $(VSRC); xmelab $(EFLAGS) worklib.$(NAME)_tb:module
+	xmvlog $(VFLAGS) $(VSRC); xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 
 exec:
-	xmsim $(SFLAGS) worklib.$(NAME)_tb:module
+	xmsim $(SFLAGS) $(COV_SFLAGS) worklib.$(NAME)_tb:module
 	grep -v xcelium xmsim.log | grep -v xmsim | grep -v "\$finish" | tee -a test.log
+ifeq ($(COV),1)
+	ls -d cov_work/scope/* > all_ucd_file
+	imc -execcmd "merge -runfile all_ucd_file -overwrite -out merge_all"
+	imc -exec xcelium_cov.tcl
+endif
 
 .PHONY: comp exec
