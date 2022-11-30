@@ -55,8 +55,7 @@ endif
 
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
 $(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
-	$(LIB_DIR)/scripts/version.py -v .
-	cp $(NAME)_version.vh $(BUILD_VSRC_DIR)
+	$(LIB_DIR)/scripts/version.py -v . -o $(@D)
 
 #simulation
 ifneq ($(wildcard hardware/simulation),)

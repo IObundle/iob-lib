@@ -13,16 +13,12 @@ $(BUILD_VSRC_DIR)/apb2iob.v: $(LIB_DIR)/hardware/apb2iob/apb2iob.v
 
 # APB slave port
 SRC+=$(BUILD_VSRC_DIR)/apb_s_port.vh
-$(BUILD_VSRC_DIR)/apb_s_port.vh: apb_s_port.vh
-	cp $< $@
-apb_s_port.vh:
-	$(LIB_DIR)/scripts/if_gen.py apb_s_port '' ''
+%/apb_s_port.vh:
+	$(LIB_DIR)/scripts/if_gen.py apb_s_port '$(@D)/' ''
 
 # iob master port
 SRC+=$(BUILD_VSRC_DIR)/iob_m_port.vh
-$(BUILD_VSRC_DIR)/iob_m_port.vh: iob_m_port.vh
-	cp $< $@
-iob_m_port.vh:
-	$(LIB_DIR)/scripts/if_gen.py iob_m_port '' ''
+%/iob_m_port.vh:
+	$(LIB_DIR)/scripts/if_gen.py iob_m_port '$(@D)/' ''
 
 endif
