@@ -73,8 +73,8 @@ set_parameter no_strict -default
 set_parameter param_string {/^[A-Z][A-Z0-9_]*$/ and /^.{1,100}$/ and not /__/}
 set_parameter constname {/^[A-Z][A-Z0-9_]*$/ and /^.{1,100}$/ and not /__/}
 set_parameter paramname {/^[A-Z][A-Z0-9_]*$/ and /^.{1,100}$/ and not /__/}
-set_parameter portname {/^[a-z][a-z0-9_]*$/ and /^.{1,20}$/ and not /__/}
-set_parameter regoutname /^(.*)_r/
+set_parameter portname {/^[a-z][a-z0-9_]*$/ and /^*$/ and /^.{1,100}$/ and not /__/}
+set_parameter regoutname /^(.*)_o/
 set_parameter nesting_level 5
 set_parameter num_max_bit_changes 3
 set_parameter OperatorCount 12
