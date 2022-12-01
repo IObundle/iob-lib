@@ -77,6 +77,7 @@ def get_build_lib(directory):
 # Get submodule directories from variables defined in config_setup.mk
 # This function replaces "$(SOC_DIR)" by "." in the directories
 # Returns dictionary with the directory for each variable found in config_setup.mk with suffix "_DIR"
+#TODO: Remove dependency from config_setup.mk; Get directories from <corename>_setup.py
 def get_submodule_directories(root_dir):
     with open(root_dir+"/config_setup.mk", "r") as file:
         lines = file.readlines()
@@ -210,9 +211,9 @@ def get_module_io(verilog_lines):
                 module_signals[signal.group(1)]="inout [{}:0]".format(
                         int(signal.group(2))-1 if signal.group(2).isdigit() else # Calculate size here if only contains digits
                         signal.group(2)+"-1") # Leave calculation for verilog
-        elif '`include "iob_gen_if.vh"' in verilog_lines[i]: #If it is a known verilog include
-            module_signals["clk"]="input "
-            module_signals["rst"]="input "
+        elif '`include "iob_clkrst_port.vh"' in verilog_lines[i]: #If it is a known verilog include
+            module_signals["clk_i"]="input "
+            module_signals["arst_i"]="input "
         elif '`include "iob_s_if.vh"' in verilog_lines[i]: #If it is a known verilog include
             module_signals["valid"]="input "
             module_signals["address"]="input [ADDR_W:0] "
@@ -385,7 +386,7 @@ def print_nslaves(peripherals_str):
     print(get_n_periphs(peripherals_str), end="")
 
 def print_nslaves_w(peripherals_str):
-    print(get_n_periphs_w())
+    print(get_n_periphs_w(peripherals_str), end="")
 
 #Print list of peripherals without parameters and duplicates
 def remove_duplicates_and_params(peripherals_str):
