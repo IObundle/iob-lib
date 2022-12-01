@@ -5,7 +5,9 @@
 
 from latex import write_table
 import if_gen
-from submodule_utils import get_peripherals
+from submodule_utils import get_peripherals, get_submodule_directories
+import importlib.util
+import os
 
 # Return full port type string based on given types: "I", "O" and "IO"
 # Maps "I", "O" and "IO" to "input", "outpuT" and "inout", respectively.
@@ -45,23 +47,36 @@ def generate_ios_header(ios, out_dir):
 
     f_io.close()
 
-# Generate list of dictionaries with interfaces for each peripheral
+# Generate list of dictionaries with interfaces for each peripheral instance
 # Each dictionary is follows the format of a dictionary table in the
 # 'ios' list of the <corename>_setup.py
 # Example dictionary of a peripheral instance with one port:
 #    {'name': 'instance_name', 'descr':'instance description', 'ports': [
 #        {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
 #    ]}
-def get_peripheral_ios(peripherals_str):
+def get_peripheral_ios(peripherals_str, root_dir):
     instances_amount, _ = get_peripherals(peripherals_str)
+    submodule_dirs = get_submodule_directories(root_dir)
     ios_list = []
     for corename in instances_amount:
-        peripheral_portlist = get_peripheral_io(corename) #TODO
+        #Find <corename>_setup.py file
+        for x in os.listdir(submodule_dirs[corename]):
+            if x.endswith("_setup.py"):
+                filename = x
+                break
+        #Import <corename>_setup.py
+        spec = importlib.util.spec_from_file_location(corename, submodule_dirs[corename]+"/"+filename)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        #Get all IO signals for this peripheral
+        port_list = []
+        for table in module.ios:
+            port_list.extend(table['ports'])
+        #Append each instance IOs to the ios_list
         for i in range(instances_amount[corename]):
-            port_list = []
-            for port in peripheral_portlist:
-                port_list.append({'name':port['name'], 'type':port['type'], 'n_bits':port['width'], 'descr':port['descr']})
             ios_list.append({'name':corename+str(i), 'descr':f'{corename+str(i)} interface signals', 'ports': port_list})
+        #Unload module
+        #del sys.modules[corename]; del module
     return ios_list
 
 
