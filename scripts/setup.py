@@ -15,19 +15,21 @@ def setup(top, version, confs, ios, regs, blocks):
     build_dir = f"../{top+'_'+version}"
     
     #build registers table
-    reg_table = []
-    for i_regs in regs:
-        reg_table += i_regs['regs']
+    if regs is not None:
+        reg_table = []
+        for i_regs in regs:
+            reg_table += i_regs['regs']
 
-    mkregs.config = confs
-    reg_table = mkregs.compute_addr(reg_table, True)
+        mkregs.config = confs
+        reg_table = mkregs.compute_addr(reg_table, True)
 
         
     #
     # Generate hw
     #
-    mkregs.write_hwheader(reg_table, build_dir+'/hardware/src', top)
-    mkregs.write_hwcode(reg_table, build_dir+'/hardware/src', top)
+    if regs is not None:
+        mkregs.write_hwheader(reg_table, build_dir+'/hardware/src', top)
+        mkregs.write_hwcode(reg_table, build_dir+'/hardware/src', top)
     p_conf.params_vh(confs, top, build_dir+'/hardware/src')
     p_conf.conf_vh(confs, top, build_dir+'/hardware/src')
 
@@ -36,9 +38,10 @@ def setup(top, version, confs, ios, regs, blocks):
     #
     # Generate sw
     #
-    mkregs.write_swheader(reg_table, build_dir+'/software/esrc', top)
-    mkregs.write_swcode(reg_table, build_dir+'/software/esrc', top)
-    if path.isdir(build_dir+'/software/psrc'): mkregs.write_swheader(reg_table, build_dir+'/software/psrc', top)
+    if regs is not None:
+        mkregs.write_swheader(reg_table, build_dir+'/software/esrc', top)
+        mkregs.write_swcode(reg_table, build_dir+'/software/esrc', top)
+        if path.isdir(build_dir+'/software/psrc'): mkregs.write_swheader(reg_table, build_dir+'/software/psrc', top)
 
     #
     # Generate Tex
@@ -48,5 +51,6 @@ def setup(top, version, confs, ios, regs, blocks):
         p_conf.generate_other_macros_tex(confs, build_dir+"/document/tsrc")
         p_conf.generate_params_tex(confs, build_dir+"/document/tsrc")
         ios_lib.generate_ios_tex(ios, build_dir+"/document/tsrc")
-        mkregs.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
+        if regs is not None:
+            mkregs.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
         blocks_lib.generate_blocks_tex(blocks, build_dir+"/document/tsrc")
