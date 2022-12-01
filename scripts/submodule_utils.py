@@ -77,6 +77,7 @@ def get_build_lib(directory):
 # Get submodule directories from variables defined in config_setup.mk
 # This function replaces "$(SOC_DIR)" by "." in the directories
 # Returns dictionary with the directory for each variable found in config_setup.mk with suffix "_DIR"
+#TODO: Remove dependency from config_setup.mk; Get directories from <corename>_setup.py
 def get_submodule_directories(root_dir):
     with open(root_dir+"/config_setup.mk", "r") as file:
         lines = file.readlines()
@@ -210,9 +211,9 @@ def get_module_io(verilog_lines):
                 module_signals[signal.group(1)]="inout [{}:0]".format(
                         int(signal.group(2))-1 if signal.group(2).isdigit() else # Calculate size here if only contains digits
                         signal.group(2)+"-1") # Leave calculation for verilog
-        elif '`include "iob_gen_if.vh"' in verilog_lines[i]: #If it is a known verilog include
-            module_signals["clk"]="input "
-            module_signals["rst"]="input "
+        elif '`include "iob_clkrst_port.vh"' in verilog_lines[i]: #If it is a known verilog include
+            module_signals["clk_i"]="input "
+            module_signals["arst_i"]="input "
         elif '`include "iob_s_if.vh"' in verilog_lines[i]: #If it is a known verilog include
             module_signals["valid"]="input "
             module_signals["address"]="input [ADDR_W:0] "
@@ -324,6 +325,49 @@ def find_idx(lines, word):
             break
     return idx+1
 
+#Creates list of defines of peripheral instances with sequential numbers
+#Returns list of tuples. One tuple for each peripheral instance with its name and value.
+def get_periphs_id(peripherals_str):
+    instances_amount, _ = get_peripherals(peripherals_str)
+    peripherals_list = []
+    j=0
+    for corename in instances_amount:
+        for i in range(instances_amount[corename]):
+            peripherals_list.append((corename+str(i),str(j)))
+            j = j + 1
+    return peripherals_list
+
+# Return list of dictionaries, defining parameters for each peripheral instance with their ID assigned
+def get_periphs_id_as_parameters(peripherals_str):
+    peripherals_list = get_periphs_id(peripherals_str)
+    parameter_list = []
+    for instance in peripherals_list:
+        parameter_list.append({'name':instance[0], 'type':'P', 'val':instance[1], 'min':'1', 'max':'NA', 'descr':f'ID of {instance[0]} peripheral'})
+    return parameter_list
+
+# Return amount of system peripherals
+def get_n_periphs(peripherals_str):
+    instances_amount, _ = get_peripherals(peripherals_str)
+    i=0
+    # Calculate total amount of instances
+    for corename in instances_amount:
+        i=i+instances_amount[corename]
+    return i
+
+# Return bus width required to address all peripherals
+def get_n_periphs_w(peripherals_str):
+    instances_amount, _ = get_peripherals(peripherals_str)
+    i=0
+    # Calculate total amount of instances
+    for corename in instances_amount:
+        i=i+instances_amount[corename]
+
+    if not i:
+        return(0)
+    else:
+        return(math.ceil(math.log(i,2)))
+
+
 ##########################################################
 # Functions to run when this script gets called directly #
 ##########################################################
@@ -339,24 +383,10 @@ def print_peripherals(peripherals_str):
         print(i, end=" ")
 
 def print_nslaves(peripherals_str):
-    instances_amount, _ = get_peripherals(peripherals_str)
-    i=0
-    # Calculate total amount of instances
-    for corename in instances_amount:
-        i=i+instances_amount[corename]
-    print(i, end="")
+    print(get_n_periphs(peripherals_str), end="")
 
 def print_nslaves_w(peripherals_str):
-    instances_amount, _ = get_peripherals(peripherals_str)
-    i=0
-    # Calculate total amount of instances
-    for corename in instances_amount:
-        i=i+instances_amount[corename]
-
-    if not i:
-        print(0)
-    else:
-        print(math.ceil(math.log(i,2)))
+    print(get_n_periphs_w(peripherals_str), end="")
 
 #Print list of peripherals without parameters and duplicates
 def remove_duplicates_and_params(peripherals_str):
@@ -370,14 +400,11 @@ def remove_duplicates_and_params(peripherals_str):
     for p in peripherals:
         print(p, end=" ")
 
-#Creates list of defines of peripheral instances with sequential numbers
+#Print list of peripheral instances with ID assigned
 def print_peripheral_defines(defmacro, peripherals_str):
-    instances_amount, _ = get_peripherals(peripherals_str)
-    j=0
-    for corename in instances_amount:
-        for i in range(instances_amount[corename]):
-            print(defmacro+corename+str(i)+"="+str(j), end=" ")
-            j = j + 1
+    peripherals_list = get_periphs_id(peripherals_str)
+    for instance in peripherals_list:
+        print(defmacro+instance[0]+"="+instance[1], end=" ")
 
 if __name__ == "__main__":
     # Parse arguments
