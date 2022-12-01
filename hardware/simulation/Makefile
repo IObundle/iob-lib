@@ -19,15 +19,15 @@ ifeq ($(SIMULATOR), verilator)
 VSRC:=$(filter-out $(wildcard ./src/*_tb.v), $(VSRC))
 endif
 
-#select simulator
-#default simulator
-SIMULATOR?=icarus
-include $(SIMULATOR).mk
-
 #include local simulation segment
 ifneq ($(wildcard sim_build.mk),)
 include sim_build.mk
 endif
+
+#select simulator
+#default simulator
+SIMULATOR?=icarus
+include $(SIMULATOR).mk
 
 build: $(VHDR) $(VSRC)
 ifeq ($(SIM_SERVER),)
