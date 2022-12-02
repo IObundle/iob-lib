@@ -29,13 +29,17 @@ endif
 SIMULATOR?=icarus
 include $(SIMULATOR).mk
 
+UFLAGS+=VCD=$(VCD)
+UFLAGS+=COV=$(COV)
+UFLAGS+=COV_TEST=$(COV_TEST)
+
 build: $(VHDR) $(VSRC)
 ifeq ($(SIM_SERVER),)
 	make comp
 else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(SIM_SYNC_FLAGS) -avz --force --delete ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) VCD=$(VCD) COV=$(COV) COV_TEST=$(COV_TEST)'
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFPAGS)'
 endif
 
 run: build
