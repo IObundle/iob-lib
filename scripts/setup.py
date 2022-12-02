@@ -9,7 +9,7 @@ import blocks as blocks_lib
 
 src_path = './hardware/src/'
 
-def setup(top, version, confs, ios, regs, blocks):
+def setup(top, version, confs, ios, regs, blocks, no_overlap=False):
 
     #build directory
     build_dir = f"../{top+'_'+version}"
@@ -21,7 +21,7 @@ def setup(top, version, confs, ios, regs, blocks):
             reg_table += i_regs['regs']
 
         mkregs.config = confs
-        reg_table = mkregs.compute_addr(reg_table, True)
+        reg_table = mkregs.compute_addr(reg_table, no_overlap)
 
         
     #
