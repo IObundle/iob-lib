@@ -20,11 +20,14 @@ module iob_sipo_reg
 
    reg [DATA_W-1:0]  data_reg;
    
+   wire [DATA_W-1:0] s_expanded;
+   assign s_expanded = {{(DATA_W-1){1'b0}}, s_i};
+   
    always @(posedge clk_i, posedge arst_i)
      if (arst_i)
-       data_reg <= 1'b0;
+       data_reg <= {DATA_W{1'b0}};
      else if (en_i)
-       data_reg <= (data_reg << 1) | s_i;
+       data_reg <= (data_reg << 1) | s_expanded;
 
    assign p_o = data_reg;
    
