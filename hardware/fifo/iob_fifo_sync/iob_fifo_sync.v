@@ -46,27 +46,8 @@ module iob_fifo_sync
    localparam ADDR_W_DIFF = $clog2(N);
    localparam [ADDR_W:0] FIFO_SIZE = (1'b1 << ADDR_W); //in bytes
 
-   //clock gating
-   `IOB_WIRE(clk_g, 1)
-   `IOB_WIRE(clk_en_reg, 1)
-   iob_reg
-     #(
-       .DATA_W(1),
-       .RST_VAL(0)
-       )
-   clk_en_reg0
-     (
-      .clk_i  (clk_i),
-      .arst_i (arst_i),
-      .rst_i  (1'b0),
-      .en_i   (1'b1),
-      .data_i (clk_en_i),
-      .data_o (clk_en_reg)
-      );
-   assign clk_g = clk_i & clk_en_reg;
-
    //effective write enable
-   wire                   w_en_int = w_en_i & ~w_full_o;
+   wire                   w_en_int = w_en_i & ~w_full_o & clk_en_i;
 
    //write address
    `IOB_WIRE(w_addr, W_ADDR_W)
@@ -77,7 +58,7 @@ module iob_fifo_sync
        )
    w_addr_cnt0
      (
-      .clk_i    (clk_g),
+      .clk_i    (clk_i),
       .arst_i   (arst_i),
       .rst_i    (rst_i),
       .ld_i     (1'b0),
@@ -87,7 +68,7 @@ module iob_fifo_sync
       );
 
    //effective read enable
-   wire                   r_en_int  = r_en_i & ~r_empty_o;
+   wire                   r_en_int  = r_en_i & ~r_empty_o & clk_en_i;
 
    //read address
    `IOB_WIRE(r_addr, R_ADDR_W)
@@ -98,7 +79,7 @@ module iob_fifo_sync
        )
    r_addr_cnt0
      (
-      .clk_i    (clk_g),
+      .clk_i    (clk_i),
       .arst_i   (arst_i),
       .rst_i    (rst_i),
       .ld_i     (1'b0),
@@ -120,10 +101,10 @@ module iob_fifo_sync
        )
    level_reg0
      (
-      .clk_i  (clk_g),
+      .clk_i  (clk_i),
       .arst_i (arst_i),
       .rst_i  (rst_i),
-      .en_i   (1'b1),
+      .en_i   (clk_en_i),
       .data_i (level_nxt[0+:ADDR_W]),
       .data_o (level_o)
       );
@@ -148,10 +129,10 @@ module iob_fifo_sync
        )
    r_empty_reg0
      (
-      .clk_i  (clk_g),
+      .clk_i  (clk_i),
       .arst_i (arst_i),
       .rst_i  (1'b0),
-      .en_i   (1'b1),
+      .en_i   (clk_en_i),
       .data_i (r_empty_nxt),
       .data_o (r_empty_o)
       );
@@ -166,10 +147,10 @@ module iob_fifo_sync
        )
    w_full_reg0
      (
-      .clk_i  (clk_g),
+      .clk_i  (clk_i),
       .arst_i (arst_i),
       .rst_i  (1'b0),
-      .en_i   (1'b1),
+      .en_i   (clk_en_i),
       .data_i (w_full_nxt),
       .data_o (w_full_o)
       );
@@ -183,7 +164,7 @@ module iob_fifo_sync
        )
     iob_ram_2p_asym0
      (
-      .clk_i            (clk_g),
+      .clk_i            (clk_i),
       
       .ext_mem_w_en_o   (ext_mem_w_en_o),
       .ext_mem_w_data_o (ext_mem_w_data_o),
