@@ -15,6 +15,7 @@ module iob_fifo_async
     input                 r_clk_i,
     input                 r_arst_i,
     input                 r_rst_i,
+    input                 r_clk_en_i,
     input                 r_en_i,
     output [R_DATA_W-1:0] r_data_o,
     output                r_empty_o,
@@ -25,6 +26,7 @@ module iob_fifo_async
     input                 w_clk_i,
     input                 w_arst_i,
     input                 w_rst_i,
+    input                 w_clk_en_i,
     input                 w_en_i,
     input [W_DATA_W-1:0]  w_data_i,
     output                w_empty_o,
@@ -41,8 +43,44 @@ module iob_fifo_async
    localparam MINADDR_W = ADDR_W-$clog2(R);//lower ADDR_W (higher DATA_W)
    localparam W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W;
    localparam R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W;
-   
 
+   //rclock gating
+   `IOB_WIRE(r_clk_g, 1)
+   `IOB_WIRE(r_clk_en_reg, 1)
+   iob_reg
+     #(
+       .DATA_W(1),
+       .RST_VAL(0)
+       )
+   r_clk_en_reg0
+     (
+      .clk_i  (r_clk_i),
+      .arst_i (r_arst_i),
+      .rst_i  (1'b0),
+      .en_i   (1'b1),
+      .data_i (r_clk_en_i),
+      .data_o (r_clk_en_reg)
+      );
+   assign r_clk_g = r_clk_i & r_clk_en_reg;
+
+   //wclock gating
+   `IOB_WIRE(w_clk_g, 1)
+   `IOB_WIRE(w_clk_en_reg, 1)
+   iob_reg
+     #(
+       .DATA_W(1),
+       .RST_VAL(0)
+       )
+   w_clk_en_reg0
+     (
+      .clk_i  (w_clk_i),
+      .arst_i (w_arst_i),
+      .rst_i  (1'b0),
+      .en_i   (1'b1),
+      .data_i (w_clk_en_i),
+      .data_o (w_clk_en_reg)
+      );
+   assign w_clk_g = w_clk_i & w_clk_en_reg;
 
    //read/write increments
    wire [ADDR_W-1:0]          r_incr, w_incr;
@@ -92,7 +130,7 @@ module iob_fifo_async
        )
    w_waddr_gray_sync0
      (
-      .clk_i    (r_clk_i),
+      .clk_i    (r_clk_g),
       .arst_i   (r_arst_i),
       .signal_i (w_waddr_gray),
       .signal_o (r_waddr_gray)
@@ -108,7 +146,7 @@ module iob_fifo_async
        )
    r_raddr_gray_sync0
      (
-      .clk_i    (w_clk_i),
+      .clk_i    (w_clk_g),
       .arst_i   (w_arst_i),
       .signal_i (r_raddr_gray),
       .signal_o (w_raddr_gray)
@@ -146,7 +184,7 @@ module iob_fifo_async
        )
    r_raddr_gray_counter
      (
-      .clk_i  (r_clk_i),
+      .clk_i  (r_clk_g),
       .arst_i (r_arst_i),
       .rst_i  (r_rst_i),
       .en_i   (r_en_int),
@@ -161,7 +199,7 @@ module iob_fifo_async
        )
    w_waddr_gray_counter
      (
-      .clk_i  (w_clk_i),
+      .clk_i  (w_clk_g),
       .arst_i (w_arst_i),
       .rst_i  (w_rst_i),
       .en_i   (w_en_int),
@@ -221,12 +259,12 @@ module iob_fifo_async
        )
    t2p_asym_ram
      (
-      .w_clk_i  (w_clk_i),
+      .w_clk_i  (w_clk_g),
       .w_en_i   (w_en_int),
       .w_data_i (w_data_i),
       .w_addr_i (w_waddr_bin[W_ADDR_W-1:0]),
 
-      .r_clk_i  (r_clk_i),
+      .r_clk_i  (r_clk_g),
       .r_addr_i (r_raddr_bin[R_ADDR_W-1:0]),
       .r_en_i   (r_en_int),
       .r_data_o (r_data_o)

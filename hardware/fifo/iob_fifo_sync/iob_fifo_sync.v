@@ -19,6 +19,7 @@ module iob_fifo_sync
     `IOB_INPUT(arst_i, 1),
     `IOB_INPUT(rst_i, 1),
     `IOB_INPUT(clk_i, 1),
+    `IOB_INPUT(clk_en_i, 1),
 
     //write port
     `IOB_OUTPUT(ext_mem_w_en_o, N),
@@ -45,6 +46,25 @@ module iob_fifo_sync
    localparam ADDR_W_DIFF = $clog2(N);
    localparam [ADDR_W:0] FIFO_SIZE = (1'b1 << ADDR_W); //in bytes
 
+   //clock gating
+   `IOB_WIRE(clk_g, 1)
+   `IOB_WIRE(clk_en_reg, 1)
+   iob_reg
+     #(
+       .DATA_W(1),
+       .RST_VAL(0)
+       )
+   clk_en_reg0
+     (
+      .clk_i  (clk_i),
+      .arst_i (arst_i),
+      .rst_i  (1'b0),
+      .en_i   (1'b1),
+      .data_i (clk_en_i),
+      .data_o (clk_en_reg)
+      );
+   assign clk_g = clk_i & clk_en_reg;
+
    //effective write enable
    wire                   w_en_int = w_en_i & ~w_full_o;
 
@@ -57,7 +77,7 @@ module iob_fifo_sync
        )
    w_addr_cnt0
      (
-      .clk_i    (clk_i),
+      .clk_i    (clk_g),
       .arst_i   (arst_i),
       .rst_i    (rst_i),
       .ld_i     (1'b0),
@@ -78,7 +98,7 @@ module iob_fifo_sync
        )
    r_addr_cnt0
      (
-      .clk_i    (clk_i),
+      .clk_i    (clk_g),
       .arst_i   (arst_i),
       .rst_i    (rst_i),
       .ld_i     (1'b0),
@@ -100,7 +120,7 @@ module iob_fifo_sync
        )
    level_reg0
      (
-      .clk_i  (clk_i),
+      .clk_i  (clk_g),
       .arst_i (arst_i),
       .rst_i  (rst_i),
       .en_i   (1'b1),
@@ -128,7 +148,7 @@ module iob_fifo_sync
        )
    r_empty_reg0
      (
-      .clk_i  (clk_i),
+      .clk_i  (clk_g),
       .arst_i (arst_i),
       .rst_i  (1'b0),
       .en_i   (1'b1),
@@ -146,7 +166,7 @@ module iob_fifo_sync
        )
    w_full_reg0
      (
-      .clk_i  (clk_i),
+      .clk_i  (clk_g),
       .arst_i (arst_i),
       .rst_i  (1'b0),
       .en_i   (1'b1),
@@ -163,7 +183,7 @@ module iob_fifo_sync
        )
     iob_ram_2p_asym0
      (
-      .clk_i            (clk_i),
+      .clk_i            (clk_g),
       
       .ext_mem_w_en_o   (ext_mem_w_en_o),
       .ext_mem_w_data_o (ext_mem_w_data_o),
