@@ -4,7 +4,7 @@ ifeq ($(filter iob_regfile_w_rp, $(HW_MODULES)),)
 HW_MODULES+=iob_regfile_w_rp
 
 # Submodules
-include $(LIB_DIR)/hardware/iob_reg/hw_setup.mk
+include $(LIB_DIR)/hardware/reg/iob_reg_are/hw_setup.mk
 
 # Sources 
 SRC+=$(BUILD_VSRC_DIR)/iob_regfile_w_rp.v

@@ -16,7 +16,7 @@ module iob_pulse_gen
 
    //start detect
    `IOB_WIRE(start_detected, 1)
-   iob_reg #(1,0) start_detected_inst (clk_i, arst_i, 1'b0, start_i, 1'b1, start_detected);
+   iob_reg_ae #(1,0) start_detected_inst (clk_i, arst_i, start_i, 1'b1, start_detected);
 
    
    //counter
