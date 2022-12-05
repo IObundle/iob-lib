@@ -81,15 +81,19 @@ ifeq ($(VCD),1)
 endif
 
 clean:
-	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" -o -name "*.v*" -o -path "./src*" \) -delete
+	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" -o -name "*.ccf" -o -name "*.tcl" -o -name "*.v*" -o -path "./src*" -o -path "./cov_work*" \) -delete
 	@rm -rf obj_dir ../../*.vh
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_SIM_DIR)/Makefile ]; then make -C $(REMOTE_SIM_DIR) $@; fi'
 endif
 
+clean-cov:
+	@rm -rf cov_work
+	@rm -f coverage_report_summary.rpt coverage_report_detail.rpt
+	
 
-test: clean clean-test-log $(TEST_LIST)
 	diff test.log test.expected
+test: clean clean-cov clean-test-log $(TEST_LIST)
 
 clean-test-log:
 	rm -f test.log
