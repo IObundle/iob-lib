@@ -4,7 +4,8 @@ ifeq ($(filter iob_fifo_sync, $(HW_MODULES)),)
 HW_MODULES+=iob_fifo_sync
 
 # Submodules
-include $(LIB_DIR)/hardware/iob_reg/hw_setup.mk
+include $(LIB_DIR)/hardware/reg/iob_reg_ar/hw_setup.mk
+include $(LIB_DIR)/hardware/reg/iob_reg_ar/hw_setup.mk
 include $(LIB_DIR)/hardware/iob_counter/hw_setup.mk
 include $(LIB_DIR)/hardware/ram/iob_ram_2p_asym/hw_setup.mk
 
