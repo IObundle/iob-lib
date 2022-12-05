@@ -1,7 +1,6 @@
 `timescale 1ns/1ps
 
 `include "iob_lib.vh"
-`define  IOB_FIFO_SIZE (1'b1 << ADDR_W) //in bytes
 
 module iob_fifo_async
   #(parameter
@@ -43,17 +42,23 @@ module iob_fifo_async
    localparam MINADDR_W = ADDR_W-$clog2(R);//lower ADDR_W (higher DATA_W)
    localparam W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W;
    localparam R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W;
+   localparam FIFO_SIZE = 1'b1 << ADDR_W; //in bytes
 
    //read/write increments
-   wire [ADDR_W-1:0]          r_incr, w_incr;
+   wire [ADDR_W-1:0]          r_incr;
+   wire [ADDR_W-1:0]          w_incr;
 
    //binary read addresses on both domains
-   wire [R_ADDR_W:0]        r_raddr_bin, w_raddr_bin;
-   wire [W_ADDR_W:0]        r_waddr_bin, w_waddr_bin;
+   wire [R_ADDR_W:0]        r_raddr_bin;
+   wire [R_ADDR_W:0]        w_raddr_bin;
+   wire [W_ADDR_W:0]        r_waddr_bin;
+   wire [W_ADDR_W:0]        w_waddr_bin;
 
    //normalized binary addresses (for narrower data side)
-   wire [ADDR_W:0]          r_raddr_bin_n, r_waddr_bin_n;
-   wire [ADDR_W:0]          w_waddr_bin_n, w_raddr_bin_n;
+   wire [ADDR_W:0]          r_raddr_bin_n;
+   wire [ADDR_W:0]          r_waddr_bin_n;
+   wire [ADDR_W:0]          w_waddr_bin_n;
+   wire [ADDR_W:0]          w_raddr_bin_n;
 
    //assign according to assymetry type
    generate
@@ -123,7 +128,7 @@ module iob_fifo_async
    //READ DOMAIN EMPTY AND FULL FLAGS
    assign r_empty_o = (r_level_int < r_incr);
    `IOB_WIRE(r_full_limit, (ADDR_W+2))
-   assign r_full_limit = (`IOB_FIFO_SIZE)-r_incr;
+   assign r_full_limit = FIFO_SIZE-r_incr;
    assign r_full_o = (r_level_int > r_full_limit);
 
    //WRITE DOMAIN FIFO LEVEL
@@ -134,7 +139,7 @@ module iob_fifo_async
    //WRITE DOMAIN EMPTY AND FULL FLAGS
    assign w_empty_o = (w_level_int < w_incr);
    `IOB_WIRE(w_full_limit, (ADDR_W+2))
-   assign w_full_limit = (`IOB_FIFO_SIZE)-w_incr;
+   assign w_full_limit = FIFO_SIZE-w_incr;
    assign w_full_o = (w_level_int > w_full_limit);
 
    
@@ -227,8 +232,8 @@ module iob_fifo_async
       .w_addr_i (w_waddr_bin[W_ADDR_W-1:0]),
 
       .r_clk_i  (r_clk_i),
-      .r_addr_i (r_raddr_bin[R_ADDR_W-1:0]),
       .r_en_i   (r_en_int),
+      .r_addr_i (r_raddr_bin[R_ADDR_W-1:0]),
       .r_data_o (r_data_o)
       );
 
