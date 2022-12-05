@@ -15,6 +15,7 @@ module iob_fifo_async
     input                 r_clk_i,
     input                 r_arst_i,
     input                 r_rst_i,
+    input                 r_clk_en_i,
     input                 r_en_i,
     output [R_DATA_W-1:0] r_data_o,
     output                r_empty_o,
@@ -25,6 +26,7 @@ module iob_fifo_async
     input                 w_clk_i,
     input                 w_arst_i,
     input                 w_rst_i,
+    input                 w_clk_en_i,
     input                 w_en_i,
     input [W_DATA_W-1:0]  w_data_i,
     output                w_empty_o,
@@ -41,8 +43,6 @@ module iob_fifo_async
    localparam MINADDR_W = ADDR_W-$clog2(R);//lower ADDR_W (higher DATA_W)
    localparam W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W;
    localparam R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W;
-   
-
 
    //read/write increments
    wire [ADDR_W-1:0]          r_incr, w_incr;
@@ -139,7 +139,7 @@ module iob_fifo_async
 
    
    //read address gray code counter
-   wire r_en_int  = r_en_i & ~r_empty_o;
+   wire r_en_int  = r_en_i & ~r_empty_o & r_clk_en_i;
    iob_gray_counter
      #(
        .W(R_ADDR_W+1)
@@ -154,7 +154,7 @@ module iob_fifo_async
       );
 
    //write address gray code counter
-   wire w_en_int = w_en_i & ~w_full_o;
+   wire w_en_int = w_en_i & ~w_full_o & w_clk_en_i;
    iob_gray_counter
      #(
        .W(W_ADDR_W+1)
