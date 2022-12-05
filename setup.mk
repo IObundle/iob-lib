@@ -16,8 +16,11 @@ PYTHON_DIR=$(LIB_DIR)/scripts
 # create version string
 VERSION_STR := $(shell $(PYTHON_DIR)/version.py -i .)
 
+# build directory name
+BUILD_DIR_NAME:=$(NAME)_$(VERSION_STR)
+
 # establish build dir paths
-BUILD_DIR := ../$(NAME)_$(VERSION_STR)
+BUILD_DIR := ../$(BUILD_DIR_NAME)
 
 BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
 BUILD_EMB_DIR = $(BUILD_DIR)/software/embedded
@@ -41,6 +44,7 @@ $(BUILD_DIR):
 	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $@
 	echo "NAME=$(NAME)" > $@/info.mk
 	echo "VERSION=$(VERSION)" >> $@/info.mk
+	echo "BUILD_DIR_NAME=$(BUILD_DIR_NAME)" >> $@/info.mk
 	echo "FLOWS=$(FLOWS)" >> $@/info.mk
 	find $@ -name \*_setup.mk -delete
 	cp $(LIB_DIR)/build.mk $@/Makefile
@@ -122,7 +126,7 @@ ifneq ($(wildcard hardware/lint/spyglass),)
 SRC+=$(patsubst $(LIB_DIR)/hardware/lint/spyglass/%, $(BUILD_LINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/spyglass/*))
 $(BUILD_LINT_DIR)/%: $(LIB_DIR)/hardware/lint/spyglass/%
 	sed 's/IOB_CORE_NAME/$(NAME)/g' $< > $@
-	
+
 endif
 
 #

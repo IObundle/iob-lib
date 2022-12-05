@@ -78,7 +78,7 @@ def gen_rd_reg(row, f):
     addr_last = int(addr + (n_items-1)*n_bytes)
     addr_w = int(ceil(log(n_items*n_bytes,2)))
     auto = row['autologic']
-    addr_base = max(log(cpu_n_bytes,2), addr_w)
+    addr_w_base = max(log(cpu_n_bytes,2), addr_w)
 
     f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**addr_w}; AUTO: {auto}\n\n")
 
@@ -102,7 +102,7 @@ def gen_rd_reg(row, f):
 
     #check if address in range
     f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
-    f.write(f"assign {name}_addressed = (`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_base)});\n")
+    f.write(f"assign {name}_addressed = (`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)});\n")
 
     #compute the read enable signal
     f.write(f"assign {name}_ren = ({name}_ready_i & iob_valid_i) & ((~|iob_wstrb_i) & {name}_addressed);\n")
@@ -143,7 +143,7 @@ def gen_inst_wire(table, f):
         n_bits = row['n_bits']
         n_items = row['n_items']
         n_bytes = bceil(n_bits, 3)/8
-        addr_w = int(ceil(log(row['n_items']*n_bytes,2)))
+        addr_w = int(ceil(log(n_items*n_bytes,2)))
         auto = row['autologic']
 
 
@@ -299,10 +299,10 @@ def write_hwcode(table, out_dir, top):
         addr_w = int(ceil(log(n_items*n_bytes,2)))
         addr_type = row['type']
         auto = row['autologic']
-        addr_base = max(log(cpu_n_bytes,2), addr_w)
+        addr_w_base = max(log(cpu_n_bytes,2), addr_w)
 
         if row['type'] == 'R':
-            f_gen.write(f"\tif((`IOB_WORD_ADDR(raddr) >= {bfloor(addr, addr_base)}) && (`IOB_WORD_ADDR(raddr) <= {bfloor(addr_last, addr_base)})) begin\n")
+            f_gen.write(f"\tif((`IOB_WORD_ADDR(raddr) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(raddr) <= {bfloor(addr_last, addr_w_base)})) begin\n")
             # rdata
             if auto:
                 f_gen.write(f"\t\trdata_int = rdata_int | (({name}_r|{8*cpu_n_bytes}'d0) << {boffset(addr, cpu_n_bytes)});\n")
@@ -311,7 +311,7 @@ def write_hwcode(table, out_dir, top):
             # rvalid
             f_gen.write(f"\t\trvalid_int = rvalid_int | {name}_rvalid_i;\n\tend\n")
             # rready
-            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_base)}))\n")
+            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)}))\n")
             f_gen.write(f"\t\trready_int = rready_int | {name}_ready_i;\n")
         else: #row['type'] == 'W'
             # get wready
@@ -343,7 +343,12 @@ def write_hwheader(table, out_dir, top):
     for row in table:
         name = row['name']
         n_bits = row['n_bits']
+        n_bytes = bceil(n_bits, 3)/8
+        n_items = row['n_items']
+        addr_w = int(ceil(log(n_items*n_bytes,2)))
         f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
+        if n_items>1:
+            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {addr_w}\n\n")
         if type(n_bits)==int:
             f_def.write(f"`define {macro_prefix}{name}_W {n_bits}\n\n")
         elif n_bits != f"{name}_W":
