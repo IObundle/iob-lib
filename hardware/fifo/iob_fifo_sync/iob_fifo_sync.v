@@ -16,9 +16,9 @@ module iob_fifo_sync
     R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
     )
    (
+    `IOB_INPUT(clk_i, 1),
     `IOB_INPUT(arst_i, 1),
     `IOB_INPUT(rst_i, 1),
-    `IOB_INPUT(clk_i, 1),
     `IOB_INPUT(clk_en_i, 1),
 
     //write port
@@ -61,9 +61,9 @@ module iob_fifo_sync
       .clk_i    (clk_i),
       .arst_i   (arst_i),
       .rst_i    (rst_i),
+      .en_i     (w_en_int),
       .ld_i     (1'b0),
       .ld_val_i ({W_ADDR_W{1'b0}}),
-      .en_i     (w_en_int),
       .data_o   (w_addr)
       );
 
@@ -82,9 +82,9 @@ module iob_fifo_sync
       .clk_i    (clk_i),
       .arst_i   (arst_i),
       .rst_i    (rst_i),
+      .en_i     (r_en_int),
       .ld_i     (1'b0),
       .ld_val_i ({R_ADDR_W{1'b0}}),
-      .en_i     (r_en_int),
       .data_o   (r_addr)
       );
 
@@ -172,8 +172,8 @@ module iob_fifo_sync
       .ext_mem_r_data_i (ext_mem_r_data_i),
 
       .w_en_i           (w_en_int),
-      .w_data_i         (w_data_i),
       .w_addr_i         (w_addr),
+      .w_data_i         (w_data_i),
 
       .r_en_i           (r_en_int),
       .r_addr_i         (r_addr),

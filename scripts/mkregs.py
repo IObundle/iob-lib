@@ -203,7 +203,7 @@ def write_hwcode(table, out_dir, top):
     # connection wires
     gen_inst_wire(table, f_inst)
 
-    f_inst.write("swreg #(\n")
+    f_inst.write(f'{top}_swreg_gen #(\n')
     f_inst.write(f'\t`include "{top}_inst_params.vh"\n')
     f_inst.write("\n) swreg_0 (\n")
     gen_portmap(table, f_inst)
@@ -226,7 +226,7 @@ def write_hwcode(table, out_dir, top):
     f_gen.write(f'`include "{top}_swreg_def.vh"\n')
 
     # declaration
-    f_gen.write("module swreg\n")
+    f_gen.write(f'module {top}_swreg_gen\n')
 
     # parameters
     f_gen.write("#(\n")
