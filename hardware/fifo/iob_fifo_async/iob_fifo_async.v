@@ -139,7 +139,7 @@ module iob_fifo_async
 
    
    //read address gray code counter
-   wire r_en_int  = r_en_i & ~r_empty_o & r_clk_en_i;
+   wire r_en_int  = (r_en_i & (~r_empty_o)) & r_clk_en_i;
    iob_gray_counter
      #(
        .W(R_ADDR_W+1)
@@ -154,7 +154,7 @@ module iob_fifo_async
       );
 
    //write address gray code counter
-   wire w_en_int = w_en_i & ~w_full_o & w_clk_en_i;
+   wire w_en_int = (w_en_i & (~w_full_o)) & w_clk_en_i;
    iob_gray_counter
      #(
        .W(W_ADDR_W+1)
