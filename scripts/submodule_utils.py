@@ -9,16 +9,17 @@ import math
 
 # Signals in this template will only be inserted if they exist in the peripheral IO
 reserved_signals_template = """\
-      .clk(clk),
-      .rst(rst),
-      .reset(rst),
-      .arst(rst),
-      .valid(slaves_req[`valid(`/*<InstanceName>*/)]),
-      .address(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W+2)-2]),
-      .wdata(slaves_req[`wdata(`/*<InstanceName>*/)]),
-      .wstrb(slaves_req[`wstrb(`/*<InstanceName>*/)]),
-      .rdata(slaves_resp[`rdata(`/*<InstanceName>*/)]),
-      .ready(slaves_resp[`ready(`/*<InstanceName>*/)]),
+      .clk_i(clk_i),
+      .rst_i(rst_i),
+      .reset(rst_i),
+      .arst_i(rst_i),
+      .iob_valid(slaves_req[`valid(`/*<InstanceName>*/)]),
+      .iob_addr(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W+2)-2]),
+      .iob_wdata(slaves_req[`wdata(`/*<InstanceName>*/)]),
+      .iob_wstrb(slaves_req[`wstrb(`/*<InstanceName>*/)]),
+      .iob_rdata(slaves_resp[`rdata(`/*<InstanceName>*/)]),
+      .iob_ready(slaves_resp[`ready(`/*<InstanceName>*/)]),
+      .iob_rvalid(slaves_resp[`rvalid(`/*<InstanceName>*/)]),
       .trap(trap[0]),
       .m_axi_awid    (m_axi_awid[0:0]),
       .m_axi_awaddr  (m_axi_awaddr[`DDR_ADDR_W-1:0]),
@@ -215,12 +216,13 @@ def get_module_io(verilog_lines):
             module_signals["clk_i"]="input "
             module_signals["arst_i"]="input "
         elif '`include "iob_s_if.vh"' in verilog_lines[i]: #If it is a known verilog include
-            module_signals["valid"]="input "
-            module_signals["address"]="input [ADDR_W:0] "
-            module_signals["wdata"]="input [DATA_W:0] "
-            module_signals["wstrb"]="input [DATA_W/8:0] "
-            module_signals["rdata"]="output [DATA_W:0] "
-            module_signals["ready"]="output "
+            module_signals["iob_valid"]="input "
+            module_signals["iob_addr"]="input [ADDR_W:0] "
+            module_signals["iob_wdata"]="input [DATA_W:0] "
+            module_signals["iob_wstrb"]="input [DATA_W/8:0] "
+            module_signals["iob_rdata"]="output [DATA_W:0] "
+            module_signals["iob_ready"]="output "
+            module_signals["iob_rvalid"]="output "
         else:
             print("Unknow macro/signal declaration '{}' in module '{}'".format(verilog_lines[i],verilog_lines[module_start-1]))
             exit(-1)
@@ -266,7 +268,7 @@ def get_module_parameters(verilog_lines):
 # It removes reserved system signals, such as: clk, rst, valid, address, wdata, wstrb, rdata, ready, ...
 def get_pio_signals(peripheral_signals):
     pio_signals = peripheral_signals.copy()
-    for signal in ["clk","rst","reset","arst","valid","address","wdata","wstrb","rdata","ready","trap"]\
+    for signal in ["clk_i","rst_i","reset","arst_i","iob_valid","iob_addr","iob_wdata","iob_wstrb","iob_rdata","iob_ready","iob_rvalid","trap"]\
                   +[i for i in pio_signals if "m_axi_" in i]:
         if signal in pio_signals: pio_signals.pop(signal)
     return pio_signals
@@ -338,12 +340,12 @@ def get_periphs_id(peripherals_str):
     return peripherals_list
 
 # Return list of dictionaries, defining parameters for each peripheral instance with their ID assigned
-def get_periphs_id_as_parameters(peripherals_str):
+def get_periphs_id_as_macros(peripherals_str):
     peripherals_list = get_periphs_id(peripherals_str)
-    parameter_list = []
+    macro_list = []
     for instance in peripherals_list:
-        parameter_list.append({'name':instance[0], 'type':'P', 'val':instance[1], 'min':'1', 'max':'NA', 'descr':f'ID of {instance[0]} peripheral'})
-    return parameter_list
+        macro_list.append({'name':instance[0], 'type':'M', 'val':instance[1], 'min':'1', 'max':'NA', 'descr':f'ID of {instance[0]} peripheral'})
+    return macro_list
 
 # Return amount of system peripherals
 def get_n_periphs(peripherals_str):

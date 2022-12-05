@@ -37,9 +37,10 @@ def conf_vh(macros, top_module, out_dir):
     file2create.write(f"`ifndef VH_{fname}_VH\n")
     file2create.write(f"`define VH_{fname}_VH\n\n")
     for macro in macros:
-        m_name = macro['name'].upper()
-        m_default_val = macro['val']
-        file2create.write(f"`define {core_prefix}{m_name} {m_default_val}\n")
+        if macro['type']=='M':
+            m_name = macro['name'].upper()
+            m_default_val = macro['val']
+            file2create.write(f"`define {core_prefix}{m_name} {m_default_val}\n")
     file2create.write(f"\n`endif // VH_{fname}_VH\n")
 
 # Generate TeX table of macros

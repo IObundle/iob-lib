@@ -203,7 +203,7 @@ def write_hwcode(table, out_dir, top):
     # connection wires
     gen_inst_wire(table, f_inst)
 
-    f_inst.write("swreg #(\n")
+    f_inst.write(f'{top}_swreg #(\n')
     f_inst.write(f'\t`include "{top}_inst_params.vh"\n')
     f_inst.write("\n) swreg_0 (\n")
     gen_portmap(table, f_inst)
@@ -226,7 +226,7 @@ def write_hwcode(table, out_dir, top):
     f_gen.write(f'`include "{top}_swreg_def.vh"\n')
 
     # declaration
-    f_gen.write("module swreg\n")
+    f_gen.write(f'module {top}_swreg\n')
 
     # parameters
     f_gen.write("#(\n")
@@ -503,6 +503,7 @@ def compute_addr(table, no_overlap):
         if addr >= 0: #manual address
             check_alignment(addr, addr_w)
             check_overlap(addr, addr_type, read_addr, write_addr)
+            addr_tmp = addr
         elif addr_type == 'R': #auto address
             read_addr = bceil(read_addr, addr_w)
             addr_tmp = read_addr
