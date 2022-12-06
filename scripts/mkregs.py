@@ -227,7 +227,7 @@ def write_hwcode(table, out_dir, top):
     f_gen.write(f'`include "{top}_swreg_def.vh"\n')
 
     # declaration
-    f_gen.write(f'module {top}_swreg_gen\n')
+    f_gen.write(f'module {top}_swreg\n')
 
     # parameters
     f_gen.write("#(\n")
@@ -509,6 +509,7 @@ def compute_addr(table, no_overlap):
         if addr >= 0: #manual address
             check_alignment(addr, addr_w)
             check_overlap(addr, addr_type, read_addr, write_addr)
+            addr_tmp = addr
         elif addr_type == 'R': #auto address
             read_addr = bceil(read_addr, addr_w)
             addr_tmp = read_addr
