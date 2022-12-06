@@ -4,7 +4,8 @@ ifeq ($(filter iob_fifo_async, $(HW_MODULES)),)
 HW_MODULES+=iob_fifo_async
 
 # Submodules
-include $(LIB_DIR)/hardware/iob_reg/hw_setup.mk
+include $(LIB_DIR)/hardware/reg/iob_reg_ar/hw_setup.mk
+include $(LIB_DIR)/hardware/reg/iob_reg_a/hw_setup.mk
 include $(LIB_DIR)/hardware/iob_sync/hw_setup.mk
 include $(LIB_DIR)/hardware/ram/iob_ram_t2p_asym/hw_setup.mk
 include $(LIB_DIR)/hardware/fifo/iob_gray_counter/hw_setup.mk
@@ -18,4 +19,3 @@ $(BUILD_VSRC_DIR)/iob_fifo_async.v: $(LIB_DIR)/hardware/fifo/iob_fifo_async/iob_
 	cp $< $(BUILD_VSRC_DIR)
 
 endif
-

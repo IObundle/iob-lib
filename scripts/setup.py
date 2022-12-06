@@ -10,6 +10,9 @@ import importlib
 
 src_path = './hardware/src/'
 
+def getf(obj, name, field):
+    return int(obj[next(i for i in range(len(obj)) if obj[i]['name'] == name)][field])
+
 # no_overlap: Optional argument. Selects if read/write addresses should not overlap
 # build_dir: Optional argument. Location of build directory. If left as 'None', name is auto generated.
 # gen_tex: Optional argument. Selects if TeX documentation should be generated.

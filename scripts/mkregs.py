@@ -56,7 +56,7 @@ def gen_wr_reg(row, f):
     if auto: #generate register and ready signal
         f.write(f"`IOB_WIRE({name}_ready_i, 1)\n")
         f.write(f"assign {name}_ready_i = |iob_wstrb_i;\n")
-        f.write(f"iob_reg #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, 1'b0, {name}_wen, {name}_wdata, {name}_o);\n")
+        f.write(f"iob_reg_ae #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, {name}_wen, {name}_wdata, {name}_o);\n")
     else: #output wdata and wen; ready signal has been declared as a port
         f.write(f"assign {name}_o = {name}_wdata;\n")
         f.write(f"assign {name}_wen_o = {name}_wen;\n")
@@ -92,10 +92,10 @@ def gen_rd_reg(row, f):
         f.write(f"assign {name}_ready_i = ~|iob_wstrb_i;\n")
         #rvalid
         f.write(f"`IOB_WIRE({name}_rvalid_i, 1)\n")
-        f.write(f"iob_reg #(1,0) {name}_rvalid (clk_i, arst_i, 1'b0, 1'b1, {name}_ren, {name}_rvalid_i);\n")
+        f.write(f"iob_reg_a #(1,0) {name}_rvalid (clk_i, arst_i, {name}_ren, {name}_rvalid_i);\n")
         #register
         f.write(f"`IOB_WIRE({name}_r, {n_bits})\n")
-        f.write(f"iob_reg #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, 1'b0, {name}_ren, {name}_i, {name}_r);\n")
+        f.write(f"iob_reg_ae #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, {name}_ren, {name}_i, {name}_r);\n")
         f.write(f"assign {name}_int_o = {name}_r;\n")
     else:
         f.write(f"assign {name}_ren_o = {name}_ren;\n")
@@ -145,7 +145,7 @@ def gen_inst_wire(table, f):
         n_bytes = bceil(n_bits, 3)/8
         addr_w = int(ceil(log(n_items*n_bytes,2)))
         auto = row['autologic']
-
+        rst_val = row['rst_val']
 
         if row['type'] == 'W':
             f.write(f"`IOB_WIRE({name}, {n_bits})\n")
@@ -159,6 +159,7 @@ def gen_inst_wire(table, f):
             else:
                 f.write(f"`IOB_WIRE({name}_int, {n_bits})\n")
         if not auto:
+            f.write(f"localparam {name}_RST_VAL = {rst_val};\n")
             f.write(f"`IOB_WIRE({name}_ready, 1)\n")
         if n_items > 1:
             f.write(f"`IOB_WIRE({name}_addr, {addr_w})\n")
@@ -203,7 +204,7 @@ def write_hwcode(table, out_dir, top):
     # connection wires
     gen_inst_wire(table, f_inst)
 
-    f_inst.write(f'{top}_swreg #(\n')
+    f_inst.write(f'{top}_swreg_gen #(\n')
     f_inst.write(f'\t`include "{top}_inst_params.vh"\n')
     f_inst.write("\n) swreg_0 (\n")
     gen_portmap(table, f_inst)
@@ -265,7 +266,7 @@ def write_hwcode(table, out_dir, top):
                 has_read_regs = 1
                 f_gen.write("//address register\n")
                 f_gen.write(f"`IOB_WIRE(raddr, {core_addr_w})\n")
-                f_gen.write(f"iob_reg #({core_addr_w}, 0) raddr_reg (clk_i, arst_i, 1'b0, iob_valid_i, iob_addr_i, raddr);\n\n")
+                f_gen.write(f"iob_reg_ae #({core_addr_w}, 0) raddr_reg (clk_i, arst_i, iob_valid_i, iob_addr_i, raddr);\n\n")
             # read register
             gen_rd_reg(row, f_gen)
 
@@ -348,7 +349,7 @@ def write_hwheader(table, out_dir, top):
         addr_w = int(ceil(log(n_items*n_bytes,2)))
         f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
         if n_items>1:
-            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {addr_w}\n\n")
+            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {addr_w}\n")
         if type(n_bits)==int:
             f_def.write(f"`define {macro_prefix}{name}_W {n_bits}\n\n")
         elif n_bits != f"{name}_W":
