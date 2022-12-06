@@ -16,11 +16,11 @@ src_path = './hardware/src/'
 def setup(top, version, confs, ios, regs, blocks, no_overlap=False, build_dir=None, gen_tex=True):
 
     #build directory
-    if build_dir is None:
+    if not build_dir:
         build_dir = f"../{top+'_'+version}"
     
     #build registers table
-    if regs is not None:
+    if regs:
         reg_table = []
         for i_regs in regs:
             reg_table += i_regs['regs']
@@ -32,7 +32,7 @@ def setup(top, version, confs, ios, regs, blocks, no_overlap=False, build_dir=No
     #
     # Generate hw
     #
-    if regs is not None:
+    if regs:
         mkregs.write_hwheader(reg_table, build_dir+'/hardware/src', top)
         mkregs.write_hwcode(reg_table, build_dir+'/hardware/src', top)
     p_conf.params_vh(confs, top, build_dir+'/hardware/src')
@@ -43,7 +43,7 @@ def setup(top, version, confs, ios, regs, blocks, no_overlap=False, build_dir=No
     #
     # Generate sw
     #
-    if regs is not None:
+    if regs:
         mkregs.write_swheader(reg_table, build_dir+'/software/esrc', top)
         mkregs.write_swcode(reg_table, build_dir+'/software/esrc', top)
         if path.isdir(build_dir+'/software/psrc'): mkregs.write_swheader(reg_table, build_dir+'/software/psrc', top)
@@ -54,9 +54,9 @@ def setup(top, version, confs, ios, regs, blocks, no_overlap=False, build_dir=No
     if path.isdir(build_dir+"/document/tsrc") and gen_tex:
         p_conf.generate_macros_tex(confs, build_dir+"/document/tsrc")
         p_conf.generate_other_macros_tex(confs, build_dir+"/document/tsrc")
-        p_conf.generate_params_tex(confs, build_dir+"/document/tsrc")
+        p_conf.generate_params_tex(confs, top, build_dir+"/document/tsrc")
         ios_lib.generate_ios_tex(ios, build_dir+"/document/tsrc")
-        if regs is not None:
+        if regs:
             mkregs.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
         blocks_lib.generate_blocks_tex(blocks, build_dir+"/document/tsrc")
 
@@ -75,4 +75,4 @@ def setup_submodule(build_dir, submodule_dir):
     spec.loader.exec_module(module)
 
     # Call setup function for this submodule
-    setup(module.top, module.version, module.confs, module.ios, module.regs, module.blocks, build_dir=build_dir, gen_tex=False)
+    setup(module.top, module.version, module.confs, module.ios, module.regs if hasattr(module,'regs') else None, module.blocks, build_dir=build_dir, gen_tex=False)

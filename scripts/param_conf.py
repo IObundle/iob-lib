@@ -64,11 +64,11 @@ def generate_other_macros_tex(confs, out_dir):
     write_table(f"{out_dir}/som",tex_table)
 
 # Generate TeX table of parameters
-def generate_params_tex(confs, out_dir):
+def generate_params_tex(confs, top_module, out_dir):
     tex_table = []
     for conf in confs:
         # Only insert parameters
         if conf['type'] == 'P':
-            tex_table.append([conf['name'].replace('_','\_'), conf['min'], conf['val'], conf['max'], conf['descr']])
+            tex_table.append([conf['name'].replace('_','\_'), "NA", (f"`{top_module}_".upper()+conf['name']).replace('_','\_'), "NA", conf['descr']])
 
     write_table(f"{out_dir}/sp",tex_table)
