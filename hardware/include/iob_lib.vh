@@ -71,7 +71,7 @@
 `define WSTRB_W_(D) D/8
 `define READY_W     1
 
-`define WRITE_W_(D) (D+`WSTRB_W_(D))
+`define WRITE_W_(D) (D+`WSTRB_W_(D)+READY_W)
 `define READ_W_(D)  (D+`READY_W)
 
 //DATA POSITIONS
@@ -111,6 +111,9 @@
 //gets the wstrb field of cat bus
 `define wstrb_(I,A,D) I*`REQ_W_(A,D) +: `WSTRB_W_(D)
 
+//gets the write ready field of cat bus
+`define wready_(I,A,D) I*`REQ_W_(A,D)
+
 //gets the write fields of cat bus
 `define write_(I,A,D) I*`REQ_W_(A,D) +: `WRITE_W_(D)
 
@@ -118,7 +121,7 @@
 `define rdata_(I,D) I*`RESP_W_(D)+`RDATA_P +: D
 
 //gets the ready field of cat bus
-`define ready_(I,D) I*`RESP_W_(D)
+`define rready_(I,D) I*`RESP_W_(D)
 
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -142,9 +145,10 @@
 `define address(I,W) `address_(I, W, ADDR_W, DATA_W)
 `define wdata(I)     `wdata_(I, ADDR_W, DATA_W)
 `define wstrb(I)     `wstrb_(I, ADDR_W, DATA_W)
+`define wready(I)    `wready_(I, ADDR_W, DARA_W)
 `define write(I)     `write_(I, ADDR_W, DATA_W)
 `define rdata(I)     `rdata_(I, DATA_W)
-`define ready(I)     `ready_(I, DATA_W)
+`define rready(I)    `rready_(I, DATA_W)
 
 `endif //  `ifndef LIBINC
            
