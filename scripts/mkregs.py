@@ -289,6 +289,8 @@ def write_hwcode(table, out_dir, top):
     f_gen.write("\trdata_int = 0;\n")
     f_gen.write("\trvalid_int = 1'b0;\n\n")
 
+    tmp = {'R': {}, 'W':{}}
+
     # update responses
     for row in table:
         name = row['name']
@@ -302,22 +304,62 @@ def write_hwcode(table, out_dir, top):
         auto = row['autologic']
         addr_w_base = max(log(cpu_n_bytes,2), addr_w)
 
+        addr_tmp = (addr >> int(log(cpu_n_bytes, 2))) << int(log(cpu_n_bytes, 2))
+
+        signal = {}
         if row['type'] == 'R':
-            f_gen.write(f"\tif((`IOB_WORD_ADDR(raddr) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(raddr) <= {bfloor(addr_last, addr_w_base)})) begin\n")
+            if (not (addr_tmp in tmp['R'])): tmp['R'][addr_tmp] = {'lower': 2**(8*cpu_n_bytes), 'upper': 0, 'signals':[]}
+
+            lower = bfloor(addr, addr_w_base)
+            upper = bfloor(addr_last, addr_w_base)
+
             # rdata
-            if auto:
-                f_gen.write(f"\t\trdata_int = rdata_int | (({name}_r|{8*cpu_n_bytes}'d0) << {boffset(addr, cpu_n_bytes)});\n")
-            else:
-                f_gen.write(f"\t\trdata_int = rdata_int | (({name}_i|{8*cpu_n_bytes}'d0) << {boffset(addr, cpu_n_bytes)});\n")
+            if auto: signal['rdata'] = f"(({name}_r|{8*cpu_n_bytes}'d0) << {boffset(addr, cpu_n_bytes)})"
+            else: signal['rdata'] = f"(({name}_i|{8*cpu_n_bytes}'d0) << {boffset(addr, cpu_n_bytes)})"
             # rvalid
-            f_gen.write(f"\t\trvalid_int = rvalid_int | {name}_rvalid_i;\n\tend\n")
+            signal['rvalid'] = f"{name}_rvalid_i"
             # rready
-            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)}))\n")
-            f_gen.write(f"\t\trready_int = rready_int | {name}_ready_i;\n")
+            signal['rready'] = f"{name}_ready_i"
         else: #row['type'] == 'W'
+            if (not (addr_tmp in tmp['W'])): tmp['W'][addr_tmp] = {'lower': 2**(8*cpu_n_bytes), 'upper': 0, 'signals':[]}
+
+            lower = addr
+            upper = addr + 2**addr_w
+
             # get wready
-            f_gen.write(f"\tif((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n")
-            f_gen.write(f"\t\twready_int = wready_int | {name}_ready_i;\n")
+            signal['wready'] = f"{name}_ready_i"
+
+        if (lower < tmp[row['type']][addr_tmp]['lower']): tmp[row['type']][addr_tmp]['lower'] = lower
+        if (upper > tmp[row['type']][addr_tmp]['upper']): tmp[row['type']][addr_tmp]['upper'] = upper
+        tmp[row['type']][addr_tmp]['signals'].append(signal)
+
+    for address in tmp['R']:
+        elem = tmp['R'][address]
+        f_gen.write(f"\tif((`IOB_WORD_ADDR(raddr) >= {elem['lower']}) && (`IOB_WORD_ADDR(raddr) <= {elem['upper']})) begin\n")
+        # rdata
+        line = "\t\trdata_int ="
+        for signal in elem['signals']:
+            line += f" {signal['rdata']} |"
+        f_gen.write(line[:-2]+";\n")
+        # rvalid
+        line = "\t\trvalid_int ="
+        for signal in elem['signals']:
+            line += f" {signal['rvalid']} |"
+        f_gen.write(line[:-2]+";\n\tend\n")
+        f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {elem['lower']}) && (`IOB_WORD_ADDR(iob_addr_i) <= {elem['upper']}))\n")
+        # rready
+        line = "\t\trready_int ="
+        for signal in elem['signals']:
+            line += f" {signal['rready']} |"
+        f_gen.write(line[:-2]+";\n")
+    for address in tmp['W']:
+        elem = tmp['W'][address]
+        f_gen.write(f"\tif((waddr >= {elem['lower']}) && (waddr < {elem['upper']}))\n")
+        # get wready
+        line = "\t\twready_int ="
+        for signal in elem['signals']:
+            line += f" {signal['wready']} |"
+        f_gen.write(line[:-2]+";\n")
 
     f_gen.write("end\n\n")
 
