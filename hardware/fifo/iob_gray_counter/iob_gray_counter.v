@@ -13,9 +13,9 @@ module iob_gray_counter
     output [W-1:0] data_o
     );
    
-   reg [W-1:0]     bin_counter;
+   wire [W-1:0]     bin_counter;
    reg [W-1:0]     bin_counter_nxt;
-   reg [W-1:0]     gray_counter;
+   wire [W-1:0]     gray_counter;
    reg [W-1:0]     gray_counter_nxt;
    
    `IOB_COMB bin_counter_nxt = bin_counter + 1;
