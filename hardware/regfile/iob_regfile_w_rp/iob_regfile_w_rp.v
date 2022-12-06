@@ -31,7 +31,7 @@ module iob_regfile_w_rp
            assign en[i] = (waddr_i < 2**ADDR_W) & (i==waddr_i[0]);
          else
            assign en[i] = (waddr_i < 2**ADDR_W) & (i==waddr_i[0+:ADDR_W]);
-         iob_reg #(DATA_W, 0) iob_reg0
+         iob_reg_are #(DATA_W, 0) iob_reg0
              (
               .clk_i(clk_i),
               .arst_i(arst_i),
