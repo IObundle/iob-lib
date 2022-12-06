@@ -348,7 +348,7 @@ def write_hwheader(table, out_dir, top):
         addr_w = int(ceil(log(n_items*n_bytes,2)))
         f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
         if n_items>1:
-            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {addr_w}\n\n")
+            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {addr_w}\n")
         if type(n_bits)==int:
             f_def.write(f"`define {macro_prefix}{name}_W {n_bits}\n\n")
         elif n_bits != f"{name}_W":
