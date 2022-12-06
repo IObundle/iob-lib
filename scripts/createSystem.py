@@ -40,17 +40,17 @@ def create_systemv(root_dir, peripherals_str, file_path):
     for corename in instances_amount:
         top_module_name = get_top_module_from_dir(f'{root_dir}/{submodule_directories[corename]}')
 
-        pio_signals = get_pio_signals(peripheral_signals[corename])
+        pio_signals = get_pio_signals(peripheral_signals[corename]) #TODO: Replace by setup.py
 
         # Insert IOs and Instances for this type of peripheral
         for i in range(instances_amount[corename]):
-            # Insert system IOs for peripheral
-            start_index = find_idx(template_contents, "PIO")
-            for signal in pio_signals:
-                signal_size = replaceByParameterValue(peripheral_signals[corename][signal],\
-                              peripheral_parameters[corename],\
-                              instances_parameters[corename][i])
-                template_contents.insert(start_index, '    {} {}_{},\n'.format(signal_size,corename+str(i),signal))
+            # Insert system IOs for peripheral (No longer needed. io.vh is handled by setup.py)
+            #start_index = find_idx(template_contents, "PIO")
+            #for signal in pio_signals:
+            #    signal_size = replaceByParameterValue(peripheral_signals[corename][signal],\
+            #                  peripheral_parameters[corename],\
+            #                  instances_parameters[corename][i])
+            #    template_contents.insert(start_index, '    {} {}_{},\n'.format(signal_size,corename+str(i),signal))
             # Insert peripheral instance (in reverse order of lines)
             start_index = find_idx(template_contents, "endmodule")-1
             template_contents.insert(start_index, "      );\n")
@@ -61,8 +61,8 @@ def create_systemv(root_dir, peripherals_str, file_path):
                 # Only insert if this reserved signal (from template) is present in IO of this peripheral
                 if (str_match is not None) and str_match.group(1) in peripheral_signals[corename]:
                     template_contents.insert(start_index,
-                            re.sub("\/\*<InstanceName>\*\/",corename+str(i),
-                            re.sub("\/\*<SwregFilename>\*\/",top_module_name+"_swreg",
+                            re.sub("\/\*<InstanceName>\*\/","IOB_SOC_"+corename+str(i), #FIXME: This currently uses fixed prefix "IOB_SOC_". But the system may have other name.
+                            re.sub("\/\*<SwregFilename>\*\/",top_module_name.upper()+"_SWREG",
                             signal)))
                     # Remove comma at the end of last signal
                     if first_reversed_signal == True:

@@ -37,9 +37,10 @@ def conf_vh(macros, top_module, out_dir):
     file2create.write(f"`ifndef VH_{fname}_VH\n")
     file2create.write(f"`define VH_{fname}_VH\n\n")
     for macro in macros:
-        m_name = macro['name'].upper()
-        m_default_val = macro['val']
-        file2create.write(f"`define {core_prefix}{m_name} {m_default_val}\n")
+        if macro['type']=='M':
+            m_name = macro['name'].upper()
+            m_default_val = macro['val']
+            file2create.write(f"`define {core_prefix}{m_name} {m_default_val}\n")
     file2create.write(f"\n`endif // VH_{fname}_VH\n")
 
 # Generate TeX table of macros
@@ -63,11 +64,11 @@ def generate_other_macros_tex(confs, out_dir):
     write_table(f"{out_dir}/som",tex_table)
 
 # Generate TeX table of parameters
-def generate_params_tex(confs, out_dir):
+def generate_params_tex(confs, top_module, out_dir):
     tex_table = []
     for conf in confs:
         # Only insert parameters
         if conf['type'] == 'P':
-            tex_table.append([conf['name'].replace('_','\_'), conf['min'], conf['val'], conf['max'], conf['descr']])
+            tex_table.append([conf['name'].replace('_','\_'), "NA", (f"`{top_module}_".upper()+conf['name']).replace('_','\_'), "NA", conf['descr']])
 
     write_table(f"{out_dir}/sp",tex_table)
