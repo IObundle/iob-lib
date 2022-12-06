@@ -31,4 +31,11 @@ ifeq ($(COV),1)
 	imc -exec xcelium_cov.tcl
 endif
 
-.PHONY: comp exec
+clean: gen-clean
+	
+very-clean: clean
+	@rm -rf cov_work
+	@rm -f coverage_report_summary.rpt coverage_report_detail.rpt
+	
+
+.PHONY: comp exec clean very-clean

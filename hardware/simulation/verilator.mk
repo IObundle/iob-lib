@@ -17,4 +17,6 @@ comp: $(VHDR) $(VSRC)
 exec:
 	./obj_dir/V$(VTOP) | tee -a test.log
 
-.PHONY: comp exec
+clean: gen-clean
+
+.PHONY: comp exec clean

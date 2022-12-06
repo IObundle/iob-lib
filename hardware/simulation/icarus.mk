@@ -15,4 +15,7 @@ a.out: $(VHDR) $(VSRC)
 exec:
 	./a.out | tee -a test.log
 
-.PHONY: comp exec
+clean: gen-clean
+	@rm -f a.out
+
+.PHONY: comp exec clean

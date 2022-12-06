@@ -37,7 +37,7 @@ module iob_ram_t2p
         ram[w_addr_i] <= w_data_i;
    end
 
-   //read mode depends on mem implementation, as ram or reg
+   //read
    always @(posedge r_clk_i) begin
       if (r_en_i)
         r_data_o <= ram[r_addr_i];
