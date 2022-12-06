@@ -227,7 +227,7 @@ def write_hwcode(table, out_dir, top):
     f_gen.write(f'`include "{top}_swreg_def.vh"\n')
 
     # declaration
-    f_gen.write(f'module {top}_swreg\n')
+    f_gen.write(f'module {top}_swreg_gen\n')
 
     # parameters
     f_gen.write("#(\n")
