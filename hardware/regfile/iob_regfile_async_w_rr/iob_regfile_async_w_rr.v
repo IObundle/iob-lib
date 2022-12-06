@@ -24,14 +24,15 @@ module iob_regfile_async_w_rr
 
    //write
    `IOB_VARARRAY_2D(regfile, (2**ADDR_W), DATA_W)
-   integer i;
-   always @(posedge w_clk_i, posedge w_arst_i) begin
-      for(i = 0; i < (2**ADDR_W); i = i + 1)
-         if (w_arst_i)
-            regfile[i] <= {DATA_W{1'd0}};
-         else if (w_en_i && (w_addr_i == i))
-            regfile[i] <= w_data_i;
-   end
+   genvar i;
+   generate for(i = 0; i < (2**ADDR_W); i = i + 1)
+      always @(posedge w_clk_i, posedge w_arst_i) begin
+            if (w_arst_i)
+               regfile[i] <= {DATA_W{1'd0}};
+            else if (w_en_i && (w_addr_i == i))
+               regfile[i] <= w_data_i;
+      end
+   endgenerate
 
    //read
    always @(posedge r_clk_i, posedge r_arst_i) begin
