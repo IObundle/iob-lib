@@ -145,7 +145,7 @@ def gen_inst_wire(table, f):
         n_bytes = bceil(n_bits, 3)/8
         addr_w = int(ceil(log(n_items*n_bytes,2)))
         auto = row['autologic']
-
+        rst_val = row['rst_val']
 
         if row['type'] == 'W':
             f.write(f"`IOB_WIRE({name}, {n_bits})\n")
@@ -159,6 +159,7 @@ def gen_inst_wire(table, f):
             else:
                 f.write(f"`IOB_WIRE({name}_int, {n_bits})\n")
         if not auto:
+            f.write(f"localparam {name}_RST_VAL = {rst_val};\n")
             f.write(f"`IOB_WIRE({name}_ready, 1)\n")
         if n_items > 1:
             f.write(f"`IOB_WIRE({name}_addr, {addr_w})\n")

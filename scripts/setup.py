@@ -10,8 +10,8 @@ import blocks as blocks_lib
 src_path = './hardware/src/'
 
 
-def get_conf(name, field):
-    return int(confs[next(i for i in range(len(confs)) if confs[i]['name'] == name)][field])
+def getf(obj, name, field):
+    return int(obj[next(i for i in range(len(obj)) if obj[i]['name'] == name)][field])
 
 
 def setup(top, version, confs, ios, regs, blocks, no_overlap=False):
