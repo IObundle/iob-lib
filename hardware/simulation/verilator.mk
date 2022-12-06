@@ -18,5 +18,6 @@ exec:
 	./obj_dir/V$(VTOP) | tee -a test.log
 
 clean: gen-clean
+	@rm -rf obj_dir
 
 .PHONY: comp exec clean
