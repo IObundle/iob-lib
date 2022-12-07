@@ -121,7 +121,7 @@
 `define rvalid_(I,D) I*`RESP_W_(D)+`READY_W
 
 //gets the ready field of cat bus
-`define ready_(I,A,D) I*`RESP_W_(D)
+`define ready_(I,D) I*`RESP_W_(D)
 
 
 /////////////////////////////////////////////////////////////////////////////////
