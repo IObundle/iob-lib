@@ -55,10 +55,6 @@ module iob_fifo_async
 
    localparam [ADDR_W:0] FIFO_SIZE = (1'b1 << ADDR_W); //in bytes
 
-   //read/write increments
-   wire [(ADDR_W+1):0]      r_incr;
-   wire [(ADDR_W+1):0]      w_incr;
-
    //binary read addresses on both domains
    wire [R_ADDR_W:0]        r_raddr_bin;
    wire [R_ADDR_W:0]        w_raddr_bin;
@@ -72,24 +68,21 @@ module iob_fifo_async
    wire [ADDR_W:0]          w_raddr_bin_n;
 
    //assign according to assymetry type
+   localparam [ADDR_W-1:0] w_incr = (W_DATA_W > R_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
+   localparam [ADDR_W-1:0] r_incr = (R_DATA_W > W_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
+   
    generate
       if (W_DATA_W > R_DATA_W) begin
-         assign r_incr = 1'b1;
-         assign w_incr = 1'b1 << ADDR_W_DIFF;
          assign w_waddr_bin_n = w_waddr_bin<<ADDR_W_DIFF;
          assign w_raddr_bin_n = w_raddr_bin;
          assign r_raddr_bin_n = r_raddr_bin;
          assign r_waddr_bin_n = r_waddr_bin<<ADDR_W_DIFF;
       end else if (R_DATA_W > W_DATA_W) begin
-         assign w_incr = 1'b1;
-         assign r_incr = 1'b1 << ADDR_W_DIFF;
          assign w_waddr_bin_n = w_waddr_bin;
          assign w_raddr_bin_n = w_raddr_bin<<ADDR_W_DIFF;
          assign r_raddr_bin_n = r_raddr_bin<<ADDR_W_DIFF;
          assign r_waddr_bin_n = r_waddr_bin;
       end else begin
-         assign r_incr = 1'b1;
-         assign w_incr = 1'b1;
          assign w_raddr_bin_n = w_raddr_bin;
          assign w_waddr_bin_n = w_waddr_bin;
          assign r_waddr_bin_n = r_waddr_bin;
@@ -137,9 +130,9 @@ module iob_fifo_async
    assign r_level_o = r_level_int[ADDR_W-1:0];
    
    //READ DOMAIN EMPTY AND FULL FLAGS
-   assign r_empty_o = (r_level_int < r_incr);
+   assign r_empty_o = (r_level_int < {2'd0, r_incr});
    `IOB_WIRE(r_full_limit, (ADDR_W+2))
-   assign r_full_limit = FIFO_SIZE-r_incr;
+   assign r_full_limit = FIFO_SIZE-{2'd0, r_incr};
    assign r_full_o = (r_level_int > r_full_limit);
 
    //WRITE DOMAIN FIFO LEVEL
@@ -148,9 +141,9 @@ module iob_fifo_async
    assign w_level_o = w_level_int[ADDR_W-1:0];
  
    //WRITE DOMAIN EMPTY AND FULL FLAGS
-   assign w_empty_o = (w_level_int < w_incr);
+   assign w_empty_o = (w_level_int < {2'd0, w_incr});
    `IOB_WIRE(w_full_limit, (ADDR_W+2))
-   assign w_full_limit = FIFO_SIZE-w_incr;
+   assign w_full_limit = FIFO_SIZE-{2'd0, w_incr};
    assign w_full_o = (w_level_int > w_full_limit);
 
    
