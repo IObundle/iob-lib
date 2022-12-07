@@ -6,19 +6,27 @@ module iob_fifo_async
   #(parameter
     W_DATA_W = 0,
     R_DATA_W = 0,
-    ADDR_W = 0 //higher ADDR_W lower DATA_W
+    ADDR_W = 0, //higher ADDR_W lower DATA_W
+    //determine W_ADDR_W and R_ADDR_W
+   MAXDATA_W = `IOB_MAX(W_DATA_W, R_DATA_W),
+   MINDATA_W = `IOB_MIN(W_DATA_W, R_DATA_W),
+   R = MAXDATA_W/MINDATA_W,
+   ADDR_W_DIFF = $clog2(R),
+   MINADDR_W = ADDR_W-$clog2(R),//lower ADDR_W (higher DATA_W)
+   W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
+   R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
     )
    (
       
    //memory write port
    `IOB_OUTPUT(ext_mem_w_clk_o, 1),
    `IOB_OUTPUT(ext_mem_w_en_o, 1),
-   `IOB_OUTPUT(ext_mem_w_addr_o, ADDR_W),
+   `IOB_OUTPUT(ext_mem_w_addr_o, W_ADDR_W),
    `IOB_OUTPUT(ext_mem_w_data_o, W_DATA_W),
    //memory read port
    `IOB_OUTPUT(ext_mem_r_clk_o, 1),
    `IOB_OUTPUT(ext_mem_r_en_o, 1),
-   `IOB_OUTPUT(ext_mem_r_addr_o, ADDR_W),
+   `IOB_OUTPUT(ext_mem_r_addr_o, R_ADDR_W),
    `IOB_INPUT(ext_mem_r_data_i, R_DATA_W),
     
     //read port
@@ -45,14 +53,6 @@ module iob_fifo_async
 
     );
 
-    //determine W_ADDR_W and R_ADDR_W
-   localparam MAXDATA_W = `IOB_MAX(W_DATA_W, R_DATA_W);
-   localparam MINDATA_W = `IOB_MIN(W_DATA_W, R_DATA_W);
-   localparam R = MAXDATA_W/MINDATA_W;
-   localparam ADDR_W_DIFF = $clog2(R);
-   localparam MINADDR_W = ADDR_W-$clog2(R);//lower ADDR_W (higher DATA_W)
-   localparam W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W;
-   localparam R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W;
    localparam [ADDR_W:0] FIFO_SIZE = (1'b1 << ADDR_W); //in bytes
 
    //read/write increments

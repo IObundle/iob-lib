@@ -169,11 +169,11 @@ module iob_fifo_async_tb;
    
    `IOB_WIRE(ext_mem_w_clk, 1)
    `IOB_WIRE(ext_mem_w_en, 1)
-   `IOB_WIRE(ext_mem_w_addr, ADDR_W)
+   `IOB_WIRE(ext_mem_w_addr, W_ADDR_W)
    `IOB_WIRE(ext_mem_w_data, W_DATA_W)
    `IOB_WIRE(ext_mem_r_clk, 1)
    `IOB_WIRE(ext_mem_r_en, 1)
-   `IOB_WIRE(ext_mem_r_addr, ADDR_W)
+   `IOB_WIRE(ext_mem_r_addr, R_ADDR_W)
    `IOB_WIRE(ext_mem_r_data, R_DATA_W)
    
    // FIFO memory

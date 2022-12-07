@@ -1,6 +1,6 @@
 VTOP?=$(NAME)
 
-VFLAGS+=--cc --exe -I. -I../src --top-module $(VTOP)
+VFLAGS+=--cc --exe -I. -I../src -Isrc --top-module $(VTOP)
 VFLAGS+=-Wno-lint
 
 ifeq ($(VCD),1)
