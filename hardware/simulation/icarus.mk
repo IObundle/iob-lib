@@ -1,4 +1,4 @@
-VFLAGS+=-W all -g2005-sv -I. -I../src
+VFLAGS+=-W all -g2005-sv -I. -I../src -Isrc
 
 ifeq ($(VCD),1)
 VFLAGS+=-DVCD
@@ -15,4 +15,7 @@ a.out: $(VHDR) $(VSRC)
 exec:
 	./a.out | tee -a test.log
 
-.PHONY: comp exec
+clean: gen-clean
+	@rm -f a.out
+
+.PHONY: comp exec clean

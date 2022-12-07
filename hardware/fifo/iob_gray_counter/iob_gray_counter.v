@@ -13,18 +13,18 @@ module iob_gray_counter
     output [W-1:0] data_o
     );
    
-   reg [W-1:0]     bin_counter;
-   reg [W-1:0]     bin_counter_nxt;
-   reg [W-1:0]     gray_counter;
-   reg [W-1:0]     gray_counter_nxt;
+   wire [W-1:0]     bin_counter;
+   wire [W-1:0]     bin_counter_nxt;
+   wire [W-1:0]     gray_counter;
+   wire [W-1:0]     gray_counter_nxt;
    
-   `IOB_COMB bin_counter_nxt = bin_counter + 1;
+   assign bin_counter_nxt = bin_counter + 1;
    
    generate 
       if (W > 1) begin
-         `IOB_COMB gray_counter_nxt = {bin_counter[W-1], bin_counter[W-2:0] ^ bin_counter[W-1:1]};
+         assign gray_counter_nxt = {bin_counter[W-1], bin_counter[W-2:0] ^ bin_counter[W-1:1]};
       end else begin
-         `IOB_COMB gray_counter_nxt = bin_counter;
+         assign gray_counter_nxt = bin_counter;
       end 
    endgenerate
    

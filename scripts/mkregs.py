@@ -227,7 +227,7 @@ def write_hwcode(table, out_dir, top):
     f_gen.write(f'`include "{top}_swreg_def.vh"\n')
 
     # declaration
-    f_gen.write(f'module {top}_swreg\n')
+    f_gen.write(f'module {top}_swreg_gen\n')
 
     # parameters
     f_gen.write("#(\n")
@@ -322,7 +322,7 @@ def write_hwcode(table, out_dir, top):
     f_gen.write("end\n\n")
 
     # convert computed variables to signals
-    f_gen.write("assign ready_int = iob_wstrb_i? wready_int: rready_int;\n")
+    f_gen.write("assign ready_int = (iob_wstrb_i != 0)? wready_int: rready_int;\n")
     f_gen.write("`IOB_VAR2WIRE(ready_int, iob_ready_o)\n")
     f_gen.write("`IOB_VAR2WIRE(rdata_int, iob_rdata_o)\n")
     f_gen.write("`IOB_VAR2WIRE(rvalid_int, iob_rvalid_o)\n\n")
