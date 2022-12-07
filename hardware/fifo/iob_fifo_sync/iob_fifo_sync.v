@@ -109,12 +109,14 @@ module iob_fifo_sync
       .data_o (level_o)
       );
 
+   `IOB_VAR(level_incr, (ADDR_W+1))
    `IOB_COMB begin
+      level_incr = level_o + w_incr;
       level_nxt = {1'd0, level_o};
       if(w_en_int && (!r_en_int))
-        level_nxt = level_o + w_incr;
+        level_nxt = level_incr;
       else if(w_en_int && r_en_int)
-        level_nxt = (level_o + w_incr) - r_incr;
+        level_nxt = level_incr - r_incr;
       else if (r_en_int) // (!w_en_int) && r_en_int
         level_nxt = level_o - r_incr;
    end

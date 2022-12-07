@@ -34,7 +34,7 @@ SRC+=$(BUILD_VSRC_DIR)/axil_m_portmap.vh
 	$(LIB_DIR)/scripts/if_gen.py axil_m_portmap '$(@D)/' '' ''
 
 # iob wires for testbench
-SRC+=$(BUILD_SIM_DIR)/iob_m_tb_wire.vh
+SRC+=$(BUILD_SIM_DIR)/src/iob_m_tb_wire.vh
 %/iob_m_tb_wire.vh:
 	$(LIB_DIR)/scripts/if_gen.py iob_m_tb_wire '$(@D)/'
 

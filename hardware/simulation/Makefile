@@ -80,16 +80,16 @@ ifeq ($(VCD),1)
 	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd $(SIM_DIR)
 endif
 
-clean:
-	@find . -type f -not \( -name "Makefile" -o -name "*.mk" -o -name "test.*" -o -name "*.v*" -o -path "./src*" \) -delete
-	@rm -rf obj_dir ../../*.vh
+gen-clean:
+	@rm -f ../../*.vh *.hex
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_SIM_DIR)/Makefile ]; then make -C $(REMOTE_SIM_DIR) $@; fi'
 endif
 
-
-test: clean clean-test-log $(TEST_LIST)
+test: very-clean clean-test-log $(TEST_LIST)
+ifneq ($(COV),1)
 	diff test.log test.expected
+endif
 
 clean-test-log:
 	rm -f test.log
@@ -102,4 +102,4 @@ debug:
 
 .PRECIOUS: uut.vcd
 
-.PHONY: build run clean kill-sim kill-remote-sim debug test $(TEST_LIST)
+.PHONY: build run gen-clean kill-sim kill-remote-sim debug test $(TEST_LIST)

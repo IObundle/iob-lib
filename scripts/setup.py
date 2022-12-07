@@ -50,6 +50,8 @@ def setup(top, version, confs, ios, regs, blocks, no_overlap=False, build_dir=No
         mkregs.write_swheader(reg_table, build_dir+'/software/esrc', top)
         mkregs.write_swcode(reg_table, build_dir+'/software/esrc', top)
         if path.isdir(build_dir+'/software/psrc'): mkregs.write_swheader(reg_table, build_dir+'/software/psrc', top)
+    p_conf.conf_h(confs, top, build_dir+'/software/esrc')
+    if path.isdir(build_dir+'/software/psrc'): p_conf.conf_h(confs, top, build_dir+'/software/psrc')
 
     #
     # Generate Tex
