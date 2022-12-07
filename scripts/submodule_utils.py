@@ -13,7 +13,7 @@ reserved_signals_template = """\
       .rst_i(rst_i),
       .reset(rst_i),
       .arst_i(rst_i),
-      .iob_valid(slaves_req[`valid(`/*<InstanceName>*/)]),
+      .iob_avalid(slaves_req[`avalid(`/*<InstanceName>*/)]),
       .iob_addr(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W+2)-2]),
       .iob_wdata(slaves_req[`wdata(`/*<InstanceName>*/)]),
       .iob_wstrb(slaves_req[`wstrb(`/*<InstanceName>*/)]),
@@ -216,7 +216,7 @@ def get_module_io(verilog_lines):
             module_signals["clk_i"]="input "
             module_signals["arst_i"]="input "
         elif '`include "iob_s_if.vh"' in verilog_lines[i]: #If it is a known verilog include
-            module_signals["iob_valid"]="input "
+            module_signals["iob_avalid"]="input "
             module_signals["iob_addr"]="input [ADDR_W:0] "
             module_signals["iob_wdata"]="input [DATA_W:0] "
             module_signals["iob_wstrb"]="input [DATA_W/8:0] "
@@ -268,7 +268,7 @@ def get_module_parameters(verilog_lines):
 # It removes reserved system signals, such as: clk, rst, valid, address, wdata, wstrb, rdata, ready, ...
 def get_pio_signals(peripheral_signals):
     pio_signals = peripheral_signals.copy()
-    for signal in ["clk_i","rst_i","reset","arst_i","iob_valid","iob_addr","iob_wdata","iob_wstrb","iob_rdata","iob_ready","iob_rvalid","trap"]\
+    for signal in ["clk_i","rst_i","reset","arst_i","iob_avalid","iob_addr","iob_wdata","iob_wstrb","iob_rdata","iob_ready","iob_rvalid","trap"]\
                   +[i for i in pio_signals if "m_axi_" in i]:
         if signal in pio_signals: pio_signals.pop(signal)
     return pio_signals

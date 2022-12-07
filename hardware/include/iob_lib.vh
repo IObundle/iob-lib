@@ -78,7 +78,7 @@
 //req bus
 `define WDATA_P_(D)    `WSTRB_W_(D)
 `define ADDR_P_(D)     (`WDATA_P_(D)+D)
-`define WVALID_P_(A,D) (`ADDR_P_(D)+A)
+`define AVALID_P_(A,D) (`ADDR_P_(D)+A)
 //resp bus
 `define RDATA_P `VALID_W+`READY_W
 
@@ -100,7 +100,7 @@
 `define resp_(I,D) I*`RESP_W_(D) +: `RESP_W_(D)
 
 //gets the write valid bit of cat bus section
-`define wvalid_(I,A,D) I*`REQ_W_(A,D) + `WVALID_P_(A,D)
+`define avalid_(I,A,D) I*`REQ_W_(A,D) + `AVALID_P_(A,D)
 
 //gets the address of cat bus section
 `define address_(I,W,A,D) I*`REQ_W_(A,D)+`ADDR_P_(D)+W-1 -: W
@@ -134,14 +134,14 @@
 
 `define WDATA_P  `WDATA_P_(DATA_W)
 `define ADDR_P   `ADDR_P_(DATA_W)
-`define WVALID_P `WVALID_P_(ADDR_W, DATA_W)
+`define AVALID_P `AVALID_P_(ADDR_W, DATA_W)
 
 `define REQ_W    `REQ_W_(ADDR_W, DATA_W)
 `define RESP_W   `RESP_W_(DATA_W)
 
 `define req(I)       `req_(I, ADDR_W, DATA_W)
 `define resp(I)      `resp_(I, DATA_W)
-`define wvalid(I)    `wvalid_(I, ADDR_W, DATA_W)
+`define avalid(I)    `avalid_(I, ADDR_W, DATA_W)
 `define address(I,W) `address_(I, W, ADDR_W, DATA_W)
 `define wdata(I)     `wdata_(I, ADDR_W, DATA_W)
 `define wstrb(I)     `wstrb_(I, ADDR_W, DATA_W)
