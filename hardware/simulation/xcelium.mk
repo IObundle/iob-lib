@@ -7,7 +7,7 @@ ifeq ($(COV),1)
 COV_SFLAGS= -LICQUEUE -covoverwrite -covtest $(COV_TEST)
 COV_EFLAGS= -covdut $(NAME) -coverage A -covfile xcelium_cov_commands.ccf
 endif
-VFLAGS+=$(SFLAGS) -update -linedebug -sv -incdir . -incdir ../src
+VFLAGS+=$(SFLAGS) -update -linedebug -sv -incdir . -incdir ../src  -incdir src
 
 ifeq ($(VCD),1)
 VFLAGS+=-define VCD
@@ -32,10 +32,10 @@ ifeq ($(COV),1)
 endif
 
 clean: gen-clean
-	
+
 very-clean: clean
 	@rm -rf cov_work
 	@rm -f coverage_report_summary.rpt coverage_report_detail.rpt
-	
+
 
 .PHONY: comp exec clean very-clean
