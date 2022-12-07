@@ -45,7 +45,7 @@ module axil2iob
    //
    // COMPUTE IOb OUTPUTS
    //
-   assign iob_valid_o = axil_awvalid_i | axil_wvalid_i | axil_arvalid_i;
+   assign iob_avalid_o = axil_awvalid_i | axil_wvalid_i | axil_arvalid_i;
    assign iob_addr_o  = axil_awvalid_i? axil_awaddr_i: axil_araddr_i;
    assign iob_wdata_o = axil_wdata_i;
    assign iob_wstrb_o = axil_wvalid_i? axil_wstrb_i: {DATA_W/8{1'b0}};

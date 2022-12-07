@@ -62,7 +62,7 @@ def gen_wr_reg(row, f):
         f.write(f"assign {name}_wen_o = {name}_wen;\n")
 
     #compute write enable
-    f.write(f"assign {name}_wen = ({name}_ready_i & iob_valid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
+    f.write(f"assign {name}_wen = ({name}_ready_i & iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
 
     #compute address for register range
     if n_items > 1:
@@ -105,7 +105,7 @@ def gen_rd_reg(row, f):
     f.write(f"assign {name}_addressed = (`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)});\n")
 
     #compute the read enable signal
-    f.write(f"assign {name}_ren = ({name}_ready_i & iob_valid_i) & ((~|iob_wstrb_i) & {name}_addressed);\n")
+    f.write(f"assign {name}_ren = ({name}_ready_i & iob_avalid_i) & ((~|iob_wstrb_i) & {name}_addressed);\n")
     if n_items > 1:
         f.write(f"assign {name}_addr_o = iob_addr_i[{addr_w}-1:0];\n")
 
@@ -266,7 +266,7 @@ def write_hwcode(table, out_dir, top):
                 has_read_regs = 1
                 f_gen.write("//address register\n")
                 f_gen.write(f"`IOB_WIRE(raddr, {core_addr_w})\n")
-                f_gen.write(f"iob_reg_ae #({core_addr_w}, 0) raddr_reg (clk_i, arst_i, iob_valid_i, iob_addr_i, raddr);\n\n")
+                f_gen.write(f"iob_reg_ae #({core_addr_w}, 0) raddr_reg (clk_i, arst_i, iob_avalid_i, iob_addr_i, raddr);\n\n")
             # read register
             gen_rd_reg(row, f_gen)
 
