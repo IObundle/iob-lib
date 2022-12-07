@@ -87,7 +87,9 @@ ifneq ($(SIM_SERVER),)
 endif
 
 test: very-clean clean-test-log $(TEST_LIST)
+ifneq ($(COV),1)
 	diff test.log test.expected
+endif
 
 clean-test-log:
 	rm -f test.log
