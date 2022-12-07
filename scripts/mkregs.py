@@ -509,6 +509,7 @@ def compute_addr(table, no_overlap):
         if addr >= 0: #manual address
             check_alignment(addr, addr_w)
             check_overlap(addr, addr_type, read_addr, write_addr)
+            addr_tmp = addr
         elif addr_type == 'R': #auto address
             read_addr = bceil(read_addr, addr_w)
             addr_tmp = read_addr
