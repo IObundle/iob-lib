@@ -148,7 +148,7 @@
 `define write(I)     `write_(I, ADDR_W, DATA_W)
 `define rdata(I)     `rdata_(I, DATA_W)
 `define rvalid(I)    `rvalid_(I, DATA_W)
-`define ready(I)     `ready_(I, DARA_W)
+`define ready(I)     `ready_(I, DATA_W)
 
 `endif //  `ifndef LIBINC
            

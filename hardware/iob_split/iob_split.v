@@ -30,7 +30,8 @@ module iob_split
    assign s_sel = m_req_i[P_SLAVES -:Nb];
 
    //ready signal sent to CPU
-   wire aux_ready, current_ready, previous_ready;
+   wire aux_ready;
+   reg current_ready, previous_ready;
    assign m_resp_o[`ready(0)] = aux_ready;
    assign aux_ready = current_ready&previous_ready;
 
@@ -44,10 +45,10 @@ module iob_split
      $display("s_sel %x", s_sel);
    */
      for (i=0; i<N_SLAVES; i=i+1)
-       if(i == s_sel)
+       if(i == s_sel) begin
          s_req_o[`req(i)] = m_req_i;
          current_ready    = s_resp_i[`ready(i)];
-       else
+       end else
          s_req_o[`req(i)] = {(`REQ_W){1'b0}};
    end
 
