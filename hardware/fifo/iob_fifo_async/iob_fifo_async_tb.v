@@ -166,6 +166,35 @@ module iob_fifo_async_tb;
       $display("INFO: TEST PASSED");
       #100 $finish;
    end
+   
+   `IOB_WIRE(ext_mem_w_clk, 1)
+   `IOB_WIRE(ext_mem_w_en, 1)
+   `IOB_WIRE(ext_mem_w_addr, ADDR_W)
+   `IOB_WIRE(ext_mem_w_data, W_DATA_W)
+   `IOB_WIRE(ext_mem_r_clk, 1)
+   `IOB_WIRE(ext_mem_r_en, 1)
+   `IOB_WIRE(ext_mem_r_addr, ADDR_W)
+   `IOB_WIRE(ext_mem_r_data, R_DATA_W)
+   
+   // FIFO memory
+   iob_ram_t2p_asym
+     #(
+       .W_DATA_W(W_DATA_W),
+       .R_DATA_W(R_DATA_W),
+       .ADDR_W(ADDR_W)
+       )
+   t2p_asym_ram
+     (
+      .w_clk_i  (ext_mem_w_clk),
+      .w_en_i   (ext_mem_w_en),
+      .w_data_i (ext_mem_w_data),
+      .w_addr_i (ext_mem_w_addr),
+
+      .r_clk_i  (ext_mem_r_clk),
+      .r_en_i   (ext_mem_r_en),
+      .r_addr_i (ext_mem_r_addr),
+      .r_data_o (ext_mem_r_data)
+      );
 
    // Instantiate the Unit Under Test (UUT)
    iob_fifo_async
@@ -176,6 +205,17 @@ module iob_fifo_async_tb;
        )
    uut
      (
+     //memory write port
+     .ext_mem_w_clk_o (ext_mem_w_clk),
+     .ext_mem_w_en_o (ext_mem_w_en),
+     .ext_mem_w_addr_o (ext_mem_w_addr),
+     .ext_mem_w_data_o (ext_mem_w_data),
+     //memory read port
+     .ext_mem_r_clk_o (ext_mem_r_clk),
+     .ext_mem_r_en_o (ext_mem_r_en),
+     .ext_mem_r_addr_o (ext_mem_r_addr),
+     .ext_mem_r_data_i (ext_mem_r_data),   
+     
       .r_clk_i    (r_clk),
       .r_arst_i   (r_arst),
       .r_rst_i    (1'd0),

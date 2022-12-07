@@ -1,6 +1,6 @@
 VTOP?=$(NAME)
 
-VFLAGS+=--cc --exe -I. -I../src --top-module $(VTOP)
+VFLAGS+=--cc --exe -I. -I../src -Isrc --top-module $(VTOP)
 VFLAGS+=-Wno-lint
 
 ifeq ($(VCD),1)
@@ -17,4 +17,7 @@ comp: $(VHDR) $(VSRC)
 exec:
 	./obj_dir/V$(VTOP) | tee -a test.log
 
-.PHONY: comp exec
+clean: gen-clean
+	@rm -rf obj_dir
+
+.PHONY: comp exec clean
