@@ -29,34 +29,34 @@ module iob_merge
    //                               
    //priority encoder: most significant bus has priority   
    //
-   reg [Nb-1:0]                        sel, sel_reg;
+   reg [Nb-1:0] sel, sel_reg;
    
    //select enable
-   reg                                 sel_en; 
+   reg sel_en; 
    always @(posedge clk_i, posedge rst_i)
      if(rst_i)
        sel_en <= 1'b1;
-     else if(s_req_o[`valid(0)])
+     else if(s_req_o[`wvalid(0)])
        sel_en <= 1'b0;
-     else if(s_resp_i[`ready(0)])
-       sel_en <= ~s_req_o[`valid(0)];
+     else if(s_resp_i[`rvalid(0)])
+       sel_en <= ~s_req_o[`wvalid(0)];
 
    
    //select master
-   integer                             k; 
+   integer k; 
    always @* begin
       sel = {Nb{1'b0}};
       for (k=0; k<N_MASTERS; k=k+1)
         if (~sel_en)
           sel = sel_reg;
-        else if( m_req_i[`valid(k)] )
+        else if( m_req_i[`wvalid(k)] )
           sel = k[Nb-1:0];          
    end
    
    //
    //route master request to slave
    //  
-   integer                             i;
+   integer i;
    always @* begin
       s_req_o = {`REQ_W{1'b0}};
       for (i=0; i<N_MASTERS; i=i+1)
@@ -77,7 +77,7 @@ module iob_merge
    end
    
    //route
-   integer                             j;
+   integer j;
    always @* begin
       for (j=0; j<N_MASTERS; j=j+1)
         if( j == sel_reg )

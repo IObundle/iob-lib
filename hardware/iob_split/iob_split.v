@@ -30,7 +30,7 @@ module iob_split
    assign s_sel = m_req_i[P_SLAVES -:Nb];
 
    //route master request to selected slave
-   integer                           i;
+   integer i;
    always @* begin
       /*
      $display("pslave %d", P_SLAVES+1);
@@ -49,7 +49,7 @@ module iob_split
    //
 
    //register the slave selection
-   reg [Nb-1:0]                       s_sel_reg;
+   reg [Nb-1:0] s_sel_reg;
    always @( posedge clk_i, posedge rst_i ) begin
       if( rst_i )
         s_sel_reg <= {Nb{1'b0}};
@@ -58,12 +58,13 @@ module iob_split
    end
 
    //route
-   integer                           j;
+   integer j;
    always @* begin
-      m_resp_o = {`RESP_W{1'b0}};
       for (j=0; j<N_SLAVES; j=j+1)
         if( j == s_sel_reg )
-          m_resp_o = s_resp_i[`resp(j)];
+          m_resp_o[`rdata(0)]  = s_resp_i[`rdata(j)];
+          m_resp_o[`rvalid(0)] = s_resp_i[`rvalid(j)];
+          m_resp_o[`ready(0)]  = s_resp_i[`ready(j)];
    end
 
 endmodule
