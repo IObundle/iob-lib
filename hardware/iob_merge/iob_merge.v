@@ -36,10 +36,10 @@ module iob_merge
    always @(posedge clk_i, posedge rst_i)
      if(rst_i)
        sel_en <= 1'b1;
-     else if(s_req_o[`wvalid(0)])
+     else if(s_req_o[`avalid(0)])
        sel_en <= 1'b0;
      else if(s_resp_i[`rvalid(0)])
-       sel_en <= ~s_req_o[`wvalid(0)];
+       sel_en <= ~s_req_o[`avalid(0)];
 
    
    //select master
@@ -49,7 +49,7 @@ module iob_merge
       for (k=0; k<N_MASTERS; k=k+1)
         if (~sel_en)
           sel = sel_reg;
-        else if( m_req_i[`wvalid(k)] )
+        else if( m_req_i[`avalid(k)] )
           sel = k[Nb-1:0];          
    end
    
