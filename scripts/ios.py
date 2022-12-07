@@ -23,8 +23,8 @@ def get_port_type(port_type):
 # ios: list of tables, each of them containing a list of ports
 # Each table is a dictionary with fomat: {'name': '<table name>', 'descr':'<table description>', 'ports': [<list of ports>]}
 # Each port is a dictionary with fomat: {'name':"<port name>", 'type':"<port type>", 'n_bits':'<port width>', 'descr':"<port description>"},
-def generate_ios_header(ios, out_dir):
-    f_io = open(f"{out_dir}/io.vh", "w+")
+def generate_ios_header(ios, top_module, out_dir):
+    f_io = open(f"{out_dir}/{top_module}_io.vh", "w+")
 
     for table in ios:
         # Check if this table is a standard interface (from if_gen.py)
@@ -74,7 +74,12 @@ def get_peripheral_ios(peripherals_str, root_dir):
             port_list.extend(table['ports'])
         #Append each instance IOs to the ios_list
         for i in range(instances_amount[corename]):
-            ios_list.append({'name':corename+str(i), 'descr':f'{corename+str(i)} interface signals', 'ports': port_list})
+            instance_port_list = port_list.copy()
+            #Add instance prefix to every port of this instance
+            for port in instance_port_list:
+                port['name'] = corename+str(i)+"_"+port['name']
+            #Append IOs of this instance
+            ios_list.append({'name':corename+str(i), 'descr':f'{corename+str(i)} interface signals', 'ports': instance_port_list})
         #Unload module
         #del sys.modules[corename]; del module
     return ios_list
