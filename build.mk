@@ -9,10 +9,10 @@ include info.mk
 ifneq ($(filter emb, $(FLOWS)),)
 EMB_DIR=software/embedded
 fw-build:
-	make -C $(EMB_DIR) fw-build
+	make -C $(EMB_DIR) build
 
 fw-clean:
-	make -C $(EMB_DIR) clean-all
+	make -C $(EMB_DIR) clean
 endif
 
 #
