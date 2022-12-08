@@ -1,54 +1,49 @@
 #!/usr/bin/env python3
-#Creates system_top.v based on system_top_core.v template 
 
 import sys, os
 
-# Add folder to path that contains python scripts to be imported
-import submodule_utils 
 from submodule_utils import *
 import createSystem
 
-def create_top_system(root_dir, peripherals_str, file_path):
-    # Get peripherals, directories and signals
-    instances_amount, instances_parameters = get_peripherals(peripherals_str)
-    submodule_directories = get_submodule_directories(root_dir)
-    peripheral_signals, peripheral_parameters = get_peripherals_signals(root_dir, instances_amount,submodule_directories)
+#Creates top system based on system_top.vt template 
+# root_dir: root directory of the repository
+# peripherals_list: list of dictionaries each of them describes a peripheral instance
+# out_file: path to output file
+def create_top_system(root_dir, peripherals_list, out_file):
+    submodule_dirs = get_submodule_directories(root_dir)
 
     # Read template file
     template_file = open(root_dir+"/hardware/simulation/system_top.vt", "r")
     template_contents = template_file.readlines() 
     template_file.close()
 
-    createSystem.insert_header_files(template_contents, root_dir)
+    createSystem.insert_header_files(template_contents, peripherals_list, submodule_dirs)
 
-    for corename in instances_amount:
-        top_module_name = get_top_module_from_dir(f'{root_dir}/{submodule_directories[corename]}')
+    # Get port list, parameter list and top module name for each type of peripheral used
+    port_list, params_list, top_list = get_peripherals_ports_params_top(peripherals_list,submodule_dirs)
 
-        pio_signals = get_pio_signals(peripheral_signals[corename])
+    # Insert wires and connect them to system 
+    for instance in peripherals_list:
+        pio_signals = get_pio_signals(port_list[instance['type']])
 
-        # Insert wires and connect them to system 
-        for i in range(instances_amount[corename]):
-            # Insert system IOs for peripheral
-            start_index = find_idx(template_contents, "PWIRES")
-            for signal in pio_signals:
-                signal_size = replaceByParameterValue(peripheral_signals[corename][signal],\
-                              peripheral_parameters[corename],\
-                              instances_parameters[corename][i])
-                template_contents.insert(start_index, '   {}  {}_{};\n'.format(re.sub("(?:(?:input)|(?:output))\s+","wire ",signal_size),corename+str(i),signal))
-            # Connect wires to soc port
-            start_index = find_idx(template_contents, "PORTS")
-            for signal in pio_signals:
-                template_contents.insert(start_index, '               .{signal}({signal}),\n'.format(signal=corename+str(i)+"_"+signal))
+        # Insert system IOs for peripheral
+        start_index = find_idx(template_contents, "PWIRES")
+        for signal in pio_signals:
+            signal_size = replaceByParameterValue(signal['n_bits'],
+                          params_list[instance['type']],
+                          instance['params'])
+            template_contents.insert(start_index, '   {} [{}-1:0] {}_{};\n'.format("wire",
+                                                                             signal_size,
+                                                                             instance['name'],
+                                                                             signal['name']))
+
+        # Connect wires to soc port
+        start_index = find_idx(template_contents, "PORTS")
+        for signal in pio_signals:
+            template_contents.insert(start_index, '               .{signal}({signal}),\n'.format(signal=instance['name']+"_"+signal['name']))
 
     # Write output file
-    output_file = open(file_path, "w")
+    output_file = open(out_file, "w")
     output_file.writelines(template_contents)
     output_file.close()
 
-
-if __name__ == "__main__":
-    # Parse arguments
-    if len(sys.argv)<4:
-        print("Usage: {} <root_dir> <peripherals> <path of file to be created>\n".format(sys.argv[0]))
-        exit(-1)
-    create_top_system(sys.argv[1], sys.argv[2], sys.argv[3]) 

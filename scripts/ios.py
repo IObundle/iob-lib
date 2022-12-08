@@ -5,12 +5,12 @@
 
 from latex import write_table
 import if_gen
-from submodule_utils import get_peripherals, get_submodule_directories
+from submodule_utils import get_submodule_directories, get_module_io, import_setup, get_pio_signals
 import importlib.util
 import os
 
 # Return full port type string based on given types: "I", "O" and "IO"
-# Maps "I", "O" and "IO" to "input", "outpuT" and "inout", respectively.
+# Maps "I", "O" and "IO" to "input", "output" and "inout", respectively.
 def get_port_type(port_type):
     if port_type == "I":
         return "input"
@@ -38,8 +38,10 @@ def generate_ios_header(ios, top_module, out_dir):
                 f_io.write(f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {port['name']}, //{port['descr']}\n")
 
     # Find and remove last comma
-    while(f_io.read(1)!=',' and f_io.tell()>1):
+    while(f_io.read(1)!='\n' and f_io.tell()>1):
         f_io.seek(f_io.tell()-2)
+    while(f_io.read(1)!=','):
+        pass
     f_io.seek(f_io.tell()-1)
     if f_io.read(1)==',':
         f_io.seek(f_io.tell()-1)
@@ -54,34 +56,26 @@ def generate_ios_header(ios, top_module, out_dir):
 #    {'name': 'instance_name', 'descr':'instance description', 'ports': [
 #        {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
 #    ]}
-def get_peripheral_ios(peripherals_str, root_dir):
-    instances_amount, _ = get_peripherals(peripherals_str)
+def get_peripheral_ios(peripherals_list, root_dir):
     submodule_dirs = get_submodule_directories(root_dir)
+    port_list = {}
+    # Get port list for each type of peripheral used
+    for instance in peripherals_list:
+        if instance['type'] not in port_list:
+            # Import <corename>_setup.py module
+            module = import_setup(submodule_dirs[instance['type']])
+            # Extract only PIO signals from the peripheral (no reserved/known signals)
+            port_list[instance['type']]=get_pio_signals(get_module_io(module.ios))
+    
     ios_list = []
-    for corename in instances_amount:
-        #Find <corename>_setup.py file
-        for x in os.listdir(submodule_dirs[corename]):
-            if x.endswith("_setup.py"):
-                filename = x
-                break
-        #Import <corename>_setup.py
-        spec = importlib.util.spec_from_file_location(corename, submodule_dirs[corename]+"/"+filename)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        #Get all IO signals for this peripheral
-        port_list = []
-        for table in module.ios:
-            port_list.extend(table['ports'])
-        #Append each instance IOs to the ios_list
-        for i in range(instances_amount[corename]):
-            instance_port_list = port_list.copy()
-            #Add instance prefix to every port of this instance
-            for port in instance_port_list:
-                port['name'] = corename+str(i)+"_"+port['name']
-            #Append IOs of this instance
-            ios_list.append({'name':corename+str(i), 'descr':f'{corename+str(i)} interface signals', 'ports': instance_port_list})
-        #Unload module
-        #del sys.modules[corename]; del module
+    # Append ports of each instance
+    for instance in peripherals_list:
+        instance_port_list = port_list[instance['type']].copy()
+        #Add instance prefix to every port of this instance
+        for port in instance_port_list:
+            port['name'] = instance['name']+"_"+port['name']
+        #Append IOs of this instance
+        ios_list.append({'name':instance['name'], 'descr':f"{instance['name']} interface signals", 'ports': instance_port_list})
     return ios_list
 
 
