@@ -228,7 +228,7 @@ clean:
 	@rm -rf scripts/__pycache__
 
 python-cache-clean:
-	find ../.. -name "*__pycache__" -exec rm -rf {} \; -prune
+	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
 debug: $(BUILD_DIR) $(SRC)
 	@echo SRC=$(SRC)

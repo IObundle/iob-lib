@@ -6,7 +6,7 @@ import param_conf as p_conf
 import mkregs
 import ios as ios_lib
 import blocks as blocks_lib
-import importlib
+from submodule_utils import import_setup
 
 src_path = './hardware/src/'
 
@@ -69,15 +69,9 @@ def setup(top, version, confs, ios, regs, blocks, no_overlap=False, build_dir=No
 # build_dir: path to build directory
 # submodule_dir: root directory of submodule to run setup function
 def setup_submodule(build_dir, submodule_dir):
-    #Find <corename>_setup.py file
-    for x in listdir(submodule_dir):
-        if x.endswith("_setup.py"):
-            filename = x
-            break
     #Import <corename>_setup.py
-    spec = importlib.util.spec_from_file_location("submodule_module", submodule_dir+"/"+filename)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    module = import_setup(submodule_dir)
 
     # Call setup function for this submodule
     setup(module.top, module.version, module.confs, module.ios, module.regs if hasattr(module,'regs') else None, module.blocks, build_dir=build_dir, gen_tex=False)
+

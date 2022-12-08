@@ -92,7 +92,7 @@ interfaces=[
 #
 
 iob=[ \
-{'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',          'name':'iob_valid', 'default':'0', 'description':'Request valid.'}, \
+{'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',          'name':'iob_avalid', 'default':'0', 'description':'Request valid.'}, \
 {'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'ADDR_W',     'name':'iob_addr',  'default':'0', 'description':'Address.'}, \
 {'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'DATA_W',     'name':'iob_wdata', 'default':'0', 'description':'Write data.'}, \
 {'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'(DATA_W/8)', 'name':'iob_wstrb', 'default':'0', 'description':'Write strobe.'}, \

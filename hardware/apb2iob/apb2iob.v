@@ -37,7 +37,7 @@ module apb2iob
    //
    // COMPUTE IOb OUTPUTS
    //
-   assign iob_valid_o = apb_sel_i;
+   assign iob_avalid_o = apb_sel_i;
    assign iob_addr_o  = apb_addr_i;
    assign iob_wdata_o = apb_wdata_i;
    assign iob_wstrb_o = apb_wstrb_i;
