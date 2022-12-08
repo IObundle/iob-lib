@@ -9,7 +9,6 @@ module iob_pulse_gen
   (
    input  clk_i,
    input  arst_i,
-   input  rst_i,
    input  start_i,
    output pulse_o
    );

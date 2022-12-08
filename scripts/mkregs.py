@@ -182,8 +182,8 @@ def gen_portmap(table, f):
         else:
             f.write(f"\t.{name}_i({name}),\n")
             if not auto:
-                f.write(f"\t.{name}_rvalid_i({name}_rvalid),\n")
                 f.write(f"\t.{name}_ren_o({name}_ren),\n")
+                f.write(f"\t.{name}_rvalid_i({name}_rvalid),\n")
             else:
                 f.write(f"\t.{name}_int_o({name}_int),\n")
         if not auto:
