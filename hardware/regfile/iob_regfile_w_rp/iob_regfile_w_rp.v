@@ -6,8 +6,7 @@ module iob_regfile_w_rp
     parameter ADDR_W = 0,
     parameter ADDR_W_MAX = 0,
     parameter DATA_W = 0,
-    parameter DATA_W_MAX = 0,
-    parameter RST_VAL = 0
+    parameter DATA_W_MAX = 0
     )
    (
     input                          clk_i,
@@ -31,10 +30,10 @@ module iob_regfile_w_rp
    generate
       for (i=0; i < 2**ADDR_W; i=i+1) begin: register_file
          if(ADDR_W==0)
-           assign en[i] = addr_in_scope;
+           assign en[i] = en_i & we_i & addr_in_scope;
          else
-           assign en[i] = addr_in_scope & (waddr_i==i);
-         iob_reg_are #(DATA_W, RST_VAL) iob_reg0
+           assign en[i] =  en_i & we_i & addr_in_scope & (waddr_i==i);
+         iob_reg_are #(DATA_W, 1) iob_reg0
              (
               .clk_i(clk_i),
               .arst_i(arst_i),

@@ -36,9 +36,9 @@ module iob_regfile_w_r
    generate
       for (i=0; i < 2**ADDR_W; i=i+1) begin: register_file
          if(ADDR_W==0)
-           assign en[i] = waddr_in_scope;
+           assign en[i] =  en_i & we_i & waddr_in_scope;
          else
-           assign en[i] = waddr_in_scope & (waddr_i==i);
+           assign en[i] =  en_i & we_i & waddr_in_scope & (waddr_i==i);
          iob_reg_are #(DATA_W_INT, 0) iob_reg0
              (
               .clk_i(clk_i),
