@@ -1,100 +1,86 @@
 #!/usr/bin/env python3
-#Creates system.v based on system_core.v template 
-
 import sys, os
 
 # Add folder to path that contains python scripts to be imported
-import submodule_utils 
 from submodule_utils import *
 
-
-# Automatically include *swreg_def.vh verilog headers in system.v
-def insert_header_files(template_contents, root_dir):
-    # get path to build_lib
-    build_path = get_build_lib(root_dir+"/..")
-    header_path = f"{build_path}/hardware/src/"
-    vsrc_files = os.listdir(header_path)
+# Automatically include <corename>_swreg_def.vh verilog headers after PHEADER comment
+def insert_header_files(template_contents, peripherals_list, submodule_dirs):
     header_index = find_idx(template_contents, "PHEADER")
+    # Get each type of peripheral used
+    included_peripherals = []
+    for instance in peripherals_list:
+        if instance['type'] not in included_peripherals:
+            included_peripherals.append(instance['type'])
+            # Import <corename>_setup.py module to get corename 'top'
+            module = import_setup(submodule_dirs[instance['type']])
+            template_contents.insert(header_index, f'`include "{module.top}_swreg_def.vh"\n')
 
-    # include swreg_def.vh files
-    for file in vsrc_files:
-        if file.endswith("swreg_def.vh"):
-            template_contents.insert(header_index, f'`include "{file}"\n')
 
-
-def create_systemv(root_dir, peripherals_str, file_path):
-    # Get peripherals, directories and signals
-    instances_amount, instances_parameters = get_peripherals(peripherals_str)
-    submodule_directories = get_submodule_directories(root_dir)
-    peripheral_signals, peripheral_parameters = get_peripherals_signals(root_dir, instances_amount,submodule_directories)
-    print(f'peripheral_signals: {peripheral_signals}')
-    print(f'peripheral_parameters: {peripheral_parameters}')
+#Creates system based on system.vt template 
+# root_dir: root directory of the repository
+# top: top name of the system
+# peripherals_list: list of dictionaries each of them describes a peripheral instance
+# out_file: path to output file
+def create_systemv(root_dir, top, peripherals_list, out_file):
+    submodule_dirs = get_submodule_directories(root_dir)
 
     # Read template file
     template_file = open(root_dir+"/hardware/src/system.vt", "r")
     template_contents = template_file.readlines() 
     template_file.close()
 
-    insert_header_files(template_contents, root_dir)
+    insert_header_files(template_contents, peripherals_list, submodule_dirs)
 
-    for corename in instances_amount:
-        top_module_name = get_top_module_from_dir(f'{root_dir}/{submodule_directories[corename]}')
+    # Get port list, parameter list and top module name for each type of peripheral used
+    port_list, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, submodule_dirs)
 
-        pio_signals = get_pio_signals(peripheral_signals[corename]) #TODO: Replace by setup.py
+    # Insert IOs and Instances for this type of peripheral
+    for instance in peripherals_list:
+        # Insert peripheral instance (in reverse order of lines)
+        start_index = find_idx(template_contents, "endmodule")-1
+        template_contents.insert(start_index, "      );\n")
 
-        # Insert IOs and Instances for this type of peripheral
-        for i in range(instances_amount[corename]):
-            # Insert system IOs for peripheral (No longer needed. io.vh is handled by setup.py)
-            #start_index = find_idx(template_contents, "PIO")
-            #for signal in pio_signals:
-            #    signal_size = replaceByParameterValue(peripheral_signals[corename][signal],\
-            #                  peripheral_parameters[corename],\
-            #                  instances_parameters[corename][i])
-            #    template_contents.insert(start_index, '    {} {}_{},\n'.format(signal_size,corename+str(i),signal))
-            # Insert peripheral instance (in reverse order of lines)
-            start_index = find_idx(template_contents, "endmodule")-1
-            template_contents.insert(start_index, "      );\n")
+        # Insert reserved signals
+        first_reversed_signal=True
+        for signal in get_reserved_signals(port_list[instance['type']]):
+            template_contents.insert(start_index,"      "+
+                                     get_reserved_signal_connection(signal['name'],
+                                                                    top.upper()+"_"+instance['name'],
+                                                                    top_list[instance['type']].upper()+"_SWREG")+",\n")
+            # Remove comma at the end of last signal (first one to insert)
+            if first_reversed_signal:
+                template_contents[start_index]=template_contents[start_index][::-1].replace(",","",1)[::-1]
+                first_reversed_signal = False
+
+        # Insert io signals
+        for signal in get_pio_signals(port_list[instance['type']]):
+            template_contents.insert(start_index, '      .{}({}_{}),\n'.format(signal['name'],instance['name'],signal['name']))
+            # Remove comma at the end of last signal (first one to insert)
+            if first_reversed_signal:
+                template_contents[start_index]=template_contents[start_index][::-1].replace(",","",1)[::-1]
+                first_reversed_signal = False
+
+        # Insert peripheral instance name
+        template_contents.insert(start_index, "   {} (\n".format(instance['name']))
+        # Insert peripheral parameters (if any)
+        if len(instance['params'])>0:
+            template_contents.insert(start_index, "   )\n")
             first_reversed_signal=True
-            # Insert reserved signals
-            for signal in reversed(reserved_signals_template.splitlines(True)):
-                str_match=re.match("^\s*\.([^\(\s]+)\s*\(",signal)
-                # Only insert if this reserved signal (from template) is present in IO of this peripheral
-                if (str_match is not None) and str_match.group(1) in peripheral_signals[corename]:
-                    template_contents.insert(start_index,
-                            re.sub("\/\*<InstanceName>\*\/","IOB_SOC_"+corename+str(i), #FIXME: This currently uses fixed prefix "IOB_SOC_". But the system may have other name.
-                            re.sub("\/\*<SwregFilename>\*\/",top_module_name.upper()+"_SWREG",
-                            signal)))
-                    # Remove comma at the end of last signal
-                    if first_reversed_signal == True:
-                        template_contents[start_index]=template_contents[start_index][::-1].replace(",","",1)[::-1]
-                        first_reversed_signal = False
-
-            # Insert io signals
-            for signal in pio_signals:
-                template_contents.insert(start_index, '      .{}({}_{}),\n'.format(signal,corename+str(i),signal))
-            template_contents.insert(start_index, "   {} (\n".format(corename+str(i)))
-            if len(instances_parameters[corename][i])>0:
-                template_contents.insert(start_index, "   )\n")
-                first_reversed_signal=True
-                # Insert parameters
-                for parameter in instances_parameters[corename][i]:
-                    template_contents.insert(start_index, '      {}{}\n'.format(parameter,"" if first_reversed_signal else ","))
-                    first_reversed_signal=False
-                template_contents.insert(start_index, "     #(\n")
-            template_contents.insert(start_index, "   {}\n".format(top_module_name))
-            template_contents.insert(start_index, "\n")
-            template_contents.insert(start_index, "   // {}\n".format(corename+str(i)))
-            template_contents.insert(start_index, "\n")
+            # Insert parameters
+            for param, value in instance['params'].items():
+                template_contents.insert(start_index, '      .{}({}){}\n'.format(param,value,"" if first_reversed_signal else ","))
+                first_reversed_signal=False
+            template_contents.insert(start_index, "     #(\n")
+        # Insert peripheral type
+        template_contents.insert(start_index, "   {}\n".format(top_list[instance['type']]))
+        template_contents.insert(start_index, "\n")
+        # Insert peripheral comment
+        template_contents.insert(start_index, "   // {}\n".format(instance['name']))
+        template_contents.insert(start_index, "\n")
 
     # Write system.v
-    systemv_file = open(file_path, "w")
+    systemv_file = open(out_file, "w")
     systemv_file.writelines(template_contents)
     systemv_file.close()
 
-
-if __name__ == "__main__":
-    # Parse arguments
-    if len(sys.argv)<4:
-        print("Usage: {} <root_dir> <peripherals> <path of file to be created>\n".format(sys.argv[0]))
-        exit(-1)
-    create_systemv(sys.argv[1], sys.argv[2], sys.argv[3]) 

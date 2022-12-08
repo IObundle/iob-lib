@@ -6,59 +6,88 @@ import subprocess
 import os
 import re
 import math
+import importlib
+import if_gen
 
-# Signals in this template will only be inserted if they exist in the peripheral IO
-reserved_signals_template = """\
-      .clk_i(clk_i),
-      .rst_i(rst_i),
-      .reset(rst_i),
-      .arst_i(rst_i),
-      .iob_valid(slaves_req[`valid(`/*<InstanceName>*/)]),
-      .iob_addr(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W+2)-2]),
-      .iob_wdata(slaves_req[`wdata(`/*<InstanceName>*/)]),
-      .iob_wstrb(slaves_req[`wstrb(`/*<InstanceName>*/)]),
-      .iob_rdata(slaves_resp[`rdata(`/*<InstanceName>*/)]),
-      .iob_ready(slaves_resp[`ready(`/*<InstanceName>*/)]),
-      .iob_rvalid(slaves_resp[`rvalid(`/*<InstanceName>*/)]),
-      .trap(trap[0]),
-      .m_axi_awid    (m_axi_awid[0:0]),
-      .m_axi_awaddr  (m_axi_awaddr[`DDR_ADDR_W-1:0]),
-      .m_axi_awlen   (m_axi_awlen[7:0]),
-      .m_axi_awsize  (m_axi_awsize[2:0]),
-      .m_axi_awburst (m_axi_awburst[1:0]),
-      .m_axi_awlock  (m_axi_awlock[0:0]),
-      .m_axi_awcache (m_axi_awcache[3:0]),
-      .m_axi_awprot  (m_axi_awprot[2:0]),
-      .m_axi_awqos   (m_axi_awqos[3:0]),
-      .m_axi_awvalid (m_axi_awvalid[0:0]),
-      .m_axi_awready (m_axi_awready[0:0]),
-      .m_axi_wdata   (m_axi_wdata[`DATA_W-1:0]),
-      .m_axi_wstrb   (m_axi_wstrb[`DATA_W/8-1:0]),
-      .m_axi_wlast   (m_axi_wlast[0:0]),
-      .m_axi_wvalid  (m_axi_wvalid[0:0]),
-      .m_axi_wready  (m_axi_wready[0:0]),
-      .m_axi_bid     (m_axi_bid[0:0]),
-      .m_axi_bresp   (m_axi_bresp[1:0]),
-      .m_axi_bvalid  (m_axi_bvalid[0:0]),
-      .m_axi_bready  (m_axi_bready[0:0]),
-      .m_axi_arid    (m_axi_arid[0:0]),
-      .m_axi_araddr  (m_axi_araddr[`DDR_ADDR_W-1:0]),
-      .m_axi_arlen   (m_axi_arlen[7:0]),
-      .m_axi_arsize  (m_axi_arsize[2:0]),
-      .m_axi_arburst (m_axi_arburst[1:0]),
-      .m_axi_arlock  (m_axi_arlock[0:0]),
-      .m_axi_arcache (m_axi_arcache[3:0]),
-      .m_axi_arprot  (m_axi_arprot[2:0]),
-      .m_axi_arqos   (m_axi_arqos[3:0]),
-      .m_axi_arvalid (m_axi_arvalid[0:0]),
-      .m_axi_arready (m_axi_arready[0:0]),
-      .m_axi_rid     (m_axi_rid[0:0]),
-      .m_axi_rdata   (m_axi_rdata[`DATA_W-1:0]),
-      .m_axi_rresp   (m_axi_rresp[1:0]),
-      .m_axi_rlast   (m_axi_rlast[0:0]),
-      .m_axi_rvalid  (m_axi_rvalid[0:0]),
-      .m_axi_rready  (m_axi_rready[0:0]),
-"""
+# List of reserved signals
+# These signals are known by the python scripts and are always connected using the matching Verilog the string.
+reserved_signals = \
+{
+'clk_i':'.clk_i(clk_i)',
+'rst_i':'.rst_i(rst_i)',
+'reset':'.reset(rst_i)',
+'arst_i':'.arst_i(rst_i)',
+'iob_avalid':'.iob_avalid(slaves_req[`avalid(`/*<InstanceName>*/)])',
+'iob_addr':'.iob_addr(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W+2)-2])',
+'iob_wdata':'.iob_wdata(slaves_req[`wdata(`/*<InstanceName>*/)])',
+'iob_wstrb':'.iob_wstrb(slaves_req[`wstrb(`/*<InstanceName>*/)])',
+'iob_rdata':'.iob_rdata(slaves_resp[`rdata(`/*<InstanceName>*/)])',
+'iob_ready':'.iob_ready(slaves_resp[`ready(`/*<InstanceName>*/)])',
+'iob_rvalid':'.iob_rvalid(slaves_resp[`rvalid(`/*<InstanceName>*/)])',
+'trap':'.trap(trap[0])',
+'m_axi_awid':'.m_axi_awid    (m_axi_awid[0:0])',
+'m_axi_awaddr':'.m_axi_awaddr  (m_axi_awaddr[`DDR_ADDR_W-1:0])',
+'m_axi_awlen':'.m_axi_awlen   (m_axi_awlen[7:0])',
+'m_axi_awsize':'.m_axi_awsize  (m_axi_awsize[2:0])',
+'m_axi_awburst':'.m_axi_awburst (m_axi_awburst[1:0])',
+'m_axi_awlock':'.m_axi_awlock  (m_axi_awlock[0:0])',
+'m_axi_awcache':'.m_axi_awcache (m_axi_awcache[3:0])',
+'m_axi_awprot':'.m_axi_awprot  (m_axi_awprot[2:0])',
+'m_axi_awqos':'.m_axi_awqos   (m_axi_awqos[3:0])',
+'m_axi_awvalid':'.m_axi_awvalid (m_axi_awvalid[0:0])',
+'m_axi_awready':'.m_axi_awready (m_axi_awready[0:0])',
+'m_axi_wdata':'.m_axi_wdata   (m_axi_wdata[`DATA_W-1:0])',
+'m_axi_wstrb':'.m_axi_wstrb   (m_axi_wstrb[`DATA_W/8-1:0])',
+'m_axi_wlast':'.m_axi_wlast   (m_axi_wlast[0:0])',
+'m_axi_wvalid':'.m_axi_wvalid  (m_axi_wvalid[0:0])',
+'m_axi_wready':'.m_axi_wready  (m_axi_wready[0:0])',
+'m_axi_bid':'.m_axi_bid     (m_axi_bid[0:0])',
+'m_axi_bresp':'.m_axi_bresp   (m_axi_bresp[1:0])',
+'m_axi_bvalid':'.m_axi_bvalid  (m_axi_bvalid[0:0])',
+'m_axi_bready':'.m_axi_bready  (m_axi_bready[0:0])',
+'m_axi_arid':'.m_axi_arid    (m_axi_arid[0:0])',
+'m_axi_araddr':'.m_axi_araddr  (m_axi_araddr[`DDR_ADDR_W-1:0])',
+'m_axi_arlen':'.m_axi_arlen   (m_axi_arlen[7:0])',
+'m_axi_arsize':'.m_axi_arsize  (m_axi_arsize[2:0])',
+'m_axi_arburst':'.m_axi_arburst (m_axi_arburst[1:0])',
+'m_axi_arlock':'.m_axi_arlock  (m_axi_arlock[0:0])',
+'m_axi_arcache':'.m_axi_arcache (m_axi_arcache[3:0])',
+'m_axi_arprot':'.m_axi_arprot  (m_axi_arprot[2:0])',
+'m_axi_arqos':'.m_axi_arqos   (m_axi_arqos[3:0])',
+'m_axi_arvalid':'.m_axi_arvalid (m_axi_arvalid[0:0])',
+'m_axi_arready':'.m_axi_arready (m_axi_arready[0:0])',
+'m_axi_rid':'.m_axi_rid     (m_axi_rid[0:0])',
+'m_axi_rdata':'.m_axi_rdata   (m_axi_rdata[`DATA_W-1:0])',
+'m_axi_rresp':'.m_axi_rresp   (m_axi_rresp[1:0])',
+'m_axi_rlast':'.m_axi_rlast   (m_axi_rlast[0:0])',
+'m_axi_rvalid':'.m_axi_rvalid  (m_axi_rvalid[0:0])',
+'m_axi_rready':'.m_axi_rready  (m_axi_rready[0:0])',
+}
+
+# Import the <corename>_setup.py from the given core directory
+def import_setup(core_dir):
+    #Find <corename>_setup.py file
+    for x in os.listdir(core_dir):
+        if x.endswith("_setup.py"):
+            filename = x
+            break
+    #Import <corename>_setup.py
+    spec = importlib.util.spec_from_file_location("core_module", core_dir+"/"+filename)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    return module
+
+# Return short port type string based on given types: "input", "output" and "inout"
+# Maps "I", "O" and "IO" to "input", "output" and "inout", respectively.
+def get_short_port_type(port_type):
+    if port_type == "input":
+        return "I"
+    elif port_type == "output":
+        return "O"
+    else:
+        return "IO"
+
 
 # Get path to build directory of directory
 # Parameter: directory: path to core directory
@@ -92,38 +121,33 @@ def get_submodule_directories(root_dir):
     return directories
 
 # Replaces a verilog parameter in a string with its value.
-# The value is determined based on default value and ordered parameters given (that may override the default)
+# The value is determined based on default value and the instance parameters given (that may override the default)
 # Arguments: 
-#   string_with_parameter: string with parameter that will be replaced. Example: "input [SIZE_PARAMETER:0]"
-#   parameters_default_values: dictionary of parameters where key is parameter name 
-#                              and value is default value of this parameter. 
-#                              Example: {"SIZE_PARAMETER":16, "ANOTHER_PARAMETER":0}
-#   ordered_parameter_values: list of ordered parameter values that override default ones.
-#                              Example: ["32", "5"]
+#   string_with_parameter: string with parameter that will be replaced. Example: "SIZE_PARAMETER+2"
+#   params_list: list of dictionaries, each of them describes a parameter and contains its default value
+#   instance_parameters: dictionary of parameters for this peripheral instance that may override default value
+#                        The keys are the parameters names, the values are the parameters values
 # Returns: 
 #   String with parameter replaced. Example: "input [32:0]"
-def replaceByParameterValue(string_with_parameter, parameters_default_values, ordered_parameter_values):
-    parameter_idx=0
-    parameter_name=""
-
+def replaceByParameterValue(string_with_parameter, params_list, instance_parameters):
+    param_to_replace = None
     #Find parameter name
-    for parameter in parameters_default_values:
-        if parameter in string_with_parameter:
-            parameter_name=parameter
+    for parameter in params_list:
+        if parameter['name'] in string_with_parameter:
+            param_to_replace=parameter
             break
-        parameter_idx+=1
 
     #Return unmodified string if there is no parameter in string
-    if not parameter_name:
+    if not param_to_replace:
         return string_with_parameter;
 
     #If parameter should be overriden
-    if(len(ordered_parameter_values)>parameter_idx):
-        #Replace parameter in string with value from parameter override
-        return string_with_parameter.replace(parameter_name,ordered_parameter_values[parameter_idx])
+    if(param_to_replace['name'] in instance_parameters):
+        #Replace parameter in string with value from instance parameter to override
+        return string_with_parameter.replace(param_to_replace['name'],instance_parameters[param_to_replace['name']])
     else:
         #Replace parameter in string with default value 
-        return string_with_parameter.replace(parameter_name,parameters_default_values[parameter_name])
+        return string_with_parameter.replace(param_to_replace['name'],param_to_replace['val'])
 
 # Parameter: PERIPHERALS string defined in config.mk
 # Returns dictionary with amount of instances for each peripheral
@@ -155,77 +179,42 @@ def get_peripherals(peripherals_str):
     #print(instances_parameters, file = sys.stderr) #Debug
     return instances_amount, instances_parameters
 
-# Given lines read from the verilog file with a module declaration
-# this function returns the inputs and outputs defined in the port list
-# of that module. The return value is a dictionary, where the key is the 
-# signal name and the value is a string like "input [10:0]"
-def get_module_io(verilog_lines):
-    module_start = 0
-    #Find module declaration
-    for line in verilog_lines:
-        module_start += 1
-        if "module " in line:
-            break #Found module declaration
+# A virtual file object with a port list. It has a write() method to extract information from if_gen.py signals.
+# Can be used to create virtual file objects with a write() method that parses the if_gen.py port string.
+class if_gen_hack_list:
+    def __init__(self):
+        self.port_list=[]
 
-    port_list_start = module_start
-    #Find module port list start 
-    for i in range(module_start, len(verilog_lines)):
-        port_list_start += 1
-        if verilog_lines[i].replace(" ", "").startswith("("):
-            break #Found port list start
+    def write(self, port_string):
+        #Parse written string
+        port = re.search("^\s*((?:input)|(?:output))\s+\[([^:]+)-1:0\]\s+([^,]+), \/\/(.*)$", verilog_lines[i])
+        #Append port to port dictionary
+        self.port_list.append({'name':port.group(3), 'type':get_short_port_type(port.group(1)), 'n_bits':port.group(2), 'descr':port.group(4)})
 
-    module_signals = {}
-    #Get signals of this module
-    for i in range(port_list_start, len(verilog_lines)):
-        #Ignore comments and empty lines
-        if not verilog_lines[i].strip() or verilog_lines[i].lstrip().startswith("//"):
-            continue
-        if ");" in verilog_lines[i]:
-            break #Found end of port list
-        #If this signal is declared in normal verilog format (no macros)
-        if any(verilog_lines[i].lstrip().startswith(x) for x in ["input","output"]):
-            signal = re.search("^\s*(inout|input|output)(?:\s|(?:\[([^:]+):([^\]]+)\]))*([^,]*),?", verilog_lines[i])
-            if signal is not None:
-                # Store signal in dictionary with format: module_signals[signalname] = "input [size:0]"
-                if signal.group(2) is None:
-                    module_signals[signal.group(4)]=signal.group(1)
-                else:
-                    module_signals[signal.group(4)]="{} [{}:{}]".format(signal.group(1), signal.group(2), signal.group(3))
-        elif "`IOB_INPUT" in verilog_lines[i]: #If it is a known verilog macro
-            signal = re.search("^\s*`IOB_INPUT\(\s*(\w+)\s*,\s*([^\s]+)\s*\),?", verilog_lines[i])
-            if signal is not None:
-                # Store signal in dictionary with format: module_signals[signalname] = "input [size:0]"
-                module_signals[signal.group(1)]="input [{}:0]".format(
-                        int(signal.group(2))-1 if signal.group(2).isdigit() else # Calculate size here if only contains digits
-                        signal.group(2)+"-1") # Leave calculation for verilog
-        elif "`IOB_OUTPUT" in verilog_lines[i] or "`IOB_OUTPUT_VAR" in verilog_lines[i]: #If it is a known verilog macro
-            signal = re.search("^\s*`IOB_OUTPUT(?:_VAR)?\(\s*(\w+)\s*,\s*([^\s]+)\s*\),?", verilog_lines[i])
-            if signal is not None:
-                # Store signal in dictionary with format: module_signals[signalname] = "output [size:0]"
-                module_signals[signal.group(1)]="output [{}:0]".format(
-                        int(signal.group(2))-1 if signal.group(2).isdigit() else # Calculate size here if only contains digits
-                        signal.group(2)+"-1") # Leave calculation for verilog
-        elif "`IOB_INOUT" in verilog_lines[i]: #If it is a known verilog macro
-            signal = re.search("^\s*`IOB_INOUT\(\s*(\w+)\s*,\s*([^\s]+)\s*\),?", verilog_lines[i])
-            if signal is not None:
-                # Store signal in dictionary with format: module_signals[signalname] = "inout [size:0]"
-                module_signals[signal.group(1)]="inout [{}:0]".format(
-                        int(signal.group(2))-1 if signal.group(2).isdigit() else # Calculate size here if only contains digits
-                        signal.group(2)+"-1") # Leave calculation for verilog
-        elif '`include "iob_clkrst_port.vh"' in verilog_lines[i]: #If it is a known verilog include
-            module_signals["clk_i"]="input "
-            module_signals["arst_i"]="input "
-        elif '`include "iob_s_if.vh"' in verilog_lines[i]: #If it is a known verilog include
-            module_signals["iob_valid"]="input "
-            module_signals["iob_addr"]="input [ADDR_W:0] "
-            module_signals["iob_wdata"]="input [DATA_W:0] "
-            module_signals["iob_wstrb"]="input [DATA_W/8:0] "
-            module_signals["iob_rdata"]="output [DATA_W:0] "
-            module_signals["iob_ready"]="output "
-            module_signals["iob_rvalid"]="output "
+def if_gen_interface(interface_name):
+    if_gen.create_signal_table(interface_name)
+    # Create a virtual file object
+    virtual_file_obj = if_gen_hack_list()
+    # Tell if_gen to write ports in virtual file object
+    if_gen.write_vh_contents(interface_name, '', '', virtual_file_obj)
+    # Extract port list from virtual file object
+    return virtual_file_obj.port_list
+
+# Given ios object for the module, extract the list of ports.
+# Returns a list of dictionaries that describe each port.
+# Example return list: 
+#[ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"},
+#  {'name':"rst_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral reset input"} ]
+def get_module_io(ios):
+    module_signals = []
+    for table in ios:
+        # Check if this table is a standard interface (from if_gen.py)
+        if table['name'] in if_gen.interfaces:
+            # Interface is standard, generate ports
+            module_signals.extend(if_gen_interface(table['name']))
         else:
-            print("Unknow macro/signal declaration '{}' in module '{}'".format(verilog_lines[i],verilog_lines[module_start-1]))
-            exit(-1)
+            # Interface is not standard, read ports
+            module_signals.extend(table['ports'])
     return module_signals
 
 # Given lines read from the verilog file with a module declaration
@@ -264,61 +253,56 @@ def get_module_parameters(verilog_lines):
 
     return module_parameters
 
-# Given a dictionary of signals, returns a dictionary with only pio signals.
-# It removes reserved system signals, such as: clk, rst, valid, address, wdata, wstrb, rdata, ready, ...
-def get_pio_signals(peripheral_signals):
-    pio_signals = peripheral_signals.copy()
-    for signal in ["clk_i","rst_i","reset","arst_i","iob_valid","iob_addr","iob_wdata","iob_wstrb","iob_rdata","iob_ready","iob_rvalid","trap"]\
-                  +[i for i in pio_signals if "m_axi_" in i]:
-        if signal in pio_signals: pio_signals.pop(signal)
-    return pio_signals
+# Filter out non reserved signals from a given list (not stored in string reserved_signals)
+# Example signal_list: 
+#[ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"},
+#  {'name':"custom_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral custom input"} ]
+# Return of this example:
+#[ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"} ]
+def get_reserved_signals(signal_list):
+    return_list = []
+    for signal in signal_list:
+        if signal['name'] in reserved_signals:
+            return_list.append(signal)
+    return return_list
 
-# Given a path to a file containing the "NAME" makefile variable declaration, return the value of that variable.
-def get_top_module(file_path):
-    config_file = open(file_path, "r")
-    config_contents = config_file.readlines()
-    config_file.close()
-    top_module = ""
-    for line in config_contents:
-        top_module_search = re.search("^\s*NAME\s*:?\??=\s*([^\s]+)", line)
-        if top_module_search is not None:
-            top_module = top_module_search.group(1)
-            break;
-    return top_module
+def get_reserved_signal_connection(signal_name, instace_name, swreg_filename):
+    signal_connection = reserved_signals[signal_name]
+    return re.sub("\/\*<InstanceName>\*\/",instace_name,
+            re.sub("\/\*<SwregFilename>\*\/",swreg_filename,
+            signal_connection))
 
+# Filter out reserved signals from a given list (stored in string reserved_signals)
+# Example signal_list: 
+#[ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"},
+#  {'name':"custom_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral custom input"} ]
+# Return of this example:
+#[ {'name':"custom_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral custom input"} ]
+def get_pio_signals(signal_list):
+    return_list = []
+    for signal in signal_list:
+        if signal['name'] not in reserved_signals:
+            return_list.append(signal)
+    return return_list
 
-# Given a path to a core, return the top module name.
-# NOTE: assumes that core is setup (run make -C core_dir)
-def get_top_module_from_dir(core_dir):
-    top_module_filename = get_top_module(f'{core_dir}/config_setup.mk')
-    return top_module_filename
-
-
-# Arguments: - list_of_peripherals: dictionary with corename of each peripheral
-#            - submodule_directories: dictionary with directory location of each peripheral given
-# Returns: - dictionary with signals from port list in top module of each peripheral
-#          - dictionary with parameters in top module of each peripheral
-def get_peripherals_signals(root_dir, list_of_peripherals, submodule_directories):
-    peripheral_signals = {}
-    peripheral_parameters = {}
-    # Get signals of each peripheral
-    for i in list_of_peripherals:
-        # Find top module verilog file of peripheral
-        module_filename = get_top_module(f'{root_dir}/{submodule_directories[i]}/config_setup.mk')+".v";
-        module_path=os.path.join(f'{root_dir}/{submodule_directories[i]}/hardware/src',module_filename)
-        # Skip iteration if peripheral does not have top module
-        if not os.path.isfile(module_path):
-            continue
-        # Read file
-        module_file = open(module_path, "r")
-        module_contents = module_file.read().splitlines()
-        # Get module inputs and outputs
-        peripheral_signals[i] = get_module_io(module_contents)
-        peripheral_parameters[i] = get_module_parameters(module_contents)
-        
-        module_file.close()
-    #print(peripheral_signals) #DEBUG
-    return peripheral_signals, peripheral_parameters
+# Get port list, parameter list and top module name for each type of peripheral in a list of instances of peripherals
+# port_list, params_list, and top_list are dictionaries where their key is the name of the type of peripheral
+# The value of port_list is a list of ports for the given type of peripheral
+# The value of params_list is a list of parameters for the given type of peripheral
+# The value of top_list is the top name of the given type of peripheral
+def get_peripherals_ports_params_top(peripherals_list, submodule_dirs):
+    port_list = {}
+    params_list = {}
+    top_list = {}
+    for instance in peripherals_list:
+        if instance['type'] not in port_list:
+            # Import <corename>_setup.py module
+            module = import_setup(submodule_dirs[instance['type']])
+            # Append module IO, parameters, and top name
+            port_list[instance['type']]=get_module_io(module.ios)
+            params_list[instance['type']]=list(i for i in module.confs if i['type'] == 'P')
+            top_list[instance['type']]=module.top
+    return port_list, params_list, top_list
 
 # Find index of word in array with multiple strings
 def find_idx(lines, word):
@@ -339,31 +323,21 @@ def get_periphs_id(peripherals_str):
             j = j + 1
     return peripherals_list
 
-# Return list of dictionaries, defining parameters for each peripheral instance with their ID assigned
-def get_periphs_id_as_macros(peripherals_str):
-    peripherals_list = get_periphs_id(peripherals_str)
+# Given a list of dictionaries representing each peripheral instance
+# Return list of dictionaries representing macros of each peripheral instance with their ID assigned
+def get_periphs_id_as_macros(peripherals_list):
     macro_list = []
-    for instance in peripherals_list:
-        macro_list.append({'name':instance[0], 'type':'M', 'val':instance[1], 'min':'1', 'max':'NA', 'descr':f'ID of {instance[0]} peripheral'})
+    for idx, instance in enumerate(peripherals_list):
+        macro_list.append({'name':instance['name'], 'type':'M', 'val':idx, 'min':'0', 'max':'NA', 'descr':f"ID of {instance['name']} peripheral"})
     return macro_list
 
 # Return amount of system peripherals
-def get_n_periphs(peripherals_str):
-    instances_amount, _ = get_peripherals(peripherals_str)
-    i=0
-    # Calculate total amount of instances
-    for corename in instances_amount:
-        i=i+instances_amount[corename]
-    return i
+def get_n_periphs(peripherals_list):
+    return len(peripherals_list)
 
 # Return bus width required to address all peripherals
-def get_n_periphs_w(peripherals_str):
-    instances_amount, _ = get_peripherals(peripherals_str)
-    i=0
-    # Calculate total amount of instances
-    for corename in instances_amount:
-        i=i+instances_amount[corename]
-
+def get_n_periphs_w(peripherals_list):
+    i=len(peripherals_list)
     if not i:
         return(0)
     else:
