@@ -4,6 +4,7 @@ module iob_edge_detect
   (
    input  clk_i,
    input  arst_i,
+   input  en_i,
    input  bit_i,
    output detected_o
    );
@@ -12,7 +13,7 @@ module iob_edge_detect
    always @(posedge clk_i, posedge arst_i)
      if (arst_i)
        bit_i_reg <= 1'b1;
-     else
+     else if (en_i)
        bit_i_reg <= bit_i;
 
    assign detected_o = bit_i & ~bit_i_reg;
