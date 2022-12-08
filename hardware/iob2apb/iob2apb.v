@@ -25,11 +25,11 @@ module iob2apb
    //
 
    // select
-   assign apb_sel_o = iob_valid_i;
+   assign apb_sel_o = iob_avalid_i;
 
    // enable
-   `IOB_VAR(iob_valid_reg, 1)
-   assign apb_enable_o = iob_valid_reg & iob_valid_i;
+   `IOB_VAR(iob_avalid_reg, 1)
+   assign apb_enable_o = iob_avalid_reg & iob_avalid_i;
 
    // protection
    assign apb_prot_o = 3'd2;
@@ -54,12 +54,12 @@ module iob2apb
        .DATA_W(1),
        .RST_VAL(0)
        )
-   iob_valid_reg0
+   iob_avalid_reg0
      (
       .clk_i(clk_i),
       .arst_i(rst_i),
-      .data_i(iob_valid_i),
-      .data_o(iob_valid_reg)
+      .data_i(iob_avalid_i),
+      .data_o(iob_avalid_reg)
       );
 
 endmodule

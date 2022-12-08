@@ -50,10 +50,9 @@ def conf_h(macros, top_module, out_dir):
     file2create.write(f"#ifndef H_{fname}_H\n")
     file2create.write(f"#define H_{fname}_H\n\n")
     for macro in macros:
-        if macro['type']=='M':
-            m_name = macro['name'].upper()
-            m_default_val = macro['val']
-            file2create.write(f"#define {m_name} {str(m_default_val).replace('`','')}\n") #Remove Verilog macros ('`')
+        m_name = macro['name'].upper()
+        m_default_val = macro['val']
+        file2create.write(f"#define {m_name} {str(m_default_val).replace('`','')}\n") #Remove Verilog macros ('`')
     file2create.write(f"\n#endif // H_{fname}_H\n")
 
 # Generate TeX table of macros
@@ -82,6 +81,6 @@ def generate_params_tex(confs, top_module, out_dir):
     for conf in confs:
         # Only insert parameters
         if conf['type'] == 'P':
-            tex_table.append([conf['name'].replace('_','\_'), "NA", (f"`{top_module}_".upper()+conf['name']).replace('_','\_'), "NA", conf['descr']])
+            tex_table.append([conf['name'].replace('_','\_'), conf['min'], conf['val'].replace('_','\_'), conf['max'], conf['descr']])
 
     write_table(f"{out_dir}/sp",tex_table)
