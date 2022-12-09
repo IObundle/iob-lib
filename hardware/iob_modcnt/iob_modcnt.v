@@ -22,7 +22,7 @@ module iob_modcnt
     );
 
    `IOB_WIRE(cnt_rst, 1)
-   assign cnt_rst = rst_i | ((data_o == mod_i) & ~ld_i & en_i);
+   assign cnt_rst = rst_i | ((data_o == mod_i) & ((~ld_i) & en_i));
    
    iob_counter #(DATA_W, RST_VAL ) cnt0 (clk_i, arst_i, cnt_rst, en_i, ld_i, ld_val_i, data_o);
    

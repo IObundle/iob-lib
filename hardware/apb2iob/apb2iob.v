@@ -32,7 +32,6 @@ module apb2iob
 
    // read
    assign apb_rdata_o = iob_rdata_i;
-   assign apb_resp_o  = 1'b0;
 
    //
    // COMPUTE IOb OUTPUTS
