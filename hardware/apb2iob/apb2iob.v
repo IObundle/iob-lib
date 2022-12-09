@@ -25,7 +25,7 @@ module apb2iob
    //
 
    // ready
-   assign apb_ready_o = apb_write_i? iob_ready_i: iob_rvalid_i;
+   assign apb_ready_o = iob_ready_i;
 
    // write response
    assign apb_slverr_o = 1'b0;
