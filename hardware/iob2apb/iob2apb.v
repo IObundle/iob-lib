@@ -45,9 +45,9 @@ module iob2apb
    // COMPUTE IOb OUTPUTS
    //
    assign iob_ready_o  = apb_ready_i;
-   assign iob_rvalid_nxt = iob_avalid_o & iob_ready_i;
+   assign iob_rvalid_nxt = iob_avalid_i & iob_ready_o;
    assign iob_rdata_o  = apb_rdata_i;
 
-   iob_reg_ar #(1,0) iob_avalid_reg0 (clk_i, rst_i, iob_avalid_nxt, iob_rvalid_o);
+   iob_reg_a #(1,0) iob_avalid_reg0 (clk_i, arst_i, iob_avalid_nxt, iob_rvalid_o);
 
 endmodule
