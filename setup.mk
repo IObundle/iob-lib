@@ -3,7 +3,7 @@
 # This file is run as a makefile to setup a build directory for an IP core
 #
 
-SHELL=/bin/bash
+SHELL=bash
 export
 
 # include core setup configuration

@@ -1,4 +1,4 @@
-SHELL:=/bin/bash
+SHELL:=bash
 export
 
 include info.mk

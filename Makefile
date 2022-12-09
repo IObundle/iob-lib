@@ -3,7 +3,7 @@
 # This makefile simulates the hardware modules in this repo
 #
 
-SHELL=/bin/bash
+SHELL=bash
 export
 
 #build here
