@@ -28,8 +28,7 @@ module iob2apb
    assign apb_sel_o = iob_avalid_i;
 
    // enable
-   `IOB_VAR(iob_avalid_reg, 1)
-   assign apb_enable_o = iob_avalid_reg & iob_avalid_i;
+   assign apb_enable_o = iob_avalid_i;
 
    // protection
    assign apb_prot_o = 3'd2;
@@ -45,21 +44,10 @@ module iob2apb
    //
    // COMPUTE IOb OUTPUTS
    //
-   assign iob_rvalid_o = apb_write_o & apb_enable_o & apb_ready_i;
+   assign iob_ready_o  = apb_ready_i;
+   assign iob_rvalid_nxt = iob_avalid_o & iob_ready_i;
    assign iob_rdata_o  = apb_rdata_i;
-   assign iob_ready_o  = apb_enable_o & apb_ready_i;
 
-   iob_reg_ar
-     #(
-       .DATA_W(1),
-       .RST_VAL(0)
-       )
-   iob_avalid_reg0
-     (
-      .clk_i(clk_i),
-      .arst_i(rst_i),
-      .data_i(iob_avalid_i),
-      .data_o(iob_avalid_reg)
-      );
+   iob_reg_ar #(1,0) iob_avalid_reg0 (clk_i, rst_i, iob_avalid_nxt, iob_rvalid_o);
 
 endmodule
