@@ -19,6 +19,25 @@ def get_port_type(port_type):
     else:
         return "inout"
 
+
+# Find and remove last comma from an IO signal line in a Verilog header file
+# It expects file to contain lines formated like:
+# input [signal_size-1:0] signal_name,  //Some comment, may contain commas
+# Note: file_obj given must have been opened in write+read mode (like "r+" or "w+")
+def delete_last_comma(file_obj):
+    # Place cursor at the end of the file
+    file_obj.read()
+    # Search for start of line (previous \n) or start of file
+    # (It is better than just searching for the comma, because there may be verilog comments in this line with commas that we dont want to remove)
+    while(file_obj.read(1)!='\n' and file_obj.tell()>1):
+        file_obj.seek(file_obj.tell()-2)
+    # Search for next comma
+    while(file_obj.read(1)!=','):
+        pass
+    file_obj.seek(file_obj.tell()-1)
+    # Delete comma
+    file_obj.write(' ')
+
 # Generate io.vh file
 # ios: list of tables, each of them containing a list of ports
 # Each table is a dictionary with fomat: {'name': '<table name>', 'descr':'<table description>', 'ports': [<list of ports>]}
@@ -38,14 +57,7 @@ def generate_ios_header(ios, top_module, out_dir):
                 f_io.write(f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {port['name']}, //{port['descr']}\n")
 
     # Find and remove last comma
-    while(f_io.read(1)!='\n' and f_io.tell()>1):
-        f_io.seek(f_io.tell()-2)
-    while(f_io.read(1)!=','):
-        pass
-    f_io.seek(f_io.tell()-1)
-    if f_io.read(1)==',':
-        f_io.seek(f_io.tell()-1)
-        f_io.write(' ')
+    delete_last_comma(f_io)
 
     f_io.close()
 
