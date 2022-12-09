@@ -10,11 +10,11 @@ module iob2apb
     parameter DATA_W = APB_DATA_W  // IOb data bus width in bits
     )
    (
-    // APB master interface
-`include "apb_m_port.vh"
-
     // IOb slave interface
 `include "iob_s_port.vh"
+
+    // APB master interface
+`include "apb_m_port.vh"
 
     // Global signals
 `include "iob_clkrst_port.vh"
