@@ -28,13 +28,13 @@ module iob_regfile_w_r
 
    localparam DATA_W_INT = (DATA_W==0)? 1: DATA_W;
                           
-   wire [DATA_W_INT-1 :0]    regfile [2**ADDR_W-1:0];
-   wire [2**ADDR_W-1:0]  en;
-   wire                  waddr_in_scope = (waddr_i < 2**ADDR_W);
+   wire [DATA_W_INT-1 :0]    regfile [(2**ADDR_W)-1:0];
+   wire [(2**ADDR_W)-1:0]  en;
+   wire waddr_in_scope = (waddr_i < (2**ADDR_W));
 
    genvar                          i;
    generate
-      for (i=0; i < 2**ADDR_W; i=i+1) begin: register_file
+      for (i=0; i < (2**ADDR_W); i=i+1) begin: register_file
          if(ADDR_W==0)
            assign en[i] =  en_i & we_i & waddr_in_scope;
          else
@@ -51,6 +51,6 @@ module iob_regfile_w_r
       end
    endgenerate
 
-   assign rdata_o = raddr_i < 2**ADDR_W? regfile[raddr_i[0+:ADDR_W]]: 0;
+   assign rdata_o = (raddr_i < (2**ADDR_W))? regfile[raddr_i[0+:ADDR_W]]: 0;
    
 endmodule

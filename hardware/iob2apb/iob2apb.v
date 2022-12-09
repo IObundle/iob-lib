@@ -49,7 +49,7 @@ module iob2apb
    assign iob_rdata_o  = apb_rdata_i;
    assign iob_ready_o  = apb_enable_o & apb_ready_i;
 
-   iob_reg_ar
+   iob_reg_a
      #(
        .DATA_W(1),
        .RST_VAL(0)
@@ -57,7 +57,7 @@ module iob2apb
    iob_avalid_reg0
      (
       .clk_i(clk_i),
-      .arst_i(rst_i),
+      .arst_i(arst_i),
       .data_i(iob_avalid_i),
       .data_o(iob_avalid_reg)
       );
