@@ -51,6 +51,6 @@ module iob_regfile_w_r
       end
    endgenerate
 
-   assign rdata_o = (raddr_i < (2**ADDR_W))? regfile[raddr_i[0+:ADDR_W]]: 0;
+   assign rdata_o = (raddr_i < (2**ADDR_W))? regfile[raddr_i[0+:ADDR_W]]: {RDATA_W_MAX{1'd0}};
    
 endmodule
