@@ -3,7 +3,7 @@
 # Makefile for creating documents in the build directory
 #
 
-SHELL = /bin/bash
+SHELL = bash
 
 # include core basic info
 include ../info.mk

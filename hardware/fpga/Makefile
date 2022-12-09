@@ -1,7 +1,7 @@
 # This file becomes the fpga makefile when copied to the build
 # directory
 
-SHELL:=/bin/bash
+SHELL:=bash
 
 # include core basic info
 include ../../info.mk

@@ -3,7 +3,7 @@
 # This makefile is used at build-time
 #
 
-SHELL:=/bin/bash
+SHELL:=bash
 
 include ../../info.mk
 
