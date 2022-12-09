@@ -4,10 +4,10 @@
 
 module iob2axil
   #(
-    parameter ADDR_W = 32, // IOb address bus width in bits
-    parameter DATA_W = 32,  // IOb data bus width in bits
-    parameter AXIL_ADDR_W = ADDR_W,     // AXI Lite address bus width in bits
-    parameter AXIL_DATA_W = DATA_W     // AXI Lite data bus width in bits
+    parameter AXIL_ADDR_W = 32,     // AXI Lite address bus width in bits
+    parameter AXIL_DATA_W = 32,     // AXI Lite data bus width in bits
+    parameter ADDR_W = AXIL_ADDR_W, // IOb address bus width in bits
+    parameter DATA_W = AXIL_DATA_W  // IOb data bus width in bits
    )
    (
     //
