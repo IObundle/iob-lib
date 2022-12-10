@@ -10,7 +10,7 @@ ifneq ($(wildcard ../../console.mk),)
 include ../../console.mk
 endif
 
-REMOTE_BUILD_DIR=sandbox/$(BUILD_DIR_NAME)
+REMOTE_BUILD_DIR=$(USER)/sandbox/$(BUILD_DIR_NAME)
 REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
 
 #select board
