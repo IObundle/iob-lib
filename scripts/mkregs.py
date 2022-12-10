@@ -277,117 +277,79 @@ def write_hwcode(table, out_dir, top):
     #
     f_gen.write("\n\n//RESPONSE SWITCH\n")
 
-    #build dictionary array for registers
-    tlen = len(table);
-    wlen = 0
-    rlen = 0
-    wreg_map = [None] * len(table)
-    rreg_map = [None] * len(table)
-
-    for i in range(len(table)):
-        if table[i]['type'] == 'R':
-            rreg_map[i]={'exists': True, 'index': rlen}
-            wreg_map[i]={'exists': False, 'index': None}
-            rlen += 1
-        else:
-            wreg_map[i]={'exists': True, 'index': wlen}
-            rreg_map[i]={'exists': False, 'index': None}
-            wlen += 1
-
     # use variables to compute response
-    f_gen.write(f"\n`IOB_VARARRAY_2D(rdata_int, {rlen}, (8*`IOB_NBYTES))\n")
-    f_gen.write(f"`IOB_VAR(rvalid_int, {rlen})\n")
-    f_gen.write(f"`IOB_VAR(wready_int, {wlen})\n")
-    f_gen.write(f"`IOB_VAR(rready_int, {rlen})\n")
-    f_gen.write(f"`IOB_VAR(ready_int, {tlen})\n\n")
+    f_gen.write(f"\n`IOB_VAR(rdata_int, {8*cpu_n_bytes})\n")
+    f_gen.write(f"`IOB_VAR(rvalid_int, {cpu_n_bytes})\n")
+    f_gen.write(f"`IOB_VAR(wready_int, {cpu_n_bytes})\n")
+    f_gen.write(f"`IOB_VAR(rready_int, {cpu_n_bytes})\n")
 
-    f_gen.write(f"\n`IOB_WIRE(rdata, (8*`IOB_NBYTES))\n")
+    f_gen.write(f"\n`IOB_WIRE(rdata, {8*cpu_n_bytes})\n")
     f_gen.write(f"`IOB_WIRE(rvalid, 1)\n")
-    f_gen.write(f"`IOB_WIRE(wready, 1)\n")
-    f_gen.write(f"`IOB_WIRE(rready, 1)\n")
-    f_gen.write(f"`IOB_WIRE(ready, 1)\n")
-    f_gen.write(f"`IOB_WIRE(ready_nxt, 1)\n\n")
+    f_gen.write(f"`IOB_WIRE(ready, 1)\n\n")
 
     f_gen.write("`IOB_COMB begin\n")
 
     #read register response
-    i = 0
     for row in table:
         name = row['name']
         addr = row['addr']
         n_bits = row['n_bits']
         n_items = row['n_items']
-        n_bytes = bceil(n_bits, 3)/8
+        n_bytes = int(bceil(n_bits, 3)/8)
         addr_last = int(addr + (n_items-1)*n_bytes)
         addr_w = int(ceil(log(n_items*n_bytes,2)))
         auto = row['autologic']
         addr_w_base = max(log(cpu_n_bytes,2), addr_w)
 
-        if row['type'] == 'R' and rreg_map[i]['exists']:
-            j = rreg_map[i]['index']
+        if row['type'] == 'R':
             f_gen.write(f"\tif((`IOB_WORD_ADDR(raddr) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(raddr) <= {bfloor(addr_last, addr_w_base)})) begin\n")
             # rdata
             if auto:
-                f_gen.write(f"\t\trdata_int[{j}] = (({name}_r|{8*cpu_n_bytes}'d0) << {boffset(addr, cpu_n_bytes)});\n")
+                f_gen.write(f"\t\trdata_int[{boffset(addr, cpu_n_bytes)}+:{8*n_bytes}] = {name}_r|{8*n_bytes}'d0;\n")
             else:
-                f_gen.write(f"\t\trdata_int[{j}] = (({name}_i|{8*cpu_n_bytes}'d0) << {boffset(addr, cpu_n_bytes)});\n")
+                f_gen.write(f"\t\trdata_int[{boffset(addr, cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n")
             # rvalid
-            f_gen.write(f"\t\trvalid_int[{j}] =  {name}_rvalid_i;\n\tend\n")
+            f_gen.write(f"\t\trvalid_int[{addr%cpu_n_bytes}+:{n_bytes}] = "+'{'+f"{n_bytes}"+'{'+f"{name}_rvalid_i"+"}};\n\tend\n")
             # rready
             f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)}))\n")
-            f_gen.write(f"\t\trready_int = rready_int[{j}] | {name}_ready_i;\n")
-
-        i+=1
+            f_gen.write(f"\t\trready_int[{addr%cpu_n_bytes}+:{n_bytes}] = "+'{'+f"{n_bytes}"+'{'+f"{name}_ready_i"+"}};\n\n")
 
     #write register response
-    i = 0
     for row in table:
         name = row['name']
         addr = row['addr']
         n_bits = row['n_bits']
         n_items = row['n_items']
-        n_bytes = bceil(n_bits, 3)/8
+        n_bytes = int(bceil(n_bits, 3)/8)
         addr_w = int(ceil(log(n_items*n_bytes,2)))
         auto = row['autologic']
         addr_w_base = max(log(cpu_n_bytes,2), addr_w)
 
-        if row['type'] == 'W' and wreg_map[i]['exists']: #row['type'] == 'W'
-            j = wreg_map[i]['index']
+        if row['type'] == 'W':
             # get wready
             f_gen.write(f"\tif((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n")
-            f_gen.write(f"\t\twready_int[{j}] = {name}_ready_i;\n")
-
-        i+=1
+            f_gen.write(f"\t\twready_int[{addr%cpu_n_bytes}+:{n_bytes}] =  "+'{'+f"{n_bytes}"+'{'+f"{name}_ready_i"+"}};\n\n")
 
     f_gen.write("end //IOB_COMB\n\n")
 
-    # combine partial results
-    f_gen.write("//combine partial results\n\n")
-
-    #valid register
-    f_gen.write("//ready output\n\n")
-    f_gen.write(f"`IOB_WIRE(avalid_reg, 1)\n\n")
-    f_gen.write("iob_reg_ae #(1,0) avalid_reg_inst (clk_i, arst_i, en_i, iob_avalid_i, avalid_reg);\n")
+    #access flag
+    f_gen.write("//determine if peripheral is being accessed\n")
+    f_gen.write(f"`IOB_WIRE(accessed, 1)\n")
+    f_gen.write("assign accessed = iob_avalid_i & iob_ready_o;\n\n")
      
-    #ready output
-    f_gen.write("assign ready = (iob_wstrb_i != 0)? |wready_int: |rready_int;\n")
-    f_gen.write("assign ready_nxt = avalid_reg? ready: 1'b0;\n")
-    f_gen.write("iob_reg_ae #(1,0) ready_reg_inst (clk_i, arst_i, en_i, ready_nxt, iob_ready_o);\n")
+    #ready output (always down after an access to allow new state to propagate to output in the next cycle)
+    f_gen.write("//ready output\n")
+    f_gen.write("assign ready = ~accessed & (iob_wstrb_i != 0)? |wready_int: |rready_int;\n")
+    f_gen.write("iob_reg_ae #(1,0) ready_reg_inst (clk_i, arst_i, en_i, ready, iob_ready_o);\n\n")
 
     #rvalid output
-    f_gen.write("//rvalid output\n\n")
+    f_gen.write("//rvalid output\n")
     f_gen.write("assign rvalid = |rvalid_int;\n")
-    f_gen.write("iob_reg_ae #(1,0) rvalid_reg_inst (clk_i, arst_i, en_i, rvalid, iob_rvalid_o);\n")
+    f_gen.write("iob_reg_ae #(1,0) rvalid_reg_inst (clk_i, arst_i, en_i, rvalid, iob_rvalid_o);\n\n")
  
     #rdata output
-    f_gen.write("//rdata output\n\n")
-
-    f_gen.write("assign rdata =\n")
-    for i in range(rlen-1):
-        f_gen.write(f"\trdata_int[{i}] |\n")
-    f_gen.write(f"\trdata_int[{rlen}-1];\n\n")
-
-    f_gen.write(f"iob_reg_ae #({8*cpu_n_bytes},0) rdata_reg_inst (clk_i, arst_i, en_i, rdata, iob_rdata_o);\n\n")
+    f_gen.write("//rdata output\n")
+    f_gen.write(f"iob_reg_ae #({8*cpu_n_bytes},0) rdata_reg_inst (clk_i, arst_i, en_i, rdata_int, iob_rdata_o);\n\n")
 
     f_gen.write("endmodule\n")
     f_gen.close()
