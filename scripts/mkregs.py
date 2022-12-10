@@ -389,7 +389,7 @@ def write_swheader(table, out_dir, top):
     for row in table:
         name = row['name']
         n_bits = row['n_bits']
-        n_bytes = bceil(n_bits, 3)/8
+        n_bytes = int(bceil(n_bits, 3)/8)
         if row["type"] == "W":
             fswhdr.write(f"#define {core_prefix}{name}_W {n_bytes*8}\n")
         if row["type"] == "R":

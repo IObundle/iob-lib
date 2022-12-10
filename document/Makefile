@@ -61,8 +61,7 @@ ug.pdf: debug results ug_figs ugtop.tex
 
 #ug top file containing the definition of sections to include
 ugtop.tex:
-	if [ -f sm_tab.tex ]; then echo "\def\SMP{Y} \def\SM{Y}" >> $@; fi
-	if [ -f sp_tab.tex ]; then echo "\def\SMP{Y} \def\SP{Y}" >> $@; fi
+	if [ -f confs_tab.tex ]; then echo "\def\CONFS{Y}" >> $@; fi
 	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi
 	if [ -f swreg.tex ]; then echo "\def\SWREG{Y}" >> $@; fi
 	if [ $(ASICSYNTH) == 1 ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
