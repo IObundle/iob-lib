@@ -38,9 +38,9 @@ module iob_split
      $display("s_sel %x", s_sel);
    */
      for (i=0; i<N_SLAVES; i=i+1)
-       if(i == s_sel) begin
+       if(i == s_sel)
          s_req_o[`req(i)] = m_req_i;
-       end else
+       else
          s_req_o[`req(i)] = {(`REQ_W){1'b0}};
    end
 
@@ -61,10 +61,11 @@ module iob_split
    integer j;
    always @* begin
       for (j=0; j<N_SLAVES; j=j+1)
-        if( j == s_sel_reg )
+        if( j == s_sel_reg ) begin
           m_resp_o[`rdata(0)]  = s_resp_i[`rdata(j)];
           m_resp_o[`rvalid(0)] = s_resp_i[`rvalid(j)];
           m_resp_o[`ready(0)]  = s_resp_i[`ready(j)];
+        end
    end
 
 endmodule
