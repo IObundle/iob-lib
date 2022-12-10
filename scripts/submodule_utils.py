@@ -328,20 +328,20 @@ def get_periphs_id(peripherals_str):
 def get_periphs_id_as_macros(peripherals_list):
     macro_list = []
     for idx, instance in enumerate(peripherals_list):
-        macro_list.append({'name':instance['name'], 'type':'M', 'val':idx, 'min':'0', 'max':'NA', 'descr':f"ID of {instance['name']} peripheral"})
+        macro_list.append({'name':instance['name'], 'type':'M', 'val':str(idx), 'min':'0', 'max':'NA', 'descr':f"ID of {instance['name']} peripheral"})
     return macro_list
 
 # Return amount of system peripherals
 def get_n_periphs(peripherals_list):
-    return len(peripherals_list)
+    return str(len(peripherals_list))
 
 # Return bus width required to address all peripherals
 def get_n_periphs_w(peripherals_list):
     i=len(peripherals_list)
     if not i:
-        return(0)
+        return str(0)
     else:
-        return(math.ceil(math.log(i,2)))
+        return str(math.ceil(math.log(i,2)))
 
 
 ##########################################################

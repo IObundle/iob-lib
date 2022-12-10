@@ -1,34 +1,23 @@
-\ifdefined\SM
-
-\subsubsection{Macros}
+\subsubsection{Configuration}
 \label{sec:cm}
 
-The configuration macros apply to all instances of the core, and are listed in
-Table~\ref{tab:sm}.
+The configuration  and are listed in
+Table~\ref{tab:confs}.
 
-\begin{longtable}{|l|c|c|c|p{9cm}|}
-    \caption{Configuration Macros}\label{tab:sp}\\ \hline
+The configuration entries may be of three types: 'D', 'M' and 'P'.
+
+\begin{itemize}
+    \item The 'D' type is used for defines that apply to all instances of the core.
+    \item The 'M' type is used for macros that apply to all instances of the core.
+    \item The 'P' type is used for parameters that can vary from instance to instance.
+\end{itemize}
+
+\begin{longtable}{|l|C|c|c|c|p{9cm}|}
+    \caption{Configuration Macros}\label{tab:confs}\\ \hline
     \rowcolor{iob-green}
-    {\bf Macro} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description}
+    {\bf Macro} & {\bf Type} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description}
     \\ \hline \hline
-    \input sm_tab
+    \input confs_tab
 \end{longtable}
 \fi
 
-\ifdefined\SP
-
-\subsubsection{Parameters}
-\label{sec:cp}
-
-The configuration parameters of the core are presented in
-Table~\ref{tab:sp}. Configuration parameters can vary from instance to instance.
-
-\begin{longtable}{|l|c|c|c|p{9cm}|}
-    \caption{Configuration Parameters}\label{tab:sp}\\ \hline
-    \rowcolor{iob-green}
-    {\bf Parameter} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description}
-    \\ \hline \hline
-    \input sp_tab
-\end{longtable}
-
-\fi
