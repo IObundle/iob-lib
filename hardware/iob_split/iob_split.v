@@ -29,13 +29,6 @@ module iob_split
    wire [Nb-1:0] s_sel;
    assign s_sel = m_req_i[P_SLAVES -:Nb];
 
-   //ready signal sent to CPU
-   wire aux_ready;
-   reg current_ready, previous_ready;
-   assign m_resp_o[`ready(0)] = aux_ready;
-   assign aux_ready = current_ready&previous_ready;
-
-
    //route master request to selected slave
    integer i;
    always @* begin
@@ -47,7 +40,6 @@ module iob_split
      for (i=0; i<N_SLAVES; i=i+1)
        if(i == s_sel) begin
          s_req_o[`req(i)] = m_req_i;
-         current_ready    = s_resp_i[`ready(i)];
        end else
          s_req_o[`req(i)] = {(`REQ_W){1'b0}};
    end
@@ -61,7 +53,7 @@ module iob_split
    always @( posedge clk_i, posedge rst_i ) begin
       if( rst_i )
         s_sel_reg <= {Nb{1'b0}};
-      else if (aux_ready)
+      else
         s_sel_reg <= s_sel;
    end
 
@@ -72,7 +64,7 @@ module iob_split
         if( j == s_sel_reg )
           m_resp_o[`rdata(0)]  = s_resp_i[`rdata(j)];
           m_resp_o[`rvalid(0)] = s_resp_i[`rvalid(j)];
-          previous_ready       = s_resp_i[`ready(j)];
+          m_resp_o[`ready(0)]  = s_resp_i[`ready(j)];
    end
 
 endmodule
