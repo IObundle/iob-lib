@@ -57,9 +57,7 @@ def setup(top, version, confs, ios, regs, blocks, no_overlap=False, build_dir=No
     # Generate Tex
     #
     if path.isdir(build_dir+"/document/tsrc") and gen_tex:
-        p_conf.generate_macros_tex(confs, build_dir+"/document/tsrc")
-        p_conf.generate_other_macros_tex(confs, build_dir+"/document/tsrc")
-        p_conf.generate_params_tex(confs, top, build_dir+"/document/tsrc")
+        p_conf.generate_confs_tex(confs, build_dir+"/document/tsrc")
         ios_lib.generate_ios_tex(ios, build_dir+"/document/tsrc")
         if regs:
             mkregs.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")

@@ -37,9 +37,11 @@ def conf_vh(macros, top_module, out_dir):
     file2create.write(f"`ifndef VH_{fname}_VH\n")
     file2create.write(f"`define VH_{fname}_VH\n\n")
     for macro in macros:
-        m_name = macro['name'].upper()
-        m_default_val = macro['val']
-        file2create.write(f"`define {core_prefix}{m_name} {m_default_val}\n")
+        #Only insert macro if its is not a bool define, and if so only insert it if it is true
+        if macro['type'] != 'D' or macro['val'] != "0":
+            m_name = macro['name'].upper()
+            m_default_val = macro['val']
+            file2create.write(f"`define {core_prefix}{m_name} {m_default_val}\n")
     file2create.write(f"\n`endif // VH_{fname}_VH\n")
 
 def conf_h(macros, top_module, out_dir):
@@ -50,37 +52,17 @@ def conf_h(macros, top_module, out_dir):
     file2create.write(f"#ifndef H_{fname}_H\n")
     file2create.write(f"#define H_{fname}_H\n\n")
     for macro in macros:
-        m_name = macro['name'].upper()
-        m_default_val = macro['val']
-        file2create.write(f"#define {m_name} {str(m_default_val).replace('`','')}\n") #Remove Verilog macros ('`')
+        #Only insert macro if its is not a bool define, and if so only insert it if it is true
+        if macro['type'] != 'D' or macro['val'] != "0":
+            m_name = macro['name'].upper()
+            m_default_val = macro['val']
+            file2create.write(f"#define {m_name} {str(m_default_val).replace('`','')}\n") #Remove Verilog macros ('`')
     file2create.write(f"\n#endif // H_{fname}_H\n")
 
-# Generate TeX table of macros
-def generate_macros_tex(confs, out_dir):
+# Generate TeX table of confs
+def generate_confs_tex(confs, out_dir):
     tex_table = []
     for conf in confs:
-        # Only insert macros
-        if conf['type'] == 'M':
-            tex_table.append([conf['name'].replace('_','\_'), conf['min'], conf['val'], conf['max'], conf['descr']])
+        tex_table.append([conf['name'].replace('_','\_'), conf['type'], conf['min'], conf['val'].replace('_','\_'), conf['max'], conf['descr']])
 
-    write_table(f"{out_dir}/sm",tex_table)
-
-# Generate TeX table of other macros
-def generate_other_macros_tex(confs, out_dir):
-    tex_table = []
-    for conf in confs:
-        # Only insert macros
-        if conf['type'] == 'O':
-            tex_table.append([conf['name'].replace('_','\_'), conf['min'], conf['val'], conf['max'], conf['descr']])
-
-    write_table(f"{out_dir}/som",tex_table)
-
-# Generate TeX table of parameters
-def generate_params_tex(confs, top_module, out_dir):
-    tex_table = []
-    for conf in confs:
-        # Only insert parameters
-        if conf['type'] == 'P':
-            tex_table.append([conf['name'].replace('_','\_'), conf['min'], conf['val'].replace('_','\_'), conf['max'], conf['descr']])
-
-    write_table(f"{out_dir}/sp",tex_table)
+    write_table(f"{out_dir}/confs",tex_table)

@@ -22,17 +22,18 @@ CFLAGS=-Os -nostdlib -march=$(MFLAGS) -mabi=ilp32 --specs=nano.specs -Wcast-alig
 FW_LFLAGS= -Wl,-Bstatic,-T,$(TEMPLATE_LDS),--strip-debug
 BOOT_LFLAGS+= -Wl,-Map,boot.map
 LLIBS=-lgcc -lc -lnosys
+INCLUDES=-I. -I../esrc
+DEFINES=
 
 HDR=$(wildcard *.h)
 HDR+=$(wildcard ../esrc/*.h)
-
 
 #FW_SRC=$(wildcard *.c)
 FW_SRC=$(wildcard ../firmware/*)
 FW_SRC+=$(wildcard ../esrc/*.c)
 
 BOOT_SRC=$(wildcard ../bootloader/*)
-BOOT_SRC+=$(wildcard ../esrc/*.c)
+BOOT_SRC+=$(filter-out ../esrc/printf.c, $(wildcard ../esrc/*.c))
 
 # include local build segment
 # all previously defined variables can be overwritten in this file
@@ -43,11 +44,11 @@ endif
 build: boot.elf firmware.elf 
 
 firmware.elf: $(TEMPLATE_LDS) $(HDR) $(FW_SRC)
-	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(FW_LFLAGS) -I. -I../firmware -I../esrc $(FW_SRC) $(LLIBS)
+	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(FW_LFLAGS) $(DEFINES) $(INCLUDES) -I../firmware $(FW_SRC) $(LLIBS)
 	$(TOOLCHAIN_PREFIX)objcopy -O binary $@ firmware.bin
 
 boot.elf: $(TEMPLATE_LDS) $(HDR) $(BOOT_SRC)
-	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(BOOT_LFLAGS) -I. -I../bootloader -I../esrc $(BOOT_SRC) $(LLIBS)
+	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(BOOT_LFLAGS) $(DEFINES) $(INCLUDES) -I../bootloader $(BOOT_SRC) $(LLIBS)
 	$(TOOLCHAIN_PREFIX)objcopy -O binary boot.elf boot.bin
 
 clean:
