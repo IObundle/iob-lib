@@ -18,4 +18,6 @@ exec:
 clean: gen-clean
 	@rm -f a.out
 
-.PHONY: comp exec clean
+very-clean: clean
+
+.PHONY: comp exec clean very-clean
