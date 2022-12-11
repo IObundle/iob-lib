@@ -19,8 +19,9 @@ endif
 #compiler settings
 TOOLCHAIN_PREFIX:=riscv64-unknown-elf-
 CFLAGS=-Os -nostdlib -march=$(MFLAGS) -mabi=ilp32 --specs=nano.specs -Wcast-align=strict
-FW_LFLAGS= -Wl,-Bstatic,-T,$(TEMPLATE_LDS),--strip-debug
-BOOT_LFLAGS+= -Wl,-Map,boot.map
+LFLAGS= -Wl,-Bstatic,-T,$(TEMPLATE_LDS),--strip-debug
+FW_LFLAGS+=$(LFLAGS) -Wl,-Map,firmware.map
+BOOT_LFLAGS+=$(LFLAGS) -Wl,-Map,boot.map
 LLIBS=-lgcc -lc -lnosys
 INCLUDES=-I. -I../esrc
 DEFINES=

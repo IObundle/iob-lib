@@ -21,6 +21,7 @@ HDR=$(wildcard *.h)
 HDR+=$(wildcard ../psrc/*.h)
 
 SRC=$(wildcard *.c)
+SRC=$(wildcard ../firmware/*.c)
 SRC+=$(wildcard ../psrc/*.c)
 
 # include local pc-emul segment

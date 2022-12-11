@@ -111,7 +111,7 @@ def generate_if_tex(ios, out_dir):
     \input '''+table['name']+'''_if_tab
  
   \end{tabular}
-  \caption{'''+table['descr']+'''}
+  \caption{'''+table['descr'].replace('_','\_')+'''}
   \label{'''+table['name']+'''_if_tab:is}
 \end{table}
 '''
