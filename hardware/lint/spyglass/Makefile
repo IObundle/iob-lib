@@ -10,7 +10,7 @@ include ../../../info.mk
 VHDR+=$(wildcard ../../src/*.vh)
 VSRC+=$(wildcard ../../src/*.v)
 
-REMOTE_BUILD_DIR=sandbox/$(BUILD_DIR_NAME)
+REMOTE_BUILD_DIR=$(USER)/sandbox/$(BUILD_DIR_NAME)
 REMOTE_SIM_DIR=$(REMOTE_BUILD_DIR)/hardware/lint/spyglass
 
 LINT_SERVER=$(SYNOPSYS_SERVER)

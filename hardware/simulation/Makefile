@@ -7,7 +7,7 @@ SHELL:=bash
 
 include ../../info.mk
 
-REMOTE_BUILD_DIR=sandbox/$(BUILD_DIR_NAME)
+REMOTE_BUILD_DIR=$(USER)/sandbox/$(BUILD_DIR_NAME)
 REMOTE_SIM_DIR=$(REMOTE_BUILD_DIR)/hardware/simulation
 
 #include the module's headers and sources
