@@ -1,6 +1,8 @@
 `timescale 1ns / 1ps
-
 `include "iob_lib.vh"
+
+//
+// APB slave port to IOb master interface
 
 module apb2iob
   #(
@@ -20,25 +22,52 @@ module apb2iob
 `include "iob_clkrst_port.vh"
     );
 
-   //
-   // COMPUTE APB OUTPUTS
-   //
 
-   // ready
-   assign apb_ready_o = iob_ready_i;
-
-   // write response
+   // APB outputs
+   assign apb_ready_o = apb_write_i? (iob_avalid_o & iob_ready_i): iob_rvalid_i;
+   assign apb_rdata_o = iob_rdata_i;
    assign apb_slverr_o = 1'b0;
 
-   // read
-   assign apb_rdata_o = iob_rdata_i;
+   // IOb outputs
+   `IOB_VAR(iob_avalid_nxt, 1)
+   iob_reg_a #(1,0) avlid_reg (clk_i, arst_i, iob_avalid_nxt, iob_avalid_o);
 
-   //
-   // COMPUTE IOb OUTPUTS
-   //
-   assign iob_avalid_o = apb_sel_i;
+   `IOB_WIRE(pc, 2)
+   `IOB_VAR(pc_nxt, 2)
+    iob_reg_a #(2,0) pc_reg (clk_i, arst_i, pc_nxt, pc);
+
+   `IOB_COMB begin
+      
+      pc_nxt = pc+1'b1;
+      iob_avalid_nxt = iob_avalid_o;
+      
+      case(pc)
+        0: begin
+           if(!apb_sel_i) //wait periph selection
+             pc_nxt = pc;
+           else
+             iob_avalid_nxt = 1'b1;
+        end
+
+        1: begin
+           if(!iob_ready_i) //wait until iob interface is ready
+             pc_nxt = pc;
+           else
+             iob_avalid_nxt = 1'b0; //deassert valid - transaction will be done
+        end
+        
+        2: begin //wait apb transaction to finish
+           if(apb_sel_i)
+             pc_nxt = pc;
+           else begin
+              pc_nxt = 0;
+           end
+        end
+      endcase
+   end
+
    assign iob_addr_o  = apb_addr_i;
    assign iob_wdata_o = apb_wdata_i;
    assign iob_wstrb_o = apb_wstrb_i;
-
+  
 endmodule
