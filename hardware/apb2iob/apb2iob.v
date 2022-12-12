@@ -48,7 +48,7 @@ module apb2iob
       
       pc_nxt = pc+1'b1;
       iob_avalid_nxt = iob_avalid_o;
-      apb_slverr_nxt = 0;
+      apb_slverr_nxt = 1'b0;
       
       case(pc)
         0: begin
@@ -60,7 +60,7 @@ module apb2iob
 
         1: begin
            if (!apb_enable_i)
-             apb_slverr_nxt = 1;
+             apb_slverr_nxt = 1'b1;
            if(!iob_ready_nxt_i) //wait until iob interface is ready
              pc_nxt = pc;
            else
@@ -71,7 +71,7 @@ module apb2iob
            if(apb_sel_i)
              pc_nxt = pc;
            else begin
-              apb_slverr_nxt = 0;
+              apb_slverr_nxt = 1'b0;
               pc_nxt = 0;
            end
         end
