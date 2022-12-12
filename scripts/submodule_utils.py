@@ -19,7 +19,7 @@ reserved_signals = \
 'reset':'.reset(rst_i)',
 'arst_i':'.arst_i(rst_i)',
 'iob_avalid':'.iob_avalid(slaves_req[`avalid(`/*<InstanceName>*/)])',
-'iob_addr':'.iob_addr(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W+2)-2])',
+'iob_addr':'.iob_addr(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])',
 'iob_wdata':'.iob_wdata(slaves_req[`wdata(`/*<InstanceName>*/)])',
 'iob_wstrb':'.iob_wstrb(slaves_req[`wstrb(`/*<InstanceName>*/)])',
 'iob_rdata':'.iob_rdata(slaves_resp[`rdata(`/*<InstanceName>*/)])',
