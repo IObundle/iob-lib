@@ -112,6 +112,9 @@ def gen_port(table, f):
             f.write(f"\t`IOB_INPUT({name}_ready_i, 1),\n")
         if n_items > 1:
             f.write(f"\t`IOB_OUTPUT({name}_addr_o, {addr_w}),\n")
+            
+    f.write(f"\t`IOB_OUTPUT(iob_ready_nxt_o, 1),\n")
+    f.write(f"\t`IOB_OUTPUT(iob_rvalid_nxt_o, 1),\n")
 
 # generate wires to connect instance in top module
 def gen_inst_wire(table, f):
@@ -128,17 +131,17 @@ def gen_inst_wire(table, f):
             f.write(f"`IOB_WIRE({name}, {n_bits})\n")
             if not auto:
                 f.write(f"`IOB_WIRE({name}_wen, 1)\n")
-        else:
+        elif row['type'] == 'R':
             f.write(f"`IOB_WIRE({name}, {n_bits})\n")
             if not row['autologic']:
                 f.write(f"`IOB_WIRE({name}_rvalid, 1)\n")
                 f.write(f"`IOB_WIRE({name}_ren, 1)\n")
-            else:
-                f.write(f"`IOB_WIRE({name}_int, {n_bits})\n")
         if not auto:
             f.write(f"`IOB_WIRE({name}_ready, 1)\n")
         if n_items > 1:
             f.write(f"`IOB_WIRE({name}_addr, {addr_w})\n")
+    f.write(f"`IOB_WIRE(iob_ready_nxt, 1)\n")
+    f.write(f"`IOB_WIRE(iob_rvalid_nxt, 1)\n")
     f.write("\n")
 
 # generate portmap for swreg instance in top module
@@ -164,6 +167,9 @@ def gen_portmap(table, f):
             f.write(f"\t.{name}_ready_i({name}_ready),\n")
         if n_items > 1:
             f.write(f"\t.{name}_addr_o({name}_addr),\n")
+
+    f.write(f"\t.iob_ready_nxt_o(iob_ready_nxt),\n")
+    f.write(f"\t.iob_rvalid_nxt_o(iob_rvalid_nxt),\n")
 
 
 def write_hwcode(table, out_dir, top):
@@ -248,19 +254,35 @@ def write_hwcode(table, out_dir, top):
     # use variables to compute response
     f_gen.write(f"\n`IOB_VAR(rdata_int, {8*cpu_n_bytes})\n")
     f_gen.write(f"\n`IOB_WIRE(rdata_nxt, {8*cpu_n_bytes})\n")
-
-    f_gen.write(f"`IOB_VAR(rvalid_int, {cpu_n_bytes})\n")
-    f_gen.write(f"`IOB_WIRE(rvalid_nxt, 1)\n")
-
-    f_gen.write(f"`IOB_VAR(wready_int, {cpu_n_bytes})\n")
-    f_gen.write(f"`IOB_VAR(rready_int, {cpu_n_bytes})\n")
-    f_gen.write(f"`IOB_WIRE(ready_nxt, 1)\n\n")
+    f_gen.write(f"`IOB_VAR(rvalid_int, 1)\n")
+    f_gen.write(f"`IOB_VAR(wready_int, 1)\n")
+    f_gen.write(f"`IOB_VAR(rready_int, 1)\n\n")
+    
+    #ready output
+    f_gen.write("//ready output\n")
+    f_gen.write("`IOB_VAR(ready_nxt, 1)\n")
+    f_gen.write("iob_reg_ae #(1,1) ready_reg_inst (clk_i, arst_i, en_i, ready_nxt, iob_ready_o);\n\n")
+    
+    #rvalid output
+    f_gen.write("//rvalid output\n")
+    f_gen.write("`IOB_VAR(rvalid_nxt, 1)\n")
+    f_gen.write("iob_reg_ae #(1,0) rvalid_reg_inst (clk_i, arst_i, en_i, rvalid_nxt, iob_rvalid_o);\n\n")
+    
+    #rdata output
+    f_gen.write("//rdata output\n")
+    f_gen.write(f"iob_reg_ae #({8*cpu_n_bytes},0) rdata_reg_inst (clk_i, arst_i, en_i, rdata_int, iob_rdata_o);\n\n")
+    
+    f_gen.write("`IOB_WIRE(pc, 1)\n")
+    f_gen.write("`IOB_VAR(pc_nxt, 1)\n")
+    f_gen.write("iob_reg_a #(1,0) pc_reg (clk_i, arst_i, pc_nxt, pc);\n\n")
 
     f_gen.write("`IOB_COMB begin\n")
 
     f_gen.write(f"\trdata_int = {8*cpu_n_bytes}'d0;\n")
-    f_gen.write(f"\twready_int = {cpu_n_bytes}'d0;\n")
-    f_gen.write(f"\trready_int = {cpu_n_bytes}'d0;\n\n")
+    f_gen.write(f"\trready_int = 1'b1;\n")
+    f_gen.write(f"\trvalid_int = 1'b1;\n")
+    f_gen.write(f"\twready_int = 1'b1;\n\n")
+    
 
     #read register response
     for row in table:
@@ -278,13 +300,11 @@ def write_hwcode(table, out_dir, top):
             f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)})) ")
             f_gen.write(f"begin\n")
             f_gen.write(f"\t\trdata_int[{boffset(addr, cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n")
-            if auto:
-                f_gen.write(f"\t\trready_int[{addr%cpu_n_bytes}+:{n_bytes}] = "+'{'+f"{n_bytes}"+'{'+"1'b1"+"}};\n")
-                f_gen.write(f"\t\trvalid_int[{addr%cpu_n_bytes}+:{n_bytes}] = "+'{'+f"{n_bytes}"+'{'+"1'b1"+"}};\n")
-            else:
-                f_gen.write(f"\t\trready_int[{addr%cpu_n_bytes}+:{n_bytes}] = "+'{'+f"{n_bytes}"+'{'+f"{name}_ready_i"+"}};\n")
-                f_gen.write(f"\t\trvalid_int[{addr%cpu_n_bytes}+:{n_bytes}] = "+'{'+f"{n_bytes}"+'{'+f"{name}_rvalid_i"+"}};\n")
-            f_gen.write(f"end\n\n")
+            if not auto:
+                f_gen.write(f"\t\trready_int = {name}_ready_i;\n")
+                f_gen.write(f"\t\trvalid_int = {name}_rvalid_i;\n")
+            f_gen.write(f"\tend\n\n")
+
 
     #write register response
     for row in table:
@@ -298,31 +318,39 @@ def write_hwcode(table, out_dir, top):
         auto = row['autologic']
 
         if row['type'] == 'W':
-            # get wready
-            f_gen.write(f"\tif((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n")
-            if auto:
-                f_gen.write(f"\t\twready_int[{addr%cpu_n_bytes}+:{n_bytes}] = "+'{'+f"{n_bytes}"+'{'+"1'b1"+"}};\n\n")
-            else:
-                f_gen.write(f"\t\twready_int[{addr%cpu_n_bytes}+:{n_bytes}] =  "+'{'+f"{n_bytes}"+'{'+f"{name}_ready_i"+"}};\n\n")
+            if not auto:
+                # get wready
+                f_gen.write(f"\tif((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n")
+                f_gen.write(f"\t\twready_int = {name}_ready_i;\n\n")
+    
+    f_gen.write("\tready_nxt = 1'b1;\n")
+    f_gen.write("\trvalid_nxt = iob_rvalid_o;\n")
+    f_gen.write("\tpc_nxt = pc + 1;\n\n")
+    f_gen.write("\tcase(pc)\n")
+    f_gen.write("\t\t0: begin\n")
+    f_gen.write("\t\t\trvalid_nxt = 1'b0;\n")
+    f_gen.write("\t\t\tif(!iob_avalid_i)\n")
+    f_gen.write("\t\t\t\tpc_nxt=pc;\n")
+    f_gen.write("\t\t\telse\n")
+    f_gen.write("\t\t\t\tready_nxt= (|iob_wstrb_i)? wready_int: rready_int;\n")
+    f_gen.write("\t\tend\n")
+    f_gen.write("\t\tdefault: begin\n")
+    f_gen.write("\t\t\tready_nxt = (|iob_wstrb_i)? wready_int: rready_int;\n")
+    f_gen.write("\t\t\trvalid_nxt =  (|iob_wstrb_i)? 1'b0: rvalid_int;\n")
+    f_gen.write("\t\t\tif((|iob_wstrb_i)? !iob_ready_o: !rvalid_int)\n")
+    f_gen.write("\t\t\t\tpc_nxt = pc;\n")
+    f_gen.write("\t\tend\n")
+    f_gen.write("\tendcase\n")
 
     f_gen.write("end //IOB_COMB\n\n")
 
-    #determine if peripheral is being accessed
-    f_gen.write("wire accessed = iob_avalid_i & iob_ready_o;\n")
-
-    #ready output (always down after an access to allow new state to propagate to output in the next cycle)
-    f_gen.write("//ready output\n")
-    f_gen.write("assign ready_nxt = ~accessed & ((iob_wstrb_i != 0)? |wready_int: |rready_int);\n")
-    f_gen.write("iob_reg_ae #(1,0) ready_reg_inst (clk_i, arst_i, en_i, ready_nxt, iob_ready_o);\n\n")
-
-    #rvalid output
-    f_gen.write("//rvalid output\n")
-    f_gen.write("assign rvalid_nxt =  (~accessed) & (|rvalid_int);\n")
-    f_gen.write("iob_reg_ae #(1,0) rvalid_reg_inst (clk_i, arst_i, en_i, rvalid_nxt, iob_rvalid_o);\n\n")
+    #ready_nxt output
+    f_gen.write("//ready_nxt output\n")
+    f_gen.write("assign iob_ready_nxt_o = ready_nxt;\n")
  
-    #rdata output
-    f_gen.write("//rdata output\n")
-    f_gen.write(f"iob_reg_ae #({8*cpu_n_bytes},0) rdata_reg_inst (clk_i, arst_i, en_i, rdata_int, iob_rdata_o);\n\n")
+    #rvalid_nxt output
+    f_gen.write("//rvalid_nxt output\n")
+    f_gen.write("assign iob_rvalid_nxt_o = rvalid_nxt;\n\n")
 
     f_gen.write("endmodule\n")
     f_gen.close()

@@ -167,14 +167,11 @@ AHB_PROT_W = '4'
 AHB_SIZE_W = '3'
 AHB_TRANS_W = '2'
 
-APB_PROT_W = '3'
-
 amba=[ \
 {'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AHB_ADDR_W',     'name':'ahb_addr',     'default':'0', 'description':'Byte address of the transfer.'}, \
 {'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AHB_BURST_W,     'name':'ahb_burst',    'default':'0', 'description':'Burst type.'}, \
 {'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_mastlock', 'default':'0', 'description':'Transfer is part of a lock sequence.'}, \
 {'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AHB_PROT_W,      'name':'ahb_prot',     'default':'1', 'description':'Protection type. Transactions set with Data, User access, Non-bufferrable, and Non-cacheable attributes (0001).'}, \
-{'ahb':0, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': APB_PROT_W,      'name':'apb_prot',     'default':'2', 'description':'Protection type. Transactions set with Normal, Non-secure, and Data attributes (010).'}, \
 {'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AHB_SIZE_W,      'name':'ahb_size',     'default':'2', 'description':'Burst size. This signal indicates the size of each transfer in the burst.'}, \
 {'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_nonsec',   'default':'0', 'description':'Non-secure transfer.'}, \
 {'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_excl',     'default':'0', 'description':'Exclusive transfer.'}, \
