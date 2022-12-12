@@ -103,6 +103,7 @@ module iob_fifo_async
      (
       .clk_i    (r_clk_i),
       .arst_i   (r_arst_i),
+      .en_i     (r_clk_en_i),
       .signal_i (w_waddr_gray),
       .signal_o (r_waddr_gray)
       );
@@ -119,6 +120,7 @@ module iob_fifo_async
      (
       .clk_i    (w_clk_i),
       .arst_i   (w_arst_i),
+      .en_i     (w_clk_en_i),
       .signal_i (r_raddr_gray),
       .signal_o (w_raddr_gray)
       );
