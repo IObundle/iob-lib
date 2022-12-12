@@ -26,14 +26,16 @@ module apb2iob
    // APB outputs
 
    `IOB_WIRE(apb_ready_nxt, 1)
+   `IOB_VAR(apb_slverr_nxt, 1)
    `IOB_VAR(iob_avalid_nxt, 1)
 
    assign apb_ready_nxt = apb_write_i? (iob_avalid_nxt & iob_ready_nxt_i): iob_rvalid_nxt_i;
 
-    iob_reg_ae #(1,0) apb_ready_reg_inst (clk_i, arst_i, en_i, apb_ready_nxt, apb_ready_o);
+   iob_reg_ae #(1,0) apb_ready_reg_inst (clk_i, arst_i, en_i, apb_ready_nxt, apb_ready_o);
 
    assign apb_rdata_o = iob_rdata_i;
-   assign apb_slverr_o = 1'b0;
+
+   iob_reg_ae #(1,0) apb_slverr_reg_inst (clk_i, arst_i, en_i, apb_slverr_nxt, apb_slverr_o);
 
    // IOb outputs
    iob_reg_ae #(1,0) avlid_reg (clk_i, arst_i, en_i, iob_avalid_nxt, iob_avalid_o);
@@ -46,6 +48,7 @@ module apb2iob
       
       pc_nxt = pc+1'b1;
       iob_avalid_nxt = iob_avalid_o;
+      apb_slverr_nxt = 0;
       
       case(pc)
         0: begin
@@ -56,17 +59,19 @@ module apb2iob
         end
 
         1: begin
-           if (apb_enable_i)
+           if (!apb_enable_i)
+             apb_slverr_nxt = 1;
            if(!iob_ready_nxt_i) //wait until iob interface is ready
              pc_nxt = pc;
            else
              iob_avalid_nxt = 1'b0; //deassert valid - transaction will be done
         end
         
-        2: begin //wait apb transaction to finish
+        default: begin //wait apb transaction to finish
            if(apb_sel_i)
              pc_nxt = pc;
            else begin
+              apb_slverr_nxt = 0;
               pc_nxt = 0;
            end
         end
