@@ -14,27 +14,36 @@ module apb2iob
    (
     // APB slave interface
 `include "apb_s_port.vh"
+    
+    `IOB_INPUT(iob_ready_nxt_i, 1),
+    `IOB_INPUT(iob_rvalid_nxt_i, 1),
 
     // IOb master interface
 `include "iob_m_port.vh"
 
     // Global signals
-`include "iob_clkrst_port.vh"
+`include "iob_clkenrst_port.vh"
     );
 
 
    // APB outputs
-   assign apb_ready_o = apb_write_i? (iob_avalid_o & iob_ready_i): iob_rvalid_i;
+
+   `IOB_WIRE(apb_ready_nxt, 1)
+   `IOB_VAR(iob_avalid_nxt, 1)
+
+   assign apb_ready_nxt = apb_write_i? (iob_avalid_nxt & iob_ready_nxt_i): iob_rvalid_nxt_i;
+
+    iob_reg_ae #(1,0) apb_ready_reg_inst (clk_i, arst_i, en_i, apb_ready_nxt, apb_ready_o);
+
    assign apb_rdata_o = iob_rdata_i;
    assign apb_slverr_o = 1'b0;
 
    // IOb outputs
-   `IOB_VAR(iob_avalid_nxt, 1)
-   iob_reg_a #(1,0) avlid_reg (clk_i, arst_i, iob_avalid_nxt, iob_avalid_o);
+   iob_reg_ae #(1,0) avlid_reg (clk_i, arst_i, en_i, iob_avalid_nxt, iob_avalid_o);
 
    `IOB_WIRE(pc, 2)
    `IOB_VAR(pc_nxt, 2)
-    iob_reg_a #(2,0) pc_reg (clk_i, arst_i, pc_nxt, pc);
+   iob_reg_ae #(2,0) pc_reg (clk_i, arst_i, en_i, pc_nxt, pc);
 
    `IOB_COMB begin
       

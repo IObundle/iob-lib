@@ -112,6 +112,9 @@ def gen_port(table, f):
             f.write(f"\t`IOB_INPUT({name}_ready_i, 1),\n")
         if n_items > 1:
             f.write(f"\t`IOB_OUTPUT({name}_addr_o, {addr_w}),\n")
+            
+    f.write(f"\t`IOB_OUTPUT(iob_ready_nxt_o, 1),\n")
+    f.write(f"\t`IOB_OUTPUT(iob_rvalid_nxt_o, 1),\n")
 
 # generate wires to connect instance in top module
 def gen_inst_wire(table, f):
@@ -137,6 +140,8 @@ def gen_inst_wire(table, f):
             f.write(f"`IOB_WIRE({name}_ready, 1)\n")
         if n_items > 1:
             f.write(f"`IOB_WIRE({name}_addr, {addr_w})\n")
+    f.write(f"`IOB_WIRE(iob_ready_nxt, 1)\n")
+    f.write(f"`IOB_WIRE(iob_rvalid_nxt, 1)\n")
     f.write("\n")
 
 # generate portmap for swreg instance in top module
@@ -162,6 +167,9 @@ def gen_portmap(table, f):
             f.write(f"\t.{name}_ready_i({name}_ready),\n")
         if n_items > 1:
             f.write(f"\t.{name}_addr_o({name}_addr),\n")
+
+    f.write(f"\t.iob_ready_nxt_o(iob_ready_nxt),\n")
+    f.write(f"\t.iob_rvalid_nxt_o(iob_rvalid_nxt),\n")
 
 
 def write_hwcode(table, out_dir, top):
@@ -314,6 +322,15 @@ def write_hwcode(table, out_dir, top):
     f_gen.write("//rdata output\n")
     f_gen.write(f"iob_reg_ae #({8*cpu_n_bytes},0) rdata_reg_inst (clk_i, arst_i, en_i, rdata_int, iob_rdata_o);\n\n")
 
+    #ready_nxt output
+    f_gen.write("//ready_nxt output\n")
+    f_gen.write("assign iob_ready_nxt_o = ready_nxt;\n")
+ 
+
+    #rvalid_nxt output
+    f_gen.write("//rvalid_nxt output\n")
+    f_gen.write("assign iob_rvalid_nxt_o = rvalid_nxt;\n")
+ 
 
     f_gen.write("`IOB_WIRE(pc, 1)\n")
     f_gen.write("`IOB_VAR(pc_nxt, 1)\n")

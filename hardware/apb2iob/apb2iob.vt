@@ -8,6 +8,9 @@
       // APB slave interface
 `include "<core name prefix>apb_portmap.vh"
 
+         .iob_ready_nxt_i(iob_ready_nxt),
+         .iob_rvalid_nxt_i(iob_rvalid_nxt),
+
       // IOb master interface
 `include "<core name prefix>portmap.vh"
 
