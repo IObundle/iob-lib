@@ -94,7 +94,7 @@ endif
 
 
 #console start command
-CONSOLE_CMD=$(PYTHON_DIR)/console -s /dev/usb-uart
+CONSOLE_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
 ifeq ($(INIT_MEM),0)
 CONSOLE_CMD+=-f
 endif
