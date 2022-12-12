@@ -12,7 +12,7 @@ endif
 # compiler flags
 CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
 
-CONSOLE_CMD=../../scripts/console -L
+CONSOLE_CMD=../../scripts/console.py -L
 
 INCLUDE=-I.
 INCLUDE+=-I../src

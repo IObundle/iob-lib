@@ -145,7 +145,7 @@ def endFileTransfer():
     FRX = None
 
 def usage(message):
-    print('{}:{}'.format(PROGNAME, "usage: ./console -s <serial port> [ -f ] [ -L/--local ]"))
+    print('{}:{}'.format(PROGNAME, "usage: ./console.py -s <serial port> [ -f ] [ -L/--local ]"))
     cnsl_perror(message)
 
 def clean_exit():
