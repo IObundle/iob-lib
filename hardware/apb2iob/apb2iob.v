@@ -15,9 +15,6 @@ module apb2iob
     // APB slave interface
 `include "apb_s_port.vh"
     
-    `IOB_INPUT(iob_ready_nxt_i, 1),
-    `IOB_INPUT(iob_rvalid_nxt_i, 1),
-
     // IOb master interface
 `include "iob_m_port.vh"
 
@@ -59,7 +56,8 @@ module apb2iob
         end
 
         1: begin
-           if(!iob_ready_i) //wait until iob interface is ready
+           if (apb_enable_i)
+           if(!iob_ready_nxt_i) //wait until iob interface is ready
              pc_nxt = pc;
            else
              iob_avalid_nxt = 1'b0; //deassert valid - transaction will be done

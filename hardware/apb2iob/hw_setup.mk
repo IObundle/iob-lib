@@ -23,13 +23,13 @@ SRC+=$(BUILD_VSRC_DIR)/apb_s_s_portmap.vh
 
 # iob master port
 SRC+=$(BUILD_VSRC_DIR)/iob_m_port.vh
-%/iob_m_port.vh:
-	$(LIB_DIR)/scripts/if_gen.py iob_m_port '$(@D)/' ''
+$(BUILD_VSRC_DIR)/iob_m_port.vh: $(LIB_DIR)/hardware/apb2iob/iob_m_port.vh
+	cp $< $@
 
 #iob master portmap for instance
 SRC+=$(BUILD_VSRC_DIR)/iob_m_portmap.vh
-%/iob_m_portmap.vh:
-	$(LIB_DIR)/scripts/if_gen.py iob_m_portmap '$(@D)/' ''
+$(BUILD_VSRC_DIR)/iob_m_portmap.vh: $(LIB_DIR)/hardware/apb2iob/iob_m_portmap.vh
+	cp $< $@
 
 # iob wires to drive swreg instance
 SRC+=$(BUILD_VSRC_DIR)/iob_wire.vh
