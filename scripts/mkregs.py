@@ -257,13 +257,32 @@ def write_hwcode(table, out_dir, top):
     f_gen.write(f"`IOB_VAR(rvalid_int, 1)\n")
     f_gen.write(f"`IOB_VAR(wready_int, 1)\n")
     f_gen.write(f"`IOB_VAR(rready_int, 1)\n\n")
+    
+    #ready output
+    f_gen.write("//ready output\n")
+    f_gen.write("`IOB_VAR(ready_nxt, 1)\n")
+    f_gen.write("iob_reg_ae #(1,1) ready_reg_inst (clk_i, arst_i, en_i, ready_nxt, iob_ready_o);\n\n")
+    
+    #rvalid output
+    f_gen.write("//rvalid output\n")
+    f_gen.write("`IOB_VAR(rvalid_nxt, 1)\n")
+    f_gen.write("iob_reg_ae #(1,0) rvalid_reg_inst (clk_i, arst_i, en_i, rvalid_nxt, iob_rvalid_o);\n\n")
+    
+    #rdata output
+    f_gen.write("//rdata output\n")
+    f_gen.write(f"iob_reg_ae #({8*cpu_n_bytes},0) rdata_reg_inst (clk_i, arst_i, en_i, rdata_int, iob_rdata_o);\n\n")
+    
+    f_gen.write("`IOB_WIRE(pc, 1)\n")
+    f_gen.write("`IOB_VAR(pc_nxt, 1)\n")
+    f_gen.write("iob_reg_a #(1,0) pc_reg (clk_i, arst_i, pc_nxt, pc);\n\n")
 
     f_gen.write("`IOB_COMB begin\n")
 
     f_gen.write(f"\trdata_int = {8*cpu_n_bytes}'d0;\n")
-    f_gen.write(f"\t\trready_int = 1'b1;\n")
-    f_gen.write(f"\t\trvalid_int = 1'b1;\n")
-    f_gen.write(f"\t\twready_int = 1'b1;\n\n")
+    f_gen.write(f"\trready_int = 1'b1;\n")
+    f_gen.write(f"\trvalid_int = 1'b1;\n")
+    f_gen.write(f"\twready_int = 1'b1;\n\n")
+    
 
     #read register response
     for row in table:
@@ -303,58 +322,35 @@ def write_hwcode(table, out_dir, top):
                 # get wready
                 f_gen.write(f"\tif((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n")
                 f_gen.write(f"\t\twready_int = {name}_ready_i;\n\n")
+    
+    f_gen.write("\tready_nxt = 1'b1;\n")
+    f_gen.write("\trvalid_nxt = iob_rvalid_o;\n")
+    f_gen.write("\tpc_nxt = pc + 1;\n\n")
+    f_gen.write("\tcase(pc)\n")
+    f_gen.write("\t\t0: begin\n")
+    f_gen.write("\t\t\trvalid_nxt = 1'b0;\n")
+    f_gen.write("\t\t\tif(!iob_avalid_i)\n")
+    f_gen.write("\t\t\t\tpc_nxt=pc;\n")
+    f_gen.write("\t\t\telse\n")
+    f_gen.write("\t\t\t\tready_nxt= (|iob_wstrb_i)? wready_int: rready_int;\n")
+    f_gen.write("\t\tend\n")
+    f_gen.write("\t\tdefault: begin\n")
+    f_gen.write("\t\t\tready_nxt = (|iob_wstrb_i)? wready_int: rready_int;\n")
+    f_gen.write("\t\t\trvalid_nxt =  (|iob_wstrb_i)? 1'b0: rvalid_int;\n")
+    f_gen.write("\t\t\tif((|iob_wstrb_i)? !iob_ready_o: !rvalid_int)\n")
+    f_gen.write("\t\t\t\tpc_nxt = pc;\n")
+    f_gen.write("\t\tend\n")
+    f_gen.write("\tendcase\n")
 
     f_gen.write("end //IOB_COMB\n\n")
-
-
-    
-    #ready output
-    f_gen.write("//ready output\n")
-    f_gen.write("`IOB_VAR(ready_nxt, 1)\n")
-    f_gen.write("iob_reg_ae #(1,1) ready_reg_inst (clk_i, arst_i, en_i, ready_nxt, iob_ready_o);\n\n")
-
-    #rvalid output
-    f_gen.write("//rvalid output\n")
-    f_gen.write("`IOB_VAR(rvalid_nxt, 1)\n")
-    f_gen.write("iob_reg_ae #(1,0) rvalid_reg_inst (clk_i, arst_i, en_i, rvalid_nxt, iob_rvalid_o);\n\n")
- 
-    #rdata output
-    f_gen.write("//rdata output\n")
-    f_gen.write(f"iob_reg_ae #({8*cpu_n_bytes},0) rdata_reg_inst (clk_i, arst_i, en_i, rdata_int, iob_rdata_o);\n\n")
 
     #ready_nxt output
     f_gen.write("//ready_nxt output\n")
     f_gen.write("assign iob_ready_nxt_o = ready_nxt;\n")
  
-
     #rvalid_nxt output
     f_gen.write("//rvalid_nxt output\n")
-    f_gen.write("assign iob_rvalid_nxt_o = rvalid_nxt;\n")
- 
-
-    f_gen.write("`IOB_WIRE(pc, 1)\n")
-    f_gen.write("`IOB_VAR(pc_nxt, 1)\n")
-    f_gen.write("iob_reg_a #(1,0) pc_reg (clk_i, arst_i, pc_nxt, pc);\n\n")
-    f_gen.write("`IOB_COMB begin\n\n")
-    f_gen.write("\tready_nxt = 1;\n")
-    f_gen.write("\trvalid_nxt = iob_rvalid_o;\n")
-    f_gen.write("\tpc_nxt = pc + 1;\n\n")
-    f_gen.write("\tcase(pc)\n")
-    f_gen.write("\t\t0: begin\n")
-    f_gen.write("\t\t\trvalid_nxt = 0;\n")
-    f_gen.write("\t\t\tif(!iob_avalid_i)\n")
-    f_gen.write("\t\t\t\tpc_nxt=pc;\n")
-    f_gen.write("\t\t\telse\n")
-    f_gen.write("\t\t\t\tready_nxt= iob_wstrb_i? wready_int: rready_int;\n")
-    f_gen.write("\t\tend\n")
-    f_gen.write("\t\tdefault: begin\n")
-    f_gen.write("\t\t\tready_nxt = iob_wstrb_i? wready_int: rready_int;\n")
-    f_gen.write("\t\t\trvalid_nxt =  iob_wstrb_i? 1'b0: rvalid_int;\n")
-    f_gen.write("\t\t\tif(iob_wstrb_i? !iob_ready_o: !rvalid_int)\n")
-    f_gen.write("\t\t\t\tpc_nxt = pc;\n")
-    f_gen.write("\t\tend\n")
-    f_gen.write("\tendcase\n")
-    f_gen.write("end\n")
+    f_gen.write("assign iob_rvalid_nxt_o = rvalid_nxt;\n\n")
 
     f_gen.write("endmodule\n")
     f_gen.close()
