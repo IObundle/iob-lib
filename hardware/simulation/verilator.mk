@@ -7,6 +7,7 @@ VFLAGS+=-CFLAGS "-I../../../software/esrc"
 
 ifeq ($(VCD),1)
 VFLAGS+=--trace
+VFLAGS+=-DVCD -CFLAGS "-DVCD"
 endif
 
 SIM_SERVER=$(VSIM_SERVER)
