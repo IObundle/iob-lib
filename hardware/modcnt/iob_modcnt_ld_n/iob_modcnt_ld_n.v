@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module iob_modcnt_n_ld
+module iob_modcnt_ld_n
   #(
     parameter DATA_W = 32,
     parameter RST_VAL = 0
@@ -23,6 +23,6 @@ module iob_modcnt_n_ld
    wire                 cnt_rst;
    assign cnt_rst = rst_i | (data_o == (mod_i-1'b1));
    
-   iob_counter_n_ld #(DATA_W, RST_VAL) cnt0 (clk_i, arst_i, cnt_rst, en_i, ld_i, ld_val_i, data_o);
+   iob_counter_ld_n #(DATA_W, RST_VAL) cnt0 (clk_i, arst_i, cnt_rst, en_i, ld_i, ld_val_i, data_o);
    
 endmodule

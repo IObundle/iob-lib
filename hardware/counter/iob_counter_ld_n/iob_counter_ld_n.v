@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module iob_counter_n_ld
+module iob_counter_ld_n
   #(
     parameter DATA_W = 32,
     parameter RST_VAL = 0
