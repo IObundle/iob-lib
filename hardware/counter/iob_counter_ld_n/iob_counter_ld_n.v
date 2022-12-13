@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module iob_counter
+module iob_counter_ld_n
   #(
     parameter DATA_W = 32,
     parameter RST_VAL = 0
@@ -20,7 +20,7 @@ module iob_counter
    // prevent width mismatch
    localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
 
-   always @(posedge clk_i, posedge arst_i) begin
+   always @(negedge clk_i, posedge arst_i) begin
       if (arst_i) begin
          data_o <= RST_VAL_INT;
       end else if (rst_i) begin

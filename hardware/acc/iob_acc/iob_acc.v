@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module iob_counter_n
+module iob_acc
   #(
     parameter DATA_W = 32,
     parameter RST_VAL = 0
@@ -11,9 +11,7 @@ module iob_counter_n
     input                   rst_i,
     input                   en_i,
 
-    input                   ld_i,
-    input [DATA_W-1:0]      ld_val_i,
-
+    input [DATA_W-1:0]      incr_i,
     output reg [DATA_W-1:0] data_o
     );
 
@@ -25,10 +23,8 @@ module iob_counter_n
          data_o <= RST_VAL_INT;
       end else if (rst_i) begin
          data_o <= RST_VAL_INT;
-      end else if (ld_i) begin
-         data_o <= ld_val_i;
       end else if (en_i) begin
-         data_o <= data_o + 1'b1;
+         data_o <= data_o + incr_i;
       end
    end
 
