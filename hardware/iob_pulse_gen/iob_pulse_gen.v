@@ -28,8 +28,7 @@ module iob_pulse_gen
    assign cnt_en = start_detected & (cnt <= (START+DURATION)) & en_i;
 
    //counter
-   iob_counter #(WIDTH,0) cnt0 
-     (clk_i, arst_i, start_i, cnt_en, 1'b0, {WIDTH{1'b0}}, cnt);
+   iob_counter #(WIDTH,0) cnt0 (clk_i, arst_i, start_i, cnt_en, cnt);
 
    //pulse
    assign pulse_o = cnt_en & |cnt;
