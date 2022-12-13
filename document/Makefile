@@ -6,7 +6,7 @@
 SHELL = bash
 
 # include core basic info
-include ../info.mk
+include ../config_build.mk
 
 #include local doc makefile segment
 ifneq ($(wildcard doc_build.mk),)

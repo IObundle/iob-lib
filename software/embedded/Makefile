@@ -3,7 +3,7 @@
 # This makefile is used at build-time in $(BUILD_DIR)/software/embedded/Makefile
 #
 
-include ../../info.mk
+include ../../config_build.mk
 
 TEMPLATE_LDS=../template.lds
 
@@ -24,7 +24,6 @@ FW_LFLAGS+=$(LFLAGS) -Wl,-Map,firmware.map
 BOOT_LFLAGS+=$(LFLAGS) -Wl,-Map,boot.map
 LLIBS=-lgcc -lc -lnosys
 INCLUDES=-I. -I../esrc
-DEFINES=
 
 HDR=$(wildcard *.h)
 HDR+=$(wildcard ../esrc/*.h)

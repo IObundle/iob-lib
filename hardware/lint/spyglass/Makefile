@@ -5,7 +5,7 @@
 
 SHELL:=bash 
 
-include ../../../info.mk
+include ../../../config_build.mk
 #include the module's headers and sources
 VHDR+=$(wildcard ../../src/*.vh)
 VSRC+=$(wildcard ../../src/*.v)

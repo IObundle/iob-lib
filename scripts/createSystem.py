@@ -14,7 +14,8 @@ def insert_header_files(template_contents, peripherals_list, submodule_dirs):
             included_peripherals.append(instance['type'])
             # Import <corename>_setup.py module to get corename 'top'
             module = import_setup(submodule_dirs[instance['type']])
-            template_contents.insert(header_index, f'`include "{module.top}_swreg_def.vh"\n')
+            top = module.meta['name']
+            template_contents.insert(header_index, f'`include "{top}_swreg_def.vh"\n')
 
 
 #Creates system based on system.vt template 
