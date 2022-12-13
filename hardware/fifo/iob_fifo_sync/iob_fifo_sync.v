@@ -94,9 +94,10 @@ module iob_fifo_sync
    
    //FIFO level
    reg [ADDR_W:0]         level_nxt;
+   wire [ADDR_W:0]        level_int;
    iob_reg_are
      #(
-       .DATA_W(ADDR_W),
+       .DATA_W(ADDR_W+1),
        .RST_VAL(0)
        )
    level_reg0
@@ -105,21 +106,23 @@ module iob_fifo_sync
       .arst_i (arst_i),
       .rst_i  (rst_i),
       .en_i   (clk_en_i),
-      .data_i (level_nxt[0+:ADDR_W]),
-      .data_o (level_o)
+      .data_i (level_nxt),
+      .data_o (level_int)
       );
 
    `IOB_VAR(level_incr, (ADDR_W+1))
    `IOB_COMB begin
-      level_incr = level_o + w_incr;
-      level_nxt = {1'd0, level_o};
+      level_incr = level_int + w_incr;
+      level_nxt = level_int;
       if(w_en_int && (!r_en_int))
         level_nxt = level_incr;
       else if(w_en_int && r_en_int)
         level_nxt = level_incr - r_incr;
       else if (r_en_int) // (!w_en_int) && r_en_int
-        level_nxt = level_o - r_incr;
+        level_nxt = level_int - r_incr;
    end
+   
+   assign level_o = level_int[0+:ADDR_W];
 
    //FIFO empty
    `IOB_WIRE(r_empty_nxt, 1)
