@@ -1,7 +1,7 @@
 SHELL:=bash
 export
 
-include info.mk
+include config_build.mk
 
 # 
 # EMBEDDED SOFTWARE

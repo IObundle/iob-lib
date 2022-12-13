@@ -42,10 +42,6 @@ setup: debug
 
 $(BUILD_DIR):
 	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $@
-	echo "NAME=$(NAME)" > $@/info.mk
-	echo "VERSION=$(VERSION)" >> $@/info.mk
-	echo "BUILD_DIR_NAME=$(BUILD_DIR_NAME)" >> $@/info.mk
-	echo "FLOWS=$(FLOWS)" >> $@/info.mk
 	find $@ -name \*_setup.mk -delete
 	cp $(LIB_DIR)/build.mk $@/Makefile
 
