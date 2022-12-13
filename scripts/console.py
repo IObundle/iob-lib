@@ -5,8 +5,8 @@ import os
 import sys
 import importlib.util
 import time
-import curses.ascii
-import time
+import select
+from threading import Thread
 
 # Global variables
 ser = None
@@ -21,16 +21,16 @@ DC1 = b'\x11' # Device Control 1 <-> End of file transfers
 
 
 def tb_write(data, number_of_bytes = 1, is_file = False):
-    transfered_bytes = 0
+    transferred_bytes = 0
     write_percentage = 100
-    while(transfered_bytes < number_of_bytes):
+    while(transferred_bytes < number_of_bytes):
         while (os.path.getsize("./cnsl2soc") != 0): pass
         f = open('./cnsl2soc', "wb")
-        f.write(data[transfered_bytes].to_bytes(1, byteorder='little'))
+        f.write(data[transferred_bytes].to_bytes(1, byteorder='little'))
         f.flush()
-        transfered_bytes += 1
+        transferred_bytes += 1
         if (is_file):
-            new_percentage = int(100/number_of_bytes*transfered_bytes)
+            new_percentage = int(100/number_of_bytes*transferred_bytes)
             if(write_percentage!=new_percentage):
                 write_percentage = new_percentage
                 if (not write_percentage%10): print("%3d %c" % (write_percentage, '%'))
@@ -45,16 +45,16 @@ def tb_read_until(end = b'\x00'):
 
 def tb_read(number_of_bytes, is_file = False):
     data = b''
-    transfered_bytes = 0
+    transferred_bytes = 0
     read_percentage = 100
-    while(transfered_bytes < number_of_bytes):
+    while(transferred_bytes < number_of_bytes):
         f = open('./soc2cnsl', "rb")
         while (os.path.getsize("./soc2cnsl") == 0): pass
         byte = f.read(1)
         data += byte
-        transfered_bytes += 1
+        transferred_bytes += 1
         if (is_file):
-            new_percentage = int(100/number_of_bytes*transfered_bytes)
+            new_percentage = int(100/number_of_bytes*transferred_bytes)
             if(read_percentage!=new_percentage):
                 read_percentage = new_percentage
                 if (not read_percentage%10): print("%3d %c" % (read_percentage, '%'))
@@ -135,6 +135,17 @@ def cnsl_recvfile():
     print(PROGNAME, end = '')
     print(': file received'.format(file_size))
 
+def getUserInput():
+    stdin = sys.stdin
+    while(1):
+        if select.select([stdin], [], [], 0.5)[0]:
+            user_str = stdin.read(1)
+            if(user_str!=''):
+                if SerialFlag:
+                    ser.write(bytes(user_str, 'UTF-8'))
+                else:
+                    tb_write(bytes(user_str, 'UTF-8'))
+
 def endFileTransfer():
     # unset the Bytes used in IOb-SoC comunication protocol
     global DC1
@@ -145,7 +156,7 @@ def endFileTransfer():
     FRX = None
 
 def usage(message):
-    print('{}:{}'.format(PROGNAME, "usage: ./console -s <serial port> [ -f ] [ -L/--local ]"))
+    print('{}:{}'.format(PROGNAME, "usage: ./console.py -s <serial port> [ -f ] [ -L/--local ]"))
     cnsl_perror(message)
 
 def clean_exit():
@@ -186,7 +197,11 @@ def init_serial():
     # configure the serial connections (the parameters differs on the device connected to)
     ser = serial.Serial()
     ser.port = "/dev/usb-uart"         # serial port
-    ser.baudrate = 115200              # baudrate
+    if ('-b' in sys.argv):
+        if (len(sys.argv)<5): usage("PROGNAME: not enough program arguments")
+        ser.baudrate = sys.argv[sys.argv.index('-b')+1]              # baudrate
+    else:
+        ser.baudrate = 115200              # baudrate
     ser.bytesize = serial.EIGHTBITS    # number of bits per bytes
     ser.parity = serial.PARITY_NONE    # set parity check: no parity
     ser.stopbits = serial.STOPBITS_ONE # number of stop bits
@@ -241,6 +256,7 @@ def init_console():
 def main():
     load_fw = init_console()
     gotENQ = False
+    input_thread = Thread(target=getUserInput, args=[], daemon=True)
 
     # Reading the data from the serial port or FIFO files. This will be running in an infinite loop.
     while(True):
@@ -249,7 +265,6 @@ def main():
         # get byte from target
         if (not SerialFlag): byte = tb_read(1)
         elif (ser.isOpen()): byte = ser.read()
-
         # process command
         if (byte == ENQ):
             if (not gotENQ):
@@ -274,10 +289,13 @@ def main():
             cnsl_sendfile()
         elif (byte == DC1):
             print(PROGNAME, end = '')
-            print(': end of file transfers')
+            print(': end of file transfer')
             endFileTransfer()
+            print(PROGNAME, end = '')
+            print(': start reading user input')
+            input_thread.start()
         else:
-            print(str(byte, 'iso-8859-1'), end = '')
-            sys.stdout.flush()
+            print(str(byte, 'iso-8859-1'), end = '', flush=True)
+
 
 if __name__ == "__main__": main()
