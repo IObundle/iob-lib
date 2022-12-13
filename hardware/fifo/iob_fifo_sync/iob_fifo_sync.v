@@ -62,8 +62,6 @@ module iob_fifo_sync
       .arst_i   (arst_i),
       .rst_i    (rst_i),
       .en_i     (w_en_int),
-      .ld_i     (1'b0),
-      .ld_val_i ({W_ADDR_W{1'b0}}),
       .data_o   (w_addr)
       );
 
@@ -83,8 +81,6 @@ module iob_fifo_sync
       .arst_i   (arst_i),
       .rst_i    (rst_i),
       .en_i     (r_en_int),
-      .ld_i     (1'b0),
-      .ld_val_i ({R_ADDR_W{1'b0}}),
       .data_o   (r_addr)
       );
 
