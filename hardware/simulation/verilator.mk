@@ -2,6 +2,8 @@ VTOP?=$(NAME)
 
 VFLAGS+=--cc --exe -I. -I../src -Isrc --top-module $(VTOP)
 VFLAGS+=-Wno-lint
+# Include embedded headers
+VFLAGS+=-CFLAGS "-I../../../software/esrc"
 
 ifeq ($(VCD),1)
 VFLAGS+=--trace
@@ -19,5 +21,7 @@ exec:
 
 clean: gen-clean
 	@rm -rf obj_dir
+
+very-clean: clean
 
 .PHONY: comp exec clean
