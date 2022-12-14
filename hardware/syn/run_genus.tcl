@@ -14,10 +14,11 @@
 #
 # set DESIGN and hdl_search_path paths
 #
-source design.tcl
 source config.tcl
 
 set OUTPUTS_DIR "./results"
+
+set_db init_hdl_search_path $INCLUDE
 
 set_db stdout_log genus.log
 set_db information_level 7

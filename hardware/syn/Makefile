@@ -14,6 +14,8 @@ REMOTE_SYN_DIR=$(REMOTE_BUILD_DIR)/hardware/syn
 VHDR+=$(wildcard ../src/*.vh) $(wildcard ./src/*.vh)
 VSRC+=$(wildcard ../src/*.v) $(wildcard ./src/*.v)
 
+INCLUDE+=../src
+
 #include local syn segment
 ifneq ($(wildcard syn_build.mk),)
 include syn_build.mk
@@ -38,8 +40,10 @@ else
 endif
 
 config.tcl:
-	@echo "set NODE $(NODE)" > config.tcl
-	@echo "set VSRC [glob $(VSRC)]" >> config.tcl
+	@echo "set NODE $(NODE)" > $@
+	@echo "set DESIGN $(NAME)" >> $@
+	@echo "set INCLUDE [list $(INCLUDE)]" >> $@
+	@echo "set VSRC [glob $(VSRC)]" >> $@
 
 gen-clean:
 	find . -maxdepth 1 -type f -not \( -name Makefile -name -o -name *.tcl -o -name *.sdc \) -delete
