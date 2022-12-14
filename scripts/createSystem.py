@@ -20,12 +20,11 @@ def insert_header_files(template_contents, peripherals_list, submodule_dirs):
 
 #Creates system based on system.vt template 
 # root_dir: root directory of the repository
+# submodule_dirs: dictionary with directory of each submodule. Format: {"PERIPHERALCORENAME1":"PATH_TO_DIRECTORY", "PERIPHERALCORENAME2":"PATH_TO_DIRECTORY2"}
 # top: top name of the system
 # peripherals_list: list of dictionaries each of them describes a peripheral instance
 # out_file: path to output file
-def create_systemv(root_dir, top, peripherals_list, out_file):
-    submodule_dirs = get_submodule_directories(root_dir)
-
+def create_systemv(root_dir, submodule_dirs, top, peripherals_list, out_file):
     # Read template file
     template_file = open(root_dir+"/hardware/src/system.vt", "r")
     template_contents = template_file.readlines() 

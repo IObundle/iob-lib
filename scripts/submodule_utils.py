@@ -105,21 +105,10 @@ def get_build_lib(directory):
     return ""
 
 
-# Get submodule directories from variables defined in config_setup.mk
-# This function replaces "$(SOC_DIR)" by "." in the directories
-# Returns dictionary with the directory for each variable found in config_setup.mk with suffix "_DIR"
-#TODO: Remove dependency from config_setup.mk; Get directories from <corename>_setup.py
+# Return submodule_dirs dictionary from iob_*_setup.py in given directory
 def get_submodule_directories(root_dir):
-    with open(root_dir+"/config_setup.mk", "r") as file:
-        lines = file.readlines()
-
-    directories = {}
-    for line in lines:
-        result = re.search("^\s*(\w+)_DIR\s*.?=\s*([^\s]+)", line)
-        if result is not None:
-            directories[result.group(1)] = result.group(2).replace("$(SOC_DIR)",".")
-
-    return directories
+    module=import_setup(root_dir)
+    return module.submodule_dirs
 
 # Replaces a verilog parameter in a string with its value.
 # The value is determined based on default value and the instance parameters given (that may override the default)
