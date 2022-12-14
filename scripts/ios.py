@@ -68,8 +68,7 @@ def generate_ios_header(ios, top_module, out_dir):
 #    {'name': 'instance_name', 'descr':'instance description', 'ports': [
 #        {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
 #    ]}
-def get_peripheral_ios(peripherals_list, root_dir):
-    submodule_dirs = get_submodule_directories(root_dir)
+def get_peripheral_ios(peripherals_list, submodule_dirs, root_dir):
     port_list = {}
     # Get port list for each type of peripheral used
     for instance in peripherals_list:
