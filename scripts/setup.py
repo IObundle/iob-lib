@@ -74,5 +74,4 @@ def setup_submodule(build_dir, submodule_dir):
     module = import_setup(submodule_dir)
 
     # Call setup function for this submodule
-    setup(module.meta, module.confs, module.ios, module.regs if hasattr(module,'regs') else None, module.blocks, build_dir=build_dir, gen_tex=False)
-
+    module.main(build_dir=build_dir, gen_tex=False)
