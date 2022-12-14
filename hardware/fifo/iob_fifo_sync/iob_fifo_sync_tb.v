@@ -36,7 +36,7 @@ module iob_fifo_sync_tb;
    wire                r_empty;
 
    //FIFO level
-   wire [ADDR_W-1:0]     level;
+   wire [ADDR_W:0]     level;
 
    parameter clk_per = 10; // clk period = 10 timeticks
    always
