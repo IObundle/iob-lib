@@ -8,8 +8,8 @@ include $(LIB_DIR)/hardware/include/hw_setup.mk
 
 # Sources
 SRC+=$(BUILD_VSRC_DIR)/apb2iob.v
-$(BUILD_VSRC_DIR)/apb2iob.v: $(LIB_DIR)/hardware/apb2iob/apb2iob.v
-	cp $< $(BUILD_VSRC_DIR)
+%/apb2iob.v: $(LIB_DIR)/hardware/apb2iob/apb2iob.v
+	cp $< $@
 
 # APB slave port
 SRC+=$(BUILD_VSRC_DIR)/apb_s_port.vh
@@ -23,12 +23,12 @@ SRC+=$(BUILD_VSRC_DIR)/apb_s_s_portmap.vh
 
 # iob master port
 SRC+=$(BUILD_VSRC_DIR)/iob_m_port.vh
-$(BUILD_VSRC_DIR)/iob_m_port.vh: $(LIB_DIR)/hardware/apb2iob/iob_m_port.vh
+%/iob_m_port.vh: $(LIB_DIR)/hardware/apb2iob/iob_m_port.vh
 	cp $< $@
 
 #iob master portmap for instance
 SRC+=$(BUILD_VSRC_DIR)/iob_m_portmap.vh
-$(BUILD_VSRC_DIR)/iob_m_portmap.vh: $(LIB_DIR)/hardware/apb2iob/iob_m_portmap.vh
+%/iob_m_portmap.vh: $(LIB_DIR)/hardware/apb2iob/iob_m_portmap.vh
 	cp $< $@
 
 # iob wires to drive swreg instance

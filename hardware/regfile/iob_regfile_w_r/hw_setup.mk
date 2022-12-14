@@ -10,7 +10,7 @@ include $(LIB_DIR)/hardware/reg/iob_reg_are/hw_setup.mk
 SRC+=$(BUILD_VSRC_DIR)/iob_regfile_w_r.v
 
 # Copy the sources to build directory
-$(BUILD_VSRC_DIR)/iob_regfile_w_r.v: $(LIB_DIR)/hardware/regfile/iob_regfile_w_r/iob_regfile_w_r.v
-	cp $< $(BUILD_VSRC_DIR)
+%/iob_regfile_w_r.v: $(LIB_DIR)/hardware/regfile/iob_regfile_w_r/iob_regfile_w_r.v
+	cp $< $@
 
 endif

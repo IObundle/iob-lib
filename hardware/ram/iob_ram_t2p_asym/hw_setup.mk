@@ -7,10 +7,10 @@ HW_MODULES+=iob_ram_t2p_asym
 include $(LIB_DIR)/hardware/ram/iob_ram_t2p/hw_setup.mk
 
 # Sources
-SRC+=$(BUILD_VSRC_DIR)/iob_ram_t2p_asym.v
+SRC+=$(BUILD_SIM_DIR)/src/iob_ram_t2p_asym.v
 
 # Copy the sources to the build directory
-$(BUILD_VSRC_DIR)/iob_ram_t2p_asym.v: $(LIB_DIR)/hardware/ram/iob_ram_t2p_asym/iob_ram_t2p_asym.v
-	cp $< $(BUILD_VSRC_DIR)
+%/iob_ram_t2p_asym.v: $(LIB_DIR)/hardware/ram/iob_ram_t2p_asym/iob_ram_t2p_asym.v
+	cp $< $@
 
 endif

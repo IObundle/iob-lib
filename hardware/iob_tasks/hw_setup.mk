@@ -5,7 +5,7 @@ HW_MODULES+=iob_tasks
 
 # Sources
 SRC+=$(BUILD_SIM_DIR)/src/iob_tasks.vh
-$(BUILD_SIM_DIR)/src/iob_tasks.vh: $(LIB_DIR)/hardware/iob_tasks/iob_tasks.vh
+%/iob_tasks.vh: $(LIB_DIR)/hardware/iob_tasks/iob_tasks.vh
 	cp $< $@
 
 endif

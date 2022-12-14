@@ -7,7 +7,7 @@ HW_MODULES+=iob_split
 SRC+=$(BUILD_VSRC_DIR)/iob_split.v
 
 # Copy the sources to the build directory 
-$(BUILD_VSRC_DIR)/iob_split.v: $(LIB_DIR)/hardware/iob_split/iob_split.v
-	cp $< $(BUILD_VSRC_DIR)
+/iob_split.v: $(LIB_DIR)/hardware/iob_split/iob_split.v
+	cp $< $@
 
 endif

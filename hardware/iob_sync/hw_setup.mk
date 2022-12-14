@@ -7,7 +7,7 @@ HW_MODULES+=iob_sync
 SRC+=$(BUILD_VSRC_DIR)/iob_sync.v
 
 # Copy sources to the build directory
-$(BUILD_VSRC_DIR)/iob_sync.v: $(LIB_DIR)/hardware/iob_sync/iob_sync.v
-	cp $< $(BUILD_VSRC_DIR)
+%/iob_sync.v: $(LIB_DIR)/hardware/iob_sync/iob_sync.v
+	cp $< $@
 
 endif

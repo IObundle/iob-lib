@@ -7,8 +7,8 @@ HW_MODULES+=iob_clkbuf
 SRC+=$(BUILD_VSRC_DIR)/iob_clkbuf.v
 
 # Copy the sources to the build directoy 
-$(BUILD_VSRC_DIR)/iob_clkbuf.v: $(LIB_DIR)/hardware/iob_clkbuf/iob_clkbuf.v
-	cp $< $(BUILD_VSRC_DIR)
+%/iob_clkbuf.v: $(LIB_DIR)/hardware/iob_clkbuf/iob_clkbuf.v
+	cp $< $@
 
 endif
 

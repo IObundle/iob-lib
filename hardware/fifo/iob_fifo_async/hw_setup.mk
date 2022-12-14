@@ -15,7 +15,7 @@ include $(LIB_DIR)/hardware/fifo/iob_gray2bin/hw_setup.mk
 SRC+=$(BUILD_VSRC_DIR)/iob_fifo_async.v
 
 # Copy the sources to the build directory
-$(BUILD_VSRC_DIR)/iob_fifo_async.v: $(LIB_DIR)/hardware/fifo/iob_fifo_async/iob_fifo_async.v
-	cp $< $(BUILD_VSRC_DIR)
+%/iob_fifo_async.v: $(LIB_DIR)/hardware/fifo/iob_fifo_async/iob_fifo_async.v
+	cp $< $@
 
 endif

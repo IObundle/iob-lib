@@ -65,20 +65,7 @@ set_db max_cpus_per_server 6
 
 # general setup
 #----------------------------------------------------------------------
-#set_db script_search_path  .
-#set_db init_hdl_search_path  "./src"
-#set_db use_current_dir_before_hdl_search_path false
-#
-#
 set_db auto_super_thread true
-#set_db super_thread_servers [string repeat "localhost " 4] 
-
-if {[file exists /proc/cpuinfo]} {
-  sh grep "model name" /proc/cpuinfo
-  sh grep "cpu MHz"    /proc/cpuinfo
-}
-
-puts "Hostname : [info hostname]"
 
 set DATE [clock format [clock seconds] -format "%b%d-%T"]
 
@@ -86,11 +73,6 @@ if {![file exists ${OUTPUTS_DIR}]} {
   file mkdir ${OUTPUTS_DIR}
   puts "Creating directory ${OUTPUTS_DIR}"
 }
-
-set DESIGNSDC_PATH "."
-set DESIGNSDC "${DESIGNSDC_PATH}/${DESIGN}.sdc"
-
-
 
 #load the library 
 #----------------------------------------------------------------------
@@ -105,15 +87,16 @@ if {[file exists $NODE/mems/genus.mems.tcl]} {
 # load and elaborate the design
 #----------------------------------------------------------------------
 #
-puts "The hdl search path is: "
-set JUNK [get_db init_hdl_search_path]
-puts $JUNK
 
 #
-# verilog source files, defines and includes
+# verilog source files, includes, design and node
 #
 echo "\n\n"
 echo "NODE=" $NODE
+echo "\n\n"
+echo "DESIGN=" $DESIGN
+echo "\n\n"
+echo "INCLUDE=" $INCLUDE
 echo "\n\n"
 echo "VSRC=" $VSRC
 echo "\n\n"
@@ -134,7 +117,7 @@ check_design -unresolved
 
 # add optimization constraints
 #----------------------------------------------------------------------
-read_sdc -stop_on_error $DESIGNSDC
+read_sdc -stop_on_error $DESIGN.sdc
 
 check_timing_intent 
 
@@ -174,9 +157,6 @@ report_clocks > $OUTPUTS_DIR/${DESIGN}_clk.rpt
 
 report_timing -max_paths 10 > $OUTPUTS_DIR/${DESIGN}_timing.rpt
 
-#Genus 17 and 18
-#report_power > $OUTPUTS_DIR/${DESIGN}_power.rpt
-#Genus 19
 report_power -by_hierarchy -format %.2f -levels 2  -unit uW  > $OUTPUTS_DIR/${DESIGN}_power.rpt
 
 report_gates -power > $OUTPUTS_DIR/${DESIGN}_gates-power.rpt
@@ -187,6 +167,5 @@ puts "============================"
 puts "Synthesis Finished ........."
 puts "============================"
 
-file rename -force [get_db stdout_log] ${OUTPUTS_DIR}/.
 timestat FINAL
 quit

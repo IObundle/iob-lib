@@ -7,8 +7,8 @@ HW_MODULES+=iob_gray2bin
 SRC+=$(BUILD_VSRC_DIR)/iob_gray2bin.v
 
 # Copy the sources to the build directory
-$(BUILD_VSRC_DIR)/iob_gray2bin.v: $(LIB_DIR)/hardware/fifo/iob_gray2bin/iob_gray2bin.v
-	cp $< $(BUILD_VSRC_DIR)
+%/iob_gray2bin.v: $(LIB_DIR)/hardware/fifo/iob_gray2bin/iob_gray2bin.v
+	cp $< $@
 
 endif
 

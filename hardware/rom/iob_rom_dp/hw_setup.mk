@@ -4,11 +4,11 @@ ifeq ($(filter iob_rom_dp, $(HW_MODULES)),)
 HW_MODULES+=iob_rom_dp
 
 # Sources
-SRC+=$(BUILD_VSRC_DIR)/iob_rom_dp.v
+SRC+=$(BUILD_SIM_DIR)/src/iob_rom_dp.v
 
 # Copy sources to build directory
-$(BUILD_VSRC_DIR)/iob_rom_dp.v: $(LIB_DIR)/hardware/rom/iob_rom_dp/iob_rom_dp.v
-	cp $< $(BUILD_VSRC_DIR)
+%/iob_rom_dp.v: $(LIB_DIR)/hardware/rom/iob_rom_dp/iob_rom_dp.v
+	cp $< $@
 
 endif
 
