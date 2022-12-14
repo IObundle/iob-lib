@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import subprocess
 from os import path, listdir
 import mk_configuration as mk_conf
 import mkregs
@@ -20,10 +21,16 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, build_dir=None
 
     top = meta_data['name']
     version = meta_data['version']
+
+    print(build_dir)
     #build directory
-    if not build_dir:
+    if (build_dir==None):
+        print('hello')
         build_dir = f"../{top}_{version}"
-    mk_conf.config_build_mk(confs, meta_data, build_dir)
+        subprocess.call(["rsync", "-avz", "--exclude", ".git", "--exclude", "submodules", "--exclude", ".gitmodules", "--exclude", ".github", ".", build_dir])
+        subprocess.call(["find", build_dir, "-name", "*_setup*", "-delete"])
+        subprocess.call(["cp", "./submodules/LIB/build.mk", f"{build_dir}/Makefile"])
+        mk_conf.config_build_mk(confs, meta_data, build_dir)
     
     #build registers table
     if regs:

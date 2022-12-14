@@ -40,13 +40,9 @@ BUILD_SW_PYTHON_DIR = $(BUILD_DIR)/scripts
 
 
 setup: debug
-	./$(NAME)_setup.py
 
 $(BUILD_DIR):
-	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $@
-	find $@ -name \*_setup.mk -delete
-	cp $(LIB_DIR)/build.mk $@/Makefile
-
+	./$(NAME)_setup.py
 #
 #HARDWARE
 #
