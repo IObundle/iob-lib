@@ -28,15 +28,15 @@ $(VHDR) $(VSRC):
 run: clean $(NAME)_files.list
 ifeq ($(LINT_SERVER),)
 ifneq ($(ALINT_INIT_SCRIPT),)
-	set -e; source $(ALINT_INIT_SCRIPT); echo exit | ./run
+	set -e; source $(ALINT_INIT_SCRIPT); echo exit | alintcon -batch -do alintpro.tcl
 else
-	echo exit | ./run
+	echo exit | alintcon -batch -do alintpro.tcl
 endif
 else
 	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync -avz --delete --exclude .git $(LINT_SYNC_FLAGS) ../../.. $(LINT_USER)@$(LINT_SERVER):$(REMOTE_BUILD_DIR)
 	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hardware/lint/alint run'
-	scp $(LINT_SCP_FLAGS) $(LINT_USER)@$(LINT_SERVER):$(REMOTE_BUILD_DIR)/hardware/lint/alint/violation.* .
+	scp $(LINT_SCP_FLAGS) $(LINT_USER)@$(LINT_SERVER):$(REMOTE_BUILD_DIR)/hardware/lint/alint/violations.* .
 endif
 
 clean:

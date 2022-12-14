@@ -18,9 +18,9 @@ puts "Reading files"
 
 
 #includes
-project.pref.vlogdirs -path verilog/
+project.pref.vlogdirs -path ../../src/
 
-workspace.file.add -destination $PRJ -f $TOP_files.list
+workspace.file.add -destination $PRJ -f IOB_CORE_NAME_files.list
 
 
 project.pref.toplevels -top $TOP
