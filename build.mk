@@ -90,6 +90,18 @@ fpga-clean:
 	make -C $(FPGA_DIR) clean
 endif
 
+#
+# SYN
+#
+ifneq ($(filter syn, $(FLOWS)),)
+SYN_DIR=hardware/syn
+syn-build:
+	make -C $(SYN_DIR) build
+
+syn-clean:
+	make -C $(SYN_DIR) clean
+endif
+
 
 #
 # DOCUMENT

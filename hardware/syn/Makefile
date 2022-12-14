@@ -1,0 +1,52 @@
+# (c) 2022-Present IObundle, Lda, all rights reserved
+#
+# This makefile is used at build-time
+#
+
+SHELL:=bash
+
+include ../../config_build.mk
+
+REMOTE_BUILD_DIR=$(USER)/sandbox/$(BUILD_DIR_NAME)
+REMOTE_SYN_DIR=$(REMOTE_BUILD_DIR)/hardware/syn
+
+#include the module's headers and sources
+VHDR+=$(wildcard ../src/*.vh) $(wildcard ./src/*.vh)
+VSRC+=$(wildcard ../src/*.v) $(wildcard ./src/*.v)
+
+#include local syn segment
+ifneq ($(wildcard syn_build.mk),)
+include syn_build.mk
+endif
+
+#select node
+#default node
+NODE?=tsmc_cln28hpc
+include $(NODE)/$(NODE).mk
+
+UFLAGS+=COV=$(COV)
+UFLAGS+=COV_TEST=$(COV_TEST)
+
+build: $(VHDR) $(VSRC) config.tcl
+ifeq ($(SYN_SERVER),)
+	make synth
+else
+	ssh $(SYN_SSH_FLAGS) $(SYN_USER)@$(SYN_SERVER) 'if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi'
+	rsync $(SYN_SYNC_FLAGS) -avz --force --delete ../.. $(SYN_USER)@$(SYN_SERVER):$(REMOTE_BUILD_DIR)
+	ssh $(SYN_SSH_FLAGS) -Y -C $(SYN_USER)@$(SYN_SERVER) 'make -C $(REMOTE_SYN_DIR) $@ NODE=$(NODE) $(UFLAGS)'
+	scp $(SYN_SCP_FLAGS) $(SYN_USER)@$(SYN_SERVER):$(REMOTE_SYN_DIR)/*.log .
+endif
+
+config.tcl:
+	@echo "set NODE $(NODE)" > config.tcl
+	@echo "set VSRC [glob $(VSRC)]" >> config.tcl
+
+gen-clean:
+	find . -maxdepth 1 -type f -not \( -name Makefile -name -o -name *.tcl -o -name *.sdc \) -delete
+	@rm -f config.tcl
+	@rm -f ../../*.vh
+ifneq ($(SYN_SERVER),)
+	ssh $(SYN_SSH_FLAGS) $(SYN_USER)@$(SYN_SERVER) 'if [ -f $(REMOTE_SYN_DIR)/Makefile ]; then make -C $(REMOTE_SYN_DIR) $@; fi'
+endif
+
+.PHONY: run gen-clean config.tcl
