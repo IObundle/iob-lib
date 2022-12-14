@@ -37,12 +37,24 @@ endif
 # LINTER
 #
 ifneq ($(filter lint, $(FLOWS)),)
-LINT_DIR=hardware/lint/spyglass
-lint-run:
-	make -C $(LINT_DIR) run
+SPYGLASS_DIR=hardware/lint/spyglass
+spyglass-run:
+	make -C $(SPYGLASS_DIR) run
 
-lint-clean:
-	make -C $(LINT_DIR) clean
+spyglass-clean:
+	make -C $(SPYGLASS_DIR) clean
+endif
+
+#
+#CDC LINTER
+#
+ifneq ($(filter alint, $(FLOWS)),)
+ALINT_DIR=hardware/lint/alint
+alint-run:
+	make -C $(ALINT_DIR) run
+
+alint-clean:
+	make -C $(ALINT_DIR) clean
 endif
 
 #
@@ -141,7 +153,8 @@ clean: fw-clean pc-emul-clean lint-clean sim-clean fpga-clean doc-clean
 
 .PHONY: fw-build \
 	pc-emul-build pc-emul-run \
-	lint-run lint-clean \
+	spyglass-run spyglass-clean \
+	alint-run alint-clean \
 	sim-build sim-run sim-debug \
 	fpga-build fpga-debug \
 	doc-build doc-debug \

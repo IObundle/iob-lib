@@ -63,7 +63,7 @@ ug.pdf: debug results ug_figs ugtop.tex
 ugtop.tex:
 	if [ -f confs_tab.tex ]; then echo "\def\CONFS{Y}" >> $@; fi
 	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi
-	if [ -f *_swreg_tab.tex ]; then echo "\def\SWREG{Y}" >> $@; fi
+	if ls *_swreg_tab.tex > /dev/null 2>&1; then echo "\def\SWREG{Y}" >> $@; fi
 	if [ $(ASICSYNTH) == 1 ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
 	make doctop DOC=ug
 
