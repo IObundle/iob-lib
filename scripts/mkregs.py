@@ -6,6 +6,7 @@
 import sys
 from math import ceil, log
 from latex import write_table
+import re
 
 cpu_n_bytes = 4
 core_addr_w = None
@@ -509,13 +510,17 @@ def compute_n_bits_value(n_bits):
         if type(n_bits)==int:
             return n_bits
         else:
+            n_bits_backup=n_bits
+            # Replace every parameter/macro found in string by its max value (worst case scenario)
             for param in config:
-                if param['name']==n_bits:
-                    try:
-                        return int(param['val'])
-                    except:
-                        return int(param['max'])
-        sys.exit(f"Error: register 'n_bits':'{n_bits}' is not well defined.")
+                if param['name'] in n_bits:
+                    #Replace parameter/macro by its max value (worst case scenario)
+                    n_bits = re.sub(f"((?:^.*[^a-zA-Z_`])|^)`?{param['name']}((?:[^a-zA-Z_].*$)|$)",f"\\g<1>{param['max']}\\g<2>",n_bits)
+            # Try to calculate string as it should only contain numeric values
+            try:
+                return eval(n_bits)
+            except:
+                sys.exit(f"Error: register 'n_bits':'{n_bits_backup}' with value '{n_bits}' is not well defined.")
 
 # compute address
 def compute_addr(table, no_overlap):
