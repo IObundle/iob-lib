@@ -579,6 +579,6 @@ def generate_regs_tex(regs, regs_with_addr, out_dir):
             tex_table.append([reg['name'].replace('_','\_'), reg['type'],
                              # Find address of matching register in regs_with_addr list
                              next(register['addr'] for register in regs_with_addr if register['name'] == reg['name']),
-                             reg['n_bits'], reg['rst_val'], reg['descr']])
+                             str(reg['n_bits']).replace('_','\_'), str(reg['rst_val']).replace('_','\_'), reg['descr'].replace('_','\_')])
 
         write_table(f"{out_dir}/{table['name']}_swreg",tex_table)
