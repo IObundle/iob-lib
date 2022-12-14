@@ -27,7 +27,8 @@ BUILD_EMB_DIR = $(BUILD_DIR)/software/embedded
 BUILD_PC_DIR = $(BUILD_DIR)/software/pc-emul
 BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
-BUILD_LINT_DIR = $(BUILD_DIR)/hardware/lint/spyglass
+SPYGLASS_LINT_DIR = $(BUILD_DIR)/hardware/lint/spyglass
+BUILD_ALINT_DIR = $(BUILD_DIR)/hardware/lint/alint
 
 BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
 BUILD_PSRC_DIR = $(BUILD_DIR)/software/psrc
@@ -119,8 +120,17 @@ endif
 #lint
 #copy lint files from LIB 
 ifneq ($(wildcard hardware/lint/spyglass),)
-SRC+=$(patsubst $(LIB_DIR)/hardware/lint/spyglass/%, $(BUILD_LINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/spyglass/*))
-$(BUILD_LINT_DIR)/%: $(LIB_DIR)/hardware/lint/spyglass/%
+SRC+=$(patsubst $(LIB_DIR)/hardware/lint/spyglass/%, $(SPYGLASS_LINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/spyglass/*))
+$(SPYGLASS_LINT_DIR)/%: $(LIB_DIR)/hardware/lint/spyglass/%
+	sed 's/IOB_CORE_NAME/$(NAME)/g' $< > $@
+
+endif
+
+#Alint
+#copy Alint files from LIB 
+ifneq ($(wildcard hardware/lint/alint),)
+SRC+=$(patsubst $(LIB_DIR)/hardware/lint/alint/%, $(BUILD_ALINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/alint/*))
+$(BUILD_ALINT_DIR)/%: $(LIB_DIR)/hardware/lint/alint/%
 	sed 's/IOB_CORE_NAME/$(NAME)/g' $< > $@
 
 endif

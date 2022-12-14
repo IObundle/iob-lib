@@ -12,11 +12,11 @@ VSRC+=$(wildcard ../../src/*.v)
 
 REMOTE_BUILD_DIR=$(USER)/sandbox/$(BUILD_DIR_NAME)
 
-LINT_SERVER=$(SYNOPSYS_SERVER)
-LINT_USER=$(SYNOPSYS_USER)
-LINT_SSH_FLAGS=$(SYNOPSYS_SSH_FLAGS)
-LINT_SCP_FLAGS=$(SYNOPSYS_SCP_FLAGS)
-LINT_SYNC_FLAGS=$(SYNOPSYS_SYNC_FLAGS)
+LINT_SERVER=$(ALINT_SERVER)
+LINT_USER=$(ALINT_USER)
+LINT_SSH_FLAGS=$(ALINT_SSH_FLAGS)
+LINT_SCP_FLAGS=$(ALINT_SCP_FLAGS)
+LINT_SYNC_FLAGS=$(ALINT_SYNC_FLAGS)
 
 $(NAME)_files.list: $(VHDR) $(VSRC)
 
@@ -27,18 +27,21 @@ $(VHDR) $(VSRC):
 
 run: clean $(NAME)_files.list
 ifeq ($(LINT_SERVER),)
-	echo exit | spyglass -shell -project iob_lint.prj -goals "lint/lint_rtl"
+ifneq ($(ALINT_INIT_SCRIPT),)
+	set -e; source $(ALINT_INIT_SCRIPT); echo exit | ./run
+else
+	echo exit | ./run
+endif
 else
 	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync -avz --delete --exclude .git $(LINT_SYNC_FLAGS) ../../.. $(LINT_USER)@$(LINT_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hardware/lint/spyglass run'
-	mkdir -p reports
-	scp $(LINT_SCP_FLAGS) $(LINT_USER)@$(LINT_SERVER):$(REMOTE_BUILD_DIR)/hardware/lint/spyglass/iob_lint/consolidated_reports/$(NAME)_lint_lint_rtl/*.rpt reports/.
+	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) 'make -C $(REMOTE_BUILD_DIR)/hardware/lint/alint run'
+	scp $(LINT_SCP_FLAGS) $(LINT_USER)@$(LINT_SERVER):$(REMOTE_BUILD_DIR)/hardware/lint/alint/violation.* .
 endif
 
 clean:
 	rm -rf $(NAME)_files.list
-	rm -rf reports
+	rm -f violation.*
 
 debug:
 	@echo $(VHDR)
