@@ -5,6 +5,8 @@ VFLAGS+=-Wno-lint
 # Include embedded headers
 VFLAGS+=-CFLAGS "-I../../../software/esrc"
 
+VFLAGS+=$(DEFINES)
+
 ifeq ($(VCD),1)
 VFLAGS+=--trace
 VFLAGS+=-DVCD -CFLAGS "-DVCD"
