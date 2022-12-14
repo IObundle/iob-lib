@@ -82,6 +82,6 @@ def config_build_mk(defines, meta_data, build_dir):
 def generate_confs_tex(confs, out_dir):
     tex_table = []
     for conf in confs:
-        tex_table.append([conf['name'].replace('_','\_'), conf['type'], conf['min'], conf['val'].replace('_','\_'), conf['max'], conf['descr']])
+        tex_table.append([conf['name'].replace('_','\_'), conf['type'], conf['min'], conf['val'].replace('_','\_'), conf['max'], conf['descr'].replace('_','\_')])
 
     write_table(f"{out_dir}/confs",tex_table)
