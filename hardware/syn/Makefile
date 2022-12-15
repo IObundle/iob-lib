@@ -14,6 +14,7 @@ REMOTE_SYN_DIR=$(REMOTE_BUILD_DIR)/hardware/syn
 VHDR+=$(wildcard ../src/*.vh) $(wildcard ./src/*.vh)
 VSRC+=$(wildcard ../src/*.v) $(wildcard ./src/*.v)
 
+INCLUDE+=.
 INCLUDE+=../src
 
 #include local syn segment
@@ -37,20 +38,21 @@ else
 	rsync $(SYN_SYNC_FLAGS) -avz --force --delete ../.. $(SYN_USER)@$(SYN_SERVER):$(REMOTE_BUILD_DIR)
 	ssh $(SYN_SSH_FLAGS) -Y -C $(SYN_USER)@$(SYN_SERVER) 'make -C $(REMOTE_SYN_DIR) $@ NODE=$(NODE) $(UFLAGS)'
 	scp $(SYN_SCP_FLAGS) $(SYN_USER)@$(SYN_SERVER):$(REMOTE_SYN_DIR)/*.log .
+	scp $(SYN_SCP_FLAGS) $(SYN_USER)@$(SYN_SERVER):$(REMOTE_SYN_DIR)/$(OUTPUT_DIR)/*.rpt .
 endif
 
 config.tcl:
 	@echo "set NODE $(NODE)" > $@
 	@echo "set DESIGN $(NAME)" >> $@
+	@echo "set OUTPUT_DIR $(OUTPUT_DIR)" >> $@
 	@echo "set INCLUDE [list $(INCLUDE)]" >> $@
 	@echo "set VSRC [glob $(VSRC)]" >> $@
 
 gen-clean:
-	find . -maxdepth 1 -type f -not \( -name Makefile -name -o -name *.tcl -o -name *.sdc \) -delete
-	@rm -f config.tcl
-	@rm -f ../../*.vh
+	find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.tcl -o -name \*.sdc \) -delete
+	@rm -f ../../*.vh config.tcl
 ifneq ($(SYN_SERVER),)
-	ssh $(SYN_SSH_FLAGS) $(SYN_USER)@$(SYN_SERVER) 'if [ -f $(REMOTE_SYN_DIR)/Makefile ]; then make -C $(REMOTE_SYN_DIR) $@; fi'
+	ssh $(SYN_SSH_FLAGS) $(SYN_USER)@$(SYN_SERVER) 'if [ -f $(REMOTE_SYN_DIR)/Makefile ]; then make -C $(REMOTE_SYN_DIR) clean; fi'
 endif
 
 .PHONY: run gen-clean config.tcl
