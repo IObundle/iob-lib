@@ -4,11 +4,11 @@ ifeq ($(filter iob_ram_t2p, $(HW_MODULES)),)
 HW_MODULES+=iob_ram_t2p
 
 # Sources
-SRC+=$(BUILD_VSRC_DIR)/iob_ram_t2p.v
+SRC+=$(BUILD_SIM_DIR)/src/iob_ram_t2p.v
 
 # Copy the sources to the build directory
-$(BUILD_VSRC_DIR)/iob_ram_t2p.v: $(LIB_DIR)/hardware/ram/iob_ram_t2p/iob_ram_t2p.v
-	cp $< $(BUILD_VSRC_DIR)
+$(BUILD_SIM_DIR)/src/iob_ram_t2p.v: $(LIB_DIR)/hardware/ram/iob_ram_t2p/iob_ram_t2p.v
+	cp $< $@
 
 endif
 

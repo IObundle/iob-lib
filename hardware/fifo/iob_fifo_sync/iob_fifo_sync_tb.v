@@ -109,11 +109,11 @@ module iob_fifo_sync_tb;
       end
       $display("INFO: write proc: w_full=1 as expected");
 
-      if(level != 0) begin
-        $display("ERROR: write proc: expecting level = 0, but got level=%d", level);
+      if(level != 2**ADDR_W) begin
+        $display("ERROR: write proc: expecting level = %.0f, but got level=%d", 2**ADDR_W, level);
          $finish;
       end
-      $display("INFO: write proc: level = 0 as expected");
+      $display("INFO: write proc: level = %.0f as expected", 2**ADDR_W);
 
       //enable reads and wait for empty
       w_r_en = 1;

@@ -6,7 +6,7 @@ HW_MODULES+=axil2iob
 # Sources
 SRC+=$(BUILD_VSRC_DIR)/axil2iob.v
 $(BUILD_VSRC_DIR)/axil2iob.v: $(LIB_DIR)/hardware/axil2iob/axil2iob.v
-	cp $< $(BUILD_VSRC_DIR)
+	cp $< $@
 
 # axil slave port
 SRC+=$(BUILD_VSRC_DIR)/axil_s_port.vh

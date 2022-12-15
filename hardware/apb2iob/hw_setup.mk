@@ -9,7 +9,7 @@ include $(LIB_DIR)/hardware/include/hw_setup.mk
 # Sources
 SRC+=$(BUILD_VSRC_DIR)/apb2iob.v
 $(BUILD_VSRC_DIR)/apb2iob.v: $(LIB_DIR)/hardware/apb2iob/apb2iob.v
-	cp $< $(BUILD_VSRC_DIR)
+	cp $< $@
 
 # APB slave port
 SRC+=$(BUILD_VSRC_DIR)/apb_s_port.vh

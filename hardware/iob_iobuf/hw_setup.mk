@@ -8,7 +8,6 @@ SRC+=$(BUILD_VSRC_DIR)/iob_iobuf.v
 
 # Copy the sources to the build directory 
 $(BUILD_VSRC_DIR)/iob_iobuf.v: $(LIB_DIR)/hardware/iob_iobuf/iob_iobuf.v
-	cp $< $(BUILD_VSRC_DIR)
-
+	cp $< $@
 
 endif

@@ -8,6 +8,6 @@ SRC+=$(BUILD_VSRC_DIR)/iob_reset_sync.v
 
 # Copy the sources to the build directoy
 $(BUILD_VSRC_DIR)/iob_reset_sync.v: $(LIB_DIR)/hardware/iob_reset_sync/iob_reset_sync.v
-	cp $< $(BUILD_VSRC_DIR)
+	cp $< $@
 
 endif
