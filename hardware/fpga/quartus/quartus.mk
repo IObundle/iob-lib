@@ -12,5 +12,5 @@ FPGA_USER=$(QUARTUS_USER)
 FPGA_ENV=$(QUARTUSPATH)/nios2eds/nios2_command_shell.sh
 
 $(FPGA_OBJ): $(VHDR) $(VSRC) $(wildcard *.sdc)
-	$(FPGA_ENV) quartus_sh -t fpga_tool.tcl $(NAME) "$(VSRC)" $(IS_FPGA)
+	$(FPGA_ENV) quartus_sh -t quartus/quartus.tcl $(NAME) $(BOARD) "$(VSRC)" $(IS_FPGA)
 	mv output_files/*.fit.summary $(FPGA_LOG)
