@@ -7,7 +7,7 @@ HW_MODULES+=iob_s2f_sync
 SRC+=$(BUILD_VSRC_DIR)/iob_s2f_sync.v
 
 # Copy the sources to the build directoy 
-%/iob_s2f_sync.v: $(LIB_DIR)/hardware/iob_s2f_sync/iob_s2f_sync.v
+$(BUILD_VSRC_DIR)/iob_s2f_sync.v: $(LIB_DIR)/hardware/iob_s2f_sync/iob_s2f_sync.v
 	cp $< $@
 
 endif

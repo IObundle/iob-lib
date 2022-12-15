@@ -8,7 +8,7 @@ include $(LIB_DIR)/hardware/include/hw_setup.mk
 
 # Sources 
 SRC+=$(BUILD_VSRC_DIR)/iob2axil.v
-%/iob2axil.v: $(LIB_DIR)/hardware/iob2axil/iob2axil.v
+$(BUILD_VSRC_DIR)/iob2axil.v: $(LIB_DIR)/hardware/iob2axil/iob2axil.v
 	cp $< $@
 
 # iob slave port module

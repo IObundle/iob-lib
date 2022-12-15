@@ -13,7 +13,7 @@ include $(LIB_DIR)/hardware/ram/iob_ram_2p_asym/hw_setup.mk
 SRC+=$(BUILD_VSRC_DIR)/iob_fifo_sync.v
 
 # Copy the sources to the build directory 
-%/iob_fifo_sync.v: $(LIB_DIR)/hardware/fifo/iob_fifo_sync/iob_fifo_sync.v
+$(BUILD_VSRC_DIR)/iob_fifo_sync.v: $(LIB_DIR)/hardware/fifo/iob_fifo_sync/iob_fifo_sync.v
 	cp $< $@
 
 endif

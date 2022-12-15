@@ -10,7 +10,7 @@ include $(LIB_DIR)/hardware/ram/iob_ram_tdp/hw_setup.mk
 SRC+=$(BUILD_SIM_DIR)/src/iob_ram_tdp_be.v
 
 # Copy the sources to the build directoy 
-%/iob_ram_tdp_be.v: $(LIB_DIR)/hardware/ram/iob_ram_tdp_be/iob_ram_tdp_be.v
+$(BUILD_SIM_DIR)/src/iob_ram_tdp_be.v: $(LIB_DIR)/hardware/ram/iob_ram_tdp_be/iob_ram_tdp_be.v
 	cp $< $@
 
 endif

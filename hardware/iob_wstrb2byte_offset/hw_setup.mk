@@ -7,7 +7,7 @@ HW_MODULES+=iob_wstrb2byte_offset
 SRC+=$(BUILD_VSRC_DIR)/iob_wstrb2byte_offset.v
 
 # Copy the sources to the build directory 
-%/iob_wstrb2byte_offset.v: $(LIB_DIR)/hardware/iob_wstrb2byte_offset/iob_wstrb2byte_offset.v
+$(BUILD_VSRC_DIR)/iob_wstrb2byte_offset.v: $(LIB_DIR)/hardware/iob_wstrb2byte_offset/iob_wstrb2byte_offset.v
 	cp $< $@
 
 endif

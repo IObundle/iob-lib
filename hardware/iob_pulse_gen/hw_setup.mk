@@ -11,7 +11,7 @@ include $(LIB_DIR)/hardware/counter/iob_counter/hw_setup.mk
 SRC+=$(BUILD_VSRC_DIR)/iob_pulse_gen.v
 
 # Copy the sources to the build directory
-%/iob_pulse_gen.v: $(LIB_DIR)/hardware/iob_pulse_gen/iob_pulse_gen.v
+$(BUILD_VSRC_DIR)/iob_pulse_gen.v: $(LIB_DIR)/hardware/iob_pulse_gen/iob_pulse_gen.v
 	cp $< $@
 
 endif

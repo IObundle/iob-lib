@@ -7,7 +7,7 @@ HW_MODULES+=iob_counter_ld_n
 SRC+=$(BUILD_VSRC_DIR)/iob_counter_ld_n.v
 
 # Copy the sources to the build directory 
-%/iob_counter_ld_n.v: $(LIB_DIR)/hardware/counter/iob_counter_ld_n/iob_counter_ld_n.v
+$(BUILD_VSRC_DIR)/iob_counter_ld_n.v: $(LIB_DIR)/hardware/counter/iob_counter_ld_n/iob_counter_ld_n.v
 	cp $< $@
 
 endif

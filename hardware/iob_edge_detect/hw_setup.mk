@@ -7,7 +7,7 @@ HW_MODULES+=iob_edge_detect
 SRC+=$(BUILD_VSRC_DIR)/iob_edge_detect.v
 
 # Copy the sources to the build directory 
-%/iob_edge_detect.v: $(LIB_DIR)/hardware/iob_edge_detect/iob_edge_detect.v
+$(BUILD_VSRC_DIR)/iob_edge_detect.v: $(LIB_DIR)/hardware/iob_edge_detect/iob_edge_detect.v
 	cp $< $@
 
 endif

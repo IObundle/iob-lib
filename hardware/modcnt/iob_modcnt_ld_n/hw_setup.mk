@@ -10,7 +10,7 @@ include $(LIB_DIR)/hardware/counter/iob_counter_ld_n/hw_setup.mk
 SRC+=$(BUILD_VSRC_DIR)/iob_modcnt_ld_n.v
 
 # Copy the sources to the build directory 
-%/iob_modcnt_ld_n.v: $(LIB_DIR)/hardware/modcnt/iob_modcnt_ld_n/iob_modcnt_ld_n.v
+$(BUILD_VSRC_DIR)/iob_modcnt_ld_n.v: $(LIB_DIR)/hardware/modcnt/iob_modcnt_ld_n/iob_modcnt_ld_n.v
 	cp $< $@
 
 endif

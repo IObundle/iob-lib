@@ -7,7 +7,7 @@ HW_MODULES+=iob_reg_n_ae
 SRC+=$(BUILD_VSRC_DIR)/iob_reg_n_ae.v
 
 # Copy the sources to the build directory 
-%/iob_reg_n_ae.v: $(LIB_DIR)/hardware/reg_n/iob_reg_n_ae/iob_reg_n_ae.v
+$(BUILD_VSRC_DIR)/iob_reg_n_ae.v: $(LIB_DIR)/hardware/reg_n/iob_reg_n_ae/iob_reg_n_ae.v
 	cp $< $@
 
 endif

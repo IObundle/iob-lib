@@ -7,7 +7,7 @@ HW_MODULES+=iob_ram_t2p
 SRC+=$(BUILD_SIM_DIR)/src/iob_ram_t2p.v
 
 # Copy the sources to the build directory
-%/iob_ram_t2p.v: $(LIB_DIR)/hardware/ram/iob_ram_t2p/iob_ram_t2p.v
+$(BUILD_SIM_DIR)/src/iob_ram_t2p.v: $(LIB_DIR)/hardware/ram/iob_ram_t2p/iob_ram_t2p.v
 	cp $< $@
 
 endif

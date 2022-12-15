@@ -5,7 +5,7 @@ HW_MODULES+=iob2axis
 
 # Sources
 SRC+=$(BUILD_SIM_DIR)/src/iob2axis.v
-%/iob2axis.v: $(LIB_DIR)/hardware/iob2axis/iob2axis.v
+$(BUILD_SIM_DIR)/src/iob2axis.v: $(LIB_DIR)/hardware/iob2axis/iob2axis.v
 	cp $< $@
 
 # iob wires for host

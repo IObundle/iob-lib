@@ -11,7 +11,7 @@ SRC+=$(BUILD_VSRC_DIR)/iob_modcnt.v
 
 # Copy the sources to the build directory 
 
-%/iob_modcnt.v: $(LIB_DIR)/hardware/modcnt/iob_modcnt/iob_modcnt.v
+$(BUILD_VSRC_DIR)/iob_modcnt.v: $(LIB_DIR)/hardware/modcnt/iob_modcnt/iob_modcnt.v
 	cp $< $@
 
 endif

@@ -7,7 +7,7 @@ HW_MODULES+=iob_rom_dp
 SRC+=$(BUILD_SIM_DIR)/src/iob_rom_dp.v
 
 # Copy sources to build directory
-%/iob_rom_dp.v: $(LIB_DIR)/hardware/rom/iob_rom_dp/iob_rom_dp.v
+$(BUILD_SIM_DIR)/src/iob_rom_dp.v: $(LIB_DIR)/hardware/rom/iob_rom_dp/iob_rom_dp.v
 	cp $< $@
 
 endif
