@@ -30,6 +30,8 @@ project.pref.vlogstandard -format sv2005
 
 #project.policy.add -policy STARC_VLOG_ALL
 
+do ./waiver.do
+
 project.run -project $PRJ
 
 #project.parse
