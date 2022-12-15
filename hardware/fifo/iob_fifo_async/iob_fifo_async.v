@@ -38,7 +38,7 @@ module iob_fifo_async
     output [R_DATA_W-1:0] r_data_o,
     output                r_empty_o,
     output                r_full_o,
-    output [ADDR_W-1:0]   r_level_o,
+    output [ADDR_W:0]     r_level_o,
 
     //write port
     input                 w_clk_i,
@@ -49,7 +49,7 @@ module iob_fifo_async
     input [W_DATA_W-1:0]  w_data_i,
     output                w_empty_o,
     output                w_full_o,
-    output [ADDR_W-1:0]   w_level_o
+    output [ADDR_W:0]     w_level_o
 
     );
 
@@ -129,7 +129,7 @@ module iob_fifo_async
    //READ DOMAIN FIFO LEVEL
    `IOB_WIRE(r_level_int, (ADDR_W+2))
    assign r_level_int = r_waddr_bin_n - r_raddr_bin_n;
-   assign r_level_o = r_level_int[ADDR_W-1:0];
+   assign r_level_o = r_level_int;
    
    //READ DOMAIN EMPTY AND FULL FLAGS
    assign r_empty_o = (r_level_int < {2'd0, r_incr});
@@ -140,7 +140,7 @@ module iob_fifo_async
    //WRITE DOMAIN FIFO LEVEL
    `IOB_WIRE(w_level_int, (ADDR_W+2))
    assign w_level_int = w_waddr_bin_n - w_raddr_bin_n;
-   assign w_level_o = w_level_int[ADDR_W-1:0];
+   assign w_level_o = w_level_int;
  
    //WRITE DOMAIN EMPTY AND FULL FLAGS
    assign w_empty_o = (w_level_int < {2'd0, w_incr});

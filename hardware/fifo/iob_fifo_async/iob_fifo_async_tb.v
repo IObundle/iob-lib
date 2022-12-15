@@ -46,14 +46,14 @@ module iob_fifo_async_tb;
    reg [W_DATA_W-1:0]  w_data;
    wire                w_empty;
    wire                w_full;
-   wire [ADDR_W-1:0]   w_level;
+   wire [ADDR_W:0]     w_level;
 
    //read port
    reg                 r_en = 0;
    wire [R_DATA_W-1:0] r_data;
    wire                r_empty;
    wire                r_full;
-   wire [ADDR_W-1:0]   r_level;
+   wire [ADDR_W:0]     r_level;
 
    integer             i,j; //iterators
 

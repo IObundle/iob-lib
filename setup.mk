@@ -27,6 +27,7 @@ BUILD_EMB_DIR = $(BUILD_DIR)/software/embedded
 BUILD_PC_DIR = $(BUILD_DIR)/software/pc-emul
 BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
+BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
 SPYGLASS_LINT_DIR = $(BUILD_DIR)/hardware/lint/spyglass
 BUILD_ALINT_DIR = $(BUILD_DIR)/hardware/lint/alint
 
@@ -103,17 +104,17 @@ $(BUILD_FPGA_DIR)/Makefile: $(LIB_DIR)/hardware/fpga/Makefile
 endif
 
 #synthesis
-ifneq ($(wildcard hardware/synthesis),)
+ifneq ($(wildcard hardware/syn),)
 
-#include  local asic synthesis makefile segment
+#include local asic synthesis makefile segment
 ifneq ($(wildcard hardware/syn/syn_setup.mk),)
 include hardware/syn/syn_setup.mk
 endif
 
 #copy asic synthesis files from LIB
-SRC+=$(patsubst $(LIB_DIR)/hardware/syn/%, $(BUILD_FPGA_DIR)/%, $(wildcard $(LIB_DIR)/hardware/syn/*))
+SRC+=$(patsubst $(LIB_DIR)/hardware/syn/%, $(BUILD_SYN_DIR)/%, $(wildcard $(LIB_DIR)/hardware/syn/*))
 $(BUILD_SYN_DIR)/%: $(LIB_DIR)/hardware/syn/%
-	cp $< $@
+	cp -r $< $@
 
 endif
 
