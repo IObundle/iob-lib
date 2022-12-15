@@ -8,6 +8,6 @@ SRC+=$(BUILD_VSRC_DIR)/iob_piso_reg.v
 
 # Copy the sources to the build directory
 $(BUILD_VSRC_DIR)/iob_piso_reg.v: $(LIB_DIR)/hardware/iob_piso_reg/iob_piso_reg.v
-	cp $< $(BUILD_VSRC_DIR)
+	cp $< $@
 
 endif

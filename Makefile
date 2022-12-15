@@ -8,8 +8,8 @@ export
 
 #build here
 LIB_DIR:=.
-BUILD_VSRC_DIR:=.
-
+BUILD_VSRC_DIR:=./src
+BUILD_SIM_DIR:=.
 
 all: sim
 
@@ -22,11 +22,15 @@ else
 $(info No such module $(MODULE))
 endif
 
+SRC:=$(patsubst $(BUILD_SIM_DIR)/src/%, $(BUILD_VSRC_DIR)/%, $(SRC))
+
 # Testbench
 TB=$(wildcard $(MODULE_DIR)/*_tb.v)
 
 # Defines
 DEFINE=-DADDR_W=10 -DDATA_W=32
+
+VCD?=0
 ifeq ($(VCD),1)
 DEFINE+= -DVCD
 endif
@@ -44,24 +48,28 @@ AXI_GEN:=./scripts/if_gen.py
 #
 VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
 
-sim: $(SRC) $(TB)
+$(BUILD_VSRC_DIR):
+	@mkdir $@
+
+sim: $(BUILD_VSRC_DIR) $(SRC) $(TB)
 	@echo "Simulating module $(MODULE)"
 ifeq ($(IS_ASYM),)
 	$(VLOG) $(SRC) $(TB)
 	@./a.out $(TEST_LOG)
 else
 	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(SRC) $(TB)
-	@./a.out $(TEST_LOG); if [ $$VCD != 0 ]; then mv uut.vcd uut1.vcd; fi
+	@./a.out $(TEST_LOG); if [ $(VCD) != 0 ]; then mv uut.vcd uut1.vcd; fi
 	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(SRC) $(TB)
-	@./a.out $(TEST_LOG); if [ $$VCD != 0 ]; then mv uut.vcd uut2.vcd; fi
+	@./a.out $(TEST_LOG); if [ $(VCD) != 0 ]; then mv uut.vcd uut2.vcd; fi
 	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(SRC) $(TB)
-	@./a.out $(TEST_LOG); if [ $$VCD != 0 ]; then mv uut.vcd uut3.vcd; fi
+	@./a.out $(TEST_LOG); if [ $(VCD) != 0 ]; then mv uut.vcd uut3.vcd; fi
 endif
 ifeq ($(VCD),1)
 	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &
 endif
 
 clean:
+	@rm -rf $(BUILD_VSRC_DIR)
 	@rm -f *.v *.vh *.c *.h *.tex
 	@rm -f *~ \#*\# a.out *.vcd *.pyc *.log
 

@@ -11,6 +11,6 @@ SRC+=$(BUILD_VSRC_DIR)/iob_regfile_w_r.v
 
 # Copy the sources to build directory
 $(BUILD_VSRC_DIR)/iob_regfile_w_r.v: $(LIB_DIR)/hardware/regfile/iob_regfile_w_r/iob_regfile_w_r.v
-	cp $< $(BUILD_VSRC_DIR)
+	cp $< $@
 
 endif
