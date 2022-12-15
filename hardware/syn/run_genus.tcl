@@ -16,7 +16,7 @@
 #
 source config.tcl
 
-set OUTPUTS_DIR "./results"
+set OUTPUTS_DIR "./${OUTPUT_DIR}"
 
 set_db init_hdl_search_path $INCLUDE
 
