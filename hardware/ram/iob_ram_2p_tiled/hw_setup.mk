@@ -11,6 +11,6 @@ SRC+=$(BUILD_VSRC_DIR)/iob_ram_2p_tiled.v
 
 # Copy the sources to the build directory
 $(BUILD_VSRC_DIR)/iob_ram_2p_tiled.v: $(LIB_DIR)/hardware/ram/iob_ram_2p_tiled/iob_ram_2p_tiled.v
-	cp $< $(BUILD_VSRC_DIR)
+	cp $< $@
 
 endif

@@ -16,6 +16,6 @@ SRC+=$(BUILD_VSRC_DIR)/iob_fifo_async.v
 
 # Copy the sources to the build directory
 $(BUILD_VSRC_DIR)/iob_fifo_async.v: $(LIB_DIR)/hardware/fifo/iob_fifo_async/iob_fifo_async.v
-	cp $< $(BUILD_VSRC_DIR)
+	cp $< $@
 
 endif

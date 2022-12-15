@@ -1,3 +1,5 @@
+OUTPUT_DIR=results
+
 GENUS_ENV:=set -e; source /apps/env/genus191
 
 SYN_SERVER=$(CADENCE_SERVER)
@@ -10,5 +12,6 @@ synth: $(VHDR) $(VSRC)
 	$(GENUS_ENV); genus -batch -files run_genus.tcl
 
 clean: gen-clean
+	@rm -rf fv results st_part_log
 
 .PHONY: synth clean

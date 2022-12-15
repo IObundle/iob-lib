@@ -104,8 +104,8 @@ module iob_fifo_async_tb;
          $finish;
       end
 
-      if(w_level != 0) begin
-         $display("ERROR: write proc: expecting w_level = 0, got %d", w_level);
+      if(w_level != 2**ADDR_W) begin
+         $display("ERROR: write proc: expecting w_level = %.0f, got %d", 2**ADDR_W, w_level);
          $finish;
       end
 

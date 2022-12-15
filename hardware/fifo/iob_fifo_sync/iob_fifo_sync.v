@@ -40,7 +40,7 @@ module iob_fifo_sync
     `IOB_OUTPUT(w_full_o, 1),
 
     //FIFO level
-    `IOB_OUTPUT(level_o, ADDR_W+1)
+    `IOB_OUTPUT(level_o, (ADDR_W+1))
     );
 
    localparam ADDR_W_DIFF = $clog2(N);
