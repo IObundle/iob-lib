@@ -10,7 +10,7 @@ include ../../../config_build.mk
 VHDR+=$(wildcard ../../src/*.vh)
 VSRC+=$(wildcard ../../src/*.v)
 
-REMOTE_BUILD_DIR=$(USER)/sandbox/$(BUILD_DIR_NAME)
+REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 
 LINT_SERVER=$(ALINT_SERVER)
 LINT_USER=$(ALINT_USER)

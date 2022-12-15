@@ -1,8 +1,9 @@
 #extract cli args
 set NAME [lindex $argv 0]
-set VSRC [lindex $argv 1]
-set QIP [lindex $argv 2]
-set IS_FPGA [lindex $argv 3]
+set BOARD [lindex $argv 1]
+set VSRC [lindex $argv 2]
+set QIP [lindex $argv 3]
+set IS_FPGA [lindex $argv 4]
 
 project_new $NAME -overwrite
 
@@ -21,7 +22,7 @@ if [project_exists $NAME] {
 set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 
 #device data
-source device.tcl
+source quartus/$BOARD/device.tcl
 
 #user io data
 
@@ -67,7 +68,7 @@ set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_
 }
 
 set_global_assignment -name LAST_QUARTUS_VERSION "18.0.0 Standard Edition"
-set_global_assignment -name SDC_FILE ../fpga/$NAME.sdc
+set_global_assignment -name SDC_FILE quartus/$NAME.sdc
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"

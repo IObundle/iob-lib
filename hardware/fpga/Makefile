@@ -10,7 +10,7 @@ ifneq ($(wildcard ../../console.mk),)
 include ../../console.mk
 endif
 
-REMOTE_BUILD_DIR=$(USER)/sandbox/$(BUILD_DIR_NAME)
+REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
 
 #select board
@@ -24,6 +24,7 @@ endif
 
 FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
 include $(FPGA_TOOL)/$(FPGA_TOOL).mk
+include $(FPGA_TOOL)/$(BOARD)/board.mk
 
 #include the module's headers and sources
 VHDR=$(wildcard ../src/*.vh)
@@ -32,8 +33,6 @@ VSRC+=$(wildcard ../src/*.v)
 #build fpga image or netlist
 build: $(VHDR) $(VSRC) $(HEX)
 ifeq ($(FPGA_SERVER),)
-	cp -f $(FPGA_TOOL)/$(FPGA_TOOL).tcl fpga_tool.tcl
-	cp -f $(FPGA_TOOL)/$(BOARD)/device.tcl .
 	make $(FPGA_OBJ)
 else 
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
@@ -52,19 +51,19 @@ ifeq ($(BOARD_SERVER),)
 	bash -c "trap 'make queue-out' INT TERM KILL; make queue-in; ../prog.sh; $(CONSOLE_CMD) | tee run.log; make queue-out;"
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
-	rsync -avz --delete --force --exclude .git $(ROOT_DIR) $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
-	bash -c "trap 'make queue-out-remote' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@  BOARD=$(BOARD)'"
-	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_TOOL)/run.log .
+	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
+	bash -c "trap 'make queue-out-remote' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'"
+	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_FPGA_DIR)/run.log .
 endif
 endif
 
-clean:
-	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga.mk" -name "quartus" -o -name "vivado" \) -delete
-	rm -f ../../*.vh
+clean: $(FPGA_TOOL)-clean
+	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga.mk" \) -delete
+	@rm -f ../../*.vh
 ifneq ($(FPGA_SERVER),)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) clean BOARD=$(BOARD); fi'
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD); fi'
 ifneq ($(BOARD_SERVER),)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(BOARD_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) clean BOARD=$(BOARD); fi'
+	ssh $(BOARD_SSH_FLAGS) $(BOARD_USER)@$(BOARD_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD); fi'
 endif
 endif
 
@@ -138,4 +137,4 @@ endif
 
 .PHONY: run build \
 	queue-in queue-out queue-wait queue-out-remote \
-	test clean-remote clean debug
+	test clean debug
