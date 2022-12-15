@@ -8,7 +8,8 @@ export
 
 #build here
 LIB_DIR:=.
-BUILD_VSRC_DIR:=.
+BUILD_VSRC_DIR:=src
+BUILD_SIM_DIR:=.
 
 
 all: sim
@@ -21,6 +22,8 @@ include $(MODULE_DIR)/hw_setup.mk
 else
 $(info No such module $(MODULE))
 endif
+
+SRC:=$(patsubst $(BUILD_SIM_DIR)/src/%, $(BUILD_VSRC_DIR)/%, $(SRC))
 
 # Testbench
 TB=$(wildcard $(MODULE_DIR)/*_tb.v)
@@ -44,7 +47,10 @@ AXI_GEN:=./scripts/if_gen.py
 #
 VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
 
-sim: $(SRC) $(TB)
+$(BUILD_VSRC_DIR):
+	@mkdir $@
+
+sim: $(BUILD_VSRC_DIR) $(SRC) $(TB)
 	@echo "Simulating module $(MODULE)"
 ifeq ($(IS_ASYM),)
 	$(VLOG) $(SRC) $(TB)
@@ -62,6 +68,7 @@ ifeq ($(VCD),1)
 endif
 
 clean:
+	@rm -rf $(BUILD_VSRC_DIR)
 	@rm -f *.v *.vh *.c *.h *.tex
 	@rm -f *~ \#*\# a.out *.vcd *.pyc *.log
 
