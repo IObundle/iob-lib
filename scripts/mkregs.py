@@ -18,6 +18,9 @@ def boffset(n, n_bytes):
 def bfloor(n, log2base):
     return f"(({n})%(2**({log2base})) == 0) ? ({n}) : ((2**({log2base}))*$floor(({n})/(2**({log2base}))))"
 
+def verilog_max(a,b):
+    return f"((({a}) > ({b})) ? ({a}) : ({b}))"
+
 def bceil(n, log2base):
     base = int(2**log2base)
     n = get_integer_value(n,'max')
@@ -306,11 +309,11 @@ def write_hwcode(table, out_dir, top):
         log2n_items = row['log2n_items']
         n_bytes = int(bceil(n_bits, 3)/8)
         addr_last = f"{addr} + (2**({log2n_items})-1)*{n_bytes}"
-        addr_w_base = f"`IOB_MAX($clog2({cpu_n_bytes}), {calc_verilog_addr_w(log2n_items, n_bytes)})"
+        addr_w_base = verilog_max(f"$clog2({cpu_n_bytes})",calc_verilog_addr_w(log2n_items, n_bytes))
         auto = row['autologic']
 
         if row['type'] == 'R':
-            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)})) ")
+            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= ({bfloor(addr, addr_w_base)})) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)})) ")
             f_gen.write(f"begin\n")
             f_gen.write(f"\t\trdata_int[{boffset(addr, cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n")
             if not auto:
