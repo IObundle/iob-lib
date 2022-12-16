@@ -7,6 +7,7 @@ module iob_regfile_async_w_rr
     parameter DATA_W = 0
     )
    (
+    input                   en_i,
     // Write Port
     input                   w_clk_i,
     input                   w_arst_i,
@@ -41,7 +42,7 @@ module iob_regfile_async_w_rr
            .data_i(w_data_i[DATA_W_INT-1:0]),
            .data_o(regfile_w[i])
            );
-      iob_sync #(DATA_W_INT,0) iob_sync_regfile (r_clk_i, r_arst_i, r_en_i, regfile_w[i], regfile_r[i]);   
+      iob_sync #(DATA_W_INT,0) iob_sync_regfile (r_clk_i, r_arst_i, en_i, regfile_w[i], regfile_r[i]);   
    end endgenerate
    
    //read
