@@ -12,13 +12,10 @@ module iob_reg_n_ae
     input [DATA_W-1:0]      data_i,
     output reg [DATA_W-1:0] data_o
     );
-
-   // prevent width mismatch
-   localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
    
    always @(negedge clk_i, posedge arst_i) begin
       if (arst_i) begin
-         data_o <= RST_VAL_INT;
+         data_o <= RST_VAL[DATA_W-1:0];
       end else if (en_i) begin
          data_o <= data_i;
       end

@@ -17,17 +17,14 @@ module iob_s2f_sync
     output reg [DATA_W-1:0] data_o
     );
 
-   // prevent width mismatch
-   localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
-
    reg [DATA_W-1:0]         sync;
    always @(posedge clk_i, posedge arst_i) begin
       if (arst_i) begin
-         sync <= RST_VAL_INT;
-         data_o <= RST_VAL_INT;
+         sync <= RST_VAL[DATA_W-1:0];
+         data_o <= RST_VAL[DATA_W-1:0];
       end else if (rst_i) begin
-         sync <= RST_VAL_INT;
-         data_o <= RST_VAL_INT;
+         sync <= RST_VAL[DATA_W-1:0];
+         data_o <= RST_VAL[DATA_W-1:0];
       end else if (ld_i) begin
          sync <= ld_val_i;
          data_o <= ld_val_i;
