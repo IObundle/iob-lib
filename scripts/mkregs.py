@@ -72,7 +72,7 @@ def gen_wr_reg(row, f):
         #Verilog does not like 'variable' part select, therefore use a for loop
         f.write(f"generate\n")
         f.write(f"for (I=0;I<{addr_w}-1;I=I+1) begin\n")
-        f.write(f"assign {name}_addr_o[I] = iob_addr_i[I+1:I];\n")
+        f.write(f"assign {name}_addr_o[I] = iob_addr_i[I];\n")
         f.write(f"end\n")
         f.write(f"endgenerate\n")
 
@@ -99,7 +99,7 @@ def gen_rd_reg(row, f):
         #Verilog does not like 'variable' part select, therefore use a for loop
         f.write(f"generate\n")
         f.write(f"for (I=0;I<{addr_w}-1;I=I+1) begin\n")
-        f.write(f"assign {name}_addr_o[I] = iob_addr_i[I+1:I];\n")
+        f.write(f"assign {name}_addr_o[I] = iob_addr_i[I];\n")
         f.write(f"end\n")
         f.write(f"endgenerate\n")
 
