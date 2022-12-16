@@ -19,32 +19,32 @@ module iob_regfile_async_w_rr
     input                   r_arst_i,
     input                   r_en_i,
     input [ADDR_W-1:0]      r_addr_i,
-    output reg [DATA_W-1:0] r_data_o
+    output [DATA_W-1:0]     r_data_o
     );
+    
+   localparam DATA_W_INT = (DATA_W==0)? 1: DATA_W;
 
    //write
    `IOB_VARARRAY_2D(regfile_w, (2**ADDR_W), DATA_W)
    `IOB_VARARRAY_2D(regfile_r, (2**ADDR_W), DATA_W)
+   
+   `IOB_WIRE(en, (2**ADDR_W))
+   
    genvar i;
-   generate for(i = 0; i < (2**ADDR_W); i = i + 1)
-      always @(posedge w_clk_i, posedge w_arst_i) begin
-            if (w_arst_i)
-               regfile_w[i] <= {DATA_W{1'd0}};
-            else begin
-               regfile_r[i] <= regfile_w[i];
-               if (w_en_i && (w_addr_i == i))
-                 regfile_w[i] <= w_data_i;
-            end
-      end
-   endgenerate
-
+   generate for(i = 0; i < (2**ADDR_W); i = i + 1) begin: register_file
+      assign en[i] =  w_en_i & (w_addr_i==i);
+      iob_reg_ae #(DATA_W_INT, 0) iob_reg0
+          (
+           .clk_i(w_clk_i),
+           .arst_i(w_arst_i),
+           .en_i(en[i]),
+           .data_i(w_data_i[DATA_W_INT-1:0]),
+           .data_o(regfile_w[i])
+           );
+      iob_sync #(DATA_W_INT,0) iob_sync_regfile (r_clk_i, r_arst_i, r_en_i, regfile_w[i], regfile_r[i]);   
+   end endgenerate
    
    //read
-   always @(posedge r_clk_i, posedge r_arst_i) begin
-      if (r_arst_i)
-         r_data_o <= {DATA_W{1'd0}};
-      else if (r_en_i)
-         r_data_o <= regfile_r[r_addr_i];
-   end
+   assign r_data_o = regfile_r[r_addr_i];
    
 endmodule
