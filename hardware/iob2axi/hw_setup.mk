@@ -11,12 +11,12 @@ include $(LIB_DIR)/hardware/fifo/iob_fifo_sync/hw_setup.mk
 # m_m_axi_write_portmap.vh \
 # m_m_axi_read_portmap.vh
 
-SRC+=$(BUILD_VSRC_DIR)/iob2axi.v $(BUILD_VSRC_DIR)/iobwaxi_wr.v $(BUILD_VSRC_DIR)/iob2axi_rd.v
+SRC+=$(BUILD_VSRC_DIR)/iob2axi.v $(BUILD_VSRC_DIR)/iob2axi_wr.v $(BUILD_VSRC_DIR)/iob2axi_rd.v
 
 $(BUILD_VSRC_DIR)/iob2axi.v: $(LIB_DIR)/hardware/iob2axi/iob2axi.v
 	cp $< $(BUILD_VSRC_DIR)
 
-$(BUILD_VSRC_DIR)/iobwaxi_wr.v: $(LIB_DIR)/hardware/iob2axi/iob2axi_wr.v
+$(BUILD_VSRC_DIR)/iob2axi_wr.v: $(LIB_DIR)/hardware/iob2axi/iob2axi_wr.v
 	cp $< $(BUILD_VSRC_DIR)
 
 $(BUILD_VSRC_DIR)/iob2axi_rd.v: $(LIB_DIR)/hardware/iob2axi/iob2axi_rd.v
