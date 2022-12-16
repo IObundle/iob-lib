@@ -16,10 +16,7 @@ def boffset(n, n_bytes):
     return 8*(n%n_bytes)
 
 def bfloor(n, log2base):
-    base = int(2**log2base)
-    if n%base == 0:
-        return n
-    return base*int(n/base)
+    return f"(({n})%(2**({log2base})) == 0) ? ({n}) : ((2**({log2base}))*$floor(({n})/(2**({log2base}))))"
 
 def bceil(n, log2base):
     base = int(2**log2base)
@@ -36,7 +33,7 @@ def calc_addr_w(log2n_items, n_bytes):
 
 # Generate symbolic expression string to caluclate addr_w in verilog
 def calc_verilog_addr_w(log2n_items, n_bytes):
-        return f"$ceil({log2n_items}+$clog2({int(n_bytes)}))"
+        return f"{log2n_items}+$clog2({int(n_bytes)})"
 
 
 def gen_wr_reg(row, f):
@@ -313,7 +310,7 @@ def write_hwcode(table, out_dir, top):
         auto = row['autologic']
 
         if row['type'] == 'R':
-            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= $floor({addr}, {addr_w_base})) && (`IOB_WORD_ADDR(iob_addr_i) <= $floor({addr_last}, {addr_w_base}))) ")
+            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)})) ")
             f_gen.write(f"begin\n")
             f_gen.write(f"\t\trdata_int[{boffset(addr, cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n")
             if not auto:
