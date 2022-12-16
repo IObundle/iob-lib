@@ -22,6 +22,7 @@ project.pref.vlogdirs -path ../../src/
 
 workspace.file.add -destination $PRJ -f IOB_CORE_NAME_files.list
 
+workspace.file.add -destination $PRJ ../$TOP.sdc
 
 project.pref.toplevels -top $TOP
 
