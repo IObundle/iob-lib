@@ -3,7 +3,7 @@ set NAME [lindex $argv 0]
 set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
 set IS_FPGA [lindex $argv 3]
-set USE_DDR [lindex $argv 4]
+set RUN_EXTMEM [lindex $argv 4]
 
 
 #verilog sources
@@ -19,7 +19,7 @@ source vivado/$BOARD/device.tcl
 
 read_xdc vivado/$NAME.xdc
 
-if { $USE_DDR == 1 } {
+if { $RUN_EXTMEM == 1 } {
 
     if { ![file isdirectory "./ip"]} {
         file mkdir ./ip
