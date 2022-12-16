@@ -326,7 +326,7 @@ def write_hwcode(table, out_dir, top):
     
     f_gen.write("\tready_nxt = 1'b1;\n")
     f_gen.write("\trvalid_nxt = iob_rvalid_o;\n")
-    f_gen.write("\tpc_nxt = pc + 1;\n\n")
+    f_gen.write("\tpc_nxt = pc + 1'b1;\n\n")
     f_gen.write("\tcase(pc)\n")
     f_gen.write("\t\t0: begin\n")
     f_gen.write("\t\t\trvalid_nxt = 1'b0;\n")
