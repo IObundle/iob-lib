@@ -36,7 +36,7 @@ def calc_addr_w(log2n_items, n_bytes):
 
 # Generate symbolic expression string to caluclate addr_w in verilog
 def calc_verilog_addr_w(log2n_items, n_bytes):
-        return f"$ceil({log2n_items}+$clog2({n_bytes})"
+        return f"$ceil({log2n_items}+$clog2({int(n_bytes)}))"
 
 
 def gen_wr_reg(row, f):
@@ -49,7 +49,7 @@ def gen_wr_reg(row, f):
     addr_w = calc_verilog_addr_w(log2n_items,n_bytes)
     auto = row['autologic']
 
-    f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): 2**{addr_w}; AUTO: {auto}\n\n")
+    f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n")
 
     #compute wdata with only the needed bits
     f.write(f"`IOB_WIRE({name}_wdata, {n_bits})\n")
@@ -84,7 +84,7 @@ def gen_rd_reg(row, f):
     addr_w = calc_verilog_addr_w(log2n_items,n_bytes)
     auto = row['autologic']
 
-    f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): 2**{addr_w}; AUTO: {auto}\n\n")
+    f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n")
 
     #generate register logic
     if not auto: #generate register
@@ -297,7 +297,7 @@ def write_hwcode(table, out_dir, top):
         log2n_items = row['log2n_items']
         n_bytes = int(bceil(n_bits, 3)/8)
         addr_last = f"{addr} + (2**({log2n_items})-1)*{n_bytes}"
-        addr_w_base = f"`IOB_MAX($clog2({cpu_n_bytes}), calc_verilog_addr_w(log2n_items, n_bytes))"
+        addr_w_base = f"`IOB_MAX($clog2({cpu_n_bytes}), {calc_verilog_addr_w(log2n_items, n_bytes)})"
         auto = row['autologic']
 
         if row['type'] == 'R':
@@ -376,7 +376,7 @@ def write_lparam_header(table, out_dir, top):
         log2n_items = row['log2n_items']
         f_def.write(f"localparam {macro_prefix}{name}_ADDR = {row['addr']};\n")
         if get_integer_value(log2n_items,'max')>0:
-            f_def.write(f"localparam {macro_prefix}{name}_ADDR_W = {calc_verilog_addr_w(log2n_items,n_bytes)};\n")
+            f_def.write(f"localparam {macro_prefix}{name}_ADDR_W = {calc_addr_w(log2n_items,n_bytes)};\n")
         f_def.write(f"localparam {macro_prefix}{name}_W = {get_integer_value(n_bits,'val')};\n\n")
     f_def.close()
 
@@ -398,7 +398,7 @@ def write_hwheader(table, out_dir, top):
         log2n_items = row['log2n_items']
         f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
         if get_integer_value(log2n_items,'max')>0:
-            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {calc_verilog_addr_w(log2n_items,n_bytes)})\n")
+            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {calc_verilog_addr_w(log2n_items,n_bytes)}\n")
         f_def.write(f"`define {macro_prefix}{name}_W {n_bits}\n\n")
     f_def.close()
 
