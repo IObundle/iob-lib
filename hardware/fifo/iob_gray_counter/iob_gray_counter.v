@@ -18,7 +18,7 @@ module iob_gray_counter
    wire [W-1:0]     gray_counter;
    wire [W-1:0]     gray_counter_nxt;
    
-   assign bin_counter_nxt = bin_counter + 1;
+   assign bin_counter_nxt = bin_counter + 1'b1;
    
    generate 
       if (W > 1) begin
