@@ -72,7 +72,12 @@ def gen_wr_reg(row, f):
 
     #compute address for register range
     if get_integer_value(log2n_items,'max')>0:
-        f.write(f"assign {name}_addr_o = iob_addr_i[{addr_w}-1:0];\n")
+        #Verilog does not like 'variable' part select, therefore use a for loop
+        f.write(f"generate\n")
+        f.write(f"for (I=0;I<{addr_w}-1;I=I+1) begin\n")
+        f.write(f"assign {name}_addr_o[I] = iob_addr_i[I+1:I];\n")
+        f.write(f"end\n")
+        f.write(f"endgenerate\n")
 
 def gen_rd_reg(row, f):
     name = row['name']
@@ -94,7 +99,12 @@ def gen_rd_reg(row, f):
 
     #compute address for register range
     if get_integer_value(log2n_items,'max')>0:
-        f.write(f"assign {name}_addr_o = iob_addr_i[{addr_w}-1:0];\n")
+        #Verilog does not like 'variable' part select, therefore use a for loop
+        f.write(f"generate\n")
+        f.write(f"for (I=0;I<{addr_w}-1;I=I+1) begin\n")
+        f.write(f"assign {name}_addr_o[I] = iob_addr_i[I+1:I];\n")
+        f.write(f"end\n")
+        f.write(f"endgenerate\n")
 
 # generate ports for swreg module
 def gen_port(table, f):
@@ -239,6 +249,8 @@ def write_hwcode(table, out_dir, top):
     #compute write address
     f_gen.write(f"`IOB_WIRE(waddr, ADDR_W)\n")
     f_gen.write(f"assign waddr = `IOB_WORD_ADDR(iob_addr_i) + byte_offset;\n")
+
+    f_gen.write(f"\ngenvar I;\n") #genvar for generate blocks
 
     # insert write register logic
     for row in table:
