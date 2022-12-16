@@ -1,8 +1,9 @@
 #extract cli args
 set NAME [lindex $argv 0]
-set VSRC [lindex $argv 1]
-set IS_FPGA [lindex $argv 2]
-set RUN_EXTMEM [lindex $argv 3]
+set BOARD [lindex $argv 1]
+set VSRC [lindex $argv 2]
+set IS_FPGA [lindex $argv 3]
+set RUN_EXTMEM [lindex $argv 4]
 
 
 #verilog sources
@@ -14,9 +15,9 @@ foreach file [split $VSRC \ ] {
 }
 
 #device data
-source device.tcl
+source vivado/$BOARD/device.tcl
 
-read_xdc ../fpga/vivado/$NAME.xdc
+read_xdc vivado/$NAME.xdc
 
 if { $RUN_EXTMEM == 1 } {
 
