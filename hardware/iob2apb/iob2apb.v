@@ -51,9 +51,6 @@ module iob2apb
 
    `IOB_VAR(iob_rdata_nxt, DATA_W)
    iob_reg_a #(DATA_W,0) rdata_reg (clk_i, arst_i, iob_rdata_nxt, iob_rdata_o);
-
-   assign apb_prot_o = 3'd2;
-
    
    `IOB_WIRE(pc, 1)
    `IOB_VAR(pc_nxt, 1)
