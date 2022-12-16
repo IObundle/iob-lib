@@ -30,17 +30,15 @@ module iob_regfile_async_w_rr
       always @(posedge w_clk_i, posedge w_arst_i) begin
             if (w_arst_i)
                regfile_w[i] <= {DATA_W{1'd0}};
-            else if (w_en_i && (w_addr_i == i))
-               regfile_w[i] <= w_data_i;
-      end
-      always @(posedge r_clk_i, posedge r_arst_i) begin
-            if (r_arst_i)
-               regfile_r[i] <= {DATA_W{1'd0}};
-            else
+            else begin
                regfile_r[i] <= regfile_w[i];
+               if (w_en_i && (w_addr_i == i))
+                 regfile_w[i] <= w_data_i;
+            end
       end
    endgenerate
 
+   
    //read
    always @(posedge r_clk_i, posedge r_arst_i) begin
       if (r_arst_i)
