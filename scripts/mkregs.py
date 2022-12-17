@@ -53,7 +53,7 @@ def gen_wr_reg(row, f):
 
     #compute wdata with only the needed bits
     f.write(f"`IOB_WIRE({name}_wdata, {n_bits})\n")
-    f.write(f"assign {name}_wdata = iob_wdata_i[{boffset(addr,cpu_n_bytes)}+:{n_bits}];\n")
+    f.write(f"assign {name}_wdata = iob_wdata_i[{boffset(addr,cpu_n_bytes)}+:{verilog_max(n_bits,1)}];\n")
 
     #check if address in range
     f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
