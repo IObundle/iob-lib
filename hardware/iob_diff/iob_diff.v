@@ -15,12 +15,15 @@ module iob_diff
     output [DATA_W-1:0] data_o
     );
 
+   // prevent width mismatch
+   localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
+
    reg [DATA_W-1:0]     data_i_reg;
    always @(posedge clk_i, posedge arst_i) begin
       if (arst_i) begin
-         data_i_reg <= RST_VAL[DATA_W-1:0];
+         data_i_reg <= RST_VAL_INT;
       end else if (rst_i) begin
-         data_i_reg <= RST_VAL[DATA_W-1:0];
+         data_i_reg <= RST_VAL_INT;
       end else if (en_i) begin
          data_i_reg <= data_i;
       end
