@@ -386,9 +386,10 @@ def write_lparam_header(table, out_dir, top):
         n_bits = row['n_bits']
         n_bytes = bceil(n_bits, 3)/8
         log2n_items = row['log2n_items']
+        addr_w = int(ceil(get_integer_value(log2n_items,'val')+log(n_bytes,2)))
         f_def.write(f"localparam {macro_prefix}{name}_ADDR = {row['addr']};\n")
-        if get_integer_value(log2n_items,'max')>0:
-            f_def.write(f"localparam {macro_prefix}{name}_ADDR_W = {calc_addr_w(log2n_items,n_bytes)};\n")
+        if get_integer_value(log2n_items,'val')>0:
+            f_def.write(f"localparam {macro_prefix}{name}_ADDR_W = {addr_w};\n")
         f_def.write(f"localparam {macro_prefix}{name}_W = {get_integer_value(n_bits,'val')};\n\n")
     f_def.close()
 
