@@ -16,7 +16,10 @@ def boffset(n, n_bytes):
     return 8*(n%n_bytes)
 
 def bfloor(n, log2base):
-    return f"(({n})%(2**({log2base})) == 0) ? ({n}) : ((2**({log2base}))*$floor(({n})/(2**({log2base}))))"
+    base = int(2**log2base)
+    if n%base == 0:
+        return n
+    return base*int(n/base)
 
 def verilog_max(a,b):
     return f"((({a}) > ({b})) ? ({a}) : ({b}))"
@@ -308,12 +311,13 @@ def write_hwcode(table, out_dir, top):
         n_bits = row['n_bits']
         log2n_items = row['log2n_items']
         n_bytes = int(bceil(n_bits, 3)/8)
-        addr_last = f"{addr} + (2**({log2n_items})-1)*{n_bytes}"
-        addr_w_base = verilog_max(f"$clog2({cpu_n_bytes})",calc_verilog_addr_w(log2n_items, n_bytes))
+        addr_last = int(addr + ((2**get_integer_value(log2n_items,'max'))-1)*n_bytes)
+        addr_w = calc_addr_w(log2n_items,n_bytes)
+        addr_w_base = max(log(cpu_n_bytes,2), addr_w)
         auto = row['autologic']
 
         if row['type'] == 'R':
-            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= ({bfloor(addr, addr_w_base)})) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)})) ")
+            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)})) ")
             f_gen.write(f"begin\n")
             f_gen.write(f"\t\trdata_int[{boffset(addr, cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n")
             if not auto:
@@ -329,12 +333,13 @@ def write_hwcode(table, out_dir, top):
         n_bits = row['n_bits']
         log2n_items = row['log2n_items']
         n_bytes = int(bceil(n_bits, 3)/8)
+        addr_w = calc_addr_w(log2n_items,n_bytes)
         auto = row['autologic']
 
         if row['type'] == 'W':
             if not auto:
                 # get wready
-                f_gen.write(f"\tif((waddr >= {addr}) && (waddr < {addr} + 2**({calc_verilog_addr_w(log2n_items,n_bytes)})))\n")
+                f_gen.write(f"\tif((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n")
                 f_gen.write(f"\t\twready_int = {name}_ready_i;\n\n")
     
     f_gen.write("\tready_nxt = 1'b1;\n")
