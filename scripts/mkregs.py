@@ -75,12 +75,7 @@ def gen_wr_reg(row, f):
 
     #compute address for register range
     if get_integer_value(log2n_items,'max')>0:
-        #Verilog does not like 'variable' part select, therefore use a for loop
-        f.write(f"generate\n")
-        f.write(f"for (I=0;I<{addr_w}-1;I=I+1) begin\n")
-        f.write(f"assign {name}_addr_o[I] = iob_addr_i[I];\n")
-        f.write(f"end\n")
-        f.write(f"endgenerate\n")
+        f.write(f"assign {name}_addr_o = iob_addr_i[{verilog_max(addr_w,1)}-1:0];\n")
 
 def gen_rd_reg(row, f):
     name = row['name']
@@ -102,12 +97,7 @@ def gen_rd_reg(row, f):
 
     #compute address for register range
     if get_integer_value(log2n_items,'max')>0:
-        #Verilog does not like 'variable' part select, therefore use a for loop
-        f.write(f"generate\n")
-        f.write(f"for (I=0;I<{addr_w}-1;I=I+1) begin\n")
-        f.write(f"assign {name}_addr_o[I] = iob_addr_i[I];\n")
-        f.write(f"end\n")
-        f.write(f"endgenerate\n")
+        f.write(f"assign {name}_addr_o = iob_addr_i[{verilog_max(addr_w,1)}-1:0];\n")
 
 # generate ports for swreg module
 def gen_port(table, f):
@@ -252,8 +242,6 @@ def write_hwcode(table, out_dir, top):
     #compute write address
     f_gen.write(f"`IOB_WIRE(waddr, ADDR_W)\n")
     f_gen.write(f"assign waddr = `IOB_WORD_ADDR(iob_addr_i) + byte_offset;\n")
-
-    f_gen.write(f"\ngenvar I;\n") #genvar for generate blocks
 
     # insert write register logic
     for row in table:
@@ -622,11 +610,40 @@ def compute_addr(table, no_overlap):
 
     return table
 
+# Generate swreg.tex file with list TeX tables of regs
+def generate_swreg_tex(regs, out_dir):
+    swreg_file = open(f"{out_dir}/swreg.tex", "w")
+
+    for table in regs:
+        swreg_file.write(\
+'''
+\\begin{table}[H]
+  \centering
+  \\begin{tabularx}{\\textwidth}{|l|c|c|c|c|X|}
+    
+    \hline
+    \\rowcolor{iob-green}
+    {\\bf Name} & {\\bf R/W} & {\\bf Addr} & {\\bf Width} & {\\bf Default} & {\\bf Description} \\\\ \hline
+
+    \input '''+table['name']+'''_swreg_tab
+ 
+  \end{tabularx}
+  \caption{'''+table['descr'].replace('_','\_')+'''}
+  \label{'''+table['name']+'''_swreg_tab:is}
+\end{table}
+'''
+        )
+
+    swreg_file.write("\clearpage")
+    swreg_file.close()
 
 # Generate TeX tables of registers
 # regs: list of tables containing registers, as defined in <corename>_setup.py
 # regs_with_addr: list of all registers, where 'addr' field has already been computed
 def generate_regs_tex(regs, regs_with_addr, out_dir):
+    # Create swreg.tex file
+    generate_swreg_tex(regs,out_dir)
+
     for table in regs:
         tex_table = []
         for reg in table['regs']:
