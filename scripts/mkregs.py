@@ -21,34 +21,46 @@ def bfloor(n, log2base):
         return n
     return base*int(n/base)
 
+def verilog_max(a,b):
+    return f"((({a}) > ({b})) ? ({a}) : ({b}))"
+
 def bceil(n, log2base):
     base = int(2**log2base)
-    n = compute_n_bits_value(n,'max')
+    n = get_integer_value(n,'max')
     #print(f"{n} of {type(n)} and {base}")
     if n%base == 0:
         return n
     else:
         return int(base*ceil(n/base))
 
+# Calculate numeric value of addr_w, replacing params by their max value
+def calc_addr_w(log2n_items, n_bytes):
+        return int(ceil(get_integer_value(log2n_items,'max')+log(n_bytes,2)))
+
+# Generate symbolic expression string to caluclate addr_w in verilog
+def calc_verilog_addr_w(log2n_items, n_bytes):
+        return f"{log2n_items}+$clog2({int(n_bytes)})"
+
+
 def gen_wr_reg(row, f):
     name = row['name']
     rst_val = row['rst_val']
     n_bits = row['n_bits']
-    n_items = row['n_items']
+    log2n_items = row['log2n_items']
     n_bytes = bceil(n_bits, 3)/8
     addr = row['addr']
-    addr_w = int(ceil(log(n_items*n_bytes,2)))
+    addr_w = calc_verilog_addr_w(log2n_items,n_bytes)
     auto = row['autologic']
 
-    f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**addr_w}; AUTO: {auto}\n\n")
+    f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n")
 
     #compute wdata with only the needed bits
     f.write(f"`IOB_WIRE({name}_wdata, {n_bits})\n")
-    f.write(f"assign {name}_wdata = iob_wdata_i[{boffset(addr,cpu_n_bytes)}+:{n_bits}];\n")
+    f.write(f"assign {name}_wdata = iob_wdata_i[{boffset(addr,cpu_n_bytes)}+:{verilog_max(n_bits,1)}];\n")
 
     #check if address in range
     f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
-    f.write(f"assign {name}_addressed = ((waddr >= {addr}) && (waddr < {addr+2**addr_w}));\n")
+    f.write(f"assign {name}_addressed = ((waddr >= {addr}) && (waddr < {addr}+2**({addr_w})));\n")
 
     #generate register logic
     if auto: #generate register
@@ -62,41 +74,48 @@ def gen_wr_reg(row, f):
     #compute write enable
 
     #compute address for register range
-    if n_items > 1:
-        f.write(f"assign {name}_addr_o = iob_addr_i[{addr_w}-1:0];\n")
+    if get_integer_value(log2n_items,'max')>0:
+        #Verilog does not like 'variable' part select, therefore use a for loop
+        f.write(f"generate\n")
+        f.write(f"for (I=0;I<{addr_w}-1;I=I+1) begin\n")
+        f.write(f"assign {name}_addr_o[I] = iob_addr_i[I];\n")
+        f.write(f"end\n")
+        f.write(f"endgenerate\n")
 
 def gen_rd_reg(row, f):
     name = row['name']
     rst_val = row['rst_val']
     n_bits = row['n_bits']
-    n_items = row['n_items']
+    log2n_items = row['log2n_items']
     n_bytes = bceil(n_bits, 3)/8
     addr = row['addr']
-    addr_last = int(addr + (n_items-1)*n_bytes)
-    addr_w = int(ceil(log(n_items*n_bytes,2)))
-    addr_w_base = max(log(cpu_n_bytes,2), addr_w)
+    addr_w = calc_verilog_addr_w(log2n_items,n_bytes)
     auto = row['autologic']
 
-    f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**addr_w}; AUTO: {auto}\n\n")
+    f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n")
 
     #generate register logic
     if not auto: #generate register
         f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
-        f.write(f"assign {name}_addressed = ((iob_addr_i >= {addr}) && (iob_addr_i < {addr+2**addr_w}));\n")
+        f.write(f"assign {name}_addressed = ((iob_addr_i >= {addr}) && (iob_addr_i < {addr}+2**({addr_w})));\n")
         f.write(f"assign {name}_ren_o = ({name}_ready_i & iob_avalid_i) & ((~|iob_wstrb_i) & {name}_addressed);\n")
 
     #compute address for register range
-    if n_items > 1:
-        f.write(f"assign {name}_addr_o = iob_addr_i[{addr_w}-1:0];\n")
+    if get_integer_value(log2n_items,'max')>0:
+        #Verilog does not like 'variable' part select, therefore use a for loop
+        f.write(f"generate\n")
+        f.write(f"for (I=0;I<{addr_w}-1;I=I+1) begin\n")
+        f.write(f"assign {name}_addr_o[I] = iob_addr_i[I];\n")
+        f.write(f"end\n")
+        f.write(f"endgenerate\n")
 
 # generate ports for swreg module
 def gen_port(table, f):
     for row in table:
         name = row['name']
         n_bits = row['n_bits']
-        n_items = row['n_items']
+        log2n_items = row['log2n_items']
         n_bytes = bceil(n_bits, 3)/8
-        addr_w = int(ceil(log(row['n_items']*n_bytes,2)))
         auto = row['autologic']
  
         
@@ -111,8 +130,8 @@ def gen_port(table, f):
                 f.write(f"\t`IOB_INPUT({name}_rvalid_i, 1),\n")
         if not auto:
             f.write(f"\t`IOB_INPUT({name}_ready_i, 1),\n")
-        if n_items > 1:
-            f.write(f"\t`IOB_OUTPUT({name}_addr_o, {addr_w}),\n")
+        if get_integer_value(log2n_items,'max')>0:
+            f.write(f"\t`IOB_OUTPUT({name}_addr_o, {calc_verilog_addr_w(log2n_items,n_bytes)}),\n")
             
     f.write(f"\t`IOB_OUTPUT(iob_ready_nxt_o, 1),\n")
     f.write(f"\t`IOB_OUTPUT(iob_rvalid_nxt_o, 1),\n")
@@ -122,9 +141,8 @@ def gen_inst_wire(table, f):
     for row in table:
         name = row['name']
         n_bits = row['n_bits']
-        n_items = row['n_items']
+        log2n_items = row['log2n_items']
         n_bytes = bceil(n_bits, 3)/8
-        addr_w = int(ceil(log(n_items*n_bytes,2)))
         auto = row['autologic']
         rst_val = row['rst_val']
 
@@ -139,8 +157,8 @@ def gen_inst_wire(table, f):
                 f.write(f"`IOB_WIRE({name}_ren, 1)\n")
         if not auto:
             f.write(f"`IOB_WIRE({name}_ready, 1)\n")
-        if n_items > 1:
-            f.write(f"`IOB_WIRE({name}_addr, {addr_w})\n")
+        if get_integer_value(log2n_items,'max')>0:
+            f.write(f"`IOB_WIRE({name}_addr, {calc_verilog_addr_w(log2n_items,n_bytes)})\n")
     f.write(f"`IOB_WIRE(iob_ready_nxt, 1)\n")
     f.write(f"`IOB_WIRE(iob_rvalid_nxt, 1)\n")
     f.write("\n")
@@ -150,9 +168,8 @@ def gen_portmap(table, f):
     for row in table:
         name = row['name']
         n_bits = row['n_bits']
-        n_items = row['n_items']
+        log2n_items = row['log2n_items']
         n_bytes = bceil(n_bits, 3)/8
-        addr_w = int(ceil(log(row['n_items']*n_bytes,2)))
         auto = row['autologic']
 
         if row['type'] == 'W':
@@ -166,7 +183,7 @@ def gen_portmap(table, f):
                 f.write(f"\t.{name}_rvalid_i({name}_rvalid),\n")
         if not auto:
             f.write(f"\t.{name}_ready_i({name}_ready),\n")
-        if n_items > 1:
+        if get_integer_value(log2n_items,'max')>0:
             f.write(f"\t.{name}_addr_o({name}_addr),\n")
 
     f.write(f"\t.iob_ready_nxt_o(iob_ready_nxt),\n")
@@ -236,6 +253,8 @@ def write_hwcode(table, out_dir, top):
     f_gen.write(f"`IOB_WIRE(waddr, ADDR_W)\n")
     f_gen.write(f"assign waddr = `IOB_WORD_ADDR(iob_addr_i) + byte_offset;\n")
 
+    f_gen.write(f"\ngenvar I;\n") #genvar for generate blocks
+
     # insert write register logic
     for row in table:
         if row['type'] == 'W':
@@ -290,10 +309,10 @@ def write_hwcode(table, out_dir, top):
         name = row['name']
         addr = row['addr']
         n_bits = row['n_bits']
-        n_items = row['n_items']
+        log2n_items = row['log2n_items']
         n_bytes = int(bceil(n_bits, 3)/8)
-        addr_last = int(addr + (n_items-1)*n_bytes)
-        addr_w = int(ceil(log(n_items*n_bytes,2)))
+        addr_last = int(addr + ((2**get_integer_value(log2n_items,'max'))-1)*n_bytes)
+        addr_w = calc_addr_w(log2n_items,n_bytes)
         addr_w_base = max(log(cpu_n_bytes,2), addr_w)
         auto = row['autologic']
 
@@ -312,10 +331,9 @@ def write_hwcode(table, out_dir, top):
         name = row['name']
         addr = row['addr']
         n_bits = row['n_bits']
-        n_items = row['n_items']
+        log2n_items = row['log2n_items']
         n_bytes = int(bceil(n_bits, 3)/8)
-        addr_w = int(ceil(log(n_items*n_bytes,2)))
-        addr_w_base = max(log(cpu_n_bytes,2), addr_w)
+        addr_w = calc_addr_w(log2n_items,n_bytes)
         auto = row['autologic']
 
         if row['type'] == 'W':
@@ -372,12 +390,12 @@ def write_lparam_header(table, out_dir, top):
         name = row['name']
         n_bits = row['n_bits']
         n_bytes = bceil(n_bits, 3)/8
-        n_items = row['n_items']
-        addr_w = int(ceil(log(n_items*n_bytes,2)))
+        log2n_items = row['log2n_items']
+        addr_w = int(ceil(get_integer_value(log2n_items,'val')+log(n_bytes,2)))
         f_def.write(f"localparam {macro_prefix}{name}_ADDR = {row['addr']};\n")
-        if n_items>1:
+        if get_integer_value(log2n_items,'val')>0:
             f_def.write(f"localparam {macro_prefix}{name}_ADDR_W = {addr_w};\n")
-        f_def.write(f"localparam {macro_prefix}{name}_W = {compute_n_bits_value(n_bits,'val')};\n\n")
+        f_def.write(f"localparam {macro_prefix}{name}_W = {get_integer_value(n_bits,'val')};\n\n")
     f_def.close()
 
 # Generate *_swreg_def.vh file. Macros from this file should only be used inside the instance of the core/system since they may contain parameters which are only known by the instance.
@@ -395,11 +413,10 @@ def write_hwheader(table, out_dir, top):
         name = row['name']
         n_bits = row['n_bits']
         n_bytes = bceil(n_bits, 3)/8
-        n_items = row['n_items']
-        addr_w = int(ceil(log(n_items*n_bytes,2)))
+        log2n_items = row['log2n_items']
         f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
-        if n_items>1:
-            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {addr_w}\n")
+        if get_integer_value(log2n_items,'max')>0:
+            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {calc_verilog_addr_w(log2n_items,n_bytes)}\n")
         f_def.write(f"`define {macro_prefix}{name}_W {n_bits}\n\n")
     f_def.close()
 
@@ -450,9 +467,9 @@ def write_swheader(table, out_dir, top):
     for row in table:
         name = row['name']
         n_bits = row['n_bits']
-        n_items = row['n_items']
+        log2n_items = row['log2n_items']
         n_bytes = bceil(n_bits, 3)/8
-        addr_w = int(ceil(log(n_items*n_bytes,2)))
+        addr_w = calc_addr_w(log2n_items, n_bytes)
         if row["type"] == "W":
             sw_type = swreg_type(name, n_bytes)
             addr_arg = ""
@@ -487,9 +504,9 @@ def write_swcode(table, out_dir, top):
     for row in table:
         name = row['name']
         n_bits = row['n_bits']
-        n_items = row['n_items']
+        log2n_items = row['log2n_items']
         n_bytes = bceil(n_bits, 3)/8
-        addr_w = int(ceil(log(n_items*n_bytes,2)))
+        addr_w = calc_addr_w(log2n_items, n_bytes)
         if row["type"] == "W":
             sw_type = swreg_type(name, n_bytes)
             addr_arg = ""
@@ -545,7 +562,7 @@ def check_overlap(addr, addr_type, read_addr, write_addr):
 
 # n_bits: May be an integer or a string with parameters
 # param_attribute: Name of the attribute in the paramater that contains the value to replace in string given. Common attribute names are: 'val' or 'max'.
-def compute_n_bits_value(n_bits,param_attribute):
+def get_integer_value(n_bits,param_attribute):
         if type(n_bits)==int:
             return n_bits
         else:
@@ -562,9 +579,9 @@ def compute_addr(table, no_overlap):
         addr = row['addr']
         addr_type = row['type']
         n_bits = row['n_bits']
-        n_items = row['n_items']
+        log2n_items = row['log2n_items']
         n_bytes = bceil(n_bits, 3)/8
-        addr_w = int(ceil(log(n_items*n_bytes,2)))
+        addr_w = calc_addr_w(log2n_items,n_bytes)
         if addr >= 0: #manual address
             check_alignment(addr, addr_w)
             check_overlap(addr, addr_type, read_addr, write_addr)
