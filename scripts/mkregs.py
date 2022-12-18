@@ -607,11 +607,40 @@ def compute_addr(table, no_overlap):
 
     return table
 
+# Generate swreg.tex file with list TeX tables of regs
+def generate_swreg_tex(regs, out_dir):
+    swreg_file = open(f"{out_dir}/swreg.tex", "w")
+
+    for table in regs:
+        swreg_file.write(\
+'''
+\\begin{table}[H]
+  \centering
+  \\begin{tabularx}{\\textwidth}{|l|c|c|c|c|X|}
+    
+    \hline
+    \\rowcolor{iob-green}
+    {\\bf Name} & {\\bf R/W} & {\\bf Addr} & {\\bf Width} & {\\bf Default} & {\\bf Description} \\\\ \hline
+
+    \input '''+table['name']+'''_swreg_tab
+ 
+  \end{tabularx}
+  \caption{'''+table['descr'].replace('_','\_')+'''}
+  \label{'''+table['name']+'''_swreg_tab:is}
+\end{table}
+'''
+        )
+
+    swreg_file.write("\clearpage")
+    swreg_file.close()
 
 # Generate TeX tables of registers
 # regs: list of tables containing registers, as defined in <corename>_setup.py
 # regs_with_addr: list of all registers, where 'addr' field has already been computed
 def generate_regs_tex(regs, regs_with_addr, out_dir):
+    # Create swreg.tex file
+    generate_swreg_tex(regs,out_dir)
+
     for table in regs:
         tex_table = []
         for reg in table['regs']:
