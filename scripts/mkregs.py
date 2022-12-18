@@ -317,7 +317,10 @@ def write_hwcode(table, out_dir, top):
         auto = row['autologic']
 
         if row['type'] == 'R':
-            f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)})) ")
+            if bfloor(addr, addr_w_base) == bfloor(addr_last, addr_w_base) :
+                f_gen.write(f"\tif(`IOB_WORD_ADDR(iob_addr_i) == {bfloor(addr, addr_w_base)}) ")
+            else :
+                f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {bfloor(addr_last, addr_w_base)})) ")
             f_gen.write(f"begin\n")
             f_gen.write(f"\t\trdata_int[{boffset(addr, cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n")
             if not auto:
