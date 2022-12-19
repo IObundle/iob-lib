@@ -47,9 +47,12 @@ $(BUILD_DIR):
 	find $@ -name \*_setup.mk -delete
 	rm -rf $@/*_setup.py
 	rm -rf $@/README.md
+	rm -rf $@/document/other
 	cp $(LIB_DIR)/build.mk $@/Makefile
 	mv $@/delivery_readme.txt $@/README
-
+	ls -R $@ >> $@/README
+	sed -i -e 's/..\///' $@/README
+	
 #
 #HARDWARE
 #
