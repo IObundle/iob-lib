@@ -25,7 +25,7 @@ module iob_regfile_w_r
     );
    
    wire [DATA_W_INT-1 :0]   regfile [(2**ADDR_W)-1:0];
-   wire [(2**ADDR_W_INT)-1:0]    en;
+   wire [(2**ADDR_W)-1:0]   en;
 
    genvar                          i;
    generate
