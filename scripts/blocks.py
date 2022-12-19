@@ -17,7 +17,7 @@ def generate_blocks_list_tex(blocks, out_dir):
 '''
 \\begin{table}[H]
   \centering
-  \\begin{tabular}{|l|l|r|p{10.5cm}|}
+  \\begin{tabularx}{\\textwidth}{|l|X|}
     
     \hline
     \\rowcolor{iob-green}
@@ -25,7 +25,7 @@ def generate_blocks_list_tex(blocks, out_dir):
 
     \input '''+table['name']+'''_module_tab
  
-  \end{tabular}
+  \end{tabularx}
   \caption{'''+table['descr']+'''}
   \label{'''+table['name']+'''_module_tab:is}
 \end{table}
