@@ -8,6 +8,7 @@ import mkregs
 import ios as ios_lib
 import blocks as blocks_lib
 from submodule_utils import import_setup
+from build_srcs import version_file
 
 src_path = './hardware/src/'
 
@@ -32,6 +33,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, build_dir=None
         subprocess.call(["cp", "./submodules/LIB/build.mk", f"{build_dir}/Makefile"])
         mk_conf.config_build_mk(confs, meta_data, build_dir)
     
+    version_file( meta_data, build_dir )
     #build registers table
     if regs:
         reg_table = []

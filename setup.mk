@@ -52,10 +52,6 @@ ifneq ($(wildcard hardware/hw_setup.mk),)
 include hardware/hw_setup.mk
 endif
 
-SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
-$(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
-	$(LIB_DIR)/scripts/version.py -v . -o $(@D)
-
 #simulation
 ifneq ($(wildcard hardware/simulation),)
 
@@ -174,12 +170,6 @@ ifneq ($(wildcard document),)
 ifneq ($(wildcard document/doc_setup.mk),)
 include document/doc_setup.mk
 endif
-
-#make and install core version file
-SRC+=$(BUILD_TSRC_DIR)/$(NAME)_version.tex
-$(BUILD_TSRC_DIR)/$(NAME)_version.tex:
-	$(LIB_DIR)/scripts/version.py -t .
-	mv $(NAME)_version.tex $(BUILD_TSRC_DIR)
 
 #make short git hash file
 SRC+=$(BUILD_TSRC_DIR)/shortHash.tex
