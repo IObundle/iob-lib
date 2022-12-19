@@ -38,7 +38,7 @@ module iob_ram_2p_tiled
    generate
       // Vector containing all BRAM outputs
       wire [DATA_W-1:0]     r_data_vec [K-1:0];
-      for(i = 0; i < K; i = i + 1) begin
+      for(i = 0; i < K; i = i + 1) begin: ram_tile
          iob_ram_2p
               #(
                 .DATA_W(DATA_W),

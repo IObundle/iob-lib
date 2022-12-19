@@ -10,14 +10,16 @@ from submodule_utils import get_peripherals
 def generate_blocks_list_tex(blocks, out_dir):
     blocks_file = open(f"{out_dir}/blocks.tex", "w")
 
-    blocks_file.write("The Verilog modules of the core are described in the following tables.\n")
+    blocks_file.write("The Verilog modules in the top-level entity of the core are described in the \
+    following tables. Each table represents a major block or block group in the \
+    Block Diagram, and contains a description of each of the sub-blocks.\n")
 
     for table in blocks:
         blocks_file.write(\
 '''
 \\begin{table}[H]
   \centering
-  \\begin{tabular}{|l|l|r|p{10.5cm}|}
+  \\begin{tabularx}{\\textwidth}{|l|X|}
     
     \hline
     \\rowcolor{iob-green}
@@ -25,7 +27,7 @@ def generate_blocks_list_tex(blocks, out_dir):
 
     \input '''+table['name']+'''_module_tab
  
-  \end{tabular}
+  \end{tabularx}
   \caption{'''+table['descr']+'''}
   \label{'''+table['name']+'''_module_tab:is}
 \end{table}

@@ -101,7 +101,7 @@ def generate_if_tex(ios, out_dir):
 '''
 \\begin{table}[H]
   \centering
-  \\begin{tabular}{|l|l|r|p{10.5cm}|}
+  \\begin{tabularx}{\\textwidth}{|l|l|r|X|}
     
     \hline
     \\rowcolor{iob-green}
@@ -109,7 +109,7 @@ def generate_if_tex(ios, out_dir):
 
     \input '''+table['name']+'''_if_tab
  
-  \end{tabular}
+  \end{tabularx}
   \caption{'''+table['descr'].replace('_','\_')+'''}
   \label{'''+table['name']+'''_if_tab:is}
 \end{table}
