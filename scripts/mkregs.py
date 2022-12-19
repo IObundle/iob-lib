@@ -39,7 +39,7 @@ def calc_addr_w(log2n_items, n_bytes):
 
 # Generate symbolic expression string to caluclate addr_w in verilog
 def calc_verilog_addr_w(log2n_items, n_bytes):
-        return f"{log2n_items}+$clog2({int(n_bytes)})"
+        return f"({log2n_items}+$clog2({int(n_bytes)}))"
 
 
 def gen_wr_reg(row, f):
@@ -60,7 +60,7 @@ def gen_wr_reg(row, f):
 
     #check if address in range
     f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
-    f.write(f"assign {name}_addressed = ((waddr >= {addr}) && (waddr < {addr}+2**({addr_w})));\n")
+    f.write(f"assign {name}_addressed = (waddr >= {addr}) && (waddr < ({addr}+(2**({addr_w}))));\n")
 
     #generate register logic
     if auto: #generate register
@@ -92,7 +92,7 @@ def gen_rd_reg(row, f):
     #generate register logic
     if not auto: #generate register
         f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
-        f.write(f"assign {name}_addressed = ((iob_addr_i >= {addr}) && (iob_addr_i < {addr}+2**({addr_w})));\n")
+        f.write(f"assign {name}_addressed = (iob_addr_i >= {addr}) && (iob_addr_i < ({addr}+(2**({addr_w}))));\n")
         f.write(f"assign {name}_ren_o = ({name}_ready_i & iob_avalid_i) & ((~|iob_wstrb_i) & {name}_addressed);\n")
 
     #compute address for register range
