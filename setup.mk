@@ -45,7 +45,10 @@ setup: debug
 $(BUILD_DIR):
 	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $@
 	find $@ -name \*_setup.mk -delete
+	rm -rf $@/*_setup.py
+	rm -rf $@/README.md
 	cp $(LIB_DIR)/build.mk $@/Makefile
+	mv $@/delivery_readme.txt $@/README
 
 #
 #HARDWARE
