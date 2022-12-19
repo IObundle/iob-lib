@@ -48,11 +48,11 @@ config.tcl:
 	@echo "set INCLUDE [list $(INCLUDE)]" >> $@
 	@echo "set VSRC [glob $(VSRC)]" >> $@
 
-gen-clean:
+clean: $(NODE)-clean
 	find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.tcl -o -name \*.sdc \) -delete
 	@rm -f ../../*.vh config.tcl
 ifneq ($(SYN_SERVER),)
-	ssh $(SYN_SSH_FLAGS) $(SYN_USER)@$(SYN_SERVER) 'if [ -f $(REMOTE_SYN_DIR)/Makefile ]; then make -C $(REMOTE_SYN_DIR) clean; fi'
+	ssh $(SYN_SSH_FLAGS) $(SYN_USER)@$(SYN_SERVER) 'if [ -f $(REMOTE_SYN_DIR)/Makefile ]; then make -C $(REMOTE_SYN_DIR) $@; fi'
 endif
 
-.PHONY: run gen-clean config.tcl
+.PHONY: run clean config.tcl
