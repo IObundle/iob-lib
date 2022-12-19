@@ -39,7 +39,17 @@ def calc_addr_w(log2n_items, n_bytes):
 
 # Generate symbolic expression string to caluclate addr_w in verilog
 def calc_verilog_addr_w(log2n_items, n_bytes):
-        return f"({log2n_items}+$clog2({int(n_bytes)}))"
+    if log2n_items == 0 :
+        if n_bytes == 1 :
+            return f"0"
+        else :
+            return f"$clog2({int(n_bytes)})"
+    else :
+        if n_bytes == 1 :
+            return f"{log2n_items}"
+        else :
+            return f"{log2n_items}+$clog2({int(n_bytes)})"
+        
 
 
 def gen_wr_reg(row, f):
