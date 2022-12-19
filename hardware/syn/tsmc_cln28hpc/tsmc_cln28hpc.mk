@@ -11,7 +11,7 @@ SYN_SYNC_FLAGS=$(CADENCE_SYNC_FLAGS)
 synth: $(VHDR) $(VSRC)
 	$(GENUS_ENV); genus -batch -files run_genus.tcl
 
-clean: gen-clean
+tsmc_cln28hpc-clean:
 	@rm -rf fv results st_part_log
 
-.PHONY: synth clean
+.PHONY: synth tsmc_cln28hpc-clean
