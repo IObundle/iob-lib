@@ -39,7 +39,17 @@ def calc_addr_w(log2n_items, n_bytes):
 
 # Generate symbolic expression string to caluclate addr_w in verilog
 def calc_verilog_addr_w(log2n_items, n_bytes):
-        return f"({log2n_items}+$clog2({int(n_bytes)}))"
+    if log2n_items == 0 :
+        if n_bytes == 1 :
+            return f"0"
+        else :
+            return f"$clog2({int(n_bytes)})"
+    else :
+        if n_bytes == 1 :
+            return f"{log2n_items}"
+        else :
+            return f"{log2n_items}+$clog2({int(n_bytes)})"
+        
 
 
 def gen_wr_reg(row, f):
@@ -55,7 +65,7 @@ def gen_wr_reg(row, f):
     f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n")
 
     #compute wdata with only the needed bits
-    f.write(f"`IOB_WIRE({name}_wdata, {n_bits})\n")
+    f.write(f"`IOB_WIRE({name}_wdata, {verilog_max(n_bits,1)})\n")
     f.write(f"assign {name}_wdata = iob_wdata_i[{boffset(addr,cpu_n_bytes)}+:{verilog_max(n_bits,1)}];\n")
 
     #check if address in range
@@ -121,7 +131,7 @@ def gen_port(table, f):
         if not auto:
             f.write(f"\t`IOB_INPUT({name}_ready_i, 1),\n")
         if get_integer_value(log2n_items,'max')>0:
-            f.write(f"\t`IOB_OUTPUT({name}_addr_o, {calc_verilog_addr_w(log2n_items,n_bytes)}),\n")
+            f.write(f"\t`IOB_OUTPUT({name}_addr_o, {verilog_max(calc_verilog_addr_w(log2n_items,n_bytes),1)}),\n")
             
     f.write(f"\t`IOB_OUTPUT(iob_ready_nxt_o, 1),\n")
     f.write(f"\t`IOB_OUTPUT(iob_rvalid_nxt_o, 1),\n")
@@ -148,7 +158,7 @@ def gen_inst_wire(table, f):
         if not auto:
             f.write(f"`IOB_WIRE({name}_ready, 1)\n")
         if get_integer_value(log2n_items,'max')>0:
-            f.write(f"`IOB_WIRE({name}_addr, {calc_verilog_addr_w(log2n_items,n_bytes)})\n")
+            f.write(f"`IOB_WIRE({name}_addr, {verilog_max(calc_verilog_addr_w(log2n_items,n_bytes),1)})\n")
     f.write(f"`IOB_WIRE(iob_ready_nxt, 1)\n")
     f.write(f"`IOB_WIRE(iob_rvalid_nxt, 1)\n")
     f.write("\n")
@@ -407,8 +417,8 @@ def write_hwheader(table, out_dir, top):
         log2n_items = row['log2n_items']
         f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
         if get_integer_value(log2n_items,'max')>0:
-            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {calc_verilog_addr_w(log2n_items,n_bytes)}\n")
-        f_def.write(f"`define {macro_prefix}{name}_W {n_bits}\n\n")
+            f_def.write(f"`define {macro_prefix}{name}_ADDR_W {verilog_max(calc_verilog_addr_w(log2n_items,n_bytes),1)}\n")
+        f_def.write(f"`define {macro_prefix}{name}_W {verilog_max(n_bits,1)}\n\n")
     f_def.close()
 
 
