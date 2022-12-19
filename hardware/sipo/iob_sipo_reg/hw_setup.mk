@@ -7,7 +7,7 @@ HW_MODULES+=iob_sipo_reg
 SRC+=$(BUILD_VSRC_DIR)/iob_sipo_reg.v
 
 # Copy the sources to the build directory
-$(BUILD_VSRC_DIR)/iob_sipo_reg.v: $(LIB_DIR)/hardware/iob_sipo_reg/iob_sipo_reg.v
+$(BUILD_VSRC_DIR)/iob_sipo_reg.v: $(LIB_DIR)/hardware/sipo/iob_sipo_reg/iob_sipo_reg.v
 	cp $< $@
 
 endif
