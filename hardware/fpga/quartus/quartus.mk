@@ -13,7 +13,7 @@ FPGA_ENV=$(QUARTUSPATH)/nios2eds/nios2_command_shell.sh
 
 $(FPGA_OBJ): $(VHDR) $(VSRC) $(wildcard *.sdc)
 	$(FPGA_ENV) quartus_sh -t quartus/quartus.tcl $(NAME) $(BOARD) "$(VSRC)" $(IS_FPGA)
-	mv output_files/*.fit.summary $(FPGA_LOG)
+	@mv output_files/*.fit.summary $(FPGA_LOG)
 
 quartus-clean:
 	@rm -rf incremental_db db output_files
