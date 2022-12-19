@@ -110,11 +110,11 @@ def gen_port(table, f):
  
         
         if row['type'] == 'W':
-            f.write(f"\t`IOB_OUTPUT({name}_o, {n_bits}),\n")
+            f.write(f"\t`IOB_OUTPUT({name}_o, {verilog_max(n_bits,1)}),\n")
             if not auto:
                 f.write(f"\t`IOB_OUTPUT({name}_wen_o, 1),\n")
         elif row['type'] == 'R':
-            f.write(f"\t`IOB_INPUT({name}_i, {n_bits}),\n")
+            f.write(f"\t`IOB_INPUT({name}_i, {verilog_max(n_bits,1)}),\n")
             if not auto:
                 f.write(f"\t`IOB_OUTPUT({name}_ren_o, 1),\n")
                 f.write(f"\t`IOB_INPUT({name}_rvalid_i, 1),\n")
@@ -137,11 +137,11 @@ def gen_inst_wire(table, f):
         rst_val = row['rst_val']
 
         if row['type'] == 'W':
-            f.write(f"`IOB_WIRE({name}, {n_bits})\n")
+            f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
             if not auto:
                 f.write(f"`IOB_WIRE({name}_wen, 1)\n")
         elif row['type'] == 'R':
-            f.write(f"`IOB_WIRE({name}, {n_bits})\n")
+            f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
             if not row['autologic']:
                 f.write(f"`IOB_WIRE({name}_rvalid, 1)\n")
                 f.write(f"`IOB_WIRE({name}_ren, 1)\n")
@@ -613,6 +613,13 @@ def compute_addr(table, no_overlap):
 # Generate swreg.tex file with list TeX tables of regs
 def generate_swreg_tex(regs, out_dir):
     swreg_file = open(f"{out_dir}/swreg.tex", "w")
+
+    swreg_file.write(\
+'''
+The software accessible registers of the core are described in the following
+tables. The tables give information on the name, read/write capability, address, width in bits, and a textual description.
+'''
+    )
 
     for table in regs:
         swreg_file.write(\
