@@ -1,22 +1,19 @@
-\subsubsection{Configuration}
-\label{sec:cm}
+This section describes how the IP core can be configured by means of
+Table~\ref{tab:confs}. The core may be configured using parameters or
+macros. The parameters are passed to each instance of the core and only affect
+that instance. The macros apply to all instances of the core. The macros and
+parameters have the following types:
+\begin{description}
+\item \textbf{'D'} Unvalued Macro: the way the core is built depends on the macro being defined or not.
+\item \textbf{'M'} Valued Macro: the value of the macro dictates the way the core is built.
+\item \textbf{'P'} True Parameter: the value of the parameter influences how the core instance that receives is built.
+\item \textbf{'F'} False Parameter: the parameter needs to be on the parameter list, but cannot be changed by the user.
+\end{description}
 
-The configuration  and are listed in
-Table~\ref{tab:confs}.
-
-The configuration entries may be of three types: 'D', 'M' and 'P'.
-
-\begin{itemize}
-    \itemsep-0.5em
-    \item The 'D' type is used for defines that apply to all instances of the core.
-    \item The 'M' type is used for macros that apply to all instances of the core.
-    \item The 'P' type is used for parameters that can vary from instance to instance.
-\end{itemize}
-
-\begin{longtable}{|l|c|c|c|c|p{9cm}|}
+\begin{xltabular}{\textwidth}{|l|c|c|c|c|X|}
     \caption{Configuration Macros}\label{tab:confs}\\ \hline
     \rowcolor{iob-green}
-    {\bf Macro} & {\bf Type} & {\bf Min} & {\bf Typ} & {\bf Max} & {\bf Description}
+    {\bf Macro} & {\bf Type} & {\bf Min} & {\bf Typical} & {\bf Max} & {\bf Description}
     \\ \hline \hline
     \input confs_tab
-\end{longtable}
+\end{xltabular}
