@@ -23,12 +23,12 @@ def setup( meta_data, confs, ios, regs, blocks, lib_srcs=None, no_overlap=False,
     #build directory
     if (build_dir==None):
         build_dir = meta_data['build_dir']
+        build_srcs.lib_dir = f"{meta_data['core_dir']}/submodules/LIB"
         subprocess.call(["rsync", "-avz", "--exclude", ".git", "--exclude", "submodules", "--exclude", ".gitmodules", "--exclude", ".github", ".", build_dir])
         subprocess.call(["find", build_dir, "-name", "*_setup*", "-delete"])
         subprocess.call(["cp", "./submodules/LIB/build.mk", f"{build_dir}/Makefile"])
         mk_conf.config_build_mk(confs, meta_data, build_dir)
     else:
-        meta_data['setup_dir'] = "."
         meta_data['build_dir'] = build_dir
     
     if lib_srcs != None:
@@ -84,5 +84,6 @@ def setup_submodule(build_dir, submodule_dir):
     #Import <corename>_setup.py
     module = import_setup(submodule_dir)
 
+    module.meta['core_dir'] = submodule_dir
     # Call setup function for this submodule
     module.main(build_dir=build_dir, gen_tex=False)

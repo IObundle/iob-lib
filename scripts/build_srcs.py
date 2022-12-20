@@ -3,39 +3,38 @@ from pathlib import Path
 import shutil
 import if_gen
 
+lib_dir = "./submodules/LIB"
+
 def hw_setup(core_meta_data, core_hw_setup):
     core_name = core_meta_data['name']
     core_version = core_meta_data['version']
     build_dir = core_meta_data['build_dir']
-    setup_dir = core_meta_data['setup_dir']
     Vheaders = core_hw_setup['v_headers']
     hardware_srcs = core_hw_setup['hw_modules']
 
     version_file(core_name, core_version, build_dir)
     if Vheaders!=None: create_Vheaders( build_dir, Vheaders )
-    if hardware_srcs!=None: copy_sources( f"{setup_dir}/submodules/LIB", f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
+    if hardware_srcs!=None: copy_sources( lib_dir, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
 
-    copy_sources( f"{setup_dir}/submodules/LIB/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
-    copy_sources( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v', copy_all = True )
+    copy_sources( f"{lib_dir}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
+    copy_sources( f"{core_meta_data['core_dir']}/hardware/src", f"{build_dir}/hardware/src", [], '*.v', copy_all = True )
 
 
 def sim_setup(core_meta_data, core_sim_setup):
     build_dir = core_meta_data['build_dir']
-    setup_dir = core_meta_data['setup_dir']
     sim_srcs  = core_sim_setup['hw_modules']
     sim_srcs.append("iob_tasks.vh")
-    copy_sources( f"{setup_dir}/submodules/LIB", f"{build_dir}/hardware/simulation/src", sim_srcs, '*.v*' )
-    copy_sources( f"{setup_dir}/submodules/LIB/hardware/simulation", f"{build_dir}/hardware/simulation/", [], '*', copy_all = True )
+    copy_sources( lib_dir, f"{build_dir}/hardware/simulation/src", sim_srcs, '*.v*' )
+    copy_sources( f"{lib_dir}/hardware/simulation", f"{build_dir}/hardware/simulation/", [], '*', copy_all = True )
 
 
 def python_setup(core_meta_data):
     build_dir = core_meta_data['build_dir']
-    setup_dir = core_meta_data['setup_dir']
     sim_srcs  = [ "sw_defines.py", "hw_defines.py", "console.py", "hex_split.py", "makehex.py" ]
     dest_dir  = f"{build_dir}/scripts"
 
     if not os.path.exists(dest_dir): os.makedirs(dest_dir)
-    copy_sources( f"{setup_dir}/submodules/LIB", dest_dir, sim_srcs, '*.py' )
+    copy_sources( lib_dir, dest_dir, sim_srcs, '*.py' )
 
 
 def copy_sources(lib_dir, dest_dir, hardware_srcs, pattern, copy_all = False):
