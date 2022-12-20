@@ -19,12 +19,9 @@ def getf(obj, name, field):
 def setup( meta_data, confs, ios, regs, blocks, lib_srcs=None, no_overlap=False, build_dir=None, gen_tex=True ):
 
     top = meta_data['name']
-    version = meta_data['version']
 
-    print(build_dir)
     #build directory
     if (build_dir==None):
-        print('hello')
         build_dir = meta_data['build_dir']
         subprocess.call(["rsync", "-avz", "--exclude", ".git", "--exclude", "submodules", "--exclude", ".gitmodules", "--exclude", ".github", ".", build_dir])
         subprocess.call(["find", build_dir, "-name", "*_setup*", "-delete"])

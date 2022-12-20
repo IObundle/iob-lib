@@ -60,14 +60,16 @@ def create_Vheaders(build_dir, Vheaders):
 def version_file(core_name, core_version, build_dir):
     tex_dir = f"{build_dir}/document/tsrc"
     verilog_dir = f"{build_dir}/hardware/src"
-    tex_file = f"{tex_dir}/{core_name}_version.tex"
-    with open(tex_file, "w+") as tex_f:
-        tex_f.write(core_version)
+    
+    if os.path.isdir(tex_dir):
+        tex_file = f"{tex_dir}/{core_name}_version.tex"
+        with open(tex_file, "w") as tex_f:
+            tex_f.write(core_version)
 
     vh_file = f"{verilog_dir}/{core_name}_version.vh"
     vh_version_string = '0'
     for c in core_version:
         if(c.isdigit()): 
             vh_version_string += c
-    with open(vh_file, "w+") as vh_f:
+    with open(vh_file, "w") as vh_f:
         vh_f.write(f"`define VERSION {vh_version_string}")
