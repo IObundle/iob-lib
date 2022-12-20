@@ -16,6 +16,7 @@ def hw_setup(core_meta_data, core_hw_setup):
     if hardware_srcs!=None: copy_sources( f"{setup_dir}/submodules/LIB", f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
 
     copy_sources( f"{setup_dir}/submodules/LIB/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
+    copy_sources( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v', copy_all = True )
 
 
 def sim_setup(core_meta_data, core_sim_setup):
