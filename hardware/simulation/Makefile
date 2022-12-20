@@ -99,7 +99,8 @@ debug:
 	@echo VHDR=$(VHDR)
 	@echo VSRC=$(VSRC)
 	@echo VFLAGS=$(VFLAGS)
+	@echo $(TEST_LIST)
 
 .PRECIOUS: uut.vcd
 
-.PHONY: build run gen-clean kill-sim kill-remote-sim debug test $(TEST_LIST)
+.PHONY: build run gen-clean kill-sim kill-remote-sim debug test
