@@ -52,20 +52,6 @@ ifneq ($(wildcard hardware/hw_setup.mk),)
 include hardware/hw_setup.mk
 endif
 
-#simulation
-ifneq ($(wildcard hardware/simulation),)
-
-#include local simulation makefile segment
-ifneq ($(wildcard hardware/simulation/sim_setup.mk),)
-include hardware/simulation/sim_setup.mk
-endif
-
-#copy simulation files from LIB 
-SRC+=$(patsubst $(LIB_DIR)/hardware/simulation/%, $(BUILD_SIM_DIR)/%, $(wildcard $(LIB_DIR)/hardware/simulation/*))
-$(BUILD_SIM_DIR)/%: $(LIB_DIR)/hardware/simulation/%
-	cp -r $< $@
-endif
-
 #fpga
 ifneq ($(wildcard hardware/fpga),)
 

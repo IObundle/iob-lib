@@ -3,33 +3,61 @@ from pathlib import Path
 import shutil
 import if_gen
 
-def import_hw_sources(setup_dir, build_dir, hardware_srcs):
+def hw_setup(core_meta_data, core_hw_setup):
+    core_name = core_meta_data['name']
+    core_version = core_meta_data['version']
+    build_dir = core_meta_data['build_dir']
+    setup_dir = core_meta_data['setup_dir']
+    Vheaders = core_hw_setup['v_headers']
+    hardware_srcs = core_hw_setup['hw_modules']
+
+    version_file(core_name, core_version, build_dir)
+    if Vheaders!=None: create_Vheaders( build_dir, Vheaders )
+    if hardware_srcs!=None: copy_sources( f"{setup_dir}/submodules/LIB", f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
+
+    copy_sources( f"{setup_dir}/submodules/LIB/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
+
+
+def sim_setup(core_meta_data, core_sim_setup):
+    build_dir = core_meta_data['build_dir']
+    setup_dir = core_meta_data['setup_dir']
+    sim_srcs  = core_sim_setup['hw_modules']
+    sim_srcs.append("iob_tasks.vh")
+    copy_sources( f"{setup_dir}/submodules/LIB", f"{build_dir}/hardware/simulation/src", sim_srcs, '*.v*' )
+    copy_sources( f"{setup_dir}/submodules/LIB/hardware/simulation", f"{build_dir}/hardware/simulation/", [], '*', copy_all = True )
+
+
+def python_setup(core_meta_data):
+    build_dir = core_meta_data['build_dir']
+    setup_dir = core_meta_data['setup_dir']
+    sim_srcs  = [ "sw_defines.py", "hw_defines.py", "console.py", "hex_split.py", "makehex.py" ]
+    dest_dir  = f"{build_dir}/scripts"
+
+    if not os.path.exists(dest_dir): os.makedirs(dest_dir)
+    copy_sources( f"{setup_dir}/submodules/LIB", dest_dir, sim_srcs, '*.py' )
+
+
+def copy_sources(lib_dir, dest_dir, hardware_srcs, pattern, copy_all = False):
     if(hardware_srcs != None):
-        for path in Path(f"{setup_dir}/submodules/LIB").rglob('*.v'):
+        for path in Path(lib_dir).rglob(pattern):
             verilog_file = path.name
-            if verilog_file in hardware_srcs:
+            if (verilog_file in hardware_srcs) or copy_all:
                 src_file = path.resolve()
-                dest_file = f"{build_dir}/hardware/src/{verilog_file}"
+                dest_file = f"{dest_dir}/{verilog_file}"
                 if not(os.path.isfile(dest_file)) or (os.stat(src_file).st_mtime > os.stat(dest_file).st_mtime):
-                    shutil.copyfile()
+                    shutil.copy(src_file, dest_file)
 
-    print('nop')
 
-def build_interface(interface_type):
-    print('nop')
-
-def import_Vheaders(Vheaders):
+def create_Vheaders(build_dir, Vheaders):
     for vh_name in Vheaders:
+        f_out = open (f"{build_dir}/hardware/src/{vh_name}.vh", 'w')
         if vh_name in if_gen.interfaces:
             # Interface is standard, generate ports
             if_gen.create_signal_table(vh_name)
-            if_gen.write_vh_contents(vh_name, '', '', f_io)
+            if_gen.write_vh_contents(vh_name, '', '', f_out)
 
 
-def version_file(module_meta_data, build_dir):
-    core_name = module_meta_data['name']
-    core_version = module_meta_data['version']
-
+def version_file(core_name, core_version, build_dir):
     tex_dir = f"{build_dir}/document/tsrc"
     verilog_dir = f"{build_dir}/hardware/src"
     tex_file = f"{tex_dir}/{core_name}_version.tex"

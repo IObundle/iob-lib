@@ -8,9 +8,7 @@ import mkregs
 import ios as ios_lib
 import blocks as blocks_lib
 from submodule_utils import import_setup
-from build_srcs import version_file
-
-src_path = './hardware/src/'
+import build_srcs
 
 def getf(obj, name, field):
     return int(obj[next(i for i in range(len(obj)) if obj[i]['name'] == name)][field])
@@ -18,7 +16,7 @@ def getf(obj, name, field):
 # no_overlap: Optional argument. Selects if read/write addresses should not overlap
 # build_dir: Optional argument. Location of build directory. If left as 'None', name is auto generated.
 # gen_tex: Optional argument. Selects if TeX documentation should be generated.
-def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, build_dir=None, gen_tex=True ):
+def setup( meta_data, confs, ios, regs, blocks, lib_srcs=None, no_overlap=False, build_dir=None, gen_tex=True ):
 
     top = meta_data['name']
     version = meta_data['version']
@@ -27,13 +25,19 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, build_dir=None
     #build directory
     if (build_dir==None):
         print('hello')
-        build_dir = f"../{top}_{version}"
+        build_dir = meta_data['build_dir']
         subprocess.call(["rsync", "-avz", "--exclude", ".git", "--exclude", "submodules", "--exclude", ".gitmodules", "--exclude", ".github", ".", build_dir])
         subprocess.call(["find", build_dir, "-name", "*_setup*", "-delete"])
         subprocess.call(["cp", "./submodules/LIB/build.mk", f"{build_dir}/Makefile"])
         mk_conf.config_build_mk(confs, meta_data, build_dir)
+    else:
+        meta_data['setup_dir'] = "."
+        meta_data['build_dir'] = build_dir
     
-    version_file( meta_data, build_dir )
+    if lib_srcs != None:
+        build_srcs.hw_setup( meta_data, lib_srcs['hw_setup'] )
+        build_srcs.python_setup( meta_data )
+        if "sim" in meta_data['flows']: build_srcs.sim_setup( meta_data, lib_srcs['sim_setup'] )
     #build registers table
     if regs:
         reg_table = []
