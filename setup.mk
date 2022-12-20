@@ -52,7 +52,7 @@ $(BUILD_DIR):
 	mv $@/delivery_readme.txt $@/README
 	ls -R $@ >> $@/README
 	sed -i -e 's/..\///' $@/README
-	
+
 #
 #HARDWARE
 #
