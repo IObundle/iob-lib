@@ -106,6 +106,7 @@ endif
 SRC+=$(BUILD_FPGA_DIR)/Makefile
 $(BUILD_FPGA_DIR)/Makefile: $(LIB_DIR)/hardware/fpga/Makefile
 	cp $< $@
+	find $(BUILD_FPGA_DIR) -name \*.pdf -delete
 
 endif
 
