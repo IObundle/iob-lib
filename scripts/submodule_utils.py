@@ -72,6 +72,8 @@ def import_setup(core_dir):
         if x.endswith("_setup.py"):
             filename = x
             break
+    if 'filename' not in vars():
+        raise FileNotFoundError(f"Could not find a *_setup.py file in {core_dir}")
     #Import <corename>_setup.py
     spec = importlib.util.spec_from_file_location("core_module", core_dir+"/"+filename)
     module = importlib.util.module_from_spec(spec)
