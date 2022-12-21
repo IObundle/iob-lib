@@ -1,4 +1,5 @@
 import os
+import subprocess
 from pathlib import Path
 import shutil
 import if_gen
@@ -17,7 +18,7 @@ def hw_setup(core_meta_data, core_hw_setup):
     if hardware_srcs!=None: copy_sources( lib_dir, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
 
     copy_sources( f"{lib_dir}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
-    copy_sources( f"{core_meta_data['core_dir']}/hardware/src", f"{build_dir}/hardware/src", [], '*.v', copy_all = True )
+    copy_sources( f"{core_meta_data['core_dir']}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
 
 
 def sim_setup(core_meta_data, core_sim_setup):
@@ -25,7 +26,21 @@ def sim_setup(core_meta_data, core_sim_setup):
     sim_srcs  = core_sim_setup['hw_modules']
     sim_srcs.append("iob_tasks.vh")
     copy_sources( lib_dir, f"{build_dir}/hardware/simulation/src", sim_srcs, '*.v*' )
-    copy_sources( f"{lib_dir}/hardware/simulation", f"{build_dir}/hardware/simulation/", [], '*', copy_all = True )
+    copy_sources( f"{lib_dir}/hardware/simulation", f"{build_dir}/hardware/simulation", [], '*', copy_all = True )
+
+
+def fpga_setup(core_meta_data):
+    build_dir = core_meta_data['build_dir']
+    fpga_dir = "hardware/fpga"
+
+    if not os.path.exists(f"{build_dir}/{fpga_dir}/quartus"): os.makedirs(f"{build_dir}/{fpga_dir}/quartus")
+    copy_sources( f"{lib_dir}/{fpga_dir}/quartus", f"{build_dir}/{fpga_dir}/quartus", [], '*', copy_all = True )
+    
+    if not os.path.exists(f"{build_dir}/{fpga_dir}/vivado"): os.makedirs(f"{build_dir}/{fpga_dir}/vivado")
+    copy_sources( f"{lib_dir}/{fpga_dir}/vivado", f"{build_dir}/{fpga_dir}/vivado", [], '*', copy_all = True )
+
+    copy_sources( f"{lib_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}", [ 'Makefile' ], 'Makefile' )
+    subprocess.call(["find", build_dir, "-name", "*.pdf", "-delete"])
 
 
 def python_setup(core_meta_data):

@@ -52,36 +52,6 @@ ifneq ($(wildcard hardware/hw_setup.mk),)
 include hardware/hw_setup.mk
 endif
 
-#fpga
-ifneq ($(wildcard hardware/fpga),)
-
-#include local fpga makefile segment
-ifneq ($(wildcard hardware/fpga/fpga_setup.mk),)
-include hardware/fpga/fpga_setup.mk
-endif
-
-#copy quartus files from LIB
-ifneq ($(wildcard hardware/fpga/quartus),)
-SRC+=$(patsubst $(LIB_DIR)/hardware/fpga/quartus/%, $(BUILD_FPGA_DIR)/quartus/%, $(wildcard $(LIB_DIR)/hardware/fpga/quartus/*))
-$(BUILD_FPGA_DIR)/quartus/%: $(LIB_DIR)/hardware/fpga/quartus/%
-	cp -r $< $@
-endif
-
-#copy vivado files from LIB
-ifneq ($(wildcard hardware/fpga/vivado),)
-SRC+=$(patsubst $(LIB_DIR)/hardware/fpga/vivado/%, $(BUILD_FPGA_DIR)/vivado/%, $(wildcard $(LIB_DIR)/hardware/fpga/vivado/*))
-$(BUILD_FPGA_DIR)/vivado/%: $(LIB_DIR)/hardware/fpga/vivado/%
-	cp -r $< $@
-endif
-
-#copy fpga makefile
-SRC+=$(BUILD_FPGA_DIR)/Makefile
-$(BUILD_FPGA_DIR)/Makefile: $(LIB_DIR)/hardware/fpga/Makefile
-	cp $< $@
-	find $(BUILD_FPGA_DIR) -name \*.pdf -delete
-
-endif
-
 #synthesis
 ifneq ($(wildcard hardware/syn),)
 
