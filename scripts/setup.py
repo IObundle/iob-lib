@@ -15,15 +15,21 @@ def getf(obj, name, field):
 
 # no_overlap: Optional argument. Selects if read/write addresses should not overlap
 # build_dir: Optional argument. Location of build directory. If left as 'None', name is auto generated.
+# delivery_dir: Optional argument. Location of delivery directory. If left as 'None', name is auto generated.
 # gen_tex: Optional argument. Selects if TeX documentation should be generated.
-def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, build_dir=None, gen_tex=True ):
+def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, build_dir=None, delivery_dir=None, gen_tex=True ):
 
     top = meta_data['name']
     version = meta_data['version']
     #build directory
     if not build_dir:
-        build_dir = f"../{top}_{version}"
+        build_dir = f"../{top}_{version}_build"
+    #delivery directory
+    if not delivery_dir:
+        delivery_dir = f"../{top}_{version}"
+    
     mk_conf.config_build_mk(confs, meta_data, build_dir)
+    mk_conf.config_delivery_mk(confs, meta_data, build_dir, delivery_dir)
     
     #build registers table
     if regs:

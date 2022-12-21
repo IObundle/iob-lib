@@ -4,7 +4,7 @@
 SHELL:=bash
 
 # include core basic info
-include ../../config_build.mk
+include ../../config.mk
 
 ifneq ($(wildcard ../../console.mk),)
 include ../../console.mk

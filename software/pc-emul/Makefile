@@ -3,7 +3,7 @@
 # This makefile is used at build-time in $(BUILD_DIR)/sw/pc/Makefile
 #
 
-include ../../config_build.mk
+include ../../config.mk
 
 ifneq ($(wildcard ../../console.mk),)
 include ../../console.mk

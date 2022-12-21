@@ -3,7 +3,7 @@
 # This makefile is used at build-time in $(BUILD_DIR)/software/embedded/Makefile
 #
 
-include ../../config_build.mk
+include ../../config.mk
 
 TEMPLATE_LDS=../template.lds
 
@@ -61,4 +61,3 @@ debug:
 	@echo $(HDR)
 
 .PHONY: build clean debug
-

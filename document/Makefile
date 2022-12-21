@@ -6,7 +6,7 @@
 SHELL = bash
 
 # include core basic info
-include ../config_build.mk
+include ../config.mk
 
 #include local doc makefile segment
 ifneq ($(wildcard doc_build.mk),)
@@ -111,4 +111,3 @@ debug: $(TSRC)
 	@echo ASIC_NODE=$(ASIC_NODE)
 
 .PHONY: view doctop figures results build clean test debug
-

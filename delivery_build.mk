@@ -34,30 +34,6 @@ pc-emul-clean:
 endif
 
 #
-# LINTER
-#
-ifneq ($(filter lint, $(FLOWS)),)
-SPYGLASS_DIR=hardware/lint/spyglass
-spyglass-run:
-	make -C $(SPYGLASS_DIR) run
-
-spyglass-clean:
-	make -C $(SPYGLASS_DIR) clean
-endif
-
-#
-#CDC LINTER
-#
-ifneq ($(filter alint, $(FLOWS)),)
-ALINT_DIR=hardware/lint/alint
-alint-run:
-	make -C $(ALINT_DIR) run
-
-alint-clean:
-	make -C $(ALINT_DIR) clean
-endif
-
-#
 # SIMULATE
 #
 ifneq ($(filter sim, $(FLOWS)),)
@@ -114,50 +90,22 @@ syn-clean:
 	make -C $(SYN_DIR) clean
 endif
 
-
-#
-# DOCUMENT
-#
-ifneq ($(filter doc, $(FLOWS)),)
-DOC_DIR=document
-doc-build: 
-	make -C $(DOC_DIR) build
-
-doc-test: 
-	make -C $(DOC_DIR) test
-
-doc-debug: 
-	make -C $(DOC_DIR) debug
-
-doc-clean:
-	make -C $(DOC_DIR) clean
-endif
-
 #
 # TEST
 #
-test: sim-test fpga-test doc-test
-
-#
-# DEBUG
-#
-debug:
-	@echo $(FLOWS)
+test: sim-test fpga-test
 
 #
 # CLEAN
 #
 
-clean: fw-clean pc-emul-clean lint-clean sim-clean fpga-clean doc-clean
+clean: fw-clean pc-emul-clean sim-clean fpga-clean
 
 
 .PHONY: fw-build \
 	pc-emul-build pc-emul-run \
-	spyglass-run spyglass-clean \
-	alint-run alint-clean \
 	sim-build sim-run sim-debug \
 	fpga-build fpga-debug \
-	doc-build doc-debug \
 	test clean debug \
-	sim-test fpga-test doc-test \
-	fw-clean pc-emul-clean sim-clean fpga-clean doc-clean
+	sim-test fpga-test \
+	fw-clean pc-emul-clean sim-clean fpga-clean

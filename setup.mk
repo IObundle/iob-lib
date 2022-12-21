@@ -17,7 +17,7 @@ PYTHON_DIR=$(LIB_DIR)/scripts
 VERSION_STR := $(shell $(PYTHON_DIR)/version.py -i .)
 
 # build directory name
-BUILD_DIR_NAME:=$(NAME)_$(VERSION_STR)
+BUILD_DIR_NAME:=$(NAME)_$(VERSION_STR)_build
 
 # establish build dir paths
 BUILD_DIR := ../$(BUILD_DIR_NAME)
@@ -41,17 +41,14 @@ BUILD_SW_PYTHON_DIR = $(BUILD_DIR)/scripts
 
 setup: debug
 	./$(NAME)_setup.py
+	mv $(BUILD_DIR)/config_build.mk $(BUILD_DIR)/config.mk
 
 $(BUILD_DIR):
-	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $@
+	@rsync -avz --exclude .git --exclude .gitignore --exclude submodules --exclude .gitmodules --exclude .github --exclude $(NAME)_setup.py . $@
 	find $@ -name \*_setup.mk -delete
-	rm -rf $@/*_setup.py
-	rm -rf $@/README.md
-	rm -rf $@/document/other
-	cp $(LIB_DIR)/build.mk $@/Makefile
+	rm -f $@/README.md
 	mv $@/delivery_readme.txt $@/README
-	ls -R $@ >> $@/README
-	sed -i -e 's/\.\.\///' $@/README
+	cp $(LIB_DIR)/build.mk $@/Makefile
 
 #
 #HARDWARE

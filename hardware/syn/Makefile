@@ -5,7 +5,7 @@
 
 SHELL:=bash
 
-include ../../config_build.mk
+include ../../config.mk
 
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 REMOTE_SYN_DIR=$(REMOTE_BUILD_DIR)/hardware/syn
