@@ -37,7 +37,6 @@ def hw_setup(core_meta_data, lib_srcs):
     copy_sources( f"{lib_dir}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
     copy_sources( f"{core_meta_data['core_dir']}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
 
-    print(sim_Vheaders  )
     if "sim" in core_meta_data['flows']: sim_setup( build_dir, sim_srcs, sim_Vheaders )
     #if "fpga" in meta_data['flows']: build_srcs.fpga_setup( meta_data )
 
