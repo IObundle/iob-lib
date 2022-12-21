@@ -31,10 +31,8 @@ def setup( meta_data, confs, ios, regs, blocks, lib_srcs=None, no_overlap=False,
     else:
         meta_data['build_dir'] = build_dir
     
-    build_srcs.hw_setup( meta_data, lib_srcs['hw_setup'] )
+    build_srcs.hw_setup( meta_data, lib_srcs )
     build_srcs.python_setup( meta_data )
-    if "sim" in meta_data['flows']: build_srcs.sim_setup( meta_data, lib_srcs['sim_setup'] )
-    #if "fpga" in meta_data['flows']: build_srcs.fpga_setup( meta_data )
     #build registers table
     if regs:
         reg_table = []

@@ -1,32 +1,54 @@
-import os
+import os, sys
 import subprocess
 from pathlib import Path
 import shutil
 import if_gen
+import iob_colors
 
 lib_dir = "./submodules/LIB"
 
-def hw_setup(core_meta_data, core_hw_setup):
+def hw_setup(core_meta_data, lib_srcs):
     core_name = core_meta_data['name']
     core_version = core_meta_data['version']
     build_dir = core_meta_data['build_dir']
+
+    core_hw_setup = lib_srcs['hw_setup']
     Vheaders = core_hw_setup['v_headers']
     hardware_srcs = core_hw_setup['hw_modules']
 
+    if "sim" in core_meta_data['flows']: 
+        core_sim_setup = lib_srcs['sim_setup']
+        sim_srcs = core_sim_setup['hw_modules']
+        sim_Vheaders = core_sim_setup['v_headers']
+
     version_file(core_name, core_version, build_dir)
+
+    for hardware_src in hardware_srcs:
+        if hardware_src in special_modules.keys():
+            Vheaders += special_modules[hardware_src]['v_headers']
+            hardware_srcs += special_modules[hardware_src]['hw_modules']
+            if "sim" in core_meta_data['flows']:
+                sim_srcs += special_modules[hardware_src]['sim_modules']
+                sim_Vheaders += special_modules[hardware_src]['sim_v_headers']
+
     if Vheaders!=None: create_Vheaders( build_dir, Vheaders )
     if hardware_srcs!=None: copy_sources( lib_dir, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
 
     copy_sources( f"{lib_dir}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
     copy_sources( f"{core_meta_data['core_dir']}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
 
+    if "sim" in core_meta_data['flows']: sim_setup( core_meta_data['build_dir'], sim_srcs, sim_Vheaders )
+    #if "fpga" in meta_data['flows']: build_srcs.fpga_setup( meta_data )
 
-def sim_setup(core_meta_data, core_sim_setup):
-    build_dir = core_meta_data['build_dir']
-    sim_srcs  = core_sim_setup['hw_modules']
+
+def sim_setup(build_dir, sim_srcs, sim_Vheaders):
+    sim_dir = "hardware/simulation"
+
     sim_srcs.append("iob_tasks.vh")
-    copy_sources( lib_dir, f"{build_dir}/hardware/simulation/src", sim_srcs, '*.v*' )
-    copy_sources( f"{lib_dir}/hardware/simulation", f"{build_dir}/hardware/simulation", [], '*', copy_all = True )
+
+    if (sim_Vheaders!=[ ]): create_Vheaders( build_dir, sim_Vheaders )
+    copy_sources( lib_dir, f"{build_dir}/{sim_dir}/src", sim_srcs, '*.v*' )
+    copy_sources( f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", [], '*', copy_all = True )
 
 
 def fpga_setup(core_meta_data):
@@ -59,17 +81,25 @@ def copy_sources(lib_dir, dest_dir, hardware_srcs, pattern, copy_all = False):
             if (verilog_file in hardware_srcs) or copy_all:
                 src_file = path.resolve()
                 dest_file = f"{dest_dir}/{verilog_file}"
-                if not(os.path.isfile(dest_file)) or (os.stat(src_file).st_mtime > os.stat(dest_file).st_mtime):
+                if os.path.isfile(src_file) or not(os.path.isfile(dest_file)) or (os.stat(src_file).st_mtime > os.stat(dest_file).st_mtime):
                     shutil.copy(src_file, dest_file)
+                elif not(os.path.isfile(src_file)): print(f"{iob_colors.WARNING}{src_file} is not a file.{iob_colors.ENDC}")
 
 
 def create_Vheaders(build_dir, Vheaders):
     for vh_name in Vheaders:
-        f_out = open (f"{build_dir}/hardware/src/{vh_name}.vh", 'w')
-        if vh_name in if_gen.interfaces:
-            # Interface is standard, generate ports
+        if (type(vh_name) is str) and (vh_name in if_gen.interfaces):
+            if 'iob_' in vh_name: file_prefix = ''
+            else: file_prefix = 'iob_'
+            f_out = open (f"{build_dir}/hardware/src/{file_prefix}{vh_name}.vh", 'w')
             if_gen.create_signal_table(vh_name)
             if_gen.write_vh_contents(vh_name, '', '', f_out)
+        elif (type(vh_name) is list) and (vh_name[1] in if_gen.interfaces):
+            f_out = open (f"{build_dir}/hardware/src/{vh_name[0]}{vh_name[1]}.vh", 'w')
+            if_gen.create_signal_table(vh_name[1])
+            if_gen.write_vh_contents(vh_name[1], vh_name[2], vh_name[3], f_out)
+        else: 
+            sys.exit(f"{iob_colors.FAIL} {vh_name} is not an available header.{iob_colors.ENDC}")
 
 
 def version_file(core_name, core_version, build_dir):
@@ -88,3 +118,12 @@ def version_file(core_name, core_version, build_dir):
             vh_version_string += c
     with open(vh_file, "w") as vh_f:
         vh_f.write(f"`define VERSION {vh_version_string}")
+
+special_modules = {
+    'iob2apb':{
+        'v_headers'    : [ 'iob_s_port', 'iob_s_s_portmap', 'apb_m_port', 'apb_m_portmap', 'apb_wire' ],
+        'hw_modules'   : [ 'iob_reg_a.v' ],
+        'sim_v_headers': [ 'iob_m_tb_wire' ],
+        'sim_modules'  : [  ]
+    },
+}
