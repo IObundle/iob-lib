@@ -51,7 +51,7 @@ $(BUILD_DIR):
 	cp $(LIB_DIR)/build.mk $@/Makefile
 	mv $@/delivery_readme.txt $@/README
 	ls -R $@ >> $@/README
-	sed -i -e 's/..\///' $@/README
+	sed -i -e 's/\.\.\///' $@/README
 
 #
 #HARDWARE
