@@ -13,7 +13,7 @@ module apb2iob
     )
    (
     // APB slave interface
-`include "apb_s_port.vh"
+`include "iob_apb_s_port.vh"
     
     // IOb master interface
 `include "iob_m_port.vh"
