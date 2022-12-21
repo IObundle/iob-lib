@@ -32,9 +32,10 @@ ifeq ($(COV),1)
 endif
 
 clean: gen-clean
+	@rm -f xmelab.log  xmsim.log  xmvlog.log *.vh
 
 very-clean: clean
-	@rm -rf cov_work *.log
+	@rm -rf cov_work test.log
 	@rm -f coverage_report_summary.rpt coverage_report_detail.rpt
 
 

@@ -81,7 +81,7 @@ ifeq ($(VCD),1)
 endif
 
 gen-clean:
-	@rm -f ../../*.vh *.hex
+	@rm -f *.vh *.hex
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_SIM_DIR)/Makefile ]; then make -C $(REMOTE_SIM_DIR) $@; fi'
 endif
@@ -99,7 +99,8 @@ debug:
 	@echo VHDR=$(VHDR)
 	@echo VSRC=$(VSRC)
 	@echo VFLAGS=$(VFLAGS)
+	@echo $(TEST_LIST)
 
 .PRECIOUS: uut.vcd
 
-.PHONY: build run gen-clean kill-sim kill-remote-sim debug test $(TEST_LIST)
+.PHONY: build run gen-clean kill-sim kill-remote-sim debug test
