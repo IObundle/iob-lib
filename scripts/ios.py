@@ -101,12 +101,7 @@ def get_peripheral_ios(peripherals_list, submodule_dirs, root_dir):
     ios_list = []
     # Append ports of each instance
     for instance in peripherals_list:
-        instance_port_list = port_list[instance['type']].copy()
-        #Add instance prefix to every port of this instance
-        for port in instance_port_list:
-            port['name'] = instance['name']+"_"+port['name']
-        #Append IOs of this instance
-        ios_list.append({'name':instance['name'], 'descr':f"{instance['name']} interface signals", 'ports': instance_port_list})
+        ios_list.append({'name':instance['name'], 'descr':f"{instance['name']} interface signals", 'ports': port_list[instance['type']]})
     return ios_list
 
 
