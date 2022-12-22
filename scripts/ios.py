@@ -9,6 +9,26 @@ from submodule_utils import get_submodule_directories, get_module_io, import_set
 import importlib.util
 import os
 
+# List of known interfaces for auto-map
+# Any interfaces in this dictionary can by auto mapped by the python scripts
+known_map_interfaces =\
+{
+        'rs232':
+            {'rxd':'txd',
+             'txd':'rxd',
+             'cts':'rts',
+             'rts':'cts',
+             },
+}
+
+#Given a known interface name, return its mapping
+def get_interface_mapping(if_name):
+    for interface in known_map_interfaces.items():
+        if if_name == interface_name[0]:
+            return interface_name[1]
+    #Did not find known interface
+    raise Exception(f"Error: Unkown mapping for '{if_name}' interface.")
+
 # Return full port type string based on given types: "I", "O" and "IO"
 # Maps "I", "O" and "IO" to "input", "output" and "inout", respectively.
 def get_port_type(port_type):
