@@ -62,7 +62,8 @@ def delete_last_comma(file_obj):
 # ios: list of tables, each of them containing a list of ports
 # Each table is a dictionary with fomat: {'name': '<table name>', 'descr':'<table description>', 'ports': [<list of ports>]}
 # Each port is a dictionary with fomat: {'name':"<port name>", 'type':"<port type>", 'n_bits':'<port width>', 'descr':"<port description>"},
-def generate_ios_header(ios, top_module, out_dir):
+# prefix: If should add ios table name as a prefix to every signal in that table
+def generate_ios_header(ios, top_module, out_dir, prefix=False):
     f_io = open(f"{out_dir}/{top_module}_io.vh", "w+")
 
     for table in ios:
@@ -70,11 +71,11 @@ def generate_ios_header(ios, top_module, out_dir):
         if table['name'] in if_gen.interfaces:
             # Interface is standard, generate ports
             if_gen.create_signal_table(table['name'])
-            if_gen.write_vh_contents(table['name'], '', '', f_io)
+            if_gen.write_vh_contents(table['name'], '', table['name']+'_' if prefix else '', f_io)
         else:
             # Interface is not standard, read ports
             for port in table['ports']:
-                f_io.write(f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {port['name']}, //{port['descr']}\n")
+                f_io.write(f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if prefix else ''}{port['name']}, //{port['descr']}\n")
 
     # Find and remove last comma
     delete_last_comma(f_io)
