@@ -28,6 +28,7 @@ BUILD_PC_DIR = $(BUILD_DIR)/software/pc-emul
 BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
+BUILD_LINT_DIR = $(BUILD_DIR)/hardware/lint
 SPYGLASS_LINT_DIR = $(BUILD_DIR)/hardware/lint/spyglass
 BUILD_ALINT_DIR = $(BUILD_DIR)/hardware/lint/alint
 
