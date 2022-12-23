@@ -37,24 +37,12 @@ endif
 # LINTER
 #
 ifneq ($(filter lint, $(FLOWS)),)
-SPYGLASS_DIR=hardware/lint/spyglass
-spyglass-run:
-	make -C $(SPYGLASS_DIR) run
+LINT_DIR=hardware/lint
+lint-run:
+	make -C $(LINT_DIR) run
 
-spyglass-clean:
-	make -C $(SPYGLASS_DIR) clean
-endif
-
-#
-#CDC LINTER
-#
-ifneq ($(filter alint, $(FLOWS)),)
-ALINT_DIR=hardware/lint/alint
-alint-run:
-	make -C $(ALINT_DIR) run
-
-alint-clean:
-	make -C $(ALINT_DIR) clean
+lint-clean:
+	make -C $(LINT_DIR) clean
 endif
 
 #
