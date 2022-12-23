@@ -106,7 +106,6 @@ endif
 SRC+=$(BUILD_FPGA_DIR)/Makefile
 $(BUILD_FPGA_DIR)/Makefile: $(LIB_DIR)/hardware/fpga/Makefile
 	cp $< $@
-	find $(BUILD_FPGA_DIR) -name \*.pdf -delete
 
 endif
 
@@ -221,6 +220,12 @@ ifeq ($(AMD_FPGA),1)
 $(BUILD_DIR)/doc/vivado.tex
 endif
 
+#
+# DELIVERY 
+#
+
+include config_delivery.mk
+
 
 # generate quartus fitting results 
 $(BUILD_DIR)/doc/quartus.tex:
@@ -237,8 +242,8 @@ $(BUILD_DIR)/doc/vivado.tex:
 endif
 
 
-clean:
-	@rm -rf $(BUILD_DIR) *.tex *.v *.vh *.h
+clean: delivery-clean
+	@rm -rf $(BUILD_DIR)
 	@rm -rf scripts/__pycache__
 
 python-cache-clean:
