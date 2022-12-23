@@ -16,7 +16,8 @@ def getf(obj, name, field):
 # no_overlap: Optional argument. Selects if read/write addresses should not overlap
 # build_dir: Optional argument. Location of build directory. If left as 'None', name is auto generated.
 # gen_tex: Optional argument. Selects if TeX documentation should be generated.
-def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, build_dir=None, gen_tex=True ):
+# ios_prefix: Optional argument. Selects if IO signals should be prefixed by their table name. Useful when multiple tables have signals with the same name.
+def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, build_dir=None, gen_tex=True, ios_prefix=False ):
 
     top = meta_data['name']
     version = meta_data['version']
@@ -45,7 +46,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, build_dir=None
     mk_conf.params_vh(confs, top, build_dir+'/hardware/src')
     mk_conf.conf_vh(confs, top, build_dir+'/hardware/src')
 
-    ios_lib.generate_ios_header(ios, top, build_dir+'/hardware/src')
+    ios_lib.generate_ios_header(ios, top, build_dir+'/hardware/src',prefix=ios_prefix)
 
     #
     # Generate sw
