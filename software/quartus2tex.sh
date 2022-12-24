@@ -1,6 +1,6 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -e
+
 RES="quartus.tex" ;\
 ALM=`grep ALM $LOG |grep -o '[0-9,]* \/' | sed s/'\/'//g` ;\
 FF=`grep registers $LOG |grep -o '[0-9]*' | sed s/'\/'//g` ;\

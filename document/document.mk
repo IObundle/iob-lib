@@ -1,4 +1,4 @@
-SHELL = /bin/bash
+SHELL = bash
 
 LIB_DOC_DIR:=$(LIB_DIR)/document
 LIB_SW_DIR:=$(LIB_DIR)/software
