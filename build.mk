@@ -37,25 +37,28 @@ endif
 # LINTER
 #
 ifneq ($(filter lint, $(FLOWS)),)
-SPYGLASS_DIR=hardware/lint/spyglass
-spyglass-run:
-	make -C $(SPYGLASS_DIR) run
+LINT_DIR=hardware/lint
+lint-run:
+	make -C $(LINT_DIR) run
 
-spyglass-clean:
-	make -C $(SPYGLASS_DIR) clean
+lint-clean:
+	make -C $(LINT_DIR) clean
 endif
 
-#
-#CDC LINTER
-#
-ifneq ($(filter alint, $(FLOWS)),)
-ALINT_DIR=hardware/lint/alint
-alint-run:
-	make -C $(ALINT_DIR) run
+ifneq ($(wildcard hardware/lint),)
+lint-test: spyglass-test #alint-test
 
-alint-clean:
-	make -C $(ALINT_DIR) clean
+spyglass-test:
+	make lint-run LINTER=spyglass
+
+alint-test:
+	make lint-run LINTER=alint
+else
+lint-test:
 endif
+
+
+
 
 #
 # SIMULATE
@@ -80,6 +83,10 @@ sim-debug:
 sim-clean:
 	make -C $(SIM_DIR) clean
 endif
+
+cov-test: sim-clean
+	make -C $(SIM_DIR) test COV=1
+
 
 #
 # FPGA
@@ -114,6 +121,7 @@ syn-clean:
 	make -C $(SYN_DIR) clean
 endif
 
+syn-test: syn-clean syn-build
 
 #
 # DOCUMENT
@@ -123,20 +131,26 @@ DOC_DIR=document
 doc-build: 
 	make -C $(DOC_DIR) build
 
-doc-test: 
-	make -C $(DOC_DIR) test
-
 doc-debug: 
 	make -C $(DOC_DIR) debug
 
 doc-clean:
 	make -C $(DOC_DIR) clean
+
+
+ifneq ($(wildcard document/tsrc),)
+doc-test: doc-clean
+	make -C $(DOC_DIR) test
+else
+doc-test:
+endif
+
 endif
 
 #
 # TEST
 #
-test: sim-test fpga-test doc-test
+test: sim-test fpga-test syn-test doc-test lint-test cov-test
 
 #
 # DEBUG
@@ -155,6 +169,7 @@ clean: fw-clean pc-emul-clean lint-clean sim-clean fpga-clean doc-clean
 	pc-emul-build pc-emul-run \
 	spyglass-run spyglass-clean \
 	alint-run alint-clean \
+	lint-test lint-clean \
 	sim-build sim-run sim-debug \
 	fpga-build fpga-debug \
 	doc-build doc-debug \
