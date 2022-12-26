@@ -55,14 +55,14 @@ def setup_tester(build_dir, tester_dir, extra_peripherals, peripheral_dirs, peri
         peripheral['IO']={}
 
     #Handle peripheral portmap
-    for map_idx, mapping in enumerate(peripheral_portmap.items()):
+    for map_idx, mapping in enumerate(peripheral_portmap):
         # List to store both items in this mamping
         mapping_items = [None, None]
         # Get tester block of peripheral in mapping[0]
-        if mapping[0]['corename']: mapping_items[0]=next(i for i in peripherals_list if i['name'] == mapping[0]['name'])
+        if mapping[0]['corename']: mapping_items[0]=next(i for i in tester_peripherals_list if i['name'] == mapping[0]['corename'])
 
         # Get tester block of peripheral in mapping[1]
-        if mapping[1]['corename']: mapping_items[1]=next(i for i in peripherals_list if i['name'] == mapping[1]['name'])
+        if mapping[1]['corename']: mapping_items[1]=next(i for i in tester_peripherals_list if i['name'] == mapping[1]['corename'])
 
         #Make sure we are not mapping two external interfaces
         if mapping_items == [None, None]: raise Exception(f"Error: {map_idx} Cannot map between two external interfaces!")
@@ -74,10 +74,10 @@ def setup_tester(build_dir, tester_dir, extra_peripherals, peripheral_dirs, peri
         # List of tester IOs from ports of this mapping
         tester_mapping_ios=[]
         # Add peripherals table to ios of tester
-        tester.ios.append({'name': f"portmap_{map_idx}", f"descr':'IOs for peripherals based on portmap index {map_idx}", 'ports': tester_mapping_ios})
+        tester.ios.append({'name': f"portmap_{map_idx}", 'descr':f"IOs for peripherals based on portmap index {map_idx}", 'ports': tester_mapping_ios})
 
         # Import module of one of the given core types (to access its IO)
-        module = import_setup(submodule_dirs[mapping_items[0]['type']])
+        module = import_setup(tester.submodule_dirs[mapping_items[0]['type']])
         #Get ports of configured interface
         interface_ports=next(i['ports'] for i in module.ios if i['name'] == mapping[0]['if_name'])
 

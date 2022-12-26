@@ -24,8 +24,8 @@ known_map_interfaces =\
 #Given a known interface name, return its mapping
 def get_interface_mapping(if_name):
     for interface in known_map_interfaces.items():
-        if if_name == interface_name[0]:
-            return interface_name[1]
+        if if_name == interface[0]:
+            return interface[1]
     #Did not find known interface
     raise Exception(f"Error: Unkown mapping for '{if_name}' interface.")
 
