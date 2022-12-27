@@ -150,7 +150,9 @@ endif
 #
 # TEST
 #
-test: sim-test fpga-test syn-test doc-test lint-test cov-test
+test: sim-test fpga-test doc-test
+
+ptest: test syn-test lint-test cov-test
 
 #
 # DEBUG
