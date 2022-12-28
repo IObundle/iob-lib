@@ -131,11 +131,11 @@ ifneq ($(wildcard hardware/lint),)
 SRC+=$(BUILD_LINT_DIR)/Makefile
 $(BUILD_LINT_DIR)/Makefile: $(LIB_DIR)/hardware/lint/Makefile
 	cp $< $@
-	
+
 SRC+=$(BUILD_LINT_DIR)/spyglass.mk
 $(BUILD_LINT_DIR)/spyglass.mk: $(LIB_DIR)/hardware/lint/spyglass.mk
 	cp $< $@
-	
+
 SRC+=$(BUILD_LINT_DIR)/alint.mk
 $(BUILD_LINT_DIR)/alint.mk: $(LIB_DIR)/hardware/lint/alint.mk
 	cp $< $@
@@ -263,4 +263,4 @@ debug: $(BUILD_DIR) $(SRC)
 	@echo SRC=$(SRC)
 
 
-.PHONY: setup debug
+.PHONY: setup clean debug
