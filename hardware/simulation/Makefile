@@ -68,9 +68,15 @@ endif
 waves:
 	if [ ! "`pgrep -u $(USER) gtkwave`" ]; then gtkwave -a uut.gtkw uut.vcd; fi &
 
+fix-vcd:
+	$(eval VCD_FILE:=$(shell ls *.vcd))
+	@tail -n 1 $(VCD_FILE) | wc -c | xargs -I {} truncate $(VCD_FILE) -s -{}
+	@echo "" >> $(VCD_FILE)
+
 kill-sim:
 	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
 	kill -9 $$(ps aux | grep $(USER) | grep console | grep python3 | grep -v grep | awk '{print $$2}'); fi
+	@if [ -e *.vcd ]; then make fix-vcd; fi
 
 kill-remote-sim:
 	@echo "INFO: Remote simulator $(SIMULATOR) will be killed"
@@ -106,4 +112,4 @@ debug:
 
 .PRECIOUS: uut.vcd
 
-.PHONY: build run gen-clean kill-sim kill-remote-sim debug test
+.PHONY: build run gen-clean clean-test-log fix-vcd kill-sim kill-remote-sim debug test
