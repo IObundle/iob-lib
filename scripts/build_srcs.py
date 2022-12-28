@@ -7,10 +7,13 @@ import iob_colors
 
 lib_dir = "./submodules/LIB"
 
-def hw_setup(core_meta_data, lib_srcs):
+# core_meta_data: dictionary with meta data of core
+# setup_dir: setup directory of core
+# build_dir: build directory
+# lib_srcs: 
+def hw_setup(core_meta_data, setup_dir, build_dir, lib_srcs):
     core_name = core_meta_data['name']
     core_version = core_meta_data['version']
-    build_dir = core_meta_data['build_dir']
 
     core_hw_setup = lib_srcs['hw_setup']
     Vheaders = core_hw_setup['v_headers']
@@ -35,10 +38,10 @@ def hw_setup(core_meta_data, lib_srcs):
     if hardware_srcs!=None: copy_sources( lib_dir, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
 
     copy_sources( f"{lib_dir}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
-    copy_sources( f"{core_meta_data['core_dir']}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
+    copy_sources( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
 
     if "sim" in core_meta_data['flows']: sim_setup( build_dir, sim_srcs, sim_Vheaders )
-    #if "fpga" in meta_data['flows']: build_srcs.fpga_setup( meta_data )
+    #if "fpga" in core_meta_data['flows']: fpga_setup( build_dir )
 
 
 def sim_setup(build_dir, sim_srcs, sim_Vheaders):
@@ -51,8 +54,7 @@ def sim_setup(build_dir, sim_srcs, sim_Vheaders):
     copy_sources( f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", [], '*', copy_all = True )
 
 
-def fpga_setup(core_meta_data):
-    build_dir = core_meta_data['build_dir']
+def fpga_setup(build_dir):
     fpga_dir = "hardware/fpga"
 
     if not os.path.exists(f"{build_dir}/{fpga_dir}/quartus"): os.makedirs(f"{build_dir}/{fpga_dir}/quartus")
@@ -65,8 +67,7 @@ def fpga_setup(core_meta_data):
     subprocess.call(["find", build_dir, "-name", "*.pdf", "-delete"])
 
 
-def python_setup(core_meta_data):
-    build_dir = core_meta_data['build_dir']
+def python_setup(build_dir):
     sim_srcs  = [ "sw_defines.py", "hw_defines.py", "console.py", "hex_split.py", "makehex.py" ]
     dest_dir  = f"{build_dir}/scripts"
 
