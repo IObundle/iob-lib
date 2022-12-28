@@ -33,31 +33,24 @@ pc-emul-clean:
 	make -C $(PC_DIR) clean
 endif
 
+
 #
-# LINTER
+# LINT
 #
+
 ifneq ($(filter lint, $(FLOWS)),)
+LINTER ?= spyglass
 LINT_DIR=hardware/lint
 lint-run:
 	make -C $(LINT_DIR) run
 
 lint-clean:
 	make -C $(LINT_DIR) clean
-endif
 
-ifneq ($(wildcard hardware/lint),)
-lint-test: spyglass-test #alint-test
-
-spyglass-test:
-	make lint-run LINTER=spyglass
-
-alint-test:
-	make lint-run LINTER=alint
-else
 lint-test:
+	make lint-run LINTER=spyglass
+	make lint-run LINTER=alint
 endif
-
-
 
 
 #
@@ -74,18 +67,19 @@ sim-run:
 sim-waves:
 	make -C $(SIM_DIR) waves
 
-sim-test: 
-	make -C $(SIM_DIR) test
-
 sim-debug: 
 	make -C $(SIM_DIR) debug
 
 sim-clean:
 	make -C $(SIM_DIR) clean
-endif
+
+sim-test: 
+	make -C $(SIM_DIR) test
 
 cov-test: sim-clean
 	make -C $(SIM_DIR) test COV=1
+
+endif
 
 
 #
@@ -150,7 +144,9 @@ endif
 #
 # TEST
 #
-test: sim-test fpga-test syn-test doc-test lint-test cov-test
+test: sim-test fpga-test doc-test
+
+ptest: test syn-test lint-test cov-test
 
 #
 # DEBUG
