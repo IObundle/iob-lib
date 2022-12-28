@@ -7,16 +7,18 @@ endif
 SIM_SERVER=$(IVSIM_SERVER)
 SIM_USER=$(IVSIM_USER)
 
-comp: a.out
+SIM_PROC=a.out
 
-a.out: $(VHDR) $(VSRC)
+comp: $(SIM_PROC)
+
+$(SIM_PROC): $(VHDR) $(VSRC)
 	iverilog $(VFLAGS) $(VSRC)
 
 exec:
-	./a.out | tee -a test.log
+	./$(SIM_PROC) | tee -a test.log
 
 clean: gen-clean
-	@rm -f a.out
+	@rm -f $(SIM_PROC)
 
 very-clean: clean
 

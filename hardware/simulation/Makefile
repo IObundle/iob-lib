@@ -77,7 +77,7 @@ kill-remote-sim:
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'killall -q -u $(SIM_USER) -9 $(SIM_PROC); \
 	make -C $(REMOTE_SIM_DIR) kill-sim'
 ifeq ($(VCD),1)
-	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd $(SIM_DIR)
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
 endif
 
 gen-clean:
