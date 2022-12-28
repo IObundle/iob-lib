@@ -62,11 +62,11 @@ ifeq ($(COV),1)
 endif
 endif
 ifeq ($(VCD),1)
-	if [ ! "`pgrep -u $(USER) gtkwave`" ]; then gtkwave -a uut.gtkw uut.vcd; fi &
+	make waves
 endif	
 
 waves:
-	gtkwave  -a uut.gtkw uut.vcd &
+	if [ ! "`pgrep -u $(USER) gtkwave`" ]; then gtkwave -a uut.gtkw uut.vcd; fi &
 
 kill-sim:
 	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
@@ -78,6 +78,7 @@ kill-remote-sim:
 	make -C $(REMOTE_SIM_DIR) kill-sim'
 ifeq ($(VCD),1)
 	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
+	make waves
 endif
 
 gen-clean:
