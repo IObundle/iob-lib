@@ -31,7 +31,7 @@ project.pref.vlogstandard -format sv2005
 
 #project.policy.add -policy STARC_VLOG_ALL
 
-do ./alint/waiver.do
+do ./alint_waiver.do
 
 project.run -project $PRJ
 
@@ -47,7 +47,7 @@ project.run -project $PRJ
 
 #project.lint
 #Synth reports
-project.report.synthesis -report alint/synth.txt
-project.report.violations -format simple_text -report alint/violations.txt
-project.report.violations -format pdf -report alint/violations.pdf
-project.report.quality -report alint/qor.txt
+project.report.synthesis -report alint_synth.txt
+project.report.violations -format simple_text -report alint_violations.txt
+project.report.violations -format pdf -report alint_violations.pdf
+project.report.quality -report alint_qor.txt
