@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module iob_reg_n_are
+module iob_reg_are_n
   #(
     parameter DATA_W = 0,
     parameter RST_VAL = 0

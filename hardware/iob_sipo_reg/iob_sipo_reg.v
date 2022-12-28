@@ -8,8 +8,9 @@ module iob_sipo_reg
 
     input               clk_i,
     input               arst_i,
-
     input               en_i,
+
+    input               sen_i,
 
     // parallel input
     input               s_i,
@@ -24,7 +25,8 @@ module iob_sipo_reg
      if (arst_i)
        data_reg <= {DATA_W{1'b0}};
      else if (en_i)
-       data_reg <= (data_reg << 1) | {{(DATA_W-1){1'b0}}, s_i};
+       if (sen_i)
+         data_reg <= (data_reg << 1) | {{(DATA_W-1){1'b0}}, s_i};
 
    assign p_o = data_reg;
    
