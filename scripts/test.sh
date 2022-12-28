@@ -12,6 +12,6 @@ for i in $TBS; do TB_DIRS+=" `dirname $i`" ; done
 for i in $TB_DIRS; do MODULES+=" `basename $i`" ; done
 
 #run tests
-for i in $MODULES; do make sim MODULE=$i VCD=0 TEST_LOG=">> test.log"; done
+for i in $MODULES; do make sim MODULE=$i VCD=0 TEST_LOG="| tee -a test.log"; done
 
 if [ `grep -c "ERROR" test.log` != 0 ]; then exit 1; fi

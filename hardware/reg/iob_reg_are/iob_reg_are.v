@@ -8,8 +8,10 @@ module iob_reg_are
    (
     input                   clk_i,
     input                   arst_i,
-    input                   rst_i,
     input                   en_i,
+
+    input                   rst_i,
+
     input [DATA_W-1:0]      data_i,
     output reg [DATA_W-1:0] data_o
     );
