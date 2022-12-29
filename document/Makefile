@@ -97,8 +97,10 @@ view: $(DOC).pdf
 
 clean:
 	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk \) -delete
-	make -C figures clean 
 	@rm -rf $(PYTHON_DIR)/__pycache__ ../*.tex
+
+veryclean: clean
+	make -C figures clean 
 
 test: clean debug $(TEST_LIST)
 
