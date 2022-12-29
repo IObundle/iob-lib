@@ -35,7 +35,7 @@ module iob_regfile_w_rp
               .arst_i(arst_i),
               .en_i(en_i),
               .rst_i(rst_i),
-              .data_i(wdata_i),
+              .data_i(wdata[i]),
               .data_o(rdata_o[((i+1)*DATA_W_INT)-1 : i*DATA_W_INT])
               );
       end
