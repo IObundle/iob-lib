@@ -16,22 +16,19 @@ def getf(obj, name, field):
 # no_overlap: Optional argument. Selects if read/write addresses should not overlap
 # build_dir: Optional argument. Location of build directory. If left as 'None', name is auto generated.
 # gen_tex: Optional argument. Selects if TeX documentation should be generated.
-def setup( meta_data, confs, ios, regs, blocks, lib_srcs=None, no_overlap=False, build_dir=None, gen_tex=True ):
+def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, gen_tex=True ):
 
     top = meta_data['name']
+    build_dir = meta_data['build_dir']
 
     #build directory
-    if (build_dir==None):
-        build_dir = meta_data['build_dir']
-        build_srcs.lib_dir = f"{meta_data['core_dir']}/submodules/LIB"
+    if (build_dir==f"../{meta_data['name']+'_'+meta_data['version']}"):
         subprocess.call(["rsync", "-avz", "--exclude", ".git", "--exclude", "submodules", "--exclude", ".gitmodules", "--exclude", ".github", ".", build_dir])
         subprocess.call(["find", build_dir, "-name", "*_setup*", "-delete"])
         subprocess.call(["cp", "./submodules/LIB/build.mk", f"{build_dir}/Makefile"])
         mk_conf.config_build_mk(confs, meta_data, build_dir)
-    else:
-        meta_data['build_dir'] = build_dir
     
-    build_srcs.hw_setup( meta_data, lib_srcs )
+    build_srcs.hw_setup( meta_data )
     build_srcs.python_setup( meta_data )
     #build registers table
     if regs:
@@ -74,14 +71,3 @@ def setup( meta_data, confs, ios, regs, blocks, lib_srcs=None, no_overlap=False,
         if regs:
             mkregs.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
         blocks_lib.generate_blocks_tex(blocks, build_dir+"/document/tsrc")
-
-# Setup a submodule in a given build directory (without TeX documentation)
-# build_dir: path to build directory
-# submodule_dir: root directory of submodule to run setup function
-def setup_submodule(build_dir, submodule_dir):
-    #Import <corename>_setup.py
-    module = import_setup(submodule_dir)
-
-    module.meta['core_dir'] = submodule_dir
-    # Call setup function for this submodule
-    module.main(build_dir=build_dir, gen_tex=False)

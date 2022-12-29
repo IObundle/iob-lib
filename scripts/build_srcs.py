@@ -2,34 +2,34 @@ import os, sys
 import subprocess
 from pathlib import Path
 import shutil
+import importlib
+# IObundle scripts imported:
 import if_gen
+#import ios Not in use
+from submodule_utils import import_setup
 import iob_colors
 
 lib_dir = "./submodules/LIB"
 
-def hw_setup(core_meta_data, lib_srcs):
+def hw_setup(core_meta_data):
     core_name = core_meta_data['name']
     core_version = core_meta_data['version']
     build_dir = core_meta_data['build_dir']
+    core_dir = core_meta_data['core_dir']
 
-    core_hw_setup = lib_srcs['hw_setup']
+    core_hw_setup = core_meta_data['submodules']['hw_setup']
     Vheaders = core_hw_setup['v_headers']
     hardware_srcs = core_hw_setup['hw_modules']
 
-    if "sim" in core_meta_data['flows']: 
-        core_sim_setup = lib_srcs['sim_setup']
-        sim_srcs = core_sim_setup['hw_modules']
-        sim_Vheaders = core_sim_setup['v_headers']
-
+    # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, build_dir)
 
-    for hardware_src in ((hardware_srcs + sim_srcs) if ("sim" in core_meta_data['flows']) else hardware_srcs):
-        if hardware_src in lib_modules.keys():
-            Vheaders += lib_modules[hardware_src]['v_headers']
-            hardware_srcs += lib_modules[hardware_src]['hw_modules']
-            if "sim" in core_meta_data['flows']:
-                sim_srcs += lib_modules[hardware_src]['sim_modules']
-                sim_Vheaders += lib_modules[hardware_src]['sim_v_headers']
+    for hardware_src in hardware_srcs:
+        sub_dir = f"{core_dir}/submodules/{hardware_src}"
+        if os.path.isdir(sub_dir):
+            submodule_setup(build_dir, sub_dir)
+        else:
+            lib_module_setup(Vheaders, hardware_srcs, hardware_src)
 
     if Vheaders!=None: create_Vheaders( f"{build_dir}/hardware/src", Vheaders )
     if hardware_srcs!=None: copy_sources( lib_dir, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
@@ -37,7 +37,7 @@ def hw_setup(core_meta_data, lib_srcs):
     copy_sources( f"{lib_dir}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
     copy_sources( f"{core_meta_data['core_dir']}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
 
-    if "sim" in core_meta_data['flows']: sim_setup( build_dir, sim_srcs, sim_Vheaders )
+    if "sim" in core_meta_data['flows']: sim_setup( build_dir, core_meta_data['submodules']['sim_setup'] )
     #if "fpga" in meta_data['flows']: build_srcs.fpga_setup( meta_data )
 
 
@@ -72,6 +72,41 @@ def python_setup(core_meta_data):
 
     if not os.path.exists(dest_dir): os.makedirs(dest_dir)
     copy_sources( lib_dir, dest_dir, sim_srcs, '*.py' )
+
+
+# Setup a submodule in a given build directory (without TeX documentation)
+# build_dir: path to build directory
+# submodule_dir: root directory of submodule to run setup function
+def submodule_setup(build_dir, submodule_dir):
+    for fname in os.listdir('.'):
+        if fname.endswith('.py'):
+            iob_submodule_setup(build_dir, submodule_dir)
+            break
+        else:
+            shutil.copytree(f"{submodule_dir}/hardware/src", f"{build_dir}/hardware/src")
+
+def iob_submodule_setup(build_dir, submodule_dir):
+    #Import <corename>_setup.py
+    module = import_setup(submodule_dir)
+    module.meta['flows'] = ''
+    module.meta['build_dir'] = build_dir
+    module.meta['core_dir'] = submodule_dir
+    # Call setup function for this submodule
+    module.main(gen_tex=False)
+
+
+def lib_module_setup(Vheaders, hardware_srcs, module_name):
+    for lib_module_path in Path(lib_dir).rglob(f"{module_name}.py"):
+        spec = importlib.util.spec_from_file_location("lib_module", lib_module_path)
+        lib_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(lib_module)
+        Vheaders.extend(lib_module.v_headers)
+        hardware_srcs.extend(lib_module.hw_modules)
+        break
+    else: sys.exit(f"{iob_colors.FAIL} {module_name} is not a LIB module.{iob_colors.ENDC}")
+    for hardware_src in hardware_srcs:
+        if not(hardware_src.endswith(".v")):
+            lib_module_setup(Vheaders, hardware_srcs, hardware_src)
 
 
 def copy_sources(lib_dir, dest_dir, hardware_srcs, pattern, copy_all = False):
