@@ -24,12 +24,7 @@ def hw_setup(core_meta_data):
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, build_dir)
 
-    for hardware_src in hardware_srcs:
-        sub_dir = f"{core_dir}/submodules/{hardware_src}"
-        if os.path.isdir(sub_dir):
-            submodule_setup(build_dir, sub_dir)
-        else:
-            lib_module_setup(Vheaders, hardware_srcs, hardware_src)
+    module_dependency_setup(hardware_srcs, Vheaders, core_dir, build_dir)
 
     if Vheaders!=None: create_Vheaders( f"{build_dir}/hardware/src", Vheaders )
     if hardware_srcs!=None: copy_sources( lib_dir, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
@@ -37,16 +32,19 @@ def hw_setup(core_meta_data):
     copy_sources( f"{lib_dir}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
     copy_sources( f"{core_meta_data['core_dir']}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
 
-    if "sim" in core_meta_data['flows']: sim_setup( build_dir, core_meta_data['submodules']['sim_setup'] )
+    if "sim" in core_meta_data['flows']: sim_setup( build_dir, core_dir, core_meta_data['submodules']['sim_setup'] )
     #if "fpga" in meta_data['flows']: build_srcs.fpga_setup( meta_data )
 
 
-def sim_setup(build_dir, sim_srcs, sim_Vheaders):
+def sim_setup(build_dir, core_dir, sim_setup):
     sim_dir = "hardware/simulation"
 
+    Vheaders = sim_setup['v_headers']
+    sim_srcs = sim_setup['hw_modules']
     sim_srcs.append("iob_tasks.vh")
+    module_dependency_setup(sim_srcs, Vheaders, core_dir, build_dir)
 
-    if (sim_Vheaders!=[ ]): create_Vheaders( f"{build_dir}/{sim_dir}/src", sim_Vheaders )
+    if (Vheaders!=[ ]): create_Vheaders( f"{build_dir}/{sim_dir}/src", Vheaders )
     copy_sources( lib_dir, f"{build_dir}/{sim_dir}/src", sim_srcs, '*.v*' )
     copy_sources( f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", [], '*', copy_all = True )
 
@@ -82,8 +80,8 @@ def submodule_setup(build_dir, submodule_dir):
         if fname.endswith('.py'):
             iob_submodule_setup(build_dir, submodule_dir)
             break
-        else:
-            shutil.copytree(f"{submodule_dir}/hardware/src", f"{build_dir}/hardware/src")
+    else:
+        shutil.copytree(f"{submodule_dir}/hardware/src", f"{build_dir}/hardware/src")
 
 def iob_submodule_setup(build_dir, submodule_dir):
     #Import <corename>_setup.py
@@ -94,8 +92,23 @@ def iob_submodule_setup(build_dir, submodule_dir):
     # Call setup function for this submodule
     module.main(gen_tex=False)
 
+def module_dependency_setup(hardware_srcs, Vheaders, core_dir, build_dir):
+    while(True):
+        for hardware_src in hardware_srcs:
+            sub_dir = f"{core_dir}/submodules/{hardware_src}"
+            if os.path.isdir(sub_dir):
+                submodule_setup(build_dir, sub_dir)
+                hardware_srcs.remove(hardware_src)
+                break
+            elif not(hardware_src.endswith(".v") or hardware_src.endswith(".vh")):
+                lib_module_setup(Vheaders, hardware_srcs, hardware_src)
+                hardware_srcs.remove(hardware_src)
+                break
+        else: break
+
 
 def lib_module_setup(Vheaders, hardware_srcs, module_name):
+    print(hardware_srcs)
     for lib_module_path in Path(lib_dir).rglob(f"{module_name}.py"):
         spec = importlib.util.spec_from_file_location("lib_module", lib_module_path)
         lib_module = importlib.util.module_from_spec(spec)
@@ -104,9 +117,6 @@ def lib_module_setup(Vheaders, hardware_srcs, module_name):
         hardware_srcs.extend(lib_module.hw_modules)
         break
     else: sys.exit(f"{iob_colors.FAIL} {module_name} is not a LIB module.{iob_colors.ENDC}")
-    for hardware_src in hardware_srcs:
-        if not(hardware_src.endswith(".v")):
-            lib_module_setup(Vheaders, hardware_srcs, hardware_src)
 
 
 def copy_sources(lib_dir, dest_dir, hardware_srcs, pattern, copy_all = False):
@@ -154,6 +164,8 @@ def version_file(core_name, core_version, build_dir):
     with open(vh_file, "w") as vh_f:
         vh_f.write(f"`define VERSION {vh_version_string}")
 
+
+# TO DELETE (WIP)
 lib_modules = {
     'apb2iob':{
         'v_headers'    : [ 'iob_wire', 'iob_s_portmap', 'iob_m_portmap', 'iob_m_port', 'apb_s_s_portmap', 'apb_s_port' ],
@@ -172,18 +184,6 @@ lib_modules = {
         'hw_modules'   : [  ],
         'sim_v_headers': [ ['stream_', 'iob_wire', 'stream_', ''] ],
         'sim_modules'  : [ 'iob2axis.v' ]
-    },
-    'iob_fifo_async':{
-        'v_headers'    : [  ],
-        'hw_modules'   : [ 'iob_fifo_async.v', 'iob_ram_t2p_asym.v', 'iob_gray_counter.v', 'iob_gray2bin.v' ],
-        'sim_v_headers': [  ],
-        'sim_modules'  : [  ]
-    },
-    'iob_fifo_sync':{
-        'v_headers'    : [  ],
-        'hw_modules'   : [ 'iob_fifo_sync.v', 'iob_reg_ae.v', 'iob_reg_are.v', 'iob_counter.v', 'iob_ram_2p_asym.v', 'iob_ram_2p.v' ],
-        'sim_v_headers': [  ],
-        'sim_modules'  : [  ]
     },
     'iob_modcnt_n':{
         'v_headers'    : [  ],

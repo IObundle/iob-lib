@@ -151,7 +151,9 @@ endif
 # DELIVERY 
 #
 
+ifneq ($(wildcard config_delivery.mk),)
 include config_delivery.mk
+endif
 
 
 # generate quartus fitting results 
@@ -169,7 +171,7 @@ $(BUILD_DIR)/doc/vivado.tex:
 endif
 
 
-clean: delivery-clean
+clean:
 	@rm -rf $(BUILD_DIR)
 	@rm -rf scripts/__pycache__
 

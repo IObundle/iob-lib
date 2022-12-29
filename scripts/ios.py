@@ -72,7 +72,7 @@ def get_peripheral_ios(peripherals_list, submodules, core_dir):
     port_list = {}
     # Get port list for each type of peripheral used
     for instance in peripherals_list:
-        if (instance['type'] not in port_list) and (instance['type'] in submodules):
+        if (instance['type'] not in port_list) and (instance['type'] in submodules["hw_setup"]["hw_modules"]):
             # Import <corename>_setup.py module
             module = import_setup(f"{core_dir}/submodules/{instance['type']}")
             # Extract only PIO signals from the peripheral (no reserved/known signals)
