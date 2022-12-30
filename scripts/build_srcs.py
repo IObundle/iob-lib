@@ -163,38 +163,3 @@ def version_file(core_name, core_version, build_dir):
             vh_version_string += c
     with open(vh_file, "w") as vh_f:
         vh_f.write(f"`define VERSION {vh_version_string}")
-
-
-# TO DELETE (WIP)
-lib_modules = {
-    'apb2iob':{
-        'v_headers'    : [ 'iob_wire', 'iob_s_portmap', 'iob_m_portmap', 'iob_m_port', 'apb_s_s_portmap', 'apb_s_port' ],
-        'hw_modules'   : [ 'apb2iob.v' ],
-        'sim_v_headers': [  ],
-        'sim_modules'  : [  ]
-    },
-    'iob2apb':{
-        'v_headers'    : [ 'iob_s_port', 'iob_s_s_portmap', 'apb_m_port', 'apb_m_portmap', 'apb_wire' ],
-        'hw_modules'   : [ 'iob2apb.v', 'iob_reg_a.v' ],
-        'sim_v_headers': [ 'iob_m_tb_wire' ],
-        'sim_modules'  : [  ]
-    },
-    'iob2axis':{
-        'v_headers'    : [  ],
-        'hw_modules'   : [  ],
-        'sim_v_headers': [ ['stream_', 'iob_wire', 'stream_', ''] ],
-        'sim_modules'  : [ 'iob2axis.v' ]
-    },
-    'iob_modcnt_n':{
-        'v_headers'    : [  ],
-        'hw_modules'   : [ 'iob_modcnt_n.v', 'iob_counter_n.v' ],
-        'sim_v_headers': [  ],
-        'sim_modules'  : [  ]
-    },
-    'iob_modcnt_ld':{
-        'v_headers'    : [  ],
-        'hw_modules'   : [ 'iob_modcnt_ld.v', 'iob_counter_ld.v' ],
-        'sim_v_headers': [  ],
-        'sim_modules'  : [  ]
-    },
-}
