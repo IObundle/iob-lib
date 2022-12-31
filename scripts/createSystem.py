@@ -5,35 +5,37 @@ import sys, os
 from submodule_utils import *
 
 # Automatically include <corename>_swreg_def.vh verilog headers after PHEADER comment
-def insert_header_files(template_contents, peripherals_list, submodule_dirs):
+def insert_header_files(template_contents, peripherals_list, core_dir):
     header_index = find_idx(template_contents, "PHEADER")
     # Get each type of peripheral used
     included_peripherals = []
     for instance in peripherals_list:
         if instance['type'] not in included_peripherals:
-            included_peripherals.append(instance['type'])
-            # Import <corename>_setup.py module to get corename 'top'
-            module = import_setup(submodule_dirs[instance['type']])
-            top = module.meta['name']
-            template_contents.insert(header_index, f'`include "{top}_swreg_def.vh"\n')
+            sub_dir = f"{core_dir}/submodules/{instance['type']}"
+            if os.path.isdir(sub_dir):
+                included_peripherals.append(instance['type'])
+                # Import <corename>_setup.py module to get corename 'top'
+                module = import_setup(sub_dir)
+                top = module.meta['name']
+                template_contents.insert(header_index, f'`include "{top}_swreg_def.vh"\n')
 
 
 #Creates system based on system.vt template 
-# root_dir: root directory of the repository
+# core_dir: directory of the core repository being setup
 # submodule_dirs: dictionary with directory of each submodule. Format: {"PERIPHERALCORENAME1":"PATH_TO_DIRECTORY", "PERIPHERALCORENAME2":"PATH_TO_DIRECTORY2"}
 # top: top name of the system
 # peripherals_list: list of dictionaries each of them describes a peripheral instance
 # out_file: path to output file
-def create_systemv(root_dir, submodule_dirs, top, peripherals_list, out_file):
+def create_systemv(core_dir, top, peripherals_list, out_file):
     # Read template file
-    template_file = open(root_dir+"/hardware/src/system.vt", "r")
+    template_file = open(core_dir+"/hardware/src/system.vt", "r")
     template_contents = template_file.readlines() 
     template_file.close()
 
-    insert_header_files(template_contents, peripherals_list, submodule_dirs)
+    insert_header_files(template_contents, peripherals_list, core_dir)
 
     # Get port list, parameter list and top module name for each type of peripheral used
-    port_list, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, submodule_dirs)
+    port_list, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, core_dir)
 
     # Insert IOs and Instances for this type of peripheral
     for instance in peripherals_list:

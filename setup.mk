@@ -28,8 +28,7 @@ BUILD_PC_DIR = $(BUILD_DIR)/software/pc-emul
 BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
-SPYGLASS_LINT_DIR = $(BUILD_DIR)/hardware/lint/spyglass
-BUILD_ALINT_DIR = $(BUILD_DIR)/hardware/lint/alint
+BUILD_LINT_DIR = $(BUILD_DIR)/hardware/lint
 
 BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
 BUILD_PSRC_DIR = $(BUILD_DIR)/software/psrc
@@ -69,18 +68,9 @@ endif
 
 #lint
 #copy lint files from LIB 
-ifneq ($(wildcard hardware/lint/spyglass),)
-SRC+=$(patsubst $(LIB_DIR)/hardware/lint/spyglass/%, $(SPYGLASS_LINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/spyglass/*))
-$(SPYGLASS_LINT_DIR)/%: $(LIB_DIR)/hardware/lint/spyglass/%
-	sed 's/IOB_CORE_NAME/$(NAME)/g' $< > $@
-
-endif
-
-#Alint
-#copy Alint files from LIB 
-ifneq ($(wildcard hardware/lint/alint),)
-SRC+=$(patsubst $(LIB_DIR)/hardware/lint/alint/%, $(BUILD_ALINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/alint/*))
-$(BUILD_ALINT_DIR)/%: $(LIB_DIR)/hardware/lint/alint/%
+ifneq ($(wildcard hardware/lint),)
+SRC+=$(patsubst $(LIB_DIR)/hardware/lint/%, $(BUILD_LINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/*))
+$(BUILD_LINT_DIR)/%: $(LIB_DIR)/hardware/lint/%
 	sed 's/IOB_CORE_NAME/$(NAME)/g' $< > $@
 
 endif
@@ -157,6 +147,14 @@ ifeq ($(AMD_FPGA),1)
 $(BUILD_DIR)/doc/vivado.tex
 endif
 
+#
+# DELIVERY 
+#
+
+ifneq ($(wildcard config_delivery.mk),)
+include config_delivery.mk
+endif
+
 
 # generate quartus fitting results 
 $(BUILD_DIR)/doc/quartus.tex:
@@ -174,7 +172,7 @@ endif
 
 
 clean:
-	@rm -rf $(BUILD_DIR) *.tex *.v *.vh *.h
+	@rm -rf $(BUILD_DIR)
 	@rm -rf scripts/__pycache__
 
 python-cache-clean:

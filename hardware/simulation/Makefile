@@ -89,6 +89,8 @@ endif
 test: very-clean clean-test-log $(TEST_LIST)
 ifneq ($(COV),1)
 	diff test.log test.expected
+else
+	echo "INFO: simulation code coverage is reserved for internal use only."
 endif
 
 clean-test-log:

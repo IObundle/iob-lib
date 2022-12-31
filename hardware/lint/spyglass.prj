@@ -11,7 +11,7 @@
 ##Data Import Section
 
 read_file -type sourcelist IOB_CORE_NAME_files.list
-read_file -type sgdc IOB_CORE_NAME.sgdc
+read_file -type sgdc spyglass.sgdc
 
 ##Common Options Section
 
@@ -21,7 +21,7 @@ set_option designread_enable_synthesis no
 set_option designread_disable_flatten no
 set_option enableV05 yes
 set_option top IOB_CORE_NAME
-set_option incdir { . ../../src }
+set_option incdir { . ../src }
 set_option active_methodology $SPYGLASS_HOME/GuideWare/latest/block/rtl_handoff
 set_option pragma { synopsys synthesis }
 set_option sdc2sgdc yes
@@ -33,8 +33,8 @@ current_methodology $SPYGLASS_HOME/GuideWare/latest/block/rtl_handoff
 
 
 current_goal lint/lint_rtl -top IOB_CORE_NAME
-read_file -type awl IOB_CORE_NAME_waiver.awl
-set_goal_option default_waiver_file IOB_CORE_NAME_waiver.awl
+read_file -type awl spyglass_waiver.awl
+set_goal_option default_waiver_file spyglass_waiver.awl
 
 set_goal_option addrules { ImproperRangeIndex-ML NonResetFSM-ML SameControlNDataNet-ML NoConstSourceInAlways-ML NonConstShift-ML FSMNonConstDefault-ML UndrivenInTerm-ML PartConnPort-ML HangingInstInput-ML UseLogic-ML PortType PortTypeMismatch-ML CheckModulesWithoutPorts-ML EnumStateDecl-ML TwoStateData-ML NoRealFunc-ML FlopFeedbackRace-ML MultiAssign-ML MixedResetEdges-ML SetBeforeRead-ML ConstWithoutValue-ML SigAssignX-ML SigAssignZ-ML NoOpen-ML NullOthers-ML NullPort-ML OneModule-ML NoInoutPort-ML PortConnToInout-ML NoWidthInBasedNum-ML HierarchyReport-ML NoSigCaseX-ML NoDisableInTask-ML NoDisableInFunc-ML BitRangeUsedParam-ML UnpackedStructUsed-ML CheckLocalParam-ML NonReusableParametricModule-ML ParamValueOverride-ML ParamOverrideMismatch-ML ParamWidthMismatch-ML DetectParamTruncate-ML UnInitParam-ML ChkSensExprPar-ML NoExprInPort-ML UseBusWidth-ML BitOrder-ML SigAsgnDelay-ML CondSigAsgnDelay-ML NoAssignX-ML RegInput-ML CAPA-ML ComplexExpr-ML AsgnToOneBit-ML UnloadedOutTerm-ML UndrivenOutPort-ML UnloadedInPort-ML UnloadedNet-ML ResetFlop-ML SignedUnsignedExpr-ML DuplicateCaseLabel-ML DisallowXInCaseZ-ML UndrivenNUnloaded-ML UndrivenNet-ML DisallowCaseZ-ML DisallowCaseX-ML DiffTimescaleUsed-ML SelfAssignment-ML UseParamWidthInOverriding-ML }
 
