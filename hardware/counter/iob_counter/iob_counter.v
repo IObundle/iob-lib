@@ -23,9 +23,10 @@ module iob_counter
      if (arst_i)
        data_o <= RST_VAL_INT;
      else if (en_i)
-       if (rst_i)
-         data_o <= RST_VAL_INT;
-       else if (sen_i)
-         data_o <= data_o + 1'b1;
+       if (sen_i)
+         if (rst_i)
+           data_o <= RST_VAL_INT;
+         else
+           data_o <= data_o + 1'b1;
 
 endmodule

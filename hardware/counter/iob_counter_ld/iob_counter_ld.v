@@ -27,11 +27,12 @@ module iob_counter_ld
       if (arst_i)
          data_o <= RST_VAL_INT;
       else if (en_i)
-        if (rst_i)
-          data_o <= RST_VAL_INT;
-        else if (ld_i)
+        if (sen_i)
+          if (rst_i)
+            data_o <= RST_VAL_INT;
+          else if (ld_i)
             data_o <= ld_val_i;
-        else if (sen_i)
+          else
             data_o <= data_o + 1'b1;
 
 endmodule

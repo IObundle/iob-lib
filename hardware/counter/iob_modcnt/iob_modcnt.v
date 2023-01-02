@@ -18,8 +18,22 @@ module iob_modcnt
     output [DATA_W-1:0] data_o
     );
 
-   wire                 cnt_rst = rst_i | (data_o == mod_i);
+   wire                 ld = (data_o == mod_i);
+   localparam [DATA_W-1:0] LD_VAL = 0;
    
-   iob_counter #(DATA_W, RST_VAL) cnt0 (clk_i, arst_i, en_i, cnt_rst, sen_i, data_o);
+   iob_counter_ld #(DATA_W, RST_VAL) cnt0 
+     (
+      .clk_i(clk_i), 
+      .arst_i(arst_i), 
+      .en_i(en_i), 
+
+      .sen_i(sen_i), 
+      .rst_i(rst_i), 
+
+      .ld_i(ld),
+      .ld_val_i(LD_VAL), 
+
+      .data_o(data_o)
+      );
    
 endmodule

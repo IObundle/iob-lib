@@ -10,12 +10,10 @@ module iob_sipo_reg
     input               arst_i,
     input               en_i,
 
-    input               sen_i,
-
-    // parallel input
+    //serial input
     input               s_i,
 
-    // serial output
+    //parallel output
     output [DATA_W-1:0] p_o
     );
 
@@ -25,8 +23,7 @@ module iob_sipo_reg
      if (arst_i)
        data_reg <= {DATA_W{1'b0}};
      else if (en_i)
-       if (sen_i)
-         data_reg <= (data_reg << 1) | {{(DATA_W-1){1'b0}}, s_i};
+       data_reg <= (data_reg << 1) | {{(DATA_W-1){1'b0}}, s_i};
 
    assign p_o = data_reg;
    

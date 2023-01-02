@@ -10,11 +10,8 @@ module iob_piso_reg
     input              arst_i,
     input              en_i,
 
-    input              sen_i,
-
-    input              ld_i,
-
     // parallel input
+    input              ld_i,
     input [DATA_W-1:0] p_i,
 
     // serial output
@@ -29,7 +26,7 @@ module iob_piso_reg
      else if (en_i)
        if (ld_i)
          data_reg <= p_i;
-       else if (sen_i)
+       else
          data_reg <= data_reg << 1;
 
    assign s_o = data_reg[DATA_W-1];
