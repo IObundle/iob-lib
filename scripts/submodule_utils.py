@@ -280,21 +280,19 @@ def get_pio_signals(signal_list):
 # The value of port_list is a list of ports for the given type of peripheral
 # The value of params_list is a list of parameters for the given type of peripheral
 # The value of top_list is the top name of the given type of peripheral
-def get_peripherals_ports_params_top(peripherals_list, core_dir):
+def get_peripherals_ports_params_top(peripherals_list, submodule_dirs):
     port_list = {}
     params_list = {}
     top_list = {}
     for instance in peripherals_list:
         if instance['type'] not in port_list:
-            sub_dir = f"{core_dir}/submodules/{instance['type']}"
-            if os.path.isdir(sub_dir):
-                # Import <corename>_setup.py module
-                module = import_setup(sub_dir)
-                # Append module IO, parameters, and top name
-                port_list[instance['type']]=get_module_io(module.ios)
-                params_list[instance['type']]=list(i for i in module.confs if i['type'] == 'P')
-                top_list[instance['type']]=module.meta['name']
-        return port_list, params_list, top_list
+            # Import <corename>_setup.py module
+            module = import_setup(submodule_dirs[instance['type']])
+            # Append module IO, parameters, and top name
+            port_list[instance['type']]=get_module_io(module.ios)
+            params_list[instance['type']]=list(i for i in module.confs if i['type'] == 'P')
+            top_list[instance['type']]=module.meta['name']
+    return port_list, params_list, top_list
 
 # Find index of word in array with multiple strings
 def find_idx(lines, word):

@@ -68,13 +68,16 @@ def generate_ios_header(ios, top_module, out_dir):
 #    {'name': 'instance_name', 'descr':'instance description', 'ports': [
 #        {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
 #    ]}
-def get_peripheral_ios(peripherals_list, submodules, core_dir):
+def get_peripheral_ios(peripherals_list, submodules):
     port_list = {}
     # Get port list for each type of peripheral used
     for instance in peripherals_list:
-        if (instance['type'] not in port_list) and (instance['type'] in submodules["hw_setup"]["hw_modules"]):
+        # Make sure we have a hw_module for this peripheral type
+        assert instance['type'] in submodules["hw_setup"]["hw_modules"], f"Error: peripheral {instance['type']} configured but no corresponding hardware module found!"
+        # Only insert ports of this peripheral type if we have not done so before
+        if instance['type'] not in port_list:
             # Import <corename>_setup.py module
-            module = import_setup(f"{core_dir}/submodules/{instance['type']}")
+            module = import_setup(submodules['dirs'][instance['type']])
             # Extract only PIO signals from the peripheral (no reserved/known signals)
             port_list[instance['type']]=get_pio_signals(get_module_io(module.ios))
     
