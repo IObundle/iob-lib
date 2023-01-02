@@ -13,7 +13,7 @@ module iob2axil
     //
     // AXI4 Lite master interface
     //
-`include "axil_m_port.vh"
+`include "iob_axil_m_port.vh"
 
     //
     // IOb slave interface

@@ -6,20 +6,20 @@ from submodule_utils import *
 import createSystem
 
 #Creates top system based on system_top.vt template 
-# root_dir: root directory of the repository
+# setup_dir: root directory of the repository
 # submodule_dirs: dictionary with directory of each submodule. Format: {"PERIPHERALCORENAME1":"PATH_TO_DIRECTORY", "PERIPHERALCORENAME2":"PATH_TO_DIRECTORY2"}
 # peripherals_list: list of dictionaries each of them describes a peripheral instance
 # out_file: path to output file
-def create_top_system(root_dir, submodule_dirs, peripherals_list, out_file):
+def create_top_system(setup_dir, submodule_dirs, peripherals_list, out_file):
     # Read template file
-    template_file = open(root_dir+"/hardware/simulation/system_top.vt", "r")
+    template_file = open(setup_dir+"/hardware/simulation/system_top.vt", "r")
     template_contents = template_file.readlines() 
     template_file.close()
 
     createSystem.insert_header_files(template_contents, peripherals_list, submodule_dirs)
 
     # Get port list, parameter list and top module name for each type of peripheral used
-    port_list, params_list, top_list = get_peripherals_ports_params_top(peripherals_list,submodule_dirs)
+    port_list, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, submodule_dirs)
 
     # Insert wires and connect them to system 
     for instance in peripherals_list:

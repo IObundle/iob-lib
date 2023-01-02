@@ -39,19 +39,9 @@ BUILD_SW_PYTHON_DIR = $(BUILD_DIR)/scripts
 
 
 setup: debug
-	./$(NAME)_setup.py
 
 $(BUILD_DIR):
-	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $@
-	find $@ -name \*_setup.mk -delete
-	rm -rf $@/*_setup.py
-	rm -rf $@/README.md
-	rm -rf $@/document/other
-	cp $(LIB_DIR)/build.mk $@/Makefile
-	mv $@/delivery_readme.txt $@/README
-	ls -R $@ >> $@/README
-	sed -i -e 's/..\///' $@/README
-
+	./$(NAME)_setup.py
 #
 #HARDWARE
 #
@@ -59,53 +49,6 @@ $(BUILD_DIR):
 # include local setup makefile segment
 ifneq ($(wildcard hardware/hw_setup.mk),)
 include hardware/hw_setup.mk
-endif
-
-SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
-$(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
-	$(LIB_DIR)/scripts/version.py -v . -o $(@D)
-
-#simulation
-ifneq ($(wildcard hardware/simulation),)
-
-#include local simulation makefile segment
-ifneq ($(wildcard hardware/simulation/sim_setup.mk),)
-include hardware/simulation/sim_setup.mk
-endif
-
-#copy simulation files from LIB 
-SRC+=$(patsubst $(LIB_DIR)/hardware/simulation/%, $(BUILD_SIM_DIR)/%, $(wildcard $(LIB_DIR)/hardware/simulation/*))
-$(BUILD_SIM_DIR)/%: $(LIB_DIR)/hardware/simulation/%
-	cp -r $< $@
-endif
-
-#fpga
-ifneq ($(wildcard hardware/fpga),)
-
-#include local fpga makefile segment
-ifneq ($(wildcard hardware/fpga/fpga_setup.mk),)
-include hardware/fpga/fpga_setup.mk
-endif
-
-#copy quartus files from LIB
-ifneq ($(wildcard hardware/fpga/quartus),)
-SRC+=$(patsubst $(LIB_DIR)/hardware/fpga/quartus/%, $(BUILD_FPGA_DIR)/quartus/%, $(wildcard $(LIB_DIR)/hardware/fpga/quartus/*))
-$(BUILD_FPGA_DIR)/quartus/%: $(LIB_DIR)/hardware/fpga/quartus/%
-	cp -r $< $@
-endif
-
-#copy vivado files from LIB
-ifneq ($(wildcard hardware/fpga/vivado),)
-SRC+=$(patsubst $(LIB_DIR)/hardware/fpga/vivado/%, $(BUILD_FPGA_DIR)/vivado/%, $(wildcard $(LIB_DIR)/hardware/fpga/vivado/*))
-$(BUILD_FPGA_DIR)/vivado/%: $(LIB_DIR)/hardware/fpga/vivado/%
-	cp -r $< $@
-endif
-
-#copy fpga makefile
-SRC+=$(BUILD_FPGA_DIR)/Makefile
-$(BUILD_FPGA_DIR)/Makefile: $(LIB_DIR)/hardware/fpga/Makefile
-	cp $< $@
-
 endif
 
 #synthesis
@@ -175,12 +118,6 @@ ifneq ($(wildcard document/doc_setup.mk),)
 include document/doc_setup.mk
 endif
 
-#make and install core version file
-SRC+=$(BUILD_TSRC_DIR)/$(NAME)_version.tex
-$(BUILD_TSRC_DIR)/$(NAME)_version.tex:
-	$(LIB_DIR)/scripts/version.py -t .
-	mv $(NAME)_version.tex $(BUILD_TSRC_DIR)
-
 #make short git hash file
 SRC+=$(BUILD_TSRC_DIR)/shortHash.tex
 $(BUILD_TSRC_DIR)/shortHash.tex:
@@ -214,7 +151,9 @@ endif
 # DELIVERY 
 #
 
+ifneq ($(wildcard config_delivery.mk),)
 include config_delivery.mk
+endif
 
 
 # generate quartus fitting results 
@@ -232,7 +171,7 @@ $(BUILD_DIR)/doc/vivado.tex:
 endif
 
 
-clean: delivery-clean
+clean:
 	@rm -rf $(BUILD_DIR)
 	@rm -rf scripts/__pycache__
 
