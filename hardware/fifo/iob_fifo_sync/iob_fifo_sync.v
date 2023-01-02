@@ -18,8 +18,9 @@ module iob_fifo_sync
    (
     `IOB_INPUT(clk_i, 1),
     `IOB_INPUT(arst_i, 1),
-    `IOB_INPUT(rst_i, 1),
     `IOB_INPUT(clk_en_i, 1),
+
+    `IOB_INPUT(rst_i, 1),
 
     //write port
     `IOB_OUTPUT(ext_mem_w_en_o, N),
@@ -47,7 +48,7 @@ module iob_fifo_sync
    localparam [ADDR_W:0] FIFO_SIZE = (1'b1 << ADDR_W); //in bytes
 
    //effective write enable
-   wire                   w_en_int = (w_en_i & (~w_full_o)) & clk_en_i;
+   wire                   w_en_int = (w_en_i & (~w_full_o)) | rst_i;
 
    //write address
    `IOB_WIRE(w_addr, W_ADDR_W)
@@ -60,13 +61,15 @@ module iob_fifo_sync
      (
       .clk_i    (clk_i),
       .arst_i   (arst_i),
+      .en_i     (clk_en_i),
+
       .rst_i    (rst_i),
-      .en_i     (w_en_int),
+      .sen_i    (w_en_int),
       .data_o   (w_addr)
       );
 
    //effective read enable
-   wire                   r_en_int  = (r_en_i & (~r_empty_o)) & clk_en_i;
+   wire                   r_en_int  = (r_en_i & (~r_empty_o)) | rst_i;
 
    //read address
    `IOB_WIRE(r_addr, R_ADDR_W)
@@ -79,8 +82,9 @@ module iob_fifo_sync
      (
       .clk_i    (clk_i),
       .arst_i   (arst_i),
+      .en_i     (clk_en_i),
       .rst_i    (rst_i),
-      .en_i     (r_en_int),
+      .sen_i     (r_en_int),
       .data_o   (r_addr)
       );
 
@@ -100,8 +104,8 @@ module iob_fifo_sync
      (
       .clk_i  (clk_i),
       .arst_i (arst_i),
-      .rst_i  (rst_i),
       .en_i   (clk_en_i),
+      .rst_i  (rst_i),
       .data_i (level_nxt),
       .data_o (level_int)
       );

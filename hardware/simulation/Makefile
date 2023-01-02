@@ -62,22 +62,29 @@ ifeq ($(COV),1)
 endif
 endif
 ifeq ($(VCD),1)
-	if [ ! "`pgrep -u $(USER) gtkwave`" ]; then gtkwave -a uut.gtkw uut.vcd; fi &
+	make waves
 endif	
 
 waves:
-	gtkwave  -a uut.gtkw uut.vcd &
+	if [ ! "`pgrep -u $(USER) gtkwave`" ]; then gtkwave -a uut.gtkw uut.vcd; fi &
+
+fix-vcd:
+	$(eval VCD_FILE:=$(shell ls *.vcd))
+	@tail -n 1 $(VCD_FILE) | wc -c | xargs -I {} truncate $(VCD_FILE) -s -{}
+	@echo "" >> $(VCD_FILE)
 
 kill-sim:
 	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
 	kill -9 $$(ps aux | grep $(USER) | grep console | grep python3 | grep -v grep | awk '{print $$2}'); fi
+	@if [ -e *.vcd ]; then make fix-vcd; fi
 
 kill-remote-sim:
 	@echo "INFO: Remote simulator $(SIMULATOR) will be killed"
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'killall -q -u $(SIM_USER) -9 $(SIM_PROC); \
 	make -C $(REMOTE_SIM_DIR) kill-sim'
 ifeq ($(VCD),1)
-	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd $(SIM_DIR)
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
+	make waves
 endif
 
 gen-clean:
@@ -105,4 +112,4 @@ debug:
 
 .PRECIOUS: uut.vcd
 
-.PHONY: build run gen-clean kill-sim kill-remote-sim debug test
+.PHONY: build run gen-clean clean-test-log fix-vcd kill-sim kill-remote-sim debug test
