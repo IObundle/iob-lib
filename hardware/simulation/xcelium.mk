@@ -19,6 +19,8 @@ SIM_SSH_FLAGS=$(CADENCE_SSH_FLAGS)
 SIM_SCP_FLAGS=$(CADENCE_SCP_FLAGS)
 SIM_SYNC_FLAGS=$(CADENCE_SYNC_FLAGS)
 
+SIM_PROC=xmsim
+
 comp: $(VHDR) $(VSRC)
 	xmvlog $(VFLAGS) $(VSRC); xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 
@@ -32,9 +34,10 @@ ifeq ($(COV),1)
 endif
 
 clean: gen-clean
+	@rm -f xmelab.log  xmsim.log  xmvlog.log *.vh
 
 very-clean: clean
-	@rm -rf cov_work *.log
+	@rm -rf cov_work test.log
 	@rm -f coverage_report_summary.rpt coverage_report_detail.rpt
 
 

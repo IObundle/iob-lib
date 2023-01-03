@@ -62,26 +62,33 @@ ifeq ($(COV),1)
 endif
 endif
 ifeq ($(VCD),1)
-	if [ ! "`pgrep -u $(USER) gtkwave`" ]; then gtkwave -a uut.gtkw uut.vcd; fi &
+	make waves
 endif	
 
 waves:
-	gtkwave  -a uut.gtkw uut.vcd &
+	if [ ! "`pgrep -u $(USER) gtkwave`" ]; then gtkwave -a uut.gtkw uut.vcd; fi &
+
+fix-vcd:
+	$(eval VCD_FILE:=$(shell ls *.vcd))
+	@tail -n 1 $(VCD_FILE) | wc -c | xargs -I {} truncate $(VCD_FILE) -s -{}
+	@echo "" >> $(VCD_FILE)
 
 kill-sim:
 	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
 	kill -9 $$(ps aux | grep $(USER) | grep console | grep python3 | grep -v grep | awk '{print $$2}'); fi
+	@if [ -e *.vcd ]; then make fix-vcd; fi
 
 kill-remote-sim:
 	@echo "INFO: Remote simulator $(SIMULATOR) will be killed"
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'killall -q -u $(SIM_USER) -9 $(SIM_PROC); \
 	make -C $(REMOTE_SIM_DIR) kill-sim'
 ifeq ($(VCD),1)
-	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd $(SIM_DIR)
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
+	make waves
 endif
 
 gen-clean:
-	@rm -f ../../*.vh *.hex
+	@rm -f *.vh *.hex
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_SIM_DIR)/Makefile ]; then make -C $(REMOTE_SIM_DIR) $@; fi'
 endif
@@ -89,6 +96,8 @@ endif
 test: very-clean clean-test-log $(TEST_LIST)
 ifneq ($(COV),1)
 	diff test.log test.expected
+else
+	echo "INFO: simulation code coverage is reserved for internal use only."
 endif
 
 clean-test-log:
@@ -99,7 +108,8 @@ debug:
 	@echo VHDR=$(VHDR)
 	@echo VSRC=$(VSRC)
 	@echo VFLAGS=$(VFLAGS)
+	@echo $(TEST_LIST)
 
 .PRECIOUS: uut.vcd
 
-.PHONY: build run gen-clean kill-sim kill-remote-sim debug test $(TEST_LIST)
+.PHONY: build run gen-clean clean-test-log fix-vcd kill-sim kill-remote-sim debug test

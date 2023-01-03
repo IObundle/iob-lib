@@ -28,8 +28,7 @@ BUILD_PC_DIR = $(BUILD_DIR)/software/pc-emul
 BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
-SPYGLASS_LINT_DIR = $(BUILD_DIR)/hardware/lint/spyglass
-BUILD_ALINT_DIR = $(BUILD_DIR)/hardware/lint/alint
+BUILD_LINT_DIR = $(BUILD_DIR)/hardware/lint
 
 BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
 BUILD_PSRC_DIR = $(BUILD_DIR)/software/psrc
@@ -45,7 +44,13 @@ setup: debug
 $(BUILD_DIR):
 	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github  . $@
 	find $@ -name \*_setup.mk -delete
+	rm -rf $@/*_setup.py
+	rm -rf $@/README.md
+	rm -rf $@/document/other
 	cp $(LIB_DIR)/build.mk $@/Makefile
+	mv $@/delivery_readme.txt $@/README
+	ls -R $@ >> $@/README
+	sed -i -e 's/..\///' $@/README
 
 #
 #HARDWARE
@@ -120,18 +125,9 @@ endif
 
 #lint
 #copy lint files from LIB 
-ifneq ($(wildcard hardware/lint/spyglass),)
-SRC+=$(patsubst $(LIB_DIR)/hardware/lint/spyglass/%, $(SPYGLASS_LINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/spyglass/*))
-$(SPYGLASS_LINT_DIR)/%: $(LIB_DIR)/hardware/lint/spyglass/%
-	sed 's/IOB_CORE_NAME/$(NAME)/g' $< > $@
-
-endif
-
-#Alint
-#copy Alint files from LIB 
-ifneq ($(wildcard hardware/lint/alint),)
-SRC+=$(patsubst $(LIB_DIR)/hardware/lint/alint/%, $(BUILD_ALINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/alint/*))
-$(BUILD_ALINT_DIR)/%: $(LIB_DIR)/hardware/lint/alint/%
+ifneq ($(wildcard hardware/lint),)
+SRC+=$(patsubst $(LIB_DIR)/hardware/lint/%, $(BUILD_LINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/*))
+$(BUILD_LINT_DIR)/%: $(LIB_DIR)/hardware/lint/%
 	sed 's/IOB_CORE_NAME/$(NAME)/g' $< > $@
 
 endif
@@ -214,6 +210,12 @@ ifeq ($(AMD_FPGA),1)
 $(BUILD_DIR)/doc/vivado.tex
 endif
 
+#
+# DELIVERY 
+#
+
+include config_delivery.mk
+
 
 # generate quartus fitting results 
 $(BUILD_DIR)/doc/quartus.tex:
@@ -230,8 +232,8 @@ $(BUILD_DIR)/doc/vivado.tex:
 endif
 
 
-clean:
-	@rm -rf $(BUILD_DIR) *.tex *.v *.vh *.h
+clean: delivery-clean
+	@rm -rf $(BUILD_DIR)
 	@rm -rf scripts/__pycache__
 
 python-cache-clean:
@@ -241,4 +243,4 @@ debug: $(BUILD_DIR) $(SRC)
 	@echo SRC=$(SRC)
 
 
-.PHONY: setup debug
+.PHONY: setup clean debug

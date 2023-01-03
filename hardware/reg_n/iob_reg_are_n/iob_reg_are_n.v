@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module iob_reg_n_ar
+module iob_reg_are_n
   #(
     parameter DATA_W = 0,
     parameter RST_VAL = 0
@@ -9,6 +9,7 @@ module iob_reg_n_ar
     input                   clk_i,
     input                   arst_i,
     input                   rst_i,
+    input                   en_i,
     input [DATA_W-1:0]      data_i,
     output reg [DATA_W-1:0] data_o
     );
@@ -21,7 +22,7 @@ module iob_reg_n_ar
          data_o <= RST_VAL_INT;
       end else if (rst_i) begin
          data_o <= RST_VAL_INT;
-      end else begin
+      end else if (en_i) begin
          data_o <= data_i;
       end
    end

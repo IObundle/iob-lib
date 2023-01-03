@@ -15,12 +15,14 @@ endif
 SIM_SERVER=$(VSIM_SERVER)
 SIM_USER=$(VSIM_USER)
 
+SIM_PROC=V$(VTOP)
+
 comp: $(VHDR) $(VSRC)
 	verilator $(VFLAGS) $(VSRC) $(NAME)_tb.cpp	
-	cd ./obj_dir && make -f V$(VTOP).mk
+	cd ./obj_dir && make -f $(SIM_PROC).mk
 
 exec:
-	./obj_dir/V$(VTOP) | tee -a test.log
+	./obj_dir/$(SIM_PROC) | tee -a test.log
 
 clean: gen-clean
 	@rm -rf obj_dir
