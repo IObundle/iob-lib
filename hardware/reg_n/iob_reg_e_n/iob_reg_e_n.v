@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module iob_reg_ae_n
+module iob_reg_e_n
   #(
     parameter DATA_W = 0,
     parameter RST_VAL = 0
@@ -8,20 +8,15 @@ module iob_reg_ae_n
    (
     input                   clk_i,
     input                   arst_i,
+    input                   ce_i,
     input                   en_i,
     input [DATA_W-1:0]      data_i,
     output reg [DATA_W-1:0] data_o
     );
 
-   // prevent width mismatch
-   localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
-   
-   always @(negedge clk_i, posedge arst_i) begin
-      if (arst_i) begin
-         data_o <= RST_VAL_INT;
-      end else if (en_i) begin
-         data_o <= data_i;
-      end
-   end
+   wire [DATA_W-1:0]    data;
+   assign data = en_i? data_i: data_o;
+
+   iob_reg_n #(DATA_W, RST_VAL) reg0 (clk_i, arst_i, ce_i, data, data_o);
 
 endmodule
