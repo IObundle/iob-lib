@@ -182,4 +182,4 @@ debug: $(BUILD_DIR) $(SRC)
 	@echo SRC=$(SRC)
 
 
-.PHONY: setup debug
+.PHONY: setup clean debug
