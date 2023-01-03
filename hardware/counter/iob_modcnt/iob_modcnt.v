@@ -27,8 +27,8 @@ module iob_modcnt
       .arst_i(arst_i), 
       .en_i(en_i), 
 
-      .sen_i(sen_i), 
       .rst_i(rst_i), 
+      .sen_i(sen_i), 
 
       .ld_i(ld),
       .ld_val_i(LD_VAL), 

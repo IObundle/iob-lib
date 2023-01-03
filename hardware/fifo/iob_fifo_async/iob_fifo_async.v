@@ -159,8 +159,8 @@ module iob_fifo_async
      (
       .clk_i  (r_clk_i),
       .arst_i (r_arst_i),
-      .rst_i  (r_rst_i),
       .en_i   (r_en_int),
+      .rst_i  (r_rst_i),
       .data_o (r_raddr_gray)
       );
 
@@ -174,8 +174,8 @@ module iob_fifo_async
      (
       .clk_i  (w_clk_i),
       .arst_i (w_arst_i),
-      .rst_i  (w_rst_i),
       .en_i   (w_en_int),
+      .rst_i  (w_rst_i),
       .data_o (w_waddr_gray)
       );
 
