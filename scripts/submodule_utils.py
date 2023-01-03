@@ -66,14 +66,16 @@ reserved_signals = \
 }
 
 # Import the <corename>_setup.py from the given core directory
-def import_setup(core_dir):
+def import_setup(setup_dir):
     #Find <corename>_setup.py file
-    for x in os.listdir(core_dir):
+    for x in os.listdir(setup_dir):
         if x.endswith("_setup.py"):
             filename = x
             break
+    if 'filename' not in vars():
+        raise FileNotFoundError(f"Could not find a *_setup.py file in {setup_dir}")
     #Import <corename>_setup.py
-    spec = importlib.util.spec_from_file_location("core_module", core_dir+"/"+filename)
+    spec = importlib.util.spec_from_file_location("core_module", setup_dir+"/"+filename)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 

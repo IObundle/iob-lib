@@ -18,15 +18,18 @@ def insert_header_files(template_contents, peripherals_list, submodule_dirs):
             template_contents.insert(header_index, f'`include "{top}_swreg_def.vh"\n')
 
 
-#Creates system based on system.vt template 
-# root_dir: root directory of the repository
+#Creates system based on {top}.vt template 
+# setup_dir: root directory of the repository
 # submodule_dirs: dictionary with directory of each submodule. Format: {"PERIPHERALCORENAME1":"PATH_TO_DIRECTORY", "PERIPHERALCORENAME2":"PATH_TO_DIRECTORY2"}
 # top: top name of the system
 # peripherals_list: list of dictionaries each of them describes a peripheral instance
 # out_file: path to output file
-def create_systemv(root_dir, submodule_dirs, top, peripherals_list, out_file):
+def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file):
+    # Only create systemv if template is available
+    if not os.path.isfile(setup_dir+f"/hardware/src/{top}.vt"): return
+
     # Read template file
-    template_file = open(root_dir+"/hardware/src/system.vt", "r")
+    template_file = open(setup_dir+f"/hardware/src/{top}.vt", "r")
     template_contents = template_file.readlines() 
     template_file.close()
 

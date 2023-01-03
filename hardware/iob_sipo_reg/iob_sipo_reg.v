@@ -8,13 +8,12 @@ module iob_sipo_reg
 
     input               clk_i,
     input               arst_i,
-
     input               en_i,
 
-    // parallel input
+    //serial input
     input               s_i,
 
-    // serial output
+    //parallel output
     output [DATA_W-1:0] p_o
     );
 

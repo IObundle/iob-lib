@@ -16,7 +16,10 @@ module iob_pulse_gen
 
    //start detect
    `IOB_WIRE(start_detected, 1)
-   iob_reg_ae #(1,0) start_detected_inst (clk_i, arst_i, start_i, en_i, start_detected);
+   `IOB_WIRE(start_detected_nxt, 1)
+   assign start_detected_nxt = start_detected | start_i;
+   
+   iob_reg_ae #(1,0) start_detected_inst (clk_i, arst_i, en_i, start_detected_nxt, start_detected);
 
    
    //counter
@@ -25,10 +28,10 @@ module iob_pulse_gen
    `IOB_WIRE(cnt, WIDTH)   
 
    //counter enable
-   assign cnt_en = start_detected & (cnt <= (START+DURATION)) & en_i;
+   assign cnt_en = start_detected & (cnt <= (START+DURATION));
 
    //counter
-   iob_counter #(WIDTH,0) cnt0 (clk_i, arst_i, start_i, cnt_en, cnt);
+   iob_counter #(WIDTH,0) cnt0 (clk_i, arst_i, en_i, start_i, cnt_en, cnt);
 
    //pulse
    assign pulse_o = cnt_en & |cnt;

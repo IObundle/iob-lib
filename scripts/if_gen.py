@@ -207,6 +207,7 @@ def make_iob():
 #
 
 def make_axi_write():
+    print(axi_write)
     bus=[]
     for i in range(len(axi_write)):
         bus.append(axi_write[i])
@@ -227,18 +228,18 @@ def make_axi():
 
 def make_axil_write():
     bus=[]
-    for i in range(len(axi_write)):
-        if axi_write[i]['lite'] == 1:
-            bus.append(axi_write[i])
+    for signal in axi_write:
+        if signal['lite'] == 1:
+            bus.append(signal.copy())
             bus[-1]['name'] = bus[-1]['name'].replace('axi_', 'axil_')
             bus[-1]['width'] = bus[-1]['width'].replace('AXI_', 'AXIL_')
     return bus
 
 def make_axil_read():
     bus=[]
-    for i in range(len(axi_read)):
-        if axi_read[i]['lite'] == 1:
-            bus.append(axi_read[i])
+    for signal in axi_read:
+        if signal['lite'] == 1:
+            bus.append(signal.copy())
             bus[-1]['name'] = bus[-1]['name'].replace('axi_', 'axil_')
             bus[-1]['width'] = bus[-1]['width'].replace('AXI_', 'AXIL_')
     return bus
@@ -484,11 +485,13 @@ def parse_arguments():
 #
 def create_signal_table(interface_name):
     global table
+    table = []
 
     if (interface_name.find("iob_")>=0):
         table = make_iob()
 
     if (interface_name.find("axi_")>=0):
+        print('ENTER')
         if (interface_name.find("write_")>=0): table = make_axi_write()
         elif (interface_name.find("read_")>=0): table = make_axi_read()
         else: table = make_axi()

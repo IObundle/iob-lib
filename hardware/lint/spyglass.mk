@@ -11,18 +11,15 @@ LINT_SYNC_FLAGS=$(SYNOPSYS_SYNC_FLAGS)
 
 run-lint:
 ifeq ($(LINT_SERVER),)
-	echo exit | spyglass -shell -project spyglass/iob_lint.prj -goals "lint/lint_rtl"
+	echo exit | spyglass -shell -project spyglass.prj -goals "lint/lint_rtl"
 else
 	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync -avz --delete --exclude .git $(LINT_SYNC_FLAGS) ../.. $(LINT_USER)@$(LINT_SERVER):$(REMOTE_BUILD_DIR)
 	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) 'make -C $(REMOTE_LINT_DIR) run LINTER=$(LINTER)'
-	mkdir -p spyglass/reports
-	scp $(LINT_SCP_FLAGS) $(LINT_USER)@$(LINT_SERVER):$(REMOTE_LINT_DIR)/iob_lint/consolidated_reports/$(NAME)_lint_lint_rtl/*.rpt spyglass/reports/.
+	mkdir -p spyglass_reports
+	scp $(LINT_SCP_FLAGS) $(LINT_USER)@$(LINT_SERVER):$(REMOTE_LINT_DIR)/spyglass/consolidated_reports/$(NAME)_lint_lint_rtl/*.rpt spyglass_reports/.
 endif
 
 clean-lint:
 	rm -rf $(NAME)_files.list
-	rm -rf spyglass/reports
-
-debug:
-	@echo $(VHDR)
+	rm -rf spyglass_reports
