@@ -61,10 +61,10 @@ module iob_fifo_sync
      (
       .clk_i    (clk_i),
       .arst_i   (arst_i),
-      .en_i     (ce_i),
+      .ce_i     (ce_i),
 
       .rst_i    (rst_i),
-      .sen_i    (w_en_int),
+      .en_i     (w_en_int),
       .data_o   (w_addr)
       );
 
@@ -82,9 +82,10 @@ module iob_fifo_sync
      (
       .clk_i    (clk_i),
       .arst_i   (arst_i),
-      .en_i     (ce_i),
+      .ce_i     (ce_i),
+
       .rst_i    (rst_i),
-      .sen_i     (r_en_int),
+      .en_i     (r_en_int),
       .data_o   (r_addr)
       );
 
