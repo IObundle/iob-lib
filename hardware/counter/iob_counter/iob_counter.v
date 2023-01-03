@@ -22,11 +22,13 @@ module iob_counter
    always @(posedge clk_i, posedge arst_i)
      if (arst_i)
        data_o <= RST_VAL_INT;
-     else if (en_i)
-       if (sen_i)
+     else if (en_i) begin
+       if (sen_i) begin
          if (rst_i)
            data_o <= RST_VAL_INT;
          else
            data_o <= data_o + 1'b1;
+       end
+     end
 
 endmodule

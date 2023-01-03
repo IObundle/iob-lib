@@ -25,12 +25,14 @@ module iob_counter_ld_n
    always @(negedge clk_i, posedge arst_i)
       if (arst_i)
         data_o <= RST_VAL_INT;
-      else if (en_i)
-        if (sen_i)
+      else if (en_i) begin
+        if (sen_i) begin
            if (rst_i)
               data_o <= RST_VAL_INT;
            else if (ld_i)
              data_o <= ld_val_i;
            else
              data_o <= data_o + 1'b1;
+        end
+      end
 endmodule
