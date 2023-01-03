@@ -5,14 +5,17 @@ import sys, os
 from submodule_utils import *
 import createSystem
 
-#Creates top system based on system_top.vt template 
+#Creates top system based on {top}_top.vt template 
 # setup_dir: root directory of the repository
 # submodule_dirs: dictionary with directory of each submodule. Format: {"PERIPHERALCORENAME1":"PATH_TO_DIRECTORY", "PERIPHERALCORENAME2":"PATH_TO_DIRECTORY2"}
 # peripherals_list: list of dictionaries each of them describes a peripheral instance
 # out_file: path to output file
-def create_top_system(setup_dir, submodule_dirs, peripherals_list, out_file):
+def create_top_system(setup_dir, submodule_dirs, top, peripherals_list, out_file):
+    # Only create testbench if template is available
+    if not os.path.isfile(setup_dir+f"/hardware/simulation/{top}_top.vt"): return
+
     # Read template file
-    template_file = open(setup_dir+"/hardware/simulation/system_top.vt", "r")
+    template_file = open(setup_dir+f"/hardware/simulation/{top}_top.vt", "r")
     template_contents = template_file.readlines() 
     template_file.close()
 
