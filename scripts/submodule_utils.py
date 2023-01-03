@@ -66,14 +66,16 @@ reserved_signals = \
 }
 
 # Import the <corename>_setup.py from the given core directory
-def import_setup(core_dir):
+def import_setup(setup_dir):
     #Find <corename>_setup.py file
-    for x in os.listdir(core_dir):
+    for x in os.listdir(setup_dir):
         if x.endswith("_setup.py"):
             filename = x
             break
+    if 'filename' not in vars():
+        raise FileNotFoundError(f"Could not find a *_setup.py file in {setup_dir}")
     #Import <corename>_setup.py
-    spec = importlib.util.spec_from_file_location("core_module", core_dir+"/"+filename)
+    spec = importlib.util.spec_from_file_location("core_module", setup_dir+"/"+filename)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
@@ -280,21 +282,19 @@ def get_pio_signals(signal_list):
 # The value of port_list is a list of ports for the given type of peripheral
 # The value of params_list is a list of parameters for the given type of peripheral
 # The value of top_list is the top name of the given type of peripheral
-def get_peripherals_ports_params_top(peripherals_list, core_dir):
+def get_peripherals_ports_params_top(peripherals_list, submodule_dirs):
     port_list = {}
     params_list = {}
     top_list = {}
     for instance in peripherals_list:
         if instance['type'] not in port_list:
-            sub_dir = f"{core_dir}/submodules/{instance['type']}"
-            if os.path.isdir(sub_dir):
-                # Import <corename>_setup.py module
-                module = import_setup(sub_dir)
-                # Append module IO, parameters, and top name
-                port_list[instance['type']]=get_module_io(module.ios)
-                params_list[instance['type']]=list(i for i in module.confs if i['type'] == 'P')
-                top_list[instance['type']]=module.meta['name']
-        return port_list, params_list, top_list
+            # Import <corename>_setup.py module
+            module = import_setup(submodule_dirs[instance['type']])
+            # Append module IO, parameters, and top name
+            port_list[instance['type']]=get_module_io(module.ios)
+            params_list[instance['type']]=list(i for i in module.confs if i['type'] == 'P')
+            top_list[instance['type']]=module.meta['name']
+    return port_list, params_list, top_list
 
 # Find index of word in array with multiple strings
 def find_idx(lines, word):
