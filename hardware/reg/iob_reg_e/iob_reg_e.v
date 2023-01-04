@@ -8,7 +8,7 @@ module iob_reg_e
    (
     input               clk_i,
     input               arst_i,
-    input               ce_i,
+    input               cke_i,
 
     input               en_i,
 
@@ -23,7 +23,7 @@ module iob_reg_e
      (
       .clk_i(clk_i),
       .arst_i(arst_i),
-      .ce_i(ce_i),
+      .cke_i(cke_i),
 
       .data_i(data),
       .data_o(data_o)

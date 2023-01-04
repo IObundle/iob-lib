@@ -8,7 +8,7 @@ module iob_counter
    (
     input               clk_i,
     input               arst_i,
-    input               ce_i,
+    input               cke_i,
 
     input               rst_i,
     input               en_i,
@@ -23,7 +23,7 @@ module iob_counter
      (
       .clk_i(clk_i),
       .arst_i(arst_i),
-      .ce_i(ce_i),
+      .cke_i(cke_i),
 
       .rst_i(rst_i),
       .en_i(en_i),

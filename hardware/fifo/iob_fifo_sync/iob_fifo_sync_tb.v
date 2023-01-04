@@ -23,7 +23,7 @@ module iob_fifo_sync_tb;
    reg reset = 0;
    reg arst = 0;
    reg                 clk = 0;
-   reg                 ce = 1;
+   reg                 cke = 1;
 
    //write port
    reg                 w_en = 0;
@@ -194,7 +194,7 @@ module iob_fifo_sync_tb;
      (
       .clk_i            (clk),
       .arst_i           (arst),
-      .ce_i             (ce),
+      .cke_i            (cke),
       .rst_i            (reset),
 
       .ext_mem_w_en_o   (ext_mem_w_en),

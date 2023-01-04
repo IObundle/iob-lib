@@ -8,7 +8,7 @@ module iob_reg_r_n
    (
     input                   clk_i,
     input                   arst_i,
-    input                   ce_i,
+    input                   cke_i,
 
     input                   rst_i,
 
@@ -22,7 +22,7 @@ module iob_reg_r_n
    always @(negedge clk_i, posedge arst_i) begin
       if (arst_i) begin
          data_o <= RST_VAL_INT;
-      end else if (ce_i) begin
+      end else if (cke_i) begin
          if (rst_i) begin
             data_o <= RST_VAL_INT;
          end else begin

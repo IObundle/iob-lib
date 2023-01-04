@@ -37,8 +37,8 @@ module iob_fifo_async_tb;
    //read clock
    `IOB_CLOCK(r_clk, 13)
 
-   reg                 r_ce = 1;
-   reg                 w_ce = 1;
+   reg                 r_cke = 1;
+   reg                 w_cke = 1;
 
    
    //write port
@@ -219,7 +219,7 @@ module iob_fifo_async_tb;
       .r_clk_i    (r_clk),
       .r_arst_i   (r_arst),
       .r_rst_i    (1'd0),
-      .r_ce_i     (r_ce),
+      .r_cke_i    (r_cke),
       .r_en_i     (r_en),
       .r_data_o   (r_data),
       .r_empty_o  (r_empty),
@@ -229,7 +229,7 @@ module iob_fifo_async_tb;
       .w_clk_i    (w_clk),
       .w_arst_i   (w_arst),
       .w_rst_i    (1'd0),
-      .w_ce_i     (w_ce),
+      .w_cke_i    (w_cke),
       .w_en_i     (w_en),
       .w_data_i   (w_data),
       .w_empty_o  (w_empty),
