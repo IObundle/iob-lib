@@ -12,5 +12,5 @@
 `include "<core name prefix>portmap.vh"
 
       // Global signals
-`include "iob_clkrst_portmap.vh"
+`include "iob_clkenrst_portmap.vh"
       );

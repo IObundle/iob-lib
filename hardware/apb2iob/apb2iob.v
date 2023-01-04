@@ -31,18 +31,54 @@ module apb2iob
 
    assign apb_ready_nxt = apb_write_i? (iob_avalid_nxt & iob_ready_nxt_i): iob_rvalid_nxt_i;
 
-   iob_reg_ae #(1,0) apb_ready_reg_inst (clk_i, arst_i, en_i, apb_ready_nxt, apb_ready_o);
+   iob_reg
+     #(1,0)
+   apb_ready_reg_inst
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(apb_ready_nxt),
+      .data_o(apb_ready_o)
+      );
 
    assign apb_rdata_o = iob_rdata_i;
 
-   iob_reg_ae #(1,0) apb_slverr_reg_inst (clk_i, arst_i, en_i, apb_slverr_nxt, apb_slverr_o);
+   iob_reg
+     #(1,0)
+   apb_slverr_reg_inst
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(apb_slverr_nxt),
+      .data_o(apb_slverr_o)
+      );
 
    // IOb outputs
-   iob_reg_ae #(1,0) avlid_reg (clk_i, arst_i, en_i, iob_avalid_nxt, iob_avalid_o);
+   iob_reg
+     #(1,0)
+   avlid_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(iob_avalid_nxt),
+      .data_o(iob_avalid_o)
+      );
 
    `IOB_WIRE(pc, 2)
    `IOB_VAR(pc_nxt, 2)
-   iob_reg_ae #(2,0) pc_reg (clk_i, arst_i, en_i, pc_nxt, pc);
+   iob_reg
+     #(2,0)
+   pc_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(pc_nxt),
+      .data_o(pc)
+      );
 
    `IOB_COMB begin
       
