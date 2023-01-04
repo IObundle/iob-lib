@@ -3,18 +3,24 @@
 module iob_f2s_1bit_sync
   (
    input  clk_i,
+   input  cke_i,
    input  i,
    output o
    );
 
-   reg [1:0] sync;
-   always @(posedge clk_i, posedge i) begin
-      if (i) begin
-         sync <= 2'b11;
-      end else begin
-         sync <= {sync[0], 1'b0};
-      end
-   end
+   wire [1:0] sync;
+   wire [1:0] data;
+   assign data = {sync[0], 1'b0};
+
+   iob_reg #(2, 1) reg0
+     (
+      .clk_i(clk_i),
+      .arst_i(i),
+      .cke_i(cke_i),
+
+      .data_i(data),
+      .data_o(sync)
+      );
 
    assign o = sync[1];
 

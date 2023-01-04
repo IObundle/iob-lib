@@ -103,7 +103,7 @@ module iob_fifo_async
      (
       .clk_i    (r_clk_i),
       .arst_i   (r_arst_i),
-      .en_i     (r_cke_i),
+      .cke_i    (r_cke_i),
       .signal_i (w_waddr_gray),
       .signal_o (r_waddr_gray)
       );
@@ -120,7 +120,7 @@ module iob_fifo_async
      (
       .clk_i    (w_clk_i),
       .arst_i   (w_arst_i),
-      .en_i     (w_cke_i),
+      .cke_i    (w_cke_i),
       .signal_i (r_raddr_gray),
       .signal_o (w_raddr_gray)
       );
@@ -150,7 +150,7 @@ module iob_fifo_async
 
    
    //read address gray code counter
-   wire r_en_int  = (r_en_i & (~r_empty_o)) & r_cke_i;
+   wire r_en_int  = (r_en_i & (~r_empty_o));
    iob_gray_counter
      #(
        .W(R_ADDR_W+1)
@@ -159,13 +159,14 @@ module iob_fifo_async
      (
       .clk_i  (r_clk_i),
       .arst_i (r_arst_i),
-      .cke_i  (r_en_int),
+      .cke_i  (r_cke_i),
       .rst_i  (r_rst_i),
+      .en_i   (r_en_int),
       .data_o (r_raddr_gray)
       );
 
    //write address gray code counter
-   wire w_en_int = (w_en_i & (~w_full_o)) & w_cke_i;
+   wire w_en_int = (w_en_i & (~w_full_o));
    iob_gray_counter
      #(
        .W(W_ADDR_W+1)
@@ -174,8 +175,9 @@ module iob_fifo_async
      (
       .clk_i  (w_clk_i),
       .arst_i (w_arst_i),
-      .cke_i  (w_en_int),
+      .cke_i  (w_cke_i),
       .rst_i  (w_rst_i),
+      .en_i   (w_en_int),
       .data_o (w_waddr_gray)
       );
 

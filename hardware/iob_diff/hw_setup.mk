@@ -3,6 +3,9 @@ ifeq ($(filter iob_diff, $(HW_MODULES)),)
 # Add to modules list
 HW_MODULES+=iob_diff
 
+# Submodules
+include $(LIB_DIR)/hardware/reg/iob_reg_r/hw_setup.mk
+
 # Sopurces
 SRC+=$(BUILD_VSRC_DIR)/iob_diff.v
 
