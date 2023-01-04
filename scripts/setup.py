@@ -21,7 +21,9 @@ def getf(obj, name, field):
 
 # no_overlap: Optional argument. Selects if read/write addresses should not overlap
 # ios_prefix: Optional argument. Selects if IO signals should be prefixed by their table name. Useful when multiple tables have signals with the same name.
-def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=False):
+# peripheral_ios: Optional argument. Selects if should append peripheral IOs to 'ios' list
+# internal_wires: Optional argument. List of extra wires for creste_systemv to create inside this core/system module
+def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=False, peripheral_ios=True, internal_wires=None):
 
     top = meta_data['name']
     build_dir = meta_data['build_dir']
@@ -50,16 +52,16 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     # Get peripheral related macros
     if peripherals_list: iob_soc.get_peripheral_macros(confs, peripherals_list)
     # Append peripherals IO 
-    if peripherals_list: ios.extend(ios_lib.get_peripheral_ios(peripherals_list, meta_data['submodules']))
+    if peripherals_list and peripheral_ios: ios.extend(ios_lib.get_peripheral_ios(peripherals_list, meta_data['submodules']))
     # Build periphs_tmp.h
     if peripherals_list: periphs_tmp.create_periphs_tmp(next(i['val'] for i in confs if i['name'] == 'P'),
                                    peripherals_list, f"{meta_data['build_dir']}/software/periphs.h")
     # Try to build iob_soc.v if template is available
-    createSystem.create_systemv(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],'hardware/src/iob_soc.v'))
+    createSystem.create_systemv(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],f'hardware/src/{top}.v'), internal_wires=internal_wires)
     # Try to build system_tb.v if template is available
-    createTestbench.create_system_testbench(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],'hardware/simulation/src/system_tb.v'))
+    createTestbench.create_system_testbench(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],f'hardware/simulation/src/{top}_tb.v'))
     # Try to build system_top.v if template is available
-    createTopSystem.create_top_system(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],'hardware/simulation/src/system_top.v'))
+    createTopSystem.create_top_system(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],f'hardware/simulation/src/{top}_top.v'))
 
 
     #

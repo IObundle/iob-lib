@@ -4,6 +4,7 @@
 #
 from submodule_utils import import_setup
 from ios import get_interface_mapping
+from setup import setup
 
 
 #Given the io dictionary of ports, the port name (and size, and optional bit list) and a wire, it will map the selected bits of the port to the given wire.
@@ -14,7 +15,7 @@ from ios import get_interface_mapping
 #           The order of bits in this list is important. The bits of the wire will always be filled in incremental order and will match the corresponding bit of the port given on this list following the list order. Example: The list [5,3] will map the port bit 5 to wire bit 0 and port bit 3 to wire bit 1.
 #wire_name: name of the wire to connect the bits of the port to.
 def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
-    if port_name in io_dict and type(port_name) == str: raise Exception(f"Error: Peripheral port {port_name} has already been previously mapped!")
+    assert not (port_name in io_dict and type(port_name) == str), f"Error: Peripheral port {port_name} has already been previously mapped!"
     if not port_bits:
         # Did not specify bits, connect all the entire port (all the bits)
         io_dict[port_name] = wire_name
@@ -24,35 +25,35 @@ def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
         # Map the selected bits to the corresponding wire bits
         # Each element in the bit list of this port will be a tuple containign the name of the wire to connect to and the bit of that wire.
         for wire_bit, bit in enumerate(port_bits):
-            if io_dict[port_name][bit]: raise Exception(f"Error: Peripheral port {port_name} bit {bit} has already been previously mapped!")
+            assert not io_dict[port_name][bit], f"Error: Peripheral port {port_name} bit {bit} has already been previously mapped!"
             io_dict[port_name][bit] = (wire_name, wire_bit)
 
-# Setup a Tester in a given build directory (without TeX documentation)
-# build_dir: path to build directory
-# tester_dir: root directory of the tester
+# Setup a Tester 
 # extra_peripherals: list of peripherals to append to the 'peripherals' table in the 'blocks' list of the Tester
 # peripheral_dirs: dictionary with directories of each extra peripheral
 # peripheral_portmap: Dictionary where each key-value pair is a Mapping between two signals. Example
 #                     { {'corename':'UART1', 'if_name':'rs232', 'port':'', 'bits':[]}:{'corename':'UUT', 'if_name':'UART0', 'port':'', 'bits':[]} }
-def setup_tester(build_dir, tester_dir, extra_peripherals, peripheral_dirs, peripheral_portmap):
-    #Import <corename>_setup.py
-    tester = import_setup(tester_dir)
-
+def setup_tester( meta_data, confs, ios, regs, blocks, module_parameters):
     #Update submodule directories of Tester with new peripherals directories
-    tester.submodule_dirs.update(peripheral_dirs)
+    meta_data['submodules']['dirs'].update(peripheral_dirs)
 
-    #Add extra peripherals to tester list
-    tester_peripherals_list=next(i['blocks'] for i in tester.blocks if i['name'] == 'peripherals')
+    #Add extra peripherals to tester list (by updating original list)
+    tester_peripherals_list=next(i['blocks'] for i in blocks if i['name'] == 'peripherals')
     for peripheral in extra_peripherals:
         # Allow extra peripherals with the same name to override default peripherals
         for default_peripheral in tester_peripherals_list:
-            if peripheral['name'] == default_peripheral['name']: default_peripheral = peripheral
-            continue # Skip appending peripheral
-        tester_peripherals_list.append(peripheral)
+            if peripheral['name'] == default_peripheral['name']:
+                default_peripheral = peripheral
+                break # Skip appending peripheral
+        else: #this is a new peripheral since it did not update a default (existing) peripheral
+            tester_peripherals_list.append(peripheral)
 
     # Add 'IO" attribute to every peripheral of tester
     for peripheral in tester_peripherals_list:
         peripheral['IO']={}
+
+    # List of peripheral interconnection wires
+    peripheral_wires = []
 
     #Handle peripheral portmap
     for map_idx, mapping in enumerate(peripheral_portmap):
@@ -65,7 +66,7 @@ def setup_tester(build_dir, tester_dir, extra_peripherals, peripheral_dirs, peri
         if mapping[1]['corename']: mapping_items[1]=next(i for i in tester_peripherals_list if i['name'] == mapping[1]['corename'])
 
         #Make sure we are not mapping two external interfaces
-        if mapping_items == [None, None]: raise Exception(f"Error: {map_idx} Cannot map between two external interfaces!")
+        assert mapping_items != [None, None], f"Error: {map_idx} Cannot map between two external interfaces!"
 
         # Store index if any of the entries is the external interface
         # Store -1 if we are not mapping to external interface
@@ -74,10 +75,10 @@ def setup_tester(build_dir, tester_dir, extra_peripherals, peripheral_dirs, peri
         # List of tester IOs from ports of this mapping
         tester_mapping_ios=[]
         # Add peripherals table to ios of tester
-        tester.ios.append({'name': f"portmap_{map_idx}", 'descr':f"IOs for peripherals based on portmap index {map_idx}", 'ports': tester_mapping_ios})
+        ios.append({'name': f"portmap_{map_idx}", 'descr':f"IOs for peripherals based on portmap index {map_idx}", 'ports': tester_mapping_ios})
 
         # Import module of one of the given core types (to access its IO)
-        module = import_setup(tester.submodule_dirs[mapping_items[0]['type']])
+        module = import_setup(meta_data['submodules']['dirs'][mapping_items[0]['type']])
         #Get ports of configured interface
         interface_ports=next(i['ports'] for i in module.ios if i['name'] == mapping[0]['if_name'])
 
@@ -95,7 +96,7 @@ def setup_tester(build_dir, tester_dir, extra_peripherals, peripheral_dirs, peri
                     # Not mapped to external interface
                     # Create peripheral wire name based on mapping.
                     wire_name = f"connect_{mapping[0]['corename']}_{mapping[0]['if_name']}_{port['name']}_to_{mapping[1]['corename']}_{mapping[1]['if_name']}_{if_mapping[port['name']]}"
-                    tester.peripheral_wires.append({'name':wire_name, 'n_bits':port['n_bits']})
+                    peripheral_wires.append({'name':wire_name, 'n_bits':port['n_bits']})
                 else:
                     #Mapped to external interface
                     #Add tester IO for this port
@@ -126,7 +127,7 @@ def setup_tester(build_dir, tester_dir, extra_peripherals, peripheral_dirs, peri
                 # Not mapped to external interface
                 # Create wire name based on mapping
                 wire_name = f"connect_{mapping[0]['corename']}_{mapping[0]['if_name']}_{mapping[0]['port']}_to_{mapping[1]['corename']}_{mapping[1]['if_name']}_{mapping[1]['port']}"
-                tester.peripheral_wires.append({'name':wire_name, 'n_bits':n_bits})
+                peripheral_wires.append({'name':wire_name, 'n_bits':n_bits})
             else:
                 #Mapped to external interface
                 #Add tester IO for this port
@@ -142,4 +143,4 @@ def setup_tester(build_dir, tester_dir, extra_peripherals, peripheral_dirs, peri
 
 
     # Call setup function for the tester
-    tester.main(build_dir=build_dir, gen_tex=False)
+    setup(meta, confs, ios, regs, blocks, ios_prefix=True, peripheral_ios=False, internal_wires=peripheral_wires)

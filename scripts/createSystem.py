@@ -24,7 +24,8 @@ def insert_header_files(template_contents, peripherals_list, submodule_dirs):
 # top: top name of the system
 # peripherals_list: list of dictionaries each of them describes a peripheral instance
 # out_file: path to output file
-def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file):
+# internal_wires: Optional argument. List of extra wires to create inside module
+def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file, internal_wires=None):
     # Only create systemv if template is available
     if not os.path.isfile(setup_dir+f"/hardware/src/{top}.vt"): return
 
@@ -81,6 +82,15 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file):
         # Insert peripheral comment
         template_contents.insert(start_index, "   // {}\n".format(instance['name']))
         template_contents.insert(start_index, "\n")
+
+    # Insert internal module wires (if any)
+    if internal_wires:
+        # Find end of module header
+        start_index = find_idx(template_contents, ");")
+        #Insert internal wires
+        for wire in internal_wires:
+            template_contents.insert(start_index, f"    wire [{wire['n_bits']}-1:0] {wire['name']}\n")
+        template_contents.insert(start_index, "    // Module internal wires\n")
 
     # Write system.v
     systemv_file = open(out_file, "w")

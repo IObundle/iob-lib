@@ -90,11 +90,12 @@ def python_setup(build_dir):
 # Setup a submodule in a given build directory
 # build_dir: path to build directory
 # submodule_dir: root directory of submodule to run setup function
-def submodule_setup(build_dir, submodule_dir):
+# module_parameters: optional argument. Allows passing an optional object with parameters to a hardware module (object is passed to the *_setup.py module).
+def submodule_setup(build_dir, submodule_dir, module_parameters=None):
     #Check if submodule has *_setup.py file
     for fname in os.listdir('.'):
         if fname.endswith('_setup.py'):
-            iob_submodule_setup(build_dir, submodule_dir)
+            iob_submodule_setup(build_dir, submodule_dir, module_parameters=module_parameters)
             return
 
     #Did not find *_setup.py file, copy sources only
@@ -103,12 +104,14 @@ def submodule_setup(build_dir, submodule_dir):
 # Setup a submodule in a given build directory using its *_setup.py file
 # build_dir: destination build directory
 # submodule_dir: root directory of submodule to run setup function
-def iob_submodule_setup(build_dir, submodule_dir):
+# module_parameters: optional argument. Allows passing an optional object with parameters to a hardware module.
+def iob_submodule_setup(build_dir, submodule_dir, module_parameters=None):
     #Import <corename>_setup.py
     module = import_setup(submodule_dir)
     module.meta['flows'] = ''
     module.meta['build_dir'] = build_dir
     module.meta['setup_dir'] = submodule_dir
+    module.module_parameters = module_parameters
     # Call setup function for this submodule
     module.main()
 
@@ -122,9 +125,10 @@ def module_dependency_setup(hardware_srcs, Vheaders, setup_dir, build_dir, submo
     while(True):
         # Handle each entry, skipping .v and .vh entries
         for hardware_src in hardware_srcs:
-            # Entry is a 'submodule'
-            if hardware_src in submodule_dirs:
-                submodule_setup(build_dir, submodule_dirs[hardware_src])
+            # Entry is a 'submodule' (may be a tuple if optional parameters are given)
+            if type(hardware_src)==tuple or hardware_src in submodule_dirs:
+                if type(hardware_src)==tuple: submodule_setup(build_dir, submodule_dirs[hardware_src[0]], module_parameters=hardware_src[1])
+                else: submodule_setup(build_dir, submodule_dirs[hardware_src])
                 hardware_srcs.remove(hardware_src)
                 break
             # Entry is a 'python include'
