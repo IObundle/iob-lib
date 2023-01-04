@@ -27,5 +27,6 @@ module iob_reg_r
            data_o <= RST_VAL_INT;
         else
           data_o <= data_i;
+      end
 
 endmodule
