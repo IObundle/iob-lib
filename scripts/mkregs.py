@@ -76,7 +76,7 @@ def gen_wr_reg(row, f):
     if auto: #generate register
         f.write(f"`IOB_WIRE({name}_wen, 1)\n")
         f.write(f"assign {name}_wen = (iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
-        f.write(f"iob_reg_ae #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, {name}_wen, {name}_wdata, {name}_o);\n")
+        f.write(f"iob_reg_e #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, cke_i, {name}_wen, {name}_wdata, {name}_o);\n")
     else: #output wdata and wen; ready signal has been declared as a port
         f.write(f"assign {name}_o = {name}_wdata;\n")
         f.write(f"assign {name}_wen_o = ({name}_ready_i & iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
@@ -279,20 +279,20 @@ def write_hwcode(table, out_dir, top):
     #ready output
     f_gen.write("//ready output\n")
     f_gen.write("`IOB_VAR(ready_nxt, 1)\n")
-    f_gen.write("iob_reg_ae #(1,1) ready_reg_inst (clk_i, arst_i, en_i, ready_nxt, iob_ready_o);\n\n")
+    f_gen.write("iob_reg #(1,1) ready_reg_inst (clk_i, arst_i, cke_i, ready_nxt, iob_ready_o);\n\n")
     
     #rvalid output
     f_gen.write("//rvalid output\n")
     f_gen.write("`IOB_VAR(rvalid_nxt, 1)\n")
-    f_gen.write("iob_reg_ae #(1,0) rvalid_reg_inst (clk_i, arst_i, en_i, rvalid_nxt, iob_rvalid_o);\n\n")
+    f_gen.write("iob_reg #(1,0) rvalid_reg_inst (clk_i, arst_i, cke_i, rvalid_nxt, iob_rvalid_o);\n\n")
     
     #rdata output
     f_gen.write("//rdata output\n")
-    f_gen.write(f"iob_reg_ae #({8*cpu_n_bytes},0) rdata_reg_inst (clk_i, arst_i, en_i, rdata_int, iob_rdata_o);\n\n")
+    f_gen.write(f"iob_reg #({8*cpu_n_bytes},0) rdata_reg_inst (clk_i, arst_i, cke_i, rdata_int, iob_rdata_o);\n\n")
     
     f_gen.write("`IOB_WIRE(pc, 1)\n")
     f_gen.write("`IOB_VAR(pc_nxt, 1)\n")
-    f_gen.write("iob_reg_a #(1,0) pc_reg (clk_i, arst_i, pc_nxt, pc);\n\n")
+    f_gen.write("iob_reg #(1,0) pc_reg (clk_i, arst_i, cke_i, pc_nxt, pc);\n\n")
 
     f_gen.write("`IOB_COMB begin\n")
 

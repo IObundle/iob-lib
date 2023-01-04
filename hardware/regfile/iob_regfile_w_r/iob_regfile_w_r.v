@@ -11,7 +11,7 @@ module iob_regfile_w_r
    (
     input                   clk_i,
     input                   arst_i,
-    input                   en_i,
+    input                   cke_i,
     
     input                   rst_i,
 
@@ -32,11 +32,11 @@ module iob_regfile_w_r
    generate
       for (i=0; i < (2**ADDR_W); i=i+1) begin: register_file
          assign wdata[i] = (we_i & (waddr_i==i))? wdata_i: regfile[i];
-         iob_reg_are #(DATA_W_INT, 0) iob_reg0
+         iob_reg_r #(DATA_W_INT, 0) iob_reg0
              (
               .clk_i(clk_i),
               .arst_i(arst_i),
-              .en_i(en_i),
+              .cke_i(cke_i),
               .rst_i(rst_i),
               .data_i(wdata[i]),
               .data_o(regfile[i])

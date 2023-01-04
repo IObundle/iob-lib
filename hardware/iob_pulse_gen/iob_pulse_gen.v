@@ -9,7 +9,7 @@ module iob_pulse_gen
   (
    input  clk_i,
    input  arst_i,
-   input  en_i,
+   input  cke_i,
    input  start_i,
    output pulse_o
    );
@@ -19,9 +19,17 @@ module iob_pulse_gen
    `IOB_WIRE(start_detected_nxt, 1)
    assign start_detected_nxt = start_detected | start_i;
    
-   iob_reg_ae #(1,0) start_detected_inst (clk_i, arst_i, en_i, start_detected_nxt, start_detected);
+   iob_reg
+     #(1,0)
+   start_detected_inst
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(start_detected_nxt),
+      .data_o(start_detected)
+      );
 
-   
    //counter
    `IOB_WIRE(cnt_en, 1)
    localparam WIDTH = $clog2(START+DURATION+2);
@@ -31,7 +39,17 @@ module iob_pulse_gen
    assign cnt_en = start_detected & (cnt <= (START+DURATION));
 
    //counter
-   iob_counter #(WIDTH,0) cnt0 (clk_i, arst_i, en_i, start_i, cnt_en, cnt);
+   iob_counter
+     #(WIDTH,0)
+   cnt0
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .rst_i(start_i),
+      .en_i(cnt_en),
+      .data_o(cnt)
+      );
 
    //pulse
    assign pulse_o = cnt_en & |cnt;

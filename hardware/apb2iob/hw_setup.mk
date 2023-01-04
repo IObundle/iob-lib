@@ -5,6 +5,7 @@ HW_MODULES+=apb2iob
 
 # import lib hardware
 include $(LIB_DIR)/hardware/include/hw_setup.mk
+include $(LIB_DIR)/hardware/reg/iob_reg/hw_setup.mk
 
 # Sources
 SRC+=$(BUILD_VSRC_DIR)/apb2iob.v

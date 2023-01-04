@@ -4,7 +4,7 @@ ifeq ($(filter iob_pulse_gen, $(HW_MODULES)),)
 HW_MODULES+=iob_pulse_gen
 
 # Subcomponents
-include $(LIB_DIR)/hardware/reg/iob_reg_ae/hw_setup.mk
+include $(LIB_DIR)/hardware/reg/iob_reg/hw_setup.mk
 include $(LIB_DIR)/hardware/counter/iob_counter/hw_setup.mk
 
 # Sources
