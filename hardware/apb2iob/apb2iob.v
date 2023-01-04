@@ -52,19 +52,16 @@ module apb2iob
       .data_o(pc)
       );
       
-   `IOB_VAR(iob_avalid_int, 1)
 
    `IOB_COMB begin
       
       pc_nxt = pc+1'b1;
-      iob_avalid_int = 1'd1;
       apb_ready_nxt = apb_write_i? iob_ready_nxt_i : iob_rvalid_nxt_i;
    
       case(pc)
         0: begin
            if(!apb_sel_i) begin//wait periph selection
              pc_nxt = pc;
-             iob_avalid_int = 1'b0;
              apb_ready_nxt = 1'd0;
            end
         end
@@ -76,7 +73,7 @@ module apb2iob
       endcase
    end
 
-   assign iob_avalid_o = iob_avalid_int;
+   assign iob_avalid_o = pc;
    assign iob_addr_o  = apb_addr_i;
    assign iob_wdata_o = apb_wdata_i;
    assign iob_wstrb_o = apb_wstrb_i;
