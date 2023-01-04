@@ -343,7 +343,7 @@ def write_hwcode(table, out_dir, top):
                 f_gen.write(f"\tif((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n")
                 f_gen.write(f"\t\twready_int = {name}_ready_i;\n\n")
     
-    f_gen.write("\tready_nxt = 1'b1;\n")
+    f_gen.write("\tready_nxt = (|iob_wstrb_i)? wready_int: rready_int;\n")
     f_gen.write("\trvalid_nxt = iob_rvalid_o;\n")
     f_gen.write("\tpc_nxt = pc + 1'b1;\n\n")
     f_gen.write("\tcase(pc)\n")
@@ -351,8 +351,6 @@ def write_hwcode(table, out_dir, top):
     f_gen.write("\t\t\trvalid_nxt = 1'b0;\n")
     f_gen.write("\t\t\tif(!iob_avalid_i)\n")
     f_gen.write("\t\t\t\tpc_nxt=pc;\n")
-    f_gen.write("\t\t\telse\n")
-    f_gen.write("\t\t\t\tready_nxt= (|iob_wstrb_i)? wready_int: rready_int;\n")
     f_gen.write("\t\tend\n")
     f_gen.write("\t\tdefault: begin\n")
     f_gen.write("\t\t\tready_nxt = (|iob_wstrb_i)? wready_int: rready_int;\n")
