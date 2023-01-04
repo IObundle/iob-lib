@@ -9,6 +9,7 @@ module iob_reg_n
     input                   clk_i,
     input                   arst_i,
     input                   ce_i,
+
     input [DATA_W-1:0]      data_i,
     output reg [DATA_W-1:0] data_o
     );
