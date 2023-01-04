@@ -26,7 +26,6 @@ module apb2iob
    // APB outputs
 
    `IOB_WIRE(apb_ready_nxt, 1)
-   `IOB_VAR(apb_slverr_nxt, 1)
    `IOB_VAR(iob_avalid_nxt, 1)
 
    assign apb_ready_nxt = apb_write_i? (iob_avalid_nxt & iob_ready_nxt_i): iob_rvalid_nxt_i;
@@ -43,17 +42,6 @@ module apb2iob
       );
 
    assign apb_rdata_o = iob_rdata_i;
-
-   iob_reg
-     #(1,0)
-   apb_slverr_reg_inst
-     (
-      .clk_i(clk_i),
-      .arst_i(arst_i),
-      .cke_i(cke_i),
-      .data_i(apb_slverr_nxt),
-      .data_o(apb_slverr_o)
-      );
 
    // IOb outputs
    iob_reg
@@ -84,7 +72,6 @@ module apb2iob
       
       pc_nxt = pc+1'b1;
       iob_avalid_nxt = iob_avalid_o;
-      apb_slverr_nxt = 1'b0;
       
       case(pc)
         0: begin
@@ -95,8 +82,6 @@ module apb2iob
         end
 
         1: begin
-           if (!apb_enable_i)
-             apb_slverr_nxt = 1'b1;
            if(!iob_ready_nxt_i) //wait until iob interface is ready
              pc_nxt = pc;
            else
@@ -106,10 +91,8 @@ module apb2iob
         default: begin //wait apb transaction to finish
            if(apb_sel_i)
              pc_nxt = pc;
-           else begin
-              apb_slverr_nxt = 1'b0;
+           else
               pc_nxt = 0;
-           end
         end
       endcase
    end
