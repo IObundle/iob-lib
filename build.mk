@@ -165,9 +165,7 @@ clean: fw-clean pc-emul-clean lint-clean sim-clean fpga-clean doc-clean
 
 .PHONY: fw-build \
 	pc-emul-build pc-emul-run \
-	spyglass-run spyglass-clean \
-	alint-run alint-clean \
-	lint-test lint-clean \
+	lint-test lint-run lint-clean \
 	sim-build sim-run sim-debug \
 	fpga-build fpga-debug \
 	doc-build doc-debug \
