@@ -11,6 +11,7 @@ module iob2axis
    (
     `IOB_INPUT(clk_i, 1),
     `IOB_INPUT(arst_i, 1),
+    `IOB_INPUT(cke_i, 1),
     
     //iob if
     `IOB_INPUT(valid_i, 1),
@@ -45,6 +46,15 @@ module iob2axis
    //rvalid
    `IOB_WIRE(rvalid_nxt, 1)
    assign rvalid_nxt = tvalid_i & tready_o;
-   iob_reg_a #(1) rvalid_reg (clk_i, arst_i, rvalid_nxt, rvalid_o);
+   iob_reg
+     #(1,0)
+   rvalid_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(rvalid_nxt),
+      .data_o(rvalid_o)
+      );
    
 endmodule 

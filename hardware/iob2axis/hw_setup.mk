@@ -3,6 +3,9 @@ ifeq ($(filter iob2axis, $(HW_MODULES)),)
 # Add to modules list
 HW_MODULES+=iob2axis
 
+# import lib hardware
+include $(LIB_DIR)/hardware/reg/iob_reg/hw_setup.mk
+
 # Sources
 SRC+=$(BUILD_SIM_DIR)/src/iob2axis.v
 $(BUILD_SIM_DIR)/src/iob2axis.v: $(LIB_DIR)/hardware/iob2axis/iob2axis.v

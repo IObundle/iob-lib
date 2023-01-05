@@ -6,27 +6,31 @@ module iob_acc
     parameter RST_VAL = 0
     )
    (
-    input                   clk_i,
-    input                   arst_i,
-    input                   en_i,
+    input               clk_i,
+    input               arst_i,
+    input               cke_i,
 
-    input                   rst_i,
-    input                   sen_i,
+    input               rst_i,
+    input               en_i,
 
-    input [DATA_W-1:0]      incr_i,
-    output reg [DATA_W-1:0] data_o
+    input [DATA_W-1:0]  incr_i,
+    output [DATA_W-1:0] data_o
     );
 
-   // prevent width mismatch
-   localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
+   wire [DATA_W-1:0]    data;
+   assign data = data_o + incr_i;
 
-   always @(posedge clk_i, posedge arst_i)
-      if (arst_i)
-         data_o <= RST_VAL_INT;
-      else if (en_i)
-        if (rst_i)
-           data_o <= RST_VAL_INT;
-        else if (sen_i)
-          data_o <= data_o + incr_i;
+   iob_reg_re #(DATA_W, RST_VAL) reg0
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+
+      .rst_i(rst_i),
+      .en_i(en_i),
+
+      .data_i(data),
+      .data_o(data_o)
+      );
 
 endmodule
