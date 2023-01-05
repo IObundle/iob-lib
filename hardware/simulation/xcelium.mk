@@ -30,7 +30,7 @@ exec:
 ifeq ($(COV),1)
 	ls -d cov_work/scope/* > all_ucd_file
 	imc -execcmd "merge -runfile all_ucd_file -overwrite -out merge_all"
-	imc -exec xcelium_cov.tcl
+	imc -init iob_cov_waiver.tcl -exec xcelium_cov.tcl
 endif
 
 clean: gen-clean
