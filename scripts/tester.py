@@ -29,17 +29,18 @@ def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
             io_dict[port_name][bit] = (wire_name, wire_bit)
 
 # Setup a Tester 
-# extra_peripherals: list of peripherals to append to the 'peripherals' table in the 'blocks' list of the Tester
-# peripheral_dirs: dictionary with directories of each extra peripheral
-# peripheral_portmap: Dictionary where each key-value pair is a Mapping between two signals. Example
+# module_parameters is a dictionary that contains the following elements:
+#    - extra_peripherals: list of peripherals to append to the 'peripherals' table in the 'blocks' list of the Tester
+#    - extra_peripheral_dirs: dictionary with directories of each extra peripheral
+#    - peripheral_portmap: Dictionary where each key-value pair is a Mapping between two signals. Example
 #                     { {'corename':'UART1', 'if_name':'rs232', 'port':'', 'bits':[]}:{'corename':'UUT', 'if_name':'UART0', 'port':'', 'bits':[]} }
 def setup_tester( meta_data, confs, ios, regs, blocks, module_parameters):
     #Update submodule directories of Tester with new peripherals directories
-    meta_data['submodules']['dirs'].update(peripheral_dirs)
+    meta_data['submodules']['dirs'].update(module_parameters['extra_peripherals_dirs'])
 
     #Add extra peripherals to tester list (by updating original list)
     tester_peripherals_list=next(i['blocks'] for i in blocks if i['name'] == 'peripherals')
-    for peripheral in extra_peripherals:
+    for peripheral in module_parameters['extra_peripherals']:
         # Allow extra peripherals with the same name to override default peripherals
         for default_peripheral in tester_peripherals_list:
             if peripheral['name'] == default_peripheral['name']:
@@ -56,7 +57,7 @@ def setup_tester( meta_data, confs, ios, regs, blocks, module_parameters):
     peripheral_wires = []
 
     #Handle peripheral portmap
-    for map_idx, mapping in enumerate(peripheral_portmap):
+    for map_idx, mapping in enumerate(module_parameters['peripheral_portmap']):
         # List to store both items in this mamping
         mapping_items = [None, None]
         # Get tester block of peripheral in mapping[0]
