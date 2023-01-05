@@ -5,6 +5,7 @@
 from submodule_utils import import_setup
 from ios import get_interface_mapping
 from setup import setup
+import build_srcs
 
 
 #Given the io dictionary of ports, the port name (and size, and optional bit list) and a wire, it will map the selected bits of the port to the given wire.
@@ -35,6 +36,9 @@ def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
 #    - peripheral_portmap: Dictionary where each key-value pair is a Mapping between two signals. Example
 #                     { {'corename':'UART1', 'if_name':'rs232', 'port':'', 'bits':[]}:{'corename':'UUT', 'if_name':'UART0', 'port':'', 'bits':[]} }
 def setup_tester( meta_data, confs, ios, regs, blocks, module_parameters):
+
+    #Create default submodule directories
+    build_srcs.set_default_submodule_dirs(meta_data)
     #Update submodule directories of Tester with new peripherals directories
     meta_data['submodules']['dirs'].update(module_parameters['extra_peripherals_dirs'])
 
@@ -144,4 +148,4 @@ def setup_tester( meta_data, confs, ios, regs, blocks, module_parameters):
 
 
     # Call setup function for the tester
-    setup(meta, confs, ios, regs, blocks, ios_prefix=True, peripheral_ios=False, internal_wires=peripheral_wires)
+    setup(meta_data, confs, ios, regs, blocks, ios_prefix=True, peripheral_ios=False, internal_wires=peripheral_wires)
