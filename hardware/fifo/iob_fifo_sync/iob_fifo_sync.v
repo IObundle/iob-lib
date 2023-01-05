@@ -18,7 +18,7 @@ module iob_fifo_sync
    (
     `IOB_INPUT(clk_i, 1),
     `IOB_INPUT(arst_i, 1),
-    `IOB_INPUT(clk_en_i, 1),
+    `IOB_INPUT(cke_i, 1),
 
     `IOB_INPUT(rst_i, 1),
 
@@ -48,7 +48,7 @@ module iob_fifo_sync
    localparam [ADDR_W:0] FIFO_SIZE = (1'b1 << ADDR_W); //in bytes
 
    //effective write enable
-   wire                   w_en_int = (w_en_i & (~w_full_o)) | rst_i;
+   wire                   w_en_int = (w_en_i & (~w_full_o));
 
    //write address
    `IOB_WIRE(w_addr, W_ADDR_W)
@@ -61,15 +61,15 @@ module iob_fifo_sync
      (
       .clk_i    (clk_i),
       .arst_i   (arst_i),
-      .en_i     (clk_en_i),
+      .cke_i    (cke_i),
 
       .rst_i    (rst_i),
-      .sen_i    (w_en_int),
+      .en_i     (w_en_int),
       .data_o   (w_addr)
       );
 
    //effective read enable
-   wire                   r_en_int  = (r_en_i & (~r_empty_o)) | rst_i;
+   wire                   r_en_int  = (r_en_i & (~r_empty_o));
 
    //read address
    `IOB_WIRE(r_addr, R_ADDR_W)
@@ -82,9 +82,10 @@ module iob_fifo_sync
      (
       .clk_i    (clk_i),
       .arst_i   (arst_i),
-      .en_i     (clk_en_i),
+      .cke_i    (cke_i),
+
       .rst_i    (rst_i),
-      .sen_i     (r_en_int),
+      .en_i     (r_en_int),
       .data_o   (r_addr)
       );
 
@@ -95,7 +96,7 @@ module iob_fifo_sync
    //FIFO level
    reg [ADDR_W:0]         level_nxt;
    wire [ADDR_W:0]        level_int;
-   iob_reg_are
+   iob_reg_r
      #(
        .DATA_W(ADDR_W+1),
        .RST_VAL(0)
@@ -104,8 +105,10 @@ module iob_fifo_sync
      (
       .clk_i  (clk_i),
       .arst_i (arst_i),
-      .en_i   (clk_en_i),
+      .cke_i  (cke_i),
+
       .rst_i  (rst_i),
+
       .data_i (level_nxt),
       .data_o (level_int)
       );
@@ -127,7 +130,7 @@ module iob_fifo_sync
    //FIFO empty
    `IOB_WIRE(r_empty_nxt, 1)
    assign r_empty_nxt = level_nxt < r_incr;
-   iob_reg_ae
+   iob_reg
      #(
        .DATA_W(1),
        .RST_VAL(1)
@@ -136,7 +139,8 @@ module iob_fifo_sync
      (
       .clk_i  (clk_i),
       .arst_i (arst_i),
-      .en_i   (clk_en_i),
+      .cke_i  (cke_i),
+
       .data_i (r_empty_nxt),
       .data_o (r_empty_o)
       );
@@ -144,7 +148,7 @@ module iob_fifo_sync
    //FIFO full
    `IOB_WIRE(w_full_nxt, 1)
    assign w_full_nxt = level_nxt > (FIFO_SIZE - w_incr);
-   iob_reg_ae
+   iob_reg
      #(
        .DATA_W(1),
        .RST_VAL(0)
@@ -153,7 +157,8 @@ module iob_fifo_sync
      (
       .clk_i  (clk_i),
       .arst_i (arst_i),
-      .en_i   (clk_en_i),
+      .cke_i  (cke_i),
+
       .data_i (w_full_nxt),
       .data_o (w_full_o)
       );

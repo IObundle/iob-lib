@@ -187,7 +187,7 @@ amba=[ \
 {'ahb':1, 'apb':0, 'master':0, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_ready',    'default':'0', 'description':'Ready input. This signal indicates the end of the last transfer.'}, \
 {'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_resp',     'default':'0', 'description':'Transfer response.'}, \
 {'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_exokay',   'default':'1', 'description':'Exclusive transfer response.'}, \
-{'ahb':0, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_slverr',   'default':'0', 'description':'Slave error. This signal indicates if the transfer has falied.'} \
+{'ahb':0, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_slverr',   'default':'0', 'description':'Slave error. This signal indicates if the transfer has falied.'} \
 ]
 
 top_macro = ''
