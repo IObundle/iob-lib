@@ -14,6 +14,7 @@ import if_gen
 reserved_signals = \
 {
 'clk_i':'.clk_i(clk_i)',
+'cke_i':'.cke_i(cke_i)',
 'en_i':'.en_i(en_i)',
 'rst_i':'.rst_i(rst_i)',
 'reset':'.reset(rst_i)',

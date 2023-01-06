@@ -31,7 +31,6 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     create_build_dir = build_dir==f"../{meta_data['name']}_{meta_data['version']}"
 
     build_srcs.set_default_submodule_dirs(meta_data)
-    build_srcs.lib_dir = meta_data['submodules']['dirs']['LIB']
 
     #
     # Build directory

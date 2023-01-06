@@ -207,7 +207,6 @@ def make_iob():
 #
 
 def make_axi_write():
-    print(axi_write)
     bus=[]
     for i in range(len(axi_write)):
         bus.append(axi_write[i])
@@ -491,7 +490,6 @@ def create_signal_table(interface_name):
         table = make_iob()
 
     if (interface_name.find("axi_")>=0):
-        print('ENTER')
         if (interface_name.find("write_")>=0): table = make_axi_write()
         elif (interface_name.find("read_")>=0): table = make_axi_read()
         else: table = make_axi()
