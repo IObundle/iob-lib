@@ -271,7 +271,6 @@ def write_hwcode(table, out_dir, top):
 
     # use variables to compute response
     f_gen.write(f"\n`IOB_VAR(rdata_int, {8*cpu_n_bytes})\n")
-    f_gen.write(f"\n`IOB_WIRE(rdata_nxt, {8*cpu_n_bytes})\n")
     f_gen.write(f"`IOB_VAR(rvalid_int, 1)\n")
     f_gen.write(f"`IOB_VAR(wready_int, 1)\n")
     f_gen.write(f"`IOB_VAR(rready_int, 1)\n\n")
