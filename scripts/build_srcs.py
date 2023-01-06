@@ -11,6 +11,25 @@ import iob_colors
 
 lib_dir = "./submodules/LIB"
 
+def build_dir_setup(core_meta_data):
+    build_dir = core_meta_data['build_dir']
+    setup_dir = core_meta_data['setup_dir']
+    core_flows = core_meta_data['flows']
+    # Setup HARDWARE directories :
+    os.makedirs(f"{build_dir}/hardware/src")
+    if "sim" in core_flows: 
+        shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation")
+    if "fpga" in core_flows: 
+        shutil.copytree(f"{setup_dir}/hardware/fpga", f"{build_dir}/hardware/fpga")
+    # Setup SOFTWARE directories :
+    if ("emb" in core_flows) or ("pc-emul" in core_flows):
+        shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", ignore=shutil.ignore_patterns('*_setup*'))
+    # Setup DOC directories :
+    if "doc" in core_flows: 
+        shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
+    # Copy generic MAKEFILE
+    shutil.copyfile(f"{lib_dir}/build.mk", f"{build_dir}/Makefile")
+
 # Adds and fills 'dirs' dictionary inside 'submodules' dicionary of given core/system 'meta_data'
 def set_default_submodule_dirs(meta_data):
     #Make sure 'dirs' dictionary exists
@@ -41,7 +60,7 @@ def hw_setup(core_meta_data):
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, build_dir)
 
-    module_dependency_setup(hardware_srcs, Vheaders, setup_dir, build_dir, core_meta_data['submodules']['dirs'])
+    module_dependency_setup(hardware_srcs, Vheaders, build_dir, core_meta_data['submodules']['dirs'])
 
     if Vheaders!=None: create_Vheaders( f"{build_dir}/hardware/src", Vheaders )
     if hardware_srcs!=None: copy_sources( lib_dir, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
@@ -59,7 +78,7 @@ def sim_setup(build_dir, setup_dir, sim_setup, submodule_dirs):
     Vheaders = sim_setup['v_headers']
     sim_srcs = sim_setup['hw_modules']
     sim_srcs.append("iob_tasks.vh")
-    module_dependency_setup(sim_srcs, Vheaders, setup_dir, build_dir, submodule_dirs)
+    module_dependency_setup(sim_srcs, Vheaders, build_dir, submodule_dirs)
 
     if (Vheaders!=[ ]): create_Vheaders( f"{build_dir}/{sim_dir}/src", Vheaders )
     copy_sources( lib_dir, f"{build_dir}/{sim_dir}/src", sim_srcs, '*.v*' )
@@ -116,7 +135,7 @@ def iob_submodule_setup(build_dir, submodule_dir):
 #                   - submodule: This entry defines a submodule to include (may contain *_setup.py or just a set of sources).
 #                   - python include: This entry defines a python module that contains a list of other hardware modules/headers.
 #                   - verilog source:  This entry defines either a verilog header (.vh) or verilog source (.v) file to include.
-def module_dependency_setup(hardware_srcs, Vheaders, setup_dir, build_dir, submodule_dirs):
+def module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs):
     # Remove all non *.v and *.vh entries from hardware_srcs
     # Do this by setting up submodules and including hardware modules/headers
     while(True):
@@ -137,7 +156,6 @@ def module_dependency_setup(hardware_srcs, Vheaders, setup_dir, build_dir, submo
 
 # Include Vheaders and hardware_srcs from given python module (module_name)
 def lib_module_setup(Vheaders, hardware_srcs, module_name):
-    print(hardware_srcs)
     for lib_module_path in Path(lib_dir).rglob(f"{module_name}.py"):
         spec = importlib.util.spec_from_file_location("lib_module", lib_module_path)
         lib_module = importlib.util.module_from_spec(spec)

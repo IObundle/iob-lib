@@ -34,9 +34,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     # Build directory
     #
     if create_build_dir:
-        subprocess.call(["rsync", "-avz", "--exclude", ".git", "--exclude", "submodules", "--exclude", ".gitmodules", "--exclude", ".github", ".", build_dir])
-        subprocess.call(["find", build_dir, "-name", "*_setup*", "-delete"])
-        subprocess.call(["cp", f"{meta_data['submodules']['dirs']['LIB']}/build.mk", f"{build_dir}/Makefile"])
+        build_srcs.build_dir_setup(meta_data)
         mk_conf.config_build_mk(confs, meta_data, build_dir)
 
     
