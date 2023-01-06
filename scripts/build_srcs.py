@@ -23,11 +23,6 @@ def set_default_submodule_dirs(meta_data):
             if submodule not in meta_data['submodules']['dirs']:
                 meta_data['submodules']['dirs'].update({submodule:f"{meta_data['setup_dir']}/submodules/{submodule}"})
 
-    #Make sure 'LIB' path exists
-    if 'LIB' not in meta_data['submodules']['dirs']:
-        meta_data['submodules']['dirs']['LIB'] = lib_dir
-
-
 def hw_setup(core_meta_data):
     core_name = core_meta_data['name']
     core_version = core_meta_data['version']

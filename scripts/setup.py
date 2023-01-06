@@ -38,9 +38,8 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     if create_build_dir:
         subprocess.call(["rsync", "-avz", "--exclude", ".git", "--exclude", "submodules", "--exclude", ".gitmodules", "--exclude", ".github", ".", build_dir])
         subprocess.call(["find", build_dir, "-name", "*_setup*", "-delete"])
-        subprocess.call(["cp", f"{meta_data['submodules']['dirs']['LIB']}/build.mk", f"{build_dir}/Makefile"])
+        subprocess.call(["cp", "./submodules/LIB/build.mk", f"{build_dir}/Makefile"])
         mk_conf.config_build_mk(confs, meta_data, build_dir)
-
     
     #
     # IOb-SoC related functions
