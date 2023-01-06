@@ -30,11 +30,12 @@ exec:
 ifeq ($(COV),1)
 	ls -d cov_work/scope/* > all_ucd_file
 	imc -execcmd "merge -runfile all_ucd_file -overwrite -out merge_all"
-	imc -exec xcelium_cov.tcl
+	imc -init iob_cov_waiver.tcl -exec xcelium_cov.tcl
 endif
 
 clean: gen-clean
 	@rm -f xmelab.log  xmsim.log  xmvlog.log *.vh
+	@rm -f iob_cov_waiver.vRefine
 
 very-clean: clean
 	@rm -rf cov_work test.log
