@@ -78,10 +78,8 @@ def gen_wr_reg(row, f):
         f.write(f"assign {name}_wen = (iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
         f.write(f"iob_reg_e #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, cke_i, {name}_wen, {name}_wdata, {name}_o);\n")
     else: #output wdata and wen; ready signal has been declared as a port
-        f.write(f"assign {name}_o = {name}_wdata;\n")
-        f.write(f"assign {name}_wen_o = ({name}_ready_i & iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
-
-    #compute write enable
+        f.write(f"assign {name}_o = iob_wdata_i;\n")
+        f.write(f"assign {name}_wstrb_o = ({name}_addressed & {name}_ready_i & iob_avalid_i)? iob_wstrb_i: 1'b0;\n")
 
     #compute address for register range
     if get_integer_value(log2n_items,'max')>0:
@@ -122,7 +120,7 @@ def gen_port(table, f):
         if row['type'] == 'W':
             f.write(f"\t`IOB_OUTPUT({name}_o, {verilog_max(n_bits,1)}),\n")
             if not auto:
-                f.write(f"\t`IOB_OUTPUT({name}_wen_o, 1),\n")
+                f.write(f"\t`IOB_OUTPUT({name}_wstrb_o, DATA_W/8),\n")
         elif row['type'] == 'R':
             f.write(f"\t`IOB_INPUT({name}_i, {verilog_max(n_bits,1)}),\n")
             if not auto:
@@ -149,7 +147,7 @@ def gen_inst_wire(table, f):
         if row['type'] == 'W':
             f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
             if not auto:
-                f.write(f"`IOB_WIRE({name}_wen, 1)\n")
+                f.write(f"`IOB_WIRE({name}_wstrb, DATA_W/8)\n")
         elif row['type'] == 'R':
             f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
             if not row['autologic']:
@@ -175,7 +173,7 @@ def gen_portmap(table, f):
         if row['type'] == 'W':
             f.write(f"\t.{name}_o({name}),\n")
             if not auto:
-                f.write(f"\t.{name}_wen_o({name}_wen),\n")
+                f.write(f"\t.{name}_wstrb_o({name}_wstrb),\n")
         else:
             f.write(f"\t.{name}_i({name}),\n")
             if not auto:
@@ -271,6 +269,7 @@ def write_hwcode(table, out_dir, top):
 
     # use variables to compute response
     f_gen.write(f"\n`IOB_VAR(rdata_int, {8*cpu_n_bytes})\n")
+    f_gen.write(f"\n`IOB_WIRE(rdata_nxt, {8*cpu_n_bytes})\n")
     f_gen.write(f"`IOB_VAR(rvalid_int, 1)\n")
     f_gen.write(f"`IOB_VAR(wready_int, 1)\n")
     f_gen.write(f"`IOB_VAR(rready_int, 1)\n\n")
@@ -560,10 +559,10 @@ def check_overlap(addr, addr_type, read_addr, write_addr):
 # n_bits: May be an integer or a string with parameters
 # param_attribute: Name of the attribute in the paramater that contains the value to replace in string given. Common attribute names are: 'val' or 'max'.
 def get_integer_value(n_bits,param_attribute):
-        if type(n_bits)==int:
-            return n_bits
-        else:
-            return evaluateUsingParamByMaxValue(n_bits, config, param_attribute)
+    if type(n_bits)==int:
+        return n_bits
+    else:
+        return evaluateUsingParamByMaxValue(n_bits, config, param_attribute)
 
 # compute address
 def compute_addr(table, no_overlap):
