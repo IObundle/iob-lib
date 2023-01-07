@@ -26,7 +26,7 @@ def verilog_max(a,b):
 
 def bceil(n, log2base):
     base = int(2**log2base)
-    n = get_integer_value(n,'max')
+    n = eval_param_expression(n,'max')
     #print(f"{n} of {type(n)} and {base}")
     if n%base == 0:
         return n
@@ -35,7 +35,7 @@ def bceil(n, log2base):
 
 # Calculate numeric value of addr_w, replacing params by their max value
 def calc_addr_w(log2n_items, n_bytes):
-        return int(ceil(get_integer_value(log2n_items,'max')+log(n_bytes,2)))
+        return int(ceil(eval_param_expression(log2n_items,'max')+log(n_bytes,2)))
 
 # Generate symbolic expression string to caluclate addr_w in verilog
 def calc_verilog_addr_w(log2n_items, n_bytes):
@@ -72,19 +72,13 @@ def gen_wr_reg(row, f):
     f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
     f.write(f"assign {name}_addressed = (waddr >= {addr}) && (waddr < ({addr}+(2**({addr_w}))));\n")
 
-    #generate register logic
     if auto: #generate register
         f.write(f"`IOB_WIRE({name}_wen, 1)\n")
         f.write(f"assign {name}_wen = (iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
         f.write(f"iob_reg_e #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, cke_i, {name}_wen, {name}_wdata, {name}_o);\n")
-    else: #output wdata and wen; ready signal has been declared as a port
-        f.write(f"assign {name}_o = iob_wdata_i;\n")
-        f.write(f"assign {name}_wstrb_o = ({name}_addressed & {name}_ready_i & iob_avalid_i)? iob_wstrb_i: 1'b0;\n")
-
-    #compute address for register range
-    if get_integer_value(log2n_items,'max')>0:
-        f.write(f"assign {name}_addr_o = iob_addr_i[{verilog_max(addr_w,1)}-1:0];\n")
-
+    else: #compute wstrb
+        f.write(f"assign {name}_wstrb_o = (iob_avalid_i & {name}_addressed)? iob_wstrb_i: 1'b0;\n")
+        
 def gen_rd_reg(row, f):
     name = row['name']
     rst_val = row['rst_val']
@@ -97,15 +91,10 @@ def gen_rd_reg(row, f):
 
     f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n")
 
-    #generate register logic
-    if not auto: #generate register
+    if not auto: #output read enable
         f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
         f.write(f"assign {name}_addressed = (iob_addr_i >= {addr}) && (iob_addr_i < ({addr}+(2**({addr_w}))));\n")
-        f.write(f"assign {name}_ren_o = ({name}_ready_i & iob_avalid_i) & ((~|iob_wstrb_i) & {name}_addressed);\n")
-
-    #compute address for register range
-    if get_integer_value(log2n_items,'max')>0:
-        f.write(f"assign {name}_addr_o = iob_addr_i[{verilog_max(addr_w,1)}-1:0];\n")
+        f.write(f"assign {name}_ren_o = {name}_addressed & iob_avalid_i & {name}_ready_i & (~|iob_wstrb_i);\n")
 
 # generate ports for swreg module
 def gen_port(table, f):
@@ -118,8 +107,10 @@ def gen_port(table, f):
  
         
         if row['type'] == 'W':
-            f.write(f"\t`IOB_OUTPUT({name}_o, {verilog_max(n_bits,1)}),\n")
-            if not auto:
+            if auto:
+                f.write(f"\t`IOB_OUTPUT({name}_o, {verilog_max(n_bits,1)}),\n")
+            else:
+                f.write(f"\t`IOB_OUTPUT({name}_o, DATA_W),\n")
                 f.write(f"\t`IOB_OUTPUT({name}_wstrb_o, DATA_W/8),\n")
         elif row['type'] == 'R':
             f.write(f"\t`IOB_INPUT({name}_i, {verilog_max(n_bits,1)}),\n")
@@ -128,8 +119,6 @@ def gen_port(table, f):
                 f.write(f"\t`IOB_INPUT({name}_rvalid_i, 1),\n")
         if not auto:
             f.write(f"\t`IOB_INPUT({name}_ready_i, 1),\n")
-        if get_integer_value(log2n_items,'max')>0:
-            f.write(f"\t`IOB_OUTPUT({name}_addr_o, {verilog_max(calc_verilog_addr_w(log2n_items,n_bytes),1)}),\n")
             
     f.write(f"\t`IOB_OUTPUT(iob_ready_nxt_o, 1),\n")
     f.write(f"\t`IOB_OUTPUT(iob_rvalid_nxt_o, 1),\n")
@@ -145,8 +134,11 @@ def gen_inst_wire(table, f):
         rst_val = row['rst_val']
 
         if row['type'] == 'W':
-            f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
-            if not auto:
+            if auto:
+                f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
+                f.write(f"`IOB_WIRE({name}_wstrb, DATA_W/8)\n")
+            else:
+                f.write(f"`IOB_WIRE({name}, DATA_W)\n")
                 f.write(f"`IOB_WIRE({name}_wstrb, DATA_W/8)\n")
         elif row['type'] == 'R':
             f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
@@ -155,8 +147,6 @@ def gen_inst_wire(table, f):
                 f.write(f"`IOB_WIRE({name}_ren, 1)\n")
         if not auto:
             f.write(f"`IOB_WIRE({name}_ready, 1)\n")
-        if get_integer_value(log2n_items,'max')>0:
-            f.write(f"`IOB_WIRE({name}_addr, {verilog_max(calc_verilog_addr_w(log2n_items,n_bytes),1)})\n")
     f.write(f"`IOB_WIRE(iob_ready_nxt, 1)\n")
     f.write(f"`IOB_WIRE(iob_rvalid_nxt, 1)\n")
     f.write("\n")
@@ -181,8 +171,6 @@ def gen_portmap(table, f):
                 f.write(f"\t.{name}_rvalid_i({name}_rvalid),\n")
         if not auto:
             f.write(f"\t.{name}_ready_i({name}_ready),\n")
-        if get_integer_value(log2n_items,'max')>0:
-            f.write(f"\t.{name}_addr_o({name}_addr),\n")
 
     f.write(f"\t.iob_ready_nxt_o(iob_ready_nxt),\n")
     f.write(f"\t.iob_rvalid_nxt_o(iob_rvalid_nxt),\n")
@@ -307,7 +295,7 @@ def write_hwcode(table, out_dir, top):
         n_bits = row['n_bits']
         log2n_items = row['log2n_items']
         n_bytes = int(bceil(n_bits, 3)/8)
-        addr_last = int(addr + ((2**get_integer_value(log2n_items,'max'))-1)*n_bytes)
+        addr_last = int(addr + ((2**eval_param_expression(log2n_items,'max'))-1)*n_bytes)
         addr_w = calc_addr_w(log2n_items,n_bytes)
         addr_w_base = max(log(cpu_n_bytes,2), addr_w)
         auto = row['autologic']
@@ -387,11 +375,11 @@ def write_lparam_header(table, out_dir, top):
         n_bits = row['n_bits']
         n_bytes = bceil(n_bits, 3)/8
         log2n_items = row['log2n_items']
-        addr_w = int(ceil(get_integer_value(log2n_items,'val')+log(n_bytes,2)))
+        addr_w = int(ceil(eval_param_expression(log2n_items,'val')+log(n_bytes,2)))
         f_def.write(f"localparam {macro_prefix}{name}_ADDR = {row['addr']};\n")
-        if get_integer_value(log2n_items,'val')>0:
+        if eval_param_expression(log2n_items,'val')>0:
             f_def.write(f"localparam {macro_prefix}{name}_ADDR_W = {addr_w};\n")
-        f_def.write(f"localparam {macro_prefix}{name}_W = {get_integer_value(n_bits,'val')};\n\n")
+        f_def.write(f"localparam {macro_prefix}{name}_W = {eval_param_expression(n_bits,'val')};\n\n")
     f_def.close()
 
 # Generate *_swreg_def.vh file. Macros from this file should only be used inside the instance of the core/system since they may contain parameters which are only known by the instance.
@@ -411,7 +399,7 @@ def write_hwheader(table, out_dir, top):
         n_bytes = bceil(n_bits, 3)/8
         log2n_items = row['log2n_items']
         f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
-        if get_integer_value(log2n_items,'max')>0:
+        if eval_param_expression(log2n_items,'max')>0:
             f_def.write(f"`define {macro_prefix}{name}_ADDR_W {verilog_max(calc_verilog_addr_w(log2n_items,n_bytes),1)}\n")
         f_def.write(f"`define {macro_prefix}{name}_W {verilog_max(n_bits,1)}\n\n")
     f_def.close()
@@ -526,24 +514,6 @@ def write_swcode(table, out_dir, top):
             fsw.write("}\n\n")
     fsw.close()
 
-# Given a mathematical string with parameters, replace every parameter by its numeric maximum value and try to evaluate the string.
-# string_with_param: String defining a math expression that may contain parameters
-# confs: list of dictionaries, each of which describes a parameter and has attributes: 'name' and 'max'. 
-#        The one of the parameters 'name' should be equal to parameter given in string. Its 'max' value will be used to replace it.
-# param_attribute: name of the attribute in the paramater that contains the value to replace in string given. Common attribute names are: 'val' or 'max'.
-def evaluateUsingParamByMaxValue(string_with_param, confs, param_attribute):
-    string_with_param=string_with_param
-    # Replace every parameter/macro found in string by its max value (worst case scenario)
-    for param in confs:
-        if param['name'] in string_with_param:
-            #Replace parameter/macro by its max value (worst case scenario)
-            string_with_param = re.sub(f"((?:^.*[^a-zA-Z_`])|^)`?{param['name']}((?:[^a-zA-Z_].*$)|$)",f"\\g<1>{param[param_attribute]}\\g<2>",string_with_param)
-    # Try to calculate string as it should only contain numeric values
-    try:
-        return eval(string_with_param)
-    except:
-        sys.exit(f"Error: string '{string_with_param}' with evaluated value '{string_with_param}' is not well defined.")
-
 # check if address is aligned 
 def check_alignment(addr, addr_w):
     if addr % (2**addr_w) != 0:
@@ -556,13 +526,27 @@ def check_overlap(addr, addr_type, read_addr, write_addr):
     elif addr_type == "W" and addr < write_addr:
         sys.exit(f"Error: write address {addr} overlaps with previous addresses")
 
-# n_bits: May be an integer or a string with parameters
-# param_attribute: Name of the attribute in the paramater that contains the value to replace in string given. Common attribute names are: 'val' or 'max'.
-def get_integer_value(n_bits,param_attribute):
-    if type(n_bits)==int:
-        return n_bits
+
+def eval_param_expression(param_expression, param_attribute):
+    # given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string.
+    # string_with_param: string defining a math expression that may contain parameters
+    # confs: list of dictionaries, each of which describes a parameter and has attributes: 'name', 'val' and 'max'. 
+    # param_attribute: name of the attribute in the paramater that contains the value to replace in string given. Attribute names are: 'val', 'min, or 'max'.
+    string_with_param = param_expression
+    if type(param_expression)==int:
+        return param_expression
     else:
-        return evaluateUsingParamByMaxValue(n_bits, config, param_attribute)
+        for param in config:
+            if param['name'] in param_expression:
+                #Replace parameter/macro by its max value (worst case scenario)
+                string_with_param = re.sub(f"((?:^.*[^a-zA-Z_`])|^)`?{param['name']}((?:[^a-zA-Z_].*$)|$)",f"\\g<1>{param[param_attribute]}\\g<2>", string_with_param)
+        # Try to calculate string as it should only contain numeric values
+        try:
+            return eval(string_with_param)
+        except:
+            print (config)
+            sys.exit(f"Error: string '{param_expression}' evaluated to '{string_with_param}' is not well defined.")
+
 
 # compute address
 def compute_addr(table, no_overlap):

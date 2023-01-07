@@ -28,10 +28,10 @@ module iob_regfile_w_rp
    
    genvar                               i, j;
    generate
-      for (i=0; i < (2**(WADDR_W-1)); i=i+1) begin: rf_addr
-         for (j=0; j < R; j=j+1) begin: rf_slice
+      for (i=0; i < 2**WADDR_W; i=i+1) begin: rf
+         for (j=0; j < R; j=j+1) begin: rf_row
             assign wstrb[i][j] = (waddr_i == i) & wstrb_i[j];
-            iob_reg_re #(RDATA_W, 1) iob_reg0
+            iob_reg_re #(RDATA_W, 1) iob_reg_rf_row_slice
               (
                .clk_i(clk_i),
                .arst_i(arst_i),
