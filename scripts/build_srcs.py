@@ -23,7 +23,7 @@ def build_dir_setup(core_meta_data):
         shutil.copytree(f"{setup_dir}/hardware/fpga", f"{build_dir}/hardware/fpga")
     # Setup SOFTWARE directories :
     if ("emb" in core_flows) or ("pc-emul" in core_flows):
-        shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", ignore=shutil.ignore_patterns('*_setup*'))
+        sw_setup(core_meta_data)
     # Setup DOC directories :
     if "doc" in core_flows: 
         shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
@@ -63,16 +63,16 @@ def hw_setup(core_meta_data):
     module_dependency_setup(hardware_srcs, Vheaders, build_dir, core_meta_data['submodules']['dirs'])
 
     if Vheaders!=None: create_Vheaders( f"{build_dir}/hardware/src", Vheaders )
-    if hardware_srcs!=None: copy_sources( lib_dir, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
+    if hardware_srcs!=None: copy_files( lib_dir, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
 
-    copy_sources( f"{lib_dir}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
-    copy_sources( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
+    copy_files( f"{lib_dir}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
+    copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
 
-    if "sim" in core_meta_data['flows']: sim_setup( build_dir, setup_dir, core_meta_data['submodules']['sim_setup'], core_meta_data['submodules']['dirs'])
+    if "sim" in core_meta_data['flows']: sim_setup( build_dir, core_meta_data['submodules']['sim_setup'], core_meta_data['submodules']['dirs'])
     #if "fpga" in core_meta_data['flows']: fpga_setup( build_dir )
 
 
-def sim_setup(build_dir, setup_dir, sim_setup, submodule_dirs):
+def sim_setup(build_dir, sim_setup, submodule_dirs):
     sim_dir = "hardware/simulation"
 
     Vheaders = sim_setup['v_headers']
@@ -81,29 +81,52 @@ def sim_setup(build_dir, setup_dir, sim_setup, submodule_dirs):
     module_dependency_setup(sim_srcs, Vheaders, build_dir, submodule_dirs)
 
     if (Vheaders!=[ ]): create_Vheaders( f"{build_dir}/{sim_dir}/src", Vheaders )
-    copy_sources( lib_dir, f"{build_dir}/{sim_dir}/src", sim_srcs, '*.v*' )
-    copy_sources( f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", [], '*', copy_all = True )
+    copy_files( lib_dir, f"{build_dir}/{sim_dir}/src", sim_srcs, '*.v*' )
+    copy_files( f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", copy_all = True )
 
 
 def fpga_setup(build_dir):
     fpga_dir = "hardware/fpga"
 
     if not os.path.exists(f"{build_dir}/{fpga_dir}/quartus"): os.makedirs(f"{build_dir}/{fpga_dir}/quartus")
-    copy_sources( f"{lib_dir}/{fpga_dir}/quartus", f"{build_dir}/{fpga_dir}/quartus", [], '*', copy_all = True )
+    copy_files( f"{lib_dir}/{fpga_dir}/quartus", f"{build_dir}/{fpga_dir}/quartus", [], '*', copy_all = True )
     
     if not os.path.exists(f"{build_dir}/{fpga_dir}/vivado"): os.makedirs(f"{build_dir}/{fpga_dir}/vivado")
-    copy_sources( f"{lib_dir}/{fpga_dir}/vivado", f"{build_dir}/{fpga_dir}/vivado", [], '*', copy_all = True )
+    copy_files( f"{lib_dir}/{fpga_dir}/vivado", f"{build_dir}/{fpga_dir}/vivado", [], '*', copy_all = True )
 
-    copy_sources( f"{lib_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}", [ 'Makefile' ], 'Makefile' )
+    copy_files( f"{lib_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}", [ 'Makefile' ], 'Makefile' )
     subprocess.call(["find", build_dir, "-name", "*.pdf", "-delete"])
 
+
+def sw_setup(core_meta_data):
+    core_flows = core_meta_data['flows']
+    build_dir = core_meta_data['build_dir']
+    setup_dir = core_meta_data['setup_dir']
+
+    shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", ignore=shutil.ignore_patterns('*_setup*'))
+    #aux = copy_files(f"{lib_dir}/software/src", f"{build_dir}/software/esrc", copy_all = True)
+    #print(aux)
+    if "pc-emul" in core_flows: copy_files(f"{lib_dir}/software/pc-emul", f"{build_dir}/software/pc-emul", copy_all = True)
+    if "emb" in core_flows: copy_files(f"{lib_dir}/software/embedded", f"{build_dir}/software/embedded", copy_all = True)
+    if ('sw_setup' and 'dirs') in core_meta_data['submodules'].keys():
+        core_sw_setup = core_meta_data['submodules']['sw_setup']
+        submodule_dirs = core_meta_data['submodules']['dirs']
+        for module in core_sw_setup['sw_modules']:
+            if module in submodule_dirs.keys():
+                copy_files(f"{submodule_dirs[module]}/software/src", f"{build_dir}/software/esrc", copy_all = True)
+                if "pc-emul" in core_flows: copy_files(f"{submodule_dirs[module]}/software/psrc", f"{build_dir}/software/psrc", copy_all = True)
+                if "emb" in core_flows: copy_files(f"{submodule_dirs[module]}/software/esrc", f"{build_dir}/software/esrc", copy_all = True)
+            else: sys.exit(f"{iob_colors.FAIL}{module} not in submodule directories.{iob_colors.ENDC}")
+    else: print(f"{iob_colors.INFO}No modules are used or the module directories where not correctly defined.{iob_colors.ENDC}")
+
+    python_setup(build_dir)
+    shutil.copy(f"{lib_dir}/scripts/console.mk", f"{build_dir}/console.mk")
 
 def python_setup(build_dir):
     sim_srcs  = [ "sw_defines.py", "hw_defines.py", "console.py", "hex_split.py", "makehex.py" ]
     dest_dir  = f"{build_dir}/scripts"
-
-    if not os.path.exists(dest_dir): os.makedirs(dest_dir)
-    copy_sources( lib_dir, dest_dir, sim_srcs, '*.py' )
+    if not os.path.exists(dest_dir): os.mkdir(dest_dir)
+    copy_files( lib_dir, dest_dir, sim_srcs, '*.py' )
 
 
 # Setup a submodule in a given build directory
@@ -166,16 +189,20 @@ def lib_module_setup(Vheaders, hardware_srcs, module_name):
     else: sys.exit(f"{iob_colors.FAIL} {module_name} is not a LIB module.{iob_colors.ENDC}")
 
 
-def copy_sources(src_dir, dest_dir, hardware_srcs, pattern, copy_all = False):
-    if(hardware_srcs != None):
+def copy_files(src_dir, dest_dir, sources = [], pattern = "*", copy_all = False):
+    files_copied = []
+    if(sources != []) or copy_all:
         for path in Path(src_dir).rglob(pattern):
-            verilog_file = path.name
-            if (verilog_file in hardware_srcs) or copy_all:
+            file = path.name
+            if (file in sources) or copy_all:
                 src_file = path.resolve()
-                dest_file = f"{dest_dir}/{verilog_file}"
+                dest_file = f"{dest_dir}/{file}"
                 if os.path.isfile(src_file) and (not(os.path.isfile(dest_file)) or (os.stat(src_file).st_mtime > os.stat(dest_file).st_mtime)):
                     shutil.copy(src_file, dest_file)
+                    files_copied.append(file)
                 elif not(os.path.isfile(src_file)): print(f"{iob_colors.WARNING}{src_file} is not a file.{iob_colors.ENDC}")
+    else: print(f"{iob_colors.WARNING}'copy_files' function did nothing.{iob_colors.ENDC}")
+    return files_copied
 
 
 def create_Vheaders(dest_dir, Vheaders):

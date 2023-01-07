@@ -60,13 +60,6 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
 
 
     #
-    # Setup functions
-    #
-    build_srcs.hw_setup( meta_data )
-    build_srcs.python_setup( meta_data['build_dir'])
-
-
-    #
     # Build registers table
     #
     if regs:
@@ -81,6 +74,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     #
     # Generate hw
     #
+    build_srcs.hw_setup( meta_data )
     if regs:
         mkregs.write_hwheader(reg_table, meta_data['build_dir']+'/hardware/src', top)
         mkregs.write_lparam_header(reg_table, meta_data['build_dir']+'/hardware/src', top)
