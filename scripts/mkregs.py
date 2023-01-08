@@ -77,7 +77,7 @@ def gen_wr_reg(row, f):
         f.write(f"assign {name}_wen = (iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
         f.write(f"iob_reg_e #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, cke_i, {name}_wen, {name}_wdata, {name}_o);\n")
     else: #compute wstrb
-        f.write(f"assign {name}_wstrb_o = (iob_avalid_i & {name}_addressed)? iob_wstrb_i: 1'b0;\n")
+        f.write(f"assign {name}_wstrb_o = ({name}_addressed & iob_avalid_i)? iob_wstrb_i: 1'b0;\n")
         
 def gen_rd_reg(row, f):
     name = row['name']
@@ -94,7 +94,7 @@ def gen_rd_reg(row, f):
     if not auto: #output read enable
         f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
         f.write(f"assign {name}_addressed = (iob_addr_i >= {addr}) && (iob_addr_i < ({addr}+(2**({addr_w}))));\n")
-        f.write(f"assign {name}_ren_o = {name}_addressed & iob_avalid_i & {name}_ready_i & (~|iob_wstrb_i);\n")
+        f.write(f"assign {name}_ren_o = {name}_addressed & iob_avalid_i & (~|iob_wstrb_i);\n")
 
 # generate ports for swreg module
 def gen_port(table, f):
@@ -110,7 +110,6 @@ def gen_port(table, f):
             if auto:
                 f.write(f"\t`IOB_OUTPUT({name}_o, {verilog_max(n_bits,1)}),\n")
             else:
-                f.write(f"\t`IOB_OUTPUT({name}_o, DATA_W),\n")
                 f.write(f"\t`IOB_OUTPUT({name}_wstrb_o, DATA_W/8),\n")
         elif row['type'] == 'R':
             f.write(f"\t`IOB_INPUT({name}_i, {verilog_max(n_bits,1)}),\n")
@@ -138,7 +137,6 @@ def gen_inst_wire(table, f):
                 f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
                 f.write(f"`IOB_WIRE({name}_wstrb, DATA_W/8)\n")
             else:
-                f.write(f"`IOB_WIRE({name}, DATA_W)\n")
                 f.write(f"`IOB_WIRE({name}_wstrb, DATA_W/8)\n")
         elif row['type'] == 'R':
             f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
@@ -161,8 +159,9 @@ def gen_portmap(table, f):
         auto = row['autologic']
 
         if row['type'] == 'W':
-            f.write(f"\t.{name}_o({name}),\n")
-            if not auto:
+            if auto:
+                f.write(f"\t.{name}_o({name}),\n")
+            else:
                 f.write(f"\t.{name}_wstrb_o({name}_wstrb),\n")
         else:
             f.write(f"\t.{name}_i({name}),\n")
