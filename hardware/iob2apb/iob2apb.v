@@ -20,41 +20,131 @@ module iob2apb
 `include "iob_apb_m_port.vh"
 
     // Global signals
-`include "iob_clkrst_port.vh"
+`include "iob_clkenrst_port.vh"
     );
 
    //APB outputs
    `IOB_VAR(apb_sel_nxt, 1)
-   iob_reg_a #(1,0) sel_reg (clk_i, arst_i, apb_sel_nxt, apb_sel_o);
+   iob_reg
+     #(1,0)
+   sel_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(apb_sel_nxt),
+      .data_o(apb_sel_o)
+      );
 
    `IOB_VAR(apb_enable_nxt, 1)
-   iob_reg_a #(1,0) enable_reg (clk_i, arst_i, apb_enable_nxt, apb_enable_o);
+   iob_reg
+     #(1,0)
+   enable_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(apb_enable_nxt),
+      .data_o(apb_enable_o)
+      );
 
    `IOB_VAR(apb_addr_nxt, ADDR_W)
-   iob_reg_a #(ADDR_W,0) addr_reg (clk_i, arst_i, apb_addr_nxt, apb_addr_o);
+   iob_reg
+     #(ADDR_W,0)
+   addr_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(apb_addr_nxt),
+      .data_o(apb_addr_o)
+      );
 
    `IOB_VAR(apb_wstrb_nxt, (DATA_W/8))
-   iob_reg_a #(DATA_W/8,0) wstrb_reg (clk_i, arst_i, apb_wstrb_nxt, apb_wstrb_o);
+   iob_reg
+     #(DATA_W/8,0)
+   wstrb_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(apb_wstrb_nxt),
+      .data_o(apb_wstrb_o)
+      );
 
    `IOB_VAR(apb_write_nxt, 1)
-   iob_reg_a #(1,0) write_reg (clk_i, arst_i, apb_write_nxt, apb_write_o);
+   iob_reg
+     #(1,0)
+   write_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(apb_write_nxt),
+      .data_o(apb_write_o)
+      );
 
    `IOB_VAR(apb_wdata_nxt, DATA_W)
-   iob_reg_a #(DATA_W,0) wdata_reg (clk_i, arst_i, apb_wdata_nxt, apb_wdata_o);
+   iob_reg
+     #(DATA_W,0)
+   wdata_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(apb_wdata_nxt),
+      .data_o(apb_wdata_o)
+      );
 
    //IOb outputs
    `IOB_VAR(iob_ready_nxt, 1)
-   iob_reg_a #(1,1) ready_reg (clk_i, arst_i, iob_ready_nxt, iob_ready_o);
+   iob_reg
+     #(1,1)
+   ready_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(iob_ready_nxt),
+      .data_o(iob_ready_o)
+      );
 
    `IOB_VAR(iob_rvalid_nxt, 1)
-   iob_reg_a #(1,0) rvalid_reg (clk_i, arst_i, iob_rvalid_nxt, iob_rvalid_o);
+   iob_reg
+     #(1,0)
+   rvalid_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(iob_rvalid_nxt),
+      .data_o(iob_rvalid_o)
+      );
 
    `IOB_VAR(iob_rdata_nxt, DATA_W)
-   iob_reg_a #(DATA_W,0) rdata_reg (clk_i, arst_i, iob_rdata_nxt, iob_rdata_o);
+   iob_reg
+     #(DATA_W,0)
+   rdata_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(iob_rdata_nxt),
+      .data_o(iob_rdata_o)
+      );
    
    `IOB_WIRE(pc, 1)
    `IOB_VAR(pc_nxt, 1)
-   iob_reg_a #(1,0) access_reg (clk_i, arst_i, pc_nxt, pc);
+   iob_reg
+     #(1,0)
+   access_reg
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(pc_nxt),
+      .data_o(pc)
+      );
    
    `IOB_COMB begin
       

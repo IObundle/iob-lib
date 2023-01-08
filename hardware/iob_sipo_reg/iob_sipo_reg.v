@@ -8,7 +8,7 @@ module iob_sipo_reg
 
     input               clk_i,
     input               arst_i,
-    input               en_i,
+    input               cke_i,
 
     //serial input
     input               s_i,
@@ -17,14 +17,17 @@ module iob_sipo_reg
     output [DATA_W-1:0] p_o
     );
 
-   reg [DATA_W-1:0]  data_reg;
-   
-   always @(posedge clk_i, posedge arst_i)
-     if (arst_i)
-       data_reg <= {DATA_W{1'b0}};
-     else if (en_i)
-       data_reg <= (data_reg << 1) | {{(DATA_W-1){1'b0}}, s_i};
+   wire [DATA_W-1:0]   data;
+   assign data = {p_o[DATA_W-2:0], s_i};
 
-   assign p_o = data_reg;
+   iob_reg #(DATA_W, 0) reg0
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+
+      .data_i(data),
+      .data_o(p_o)
+      );
    
 endmodule

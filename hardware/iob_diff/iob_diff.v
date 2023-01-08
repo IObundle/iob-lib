@@ -8,26 +8,26 @@ module iob_diff
    (
     input               clk_i,
     input               arst_i,
+    input               cke_i,
+
     input               rst_i,
 
-    input               en_i,
     input [DATA_W-1:0]  data_i,
     output [DATA_W-1:0] data_o
     );
 
-   // prevent width mismatch
-   localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
+   wire [DATA_W-1:0]    data_i_reg;
+   iob_reg_r #(DATA_W, RST_VAL) reg0
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
 
-   reg [DATA_W-1:0]     data_i_reg;
-   always @(posedge clk_i, posedge arst_i) begin
-      if (arst_i) begin
-         data_i_reg <= RST_VAL_INT;
-      end else if (rst_i) begin
-         data_i_reg <= RST_VAL_INT;
-      end else if (en_i) begin
-         data_i_reg <= data_i;
-      end
-   end
+      .rst_i(rst_i),
+
+      .data_i(data_i),
+      .data_o(data_i_reg)
+      );
 
    assign data_o = data_i - data_i_reg;
 
