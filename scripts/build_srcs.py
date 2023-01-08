@@ -118,6 +118,7 @@ def sw_setup(core_meta_data):
         for module in core_sw_setup['sw_modules']:
             if module in submodule_dirs.keys():
                 copy_files(f"{submodule_dirs[module]}/software/src", f"{build_dir}/software/esrc", copy_all = True)
+                copy_files(f"{submodule_dirs[module]}/software/src", f"{build_dir}/software/psrc", copy_all = True)
                 if "pc-emul" in core_flows: copy_files(f"{submodule_dirs[module]}/software/psrc", f"{build_dir}/software/psrc", copy_all = True)
                 if "emb" in core_flows: copy_files(f"{submodule_dirs[module]}/software/esrc", f"{build_dir}/software/esrc", copy_all = True)
             else: sys.exit(f"{iob_colors.FAIL}{module} not in submodule directories.{iob_colors.ENDC}")
