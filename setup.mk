@@ -39,11 +39,7 @@ $(BUILD_DIR):
 #
 #HARDWARE
 #
-
 # include local setup makefile segment
-ifneq ($(wildcard hardware/hw_setup.mk),)
-include hardware/hw_setup.mk
-endif
 
 #synthesis
 ifneq ($(wildcard hardware/syn),)
@@ -60,22 +56,11 @@ $(BUILD_SYN_DIR)/%: $(LIB_DIR)/hardware/syn/%
 
 endif
 
-#lint
-#copy lint files from LIB 
-ifneq ($(wildcard hardware/lint),)
-SRC+=$(patsubst $(LIB_DIR)/hardware/lint/%, $(BUILD_LINT_DIR)/%, $(wildcard $(LIB_DIR)/hardware/lint/*))
-$(BUILD_LINT_DIR)/%: $(LIB_DIR)/hardware/lint/%
-	sed 's/IOB_CORE_NAME/$(NAME)/g' $< > $@
-
-endif
 
 #
 #SOFTWARE
 #
 # include local setup makefile segment
-ifneq ($(wildcard software/sw_setup.mk),)
-include software/sw_setup.mk
-endif
 
 #
 #DOCUMENT

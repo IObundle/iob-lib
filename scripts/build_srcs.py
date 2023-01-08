@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 import subprocess
 from pathlib import Path
 import shutil
@@ -9,8 +9,9 @@ import if_gen
 from submodule_utils import import_setup
 import iob_colors
 
-lib_dir = "./submodules/LIB"
+lib_dir = "submodules/LIB"
 
+# build_dir_setup should only be called by the main core. Therefor, executed only one time.
 def build_dir_setup(core_meta_data):
     build_dir = core_meta_data['build_dir']
     setup_dir = core_meta_data['setup_dir']
@@ -18,9 +19,11 @@ def build_dir_setup(core_meta_data):
     # Setup HARDWARE directories :
     os.makedirs(f"{build_dir}/hardware/src")
     if "sim" in core_flows: 
-        shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation")
+        sim_setup( core_meta_data )
     if "fpga" in core_flows: 
-        shutil.copytree(f"{setup_dir}/hardware/fpga", f"{build_dir}/hardware/fpga")
+        fpga_setup( core_meta_data )
+    if "lint" in core_flows: 
+        lint_setup( core_meta_data )
     # Setup SOFTWARE directories :
     if ("emb" in core_flows) or ("pc-emul" in core_flows):
         sw_setup(core_meta_data)
@@ -29,22 +32,6 @@ def build_dir_setup(core_meta_data):
         shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
     # Copy generic MAKEFILE
     shutil.copyfile(f"{lib_dir}/build.mk", f"{build_dir}/Makefile")
-
-# Adds and fills 'dirs' dictionary inside 'submodules' dicionary of given core/system 'meta_data'
-def set_default_submodule_dirs(meta_data):
-    #Make sure 'dirs' dictionary exists
-    if 'dirs' not in meta_data['submodules']:
-        meta_data['submodules']['dirs'] = {}
-
-    if os.path.isdir(f"{meta_data['setup_dir']}/submodules"):
-        # Add default path for every submodule without a path
-        for submodule in os.listdir(f"{meta_data['setup_dir']}/submodules"):
-            if submodule not in meta_data['submodules']['dirs']:
-                meta_data['submodules']['dirs'].update({submodule:f"{meta_data['setup_dir']}/submodules/{submodule}"})
-
-    #Make sure 'LIB' path exists
-    if 'LIB' not in meta_data['submodules']['dirs']:
-        meta_data['submodules']['dirs']['LIB'] = lib_dir
 
 
 def hw_setup(core_meta_data):
@@ -68,34 +55,51 @@ def hw_setup(core_meta_data):
     copy_files( f"{lib_dir}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
     copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
 
-    if "sim" in core_meta_data['flows']: sim_setup( build_dir, core_meta_data['submodules']['sim_setup'], core_meta_data['submodules']['dirs'])
-    #if "fpga" in core_meta_data['flows']: fpga_setup( build_dir )
-
-
-def sim_setup(build_dir, sim_setup, submodule_dirs):
+def sim_setup( core_meta_data ):
+    build_dir = core_meta_data['build_dir']
+    setup_dir = core_meta_data['setup_dir']
+    sim_setup = core_meta_data['submodules']['sim_setup']
+    submodule_dirs = core_meta_data['submodules']['dirs']
     sim_dir = "hardware/simulation"
-
+    
     Vheaders = sim_setup['v_headers']
     sim_srcs = sim_setup['hw_modules']
     sim_srcs.append("iob_tasks.vh")
-    module_dependency_setup(sim_srcs, Vheaders, build_dir, submodule_dirs)
+
+    shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation")
+    module_dependency_setup(sim_srcs, Vheaders, build_dir, submodule_dirs) 
+    # Sim modules probably shouldn't be dealt with similarly to hardware module
 
     if (Vheaders!=[ ]): create_Vheaders( f"{build_dir}/{sim_dir}/src", Vheaders )
     copy_files( lib_dir, f"{build_dir}/{sim_dir}/src", sim_srcs, '*.v*' )
     copy_files( f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", copy_all = True )
 
-
-def fpga_setup(build_dir):
+# Currently not used because it is not needed
+def fpga_setup(core_meta_data):
+    build_dir = core_meta_data['build_dir']
+    setup_dir = core_meta_data['setup_dir']
     fpga_dir = "hardware/fpga"
 
-    if not os.path.exists(f"{build_dir}/{fpga_dir}/quartus"): os.makedirs(f"{build_dir}/{fpga_dir}/quartus")
-    copy_files( f"{lib_dir}/{fpga_dir}/quartus", f"{build_dir}/{fpga_dir}/quartus", [], '*', copy_all = True )
-    
-    if not os.path.exists(f"{build_dir}/{fpga_dir}/vivado"): os.makedirs(f"{build_dir}/{fpga_dir}/vivado")
-    copy_files( f"{lib_dir}/{fpga_dir}/vivado", f"{build_dir}/{fpga_dir}/vivado", [], '*', copy_all = True )
-
-    copy_files( f"{lib_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}", [ 'Makefile' ], 'Makefile' )
+    shutil.copytree(f"{setup_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}")
+    for file in Path(f"{lib_dir}/{fpga_dir}").rglob('*'):
+        src_file = file.as_posix()
+        dest_file = re.sub(lib_dir, build_dir, src_file)
+        if os.path.isfile(src_file): shutil.copyfile(f"{src_file}", f"{dest_file}")
     subprocess.call(["find", build_dir, "-name", "*.pdf", "-delete"])
+
+def lint_setup(core_meta_data):
+    build_dir = core_meta_data['build_dir']
+    core_name = core_meta_data['name']
+    lint_dir = "hardware/lint"
+
+    os.mkdir(f"{build_dir}/{lint_dir}")
+    files = Path(f"{lib_dir}/{lint_dir}").glob('*')
+    for file in files:
+        with open(f"{lib_dir}/{lint_dir}/{file}", "r") as sources:
+            lines = sources.readlines()
+        with open(f"{build_dir}/{lint_dir}/{file}", "w") as sources:
+            for line in lines:
+                sources.write(re.sub(r'IOB_CORE_NAME', core_name, line))
 
 
 def sw_setup(core_meta_data):
@@ -219,6 +223,23 @@ def create_Vheaders(dest_dir, Vheaders):
             if_gen.write_vh_contents(vh_name[1], vh_name[2], vh_name[3], f_out)
         else: 
             sys.exit(f"{iob_colors.FAIL} {vh_name} is not an available header.{iob_colors.ENDC}")
+
+
+# Adds and fills 'dirs' dictionary inside 'submodules' dicionary of given core/system 'meta_data'
+def set_default_submodule_dirs(meta_data):
+    #Make sure 'dirs' dictionary exists
+    if 'dirs' not in meta_data['submodules']:
+        meta_data['submodules']['dirs'] = {}
+
+    if os.path.isdir(f"{meta_data['setup_dir']}/submodules"):
+        # Add default path for every submodule without a path
+        for submodule in os.listdir(f"{meta_data['setup_dir']}/submodules"):
+            if submodule not in meta_data['submodules']['dirs']:
+                meta_data['submodules']['dirs'].update({submodule:f"{meta_data['setup_dir']}/submodules/{submodule}"})
+
+    #Make sure 'LIB' path exists
+    if 'LIB' not in meta_data['submodules']['dirs']:
+        meta_data['submodules']['dirs']['LIB'] = lib_dir
 
 
 def version_file(core_name, core_version, build_dir):
