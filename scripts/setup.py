@@ -36,9 +36,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     # Build directory
     #
     if create_build_dir:
-        subprocess.call(["rsync", "-avz", "--exclude", ".git", "--exclude", "submodules", "--exclude", ".gitmodules", "--exclude", ".github", ".", build_dir])
-        subprocess.call(["find", build_dir, "-name", "*_setup*", "-delete"])
-        subprocess.call(["cp", "./submodules/LIB/build.mk", f"{build_dir}/Makefile"])
+        build_srcs.build_dir_setup(meta_data)
         mk_conf.config_build_mk(confs, meta_data, build_dir)
     
     #
@@ -63,13 +61,6 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
 
 
     #
-    # Setup functions
-    #
-    build_srcs.hw_setup( meta_data )
-    build_srcs.python_setup( meta_data['build_dir'])
-
-
-    #
     # Build registers table
     #
     if regs:
@@ -84,6 +75,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     #
     # Generate hw
     #
+    build_srcs.hw_setup( meta_data )
     if regs:
         mkregs.write_hwheader(reg_table, meta_data['build_dir']+'/hardware/src', top)
         mkregs.write_lparam_header(reg_table, meta_data['build_dir']+'/hardware/src', top)

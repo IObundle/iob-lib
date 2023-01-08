@@ -22,20 +22,14 @@ BUILD_DIR_NAME:=$(NAME)_$(VERSION_STR)
 # establish build dir paths
 BUILD_DIR := ../$(BUILD_DIR_NAME)
 
-BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
-BUILD_EMB_DIR = $(BUILD_DIR)/software/embedded
-BUILD_PC_DIR = $(BUILD_DIR)/software/pc-emul
-BUILD_SIM_DIR = $(BUILD_DIR)/hardware/simulation
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
 BUILD_LINT_DIR = $(BUILD_DIR)/hardware/lint
 
 BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
-BUILD_PSRC_DIR = $(BUILD_DIR)/software/psrc
 BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
-BUILD_SW_PYTHON_DIR = $(BUILD_DIR)/scripts
 
 
 setup: debug
@@ -78,33 +72,9 @@ endif
 #
 #SOFTWARE
 #
-
-ifneq ($(wildcard software),)
-
-#include software makefile segment
+# include local setup makefile segment
 ifneq ($(wildcard software/sw_setup.mk),)
 include software/sw_setup.mk
-endif
-
-#copy source files from LIB 
-SRC+=$(patsubst $(LIB_DIR)/software/src/%, $(BUILD_ESRC_DIR)/%, $(wildcard $(LIB_DIR)/software/src/%))
-$(BUILD_ESRC_DIR)/%: $(LIB_DIR)/software/src/%
-	cp $< $@
-
-#copy embedded files from LIB
-ifneq ($(wildcard software/embedded),)
-SRC+=$(patsubst $(LIB_DIR)/software/embedded/%, $(BUILD_EMB_DIR)/%, $(wildcard $(LIB_DIR)/software/embedded/*))
-$(BUILD_EMB_DIR)/%: $(LIB_DIR)/software/embedded/%
-	cp $< $@
-endif
-
-#copy pc-emul files from LIB
-ifneq ($(wildcard software/pc-emul),)
-SRC+=$(patsubst $(LIB_DIR)/software/pc-emul/%, $(BUILD_PC_DIR)/%, $(wildcard $(LIB_DIR)/software/pc-emul/*))
-$(BUILD_PC_DIR)/%: $(LIB_DIR)/software/pc-emul/%
-	cp $< $@
-endif
-
 endif
 
 #
