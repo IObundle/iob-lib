@@ -164,3 +164,13 @@ def generate_ios_tex(ios, out_dir):
                 tex_table.append([port['name'].replace('_','\_'),get_port_type(port['type']),port['n_bits'].replace('_','\_'),port['descr'].replace('_','\_')])
 
         write_table(f"{out_dir}/{table['name']}_if",tex_table)
+
+# Returns a string that defines a Verilog mapping. This string can be assigend to a verilog wire/port.
+def get_verilog_mapping(map_obj):
+    if not map_obj:
+        return "" #FIXME: REturn something useful if IO not defined
+
+    if type(map_obj) == str:
+        return map_obj
+
+    #TODO: If mapping is a list of bits...

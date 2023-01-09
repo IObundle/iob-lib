@@ -146,6 +146,5 @@ def setup_tester( meta_data, confs, ios, regs, blocks, module_parameters):
             #Insert mapping between IO and wire for mapping[1] (if its not external interface)
             if mapping_external_interface!=1: map_IO_to_wire(mapping_items[1]['IO'], mapping[1]['port'], n_bits, mapping[1]['bits'], wire_name)
 
-
     # Call setup function for the tester
     setup(meta_data, confs, ios, regs, blocks, ios_prefix=True, peripheral_ios=False, internal_wires=peripheral_wires)

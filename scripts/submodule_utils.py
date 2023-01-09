@@ -26,7 +26,7 @@ reserved_signals = \
 'iob_rdata':'.iob_rdata(slaves_resp[`rdata(`/*<InstanceName>*/)])',
 'iob_ready':'.iob_ready(slaves_resp[`ready(`/*<InstanceName>*/)])',
 'iob_rvalid':'.iob_rvalid(slaves_resp[`rvalid(`/*<InstanceName>*/)])',
-'trap':'.trap(trap[0])',
+'trap_o':'.trap_o(trap_o[0])',
 'm_axi_awid':'.m_axi_awid    (m_axi_awid[0:0])',
 'm_axi_awaddr':'.m_axi_awaddr  (m_axi_awaddr[`DDR_ADDR_W-1:0])',
 'm_axi_awlen':'.m_axi_awlen   (m_axi_awlen[7:0])',

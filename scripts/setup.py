@@ -57,7 +57,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     # Try to build system_tb.v if template is available
     createTestbench.create_system_testbench(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],f'hardware/simulation/src/{top}_tb.v'))
     # Try to build system_top.v if template is available
-    createTopSystem.create_top_system(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],f'hardware/simulation/src/{top}_top.v'))
+    createTopSystem.create_top_system(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, ios, os.path.join(meta_data['build_dir'],f'hardware/simulation/src/{top}_top.v'))
 
 
     #
