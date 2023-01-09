@@ -14,8 +14,6 @@ module iob_regfile_w_r
     input                arst_i,
     input                cke_i,
     
-    input                rst_i,
-
     // Write Port
     input [R-1:0]        wstrb_i,
     input [WADDR_W-1:0]  waddr_i,
@@ -26,21 +24,20 @@ module iob_regfile_w_r
     output [RDATA_W-1:0] rdata_o
     );
    
-   wire [R-1:0]          wstrb [(2**WADDR_W)-1:0];
+   wire [R*(2**WADDR_W)-1:0] wstrb;
    wire [((2**WADDR_W)*WDATA_W)-1 :0] regfile;
    
    genvar                            i, j;
    generate
       for (i=0; i < 2**WADDR_W; i=i+1) begin: rf
          for (j=0; j < R; j=j+1) begin: rf_row
-            assign wstrb[i][j] = (waddr_i == i) & wstrb_i[j];
-            iob_reg_re #(RDATA_W, 0) iob_reg_rf_row_slice
+            assign wstrb[i*R+j] = (waddr_i == i) & wstrb_i[j];
+            iob_reg_e #(RDATA_W, 0) iob_reg_rf_row_slice
               (
                .clk_i(clk_i),
                .arst_i(arst_i),
                .cke_i(cke_i),
-               .rst_i(rst_i),
-               .en_i(wstrb[i][j]),
+               .en_i(wstrb[i*R+j]),
                .data_i(wdata_i[j*RDATA_W+:RDATA_W]),
                .data_o(regfile[i*WDATA_W+j*RDATA_W+:RDATA_W])
                );

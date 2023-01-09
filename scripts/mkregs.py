@@ -76,8 +76,8 @@ def gen_wr_reg(row, f):
         f.write(f"`IOB_WIRE({name}_wen, 1)\n")
         f.write(f"assign {name}_wen = (iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
         f.write(f"iob_reg_e #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, cke_i, {name}_wen, {name}_wdata, {name}_o);\n")
-    else: #compute wstrb
-        f.write(f"assign {name}_wstrb_o = ({name}_addressed & iob_avalid_i)? iob_wstrb_i: 1'b0;\n")
+    else: #compute wen
+        f.write(f"assign {name}_wen_o = ({name}_addressed & iob_avalid_i)? |iob_wstrb_i: 1'b0;\n")
         
 def gen_rd_reg(row, f):
     name = row['name']
@@ -110,7 +110,7 @@ def gen_port(table, f):
             if auto:
                 f.write(f"\t`IOB_OUTPUT({name}_o, {verilog_max(n_bits,1)}),\n")
             else:
-                f.write(f"\t`IOB_OUTPUT({name}_wstrb_o, DATA_W/8),\n")
+                f.write(f"\t`IOB_OUTPUT({name}_wen_o, 1),\n")
         elif row['type'] == 'R':
             f.write(f"\t`IOB_INPUT({name}_i, {verilog_max(n_bits,1)}),\n")
             if not auto:
@@ -135,9 +135,8 @@ def gen_inst_wire(table, f):
         if row['type'] == 'W':
             if auto:
                 f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
-                f.write(f"`IOB_WIRE({name}_wstrb, DATA_W/8)\n")
             else:
-                f.write(f"`IOB_WIRE({name}_wstrb, DATA_W/8)\n")
+                f.write(f"`IOB_WIRE({name}_wen, 1)\n")
         elif row['type'] == 'R':
             f.write(f"`IOB_WIRE({name}, {verilog_max(n_bits,1)})\n")
             if not row['autologic']:
@@ -162,7 +161,7 @@ def gen_portmap(table, f):
             if auto:
                 f.write(f"\t.{name}_o({name}),\n")
             else:
-                f.write(f"\t.{name}_wstrb_o({name}_wstrb),\n")
+                f.write(f"\t.{name}_wen_o({name}_wen),\n")
         else:
             f.write(f"\t.{name}_i({name}),\n")
             if not auto:
@@ -256,7 +255,6 @@ def write_hwcode(table, out_dir, top):
 
     # use variables to compute response
     f_gen.write(f"\n`IOB_VAR(rdata_int, {8*cpu_n_bytes})\n")
-    f_gen.write(f"\n`IOB_WIRE(rdata_nxt, {8*cpu_n_bytes})\n")
     f_gen.write(f"`IOB_VAR(rvalid_int, 1)\n")
     f_gen.write(f"`IOB_VAR(wready_int, 1)\n")
     f_gen.write(f"`IOB_VAR(rready_int, 1)\n\n")
