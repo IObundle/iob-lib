@@ -69,6 +69,7 @@ def generate_ios_header(ios, top_module, out_dir, prefix=False):
 
     for table in ios:
         # Check if this table is a standard interface (from if_gen.py)
+        if 'if_defined' in table.keys(): f_io.write(f"`ifdef {table['if_defined']}\n")
         if table['name'] in if_gen.interfaces:
             # Interface is standard, generate ports
             if_gen.create_signal_table(table['name'])
@@ -77,6 +78,7 @@ def generate_ios_header(ios, top_module, out_dir, prefix=False):
             # Interface is not standard, read ports
             for port in table['ports']:
                 f_io.write(f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if prefix else ''}{port['name']}, //{port['descr']}\n")
+        if 'if_defined' in table.keys(): f_io.write("`endif\n")
 
     # Find and remove last comma
     delete_last_comma(f_io)
