@@ -17,13 +17,15 @@ def build_dir_setup(core_meta_data):
     setup_dir = core_meta_data['setup_dir']
     core_flows = core_meta_data['flows']
     # Setup HARDWARE directories :
-    os.makedirs(f"{build_dir}/hardware/src")
+    os.makedirs(f"{build_dir}/hardware/src", exist_ok=True)
     if "sim" in core_flows: 
         sim_setup( core_meta_data )
     if "fpga" in core_flows: 
         fpga_setup( core_meta_data )
     if "lint" in core_flows: 
         lint_setup( core_meta_data )
+    if "syn" in core_flows: 
+        syn_setup( core_meta_data )
     # Setup SOFTWARE directories :
     if ("emb" in core_flows) or ("pc-emul" in core_flows):
         sw_setup( core_meta_data )
@@ -106,6 +108,19 @@ def lint_setup(core_meta_data):
             for line in lines:
                 sources.write(re.sub(r'IOB_CORE_NAME', core_name, line))
 
+#synthesis
+def syn_setup(core_meta_data):
+    build_dir = core_meta_data['build_dir']
+    setup_dir = core_meta_data['setup_dir']
+    syn_dir = "hardware/syn"
+
+    shutil.copytree(f"{setup_dir}/{syn_dir}", f"{build_dir}/{syn_dir}")
+    for file in Path(f"{lib_dir}/{syn_dir}").rglob('*'):
+        src_file = file.as_posix()
+        dest_file = re.sub(lib_dir, build_dir, src_file)
+        if os.path.isfile(src_file): 
+            os.makedirs(os.path.dirname(dest_file), exist_ok=True)
+            shutil.copyfile(f"{src_file}", f"{dest_file}")
 
 def sw_setup(core_meta_data):
     core_flows = core_meta_data['flows']

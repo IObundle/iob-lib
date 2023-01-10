@@ -6,15 +6,19 @@
 SHELL=bash
 export
 
-# include core setup configuration
-LIB_DIR=submodules/LIB
-include config_setup.mk
+SETUP_PYTHON_FILENAME=$(wildcard *_setup.py)
 
 # python scripts directory
-PYTHON_DIR=$(LIB_DIR)/scripts
+PYTHON_DIR=submodules/LIB/scripts
+
+#submodule directories
+$(foreach entry, $(shell $(PYTHON_DIR)/setup.py get_core_submodules_dirs), $(eval $(entry)))
+#
+# core name
+NAME:=$(shell $(PYTHON_DIR)/setup.py get_core_name)
 
 # create version string
-VERSION_STR := $(shell $(PYTHON_DIR)/version.py -i .)
+VERSION_STR:=$(shell $(PYTHON_DIR)/version.py -i .)
 
 # build directory name
 BUILD_DIR_NAME:=$(NAME)_$(VERSION_STR)
@@ -35,27 +39,11 @@ BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 setup: debug
 
 $(BUILD_DIR):
-	./$(NAME)_setup.py
+	./$(SETUP_PYTHON_FILENAME)
 #
 #HARDWARE
 #
 # include local setup makefile segment
-
-#synthesis
-ifneq ($(wildcard hardware/syn),)
-
-#include local asic synthesis makefile segment
-ifneq ($(wildcard hardware/syn/syn_setup.mk),)
-include hardware/syn/syn_setup.mk
-endif
-
-#copy asic synthesis files from LIB
-SRC+=$(patsubst $(LIB_DIR)/hardware/syn/%, $(BUILD_SYN_DIR)/%, $(wildcard $(LIB_DIR)/hardware/syn/*))
-$(BUILD_SYN_DIR)/%: $(LIB_DIR)/hardware/syn/%
-	cp -r $< $@
-
-endif
-
 
 #
 #SOFTWARE

@@ -68,8 +68,11 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
         for i_regs in regs:
             reg_table += i_regs['regs']
 
-        mkregs.config = confs
-        reg_table = mkregs.compute_addr(reg_table, no_overlap)
+        # Create an instance of the mkregs class inside the mkregs module
+        # This instance is only used locally, not affecting status of mkregs imported in other functions/modules
+        mkregs_obj = mkregs.mkregs()
+        mkregs_obj.config = confs
+        reg_table = mkregs_obj.compute_addr(reg_table, no_overlap)
 
         
     #
@@ -77,9 +80,9 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     #
     build_srcs.hw_setup( meta_data )
     if regs:
-        mkregs.write_hwheader(reg_table, meta_data['build_dir']+'/hardware/src', top)
-        mkregs.write_lparam_header(reg_table, meta_data['build_dir']+'/hardware/src', top)
-        mkregs.write_hwcode(reg_table, meta_data['build_dir']+'/hardware/src', top)
+        mkregs_obj.write_hwheader(reg_table, meta_data['build_dir']+'/hardware/src', top)
+        mkregs_obj.write_lparam_header(reg_table, meta_data['build_dir']+'/hardware/src', top)
+        mkregs_obj.write_hwcode(reg_table, meta_data['build_dir']+'/hardware/src', top)
     mk_conf.params_vh(confs, top, meta_data['build_dir']+'/hardware/src')
     mk_conf.conf_vh(confs, top, meta_data['build_dir']+'/hardware/src')
 
@@ -89,9 +92,9 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     # Generate sw
     #
     if regs:
-        mkregs.write_swheader(reg_table, meta_data['build_dir']+'/software/esrc', top)
-        mkregs.write_swcode(reg_table, meta_data['build_dir']+'/software/esrc', top)
-        if os.path.isdir(meta_data['setup_dir']+'/software/psrc'): mkregs.write_swheader(reg_table, meta_data['build_dir']+'/software/psrc', top)
+        mkregs_obj.write_swheader(reg_table, meta_data['build_dir']+'/software/esrc', top)
+        mkregs_obj.write_swcode(reg_table, meta_data['build_dir']+'/software/esrc', top)
+        if os.path.isdir(meta_data['setup_dir']+'/software/psrc'): mkregs_obj.write_swheader(reg_table, meta_data['build_dir']+'/software/psrc', top)
     mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/esrc')
     if os.path.isdir(meta_data['setup_dir']+'/software/psrc'): mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/psrc')
 
@@ -103,5 +106,33 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
         mk_conf.generate_confs_tex(confs, meta_data['build_dir']+"/document/tsrc")
         ios_lib.generate_ios_tex(ios, meta_data['build_dir']+"/document/tsrc")
         if regs:
-            mkregs.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
+            mkregs_obj.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
         blocks_lib.generate_blocks_tex(blocks, build_dir+"/document/tsrc")
+
+
+
+#Return name of the core/system in the current directory (extracted from *_setup.py)
+def get_core_name():
+    module = import_setup(".")
+    print(module.meta['name'])
+
+#Return version of the core/system in the current directory (extracted from *_setup.py)
+def get_core_version():
+    module = import_setup(".")
+    print(module.meta['version'])
+
+#Return version of the core/system in the current directory (extracted from *_setup.py)
+def get_core_flows():
+    module = import_setup(".")
+    print(module.meta['flows'])
+
+#Return white-space separated list of submodules directories of the core/system in the current directory (extracted from *_setup.py)
+def get_core_submodules_dirs():
+    module = import_setup(".")
+    build_srcs.set_default_submodule_dirs(module.meta)
+    for key, value in module.meta['submodules']['dirs'].items():
+        print(f"{key}_DIR={value}", end=" ")
+
+# If this script is called directly, run function given in first argument
+if __name__ == '__main__':
+    globals()[sys.argv[1]]()
