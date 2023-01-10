@@ -86,7 +86,9 @@ def fpga_setup(core_meta_data):
     for file in Path(f"{lib_dir}/{fpga_dir}").rglob('*'):
         src_file = file.as_posix()
         dest_file = re.sub(lib_dir, build_dir, src_file)
-        if os.path.isfile(src_file): shutil.copyfile(f"{src_file}", f"{dest_file}")
+        if os.path.isfile(src_file): 
+            os.makedirs(os.path.dirname(dest_file), exist_ok=True)
+            shutil.copyfile(f"{src_file}", f"{dest_file}")
     subprocess.call(["find", build_dir, "-name", "*.pdf", "-delete"])
 
 def lint_setup(core_meta_data):
@@ -97,6 +99,7 @@ def lint_setup(core_meta_data):
     os.mkdir(f"{build_dir}/{lint_dir}")
     files = Path(f"{lib_dir}/{lint_dir}").glob('*')
     for file in files:
+        file = os.path.basename(file)
         with open(f"{lib_dir}/{lint_dir}/{file}", "r") as sources:
             lines = sources.readlines()
         with open(f"{build_dir}/{lint_dir}/{file}", "w") as sources:
