@@ -21,6 +21,8 @@ module iob_ctls
    wire [N-1:0]         data_rev;
    generate
       if (TYPE) begin
+         assign data_rev = data_i;
+      end else begin
          iob_reverse
            #(N)
          reverse0
@@ -28,36 +30,29 @@ module iob_ctls
             .data_i(data_i),
             .data_o(data_rev)
             );
-      end else begin
-         assign data_rev = data_i;
       end
    endgenerate
 
    wire [N-1:0]         data_n;
    assign data_n = SYMBOL? data_rev: ~data_rev;
 
-   // Compute ones word
-   wire [N-1:0]         ones;
-   assign ones[N-1] = data_n[N-1];
+   wire [N*($clog2(N)+1)-1:0] idx;
+   wire [N*($clog2(N)+1)-1:0] count;
+   wire [N-1:0]               found;
+   wire [N:0]                 ones;
+   assign ones[0] = data_n[0];
 
-   genvar               i;
+   genvar                     i;
    generate
-      for (i=N-2; i >= 0; i=i-1) begin: lead_ones_gen
-         assign ones[i] = data_n[i] & ones[i+1];
+      for (i=0; i < N; i=i+1) begin: lead_ones_gen
+         assign ones[i+1] = data_n[i] & ones[i];
+         assign found[i] = ~ones[i+1] & ones[i];
+         assign idx[N*($clog2(N)+1)-i*($clog2(N)+1)-1 -: $clog2(N)+1] = found[i]? i[$clog2(N):0]: 1'b0;
+         assign count[N*($clog2(N)+1)-i*($clog2(N)+1)-1 -: $clog2(N)+1] = (i == 0)? idx[N*($clog2(N)+1)-i*($clog2(N)+1)-1 -: $clog2(N)+1]:
+                                                                                    idx[N*($clog2(N)+1)-i*($clog2(N)+1)-1 -: $clog2(N)+1] | count[N*($clog2(N)+1)-(i-1)*($clog2(N)+1)-1 -: $clog2(N)+1];
       end
    endgenerate
 
-   // Sum ones
-   wire [$clog2(N):0]   array [N-1:0];
-   assign array[0] = {{(N-1){1'b0}}, ones[0]};
-
-   genvar               j;
-   generate
-      for (j=0; j < N-1; j=j+1) begin: sum_ones_gen
-         assign array[j+1] = array[j] + ones[j+1];
-      end
-   endgenerate
-
-   assign count_o = array[N-1];
+   assign count_o = ones[N]? N: count[$clog2(N):0];
 
 endmodule
