@@ -46,7 +46,7 @@ def hw_setup(core_meta_data):
 
     core_hw_setup = core_meta_data['submodules']['hw_setup']
     Vheaders = core_hw_setup['v_headers']
-    hardware_srcs = core_hw_setup['hw_modules']
+    hardware_srcs = core_hw_setup['modules']
 
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, build_dir)
@@ -67,7 +67,7 @@ def sim_setup( core_meta_data ):
     sim_dir = "hardware/simulation"
     
     Vheaders = sim_setup['v_headers']
-    sim_srcs = sim_setup['hw_modules']
+    sim_srcs = sim_setup['modules']
     sim_srcs.append("iob_tasks.vh")
 
     shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation")
@@ -77,6 +77,7 @@ def sim_setup( core_meta_data ):
     if (Vheaders!=[ ]): create_Vheaders( f"{build_dir}/{sim_dir}/src", Vheaders )
     copy_files( lib_dir, f"{build_dir}/{sim_dir}/src", sim_srcs, '*.v*' )
     copy_files( f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", copy_all = True )
+    
 
 # Currently not used because it is not needed
 def fpga_setup(core_meta_data):
@@ -122,6 +123,34 @@ def syn_setup(core_meta_data):
             os.makedirs(os.path.dirname(dest_file), exist_ok=True)
             shutil.copyfile(f"{src_file}", f"{dest_file}")
 
+# Check if any *_setup.py modules exist (like sim_setup.py, fpga_setup.py, ...).
+# If so, get a lambda expression to execute them and add them to the 'modules' list of the 'submodules' key in the 'meta' dictionary
+# This will allow these modules to be executed during setup
+#    meta: meta dictionary, should contain setup_dir
+#    **kwargs: set of objects that will be accessible from inside the modules when they are executed
+def add_setup_lambdas(meta, **kwargs):
+    # Check if any *_setup.py modules exist. If so, get a lambda expression to execute them and add them to the 'modules' list
+    for module_type, module_path in [('hw_setup','hardware/simulation/sim_setup.py'), ('hw_setup','hardware/fpga/fpga_setup.py'), ('sw_setup','hardware/software/sw_setup.py')]:
+        full_module_path = os.path.join(meta['setup_dir'],module_path)
+        if os.path.isfile(full_module_path): 
+            # Append executable module to 'modules' list of the submodules dictionary
+            # The lambda expression will be executed during setup
+            meta['submodules'][module_type]['modules'].append(get_module_lambda(full_module_path, meta=meta, **kwargs))
+            print(f"{module_type} -> {meta['submodules'][module_type]['modules']}")
+
+#Get an executable lambda expression to run a given python module
+#    module_path: python module path
+#    **kwargs: set of objects that will be accessible from inside the module when it is executed
+#Example: get_module_lambda("sim_setup.py",meta=meta,confs=confs)
+def get_module_lambda(module_path, **kwargs):
+    spec = importlib.util.spec_from_file_location("python_module", module_path)
+    module = importlib.util.module_from_spec(spec)
+    # Define objects given in the module
+    for key, value in kwargs.items():
+        vars(module)[key]=value
+    return lambda: spec.loader.exec_module(module)
+
+
 def sw_setup(core_meta_data):
     core_flows = core_meta_data['flows']
     build_dir = core_meta_data['build_dir']
@@ -135,7 +164,7 @@ def sw_setup(core_meta_data):
     if ('sw_setup' and 'dirs') in core_meta_data['submodules'].keys():
         core_sw_setup = core_meta_data['submodules']['sw_setup']
         submodule_dirs = core_meta_data['submodules']['dirs']
-        for module in core_sw_setup['sw_modules']:
+        for module in core_sw_setup['modules']:
             if module in submodule_dirs.keys():
                 copy_files(f"{submodule_dirs[module]}/software/src", f"{build_dir}/software/esrc", copy_all = True)
                 copy_files(f"{submodule_dirs[module]}/software/src", f"{build_dir}/software/psrc", copy_all = True)
@@ -190,8 +219,9 @@ def iob_submodule_setup(build_dir, submodule_dir, module_parameters=None):
     # Call setup function for this submodule
     module.main()
 
-#hardware_srcs: list that may contain 3 types of entries:
-#                   - submodule: This entry defines a submodule to include (may contain *_setup.py or just a set of sources).
+#hardware_srcs: list that may contain 4 types of entries:
+#                   - function: This entry defines a function to call.
+#                   - submodule: This entry defines a submodule to include (may contain *_setup.py or just a set of sources). Can be a tuple, where the first item is the submodule, the second item is a dictionary with module parameters.
 #                   - python include: This entry defines a python module that contains a list of other hardware modules/headers.
 #                   - verilog source:  This entry defines either a verilog header (.vh) or verilog source (.v) file to include.
 def module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs):
@@ -200,8 +230,13 @@ def module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs):
     while(True):
         # Handle each entry, skipping .v and .vh entries
         for hardware_src in hardware_srcs:
+            # Entry is a function
+            if callable(hardware_src):
+                hardware_src()
+                hardware_srcs.remove(hardware_src)
+                break
             # Entry is a 'submodule' (may be a tuple if optional parameters are given)
-            if type(hardware_src)==tuple or hardware_src in submodule_dirs:
+            elif type(hardware_src)==tuple or hardware_src in submodule_dirs:
                 if type(hardware_src)==tuple: submodule_setup(build_dir, submodule_dirs[hardware_src[0]], module_parameters=hardware_src[1])
                 else: submodule_setup(build_dir, submodule_dirs[hardware_src])
                 hardware_srcs.remove(hardware_src)

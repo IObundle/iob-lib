@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-import subprocess
 import os
 import mk_configuration as mk_conf
 import mkregs
@@ -31,6 +30,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     create_build_dir = build_dir==f"../{meta_data['name']}_{meta_data['version']}"
 
     build_srcs.set_default_submodule_dirs(meta_data)
+    build_srcs.add_setup_lambdas(meta_data,confs=confs,ios=ios,regs=regs,blocks=blocks)
 
     #
     # Build directory
