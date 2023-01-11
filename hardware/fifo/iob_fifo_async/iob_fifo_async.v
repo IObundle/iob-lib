@@ -133,9 +133,7 @@ module iob_fifo_async
    
    //READ DOMAIN EMPTY AND FULL FLAGS
    assign r_empty_o = (r_level_int < {2'd0, r_incr});
-   `IOB_WIRE(r_full_limit, (ADDR_W+2))
-   assign r_full_limit = FIFO_SIZE-{2'd0, r_incr};
-   assign r_full_o = (r_level_int > r_full_limit);
+   assign r_full_o = (r_level_int > (FIFO_SIZE-{2'd0, r_incr}));
 
    //WRITE DOMAIN FIFO LEVEL
    `IOB_WIRE(w_level_int, (ADDR_W+2))
@@ -144,9 +142,7 @@ module iob_fifo_async
  
    //WRITE DOMAIN EMPTY AND FULL FLAGS
    assign w_empty_o = (w_level_int < {2'd0, w_incr});
-   `IOB_WIRE(w_full_limit, (ADDR_W+2))
-   assign w_full_limit = FIFO_SIZE-{2'd0, w_incr};
-   assign w_full_o = (w_level_int > w_full_limit);
+   assign w_full_o = (w_level_int > (FIFO_SIZE-{2'd0, w_incr}));
 
    
    //read address gray code counter
