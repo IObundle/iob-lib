@@ -97,7 +97,7 @@ def get_peripheral_ios(peripherals_list, submodules):
     # Get port list for each type of peripheral used
     for instance in peripherals_list:
         # Make sure we have a hw_module for this peripheral type
-        assert instance['type'] in submodules["hw_setup"]["hw_modules"], f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
+        assert instance['type'] in submodules["hw_setup"]["modules"], f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
         # Only insert ports of this peripheral type if we have not done so before
         if instance['type'] not in port_list:
             # Import <corename>_setup.py module
@@ -167,10 +167,18 @@ def generate_ios_tex(ios, out_dir):
 
 # Returns a string that defines a Verilog mapping. This string can be assigend to a verilog wire/port.
 def get_verilog_mapping(map_obj):
-    if not map_obj:
-        return "" #FIXME: REturn something useful if IO not defined
-
+    #Check if map_obj is mapped to all bits of a signal (it is a string with signal name)
     if type(map_obj) == str:
         return map_obj
 
+    #Signal is mapped to specific bits of single/multiple wire(s)
     #TODO: If mapping is a list of bits...
+
+#peripheral_instance: dictionary describing a peripheral instance. Must have 'name' and 'IO' attributes.
+#port_name: name of the port we are mapping
+def get_peripheral_port_mapping(peripheral_instance, port_name):
+    # If IO dictionary (with mapping) does not exist for this peripheral, use default wire name
+    if not 'IO' in peripheral_instance:
+        return f"{peripheral_instance['name']}_{port_name}"
+    # IO mapping dictionary exists, get verilog string for that mapping
+    return get_verilog_mapping(peripheral_instance['IO'][port_name])

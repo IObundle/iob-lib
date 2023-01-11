@@ -60,7 +60,7 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file, i
 
         # Insert io signals
         for signal in get_pio_signals(port_list[instance['type']]):
-            template_contents.insert(start_index, '      .{}({}),\n'.format(signal['name'],ios.get_verilog_mapping(instance['IO'][signal['name']]))) #FIXME: What if 'IO' does not exist? (as in iob-soc)
+            template_contents.insert(start_index, '      .{}({}),\n'.format(signal['name'],ios.get_peripheral_port_mapping(instance,signal['name'])))
             # Remove comma at the end of last signal (first one to insert)
             if first_reversed_signal:
                 template_contents[start_index]=template_contents[start_index][::-1].replace(",","",1)[::-1]
