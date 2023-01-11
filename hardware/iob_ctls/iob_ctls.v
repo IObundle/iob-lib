@@ -36,23 +36,23 @@ module iob_ctls
    wire [N-1:0]         data_n;
    assign data_n = SYMBOL? data_rev: ~data_rev;
 
-   wire [N*($clog2(N)+1)-1:0] idx;
-   wire [N*($clog2(N)+1)-1:0] count;
-   wire [N-1:0]               found;
-   wire [N:0]                 ones;
+   wire [N*$clog2(N)-1:0] idx;
+   wire [N*$clog2(N)-1:0] count;
+   wire [N-1:0]           found;
+   wire [N:0]             ones;
    assign ones[0] = data_n[0];
 
-   genvar                     i;
+   genvar                 i;
    generate
       for (i=0; i < N; i=i+1) begin: lead_ones_gen
          assign ones[i+1] = data_n[i] & ones[i];
          assign found[i] = ~ones[i+1] & ones[i];
-         assign idx[N*($clog2(N)+1)-i*($clog2(N)+1)-1 -: $clog2(N)+1] = found[i]? i[$clog2(N):0]: 1'b0;
-         assign count[N*($clog2(N)+1)-i*($clog2(N)+1)-1 -: $clog2(N)+1] = (i == 0)? idx[N*($clog2(N)+1)-i*($clog2(N)+1)-1 -: $clog2(N)+1]:
-                                                                                    idx[N*($clog2(N)+1)-i*($clog2(N)+1)-1 -: $clog2(N)+1] | count[N*($clog2(N)+1)-(i-1)*($clog2(N)+1)-1 -: $clog2(N)+1];
+         assign idx[N*$clog2(N)-i*$clog2(N)-1 -: $clog2(N)] = found[i]? i[$clog2(N)-1:0]: 1'b0;
+         assign count[N*$clog2(N)-i*$clog2(N)-1 -: $clog2(N)] = (i == 0)? idx[N*$clog2(N)-i*$clog2(N)-1 -: $clog2(N)]:
+                                                                          idx[N*$clog2(N)-i*$clog2(N)-1 -: $clog2(N)] | count[N*$clog2(N)-(i-1)*$clog2(N)-1 -: $clog2(N)];
       end
    endgenerate
 
-   assign count_o = ones[N]? N: count[$clog2(N):0];
+   assign count_o = ones[N]? N: {1'b0, count[$clog2(N)-1:0]};
 
 endmodule
