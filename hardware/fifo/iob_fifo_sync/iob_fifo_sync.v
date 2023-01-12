@@ -22,6 +22,7 @@ module iob_fifo_sync
 
     `IOB_INPUT(rst_i, 1),
 
+    `IOB_OUTPUT(ext_mem_clk_o, 1),
     //write port
     `IOB_OUTPUT(ext_mem_w_en_o, N),
     `IOB_OUTPUT(ext_mem_w_addr_o, (MINADDR_W*N)),
@@ -173,7 +174,8 @@ module iob_fifo_sync
     iob_ram_2p_asym0
      (
       .clk_i            (clk_i),
-      
+
+      .ext_mem_clk_o    (ext_mem_clk_o),
       .ext_mem_w_en_o   (ext_mem_w_en_o),
       .ext_mem_w_data_o (ext_mem_w_data_o),
       .ext_mem_w_addr_o (ext_mem_w_addr_o),

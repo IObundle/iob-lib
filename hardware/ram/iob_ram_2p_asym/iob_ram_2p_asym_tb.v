@@ -20,6 +20,7 @@ module iob_ram_2p_asym_tb;
 
    reg clk = 0;
 
+   wire ext_mem_clk;
    // external write port
    wire [N-1:0]        ext_mem_w_en;
    wire [N*MINADDR_W-1:0] ext_mem_w_addr;
@@ -111,6 +112,7 @@ module iob_ram_2p_asym_tb;
      (
       .clk_i            (clk),
 
+      .ext_mem_clk_o    (ext_mem_clk),
       .ext_mem_w_en_o   (ext_mem_w_en),
       .ext_mem_w_data_o (ext_mem_w_data),
       .ext_mem_w_addr_o (ext_mem_w_addr),
@@ -129,6 +131,7 @@ module iob_ram_2p_asym_tb;
 
    genvar p;
    generate for(p=0; p < N; p=p+1) begin
+      wire mem_clk;
       wire mem_w_en;
       wire [MINDATA_W-1:0]	mem_w_data;
       wire [MINADDR_W-1:0]	mem_w_addr;
@@ -136,6 +139,7 @@ module iob_ram_2p_asym_tb;
       wire [MINADDR_W-1:0]  mem_r_addr;
       wire [MINDATA_W-1:0]  mem_r_data;
 
+      assign mem_clk = ext_mem_clk;
       assign mem_w_en = ext_mem_w_en[p];
       assign mem_w_addr = ext_mem_w_addr[p*MINADDR_W +: MINADDR_W];
       assign mem_w_data = ext_mem_w_data[p*MINDATA_W +: MINDATA_W];
@@ -149,7 +153,7 @@ module iob_ram_2p_asym_tb;
           )
       iob_ram_2p_inst
         (
-         .clk_i     (clk),
+         .clk_i     (mem_clk),
          .w_en_i    (mem_w_en),
          .w_addr_i  (mem_w_addr),
          .w_data_i  (mem_w_data),

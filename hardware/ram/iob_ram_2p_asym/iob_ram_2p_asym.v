@@ -19,6 +19,7 @@ module iob_ram_2p_asym
    (
     input                      clk_i,
 
+    output                     ext_mem_clk_o,
     //write port
     output [N-1:0]             ext_mem_w_en_o,
     output [(MINDATA_W*N)-1:0] ext_mem_w_data_o,
@@ -131,5 +132,6 @@ module iob_ram_2p_asym
       end
    endgenerate
    assign ext_mem_r_en_o = r_en_i;
+   assign ext_mem_clk_o = clk_i;
 
 endmodule
