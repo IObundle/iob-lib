@@ -46,8 +46,7 @@ module iob_regfile_w_r
    endgenerate
 
    wire [RADDR_W-1:0] raddr = (wstrb_i == 0) ? raddr_i : {RADDR_W{1'b0}};
-   wire [((2**WADDR_W)*WDATA_W)-1 :0] regf_shifted = regfile >> (RDATA_W*raddr);
    
-   assign rdata_o = regf_shifted[RDATA_W-1:0];
+   assign rdata_o = regfile[raddr+:RDATA_W];
    
 endmodule
