@@ -22,7 +22,12 @@ def getf(obj, name, field):
 # ios_prefix: Optional argument. Selects if IO signals should be prefixed by their table name. Useful when multiple tables have signals with the same name.
 # peripheral_ios: Optional argument. Selects if should append peripheral IOs to 'ios' list
 # internal_wires: Optional argument. List of extra wires for creste_systemv to create inside this core/system module
-def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=False, peripheral_ios=True, internal_wires=None):
+def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=True, internal_wires=None):
+    meta_data = python_module.meta
+    confs = python_module.confs
+    ios = python_module.ios
+    regs = python_module.regs
+    blocks = python_module.blocks
 
     top = meta_data['name']
     build_dir = meta_data['build_dir']
@@ -30,14 +35,14 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     create_build_dir = build_dir==f"../{meta_data['name']}_{meta_data['version']}"
 
     build_srcs.set_default_submodule_dirs(meta_data)
-    build_srcs.add_setup_lambdas(meta_data,confs=confs,ios=ios,regs=regs,blocks=blocks)
 
     #
     # Build directory
     #
     if create_build_dir:
-        build_srcs.build_dir_setup(meta_data)
+        os.makedirs(build_dir, exist_ok=True)
         mk_conf.config_build_mk(confs, meta_data, build_dir)
+        build_srcs.build_dir_setup(python_module)
     
     #
     # IOb-SoC related functions
@@ -78,7 +83,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     #
     # Generate hw
     #
-    build_srcs.hw_setup( meta_data )
+    build_srcs.hw_setup( python_module )
     if regs:
         mkregs_obj.write_hwheader(reg_table, meta_data['build_dir']+'/hardware/src', top)
         mkregs_obj.write_lparam_header(reg_table, meta_data['build_dir']+'/hardware/src', top)

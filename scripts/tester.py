@@ -35,8 +35,11 @@ def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
 #    - extra_peripheral_dirs: dictionary with directories of each extra peripheral
 #    - peripheral_portmap: Dictionary where each key-value pair is a Mapping between two signals. Example
 #                     { {'corename':'UART1', 'if_name':'rs232', 'port':'', 'bits':[]}:{'corename':'UUT', 'if_name':'UART0', 'port':'', 'bits':[]} }
-def setup_tester( meta_data, confs, ios, regs, blocks, module_parameters):
-
+def setup_tester( python_module, module_parameters):
+    meta_data = python_module.meta
+    ios = python_module.ios
+    blocks = python_module.blocks
+    
     #Create default submodule directories
     build_srcs.set_default_submodule_dirs(meta_data)
     #Update submodule directories of Tester with new peripherals directories
@@ -147,4 +150,4 @@ def setup_tester( meta_data, confs, ios, regs, blocks, module_parameters):
             if mapping_external_interface!=1: map_IO_to_wire(mapping_items[1]['IO'], mapping[1]['port'], n_bits, mapping[1]['bits'], wire_name)
 
     # Call setup function for the tester
-    setup(meta_data, confs, ios, regs, blocks, ios_prefix=True, peripheral_ios=False, internal_wires=peripheral_wires)
+    setup(python_module, ios_prefix=True, peripheral_ios=False, internal_wires=peripheral_wires)
