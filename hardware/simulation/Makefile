@@ -65,6 +65,13 @@ ifeq ($(VCD),1)
 	make waves
 endif	
 
+run-tests: $(TEST_LIST)
+ifneq ($(COV),1)
+	diff test.log test.expected
+else
+	echo "INFO: simulation code coverage is reserved for internal use only."
+endif
+
 waves:
 	if [ ! "`pgrep -u $(USER) gtkwave`" ]; then gtkwave -a uut.gtkw uut.vcd; fi &
 
@@ -93,11 +100,14 @@ ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_SIM_DIR)/Makefile ]; then make -C $(REMOTE_SIM_DIR) $@; fi'
 endif
 
-test: very-clean clean-test-log $(TEST_LIST)
-ifneq ($(COV),1)
-	diff test.log test.expected
-else
-	echo "INFO: simulation code coverage is reserved for internal use only."
+test: very-clean clean-test-log
+ifneq ($(SIM_SERVER),)
+	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) run-tests SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
+ifeq ($(COV),1)
+	scp -r $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/cov_work .
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_summary.rpt .
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_detail.rpt .
+endif
 endif
 
 clean-test-log:
