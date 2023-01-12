@@ -52,7 +52,7 @@ module iob_ram_2p_asym
    assign data_rd_0 = data_rd[0];
 
    //connect the buses
-   integer j,k,l;
+   integer m,q,j,k,l;
    generate
 
       if (W_DATA_W > R_DATA_W) begin
@@ -90,18 +90,18 @@ module iob_ram_2p_asym
       end else  if (W_DATA_W < R_DATA_W) begin
          //write serial
          always @* begin
-            for (j=0; j < N; j= j+1) begin
-               en_wr[j] = w_en_i & (w_addr_i[(W_ADDR_W-R_ADDR_W)-1:0] == j);
-               data_wr[j] = w_data_i;
-               addr_wr[j] = w_addr_i[W_ADDR_W-1 -: R_ADDR_W];
+            for (m=0; m < N; m= m+1) begin
+               en_wr[m] = w_en_i & (w_addr_i[(W_ADDR_W-R_ADDR_W)-1:0] == m);
+               data_wr[m] = w_data_i;
+               addr_wr[m] = w_addr_i[W_ADDR_W-1 -: R_ADDR_W];
             end
          end
          //read parallel
          always @* begin
             r_data_o = 1'b0;
-            for (k=0; k < N; k= k+1) begin
-               addr_rd[k] = r_addr_i;
-               r_data_o[k*MINDATA_W +: MINDATA_W] = data_rd[k];
+            for (q=0; q < N; q= q+1) begin
+               addr_rd[q] = r_addr_i;
+               r_data_o[q*MINDATA_W +: MINDATA_W] = data_rd[q];
             end
          end
 

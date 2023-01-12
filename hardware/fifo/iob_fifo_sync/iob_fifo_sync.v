@@ -45,7 +45,7 @@ module iob_fifo_sync
     );
 
    localparam ADDR_W_DIFF = $clog2(N);
-   localparam [ADDR_W:0] FIFO_SIZE = (1'b1 << ADDR_W); //in bytes
+   localparam [ADDR_W:0] FIFO_SIZE = (1 << ADDR_W); //in bytes
 
    //effective write enable
    wire                   w_en_int = (w_en_i & (~w_full_o));
@@ -90,8 +90,8 @@ module iob_fifo_sync
       );
 
    //assign according to assymetry type
-   localparam [ADDR_W-1:0] w_incr = (W_DATA_W > R_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
-   localparam [ADDR_W-1:0] r_incr = (R_DATA_W > W_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
+   localparam [ADDR_W-1:0] W_INCR = (W_DATA_W > R_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
+   localparam [ADDR_W-1:0] R_INCR = (R_DATA_W > W_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
    
    //FIFO level
    reg [ADDR_W:0]         level_nxt;
@@ -115,21 +115,21 @@ module iob_fifo_sync
 
    `IOB_VAR(level_incr, (ADDR_W+1))
    `IOB_COMB begin
-      level_incr = level_int + w_incr;
+      level_incr = level_int + W_INCR;
       level_nxt = level_int;
       if(w_en_int && (!r_en_int))
         level_nxt = level_incr;
       else if(w_en_int && r_en_int)
-        level_nxt = level_incr - r_incr;
+        level_nxt = level_incr - R_INCR;
       else if (r_en_int) // (!w_en_int) && r_en_int
-        level_nxt = level_int - r_incr;
+        level_nxt = level_int - R_INCR;
    end
    
    assign level_o = level_int;
 
    //FIFO empty
    `IOB_WIRE(r_empty_nxt, 1)
-   assign r_empty_nxt = level_nxt < r_incr;
+   assign r_empty_nxt = level_nxt < R_INCR;
    iob_reg
      #(
        .DATA_W(1),
@@ -147,7 +147,7 @@ module iob_fifo_sync
 
    //FIFO full
    `IOB_WIRE(w_full_nxt, 1)
-   assign w_full_nxt = level_nxt > (FIFO_SIZE - w_incr);
+   assign w_full_nxt = level_nxt > (FIFO_SIZE - W_INCR);
    iob_reg
      #(
        .DATA_W(1),
