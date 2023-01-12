@@ -63,13 +63,6 @@ endif
 endif
 ifeq ($(VCD),1)
 	make waves
-endif	
-
-run-tests: $(TEST_LIST)
-ifneq ($(COV),1)
-	diff test.log test.expected
-else
-	echo "INFO: simulation code coverage is reserved for internal use only."
 endif
 
 waves:
@@ -94,20 +87,32 @@ ifeq ($(VCD),1)
 	make waves
 endif
 
-gen-clean:
-	@rm -f *.vh *.hex
-ifneq ($(SIM_SERVER),)
-	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_SIM_DIR)/Makefile ]; then make -C $(REMOTE_SIM_DIR) $@; fi'
-endif
-
 test: very-clean clean-test-log
 ifneq ($(SIM_SERVER),)
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
+	rsync $(SIM_SYNC_FLAGS) -avz --force --delete ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
 	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) run-tests SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
+	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
 ifeq ($(COV),1)
 	scp -r $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/cov_work .
 	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_summary.rpt .
 	scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_detail.rpt .
 endif
+else
+	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make run-tests"
+endif
+ifneq ($(COV),1)
+	diff test.log test.expected
+else
+	@echo "INFO: simulation code coverage is reserved for internal use only."
+endif
+
+run-tests: $(TEST_LIST)
+
+gen-clean:
+	@rm -f *.vh *.hex
+ifneq ($(SIM_SERVER),)
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_SIM_DIR)/Makefile ]; then make -C $(REMOTE_SIM_DIR) $@; fi'
 endif
 
 clean-test-log:
@@ -122,4 +127,9 @@ debug:
 
 .PRECIOUS: uut.vcd
 
-.PHONY: build run gen-clean clean-test-log fix-vcd kill-sim kill-remote-sim debug test
+.PHONY: build run \
+	waves fix-vcd \
+	kill-sim kill-remote-sim \
+	test run-tests \
+	gen-clean clean-test-log \
+	debug
