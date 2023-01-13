@@ -8,7 +8,7 @@ from math import ceil, log
 from latex import write_table
 import re
 
-# Use a class for the entire module, as it may be imported multiple times, but must have instance variables
+# Use a class for the entire module, as it may be imported multiple times, but must have instance variables (multiple cores/submodules have different registers)
 class mkregs:
     def __init__(self):
         self.cpu_n_bytes = 4
@@ -72,8 +72,9 @@ class mkregs:
         f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n")
 
         #compute wdata with only the needed bits
-        f.write(f"`IOB_WIRE({name}_wdata, {self.verilog_max(n_bits,1)})\n")
-        f.write(f"assign {name}_wdata = iob_wdata_i[{self.boffset(addr,self.cpu_n_bytes)}+:{self.verilog_max(n_bits,1)}];\n")
+        if auto:
+            f.write(f"`IOB_WIRE({name}_wdata, {self.verilog_max(n_bits,1)})\n")
+            f.write(f"assign {name}_wdata = iob_wdata_i[{self.boffset(addr,self.cpu_n_bytes)}+:{self.verilog_max(n_bits,1)}];\n")
 
         #check if address in range
         f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
@@ -238,8 +239,8 @@ class mkregs:
         f_gen.write("\n//write address\n")
 
         #extract address byte offset
-        f_gen.write(f"`IOB_WIRE(byte_offset, $clog2(DATA_W/8))\n")
-        f_gen.write(f"iob_wstrb2byte_offset #(DATA_W/8) bo_inst (iob_wstrb_i, byte_offset);\n")
+        f_gen.write(f"`IOB_WIRE(byte_offset, $clog2(DATA_W/8)+1)\n")
+        f_gen.write(f"iob_ctls #(DATA_W/8, 1, 0) bo_inst (iob_wstrb_i, byte_offset);\n")
 
         #compute write address
         f_gen.write(f"`IOB_WIRE(waddr, ADDR_W)\n")

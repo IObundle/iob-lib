@@ -24,7 +24,7 @@ SIM_PROC=xmsim
 comp: $(VHDR) $(VSRC)
 	xmvlog $(VFLAGS) $(VSRC); xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 
-exec:
+exec: xmelab.log
 	xmsim $(SFLAGS) $(COV_SFLAGS) worklib.$(NAME)_tb:module
 	grep -v xcelium xmsim.log | grep -v xmsim | grep -v "\$finish" >> test.log
 ifeq ($(COV),1)

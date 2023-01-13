@@ -3,18 +3,18 @@
 `include "iob_lib.vh"
 
 module iob_fifo_async
-  #(parameter
-    W_DATA_W = 0,
-    R_DATA_W = 0,
-    ADDR_W = 0, //higher ADDR_W lower DATA_W
-    //determine W_ADDR_W and R_ADDR_W
-   MAXDATA_W = `IOB_MAX(W_DATA_W, R_DATA_W),
-   MINDATA_W = `IOB_MIN(W_DATA_W, R_DATA_W),
-   R = MAXDATA_W/MINDATA_W,
-   ADDR_W_DIFF = $clog2(R),
-   MINADDR_W = ADDR_W-$clog2(R),//lower ADDR_W (higher DATA_W)
-   W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
-   R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
+  #(
+   parameter W_DATA_W = 0,
+   parameter R_DATA_W = 0,
+   parameter ADDR_W = 0, //higher ADDR_W lower DATA_W
+   //determine W_ADDR_W and R_ADDR_W
+   parameter MAXDATA_W = `IOB_MAX(W_DATA_W, R_DATA_W),
+   parameter MINDATA_W = `IOB_MIN(W_DATA_W, R_DATA_W),
+   parameter R = MAXDATA_W/MINDATA_W,
+   parameter ADDR_W_DIFF = $clog2(R),
+   parameter MINADDR_W = ADDR_W-$clog2(R),//lower ADDR_W (higher DATA_W)
+   parameter W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
+   parameter R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
     )
    (
       
@@ -53,7 +53,7 @@ module iob_fifo_async
 
     );
 
-   localparam [ADDR_W:0] FIFO_SIZE = (1'b1 << ADDR_W); //in bytes
+   localparam [ADDR_W:0] FIFO_SIZE = (1 << ADDR_W); //in bytes
 
    //binary read addresses on both domains
    wire [R_ADDR_W:0]        r_raddr_bin;
@@ -68,8 +68,8 @@ module iob_fifo_async
    wire [ADDR_W:0]          w_raddr_bin_n;
 
    //assign according to assymetry type
-   localparam [ADDR_W-1:0] w_incr = (W_DATA_W > R_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
-   localparam [ADDR_W-1:0] r_incr = (R_DATA_W > W_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
+   localparam [ADDR_W-1:0] W_INCR = (W_DATA_W > R_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
+   localparam [ADDR_W-1:0] R_INCR = (R_DATA_W > W_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
    
    generate
       if (W_DATA_W > R_DATA_W) begin
@@ -127,22 +127,22 @@ module iob_fifo_async
 
 
    //READ DOMAIN FIFO LEVEL
-   `IOB_WIRE(r_level_int, (ADDR_W+2))
+   `IOB_WIRE(r_level_int, (ADDR_W+1))
    assign r_level_int = r_waddr_bin_n - r_raddr_bin_n;
    assign r_level_o = r_level_int[0+:(ADDR_W+1)];
    
    //READ DOMAIN EMPTY AND FULL FLAGS
-   assign r_empty_o = (r_level_int < {2'd0, r_incr});
-   assign r_full_o = (r_level_int > (FIFO_SIZE-{2'd0, r_incr}));
+   assign r_empty_o = (r_level_int < {2'd0, R_INCR});
+   assign r_full_o = (r_level_int > (FIFO_SIZE-{2'd0, R_INCR}));
 
    //WRITE DOMAIN FIFO LEVEL
-   `IOB_WIRE(w_level_int, (ADDR_W+2))
+   `IOB_WIRE(w_level_int, (ADDR_W+1))
    assign w_level_int = w_waddr_bin_n - w_raddr_bin_n;
    assign w_level_o = w_level_int[0+:(ADDR_W+1)];
  
    //WRITE DOMAIN EMPTY AND FULL FLAGS
-   assign w_empty_o = (w_level_int < {2'd0, w_incr});
-   assign w_full_o = (w_level_int > (FIFO_SIZE-{2'd0, w_incr}));
+   assign w_empty_o = (w_level_int < {2'd0, W_INCR});
+   assign w_full_o = (w_level_int > (FIFO_SIZE-{2'd0, W_INCR}));
 
    
    //read address gray code counter
