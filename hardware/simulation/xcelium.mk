@@ -25,7 +25,7 @@ comp: $(VHDR) $(VSRC)
 	xmvlog $(VFLAGS) $(VSRC); xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 
 exec: xmelab.log
-	sync && xmsim $(SFLAGS) $(COV_SFLAGS) worklib.$(NAME)_tb:module
+	sync && sleep 1 && xmsim $(SFLAGS) $(COV_SFLAGS) worklib.$(NAME)_tb:module
 	grep -v xcelium xmsim.log | grep -v xmsim | grep -v "\$finish" >> test.log
 ifeq ($(COV),1)
 	ls -d cov_work/scope/* > all_ucd_file
