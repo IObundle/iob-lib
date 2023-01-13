@@ -2,7 +2,7 @@
 #
 #    tester.py: tester related functions
 #
-from submodule_utils import import_setup
+from submodule_utils import import_setup, get_module_io
 from ios import get_interface_mapping
 from setup import setup
 import build_srcs
@@ -99,7 +99,7 @@ def setup_tester( python_module, module_parameters):
         # Import module of one of the given core types (to access its IO)
         module = import_setup(meta_data['submodules']['dirs'][mapping_items[0]['type']])
         #Get ports of configured interface
-        interface_ports=next(i['ports'] for i in module.ios if i['name'] == mapping[0]['if_name'])
+        interface_ports=get_module_io([ next(i for i in module.ios if i['name'] == mapping[0]['if_name']) ])
 
         # Check if should insert one port or every port in the interface
         if not mapping[0]['port']:

@@ -5,7 +5,7 @@
 
 from latex import write_table
 import if_gen
-from submodule_utils import get_submodule_directories, get_module_io, import_setup, get_pio_signals
+from submodule_utils import get_submodule_directories, get_module_io, import_setup, get_pio_signals, if_gen_interface
 import importlib.util
 import os
 import iob_colors
@@ -22,13 +22,25 @@ known_map_interfaces =\
              },
 }
 
+def reverse_port(port_type):
+    if port_type == "I": return "O"
+    else: return "I"
+
 #Given a known interface name, return its mapping
 def get_interface_mapping(if_name):
     for interface in known_map_interfaces.items():
         if if_name == interface[0]:
             return interface[1]
+    #Interface is was not in 'known_map_interfaces'. Check if_gen.py
+    if if_name in if_gen.interfaces:
+        if_mapping = {}
+        port_list = if_gen_interface(if_name)
+        for port in port_list:
+            if_mapping[port['name']]=port['name'][:-1]+reverse_port(port['type']).lower()
+        return if_mapping
+
     #Did not find known interface
-    raise Exception(f"Error: Unkown mapping for '{if_name}' interface.")
+    assert False, f"{iob_colors.FAIL} Unknown mapping for ports of '{if_name}' interface.{iob_colors.ENDC}"
 
 # Return full port type string based on given types: "I", "O" and "IO"
 # Maps "I", "O" and "IO" to "input", "output" and "inout", respectively.
@@ -180,5 +192,7 @@ def get_peripheral_port_mapping(peripheral_instance, port_name):
     # If IO dictionary (with mapping) does not exist for this peripheral, use default wire name
     if not 'IO' in peripheral_instance:
         return f"{peripheral_instance['name']}_{port_name}"
+
+    assert port_name in peripheral_instance['IO'], f"{iob_colors.FAIL}Port {port_name} of {peripheral_instance['name']} not mapped!{iob_colors.ENDC}"
     # IO mapping dictionary exists, get verilog string for that mapping
     return get_verilog_mapping(peripheral_instance['IO'][port_name])

@@ -182,7 +182,7 @@ class if_gen_hack_list:
 
     def write(self, port_string):
         #Parse written string
-        port = re.search("^\s*((?:input)|(?:output))\s+\[([^:]+)-1:0\]\s+([^,]+), \/\/(.*)$", verilog_lines[i])
+        port = re.search("^\s*((?:input)|(?:output))\s+\[([^:]+)-1:0\]\s+([^,]+), \/\/(.*)$", port_string)
         #Append port to port dictionary
         self.port_list.append({'name':port.group(3), 'type':get_short_port_type(port.group(1)), 'n_bits':port.group(2), 'descr':port.group(4)})
 
