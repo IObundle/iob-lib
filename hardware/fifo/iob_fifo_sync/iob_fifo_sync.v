@@ -164,30 +164,58 @@ module iob_fifo_sync
       );
 
    //FIFO memory
-   iob_ram_2p_asym
-     #(
-       .W_DATA_W  (W_DATA_W),
-       .R_DATA_W  (R_DATA_W),
-       .ADDR_W    (ADDR_W)
-       )
-    iob_ram_2p_asym0
-     (
-      .clk_i            (clk_i),
-      
-      .ext_mem_w_en_o   (ext_mem_w_en_o),
-      .ext_mem_w_data_o (ext_mem_w_data_o),
-      .ext_mem_w_addr_o (ext_mem_w_addr_o),
-      .ext_mem_r_en_o   (ext_mem_r_en_o),
-      .ext_mem_r_addr_o (ext_mem_r_addr_o),
-      .ext_mem_r_data_i (ext_mem_r_data_i),
+   generate
+      if (W_DATA_W > R_DATA_W) begin
+         iob_ram_2p_asym_wgtr
+           #(
+             .W_DATA_W  (W_DATA_W),
+             .R_DATA_W  (R_DATA_W),
+             .ADDR_W    (ADDR_W)
+             )
+         iob_ram_2p_asym0
+           (
+            .clk_i            (clk_i),
 
-      .w_en_i           (w_en_int),
-      .w_addr_i         (w_addr),
-      .w_data_i         (w_data_i),
+            .ext_mem_w_en_o   (ext_mem_w_en_o),
+            .ext_mem_w_data_o (ext_mem_w_data_o),
+            .ext_mem_w_addr_o (ext_mem_w_addr_o),
+            .ext_mem_r_en_o   (ext_mem_r_en_o),
+            .ext_mem_r_addr_o (ext_mem_r_addr_o),
+            .ext_mem_r_data_i (ext_mem_r_data_i),
 
-      .r_en_i           (r_en_int),
-      .r_addr_i         (r_addr),
-      .r_data_o         (r_data_o)
-      );
+            .w_en_i           (w_en_int),
+            .w_addr_i         (w_addr),
+            .w_data_i         (w_data_i),
+
+            .r_en_i           (r_en_int),
+            .r_addr_i         (r_addr),
+            .r_data_o         (r_data_o)
+            );
+      end else begin
+         iob_ram_2p_asym_wler
+           #(
+             .W_DATA_W  (W_DATA_W),
+             .R_DATA_W  (R_DATA_W),
+             .ADDR_W    (ADDR_W)
+             )
+         iob_ram_2p_asym0
+           (
+            .ext_mem_w_en_o   (ext_mem_w_en_o),
+            .ext_mem_w_data_o (ext_mem_w_data_o),
+            .ext_mem_w_addr_o (ext_mem_w_addr_o),
+            .ext_mem_r_en_o   (ext_mem_r_en_o),
+            .ext_mem_r_addr_o (ext_mem_r_addr_o),
+            .ext_mem_r_data_i (ext_mem_r_data_i),
+
+            .w_en_i           (w_en_int),
+            .w_addr_i         (w_addr),
+            .w_data_i         (w_data_i),
+
+            .r_en_i           (r_en_int),
+            .r_addr_i         (r_addr),
+            .r_data_o         (r_data_o)
+            );
+      end
+   endgenerate
 
 endmodule
