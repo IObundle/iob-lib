@@ -34,40 +34,41 @@ module iob_ram_2p_asym_wgtr
     //read port
     input                      r_en_i,
     input [R_ADDR_W-1:0]       r_addr_i,
-    output reg [R_DATA_W-1:0]  r_data_o
+    output [R_DATA_W-1:0]      r_data_o
     );
 
    //symmetric memory block buses
    //write buses
-   reg [R-1:0]                en_wr;
-   reg [MINDATA_W-1:0]        data_wr [R-1:0];
-   reg [MINADDR_W-1:0]        addr_wr [R-1:0];
+   wire [R-1:0]                en_wr;
+   wire [R*MINDATA_W-1:0]      data_wr;
+   wire [R*MINADDR_W-1:0]      addr_wr;
 
    //read buses
-   wire [MINDATA_W-1:0]       data_rd [R-1:0];
-   reg [MINADDR_W-1:0]        addr_rd [R-1:0];
+   wire [R*MINDATA_W-1:0]      data_rd;
+   wire [R*MINADDR_W-1:0]      addr_rd;
 
    wire [MINDATA_W-1:0]       data_rd_0;
-   assign data_rd_0 = data_rd[0];
+   assign data_rd_0 = data_rd[R*MINDATA_W-1 -: MINDATA_W];
 
    //connect the buses
-   integer m,q,j,k,l;
 
    //write parallel
-   always @* begin
+   genvar                     j;
+   generate
       for (j=0; j < R; j= j+1) begin
-         en_wr[j] = w_en_i;
-         data_wr[j] = w_data_i[j*MINDATA_W +: MINDATA_W];
-         addr_wr[j] = w_addr_i;
+         assign en_wr[j] = w_en_i;
+         assign data_wr[R*MINDATA_W-j*MINDATA_W-1 -: MINDATA_W] = w_data_i[j*MINDATA_W +: MINDATA_W];
+         assign addr_wr[R*MINADDR_W-j*MINADDR_W-1 -: MINADDR_W] = w_addr_i;
       end
-   end
+   endgenerate
 
    //read serial
-   always @* begin
+   genvar                     k;
+   generate
       for (k=0; k < R; k= k+1) begin
-         addr_rd[k] = r_addr_i[R_ADDR_W-1-:W_ADDR_W];
+         assign addr_rd[R*MINADDR_W-k*MINADDR_W-1 -: MINADDR_W] = r_addr_i[R_ADDR_W-1-:W_ADDR_W];
       end
-   end
+   endgenerate
 
    //read address register
    reg [(R_ADDR_W-W_ADDR_W)-1:0] r_addr_lsbs_reg;
@@ -76,21 +77,21 @@ module iob_ram_2p_asym_wgtr
        r_addr_lsbs_reg <= r_addr_i[(R_ADDR_W-W_ADDR_W)-1:0];
 
    //read mux
-   always @* begin
-      r_data_o = 1'b0;
+   genvar                     l;
+   generate
       for (l=0; l < R; l= l+1) begin
-         r_data_o = data_rd[r_addr_lsbs_reg];
+         assign r_data_o = data_rd[R*MINDATA_W-r_addr_lsbs_reg*MINDATA_W-1 -: MINDATA_W];
       end
-   end
+   endgenerate
 
    genvar  p;
    generate
       for(p=0; p < R; p= p+1) begin : ext_mem_interface_gen
          assign ext_mem_w_en_o[p] = en_wr[p];
-         assign ext_mem_w_addr_o[p*MINADDR_W+:MINADDR_W] = addr_wr[p];
-         assign ext_mem_w_data_o[p*MINDATA_W+:MINDATA_W] = data_wr[p];
-         assign ext_mem_r_addr_o[p*MINADDR_W+:MINADDR_W] = addr_rd[p];
-         assign data_rd[p] = ext_mem_r_data_i[p*MINDATA_W+:MINDATA_W];
+         assign ext_mem_w_addr_o[p*MINADDR_W+:MINADDR_W] = addr_wr[R*MINADDR_W-p*MINADDR_W-1 -: MINADDR_W];
+         assign ext_mem_w_data_o[p*MINDATA_W+:MINDATA_W] = data_wr[R*MINDATA_W-p*MINDATA_W-1 -: MINDATA_W];
+         assign ext_mem_r_addr_o[p*MINADDR_W+:MINADDR_W] = addr_rd[R*MINADDR_W-p*MINADDR_W-1 -: MINADDR_W];
+         assign data_rd[R*MINDATA_W-p*MINDATA_W-1 -: MINDATA_W] = ext_mem_r_data_i[p*MINDATA_W+:MINDATA_W];
       end
    endgenerate
    assign ext_mem_r_en_o = r_en_i;
