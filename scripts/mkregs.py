@@ -231,7 +231,7 @@ def write_hwcode(table, out_dir, top):
     f_gen.write("\n//write address\n")
 
     #extract address byte offset
-    f_gen.write(f"`IOB_WIRE(byte_offset, $clog2(DATA_W/8)+1)\n")
+    f_gen.write(f"`IOB_WIRE(byte_offset, ($clog2(DATA_W/8)+1))\n")
     f_gen.write(f"iob_ctls #(DATA_W/8, 1, 0) bo_inst (iob_wstrb_i, byte_offset);\n")
 
     #compute write address
