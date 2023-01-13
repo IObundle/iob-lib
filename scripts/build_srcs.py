@@ -5,7 +5,7 @@ import shutil
 import importlib
 # IObundle scripts imported:
 import if_gen
-#import ios Not in use
+#import ios # Not in use
 from submodule_utils import import_setup
 import iob_colors
 
@@ -26,10 +26,12 @@ def build_dir_setup(core_meta_data):
         lint_setup( core_meta_data )
     # Setup SOFTWARE directories :
     if ("emb" in core_flows) or ("pc-emul" in core_flows):
-        sw_setup(core_meta_data)
+        sw_setup( core_meta_data )
     # Setup DOC directories :
     if "doc" in core_flows: 
-        shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
+        doc_setup( core_meta_data )
+    # Setup DELIVERY directories :
+    # (WIP)
     # Copy generic MAKEFILE
     shutil.copyfile(f"{lib_dir}/build.mk", f"{build_dir}/Makefile")
 
@@ -118,6 +120,7 @@ def sw_setup(core_meta_data):
         for module in core_sw_setup['sw_modules']:
             if module in submodule_dirs.keys():
                 copy_files(f"{submodule_dirs[module]}/software/src", f"{build_dir}/software/esrc", copy_all = True)
+                copy_files(f"{submodule_dirs[module]}/software/src", f"{build_dir}/software/psrc", copy_all = True)
                 if "pc-emul" in core_flows: copy_files(f"{submodule_dirs[module]}/software/psrc", f"{build_dir}/software/psrc", copy_all = True)
                 if "emb" in core_flows: copy_files(f"{submodule_dirs[module]}/software/esrc", f"{build_dir}/software/esrc", copy_all = True)
             else: sys.exit(f"{iob_colors.FAIL}{module} not in submodule directories.{iob_colors.ENDC}")
@@ -131,6 +134,14 @@ def python_setup(build_dir):
     dest_dir  = f"{build_dir}/scripts"
     if not os.path.exists(dest_dir): os.mkdir(dest_dir)
     copy_files( lib_dir, dest_dir, sim_srcs, '*.py' )
+
+
+def doc_setup( meta_core_data ):
+    core_flows = meta_core_data['flows']
+    build_dir = meta_core_data['build_dir']
+    setup_dir = meta_core_data['setup_dir']
+
+    shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
 
 
 # Setup a submodule in a given build directory
