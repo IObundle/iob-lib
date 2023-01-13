@@ -7,6 +7,17 @@ from ios import get_interface_mapping
 from setup import setup
 import build_srcs
 
+# Add tester modules to the list of hw, sim, sw and fpga modules of the current core/system
+# meta: meta dictionary of the current system
+# tester_options: dictionary with tester options
+def add_tester_modules(meta, tester_options):
+    # Make sure lists exist
+    for i in ['hw_setup','sim_setup','fpga_setup','sw_setup']:
+        if i not in meta['submodules']: meta['submodules'][i] = { 'headers' : [], 'modules': [] }
+
+    # Add tester to lists
+    for i in ['hw_setup','sim_setup','fpga_setup','sw_setup']:
+        meta['submodules'][i]['modules'].append(('TESTER',tester_options))
 
 #Given the io dictionary of ports, the port name (and size, and optional bit list) and a wire, it will map the selected bits of the port to the given wire.
 #io_dict: dictionary where keys represent port names, values are the mappings

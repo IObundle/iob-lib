@@ -31,7 +31,9 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
 
     top = meta_data['name']
     build_dir = meta_data['build_dir']
+
     # Check if should create build directory for this core/system
+    #TODO: We need to find another way of checking this. Currently we can not configure another build_dir in *_setup.py because it will cause this to not build the directory!
     create_build_dir = build_dir==f"../{meta_data['name']}_{meta_data['version']}"
 
     build_srcs.set_default_submodule_dirs(meta_data)
@@ -116,20 +118,10 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
 
 
 
-#Return name of the core/system in the current directory (extracted from *_setup.py)
-def get_core_name():
+#Print build directory of the core/system in the current directory (extracted from *_setup.py)
+def get_build_dir():
     module = import_setup(".")
-    print(module.meta['name'])
-
-#Return version of the core/system in the current directory (extracted from *_setup.py)
-def get_core_version():
-    module = import_setup(".")
-    print(module.meta['version'])
-
-#Return version of the core/system in the current directory (extracted from *_setup.py)
-def get_core_flows():
-    module = import_setup(".")
-    print(module.meta['flows'])
+    print(module.meta['build_dir'])
 
 #Return white-space separated list of submodules directories of the core/system in the current directory (extracted from *_setup.py)
 def get_core_submodules_dirs():

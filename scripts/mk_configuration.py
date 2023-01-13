@@ -69,16 +69,6 @@ def config_build_mk(defines, meta_data, build_dir):
     file2create.write(f"VERSION={meta_data['version']}\n")
     file2create.write(f"BUILD_DIR_NAME={build_dir.split('/')[-1]}\n")
     file2create.write(f"FLOWS={meta_data['flows']}\n\n")
-    file2create.write(f"DEFINES=\n")
-
-    for macro in defines:
-        if macro['type'] == 'D':
-            d_name = macro['name'].upper()
-            d_val = macro['val']
-            file2create.write(f"{d_name} ?= {d_val}\n")
-            file2create.write(f"ifeq ($({d_name}),1)\n")
-            file2create.write(f"DEFINES+= -D{d_name}\n")
-            file2create.write(f"endif\n\n")
 
     file2create.close()
 
@@ -88,7 +78,7 @@ def config_build_mk(defines, meta_data, build_dir):
 #flows_list:  list of flows of module
 #flows_filter: list of flows that should be appended if they exist in flows_list
 #build_dir: build directory containing config_build.mk
-def append_config_build_mk(flows_list, flows_filter, build_dir):
+def append_flows_config_build_mk(flows_list, flows_filter, build_dir):
     flows2append=""
     for flow in flows_filter:
         if flow in flows_list: flows2append += f"{flow} "
@@ -96,6 +86,20 @@ def append_config_build_mk(flows_list, flows_filter, build_dir):
     if not flows2append: return
     file = open(f"{build_dir}/config_build.mk", "a")
     file.write(f"FLOWS+={flows2append}\n\n")
+    file.close()
+
+def append_defines_config_build_mk(defines, build_dir):
+    file = open(f"{build_dir}/config_build.mk", "a")
+
+    for macro in defines:
+        if macro['type'] == 'D':
+            d_name = macro['name'].upper()
+            d_val = macro['val']
+            file.write(f"{d_name} ?= {d_val}\n")
+            file.write(f"ifeq ($({d_name}),1)\n")
+            file.write(f"DEFINES+= -D{d_name}\n")
+            file.write(f"endif\n\n")
+
     file.close()
 
 # Generate TeX table of confs

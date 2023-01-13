@@ -13,18 +13,9 @@ PYTHON_DIR=submodules/LIB/scripts
 
 #submodule directories
 $(foreach entry, $(shell $(PYTHON_DIR)/setup.py get_core_submodules_dirs), $(eval $(entry)))
-#
-# core name
-NAME:=$(shell $(PYTHON_DIR)/setup.py get_core_name)
-
-# create version string
-VERSION_STR:=$(shell $(PYTHON_DIR)/version.py -i .)
-
-# build directory name
-BUILD_DIR_NAME:=$(NAME)_$(VERSION_STR)
 
 # establish build dir paths
-BUILD_DIR := ../$(BUILD_DIR_NAME)
+BUILD_DIR := $(shell $(PYTHON_DIR)/setup.py get_build_dir)
 
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn

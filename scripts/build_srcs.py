@@ -69,6 +69,9 @@ def hw_setup(module):
     set_default_submodule_dirs(core_meta_data) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
     submodule_dirs = core_meta_data['submodules']['dirs']
 
+    # append this core hw defines to config_build.mk
+    mk_conf.append_defines_config_build_mk(module.confs, build_dir)
+
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, build_dir)
 
@@ -106,7 +109,7 @@ def sim_setup(module):
     sim_dir = "hardware/simulation"
 
     # append this core hw flows to config_build
-    mk_conf.append_config_build_mk(core_flows,["sim"],build_dir)
+    mk_conf.append_flows_config_build_mk(core_flows,["sim"],build_dir)
 
     if 'sim' in core_flows:
         #Use distutils copy_tree() to copy entire simulation directory and possibly merge with existing one
@@ -219,7 +222,7 @@ def sw_setup(module):
     submodule_dirs = core_meta_data['submodules']['dirs']
 
     # append this core hw flows to config_build
-    mk_conf.append_config_build_mk(core_flows,["emb","pc-emul"],build_dir)
+    mk_conf.append_flows_config_build_mk(core_flows,["emb","pc-emul"],build_dir)
 
     # Copy software tree if it exists as this core may contain software sources to be used by others
     if os.path.isdir(f"{setup_dir}/software"):
