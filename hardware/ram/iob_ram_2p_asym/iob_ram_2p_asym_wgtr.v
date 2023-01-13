@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 `include "iob_lib.vh"
 
-module iob_ram_2p_asym
+module iob_ram_2p_asym_wgtr
   #(
     parameter W_DATA_W = 0,
     parameter R_DATA_W = 0,
@@ -52,72 +52,36 @@ module iob_ram_2p_asym
 
    //connect the buses
    integer m,q,j,k,l;
-   generate
 
-      if (W_DATA_W > R_DATA_W) begin
-
-         //write parallel
-         always @* begin
-            for (j=0; j < R; j= j+1) begin
-               en_wr[j] = w_en_i;
-               data_wr[j] = w_data_i[j*MINDATA_W +: MINDATA_W];
-               addr_wr[j] = w_addr_i;
-            end
-         end
-
-         //read serial
-         always @* begin
-            for (k=0; k < R; k= k+1) begin
-               addr_rd[k] = r_addr_i[R_ADDR_W-1-:W_ADDR_W];
-            end
-         end
-
-         //read address register
-         reg [(R_ADDR_W-W_ADDR_W)-1:0] r_addr_lsbs_reg;
-         always @(posedge clk_i)
-           if (r_en_i)
-             r_addr_lsbs_reg <= r_addr_i[(R_ADDR_W-W_ADDR_W)-1:0];
-
-         //read mux
-         always @* begin
-            r_data_o = 1'b0;
-            for (l=0; l < R; l= l+1) begin
-               r_data_o = data_rd[r_addr_lsbs_reg];
-            end
-         end
-
-      end else  if (W_DATA_W < R_DATA_W) begin
-         //write serial
-         always @* begin
-            for (m=0; m < R; m= m+1) begin
-               en_wr[m] = w_en_i & (w_addr_i[(W_ADDR_W-R_ADDR_W)-1:0] == m);
-               data_wr[m] = w_data_i;
-               addr_wr[m] = w_addr_i[W_ADDR_W-1 -: R_ADDR_W];
-            end
-         end
-         //read parallel
-         always @* begin
-            r_data_o = 1'b0;
-            for (q=0; q < R; q= q+1) begin
-               addr_rd[q] = r_addr_i;
-               r_data_o[q*MINDATA_W +: MINDATA_W] = data_rd[q];
-            end
-         end
-
-      end else begin //W_DATA_W = R_DATA_W
-         //write serial
-         always @* begin
-            en_wr[0] = w_en_i;
-            data_wr[0] = w_data_i;
-            addr_wr[0] = w_addr_i;
-         end
-         //read parallel
-         always @* begin
-            addr_rd[0] = r_addr_i;
-            r_data_o = data_rd_0;
-         end
+   //write parallel
+   always @* begin
+      for (j=0; j < R; j= j+1) begin
+         en_wr[j] = w_en_i;
+         data_wr[j] = w_data_i[j*MINDATA_W +: MINDATA_W];
+         addr_wr[j] = w_addr_i;
       end
-   endgenerate
+   end
+
+   //read serial
+   always @* begin
+      for (k=0; k < R; k= k+1) begin
+         addr_rd[k] = r_addr_i[R_ADDR_W-1-:W_ADDR_W];
+      end
+   end
+
+   //read address register
+   reg [(R_ADDR_W-W_ADDR_W)-1:0] r_addr_lsbs_reg;
+   always @(posedge clk_i)
+     if (r_en_i)
+       r_addr_lsbs_reg <= r_addr_i[(R_ADDR_W-W_ADDR_W)-1:0];
+
+   //read mux
+   always @* begin
+      r_data_o = 1'b0;
+      for (l=0; l < R; l= l+1) begin
+         r_data_o = data_rd[r_addr_lsbs_reg];
+      end
+   end
 
    genvar  p;
    generate
