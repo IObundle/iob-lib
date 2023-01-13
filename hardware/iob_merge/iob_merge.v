@@ -11,7 +11,7 @@ module iob_merge
    (
 
     input                              clk_i,
-    input                              rst_i,
+    input                              arst_i,
 
     //masters interface
     input [N_MASTERS*`REQ_W-1:0]       m_req_i,
@@ -33,8 +33,8 @@ module iob_merge
    
    //select enable
    reg sel_en; 
-   always @(posedge clk_i, posedge rst_i)
-     if(rst_i)
+   always @(posedge clk_i, posedge arst_i)
+     if(arst_i)
        sel_en <= 1'b1;
      else if(s_req_o[`avalid(0)])
        sel_en <= 1'b0;
@@ -69,8 +69,8 @@ module iob_merge
    //
 
    //register master selection
-   always @( posedge clk_i, posedge rst_i ) begin
-      if( rst_i )
+   always @( posedge clk_i, posedge arst_i ) begin
+      if( arst_i )
         sel_reg <= {Nb{1'b0}};
       else
         sel_reg <= sel;
