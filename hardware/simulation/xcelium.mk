@@ -24,8 +24,8 @@ SIM_PROC=xmsim
 comp: $(VHDR) $(VSRC)
 	xmvlog $(VFLAGS) $(VSRC); xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 
-exec:
-	xmsim $(SFLAGS) $(COV_SFLAGS) worklib.$(NAME)_tb:module
+exec: xmelab.log
+	sync && sleep 1 && xmsim $(SFLAGS) $(COV_SFLAGS) worklib.$(NAME)_tb:module
 	grep -v xcelium xmsim.log | grep -v xmsim | grep -v "\$finish" >> test.log
 ifeq ($(COV),1)
 	ls -d cov_work/scope/* > all_ucd_file
@@ -34,7 +34,7 @@ ifeq ($(COV),1)
 endif
 
 clean: gen-clean
-	@rm -f xmelab.log  xmsim.log  xmvlog.log *.vh
+	@rm -f xmelab.log  xmsim.log  xmvlog.log
 	@rm -f iob_cov_waiver.vRefine
 
 very-clean: clean
