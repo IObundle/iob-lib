@@ -38,7 +38,7 @@ module iob_merge
        sel_en <= 1'b1;
      else if(s_req_o[`avalid(0)])
        sel_en <= 1'b0;
-     else if(s_resp_i[`rvalid(0)])
+     else if(s_resp_i[`ready(0)])
        sel_en <= ~s_req_o[`avalid(0)];
 
    
