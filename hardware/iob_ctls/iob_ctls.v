@@ -10,7 +10,7 @@
 module iob_ctls
   #(
     parameter N = 0,
-    parameter TYPE = 0, //trailing (0), leading (1)
+    parameter MODE = 0, //trailing (0), leading (1)
     parameter SYMBOL = 0 //search zeros (0), search ones (1) 
     )
   (
@@ -31,7 +31,7 @@ module iob_ctls
       .data_o(data_int2)
       );
    
-   wire [N-1:0]         data_int3 = TYPE? data_int2: data_int1;
+   wire [N-1:0]         data_int3 = MODE? data_int2: data_int1;
 
    //normalized to count trailing ones
    reg found_zero;
