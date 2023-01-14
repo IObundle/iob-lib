@@ -62,7 +62,7 @@ include hardware/hw_setup.mk
 endif
 
 SRC+=$(BUILD_VSRC_DIR)/$(NAME)_version.vh
-$(BUILD_VSRC_DIR)/$(NAME)_version.vh: config_setup.mk
+$(BUILD_VSRC_DIR)/$(NAME)_version.vh:
 	$(LIB_DIR)/scripts/version.py -v . -o $(@D)
 
 #simulation
@@ -180,6 +180,7 @@ SRC+=$(BUILD_TSRC_DIR)/$(NAME)_version.tex
 $(BUILD_TSRC_DIR)/$(NAME)_version.tex:
 	$(LIB_DIR)/scripts/version.py -t .
 	mv $(NAME)_version.tex $(BUILD_TSRC_DIR)
+	mv $(NAME)_previous_version.tex $(BUILD_TSRC_DIR)
 
 #make short git hash file
 SRC+=$(BUILD_TSRC_DIR)/shortHash.tex
