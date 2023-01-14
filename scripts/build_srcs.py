@@ -60,13 +60,15 @@ def hw_setup(core_meta_data):
 def sim_setup( core_meta_data ):
     build_dir = core_meta_data['build_dir']
     setup_dir = core_meta_data['setup_dir']
-    sim_setup = core_meta_data['submodules']['sim_setup']
     submodule_dirs = core_meta_data['submodules']['dirs']
     sim_dir = "hardware/simulation"
+    sim_srcs = ["iob_tasks.vh"]
+    Vheaders = []
     
-    Vheaders = sim_setup['v_headers']
-    sim_srcs = sim_setup['hw_modules']
-    sim_srcs.append("iob_tasks.vh")
+    if 'sim_setup' in core_meta_data['submodules'].keys():
+        sim_setup = core_meta_data['submodules']['sim_setup']
+        Vheaders.extend(sim_setup['v_headers'])
+        sim_srcs.extend(sim_setup['hw_modules'])
 
     shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation")
     module_dependency_setup(sim_srcs, Vheaders, build_dir, submodule_dirs) 
