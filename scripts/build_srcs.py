@@ -117,7 +117,7 @@ def sw_setup(core_meta_data):
     #print(aux)
     if "pc-emul" in core_flows: copy_files(f"{lib_dir}/software/pc-emul", f"{build_dir}/software/pc-emul", copy_all = True)
     if "emb" in core_flows: copy_files(f"{lib_dir}/software/embedded", f"{build_dir}/software/embedded", copy_all = True)
-    if ('sw_setup' and 'dirs') in core_meta_data['submodules'].keys():
+    if 'sw_setup' in core_meta_data['submodules'].keys() and 'dirs' in core_meta_data['submodules'].keys():
         core_sw_setup = core_meta_data['submodules']['sw_setup']
         submodule_dirs = core_meta_data['submodules']['dirs']
         for module in core_sw_setup['sw_modules']:
