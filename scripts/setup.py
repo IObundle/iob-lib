@@ -88,13 +88,13 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     #
     # Generate sw
     #
-    if ("emb" in core_flows) or ("pc-emul" in core_flows):
-        if regs:
+    if regs:
+        if os.path.isdir(meta_data['build_dir']+'/software/esrc'):
             mkregs.write_swheader(reg_table, meta_data['build_dir']+'/software/esrc', top)
             mkregs.write_swcode(reg_table, meta_data['build_dir']+'/software/esrc', top)
-            if os.path.isdir(meta_data['build_dir']+'/software/psrc'): mkregs.write_swheader(reg_table, meta_data['build_dir']+'/software/psrc', top)
-        mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/esrc')
-        if os.path.isdir(meta_data['build_dir']+'/software/psrc'): mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/psrc')
+        if os.path.isdir(meta_data['build_dir']+'/software/psrc'): mkregs.write_swheader(reg_table, meta_data['build_dir']+'/software/psrc', top)
+    if os.path.isdir(meta_data['build_dir']+'/software/esrc'): mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/esrc')
+    if os.path.isdir(meta_data['build_dir']+'/software/psrc'): mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/psrc')
 
     #
     # Generate TeX
