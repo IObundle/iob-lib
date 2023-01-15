@@ -73,12 +73,6 @@ ifneq ($(wildcard document/doc_setup.mk),)
 include document/doc_setup.mk
 endif
 
-#make short git hash file
-SRC+=$(BUILD_TSRC_DIR)/shortHash.tex
-$(BUILD_TSRC_DIR)/shortHash.tex:
-	git rev-parse --short HEAD > $@
-
-
 #copy lib tex files if not present
 SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%, $(BUILD_TSRC_DIR)/%, $(wildcard $(LIB_DIR)/document/tsrc/*))
 $(BUILD_TSRC_DIR)/%: $(LIB_DIR)/document/tsrc/%

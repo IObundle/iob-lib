@@ -28,8 +28,7 @@ def build_dir_setup(core_meta_data):
     if ("emb" in core_flows) or ("pc-emul" in core_flows):
         sw_setup( core_meta_data )
     # Setup DOC directories :
-    if "doc" in core_flows: 
-        doc_setup( core_meta_data )
+    doc_setup( core_meta_data )
     # Setup DELIVERY directories :
     # (WIP)
     # Copy generic MAKEFILE
@@ -147,9 +146,20 @@ def doc_setup( meta_core_data ):
     build_dir = meta_core_data['build_dir']
     setup_dir = meta_core_data['setup_dir']
 
-    shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
-    if not(os.path.exists(f"{setup_dir}/document/tsrc")): os.mkdir(f"{setup_dir}/document/tsrc")
+    # For cores that have their own documentation
+    if "doc" in core_flows: 
+        shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
 
+    # General documentation
+    write_git_revision_short_hash(f"{setup_dir}/document/tsrc")
+
+def write_git_revision_short_hash(dst_dir):
+    file_name = 'shortHash.tex'
+    text = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+
+    if not(os.path.exists(dst_dir)): os.makedirs(dst_dir)
+    file = open(f"{dst_dir}/{file_name}", "w")
+    file.write(text)
 
 # Setup a submodule in a given build directory
 # build_dir: path to build directory
