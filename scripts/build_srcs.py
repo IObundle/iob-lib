@@ -151,7 +151,7 @@ def doc_setup( meta_core_data ):
         shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
 
     # General documentation
-    write_git_revision_short_hash(f"{setup_dir}/document/tsrc")
+    write_git_revision_short_hash(f"{build_dir}/document/tsrc")
 
 def write_git_revision_short_hash(dst_dir):
     file_name = 'shortHash.tex'
