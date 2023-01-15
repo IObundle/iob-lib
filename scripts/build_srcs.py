@@ -87,7 +87,8 @@ def fpga_setup(core_meta_data):
     for file in Path(f"{lib_dir}/{fpga_dir}").rglob('*'):
         src_file = file.as_posix()
         dest_file = re.sub(lib_dir, build_dir, src_file)
-        if not(os.path.exists(file.parent)): os.makedirs(file.parent) 
+        dest_dir = Path(dest_file).parent
+        if not(os.path.exists(dest_dir)): os.mkdir(dest_dir)
         if os.path.isfile(src_file): shutil.copyfile(f"{src_file}", f"{dest_file}")
     subprocess.call(["find", build_dir, "-name", "*.pdf", "-delete"])
 
