@@ -148,6 +148,7 @@ def doc_setup( meta_core_data ):
     setup_dir = meta_core_data['setup_dir']
 
     shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
+    if not(os.path.exists(f"{setup_dir}/document/tsrc")): os.mkdir(f"{setup_dir}/document/tsrc")
 
 
 # Setup a submodule in a given build directory
