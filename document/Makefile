@@ -14,7 +14,7 @@ include doc_build.mk
 endif
 
 #default DOC
-DOC?=pb
+DOC?=ug
 
 TSRC = $(patsubst tsrc/%, ./%, $(wildcard tsrc/*))
 %.tex: tsrc/%.tex
