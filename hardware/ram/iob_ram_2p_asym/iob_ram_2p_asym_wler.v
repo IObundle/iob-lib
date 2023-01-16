@@ -52,20 +52,20 @@ module iob_ram_2p_asym_wler
    genvar                      m,q;
    generate
 
-      if (W_DATA_W < R_DATA_W) begin
+      if (W_DATA_W < R_DATA_W) begin : wltr
          //write serial
-         for (m=0; m < R; m= m+1) begin
+         for (m=0; m < R; m= m+1) begin: wser
             assign en_wr[m] = w_en_i & (w_addr_i[(W_ADDR_W-R_ADDR_W)-1:0] == m);
             assign data_wr[((R*MINDATA_W)-(m*MINDATA_W))-1 -: MINDATA_W] = w_data_i;
             assign addr_wr[((R*MINADDR_W)-(m*MINADDR_W))-1 -: MINADDR_W] = w_addr_i[W_ADDR_W-1 -: R_ADDR_W];
          end
          //read parallel
-         for (q=0; q < R; q= q+1) begin
+         for (q=0; q < R; q= q+1) begin :rpar
             assign addr_rd[((R*MINADDR_W)-(q*MINADDR_W))-1 -: MINADDR_W] = r_addr_i;
             assign r_data_o[q*MINDATA_W +: MINDATA_W] = data_rd[((R*MINDATA_W)-(q*MINDATA_W))-1 -: MINDATA_W];
          end
 
-      end else begin //W_DATA_W = R_DATA_W
+      end else begin : wger //W_DATA_W = R_DATA_W
          //write serial
          assign en_wr[0] = w_en_i;
          assign data_wr[(R*MINDATA_W)-1 -: MINDATA_W] = w_data_i;

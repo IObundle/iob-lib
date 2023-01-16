@@ -55,7 +55,7 @@ module iob_ram_2p_asym_wgtr
    //write parallel
    genvar                     j;
    generate
-      for (j=0; j < R; j= j+1) begin
+      for (j=0; j < R; j= j+1) begin : wpar
          assign en_wr[j] = w_en_i;
          assign data_wr[(R*MINDATA_W)-(j*MINDATA_W)-1 -: MINDATA_W] = w_data_i[(j*MINDATA_W) +: MINDATA_W];
          assign addr_wr[(R*MINADDR_W)-(j*MINADDR_W)-1 -: MINADDR_W] = w_addr_i;
@@ -65,7 +65,7 @@ module iob_ram_2p_asym_wgtr
    //read serial
    genvar                     k;
    generate
-      for (k=0; k < R; k= k+1) begin
+      for (k=0; k < R; k= k+1) begin :rser
          assign addr_rd[(R*MINADDR_W)-(k*MINADDR_W)-1 -: MINADDR_W] = r_addr_i[R_ADDR_W-1-:W_ADDR_W];
       end
    endgenerate
@@ -79,7 +79,7 @@ module iob_ram_2p_asym_wgtr
    //read mux
    genvar                     l;
    generate
-      for (l=0; l < R; l= l+1) begin
+      for (l=0; l < R; l= l+1) begin :rmux
          assign r_data_o = data_rd[(R*MINDATA_W)-(r_addr_lsbs_reg*MINDATA_W)-1 -: MINDATA_W];
       end
    endgenerate
