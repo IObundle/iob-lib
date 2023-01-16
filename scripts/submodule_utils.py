@@ -10,7 +10,8 @@ import importlib
 import if_gen
 
 # List of reserved signals
-# These signals are known by the python scripts and are always connected using the matching Verilog the string.
+# These signals are known by the python scripts and are always auto-connected using the matching Verilog the string.
+# These signals can not be portmapped! They will always have the fixed connection specified here.
 reserved_signals = \
 {
 'clk_i':'.clk_i(clk_i)',
@@ -19,13 +20,13 @@ reserved_signals = \
 'rst_i':'.rst_i(rst_i)',
 'reset':'.reset(rst_i)',
 'arst_i':'.arst_i(rst_i)',
-'iob_avalid':'.iob_avalid(slaves_req[`avalid(`/*<InstanceName>*/)])',
-'iob_addr':'.iob_addr(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])',
-'iob_wdata':'.iob_wdata(slaves_req[`wdata(`/*<InstanceName>*/)])',
-'iob_wstrb':'.iob_wstrb(slaves_req[`wstrb(`/*<InstanceName>*/)])',
-'iob_rdata':'.iob_rdata(slaves_resp[`rdata(`/*<InstanceName>*/)])',
-'iob_ready':'.iob_ready(slaves_resp[`ready(`/*<InstanceName>*/)])',
-'iob_rvalid':'.iob_rvalid(slaves_resp[`rvalid(`/*<InstanceName>*/)])',
+'iob_avalid_i':'.iob_avalid_i(slaves_req[`avalid(`/*<InstanceName>*/)])',
+'iob_addr_i':'.iob_addr_i(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])',
+'iob_wdata_i':'.iob_wdata_i(slaves_req[`wdata(`/*<InstanceName>*/)])',
+'iob_wstrb_i':'.iob_wstrb_i(slaves_req[`wstrb(`/*<InstanceName>*/)])',
+'iob_rdata_o':'.iob_rdata_o(slaves_resp[`rdata(`/*<InstanceName>*/)])',
+'iob_ready_o':'.iob_ready_o(slaves_resp[`ready(`/*<InstanceName>*/)])',
+'iob_rvalid_o':'.iob_rvalid_o(slaves_resp[`rvalid(`/*<InstanceName>*/)])',
 'trap_o':'.trap_o(trap_o[0])',
 'm_axi_awid':'.m_axi_awid    (m_axi_awid[0:0])',
 'm_axi_awaddr':'.m_axi_awaddr  (m_axi_awaddr[`DDR_ADDR_W-1:0])',
@@ -212,6 +213,23 @@ def get_module_io(ios):
             module_signals.extend(table['ports'])
     return module_signals
 
+# string: string with parameter
+# confs: confs list of dictionaries. Each dictionary describes a parameter (macros will be filtered if they exist)
+# prefix: String to add as a prefix to any parameter found in the string
+def add_prefix_to_parameters_in_string(string, confs, prefix):
+    for parameter in confs:
+        if parameter['type'] in ['P','F']:
+            string = string.replace(parameter['name'], prefix+parameter['name'])
+    return string
+
+# port: dictionary describing a port (IO). Example: {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
+# confs: confs list of dictionaries. Each dictionary describes a parameter (macros will be filtered if they exist)
+# prefix: String to add as a prefix to any parameter found in the port width
+def add_prefix_to_parameters_in_port(port, confs, prefix):
+    local_port = port.copy()
+    local_port['n_bits'] = add_prefix_to_parameters_in_string(local_port['n_bits'], confs, prefix)
+    return local_port
+
 # Given lines read from the verilog file with a module declaration
 # this function returns the parameters of that module. 
 # The return value is a dictionary, where the key is the 
@@ -295,7 +313,7 @@ def get_peripherals_ports_params_top(peripherals_list, submodule_dirs):
             module = import_setup(submodule_dirs[instance['type']])
             # Append module IO, parameters, and top name
             port_list[instance['type']]=get_module_io(module.ios)
-            params_list[instance['type']]=list(i for i in module.confs if i['type'] == 'P')
+            params_list[instance['type']]=list(i for i in module.confs if i['type'] in ['P','F'])
             top_list[instance['type']]=module.meta['name']
     return port_list, params_list, top_list
 

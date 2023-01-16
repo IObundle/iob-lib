@@ -2,7 +2,7 @@
 #
 #    tester.py: tester related functions
 #
-from submodule_utils import import_setup, get_module_io
+from submodule_utils import import_setup, get_module_io, add_prefix_to_parameters_in_port
 from ios import get_interface_mapping
 from setup import setup
 import build_srcs
@@ -119,7 +119,7 @@ def setup_tester( python_module, module_parameters):
                 else:
                     #Mapped to external interface
                     #Add tester IO for this port
-                    tester_mapping_ios.append(port)
+                    tester_mapping_ios.append(add_prefix_to_parameters_in_port(port,module.confs,mapping[0]['corename']+"_"))
                     #Wire name generated the same way as ios inserted in verilog
                     wire_name = f"portmap_{map_idx}_{port['name']}"
 
@@ -150,7 +150,8 @@ def setup_tester( python_module, module_parameters):
             else:
                 #Mapped to external interface
                 #Add tester IO for this port
-                tester_mapping_ios.append({'name':port['name'], 'type':port['type'], 'n_bits':n_bits, 'descr':port['descr']})
+                tester_mapping_ios.append(add_prefix_to_parameters_in_port({'name':port['name'], 'type':port['type'], 'n_bits':n_bits, 'descr':port['descr']},
+                                                                           module.confs,mapping[0]['corename']+"_"))
                 #Wire name generated the same way as ios inserted in verilog
                 wire_name = f"portmap_{map_idx}_{port['name']}"
 

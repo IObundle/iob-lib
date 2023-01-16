@@ -15,8 +15,10 @@ def insert_header_files(template_contents, peripherals_list, submodule_dirs):
             included_peripherals.append(instance['type'])
             # Import <corename>_setup.py module to get corename 'top'
             module = import_setup(submodule_dirs[instance['type']])
-            top = module.meta['name']
-            template_contents.insert(header_index, f'`include "{top}_swreg_def.vh"\n')
+            # Only insert swreg file if module has regiters
+            if hasattr(module,'regs') and module.regs:
+                top = module.meta['name']
+                template_contents.insert(header_index, f'`include "{top}_swreg_def.vh"\n')
 
 
 #Creates system based on {top}.vt template 
@@ -69,12 +71,12 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file, i
         # Insert peripheral instance name
         template_contents.insert(start_index, "   {} (\n".format(instance['name']))
         # Insert peripheral parameters (if any)
-        if len(instance['params'])>0:
+        if params_list[instance['type']]:
             template_contents.insert(start_index, "   )\n")
             first_reversed_signal=True
             # Insert parameters
-            for param, value in instance['params'].items():
-                template_contents.insert(start_index, '      .{}({}){}\n'.format(param,value,"" if first_reversed_signal else ","))
+            for param in params_list[instance['type']]:
+                template_contents.insert(start_index, '      .{}({}){}\n'.format(param['name'],instance['name']+"_"+param['name'],"" if first_reversed_signal else ","))
                 first_reversed_signal=False
             template_contents.insert(start_index, "     #(\n")
         # Insert peripheral type

@@ -6,7 +6,7 @@ import mk_configuration as mk_conf
 import mkregs
 import ios as ios_lib
 import blocks as blocks_lib
-from submodule_utils import import_setup
+from submodule_utils import import_setup, get_peripherals_ports_params_top
 import build_srcs
 import iob_soc
 
@@ -52,6 +52,17 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
 
     # Get peripherals list from 'peripherals' table in blocks list
     peripherals_list = iob_soc.get_peripherals_list(blocks)
+
+    if peripherals_list:
+        # Get port list, parameter list and top module name for each type of peripheral used
+        port_list, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, meta_data['submodules']['dirs'])
+        # Insert peripheral instance parameters in system parameters
+        # This causes the system to have a parameter for each parameter of each peripheral instance
+        for instance in peripherals_list:
+            for parameter in params_list[instance['type']]:
+                parameter_to_append = parameter.copy()
+                parameter_to_append['name'] = f"{instance['name']}_{parameter_to_append['name']}"
+                confs.append(parameter_to_append)
     # Get peripheral related macros
     if peripherals_list: iob_soc.get_peripheral_macros(confs, peripherals_list)
     # Append peripherals IO 
@@ -64,7 +75,7 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     # Try to build system_tb.v if template is available
     createTestbench.create_system_testbench(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],f'hardware/simulation/src/{top}_tb.v'))
     # Try to build system_top.v if template is available
-    createTopSystem.create_top_system(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, ios, os.path.join(meta_data['build_dir'],f'hardware/simulation/src/{top}_top.v'))
+    createTopSystem.create_top_system(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, ios, confs, os.path.join(meta_data['build_dir'],f'hardware/simulation/src/{top}_top.v'))
 
 
     #
