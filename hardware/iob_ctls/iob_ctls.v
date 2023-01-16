@@ -19,10 +19,16 @@ module iob_ctls
    );
 
    //invert if searching zeros or not
-   wire [N-1:0]         data_int1 = !SYMBOL? ~data_i: data_i;
-
+   wire [N-1:0]         data_int1;
+   generate if (SYMBOL == 0)
+     assign data_int1 = data_i;
+   else
+     assign data_int1 = ~data_i;
+   endgenerate
+        
    // reverse if lading symbols or not
    wire [N-1:0]         data_int2;
+   generate if (MODE == 1)
    iob_reverse
      #(N)
    reverse0
@@ -30,22 +36,20 @@ module iob_ctls
       .data_i(data_int1),
       .data_o(data_int2)
       );
-   
-   wire [N-1:0]         data_int3 = MODE? data_int2: data_int1;
+   else
+     assign data_int2 = data_int1;   
+   endgenerate
 
-   //normalized to count trailing ones
-   reg found_zero;
-   reg [$clog2(N):0] count;   
+   //normalized to count trailing zeros
+   reg [$clog2(N):0] count;
    integer           i;
    
    always @* begin
-      found_zero = 0;
       count = 0;
-      for (i=0; i < N; i=i+1) begin
-         found_zero = found_zero | ~data_int3[i];
-         if (!found_zero)
-           count=count+1;
-      end
+      
+      for (i=0; i < N; i=i+1)
+         if ((data_int2[i]==1'd0) && (count==i))
+            count = i+1;
    end
    
    assign count_o = count;
