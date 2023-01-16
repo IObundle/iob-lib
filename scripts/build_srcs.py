@@ -28,8 +28,7 @@ def build_dir_setup(core_meta_data):
     if ("emb" in core_flows) or ("pc-emul" in core_flows):
         sw_setup( core_meta_data )
     # Setup DOC directories :
-    if "doc" in core_flows: 
-        doc_setup( core_meta_data )
+    doc_setup( core_meta_data )
     # Setup DELIVERY directories :
     # (WIP)
     # Copy generic MAKEFILE
@@ -88,6 +87,8 @@ def fpga_setup(core_meta_data):
     for file in Path(f"{lib_dir}/{fpga_dir}").rglob('*'):
         src_file = file.as_posix()
         dest_file = re.sub(lib_dir, build_dir, src_file)
+        dest_dir = Path(dest_file).parent
+        if not(os.path.exists(dest_dir)): os.mkdir(dest_dir)
         if os.path.isfile(src_file): shutil.copyfile(f"{src_file}", f"{dest_file}")
     subprocess.call(["find", build_dir, "-name", "*.pdf", "-delete"])
 
@@ -113,6 +114,9 @@ def sw_setup(core_meta_data):
 
     shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", ignore=shutil.ignore_patterns('*_setup*'))
     if "emb" in core_flows and not(os.path.exists(f"{setup_dir}/software/embedded")): os.mkdir(f"{setup_dir}/software/embedded")
+    if "emb" in core_flows and not(os.path.exists(f"{setup_dir}/software/esrc")): os.mkdir(f"{setup_dir}/software/esrc")
+    if "pc-emul" in core_flows and not(os.path.exists(f"{setup_dir}/software/psrc")): os.mkdir(f"{setup_dir}/software/psrc")
+    
     #aux = copy_files(f"{lib_dir}/software/src", f"{build_dir}/software/esrc", copy_all = True)
     #print(aux)
     if "pc-emul" in core_flows: copy_files(f"{lib_dir}/software/pc-emul", f"{build_dir}/software/pc-emul", copy_all = True)
@@ -144,8 +148,20 @@ def doc_setup( meta_core_data ):
     build_dir = meta_core_data['build_dir']
     setup_dir = meta_core_data['setup_dir']
 
-    shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
+    # For cores that have their own documentation
+    if "doc" in core_flows: 
+        shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
 
+    # General documentation
+    write_git_revision_short_hash(f"{build_dir}/document/tsrc")
+
+def write_git_revision_short_hash(dst_dir):
+    file_name = 'shortHash.tex'
+    text = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+
+    if not(os.path.exists(dst_dir)): os.makedirs(dst_dir)
+    file = open(f"{dst_dir}/{file_name}", "w")
+    file.write(text)
 
 # Setup a submodule in a given build directory
 # build_dir: path to build directory
