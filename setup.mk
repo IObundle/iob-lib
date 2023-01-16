@@ -42,7 +42,7 @@ setup: debug
 	./$(NAME)_setup.py
 
 $(BUILD_DIR):
-	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github .gitignore . $@
+	@rsync -avz --exclude .git --exclude submodules --exclude .gitmodules --exclude .github --exclude .gitignore . $@
 	find $@ -name \*_setup.mk -delete
 	rm -rf $@/*_setup.py
 	rm -rf $@/README.md
