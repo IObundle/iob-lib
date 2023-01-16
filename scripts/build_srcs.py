@@ -17,7 +17,7 @@ def build_dir_setup(core_meta_data):
     setup_dir = core_meta_data['setup_dir']
     core_flows = core_meta_data['flows']
     # Setup HARDWARE directories :
-    os.makedirs(f"{build_dir}/hardware/src")
+    os.makedirs(f"{build_dir}/hardware/src", exist_ok=True)
     if "sim" in core_flows: 
         sim_setup( core_meta_data )
     if "fpga" in core_flows: 

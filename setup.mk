@@ -24,9 +24,7 @@ BUILD_DIR := ../$(BUILD_DIR_NAME)
 
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
-BUILD_LINT_DIR = $(BUILD_DIR)/hardware/lint
 
-BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
 BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc

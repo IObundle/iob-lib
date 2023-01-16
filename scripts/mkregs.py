@@ -22,7 +22,8 @@ def bfloor(n, log2base):
     return base*int(n/base)
 
 def verilog_max(a,b):
-    return f"((({a}) > ({b})) ? ({a}) : ({b}))"
+    if(a==b): return f"{a}"
+    else: return f"((({a}) > ({b})) ? ({a}) : ({b}))"
 
 def bceil(n, log2base):
     base = int(2**log2base)
