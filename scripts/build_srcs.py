@@ -113,9 +113,9 @@ def sw_setup(core_meta_data):
     setup_dir = core_meta_data['setup_dir']
 
     shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", ignore=shutil.ignore_patterns('*_setup*'))
-    if "emb" in core_flows and not(os.path.exists(f"{setup_dir}/software/embedded")): os.mkdir(f"{setup_dir}/software/embedded")
-    if "emb" in core_flows and not(os.path.exists(f"{setup_dir}/software/esrc")): os.mkdir(f"{setup_dir}/software/esrc")
-    if "pc-emul" in core_flows and not(os.path.exists(f"{setup_dir}/software/psrc")): os.mkdir(f"{setup_dir}/software/psrc")
+    if "emb" in core_flows and not(os.path.exists(f"{build_dir}/software/embedded")): os.mkdir(f"{build_dir}/software/embedded")
+    if "emb" in core_flows and not(os.path.exists(f"{build_dir}/software/esrc")): os.mkdir(f"{build_dir}/software/esrc")
+    if "pc-emul" in core_flows and not(os.path.exists(f"{build_dir}/software/psrc")): os.mkdir(f"{build_dir}/software/psrc")
     
     #aux = copy_files(f"{lib_dir}/software/src", f"{build_dir}/software/esrc", copy_all = True)
     #print(aux)
