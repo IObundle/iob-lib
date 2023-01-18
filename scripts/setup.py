@@ -75,6 +75,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, ios_prefix=Fal
     #
     # Generate hw
     #
+    meta_data['submodules']['hw_setup']['hw_modules'].append('iob_ctls')
     build_srcs.hw_setup( meta_data )
     if regs:
         mkregs.write_hwheader(reg_table, meta_data['build_dir']+'/hardware/src', top)

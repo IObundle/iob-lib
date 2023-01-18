@@ -14,7 +14,7 @@ include config_setup.mk
 PYTHON_DIR=$(LIB_DIR)/scripts
 
 # create version string
-VERSION_STR := V0.10
+VERSION_STR := V0.70
 
 # build directory name
 BUILD_DIR_NAME:=$(NAME)_$(VERSION_STR)
