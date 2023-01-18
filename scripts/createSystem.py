@@ -92,7 +92,7 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file, i
         start_index = find_idx(template_contents, ");")
         #Insert internal wires
         for wire in internal_wires:
-            template_contents.insert(start_index, f"    wire [{wire['n_bits']}-1:0] {wire['name']}\n")
+            template_contents.insert(start_index, f"    wire [{wire['n_bits']}-1:0] {wire['name']};\n")
         template_contents.insert(start_index, "    // Module internal wires\n")
 
     # Write system.v

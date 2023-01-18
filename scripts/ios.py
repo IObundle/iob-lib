@@ -184,7 +184,18 @@ def get_verilog_mapping(map_obj):
         return map_obj
 
     #Signal is mapped to specific bits of single/multiple wire(s)
+    verilog_concat_string = ""
+    #Create verilog concatenation of bits of same/different wires
+    for map_wire_bit in map_obj:
+        #Stop concatenation if we find a bit not mapped. (Every bit after it should not be mapped aswell)
+        if not map_wire_bit: break 
+        wire, bit = map_wire_bit
+        verilog_concat_string = f"{wire}[{bit}],{verilog_concat_string}"
     #TODO: If mapping is a list of bits...
+
+    verilog_concat_string = "{"+verilog_concat_string
+    verilog_concat_string=verilog_concat_string[:-1]+"}" #Replace last comma by a '}'
+    return verilog_concat_string
 
 #peripheral_instance: dictionary describing a peripheral instance. Must have 'name' and 'IO' attributes.
 #port_name: name of the port we are mapping

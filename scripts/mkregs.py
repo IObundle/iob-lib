@@ -6,6 +6,7 @@
 import sys, os
 from math import ceil, log
 from latex import write_table
+from submodule_utils import eval_param_expression_from_config
 import re
 
 # Use a class for the entire module, as it may be imported multiple times, but must have instance variables (multiple cores/submodules have different registers)
@@ -32,7 +33,7 @@ class mkregs:
 
     def bceil(self, n, log2base):
         base = int(2**log2base)
-        n = self.eval_param_expression(n,'max')
+        n = eval_param_expression_from_config(n, self.config,'max')
         #print(f"{n} of {type(n)} and {base}")
         if n%base == 0:
             return n
@@ -41,7 +42,7 @@ class mkregs:
 
     # Calculate numeric value of addr_w, replacing params by their max value
     def calc_addr_w(self, log2n_items, n_bytes):
-            return int(ceil(self.eval_param_expression(log2n_items,'max')+log(n_bytes,2)))
+            return int(ceil(eval_param_expression_from_config(log2n_items, self.config,'max')+log(n_bytes,2)))
 
     # Generate symbolic expression string to caluclate addr_w in verilog
     @staticmethod
@@ -301,7 +302,7 @@ class mkregs:
             n_bits = row['n_bits']
             log2n_items = row['log2n_items']
             n_bytes = int(self.bceil(n_bits, 3)/8)
-            addr_last = int(addr + ((2**self.eval_param_expression(log2n_items,'max'))-1)*n_bytes)
+            addr_last = int(addr + ((2**eval_param_expression_from_config(log2n_items, self.config,'max'))-1)*n_bytes)
             addr_w = self.calc_addr_w(log2n_items,n_bytes)
             addr_w_base = max(log(self.cpu_n_bytes,2), addr_w)
             auto = row['autologic']
@@ -382,11 +383,11 @@ class mkregs:
             n_bits = row['n_bits']
             n_bytes = self.bceil(n_bits, 3)/8
             log2n_items = row['log2n_items']
-            addr_w = int(ceil(self.eval_param_expression(log2n_items,'val')+log(n_bytes,2)))
+            addr_w = int(ceil(eval_param_expression_from_config(log2n_items, self.config,'val')+log(n_bytes,2)))
             f_def.write(f"localparam {macro_prefix}{name}_ADDR = {row['addr']};\n")
-            if self.eval_param_expression(log2n_items,'val')>0:
+            if eval_param_expression_from_config(log2n_items, self.config,'val')>0:
                 f_def.write(f"localparam {macro_prefix}{name}_ADDR_W = {addr_w};\n")
-            f_def.write(f"localparam {macro_prefix}{name}_W = {self.eval_param_expression(n_bits,'val')};\n\n")
+            f_def.write(f"localparam {macro_prefix}{name}_W = {eval_param_expression_from_config(n_bits, self.config,'val')};\n\n")
         f_def.close()
 
     # Generate *_swreg_def.vh file. Macros from this file should only be used inside the instance of the core/system since they may contain parameters which are only known by the instance.
@@ -407,7 +408,7 @@ class mkregs:
             n_bytes = self.bceil(n_bits, 3)/8
             log2n_items = row['log2n_items']
             f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
-            if self.eval_param_expression(log2n_items,'max')>0:
+            if eval_param_expression_from_config(log2n_items, self.config,'max')>0:
                 f_def.write(f"`define {macro_prefix}{name}_ADDR_W {self.verilog_max(self.calc_verilog_addr_w(log2n_items,n_bytes),1)}\n")
             f_def.write(f"`define {macro_prefix}{name}_W {self.verilog_max(n_bits,1)}\n\n")
         f_def.close()
@@ -538,28 +539,6 @@ class mkregs:
             sys.exit(f"Error: read address {addr} overlaps with previous addresses")
         elif addr_type == "W" and addr < write_addr:
             sys.exit(f"Error: write address {addr} overlaps with previous addresses")
-
-
-    def eval_param_expression(self, param_expression, param_attribute):
-        # given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string.
-        # string_with_param: string defining a math expression that may contain parameters
-        # confs: list of dictionaries, each of which describes a parameter and has attributes: 'name', 'val' and 'max'. 
-        # param_attribute: name of the attribute in the paramater that contains the value to replace in string given. Attribute names are: 'val', 'min, or 'max'.
-        string_with_param = param_expression
-        if type(param_expression)==int:
-            return param_expression
-        else:
-            for param in self.config:
-                if param['name'] in param_expression:
-                    #Replace parameter/macro by its max value (worst case scenario)
-                    string_with_param = re.sub(f"((?:^.*[^a-zA-Z_`])|^)`?{param['name']}((?:[^a-zA-Z_].*$)|$)",f"\\g<1>{param[param_attribute]}\\g<2>", string_with_param)
-            # Try to calculate string as it should only contain numeric values
-            try:
-                return eval(string_with_param)
-            except:
-                print (self.config)
-                sys.exit(f"Error: string '{param_expression}' evaluated to '{string_with_param}' is not well defined.")
-
 
     # compute address
     def compute_addr(self, table, no_overlap):

@@ -61,6 +61,10 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
         for instance in peripherals_list:
             for parameter in params_list[instance['type']]:
                 parameter_to_append = parameter.copy()
+                # Override parameter value if user specified a 'parameters' dictionary with an override value for this parameter.
+                if 'params' in instance and parameter['name'] in instance['params']:
+                    parameter_to_append['val'] = instance['params'][parameter['name']]
+                # Add instance name prefix to the name of the parameter. This makes this parameter unique to this instance
                 parameter_to_append['name'] = f"{instance['name']}_{parameter_to_append['name']}"
                 confs.append(parameter_to_append)
     # Get peripheral related macros
