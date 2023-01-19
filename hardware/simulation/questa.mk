@@ -4,6 +4,7 @@ SIM_SSH_FLAGS=$(QUESTA_SSH_FLAGS)
 SIM_SCP_FLAGS=$(QUESTA_SCP_FLAGS)
 SIM_SYNC_FLAGS=$(QUESTA_SYNC_FLAGS)
 
+SIM_PROC=vsim
 
 CFLAGS = -sv +incdir+. +incdir+../src  +incdir+src
 SFLAGS = -voptargs="+acc" -c 

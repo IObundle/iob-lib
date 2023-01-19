@@ -4,6 +4,8 @@ SIM_SSH_FLAGS=$(SYNOPSYS_SSH_FLAGS)
 SIM_SCP_FLAGS=$(SYNOPSYS_SCP_FLAGS)
 SIM_SYNC_FLAGS=$(SYNOPSYS_SYNC_FLAGS)
 
+SIM_PROC=simv
+
 SFLAGS=-nc -sverilog +incdir+. +incdir+../src  +incdir+src
 ifeq ($(VCD),1)
 SFLAGS+=+define+VCD
