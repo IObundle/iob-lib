@@ -46,11 +46,26 @@ def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
 #    - extra_peripheral_dirs: dictionary with directories of each extra peripheral
 #    - peripheral_portmap: Dictionary where each key-value pair is a Mapping between two signals. Example
 #                     { {'corename':'UART1', 'if_name':'rs232', 'port':'', 'bits':[]}:{'corename':'UUT', 'if_name':'UART0', 'port':'', 'bits':[]} }
-def setup_tester( python_module, module_parameters):
+#    - confs: Optional dictionary with extra macros/parameters or with overrides for existing ones
+def setup_tester( python_module ):
     meta_data = python_module.meta
     ios = python_module.ios
     blocks = python_module.blocks
-    
+    module_parameters = python_module.module_parameters
+    confs = python_module.confs
+
+    #Override Tester confs if any are given in the 'confs' dictionary of the 'module_parameters' dictionary
+    if 'confs' in module_parameters: 
+        for entry in module_parameters['confs']:
+            #If entry exists in confs, then update it
+            for idx, entry2 in enumerate(confs):
+                if entry['name'] == entry2['name']:
+                    confs[idx]=entry
+                    break
+            else:
+                #Did not find entry, so append it
+                confs.append(entry)
+
     #Create default submodule directories
     build_srcs.set_default_submodule_dirs(meta_data)
     #Update submodule directories of Tester with new peripherals directories
