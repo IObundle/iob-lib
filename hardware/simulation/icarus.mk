@@ -4,6 +4,10 @@ ifeq ($(VCD),1)
 VFLAGS+=-DVCD
 endif
 
+ifneq ($(VTOP),)
+VFLAGS+=-s $(VTOP)
+endif
+
 SIM_SERVER=$(IVSIM_SERVER)
 SIM_USER=$(IVSIM_USER)
 

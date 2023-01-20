@@ -100,32 +100,61 @@ module iob_ram_2p_asym_tb;
    end
 
    // instantiate the Unit Under Test (UUT)
-   iob_ram_2p_asym
-     #(
-       .W_DATA_W(W_DATA_W),
-       .R_DATA_W(R_DATA_W),
-       .ADDR_W(MAXADDR_W),
-       .N(N)
-       )
-   uut
-     (
-      .clk_i            (clk),
+   generate
+      if (W_DATA_W > R_DATA_W) begin
+         iob_ram_2p_asym_wgtr
+           #(
+             .W_DATA_W(W_DATA_W),
+             .R_DATA_W(R_DATA_W),
+             .ADDR_W(MAXADDR_W),
+             .N(N)
+             )
+         uut
+           (
+            .clk_i            (clk),
 
-      .ext_mem_w_en_o   (ext_mem_w_en),
-      .ext_mem_w_data_o (ext_mem_w_data),
-      .ext_mem_w_addr_o (ext_mem_w_addr),
-      .ext_mem_r_en_o   (ext_mem_r_en),
-      .ext_mem_r_addr_o (ext_mem_r_addr),
-      .ext_mem_r_data_i (ext_mem_r_data),
-      
-      .w_en_i           (w_en),
-      .w_addr_i         (w_addr),
-      .w_data_i         (w_data),
+            .ext_mem_w_en_o   (ext_mem_w_en),
+            .ext_mem_w_data_o (ext_mem_w_data),
+            .ext_mem_w_addr_o (ext_mem_w_addr),
+            .ext_mem_r_en_o   (ext_mem_r_en),
+            .ext_mem_r_addr_o (ext_mem_r_addr),
+            .ext_mem_r_data_i (ext_mem_r_data),
 
-      .r_en_i           (r_en),
-      .r_addr_i         (r_addr),
-      .r_data_o         (r_data)
-      );
+            .w_en_i           (w_en),
+            .w_addr_i         (w_addr),
+            .w_data_i         (w_data),
+
+            .r_en_i           (r_en),
+            .r_addr_i         (r_addr),
+            .r_data_o         (r_data)
+            );
+      end else begin
+         iob_ram_2p_asym_wler
+           #(
+             .W_DATA_W(W_DATA_W),
+             .R_DATA_W(R_DATA_W),
+             .ADDR_W(MAXADDR_W),
+             .N(N)
+             )
+         uut
+           (
+            .ext_mem_w_en_o   (ext_mem_w_en),
+            .ext_mem_w_data_o (ext_mem_w_data),
+            .ext_mem_w_addr_o (ext_mem_w_addr),
+            .ext_mem_r_en_o   (ext_mem_r_en),
+            .ext_mem_r_addr_o (ext_mem_r_addr),
+            .ext_mem_r_data_i (ext_mem_r_data),
+
+            .w_en_i           (w_en),
+            .w_addr_i         (w_addr),
+            .w_data_i         (w_data),
+
+            .r_en_i           (r_en),
+            .r_addr_i         (r_addr),
+            .r_data_o         (r_data)
+            );
+      end
+   endgenerate
 
    genvar p;
    generate for(p=0; p < N; p=p+1) begin

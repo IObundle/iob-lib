@@ -10,7 +10,8 @@ import importlib
 import if_gen
 
 # List of reserved signals
-# These signals are known by the python scripts and are always connected using the matching Verilog the string.
+# These signals are known by the python scripts and are always auto-connected using the matching Verilog the string.
+# These signals can not be portmapped! They will always have the fixed connection specified here.
 reserved_signals = \
 {
 'clk_i':'.clk_i(clk_i)',
@@ -19,14 +20,14 @@ reserved_signals = \
 'rst_i':'.rst_i(rst_i)',
 'reset':'.reset(rst_i)',
 'arst_i':'.arst_i(arst_i)',
-'iob_avalid':'.iob_avalid(slaves_req[`avalid(`/*<InstanceName>*/)])',
-'iob_addr':'.iob_addr(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])',
-'iob_wdata':'.iob_wdata(slaves_req[`wdata(`/*<InstanceName>*/)])',
-'iob_wstrb':'.iob_wstrb(slaves_req[`wstrb(`/*<InstanceName>*/)])',
-'iob_rdata':'.iob_rdata(slaves_resp[`rdata(`/*<InstanceName>*/)])',
-'iob_ready':'.iob_ready(slaves_resp[`ready(`/*<InstanceName>*/)])',
-'iob_rvalid':'.iob_rvalid(slaves_resp[`rvalid(`/*<InstanceName>*/)])',
-'trap':'.trap(trap[0])',
+'iob_avalid_i':'.iob_avalid_i(slaves_req[`avalid(`/*<InstanceName>*/)])',
+'iob_addr_i':'.iob_addr_i(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])',
+'iob_wdata_i':'.iob_wdata_i(slaves_req[`wdata(`/*<InstanceName>*/)])',
+'iob_wstrb_i':'.iob_wstrb_i(slaves_req[`wstrb(`/*<InstanceName>*/)])',
+'iob_rdata_o':'.iob_rdata_o(slaves_resp[`rdata(`/*<InstanceName>*/)])',
+'iob_ready_o':'.iob_ready_o(slaves_resp[`ready(`/*<InstanceName>*/)])',
+'iob_rvalid_o':'.iob_rvalid_o(slaves_resp[`rvalid(`/*<InstanceName>*/)])',
+'trap_o':'.trap_o(trap_o[0])',
 'm_axi_awid':'.m_axi_awid    (m_axi_awid[0:0])',
 'm_axi_awaddr':'.m_axi_awaddr  (m_axi_awaddr[`DDR_ADDR_W-1:0])',
 'm_axi_awlen':'.m_axi_awlen   (m_axi_awlen[7:0])',
@@ -76,8 +77,10 @@ def import_setup(setup_dir):
     if 'filename' not in vars():
         raise FileNotFoundError(f"Could not find a *_setup.py file in {setup_dir}")
     #Import <corename>_setup.py
-    spec = importlib.util.spec_from_file_location("core_module", setup_dir+"/"+filename)
+    module_name = filename.split('.')[0]
+    spec = importlib.util.spec_from_file_location(module_name, setup_dir+"/"+filename)
     module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name]=module
     spec.loader.exec_module(module)
 
     return module
@@ -112,6 +115,38 @@ def get_build_lib(directory):
 def get_submodule_directories(root_dir):
     module=import_setup(root_dir)
     return module.submodule_dirs
+
+# given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string.
+# param_expression: string defining a math expression that may contain parameters
+# params_dict: dictionary of parameters, where the key is the parameter name and the value is its value
+def eval_param_expression(param_expression, params_dict):
+    if type(param_expression)==int:
+        return param_expression
+    else:
+        original_expression = param_expression
+        # Replace each parameter, following the reverse order of parameter list. The reversed order allows replacing parameters recursively (parameters may have values with parameters that came before).
+        for param_name, param_value in reversed(params_dict.items()):
+            if param_name in param_expression:
+                #Replace parameter/macro by its max value (worst case scenario)
+                param_expression = re.sub(f"((?:^.*[^a-zA-Z_`])|^)`?{param_name}((?:[^a-zA-Z_].*$)|$)",f"\\g<1>{param_value}\\g<2>", param_expression)
+        # Try to calculate string as it should only contain numeric values
+        try:
+            return eval(param_expression)
+        except:
+            sys.exit(f"Error: string '{original_expression}' evaluated to '{param_expression}' is not well defined.")
+
+# given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string. The parameters are taken from the confs dictionary.
+# param_expression: string defining a math expression that may contain parameters
+# confs: list of dictionaries, each of which describes a parameter and has attributes: 'name', 'val' and 'max'. 
+# param_attribute: name of the attribute in the paramater that contains the value to replace in string given. Attribute names are: 'val', 'min, or 'max'.
+def eval_param_expression_from_config(param_expression, confs, param_attribute):
+
+    #Create parameter dictionary with correct values to be replaced in string
+    params_dict = {}
+    for param in confs:
+        params_dict[param['name']] = param[param_attribute]
+
+    return eval_param_expression(param_expression, params_dict)
 
 # Replaces a verilog parameter in a string with its value.
 # The value is determined based on default value and the instance parameters given (that may override the default)
@@ -180,7 +215,7 @@ class if_gen_hack_list:
 
     def write(self, port_string):
         #Parse written string
-        port = re.search("^\s*((?:input)|(?:output))\s+\[([^:]+)-1:0\]\s+([^,]+), \/\/(.*)$", verilog_lines[i])
+        port = re.search("^\s*((?:input)|(?:output))\s+\[([^:]+)-1:0\]\s+([^,]+), \/\/(.*)$", port_string)
         #Append port to port dictionary
         self.port_list.append({'name':port.group(3), 'type':get_short_port_type(port.group(1)), 'n_bits':port.group(2), 'descr':port.group(4)})
 
@@ -209,6 +244,23 @@ def get_module_io(ios):
             # Interface is not standard, read ports
             module_signals.extend(table['ports'])
     return module_signals
+
+# string: string with parameter
+# confs: confs list of dictionaries. Each dictionary describes a parameter (macros will be filtered if they exist)
+# prefix: String to add as a prefix to any parameter found in the string
+def add_prefix_to_parameters_in_string(string, confs, prefix):
+    for parameter in confs:
+        if parameter['type'] in ['P','F']:
+            string = string.replace(parameter['name'], prefix+parameter['name'])
+    return string
+
+# port: dictionary describing a port (IO). Example: {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
+# confs: confs list of dictionaries. Each dictionary describes a parameter (macros will be filtered if they exist)
+# prefix: String to add as a prefix to any parameter found in the port width
+def add_prefix_to_parameters_in_port(port, confs, prefix):
+    local_port = port.copy()
+    local_port['n_bits'] = add_prefix_to_parameters_in_string(local_port['n_bits'], confs, prefix)
+    return local_port
 
 # Given lines read from the verilog file with a module declaration
 # this function returns the parameters of that module. 
@@ -293,7 +345,7 @@ def get_peripherals_ports_params_top(peripherals_list, submodule_dirs):
             module = import_setup(submodule_dirs[instance['type']])
             # Append module IO, parameters, and top name
             port_list[instance['type']]=get_module_io(module.ios)
-            params_list[instance['type']]=list(i for i in module.confs if i['type'] == 'P')
+            params_list[instance['type']]=list(i for i in module.confs if i['type'] in ['P','F'])
             top_list[instance['type']]=module.meta['name']
     return port_list, params_list, top_list
 
