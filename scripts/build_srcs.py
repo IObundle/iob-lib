@@ -361,6 +361,7 @@ def lib_module_setup(Vheaders, hardware_srcs, module_name):
 def copy_files(src_dir, dest_dir, sources = [], pattern = "*", copy_all = False):
     files_copied = []
     if(sources != []) or copy_all:
+        os.makedirs(dest_dir, exist_ok=True)
         for path in Path(src_dir).rglob(pattern):
             file = path.name
             if (file in sources) or copy_all:
