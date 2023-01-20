@@ -100,7 +100,11 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     #
     # Generate hw
     #
-    meta_data['submodules']['hw_setup']['modules'].append('iob_ctls') #Auto-add iob_ctls module
+    # Make sure 'hw_setup' dictionary exists
+    if 'hw_setup' not in meta_data['submodules']: meta_data['submodules']['hw_setup'] = {'headers':[], 'modules':[]}
+    # Auto-add iob_ctls module
+    meta_data['submodules']['hw_setup']['modules'].append('iob_ctls')
+    # Build hardware
     build_srcs.hw_setup( python_module )
     if regs:
         mkregs_obj.write_hwheader(reg_table, meta_data['build_dir']+'/hardware/src', top)
