@@ -14,7 +14,7 @@ include doc_build.mk
 endif
 
 #default DOC
-DOC?=pb
+DOC?=ug
 
 TSRC = $(patsubst tsrc/%, ./%, $(wildcard tsrc/*))
 %.tex: tsrc/%.tex
@@ -80,8 +80,19 @@ endif
 RESULTS = $(INTEL_FPGA)$(AMD_FPGA)$(UMC130_ASIC)
 ASICSYNTH?=$(UMC130_ASIC)
 
+rntop.tex:
+	make doctop DOC=rn
+
+rn.pdf: rntop.tex
+	pdflatex -jobname rn rntop.tex
+	pdflatex -jobname rn rntop.tex
+
+
 doctop:
 	echo "\def\NAME{$(NAME)}" >> $(DOC)top.tex
+ifeq ($(DOC),rn)
+	echo "\def\RN{Y}" >> $(DOC)top.tex
+endif
 	if [ $(RESULTS) ]; then echo "\def\RESULTS{Y}" >> $(DOC)top.tex; fi
 	if [ $(INTEL_FPGA)$(AMD_FPGA) ]; then echo "\def\FPGA{Y}" >> $(DOC)top.tex; fi
 	if [ $(AMD_FPGA) ]; then echo "\def\AMD{Y}" >> $(DOC)top.tex; fi
@@ -102,7 +113,7 @@ clean:
 veryclean: clean
 	make -C figures clean 
 
-test: clean debug $(TEST_LIST)
+test: clean debug ug.pdf
 
 debug: $(TSRC)
 	@echo TSRC=$(TSRC)

@@ -19,9 +19,7 @@ BUILD_DIR := $(shell $(PYTHON_DIR)/setup.py get_build_dir)
 
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
-BUILD_LINT_DIR = $(BUILD_DIR)/hardware/lint
 
-BUILD_ESRC_DIR = $(BUILD_DIR)/software/esrc
 BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
@@ -51,12 +49,6 @@ ifneq ($(wildcard document),)
 ifneq ($(wildcard document/doc_setup.mk),)
 include document/doc_setup.mk
 endif
-
-#make short git hash file
-SRC+=$(BUILD_TSRC_DIR)/shortHash.tex
-$(BUILD_TSRC_DIR)/shortHash.tex:
-	git rev-parse --short HEAD > $@
-
 
 #copy lib tex files if not present
 SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%, $(BUILD_TSRC_DIR)/%, $(wildcard $(LIB_DIR)/document/tsrc/*))

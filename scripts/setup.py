@@ -100,6 +100,7 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     #
     # Generate hw
     #
+    meta_data['submodules']['hw_setup']['modules'].append('iob_ctls') #Auto-add iob_ctls module
     build_srcs.hw_setup( python_module )
     if regs:
         mkregs_obj.write_hwheader(reg_table, meta_data['build_dir']+'/hardware/src', top)
@@ -114,10 +115,11 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     # Generate sw
     #
     if regs:
-        mkregs_obj.write_swheader(reg_table, meta_data['build_dir']+'/software/esrc', top)
-        mkregs_obj.write_swcode(reg_table, meta_data['build_dir']+'/software/esrc', top)
+        if os.path.isdir(meta_data['setup_dir']+'/software/esrc'):
+            mkregs_obj.write_swheader(reg_table, meta_data['build_dir']+'/software/esrc', top)
+            mkregs_obj.write_swcode(reg_table, meta_data['build_dir']+'/software/esrc', top)
         if os.path.isdir(meta_data['setup_dir']+'/software/psrc'): mkregs_obj.write_swheader(reg_table, meta_data['build_dir']+'/software/psrc', top)
-    mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/esrc')
+    if os.path.isdir(meta_data['setup_dir']+'/software/esrc'): mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/esrc')
     if os.path.isdir(meta_data['setup_dir']+'/software/psrc'): mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/psrc')
 
     #

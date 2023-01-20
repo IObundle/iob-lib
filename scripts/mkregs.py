@@ -29,7 +29,8 @@ class mkregs:
 
     @staticmethod
     def verilog_max(a,b):
-        return f"((({a}) > ({b})) ? ({a}) : ({b}))"
+        if(a==b): return f"{a}"
+        else: return f"((({a}) > ({b})) ? ({a}) : ({b}))"
 
     def bceil(self, n, log2base):
         base = int(2**log2base)
@@ -241,7 +242,7 @@ class mkregs:
 
         #extract address byte offset
         f_gen.write(f"`IOB_WIRE(byte_offset, ($clog2(DATA_W/8)+1))\n")
-        f_gen.write(f"iob_ctls #(DATA_W/8, 1, 0) bo_inst (iob_wstrb_i, byte_offset);\n")
+        f_gen.write(f"iob_ctls #(.N(DATA_W/8), .MODE(0), .SYMBOL(0)) bo_inst (iob_wstrb_i, byte_offset);\n")
 
         #compute write address
         f_gen.write(f"`IOB_WIRE(waddr, ADDR_W)\n")

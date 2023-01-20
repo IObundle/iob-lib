@@ -11,7 +11,7 @@ module iob_split
     )
    (
     input                            clk_i,
-    input                            rst_i,
+    input                            arst_i,
 
     //masters interface
     input [`REQ_W-1:0]               m_req_i,
@@ -50,8 +50,8 @@ module iob_split
 
    //register the slave selection
    reg [Nb-1:0] s_sel_reg;
-   always @( posedge clk_i, posedge rst_i ) begin
-      if( rst_i )
+   always @( posedge clk_i, posedge arst_i ) begin
+      if( arst_i )
         s_sel_reg <= {Nb{1'b0}};
       else
         s_sel_reg <= s_sel;

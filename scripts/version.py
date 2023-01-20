@@ -10,7 +10,6 @@ import os
 from submodule_utils import import_setup
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Get core version from config_setup.mk file")
     group = parser.add_mutually_exclusive_group()
@@ -42,12 +41,18 @@ if __name__ == "__main__":
     module = import_setup(args.path)
     core_name = module.meta['name']
     core_version = module.meta['version']
+    core_previous_version = module.meta['previous_version']
 
     # functionality: [tex file, vh file, stdout print]
     if args.latex:
         tex_file = f"{out_dir}/{core_name}_version.tex"
         with open(tex_file, "w+") as tex_f:
             tex_f.write(core_version)
+        tex_f.close()
+        tex_file = f"{out_dir}/{core_name}_previous_version.tex"
+        with open(tex_file, "w+") as tex_f:
+            tex_f.write(core_previous_version)
+        tex_f.close()
     elif args.verilog:
         vh_file = f"{out_dir}/{core_name}_version.vh"
         with open(vh_file, "w+") as vh_f:

@@ -5,7 +5,6 @@ HW_MODULES+=iob_fifo_async
 
 # Submodules
 include $(LIB_DIR)/hardware/iob_sync/hw_setup.mk
-include $(LIB_DIR)/hardware/ram/iob_ram_t2p_asym/hw_setup.mk
 include $(LIB_DIR)/hardware/fifo/iob_gray_counter/hw_setup.mk
 include $(LIB_DIR)/hardware/fifo/iob_gray2bin/hw_setup.mk
 

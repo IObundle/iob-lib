@@ -5,7 +5,6 @@ import shutil
 import importlib
 # IObundle scripts imported:
 import if_gen
-#import ios # Not in use
 from submodule_utils import import_setup
 import iob_colors
 import inspect
@@ -43,8 +42,7 @@ def build_dir_setup(module):
     sw_setup(module)
 
     # Setup DOC directories :
-    if "doc" in core_flows: 
-        doc_setup( core_meta_data )
+    doc_setup( core_meta_data )
     # Setup DELIVERY directories :
     # (WIP)
     # Copy generic MAKEFILE
@@ -227,7 +225,7 @@ def sw_setup(module):
     # Copy software tree if it exists as this core may contain software sources to be used by others
     if os.path.isdir(f"{setup_dir}/software"):
         #Use distutils copy_tree() to copy entire software directory and possibly merge with existing one
-        shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", dirs_exist_ok=True, copy_function=copy_without_override)
+        shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
     #Add lambda functions to the sw_srcs. These functions call setup modules for software setup (sw_setup.py)
     add_setup_lambdas(core_meta_data,confs=module.confs,ios=module.ios,regs=module.regs,blocks=module.blocks)
@@ -258,8 +256,20 @@ def doc_setup( meta_core_data ):
     build_dir = meta_core_data['build_dir']
     setup_dir = meta_core_data['setup_dir']
 
-    shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
+    # For cores that have their own documentation
+    if "doc" in core_flows: 
+        shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")  
 
+    # General documentation
+    write_git_revision_short_hash(f"{build_dir}/document/tsrc")
+
+def write_git_revision_short_hash(dst_dir):
+    file_name = 'shortHash.tex'
+    text = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+
+    if not(os.path.exists(dst_dir)): os.makedirs(dst_dir)
+    file = open(f"{dst_dir}/{file_name}", "w")
+    file.write(text)
 
 # Setup a submodule in a given build directory
 # build_dir: path to build directory

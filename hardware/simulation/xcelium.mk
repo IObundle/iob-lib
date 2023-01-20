@@ -1,4 +1,9 @@
-# Coverage test name
+SIM_SERVER=$(CADENCE_SERVER)
+SIM_USER=$(CADENCE_USER)
+SIM_SSH_FLAGS=$(CADENCE_SSH_FLAGS)
+SIM_SCP_FLAGS=$(CADENCE_SCP_FLAGS)
+SIM_SYNC_FLAGS=$(CADENCE_SYNC_FLAGS)
+
 COV_TEST?=test
 
 SFLAGS = -errormax 15 -status
@@ -13,20 +18,11 @@ ifeq ($(VCD),1)
 VFLAGS+=-define VCD
 endif
 
-SIM_SERVER=$(CADENCE_SERVER)
-SIM_USER=$(CADENCE_USER)
-SIM_SSH_FLAGS=$(CADENCE_SSH_FLAGS)
-SIM_SCP_FLAGS=$(CADENCE_SCP_FLAGS)
-SIM_SYNC_FLAGS=$(CADENCE_SYNC_FLAGS)
-
-SIM_PROC=xmsim
-
 comp: $(VHDR) $(VSRC)
-	xmvlog $(VFLAGS) $(VSRC); xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
+	xmvlog $(VFLAGS) $(VSRC) && xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 
 exec: xmelab.log
 	sync && sleep 1 && xmsim $(SFLAGS) $(COV_SFLAGS) worklib.$(NAME)_tb:module
-	grep -v xcelium xmsim.log | grep -v xmsim | grep -v "\$finish" >> test.log
 ifeq ($(COV),1)
 	ls -d cov_work/scope/* > all_ucd_file
 	imc -execcmd "merge -runfile all_ucd_file -overwrite -out merge_all"
@@ -38,7 +34,7 @@ clean: gen-clean
 	@rm -f iob_cov_waiver.vRefine
 
 very-clean: clean
-	@rm -rf cov_work test.log
+	@rm -rf cov_work *.log
 	@rm -f coverage_report_summary.rpt coverage_report_detail.rpt
 
 
