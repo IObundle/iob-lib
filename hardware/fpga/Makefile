@@ -12,6 +12,8 @@ endif
 
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
+EMB_DIR = ../../software/embedded
+PYTHON_DIR = ../../scripts
 
 #select board
 #default board
@@ -30,6 +32,39 @@ include $(FPGA_TOOL)/$(BOARD)/board.mk
 VHDR=$(wildcard ../src/*.vh)
 VSRC+=$(wildcard ../src/*.v)
 
+#
+# Running parameters
+#
+
+#board UART baud rate and core frequency of operation
+BAUD=$(BOARD_BAUD)
+FREQ=$(BOARD_FREQ)
+
+#disable external memory initialization 
+ifeq ($(RUN_EXTMEM),1)
+INIT_MEM=0
+endif
+
+
+#console start command
+CONSOLE_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
+ifeq ($(INIT_MEM),0)
+CONSOLE_CMD+=-f
+endif
+
+#RULES
+
+HEX:=boot.hex
+ifeq ($(INIT_MEM),1)
+HEX+=firmware.hex
+endif
+
+#
+# Board access queue
+#
+
+QUEUE_FILE=/tmp/$(BOARD).queue
+
 #build fpga image or netlist
 build: $(VHDR) $(VSRC) $(HEX)
 ifeq ($(FPGA_SERVER),)
@@ -42,13 +77,13 @@ else
 	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_LOG) .
 endif
 
-
+FPGA_PROG?=echo 'FPGA programming tool is not set. Should be set in $(FPGA_TOOL).mk.'
 #run fpga image
-run:
+run: build
 ifeq ($(NORUN),0)
 ifeq ($(BOARD_SERVER),)
-	cp $(FIRM_DIR)/firmware.bin .
-	bash -c "trap 'make queue-out' INT TERM KILL; make queue-in; ../prog.sh; $(CONSOLE_CMD) | tee run.log; make queue-out;"
+	cp $(EMB_DIR)/firmware.bin .
+	bash -c "trap 'make queue-out' INT TERM KILL; make queue-in; $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log; make queue-out;"
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
@@ -77,40 +112,6 @@ debug:
 	@echo FPGA_SERVER=$(FPGA_SERVER)
 	@echo FPGA_OBJ=$(FPGA_OBJ)
 	@echo TEST_LIST=$(TEST_LIST)
-
-#
-# Running parameters
-#
-
-#board UART baud rate and core frequency of operation
-BAUD=$(BOARD_BAUD)
-FREQ=$(BOARD_FREQ)
-
-#disable external memory initialization 
-ifeq ($(RUN_EXTMEM),1)
-INIT_MEM=0
-endif
-
-
-#console start command
-CONSOLE_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
-ifeq ($(INIT_MEM),0)
-CONSOLE_CMD+=-f
-endif
-
-
-#RULES
-
-HEX:=boot.hex
-ifeq ($(INIT_MEM),1)
-HEX+=firmware.hex
-endif
-
-#
-# Board access queue
-#
-
-QUEUE_FILE=/tmp/$(BOARD).queue
 
 queue-in:
 	if [ ! -f $(QUEUE_FILE) ]; then touch $(QUEUE_FILE); chown $(USER):dialout $(QUEUE_FILE); chmod 664 $(QUEUE_FILE); fi;\
