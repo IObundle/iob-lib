@@ -9,8 +9,10 @@ import createSystem
 # setup_dir: root directory of the repository
 # submodule_dirs: dictionary with directory of each submodule. Format: {"PERIPHERALCORENAME1":"PATH_TO_DIRECTORY", "PERIPHERALCORENAME2":"PATH_TO_DIRECTORY2"}
 # peripherals_list: list of dictionaries each of them describes a peripheral instance
+# ios: ios dictionary of system
+# confs: confs dictionary of system
 # out_file: path to output file
-def create_top_system(setup_dir, submodule_dirs, top, peripherals_list, out_file):
+def create_top_system(setup_dir, submodule_dirs, top, peripherals_list, ios, confs, out_file):
     # Only create testbench if template is available
     if not os.path.isfile(setup_dir+f"/hardware/simulation/{top}_top.vt"): return
 
@@ -21,28 +23,25 @@ def create_top_system(setup_dir, submodule_dirs, top, peripherals_list, out_file
 
     createSystem.insert_header_files(template_contents, peripherals_list, submodule_dirs)
 
-    # Get port list, parameter list and top module name for each type of peripheral used
-    port_list, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, submodule_dirs)
-
     # Insert wires and connect them to system 
-    for instance in peripherals_list:
-        pio_signals = get_pio_signals(port_list[instance['type']])
+    for table in ios:
+        pio_signals = get_pio_signals(table['ports'])
 
         # Insert system IOs for peripheral
         start_index = find_idx(template_contents, "PWIRES")
+        if pio_signals and 'if_defined' in table.keys(): template_contents.insert(start_index, "`endif\n")
         for signal in pio_signals:
-            signal_size = replaceByParameterValue(signal['n_bits'],
-                          params_list[instance['type']],
-                          instance['params'])
-            template_contents.insert(start_index, '   {} [{}-1:0] {}_{};\n'.format("wire",
-                                                                             signal_size,
-                                                                             instance['name'],
+            template_contents.insert(start_index, '   wire [{}-1:0] {}_{};\n'.format(add_prefix_to_parameters_in_string(signal['n_bits'],confs,"`"+top.upper()+"_"),
+                                                                             table['name'],
                                                                              signal['name']))
+        if pio_signals and 'if_defined' in table.keys(): template_contents.insert(start_index, f"`ifdef {table['if_defined']}\n")
 
         # Connect wires to soc port
         start_index = find_idx(template_contents, "PORTS")
+        if pio_signals and 'if_defined' in table.keys(): template_contents.insert(start_index, "`endif\n")
         for signal in pio_signals:
-            template_contents.insert(start_index, '               .{signal}({signal}),\n'.format(signal=instance['name']+"_"+signal['name']))
+            template_contents.insert(start_index, '               .{signal}({signal}),\n'.format(signal=table['name']+"_"+signal['name']))
+        if pio_signals and 'if_defined' in table.keys(): template_contents.insert(start_index, f"`ifdef {table['if_defined']}\n")
 
     # Write output file
     output_file = open(out_file, "w")

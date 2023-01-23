@@ -5,7 +5,7 @@
 
 include ../../config_build.mk
 
-TEMPLATE_LDS=../template.lds
+TEMPLATE_LDS ?=../template.lds
 
 MFLAGS=$(MFLAGS_BASE)$(MFLAG_M)$(MFLAG_C)
 MFLAGS_BASE:=rv32i
@@ -16,24 +16,12 @@ ifeq ($(USE_COMPRESSED),1)
 MFLAG_C=c
 endif
 
-#compiler settings
-TOOLCHAIN_PREFIX:=riscv64-unknown-elf-
-CFLAGS=-Os -nostdlib -march=$(MFLAGS) -mabi=ilp32 --specs=nano.specs -Wcast-align=strict
-LFLAGS= -Wl,-Bstatic,-T,$(TEMPLATE_LDS),--strip-debug
-FW_LFLAGS+=$(LFLAGS) -Wl,-Map,firmware.map
-BOOT_LFLAGS+=$(LFLAGS) -Wl,-Map,boot.map
-LLIBS=-lgcc -lc -lnosys
-INCLUDES=-I. -I../esrc
-
-HDR=$(wildcard *.h)
-HDR+=$(wildcard ../esrc/*.h)
-
-#FW_SRC=$(wildcard *.c)
-FW_SRC=$(wildcard ../firmware/*)
-FW_SRC+=$(wildcard ../esrc/*.c)
-
-BOOT_SRC=$(wildcard ../bootloader/*)
-BOOT_SRC+=$(filter-out ../esrc/printf.c, $(wildcard ../esrc/*.c))
+#default compiler settings
+TOOLCHAIN_PREFIX ?=riscv64-unknown-elf-
+CFLAGS ?=-Os -nostdlib -march=$(MFLAGS) -mabi=ilp32 --specs=nano.specs -Wcast-align=strict
+LFLAGS ?= -Wl,-Bstatic,-T,$(TEMPLATE_LDS),--strip-debug
+LLIBS ?=-lgcc -lc -lnosys
+INCLUDES ?=-I. -I../esrc
 
 # include local build segment
 # all previously defined variables can be overwritten in this file
@@ -41,18 +29,14 @@ ifneq ($(wildcard embed_build.mk),)
 include embed_build.mk
 endif
 
-build: boot.elf firmware.elf 
+build: $(UTARGETS)
 
-firmware.elf: $(TEMPLATE_LDS) $(HDR) $(FW_SRC)
-	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(FW_LFLAGS) $(DEFINES) $(INCLUDES) -I../firmware $(FW_SRC) $(LLIBS)
-	$(TOOLCHAIN_PREFIX)objcopy -O binary $@ firmware.bin
-
-boot.elf: $(TEMPLATE_LDS) $(HDR) $(BOOT_SRC)
-	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(BOOT_LFLAGS) $(DEFINES) $(INCLUDES) -I../bootloader $(BOOT_SRC) $(LLIBS)
-	$(TOOLCHAIN_PREFIX)objcopy -O binary boot.elf boot.bin
+%.elf: $(TEMPLATE_LDS) $(HDR) $(SRC)
+	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(LFLAGS) $(DEFINES) $(INCLUDES) $(SRC) $(LLIBS)
+	$(TOOLCHAIN_PREFIX)objcopy -O binary $@ $(*F).bin
 
 clean:
-	@rm -rf firmware.bin firmware.elf firmware.map *.hex
+	@rm -rf *.bin *.elf *.map *.hex
 
 debug:
 	@echo $(TEMPLATE_LDS)

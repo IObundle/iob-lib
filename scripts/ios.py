@@ -5,7 +5,7 @@
 
 from latex import write_table
 import if_gen
-from submodule_utils import get_submodule_directories, get_module_io, import_setup, get_pio_signals
+from submodule_utils import get_submodule_directories, get_module_io, import_setup, get_pio_signals, if_gen_interface
 import importlib.util
 import os
 import iob_colors
@@ -22,13 +22,25 @@ known_map_interfaces =\
              },
 }
 
+def reverse_port(port_type):
+    if port_type == "I": return "O"
+    else: return "I"
+
 #Given a known interface name, return its mapping
 def get_interface_mapping(if_name):
     for interface in known_map_interfaces.items():
         if if_name == interface[0]:
             return interface[1]
+    #Interface is was not in 'known_map_interfaces'. Check if_gen.py
+    if if_name in if_gen.interfaces:
+        if_mapping = {}
+        port_list = if_gen_interface(if_name)
+        for port in port_list:
+            if_mapping[port['name']]=port['name'][:-1]+reverse_port(port['type']).lower()
+        return if_mapping
+
     #Did not find known interface
-    raise Exception(f"Error: Unkown mapping for '{if_name}' interface.")
+    assert False, f"{iob_colors.FAIL} Unknown mapping for ports of '{if_name}' interface.{iob_colors.ENDC}"
 
 # Return full port type string based on given types: "I", "O" and "IO"
 # Maps "I", "O" and "IO" to "input", "output" and "inout", respectively.
@@ -97,7 +109,7 @@ def get_peripheral_ios(peripherals_list, submodules):
     # Get port list for each type of peripheral used
     for instance in peripherals_list:
         # Make sure we have a hw_module for this peripheral type
-        assert instance['type'] in submodules["hw_setup"]["hw_modules"], f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
+        assert instance['type'] in submodules["hw_setup"]["modules"], f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
         # Only insert ports of this peripheral type if we have not done so before
         if instance['type'] not in port_list:
             # Import <corename>_setup.py module
@@ -164,3 +176,34 @@ def generate_ios_tex(ios, out_dir):
                 tex_table.append([port['name'].replace('_','\_'),get_port_type(port['type']),port['n_bits'].replace('_','\_'),port['descr'].replace('_','\_')])
 
         write_table(f"{out_dir}/{table['name']}_if",tex_table)
+
+# Returns a string that defines a Verilog mapping. This string can be assigend to a verilog wire/port.
+def get_verilog_mapping(map_obj):
+    #Check if map_obj is mapped to all bits of a signal (it is a string with signal name)
+    if type(map_obj) == str:
+        return map_obj
+
+    #Signal is mapped to specific bits of single/multiple wire(s)
+    verilog_concat_string = ""
+    #Create verilog concatenation of bits of same/different wires
+    for map_wire_bit in map_obj:
+        #Stop concatenation if we find a bit not mapped. (Every bit after it should not be mapped aswell)
+        if not map_wire_bit: break 
+        wire, bit = map_wire_bit
+        verilog_concat_string = f"{wire}[{bit}],{verilog_concat_string}"
+    #TODO: If mapping is a list of bits...
+
+    verilog_concat_string = "{"+verilog_concat_string
+    verilog_concat_string=verilog_concat_string[:-1]+"}" #Replace last comma by a '}'
+    return verilog_concat_string
+
+#peripheral_instance: dictionary describing a peripheral instance. Must have 'name' and 'IO' attributes.
+#port_name: name of the port we are mapping
+def get_peripheral_port_mapping(peripheral_instance, port_name):
+    # If IO dictionary (with mapping) does not exist for this peripheral, use default wire name
+    if not 'IO' in peripheral_instance:
+        return f"{peripheral_instance['name']}_{port_name}"
+
+    assert port_name in peripheral_instance['IO'], f"{iob_colors.FAIL}Port {port_name} of {peripheral_instance['name']} not mapped!{iob_colors.ENDC}"
+    # IO mapping dictionary exists, get verilog string for that mapping
+    return get_verilog_mapping(peripheral_instance['IO'][port_name])

@@ -3,6 +3,7 @@ import sys, os
 
 # Add folder to path that contains python scripts to be imported
 from submodule_utils import *
+import ios
 
 # Automatically include <corename>_swreg_def.vh verilog headers after PHEADER comment
 def insert_header_files(template_contents, peripherals_list, submodule_dirs):
@@ -14,8 +15,10 @@ def insert_header_files(template_contents, peripherals_list, submodule_dirs):
             included_peripherals.append(instance['type'])
             # Import <corename>_setup.py module to get corename 'top'
             module = import_setup(submodule_dirs[instance['type']])
-            top = module.meta['name']
-            template_contents.insert(header_index, f'`include "{top}_swreg_def.vh"\n')
+            # Only insert swreg file if module has regiters
+            if hasattr(module,'regs') and module.regs:
+                top = module.meta['name']
+                template_contents.insert(header_index, f'`include "{top}_swreg_def.vh"\n')
 
 
 #Creates system based on {top}.vt template 
@@ -24,7 +27,8 @@ def insert_header_files(template_contents, peripherals_list, submodule_dirs):
 # top: top name of the system
 # peripherals_list: list of dictionaries each of them describes a peripheral instance
 # out_file: path to output file
-def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file):
+# internal_wires: Optional argument. List of extra wires to create inside module
+def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file, internal_wires=None):
     # Only create systemv if template is available
     if not os.path.isfile(setup_dir+f"/hardware/src/{top}.vt"): return
 
@@ -58,7 +62,7 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file):
 
         # Insert io signals
         for signal in get_pio_signals(port_list[instance['type']]):
-            template_contents.insert(start_index, '      .{}({}_{}),\n'.format(signal['name'],instance['name'],signal['name']))
+            template_contents.insert(start_index, '      .{}({}),\n'.format(signal['name'],ios.get_peripheral_port_mapping(instance,signal['name'])))
             # Remove comma at the end of last signal (first one to insert)
             if first_reversed_signal:
                 template_contents[start_index]=template_contents[start_index][::-1].replace(",","",1)[::-1]
@@ -67,12 +71,12 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file):
         # Insert peripheral instance name
         template_contents.insert(start_index, "   {} (\n".format(instance['name']))
         # Insert peripheral parameters (if any)
-        if len(instance['params'])>0:
+        if params_list[instance['type']]:
             template_contents.insert(start_index, "   )\n")
             first_reversed_signal=True
             # Insert parameters
-            for param, value in instance['params'].items():
-                template_contents.insert(start_index, '      .{}({}){}\n'.format(param,value,"" if first_reversed_signal else ","))
+            for param in params_list[instance['type']]:
+                template_contents.insert(start_index, '      .{}({}){}\n'.format(param['name'],instance['name']+"_"+param['name'],"" if first_reversed_signal else ","))
                 first_reversed_signal=False
             template_contents.insert(start_index, "     #(\n")
         # Insert peripheral type
@@ -81,6 +85,15 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file):
         # Insert peripheral comment
         template_contents.insert(start_index, "   // {}\n".format(instance['name']))
         template_contents.insert(start_index, "\n")
+
+    # Insert internal module wires (if any)
+    if internal_wires:
+        # Find end of module header
+        start_index = find_idx(template_contents, ");")
+        #Insert internal wires
+        for wire in internal_wires:
+            template_contents.insert(start_index, f"    wire [{wire['n_bits']}-1:0] {wire['name']};\n")
+        template_contents.insert(start_index, "    // Module internal wires\n")
 
     # Write system.v
     systemv_file = open(out_file, "w")
