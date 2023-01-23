@@ -113,7 +113,7 @@ def sim_setup(module):
 
     if 'sim' in core_flows:
         #Use distutils copy_tree() to copy entire simulation directory and possibly merge with existing one
-        shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation", dirs_exist_ok=True, copy_function=copy_without_override)
+        shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
     #Add lambda functions to the sim_srcs. These functions call setup modules for simulation setup (sim_setup.py)
     add_setup_lambdas(core_meta_data,confs=module.confs,ios=module.ios,regs=module.regs,blocks=module.blocks)
