@@ -53,6 +53,8 @@ def hw_setup(module):
     core_meta_data = module.meta
     core_name = core_meta_data['name']
     core_version = core_meta_data['version']
+    if 'previous_version' in core_meta_data: core_previous_version = core_meta_data['previous_version']
+    else: core_previous_version = core_version
     build_dir = core_meta_data['build_dir']
     setup_dir = core_meta_data['setup_dir']
 
@@ -71,7 +73,7 @@ def hw_setup(module):
     mk_conf.append_defines_config_build_mk(module.confs, build_dir)
 
     # create module's *_version.vh Verilog Header
-    version_file(core_name, core_version, build_dir)
+    version_file(core_name, core_version, core_previous_version, build_dir)
 
     #Add lambda functions to the hw_srcs. These functions call setup modules for hardware setup (hw_setup.py)
     add_setup_lambdas(core_meta_data,confs=module.confs,ios=module.ios,regs=module.regs,blocks=module.blocks)
@@ -111,7 +113,7 @@ def sim_setup(module):
 
     if 'sim' in core_flows:
         #Use distutils copy_tree() to copy entire simulation directory and possibly merge with existing one
-        shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation", dirs_exist_ok=True, copy_function=copy_without_override)
+        shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
     #Add lambda functions to the sim_srcs. These functions call setup modules for simulation setup (sim_setup.py)
     add_setup_lambdas(core_meta_data,confs=module.confs,ios=module.ios,regs=module.regs,blocks=module.blocks)
@@ -408,7 +410,7 @@ def set_default_submodule_dirs(meta_data):
         meta_data['submodules']['dirs']['LIB'] = lib_dir
 
 
-def version_file(core_name, core_version, build_dir):
+def version_file(core_name, core_version, core_previous_version, build_dir):
     tex_dir = f"{build_dir}/document/tsrc"
     verilog_dir = f"{build_dir}/hardware/src"
     
@@ -416,6 +418,9 @@ def version_file(core_name, core_version, build_dir):
         tex_file = f"{tex_dir}/{core_name}_version.tex"
         with open(tex_file, "w") as tex_f:
             tex_f.write(core_version)
+        tex_file = f"{tex_dir}/{core_name}_previous_version.tex"
+        with open(tex_file, "w") as tex_f:
+            tex_f.write(core_previous_version)
 
     vh_file = f"{verilog_dir}/{core_name}_version.vh"
     vh_version_string = '0'
