@@ -95,6 +95,8 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
         mkregs_obj = mkregs.mkregs()
         mkregs_obj.config = confs
         reg_table = mkregs_obj.compute_addr(reg_table, no_overlap)
+        # Auto-add iob_ctls module
+        meta_data['submodules']['hw_setup']['modules'].append('iob_ctls')
 
         
     #
@@ -102,8 +104,6 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     #
     # Make sure 'hw_setup' dictionary exists
     if 'hw_setup' not in meta_data['submodules']: meta_data['submodules']['hw_setup'] = {'headers':[], 'modules':[]}
-    # Auto-add iob_ctls module
-    meta_data['submodules']['hw_setup']['modules'].append('iob_ctls')
     # Build hardware
     build_srcs.hw_setup( python_module )
     if regs:
