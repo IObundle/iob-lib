@@ -32,6 +32,10 @@ include $(FPGA_TOOL)/$(BOARD)/board.mk
 VHDR=$(wildcard ../src/*.vh)
 VSRC+=$(wildcard ../src/*.v)
 
+ifneq ($(wildcard $(FPGA_TOOL)/$(BOARD)/$(NAME)_fpga_wrapper.v),)
+VSRC+=$(FPGA_TOOL)/$(BOARD)/$(NAME)_fpga_wrapper.v
+endif
+
 #
 # Running parameters
 #
@@ -54,9 +58,9 @@ endif
 
 #RULES
 
-HEX:=boot.hex
+HEX:=$(NAME)_boot.hex
 ifeq ($(INIT_MEM),1)
-HEX+=firmware.hex
+HEX+=$(NAME)_firmware.hex
 endif
 
 #
@@ -82,7 +86,7 @@ FPGA_PROG?=echo 'FPGA programming tool is not set. Should be set in $(FPGA_TOOL)
 run: build
 ifeq ($(NORUN),0)
 ifeq ($(BOARD_SERVER),)
-	cp $(EMB_DIR)/firmware.bin .
+	cp $(EMB_DIR)/$(NAME)_firmware.bin .
 	bash -c "trap 'make queue-out' INT TERM KILL; make queue-in; $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log; make queue-out;"
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
