@@ -56,13 +56,7 @@ module iob_merge
    //
    //route master request to slave
    //  
-   integer i;
-   always @* begin
-      s_req_o = {`REQ_W{1'b0}};
-      for (i=0; i<N_MASTERS; i=i+1)
-        if( i == sel )
-          s_req_o = m_req_i[`req(i)];
-   end
+   assign s_req_o = m_req_i[`req(sel)];
 
    //
    //route response from slave to previously selected master
@@ -77,13 +71,9 @@ module iob_merge
    end
    
    //route
-   integer j;
    always @* begin
-      for (j=0; j<N_MASTERS; j=j+1)
-        if( j == sel_reg )
-          m_resp_o[`resp(j)] = s_resp_i;
-        else
-          m_resp_o[`resp(j)] = {`RESP_W{1'b0}};
+        m_resp_o = {(`RESP_W*N_MASTERS){1'b0}};
+        m_resp_o[`resp(sel_reg)] = s_resp_i;
    end
 
    
