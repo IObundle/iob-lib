@@ -2,16 +2,15 @@
 
 `include "iob_lib.vh"
 
-module iob_split
-  #(
+module iob_split #(
     parameter DATA_W = 32,
     parameter ADDR_W = 32,
     parameter N_SLAVES = 2, //number of slaves
     parameter P_SLAVES = `REQ_W-2 //slave select word msb position
-    )
-   (
+    ) (
     input                            clk_i,
     input                            arst_i,
+    input                            cke_i,
 
     //masters interface
     input [`REQ_W-1:0]               m_req_i,
@@ -22,50 +21,18 @@ module iob_split
     input [N_SLAVES*`RESP_W-1:0]     s_resp_i
     );
 
-   localparam  Nb=$clog2(N_SLAVES)+($clog2(N_SLAVES)==0);
+    localparam  Nb=$clog2(N_SLAVES)+($clog2(N_SLAVES)==0);
 
 
-   //slave select word
-   wire [Nb-1:0] s_sel;
-   assign s_sel = m_req_i[P_SLAVES -:Nb];
+    //slave select word
+    wire [Nb-1:0] s_sel;
+    assign s_sel = m_req_i[P_SLAVES -:Nb];
 
-   //route master request to selected slave
-   integer i;
-   always @* begin
-      /*
-     $display("pslave %d", P_SLAVES+1);
-     $display("mreq %x", m_req);
-     $display("s_sel %x", s_sel);
-   */
-     for (i=0; i<N_SLAVES; i=i+1)
-       if(i == s_sel)
-         s_req_o[`req(i)] = m_req_i;
-       else
-         s_req_o[`req(i)] = {(`REQ_W){1'b0}};
-   end
+    wire sel_reg_en = s_resp_i[`ready(0)];
+    reg [Nb-1:0] s_sel_reg;
+    iob_reg #(1,0) sel_reg (clk_i, arst_i, cke_i, s_sel, s_sel_reg);
 
-   //
-   //route response from previously selected slave to master
-   //
-
-   //register the slave selection
-   reg [Nb-1:0] s_sel_reg;
-   always @( posedge clk_i, posedge arst_i ) begin
-      if( arst_i )
-        s_sel_reg <= {Nb{1'b0}};
-      else
-        s_sel_reg <= s_sel;
-   end
-
-   //route
-   integer j;
-   always @* begin
-      for (j=0; j<N_SLAVES; j=j+1)
-        if( j == s_sel_reg ) begin
-          m_resp_o[`rdata(0)]  = s_resp_i[`rdata(j)];
-          m_resp_o[`rvalid(0)] = s_resp_i[`rvalid(j)];
-          m_resp_o[`ready(0)]  = s_resp_i[`ready(j)];
-        end
-   end
+    iob_demux #(`REQ_W,N_SLAVES) req_demux (s_sel_reg, m_req_i, s_req_o);
+    iob_mux #(`RESP_W,N_SLAVES) resp_mux (s_sel_reg, s_resp_i, m_resp_o);
 
 endmodule
