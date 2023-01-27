@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 
 from latex import write_table
 import re
@@ -57,7 +58,7 @@ def conf_h(macros, top_module, out_dir):
         #Only insert macro if its is not a bool define, and if so only insert it if it is true
         if macro['type'] != 'D':
             m_name = macro['name'].upper()
-            # Replace any Berilog specific syntax by equivalent C syntax
+            # Replace any Verilog specific syntax by equivalent C syntax
             m_default_val = re.sub("\d+'h","0x",macro['val'])
             file2create.write(f"#define {m_name} {str(m_default_val).replace('`','')}\n") #Remove Verilog macros ('`')
     file2create.write(f"\n#endif // H_{fname}_H\n")
