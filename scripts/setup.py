@@ -111,6 +111,11 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
         if 'hw_setup' not in meta_data['submodules']: meta_data['submodules']['hw_setup'] = {'headers':[], 'modules':[]}
         # Auto-add iob_ctls module
         meta_data['submodules']['hw_setup']['modules'].append('iob_ctls')
+        # Auto-add iob_s_port.vh
+        meta_data['submodules']['hw_setup']['headers'].append('iob_s_port')
+        # Auto-add cpu_iob_s_portmap.vh
+        #   [ file_prefix, interface_name, port_prefix, wire_prefix ]
+        meta_data['submodules']['hw_setup']['headers'].append([ 'cpu_', 'iob_s_portmap', '', 'cpu_' ])
 
         
     #
