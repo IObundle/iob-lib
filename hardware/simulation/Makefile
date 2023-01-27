@@ -11,8 +11,15 @@ REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 REMOTE_SIM_DIR=$(REMOTE_BUILD_DIR)/hardware/simulation
 
 #include the module's headers and sources
-VHDR+=$(wildcard ../src/*.vh) $(wildcard ./src/*.vh)
-VSRC+=$(wildcard ../src/*.v) $(wildcard ./src/*.v)
+VHDR+=$(wildcard ../src/*.vh)
+VSRC+=$(wildcard ../src/*.v)
+
+ifeq ($(SYN),)
+VHDR+=$(wildcard ./src/*.vh)
+VSRC+=$(wildcard ./src/*.v)
+else
+VSRC+=../syn/*.v
+endif
 
 #exclude verilog testbench when using Verilator
 ifeq ($(SIMULATOR), verilator)
@@ -31,6 +38,7 @@ include $(SIMULATOR).mk
 
 UFLAGS+=VCD=$(VCD)
 UFLAGS+=COV=$(COV)
+UFLAGS+=SYN=$(SYN)
 UFLAGS+=COV_TEST=$(COV_TEST)
 
 build: $(VHDR) $(VSRC)
