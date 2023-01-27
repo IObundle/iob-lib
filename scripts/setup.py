@@ -119,13 +119,13 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     # Build hardware
     build_srcs.hw_setup( python_module )
     if regs:
-        mkregs_obj.write_hwheader(reg_table, meta_data['build_dir']+'/hardware/src', top)
-        mkregs_obj.write_lparam_header(reg_table, meta_data['build_dir']+'/hardware/src', top)
-        mkregs_obj.write_hwcode(reg_table, meta_data['build_dir']+'/hardware/src', top)
-    mk_conf.params_vh(confs, top, meta_data['build_dir']+'/hardware/src')
-    mk_conf.conf_vh(confs, top, meta_data['build_dir']+'/hardware/src')
+        mkregs_obj.write_hwheader(reg_table, build_dir+'/hardware/src', top)
+        mkregs_obj.write_lparam_header(reg_table, build_dir+'/hardware/simulation/src', top)
+        mkregs_obj.write_hwcode(reg_table, build_dir+'/hardware/src', top)
+    mk_conf.params_vh(confs, top, build_dir+'/hardware/src')
+    mk_conf.conf_vh(confs, top, build_dir+'/hardware/src')
 
-    ios_lib.generate_ios_header(ios, top, meta_data['build_dir']+'/hardware/src',prefix=ios_prefix)
+    ios_lib.generate_ios_header(ios, top, build_dir+'/hardware/src',prefix=ios_prefix)
 
     #
     # Generate sw

@@ -40,7 +40,7 @@ features, improvements, etc.
     {\bf Version Number} & \input \NAME_version \\ \hline
     {\bf Previous Version} & input \NAME_previous_version \\ \hline
     {\bf Release Date} & \today \\ \hline
-    {\bf Release Type} & Major (first release) \\ \hline
+    {\bf Release Type} &  rn_release_type\\ \hline
 
   \end{tabularx}
 
@@ -55,11 +55,7 @@ features, improvements, etc.
     \multicolumn{3}{|c|}{\bf ProductInformation} \\ \hline
     \multicolumn{2}{|l|}{\bf Overview} & \input intro \\ \hline
     {\bf Deliverables} & {\bf Changed} & {\bf Description} \\ \hline
-    Documentation & NA & User guide \\ \hline
-    RTL code & NA & Verilog .v and header .vh files\\ \hline
-    Test Bench & NA & Verilog \_tb.v file \\ \hline
-    Tests & NA & Each test case is provide in a .vh file, which is automatically included in the testbench to run the test case. \\ \hline
-    Scripts and Macros & NA & Simulation and synthesis are invoked through a Makefile, which runs the scripts provided when needed.\\ \hline
+    \input rn_deliverables
   \end{tabularx}
 \end{table}
 
