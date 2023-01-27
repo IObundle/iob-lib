@@ -3,7 +3,6 @@ import os
 import re
 
 from latex import write_table
-import re
 
 def params_vh(params, top_module, out_dir):
     file2create = open(f"{out_dir}/{top_module}_params.vh", "w")
