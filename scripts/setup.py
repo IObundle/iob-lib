@@ -32,6 +32,9 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     top = meta_data['name']
     build_dir = meta_data['build_dir']
 
+    #Auto-add 'VERSION' macro
+    confs.append({'name':'VERSION', 'type':'M', 'val':"16'h"+build_srcs.version_str_to_digits(meta_data['version']), 'min':'NA', 'max':'NA', 'descr':"Product version."})
+
     # Check if should create build directory for this core/system
     #TODO: We need to find another way of checking this. Currently we can not configure another build_dir in *_setup.py because it will cause this to not build the directory!
     create_build_dir = build_dir==f"../{meta_data['name']}_{meta_data['version']}"
@@ -43,7 +46,7 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     #
     if create_build_dir:
         os.makedirs(build_dir, exist_ok=True)
-        mk_conf.config_build_mk(confs, meta_data, build_dir)
+        mk_conf.config_build_mk(meta_data, build_dir)
         build_srcs.build_dir_setup(python_module)
     
     #
@@ -86,6 +89,15 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     # Build registers table
     #
     if regs:
+        # Make sure 'genera;' registers table exists
+        general_regs_table = next((i for i in regs if i['name']=='general'),None)
+        if not general_regs_table:
+            general_regs_table = {'name': 'general', 'descr':'General Registers.', 'regs': []}
+            regs.append(general_regs_table)
+        # Auto add 'VERSION' register in 'general' registers table
+        general_regs_table['regs'].append({'name':"VERSION", 'type':"R", 'n_bits':16, 'rst_val':build_srcs.version_str_to_digits(meta_data['version']), 'addr':-1, 'log2n_items':0, 'autologic':True, 'descr':"Product version."})
+
+        # Create reg table
         reg_table = []
         for i_regs in regs:
             reg_table += i_regs['regs']

@@ -429,3 +429,9 @@ def version_file(core_name, core_version, core_previous_version, build_dir):
             vh_version_string += c
     with open(vh_file, "w") as vh_f:
         vh_f.write(f"`define VERSION {vh_version_string}")
+
+# Given a version string (like "V0.12"), return a 4 digit string representing the version (like "0012")
+def version_str_to_digits(version_str):
+    version_str=version_str.replace('V','')
+    major_ver, minor_ver = version_str.split('.')
+    return f"{int(major_ver):02d}{int(minor_ver):02d}"
