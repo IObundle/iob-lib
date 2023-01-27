@@ -4,7 +4,7 @@ set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
 set QIP [lindex $argv 3]
 set IS_FPGA [lindex $argv 4]
-set RUN_EXTMEM [lindex $argv 4]
+set RUN_EXTMEM [lindex $argv 5]
 
 project_new $NAME -overwrite
 
@@ -27,8 +27,9 @@ source quartus/$BOARD/device.tcl
 
 #user io data
 
-if [ file exists "io.tcl" ] {
-    source io.tcl
+set ioPath "quartus/$BOARD/io.tcl"
+if {[file exists $ioPath]} {
+    source $ioPath
 }
 
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
@@ -39,7 +40,7 @@ set_global_assignment -name SEARCH_PATH ../src
 
 #quartus IPs
 foreach file [split $QIP \ ] {
-    if {$file != ""} {
+    if {$file != "None"} {
         set_global_assignment -name QIP_FILE $file
     }
 }
@@ -69,7 +70,7 @@ if {$IS_FPGA != "1"} {
 }
 
 set_global_assignment -name LAST_QUARTUS_VERSION "18.0.0 Standard Edition"
-set_global_assignment -name SDC_FILE quartus//$BOARD/$NAME.sdc
+set_global_assignment -name SDC_FILE quartus/$BOARD/$NAME.sdc
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
@@ -107,10 +108,10 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $NAME"} result] {
 if {$IS_FPGA != "1"} {
     if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
         qexit -error
-    } else {
-        if [catch {qexec "[file join $::quartus(binpath) quartus_asm] $NAME"} result] {
-            qexit -error
-        }
+    } 
+} else {
+    if [catch {qexec "[file join $::quartus(binpath) quartus_asm] $NAME"} result] {
+        qexit -error
     }
 }
 

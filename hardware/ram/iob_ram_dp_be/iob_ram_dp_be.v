@@ -8,7 +8,7 @@ module iob_ram_dp_be
     parameter HEXFILE = "none",
     parameter ADDR_W = 10, // Addr Width in bits : 2*ADDR_W = RAM Depth
     parameter DATA_W = 32,  // Data Width in bits
-    parameter IOB_MEM_NO_READ_ON_WRITE = 1
+    parameter MEM_NO_READ_ON_WRITE = 1
     )
    (
     input                clk_i,
@@ -33,7 +33,7 @@ module iob_ram_dp_be
 
    genvar index;
    generate
-   if(IOB_MEM_NO_READ_ON_WRITE) begin: with_IOB_MEM_NO_READ_ON_WRITE
+   if(MEM_NO_READ_ON_WRITE) begin: with_MEM_NO_READ_ON_WRITE
     localparam file_suffix = {"7","6","5","4","3","2","1","0"};
     for (index=0; index < NUM_COL; index=index+1) begin: ram_col
         localparam mem_init_file_int = (HEXFILE != "none")? {HEXFILE, "_", file_suffix[8*(index+1)-1 -: 8], ".hex"}: "none";
@@ -43,7 +43,7 @@ module iob_ram_dp_be
             .HEXFILE(mem_init_file_int),
             .ADDR_W(ADDR_W),
             .DATA_W(COL_W),
-            .IOB_MEM_NO_READ_ON_WRITE(IOB_MEM_NO_READ_ON_WRITE)
+            .MEM_NO_READ_ON_WRITE(MEM_NO_READ_ON_WRITE)
             ) ram
         (
             .clk_i   (clk_i),
@@ -61,7 +61,7 @@ module iob_ram_dp_be
             .dB_o    (dB_o[index*COL_W +: COL_W])
             );
     end
-   end else begin: not_IOB_MEM_NO_READ_ON_WRITE
+   end else begin: not_MEM_NO_READ_ON_WRITE
     // this allow ISE 14.7 to work; do not remove
     localparam mem_init_file_int = {HEXFILE, ".hex"};
 

@@ -49,8 +49,6 @@ module iob_split
    end
 
    //route
-    assign m_resp_o[`rdata(0)]  = s_resp_i[`rdata(s_sel_reg)];
-    assign m_resp_o[`rvalid(0)] = s_resp_i[`rvalid(s_sel_reg)];
-    assign m_resp_o[`ready(0)]  = s_resp_i[`ready(s_sel_reg)];
+    assign m_resp_o  = {s_resp_i[`rdata(s_sel_reg)], s_resp_i[`rvalid(s_sel_reg)], s_resp_i[`ready(s_sel_reg)]};
 
 endmodule

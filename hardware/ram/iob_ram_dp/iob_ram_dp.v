@@ -5,7 +5,7 @@ module iob_ram_dp
     parameter HEXFILE = "none",
     parameter DATA_W = 8,
     parameter ADDR_W = 6,
-    parameter IOB_MEM_NO_READ_ON_WRITE = 1
+    parameter MEM_NO_READ_ON_WRITE = 1
     )
    (
     input                   clk_i,
@@ -38,7 +38,7 @@ module iob_ram_dp
        $readmemh(mem_init_file_int, ram, 0, 2**ADDR_W - 1);
 
    generate
-   if(IOB_MEM_NO_READ_ON_WRITE) begin: with_IOB_MEM_NO_READ_ON_WRITE
+   if(MEM_NO_READ_ON_WRITE) begin: with_MEM_NO_READ_ON_WRITE
     always @ (posedge clk_i) begin// Port A
         if (enA_i)
             if (weA_i)
@@ -53,7 +53,7 @@ module iob_ram_dp
             else
                 dB_o <= ram[addrB_i];
     end
-   end else begin: not_IOB_MEM_NO_READ_ON_WRITE
+   end else begin: not_MEM_NO_READ_ON_WRITE
     always @ (posedge clk_i) begin// Port A
         if (enA_i)
             if (weA_i)
