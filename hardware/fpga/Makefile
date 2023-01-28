@@ -12,6 +12,8 @@ endif
 
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
+EMB_DIR = ../../software/embedded
+PYTHON_DIR = ../../scripts
 
 #select board
 #default board
@@ -30,53 +32,9 @@ include $(FPGA_TOOL)/$(BOARD)/board.mk
 VHDR=$(wildcard ../src/*.vh)
 VSRC+=$(wildcard ../src/*.v)
 
-#build fpga image or netlist
-build: $(VHDR) $(VSRC) $(HEX)
-ifeq ($(FPGA_SERVER),)
-	make $(FPGA_OBJ)
-else 
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
-	rsync $(FPGA_SYNC_FLAGS) -avz --delete --force ../.. $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'
-	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_OBJ) .
-	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_LOG) .
+ifneq ($(wildcard $(FPGA_TOOL)/$(BOARD)/$(NAME)_fpga_wrapper.v),)
+VSRC+=$(FPGA_TOOL)/$(BOARD)/$(NAME)_fpga_wrapper.v
 endif
-
-
-#run fpga image
-run:
-ifeq ($(NORUN),0)
-ifeq ($(BOARD_SERVER),)
-	cp $(FIRM_DIR)/firmware.bin .
-	bash -c "trap 'make queue-out' INT TERM KILL; make queue-in; ../prog.sh; $(CONSOLE_CMD) | tee run.log; make queue-out;"
-else
-	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
-	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
-	bash -c "trap 'make queue-out-remote' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'"
-	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_FPGA_DIR)/run.log .
-endif
-endif
-
-clean: $(FPGA_TOOL)-clean
-	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga.mk" \) -delete
-	@rm -f ../../*.vh
-ifneq ($(FPGA_SERVER),)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD); fi'
-ifneq ($(BOARD_SERVER),)
-	ssh $(BOARD_SSH_FLAGS) $(BOARD_USER)@$(BOARD_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD); fi'
-endif
-endif
-
-test: debug $(TEST_LIST)
-
-debug:
-	@echo SIMULATOR=$(SIMULATOR)
-	@echo BOARD=$(BOARD)
-	@echo VHDR=$(VHDR)
-	@echo VSRC=$(VSRC)
-	@echo FPGA_SERVER=$(FPGA_SERVER)
-	@echo FPGA_OBJ=$(FPGA_OBJ)
-	@echo TEST_LIST=$(TEST_LIST)
 
 #
 # Running parameters
@@ -98,12 +56,11 @@ ifeq ($(INIT_MEM),0)
 CONSOLE_CMD+=-f
 endif
 
-
 #RULES
 
-HEX:=boot.hex
+HEX:=$(NAME)_boot.hex
 ifeq ($(INIT_MEM),1)
-HEX+=firmware.hex
+HEX+=$(NAME)_firmware.hex
 endif
 
 #
@@ -111,6 +68,54 @@ endif
 #
 
 QUEUE_FILE=/tmp/$(BOARD).queue
+
+#build fpga image or netlist
+build: $(VHDR) $(VSRC) $(HEX)
+ifeq ($(FPGA_SERVER),)
+	make $(FPGA_OBJ)
+else 
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
+	rsync $(FPGA_SYNC_FLAGS) -avz --delete --force ../.. $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_BUILD_DIR)
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'
+	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_OBJ) .
+	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_LOG) .
+endif
+
+FPGA_PROG?=echo 'FPGA programming tool is not set. Should be set in $(FPGA_TOOL).mk.'
+#run fpga image
+run: build
+ifeq ($(NORUN),0)
+ifeq ($(BOARD_SERVER),)
+	cp $(EMB_DIR)/$(NAME)_firmware.bin .
+	bash -c "trap 'make queue-out' INT TERM KILL; make queue-in; $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log; make queue-out;"
+else
+	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
+	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
+	bash -c "trap 'make queue-out-remote' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'"
+	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_FPGA_DIR)/run.log .
+endif
+endif
+
+clean: $(FPGA_TOOL)-clean
+	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga_build.mk" \) -delete
+	@rm -f ../../*.vh
+ifneq ($(FPGA_SERVER),)
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD); fi'
+ifneq ($(BOARD_SERVER),)
+	ssh $(BOARD_SSH_FLAGS) $(BOARD_USER)@$(BOARD_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD); fi'
+endif
+endif
+
+test: debug $(TEST_LIST)
+
+debug:
+	@echo SIMULATOR=$(SIMULATOR)
+	@echo BOARD=$(BOARD)
+	@echo VHDR=$(VHDR)
+	@echo VSRC=$(VSRC)
+	@echo FPGA_SERVER=$(FPGA_SERVER)
+	@echo FPGA_OBJ=$(FPGA_OBJ)
+	@echo TEST_LIST=$(TEST_LIST)
 
 queue-in:
 	if [ ! -f $(QUEUE_FILE) ]; then touch $(QUEUE_FILE); chown $(USER):dialout $(QUEUE_FILE); chmod 664 $(QUEUE_FILE); fi;\

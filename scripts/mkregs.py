@@ -30,6 +30,9 @@ class mkregs:
     @staticmethod
     def verilog_max(a,b):
         if(a==b): return f"{a}"
+        elif(type(a)==int and type(b)==int): 
+            if (a>b): return f"{a}"
+            else: return f"{b}"
         else: return f"((({a}) > ({b})) ? ({a}) : ({b}))"
 
     def bceil(self, n, log2base):

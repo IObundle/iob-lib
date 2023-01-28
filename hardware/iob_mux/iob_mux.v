@@ -7,8 +7,8 @@ module iob_mux
     parameter N = 0
     )
    (
+    `IOB_INPUT(sel_i, $clog2(N)+($clog2(N)==0)),
     `IOB_INPUT(data_i, N*DATA_W),
-    `IOB_INPUT(sel_i, $clog2(1+N)),
     `IOB_OUTPUT(data_o, DATA_W)
     );
 

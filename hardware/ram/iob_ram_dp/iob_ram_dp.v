@@ -4,7 +4,8 @@ module iob_ram_dp
   #(
     parameter HEXFILE = "none",
     parameter DATA_W = 8,
-    parameter ADDR_W = 6
+    parameter ADDR_W = 6,
+    parameter MEM_NO_READ_ON_WRITE = 1
     )
    (
     input                   clk_i,
@@ -36,24 +37,36 @@ module iob_ram_dp
      if(mem_init_file_int != "none")
        $readmemh(mem_init_file_int, ram, 0, 2**ADDR_W - 1);
 
-   always @ (posedge clk_i) begin// Port A
-      if (enA_i)
-        if (weA_i)
-	        ram[addrA_i] <= dA_i;
-      `ifdef IOB_MEM_NO_READ_ON_WRITE
-        else
-      `endif
-      dA_o <= ram[addrA_i];
+   generate
+   if(MEM_NO_READ_ON_WRITE) begin: with_MEM_NO_READ_ON_WRITE
+    always @ (posedge clk_i) begin// Port A
+        if (enA_i)
+            if (weA_i)
+                ram[addrA_i] <= dA_i;
+            else
+                dA_o <= ram[addrA_i];
     end
-
-   always @ (posedge clk_i) begin // Port B
+    always @ (posedge clk_i) begin // Port B
+        if (enB_i)
+            if (weB_i)
+                ram[addrB_i] <= dB_i;
+            else
+                dB_o <= ram[addrB_i];
+    end
+   end else begin: not_MEM_NO_READ_ON_WRITE
+    always @ (posedge clk_i) begin// Port A
+        if (enA_i)
+            if (weA_i)
+                ram[addrA_i] <= dA_i;
+        dA_o <= ram[addrA_i];
+    end
+    always @ (posedge clk_i) begin // Port B
       if (enB_i)
         if (weB_i)
 	        ram[addrB_i] <= dB_i;
-      `ifdef IOB_MEM_NO_READ_ON_WRITE
-        else
-      `endif
 	    dB_o <= ram[addrB_i];
     end
+   end
+   endgenerate
 
 endmodule   

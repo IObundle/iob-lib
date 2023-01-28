@@ -17,7 +17,7 @@ foreach file [split $VSRC \ ] {
 #device data
 source vivado/$BOARD/device.tcl
 
-read_xdc vivado/$NAME.xdc
+read_xdc vivado/$BOARD/$NAME.xdc
 
 if { $RUN_EXTMEM == 1 } {
 
@@ -87,10 +87,15 @@ if { $RUN_EXTMEM == 1 } {
 
     read_xdc ./ddr.xdc
 
+} else {
+    read_verilog vivado/$BOARD/clock_wizard.v
 }
 
-
-synth_design -include_dirs ../src -part $PART -top $NAME -mode out_of_context -flatten_hierarchy none -verbose
+if { $IS_FPGA == "1" } {
+    synth_design -include_dirs ../src -part $PART -top $NAME -verbose
+} else {
+    synth_design -include_dirs ../src -part $PART -top $NAME -mode out_of_context -flatten_hierarchy none -verbose
+}
 
 opt_design
 
@@ -105,6 +110,14 @@ report_timing
 report_clocks
 report_clock_interaction
 report_cdc -details
+
+file mkdir reports
+report_timing -file reports/timing.txt -max_paths 30
+report_clocks -file reports/clocks.txt
+report_clock_interaction -file reports/clock_interaction.txt
+report_cdc -details -file reports/cdc.txt
+report_synchronizer_mtbf -file reports/synchronizer_mtbf.txt
+report_utilization -hierarchical -file reports/utilization.txt
 
 if { $IS_FPGA == "1" } {
     write_bitstream -force $NAME.bit
