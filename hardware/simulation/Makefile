@@ -10,15 +10,20 @@ include ../../config_build.mk
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 REMOTE_SIM_DIR=$(REMOTE_BUILD_DIR)/hardware/simulation
 
+#include simulation headers and sources
+VHDR+=$(wildcard ./src/*.vh)
+VSRC+=$(wildcard ./src/*.v)
+
+ifeq ($(SYN),)
 #include the module's headers and sources
 VHDR+=$(wildcard ../src/*.vh)
 VSRC+=$(wildcard ../src/*.v)
-
-ifeq ($(SYN),)
-VHDR+=$(wildcard ./src/*.vh)
-VSRC+=$(wildcard ./src/*.v)
 else
-VSRC+=../syn/*.v
+NODE ?= umc130
+include ../syn/$(NODE)/sim.mk
+VSRC+= ../syn/results/*.v
+../syn/%.v:
+	make -C ../syn build
 endif
 
 #exclude verilog testbench when using Verilator
@@ -39,6 +44,7 @@ include $(SIMULATOR).mk
 UFLAGS+=VCD=$(VCD)
 UFLAGS+=COV=$(COV)
 UFLAGS+=SYN=$(SYN)
+UFLAGS+=NODE=$(NODE)
 UFLAGS+=COV_TEST=$(COV_TEST)
 
 build: $(VHDR) $(VSRC)

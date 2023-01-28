@@ -22,10 +22,20 @@ ifneq ($(wildcard syn_build.mk),)
 include syn_build.mk
 endif
 
-#select node
+OUTPUT_DIR=results
+
 #default node
-NODE?=tsmc_cln28hpc
-include $(NODE)/$(NODE).mk
+NODE ?= umc130
+
+SYN_SERVER=$(CADENCE_SERVER)
+SYN_USER=$(CADENCE_USER)
+SYN_SSH_FLAGS=$(CADENCE_SSH_FLAGS)
+SYN_SCP_FLAGS=$(CADENCE_SCP_FLAGS)
+SYN_SYNC_FLAGS=$(CADENCE_SYNC_FLAGS)
+
+synth: $(VHDR) $(VSRC)
+	genus -batch -files run_genus.tcl
+
 
 UFLAGS+=COV=$(COV)
 UFLAGS+=COV_TEST=$(COV_TEST)
@@ -49,11 +59,11 @@ config.tcl:
 	@echo "set INCLUDE [list $(INCLUDE)]" >> $@
 	@echo "set VSRC [glob $(VSRC)]" >> $@
 
-clean: $(NODE)-clean
+clean:
 	find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.tcl -o -name \*.sdc \) -delete
-	@rm -f ../../*.vh config.tcl
+	@rm -rf ../../*.vh config.tcl fv results st_part_log
 ifneq ($(SYN_SERVER),)
 	ssh $(SYN_SSH_FLAGS) $(SYN_USER)@$(SYN_SERVER) 'if [ -f $(REMOTE_SYN_DIR)/Makefile ]; then make -C $(REMOTE_SYN_DIR) $@; fi'
 endif
 
-.PHONY: run clean config.tcl
+.PHONY: run clean config.tcl synth
