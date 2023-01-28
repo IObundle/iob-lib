@@ -44,6 +44,7 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     if create_build_dir:
         os.makedirs(build_dir, exist_ok=True)
         mk_conf.config_build_mk(confs, meta_data, build_dir)
+        if 'board' in meta_data.keys(): mk_conf.config_for_board(meta_data['board'], build_dir, confs)
         build_srcs.build_dir_setup(python_module)
     
     #

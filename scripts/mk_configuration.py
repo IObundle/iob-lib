@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 
+import iob_colors
 from latex import write_table
 
 def params_vh(params, top_module, out_dir):
@@ -109,3 +110,39 @@ def generate_confs_tex(confs, out_dir):
         tex_table.append([conf['name'].replace('_','\_'), conf['type'], conf['min'], conf['val'].replace('_','\_'), conf['max'], conf['descr'].replace('_','\_')])
 
     write_table(f"{out_dir}/confs",tex_table)
+
+
+def config_for_board(board, build_dir, confs):
+    available_boards = {\
+        'CYCLONEV-GT-DK':{'BAUD':'115200', 'FREQ':'50000000', 'MEM_NO_READ_ON_WRITE':'0', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'30'}, 
+        'AES-KU040-DB-G':{'BAUD':'115200', 'FREQ':'100000000', 'MEM_NO_READ_ON_WRITE':'1', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'30'}
+        }
+    if board not in available_boards.keys(): 
+        sim_conf = {'BAUD':'3000000', 'FREQ':'100000000', 'MEM_NO_READ_ON_WRITE':'0', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'24'}
+        print(f"{iob_colors.INFO}Board name is not in the available boards.\nDefaulting to the simulation configuration.{iob_colors.ENDC}")
+        edit_config_for_board(confs, sim_conf)
+    else:
+        for key in available_boards.keys():
+            if board == key:
+                print(f"{iob_colors.INFO}Configuring IP core to run in {board}.{iob_colors.ENDC}")
+                edit_config_for_board(confs, available_boards[key])
+
+    file = open(f"{build_dir}/config_build.mk", "a")
+    file.write(f"BOARD={board}\n")
+    file.close()
+
+
+def edit_config_for_board(confs, board):
+    edit_confs = [ \
+        {'name':'BAUD', 'type':'M', 'val':board['BAUD'], 'min':'1', 'max':'NA', 'descr':"UART baud rate"},
+        {'name':'FREQ', 'type':'M', 'val':board['FREQ'], 'min':'1', 'max':'NA', 'descr':"System clock frequency"},
+        {'name':'MEM_NO_READ_ON_WRITE', 'type':'M', 'val':board['MEM_NO_READ_ON_WRITE'], 'min':'0', 'max':'1', 'descr':"Disable simultaneous read and writes to RAM."},
+        {'name':'DDR_DATA_W', 'type':'M', 'val':board['DDR_DATA_W'], 'min':'1', 'max':'32', 'descr':"DDR data bus width"},
+        {'name':'DDR_ADDR_W', 'type':'M', 'val':board['DDR_ADDR_W'], 'min':'1', 'max':'32', 'descr':"DDR address bus width"},
+    ]
+    for edit_conf in edit_confs:
+        for conf in confs:
+            if edit_conf['name']==conf['name']:
+                conf['val'] = edit_conf['val']
+                break
+        else: confs.append(edit_conf)
