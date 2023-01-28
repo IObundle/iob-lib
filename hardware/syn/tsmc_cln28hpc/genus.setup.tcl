@@ -1,5 +1,5 @@
 
-
+#get from command line arg
 set LIBDIR /tria/apps/libs/arm/tsmc/cln28hpc 
 
 set_db lib_search_path [list     $LIBDIR/sc9mcpp140_base_svt_c35/r0p0/lib     \
