@@ -126,7 +126,7 @@ def config_for_board(board, build_dir, confs):
     else:
         for key in available_boards.keys():
             if board == key:
-                print(f"{iob_colors.INFO}Configuring IP core to run in {board}.{iob_colors.ENDC}")
+                print(f"{iob_colors.INFO}Configuring system to run on {board}.{iob_colors.ENDC}")
                 edit_config_for_board(confs, available_boards[key])
 
     file = open(f"{build_dir}/config_build.mk", "a")
@@ -147,4 +147,4 @@ def edit_config_for_board(confs, board):
             if edit_conf['name']==conf['name']:
                 conf['val'] = edit_conf['val']
                 break
-        else: confs.append(edit_conf)
+            else: confs.append(edit_conf)
