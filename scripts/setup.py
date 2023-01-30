@@ -40,7 +40,7 @@ def setup( meta_data, confs, ios, regs, blocks, no_overlap=False, build_dir=None
     #
     if regs:
         mkregs.write_hwheader(reg_table, build_dir+'/hardware/src', top)
-        mkregs.write_lparam_header(reg_table, build_dir+'/hardware/src', top)
+        mkregs.write_lparam_header(reg_table, build_dir+'/hardware/simulation/src', top)
         mkregs.write_hwcode(reg_table, build_dir+'/hardware/src', top)
     mk_conf.params_vh(confs, top, build_dir+'/hardware/src')
     mk_conf.conf_vh(confs, top, build_dir+'/hardware/src')
