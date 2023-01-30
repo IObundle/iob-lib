@@ -70,7 +70,7 @@ def hw_setup(module):
     submodule_dirs = core_meta_data['submodules']['dirs']
 
     # append this core hw defines to config_build.mk
-    mk_conf.append_defines_config_build_mk(module.confs, build_dir)
+    #mk_conf.append_defines_config_build_mk(module.confs, build_dir)
 
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, core_previous_version, build_dir)

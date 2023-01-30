@@ -5,6 +5,12 @@ set VSRC [lindex $argv 2]
 set IS_FPGA [lindex $argv 3]
 set RUN_EXTMEM [lindex $argv 4]
 
+puts $NAME
+puts $BOARD
+puts $VSRC
+puts $IS_FPGA
+puts $RUN_EXTMEM
+
 
 #verilog sources
 foreach file [split $VSRC \ ] {

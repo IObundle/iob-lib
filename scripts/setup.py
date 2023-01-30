@@ -49,7 +49,7 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
         mk_conf.config_build_mk(meta_data, build_dir)
         if 'board' in meta_data.keys(): mk_conf.config_for_board(meta_data['board'], build_dir, confs)
         build_srcs.build_dir_setup(python_module)
-    
+
     #
     # IOb-SoC related functions
     #
@@ -129,8 +129,10 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
         mkregs_obj.write_lparam_header(reg_table, build_dir+'/hardware/simulation/src', top)
         mkregs_obj.write_hwcode(reg_table, build_dir+'/hardware/src', top)
     mk_conf.params_vh(confs, top, build_dir+'/hardware/src')
+
     mk_conf.conf_vh(confs, top, build_dir+'/hardware/src')
 
+    
     ios_lib.generate_ios_header(ios, top, build_dir+'/hardware/src',prefix=ios_prefix)
 
     #
