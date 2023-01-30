@@ -196,7 +196,7 @@ def init_serial():
 
     # configure the serial connections (the parameters differs on the device connected to)
     ser = serial.Serial()
-    ser.port = "/dev/usb-uart"         # serial port
+    ser.port = sys.argv[sys.argv.index('-s')+1] #serial port from -s argument
     if ('-b' in sys.argv):
         if (len(sys.argv)<5): usage("PROGNAME: not enough program arguments")
         ser.baudrate = sys.argv[sys.argv.index('-b')+1]              # baudrate
