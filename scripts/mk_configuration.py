@@ -72,7 +72,7 @@ def config_build_mk(meta_data, build_dir):
     file2create.write(f"VERSION={meta_data['version']}\n")
     file2create.write(f"BUILD_DIR_NAME={build_dir.split('/')[-1]}\n")
     file2create.write(f"FLOWS={meta_data['flows']}\n\n")
-
+    file2create.write(f"DEFINES=\n")
     file2create.close()
 
 
