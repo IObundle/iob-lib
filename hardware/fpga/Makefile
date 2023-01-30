@@ -57,7 +57,8 @@ run: build
 ifeq ($(NORUN),0)
 ifeq ($(BOARD_SERVER),)
 	cp $(EMB_DIR)/$(NAME)_firmware.bin .
-	bash -c "trap 'make release' INT TERM KILL; make grab; $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log; make release;"
+	bash -c "trap 'make release' INT TERM KILL; $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log;"
+#bash -c "trap 'make release' INT TERM KILL; make grab; $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log; make release;"
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
