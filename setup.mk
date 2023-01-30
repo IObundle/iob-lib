@@ -11,11 +11,13 @@ SETUP_PYTHON_FILENAME=$(wildcard *_setup.py)
 # python scripts directory
 PYTHON_DIR=submodules/LIB/scripts
 
+PYTHON_EXEC:=/usr/bin/env python3 -B
+
 #submodule directories
-$(foreach entry, $(shell $(PYTHON_DIR)/setup.py get_core_submodules_dirs), $(eval $(entry)))
+$(foreach entry, $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_core_submodules_dirs), $(eval $(entry)))
 
 # establish build dir paths
-BUILD_DIR := $(shell $(PYTHON_DIR)/setup.py get_build_dir)
+BUILD_DIR := $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_build_dir)
 
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
@@ -28,7 +30,7 @@ BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 setup: debug
 
 $(BUILD_DIR):
-	./$(SETUP_PYTHON_FILENAME) $(SETUP_ARGS)
+	$(PYTHON_EXEC) ./$(SETUP_PYTHON_FILENAME) $(SETUP_ARGS)
 #
 #HARDWARE
 #
@@ -99,8 +101,8 @@ endif
 
 clean:
 	@rm -rf $(BUILD_DIR)
-	@rm -rf scripts/__pycache__
 
+# Remove all __pycache__ folders with python bytecode
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
