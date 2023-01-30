@@ -40,10 +40,7 @@ def conf_vh(macros, top_module, out_dir):
     file2create.write(f"`define VH_{fname}_VH\n\n")
     for macro in macros:
         #Only insert macro if its is not a bool define, and if so only insert it if it is true
-        if macro['type'] != 'D' and macro['val'] != '0':
-            if macro['name'] == 'UART0_DATA_W':
-                print ("found")
-                exit(1)
+        if macro['val'] != 'NA':
             m_name = macro['name'].upper()
             m_default_val = macro['val']
             file2create.write(f"`define {core_prefix}{m_name} {m_default_val}\n")
@@ -59,7 +56,7 @@ def conf_h(macros, top_module, out_dir):
     file2create.write(f"#define H_{fname}_H\n\n")
     for macro in macros:
         #Only insert macro if its is not a bool define, and if so only insert it if it is true
-        if macro['type'] != 'D':
+        if macro['val'] != 'NA':
             m_name = macro['name'].upper()
             # Replace any Verilog specific syntax by equivalent C syntax
             m_default_val = re.sub("\d+'h","0x",macro['val'])
@@ -94,20 +91,6 @@ def append_flows_config_build_mk(flows_list, flows_filter, build_dir):
     file.write(f"FLOWS+={flows2append}\n\n")
     file.close()
 
-def append_defines_config_build_mk(defines, build_dir):
-    file = open(f"{build_dir}/config_build.mk", "a")
-
-    for macro in defines:
-        if macro['type'] == 'D':
-            d_name = macro['name'].upper()
-            d_val = macro['val']
-            file.write(f"{d_name} ?= {d_val}\n")
-            file.write(f"ifeq ($({d_name}),1)\n")
-            file.write(f"DEFINES+= -D{d_name}\n")
-            file.write(f"endif\n\n")
-
-    file.close()
-
 # Generate TeX table of confs
 def generate_confs_tex(confs, out_dir):
     tex_table = []
@@ -120,10 +103,10 @@ def generate_confs_tex(confs, out_dir):
 def config_for_board(board, build_dir, confs):
     available_boards = {\
         'CYCLONEV-GT-DK':{'BAUD':'115200', 'FREQ':'50000000', 'MEM_NO_READ_ON_WRITE':'1', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'30'}, 
-        'AES-KU040-DB-G':{'BAUD':'115200', 'FREQ':'100000000', 'MEM_NO_READ_ON_WRITE':'0', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'30'}
+        'AES-KU040-DB-G':{'BAUD':'115200', 'FREQ':'100000000', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'30'}
         }
     if board not in available_boards.keys(): 
-        sim_conf = {'BAUD':'3000000', 'FREQ':'100000000', 'MEM_NO_READ_ON_WRITE':'0', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'24'}
+        sim_conf = {'BAUD':'3000000', 'FREQ':'100000000', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'24'}
         print(f"{iob_colors.INFO}Board name is not in the available boards.\nDefaulting to the simulation configuration.{iob_colors.ENDC}")
         edit_config_for_board(confs, sim_conf)
     else:
@@ -136,12 +119,14 @@ def config_for_board(board, build_dir, confs):
 
 
 def edit_config_for_board(confs, board):
-    board_confs = [ \
-        {'name':'BAUD', 'type':'M', 'val':board['BAUD'], 'min':'1', 'max':'NA', 'descr':"UART baud rate"},
-        {'name':'FREQ', 'type':'M', 'val':board['FREQ'], 'min':'1', 'max':'NA', 'descr':"System clock frequency"},
-        {'name':'MEM_NO_READ_ON_WRITE', 'type':'M', 'val':board['MEM_NO_READ_ON_WRITE'], 'min':'0', 'max':'1', 'descr':"Disable simultaneous read and writes to RAM."},
-        {'name':'DDR_DATA_W', 'type':'M', 'val':board['DDR_DATA_W'], 'min':'1', 'max':'32', 'descr':"DDR data bus width"},
-        {'name':'DDR_ADDR_W', 'type':'M', 'val':board['DDR_ADDR_W'], 'min':'1', 'max':'32', 'descr':"DDR address bus width"},
+    board_possible_confs = [ \
+        {'name':'BAUD', 'type':'M', 'val':'', 'min':'1', 'max':'NA', 'descr':"UART baud rate"},
+        {'name':'FREQ', 'type':'M', 'val':'', 'min':'1', 'max':'NA', 'descr':"System clock frequency"},
+        {'name':'MEM_NO_READ_ON_WRITE', 'type':'M', 'val':'', 'min':'0', 'max':'1', 'descr':"Disable simultaneous read and writes to RAM."},
+        {'name':'DDR_DATA_W', 'type':'M', 'val':'', 'min':'1', 'max':'32', 'descr':"DDR data bus width"},
+        {'name':'DDR_ADDR_W', 'type':'M', 'val':'', 'min':'1', 'max':'32', 'descr':"DDR address bus width"},
     ]
-    for board_conf in board_confs:
-        confs.append(board_conf)
+    for board_conf in board_possible_confs:
+        if board_conf['name'] in board.keys():
+            board_conf['val'] = board[board_conf['name']]
+            confs.append(board_conf)

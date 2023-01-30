@@ -250,7 +250,6 @@ def get_module_io(ios):
 # prefix: String to add as a prefix to any parameter found in the string
 def add_prefix_to_parameters_in_string(string, confs, prefix):
     for parameter in confs:
-        print(parameter)
         if parameter['type'] in ['P','F']:
             string = string.replace(parameter['name'], prefix+parameter['name'])
     return string

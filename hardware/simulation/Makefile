@@ -47,7 +47,7 @@ UFLAGS+=SYN=$(SYN)
 UFLAGS+=NODE=$(NODE)
 UFLAGS+=COV_TEST=$(COV_TEST)
 
-build: $(VHDR) $(VSRC)
+build: $(VHDR) $(VSRC) $(HEX)
 ifeq ($(SIM_SERVER),)
 	make comp
 else
