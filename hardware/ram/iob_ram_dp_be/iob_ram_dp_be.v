@@ -7,7 +7,8 @@ module iob_ram_dp_be
   #(
     parameter HEXFILE = "none",
     parameter ADDR_W = 10, // Addr Width in bits : 2*ADDR_W = RAM Depth
-    parameter DATA_W = 32  // Data Width in bits
+    parameter DATA_W = 32,  // Data Width in bits
+    parameter MEM_NO_READ_ON_WRITE = 0 //no simultaneous read/write
     )
    (
     input                clk_i,
@@ -41,7 +42,7 @@ module iob_ram_dp_be
                    .HEXFILE(mem_init_file_int),
                    .ADDR_W(ADDR_W),
                    .DATA_W(COL_W),
-                   .MEM_NO_READ_ON_WRITE(1)
+                   .MEM_NO_READ_ON_WRITE(MEM_NO_READ_ON_WRITE)
                    ) ram
                  (
                   .clk_i   (clk_i),

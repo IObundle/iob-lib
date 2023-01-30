@@ -49,7 +49,9 @@ else
 	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_LOG) .
 endif
 
-FPGA_PROG?=echo 'FPGA programming tool is not set. Should be set in $(FPGA_TOOL).mk.'
+#console start command
+CONSOLE_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
+
 #run fpga image
 run: build
 ifeq ($(NORUN),0)
@@ -86,7 +88,7 @@ debug:
 	@echo TEST_LIST=$(TEST_LIST)
 
 grab:
-	if [ ! -f $(FPGA_GRABBED) ]; then touch $(FPGA_GRABBED); chown $(USER):dialout $(FPGA_GRABBED); chmod 664 $(FPGA_GRABBED); fi;\
+	while [ -f $(FPGA_GRABBED) ]; do echo "INFO: board being used..."; sleep 5; done && touch $(FPGA_GRABBED) && chown $(USER):dialout $(FPGA_GRABBED) && chmod 664 $(FPGA_GRABBED); fi;\
 	bash -c "trap 'make release; exit' INT TERM KILL"
 
 release:
