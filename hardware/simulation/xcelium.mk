@@ -20,6 +20,10 @@ ifeq ($(VCD),1)
 VFLAGS+=-define VCD
 endif
 
+ifeq ($(SYN),1)
+VFLAGS+=-define SYN
+endif
+
 comp: $(VHDR) $(VSRC)
 	xmvlog $(VFLAGS) $(VSRC) && xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 

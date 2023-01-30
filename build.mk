@@ -147,8 +147,8 @@ endif
 test: sim-test fpga-test doc-test
 
 ptest: test syn-test lint-test cov-test
-	
-dtest: test syn-test	
+
+dtest: sim-test syn-test fpga-test
 
 #
 # DEBUG
