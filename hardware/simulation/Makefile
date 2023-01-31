@@ -5,6 +5,12 @@
 
 SHELL:=bash
 
+#select simulator
+#default simulator
+SIMULATOR ?=icarus
+
+# Generate configuration when importing config_build.mk
+GEN_CONFIG:=1
 include ../../config_build.mk
 
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
@@ -36,9 +42,6 @@ ifneq ($(wildcard sim_build.mk),)
 include sim_build.mk
 endif
 
-#select simulator
-#default simulator
-SIMULATOR?=icarus
 include $(SIMULATOR).mk
 
 UFLAGS+=VCD=$(VCD)

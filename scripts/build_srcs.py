@@ -195,6 +195,9 @@ def add_setup_lambdas(python_module, **kwargs):
     for module_type, module_path in [('sim_setup','hardware/simulation/sim_setup.py'), ('fpga_setup','hardware/fpga/fpga_setup.py'), ('sw_setup','software/sw_setup.py')]:
         full_module_path = os.path.join(python_module.setup_dir,module_path)
         if os.path.isfile(full_module_path): 
+            # Make sure dictionary exists
+            if module_type not in python_module.submodules: 
+                python_module.submodules[module_type] = {'headers':[], 'modules':[]}
             # Append executable module to 'modules' list of the submodules dictionary
             # The lambda expression will be executed during setup
             python_module.submodules[module_type]['modules'].append(get_module_lambda(full_module_path, **kwargs))
