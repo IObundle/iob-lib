@@ -6,6 +6,7 @@ SHELL:=bash
 #select board
 #default board
 BOARD ?=CYCLONEV-GT-DK
+BOARD_GRABBED=/tmp/$(BOARD).grabbed
 
 # Generate configuration when importing config_build.mk
 GEN_CONFIG:=1
@@ -20,7 +21,6 @@ REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
 EMB_DIR = ../../software/embedded
 PYTHON_DIR = ../../scripts
 FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
-FPGA_GRABBED=/tmp/$(BOARD).grabbed
 
 #include local fpga segment
 ifneq ($(wildcard fpga_build.mk),)
