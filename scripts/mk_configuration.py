@@ -152,11 +152,15 @@ def config_for_board(top, flows_list, build_dir):
 # define_name: name of the macro in confs (its called define because it is unvalued, it is either set or unset)
 # should_set: Select if define should be set or not
 def update_define(confs, define_name, should_set):
-    for idx, macro in enumerate(confs):
+    for macro in confs:
         if macro['name']==define_name:
             # Found macro. Unset it if not 'should_set'
-            if not should_set: del confs[idx]
+            if should_set: 
+                macro['val'] = '1'
+            else:
+                confs.remove(macro)
             break
     else:
         # Did not find define. Set it if should_set.
-        if should_set: confs.append({'name':define_name,'type':'M', 'val':'-', 'min':'-', 'max':'-', 'descr':"Define"})
+        if should_set: 
+            confs.append({'name':define_name,'type':'M', 'val':'1', 'min':'0', 'max':'1', 'descr':"Define"})
