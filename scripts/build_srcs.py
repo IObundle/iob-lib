@@ -102,7 +102,7 @@ def sim_setup(python_module):
     sim_dir = "hardware/simulation"
 
     # append this core hw flows to config_build
-    mk_conf.append_flows_config_build_mk(core_flows,["sim"],build_dir)
+    if 'sim' not in core_flows: mk_conf.append_flows_config_build_mk(core_flows,["sim"],build_dir)
 
     if 'sim' in core_flows:
         shutil.copytree(f"{setup_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
@@ -236,7 +236,8 @@ def sw_setup(python_module):
     submodule_dirs = python_module.submodules['dirs']
 
     # append this core hw flows to config_build
-    mk_conf.append_flows_config_build_mk(core_flows,["emb","pc-emul"],build_dir)
+    if "emb" not in core_flows: mk_conf.append_flows_config_build_mk(core_flows,["emb"],build_dir)
+    if "pc-emul" not in core_flows: mk_conf.append_flows_config_build_mk(core_flows,["pc-emul"],build_dir)
 
     # Copy software tree if it exists as this core may contain software sources to be used by others
     if os.path.isdir(f"{setup_dir}/software"):
