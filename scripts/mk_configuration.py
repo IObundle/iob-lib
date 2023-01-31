@@ -39,14 +39,9 @@ def conf_vh(macros, top_module, out_dir):
     file2create.write(f"`ifndef VH_{fname}_VH\n")
     file2create.write(f"`define VH_{fname}_VH\n\n")
     for macro in macros:
-        #Only insert macro if its is not a bool define, and if so only insert it if it is true
-        if macro['type'] != 'D' and macro['val'] != '0':
-            if macro['name'] == 'UART0_DATA_W':
-                print ("found")
-                exit(1)
-            m_name = macro['name'].upper()
-            m_default_val = macro['val']
-            file2create.write(f"`define {core_prefix}{m_name} {m_default_val}\n")
+        m_name = macro['name'].upper()
+        m_default_val = macro['val']
+        file2create.write(f"`define {core_prefix}{m_name} {m_default_val}\n")
     file2create.write(f"\n`endif // VH_{fname}_VH\n")
 
 def conf_h(macros, top_module, out_dir):
@@ -58,12 +53,10 @@ def conf_h(macros, top_module, out_dir):
     file2create.write(f"#ifndef H_{fname}_H\n")
     file2create.write(f"#define H_{fname}_H\n\n")
     for macro in macros:
-        #Only insert macro if its is not a bool define, and if so only insert it if it is true
-        if macro['type'] != 'D':
-            m_name = macro['name'].upper()
-            # Replace any Verilog specific syntax by equivalent C syntax
-            m_default_val = re.sub("\d+'h","0x",macro['val'])
-            file2create.write(f"#define {m_name} {str(m_default_val).replace('`','')}\n") #Remove Verilog macros ('`')
+        m_name = macro['name'].upper()
+        # Replace any Verilog specific syntax by equivalent C syntax
+        m_default_val = re.sub("\d+'h","0x",macro['val'])
+        file2create.write(f"#define {m_name} {str(m_default_val).replace('`','')}\n") #Remove Verilog macros ('`')
     file2create.write(f"\n#endif // H_{fname}_H\n")
 
     file2create.close()
@@ -92,20 +85,6 @@ def append_flows_config_build_mk(flows_list, flows_filter, build_dir):
     if not flows2append: return
     file = open(f"{build_dir}/config_build.mk", "a")
     file.write(f"FLOWS+={flows2append}\n\n")
-    file.close()
-
-def append_defines_config_build_mk(defines, build_dir):
-    file = open(f"{build_dir}/config_build.mk", "a")
-
-    for macro in defines:
-        if macro['type'] == 'D':
-            d_name = macro['name'].upper()
-            d_val = macro['val']
-            file.write(f"{d_name} ?= {d_val}\n")
-            file.write(f"ifeq ($({d_name}),1)\n")
-            file.write(f"DEFINES+= -D{d_name}\n")
-            file.write(f"endif\n\n")
-
     file.close()
 
 # Generate TeX table of confs

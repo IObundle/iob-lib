@@ -8,7 +8,6 @@ import if_gen
 from submodule_utils import import_setup
 import iob_colors
 import inspect
-import distutils
 import mk_configuration as mk_conf
 
 lib_dir = "submodules/LIB"
@@ -29,8 +28,8 @@ def build_dir_setup(python_module):
     # Setup simulation
     sim_setup(python_module)
 
-    if "fpga" in core_flows: 
-        fpga_setup( python_module ) #TODO: change to be similar to sim_setup
+    # Setup fpga
+    fpga_setup(python_module)
 
     if "lint" in core_flows: 
         lint_setup( python_module )
@@ -66,9 +65,6 @@ def hw_setup(python_module):
 
     set_default_submodule_dirs(python_module) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
     submodule_dirs = python_module.submodules['dirs']
-
-    # append this core hw defines to config_build.mk
-    #mk_conf.append_defines_config_build_mk(module.confs, build_dir)
 
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, core_previous_version, build_dir)
@@ -109,8 +105,7 @@ def sim_setup(python_module):
     mk_conf.append_flows_config_build_mk(core_flows,["sim"],build_dir)
 
     if 'sim' in core_flows:
-        #Use distutils copy_tree() to copy entire simulation directory and possibly merge with existing one
-        shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
+        shutil.copytree(f"{setup_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
     #Add lambda functions to the sim_srcs. These functions call setup modules for simulation setup (sim_setup.py)
     add_setup_lambdas(python_module,setup_module=python_module)
@@ -122,23 +117,44 @@ def sim_setup(python_module):
 
     # Copy LIB sim files
     if 'sim' in core_flows:
-        copy_files( f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", copy_all = True )
+        shutil.copytree(f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*.pdf'))
     
 
 # Currently not used because it is not needed
 def fpga_setup(python_module):
+    core_flows = python_module.flows
     build_dir = python_module.build_dir
     setup_dir = python_module.setup_dir
+    
+    # Make sure 'fpga_setup' dictionary exists
+    if 'fpga_setup' not in python_module.submodules: 
+        python_module.submodules['fpga_setup'] = {'headers':[], 'modules':[]}
+
+    fpga_setup = python_module.submodules['fpga_setup']
+    Vheaders = fpga_setup['headers']
+    fpga_srcs = fpga_setup['modules']
+
+    set_default_submodule_dirs(python_module) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
+    submodule_dirs = python_module.submodules['dirs']
     fpga_dir = "hardware/fpga"
 
-    shutil.copytree(f"{setup_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}")
-    for file in Path(f"{lib_dir}/{fpga_dir}").rglob('*'):
-        src_file = file.as_posix()
-        dest_file = re.sub(lib_dir, build_dir, src_file)
-        if os.path.isfile(src_file): 
-            os.makedirs(os.path.dirname(dest_file), exist_ok=True)
-            shutil.copyfile(f"{src_file}", f"{dest_file}")
-    subprocess.call(["find", build_dir, "-name", "*.pdf", "-delete"])
+    # append this core hw flows to config_build
+    mk_conf.append_flows_config_build_mk(core_flows,["fpga"],build_dir)
+
+    if 'fpga' in core_flows:
+        shutil.copytree(f"{setup_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
+
+    #Add lambda functions to the fpga_srcs. These functions call setup modules for fpga setup (fpga_setup.py)
+    add_setup_lambdas(python_module,setup_module=python_module)
+    #Setup any fpga submodules by calling the 'fpga_setup()' function from their *_setup.py module
+    module_dependency_setup(fpga_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.fpga_setup") 
+
+    if Vheaders: create_Vheaders( f"{build_dir}/{fpga_dir}/src", Vheaders )
+    if fpga_srcs: copy_files( lib_dir, f"{build_dir}/{fpga_dir}/src", fpga_srcs, '*.v*' )
+
+    # Copy LIB fpga files
+    if 'fpga' in core_flows:
+        shutil.copytree(f"{lib_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*.pdf'))
 
 def lint_setup(python_module):
     build_dir = python_module.build_dir
@@ -221,7 +237,6 @@ def sw_setup(python_module):
 
     # Copy software tree if it exists as this core may contain software sources to be used by others
     if os.path.isdir(f"{setup_dir}/software"):
-        #Use distutils copy_tree() to copy entire software directory and possibly merge with existing one
         shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
     #Add lambda functions to the sw_srcs. These functions call setup modules for software setup (sw_setup.py)
