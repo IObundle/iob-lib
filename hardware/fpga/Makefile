@@ -20,6 +20,7 @@ REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
 EMB_DIR = ../../software/embedded
 PYTHON_DIR = ../../scripts
 FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
+FPGA_GRABBED=/tmp/$(BOARD).grabbed
 
 #include local fpga segment
 ifneq ($(wildcard fpga_build.mk),)
@@ -89,7 +90,7 @@ debug:
 	@echo TEST_LIST=$(TEST_LIST)
 
 grab:
-	while [ -f $(FPGA_GRABBED) ]; do echo "INFO: board being used..."; sleep 5; done && touch $(FPGA_GRABBED) && chown $(USER):dialout $(FPGA_GRABBED) && chmod 664 $(FPGA_GRABBED); done;\
+	while [ -f $(FPGA_GRABBED) ]; do echo "INFO: board being used..."; sleep 5; done && touch $(FPGA_GRABBED) && chown $(USER):dialout $(FPGA_GRABBED) && chmod 664 $(FPGA_GRABBED);\
 	bash -c "trap 'make release; exit' INT TERM KILL"
 
 release:
