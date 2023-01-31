@@ -5,6 +5,12 @@
 
 SHELL:=bash
 
+#select simulator
+#default simulator
+SIMULATOR ?=icarus
+
+# Generate configuration when importing config_build.mk
+GEN_CONFIG:=1
 include ../../config_build.mk
 
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
@@ -36,9 +42,6 @@ ifneq ($(wildcard sim_build.mk),)
 include sim_build.mk
 endif
 
-#select simulator
-#default simulator
-SIMULATOR?=icarus
 include $(SIMULATOR).mk
 
 UFLAGS+=VCD=$(VCD)
@@ -66,7 +69,7 @@ ifneq ($(CONSOLE_CMD),)
 endif
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make exec"
 else
-	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) exec SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
+	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
 ifeq ($(VCD),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
@@ -118,7 +121,7 @@ else
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make run-tests"
 endif
 ifneq ($(COV),1)
-	diff test.log test.expected
+	diff test.log src/test.expected
 else
 	@echo "INFO: simulation code coverage is reserved for internal use only."
 endif

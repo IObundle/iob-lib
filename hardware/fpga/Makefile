@@ -3,7 +3,12 @@
 
 SHELL:=bash
 
-# include core basic info
+#select board
+#default board
+BOARD ?=CYCLONEV-GT-DK
+
+# Generate configuration when importing config_build.mk
+GEN_CONFIG:=1
 include ../../config_build.mk
 
 ifneq ($(wildcard ../../console.mk),)
@@ -14,17 +19,13 @@ REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
 EMB_DIR = ../../software/embedded
 PYTHON_DIR = ../../scripts
-
-#select board
-#default board
-BOARD?=CYCLONEV-GT-DK
+FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
 
 #include local fpga segment
 ifneq ($(wildcard fpga_build.mk),)
 include fpga_build.mk
 endif
 
-FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
 include $(FPGA_TOOL)/$(FPGA_TOOL).mk
 include $(FPGA_TOOL)/$(BOARD)/board.mk
 
@@ -89,7 +90,7 @@ debug:
 	@echo TEST_LIST=$(TEST_LIST)
 
 grab:
-	while [ -f $(FPGA_GRABBED) ]; do echo "INFO: board being used..."; sleep 5; done && touch $(FPGA_GRABBED) && chown $(USER):dialout $(FPGA_GRABBED) && chmod 664 $(FPGA_GRABBED); fi;\
+	while [ -f $(FPGA_GRABBED) ]; do echo "INFO: board being used..."; sleep 5; done && touch $(FPGA_GRABBED) && chown $(USER):dialout $(FPGA_GRABBED) && chmod 664 $(FPGA_GRABBED); done;\
 	bash -c "trap 'make release; exit' INT TERM KILL"
 
 release:

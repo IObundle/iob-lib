@@ -13,7 +13,7 @@ endif
 
 EFLAGS=-debug_access+nomemcbk+dmptf -licqueue -debug_region+cell -notice +bidir+1
 
-#+lint=all +print+bidir+warn
+#+lint=all
 
 
 comp: $(VHDR) $(VSRC)

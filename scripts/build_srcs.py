@@ -8,7 +8,6 @@ import if_gen
 from submodule_utils import import_setup
 import iob_colors
 import inspect
-import distutils
 import mk_configuration as mk_conf
 
 lib_dir = "submodules/LIB"
@@ -19,61 +18,59 @@ def copy_without_override(src, dst):
         shutil.copy2(src, dst)
 
 # build_dir_setup should only be called by the main core. Therefor, executed only one time.
-def build_dir_setup(module):
-    core_meta_data = module.meta
-    build_dir = core_meta_data['build_dir']
-    setup_dir = core_meta_data['setup_dir']
-    core_flows = core_meta_data['flows']
+def build_dir_setup(python_module):
+    build_dir = python_module.build_dir
+    setup_dir = python_module.setup_dir
+    core_flows = python_module.flows
     # Setup HARDWARE directories :
     os.makedirs(f"{build_dir}/hardware/src", exist_ok=True)
 
     # Setup simulation
-    sim_setup(module)
+    sim_setup(python_module)
 
-    if "fpga" in core_flows: 
-        fpga_setup( core_meta_data ) #TODO: change to be similar to sim_setup
+    # Setup fpga
+    fpga_setup(python_module)
 
     if "lint" in core_flows: 
-        lint_setup( core_meta_data )
+        lint_setup( python_module )
     if "syn" in core_flows: 
-        syn_setup( core_meta_data )
+        syn_setup( python_module )
 
     # Setup software
-    sw_setup(module)
+    sw_setup(python_module)
 
     # Setup DOC directories :
-    doc_setup( core_meta_data )
+    doc_setup( python_module )
     # Setup DELIVERY directories :
     # (WIP)
     # Copy generic MAKEFILE
     shutil.copyfile(f"{lib_dir}/build.mk", f"{build_dir}/Makefile")
 
 
-def hw_setup(module):
-    core_meta_data = module.meta
-    core_name = core_meta_data['name']
-    core_version = core_meta_data['version']
-    if 'previous_version' in core_meta_data: core_previous_version = core_meta_data['previous_version']
+def hw_setup(python_module):
+    core_name = python_module.name
+    core_version = python_module.version
+    if 'previous_version' in vars(python_module): core_previous_version = python_module.previous_version
     else: core_previous_version = core_version
-    build_dir = core_meta_data['build_dir']
-    setup_dir = core_meta_data['setup_dir']
+    build_dir = python_module.build_dir
+    setup_dir = python_module.setup_dir
 
     # Make sure 'hw_setup' dictionary exists
-    if 'hw_setup' not in core_meta_data['submodules']: 
-        core_meta_data['submodules']['hw_setup'] = {'headers':[], 'modules':[]}
+    if 'hw_setup' not in python_module.submodules: 
+        python_module.submodules['hw_setup'] = {'headers':[], 'modules':[]}
 
-    core_hw_setup = core_meta_data['submodules']['hw_setup']
+    core_hw_setup = python_module.submodules['hw_setup']
     Vheaders = core_hw_setup['headers']
     hardware_srcs = core_hw_setup['modules']
 
-    set_default_submodule_dirs(core_meta_data) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
-    submodule_dirs = core_meta_data['submodules']['dirs']
+    set_default_submodule_dirs(python_module) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
+    submodule_dirs = python_module.submodules['dirs']
 
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, core_previous_version, build_dir)
 
     #Add lambda functions to the hw_srcs. These functions call setup modules for hardware setup (hw_setup.py)
-    add_setup_lambdas(core_meta_data,confs=module.confs,ios=module.ios,regs=module.regs,blocks=module.blocks)
+    add_setup_lambdas(python_module,setup_module=python_module)
     #Setup any hw submodules by calling the 'main()' function from their *_setup.py module
     module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs)
 
@@ -87,33 +84,31 @@ def hw_setup(module):
 
 # Setup simulation related files/modules
 # module: python module representing a *_setup.py file of the root directory of the core/system.
-def sim_setup(module):
-    core_meta_data = module.meta
-    core_flows = core_meta_data['flows']
-    build_dir = core_meta_data['build_dir']
-    setup_dir = core_meta_data['setup_dir']
+def sim_setup(python_module):
+    core_flows = python_module.flows
+    build_dir = python_module.build_dir
+    setup_dir = python_module.setup_dir
 
     # Make sure 'sim_setup' dictionary exists
-    if 'sim_setup' not in core_meta_data['submodules']: 
-        core_meta_data['submodules']['sim_setup'] = {'headers':[], 'modules':[]}
+    if 'sim_setup' not in python_module.submodules: 
+        python_module.submodules['sim_setup'] = {'headers':[], 'modules':[]}
 
-    sim_setup = core_meta_data['submodules']['sim_setup']
+    sim_setup = python_module.submodules['sim_setup']
     Vheaders = sim_setup['headers']
     sim_srcs = sim_setup['modules']
 
-    set_default_submodule_dirs(core_meta_data) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
-    submodule_dirs = core_meta_data['submodules']['dirs']
+    set_default_submodule_dirs(python_module) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
+    submodule_dirs = python_module.submodules['dirs']
     sim_dir = "hardware/simulation"
 
     # append this core hw flows to config_build
     if 'sim' not in core_flows: mk_conf.append_flows_config_build_mk(core_flows,["sim"],build_dir)
 
     if 'sim' in core_flows:
-        #Use distutils copy_tree() to copy entire simulation directory and possibly merge with existing one
-        shutil.copytree(f"{setup_dir}/hardware/simulation", f"{build_dir}/hardware/simulation", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
+        shutil.copytree(f"{setup_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
     #Add lambda functions to the sim_srcs. These functions call setup modules for simulation setup (sim_setup.py)
-    add_setup_lambdas(core_meta_data,confs=module.confs,ios=module.ios,regs=module.regs,blocks=module.blocks)
+    add_setup_lambdas(python_module,setup_module=python_module)
     #Setup any sim submodules by calling the 'sim_setup()' function from their *_setup.py module
     module_dependency_setup(sim_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sim_setup") 
 
@@ -122,27 +117,48 @@ def sim_setup(module):
 
     # Copy LIB sim files
     if 'sim' in core_flows:
-        copy_files( f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", copy_all = True )
+        shutil.copytree(f"{lib_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*.pdf'))
     
 
 # Currently not used because it is not needed
-def fpga_setup(core_meta_data):
-    build_dir = core_meta_data['build_dir']
-    setup_dir = core_meta_data['setup_dir']
+def fpga_setup(python_module):
+    core_flows = python_module.flows
+    build_dir = python_module.build_dir
+    setup_dir = python_module.setup_dir
+    
+    # Make sure 'fpga_setup' dictionary exists
+    if 'fpga_setup' not in python_module.submodules: 
+        python_module.submodules['fpga_setup'] = {'headers':[], 'modules':[]}
+
+    fpga_setup = python_module.submodules['fpga_setup']
+    Vheaders = fpga_setup['headers']
+    fpga_srcs = fpga_setup['modules']
+
+    set_default_submodule_dirs(python_module) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
+    submodule_dirs = python_module.submodules['dirs']
     fpga_dir = "hardware/fpga"
 
-    shutil.copytree(f"{setup_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}")
-    for file in Path(f"{lib_dir}/{fpga_dir}").rglob('*'):
-        src_file = file.as_posix()
-        dest_file = re.sub(lib_dir, build_dir, src_file)
-        if os.path.isfile(src_file): 
-            os.makedirs(os.path.dirname(dest_file), exist_ok=True)
-            shutil.copyfile(f"{src_file}", f"{dest_file}")
-    subprocess.call(["find", build_dir, "-name", "*.pdf", "-delete"])
+    # append this core hw flows to config_build
+    mk_conf.append_flows_config_build_mk(core_flows,["fpga"],build_dir)
 
-def lint_setup(core_meta_data):
-    build_dir = core_meta_data['build_dir']
-    core_name = core_meta_data['name']
+    if 'fpga' in core_flows:
+        shutil.copytree(f"{setup_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
+
+    #Add lambda functions to the fpga_srcs. These functions call setup modules for fpga setup (fpga_setup.py)
+    add_setup_lambdas(python_module,setup_module=python_module)
+    #Setup any fpga submodules by calling the 'fpga_setup()' function from their *_setup.py module
+    module_dependency_setup(fpga_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.fpga_setup") 
+
+    if Vheaders: create_Vheaders( f"{build_dir}/{fpga_dir}/src", Vheaders )
+    if fpga_srcs: copy_files( lib_dir, f"{build_dir}/{fpga_dir}/src", fpga_srcs, '*.v*' )
+
+    # Copy LIB fpga files
+    if 'fpga' in core_flows:
+        shutil.copytree(f"{lib_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*.pdf'))
+
+def lint_setup(python_module):
+    build_dir = python_module.build_dir
+    core_name = python_module.name
     lint_dir = "hardware/lint"
 
     os.mkdir(f"{build_dir}/{lint_dir}")
@@ -156,9 +172,9 @@ def lint_setup(core_meta_data):
                 sources.write(re.sub(r'IOB_CORE_NAME', core_name, line))
 
 #synthesis
-def syn_setup(core_meta_data):
-    build_dir = core_meta_data['build_dir']
-    setup_dir = core_meta_data['setup_dir']
+def syn_setup(python_module):
+    build_dir = python_module.build_dir
+    setup_dir = python_module.setup_dir
     syn_dir = "hardware/syn"
 
     shutil.copytree(f"{setup_dir}/{syn_dir}", f"{build_dir}/{syn_dir}")
@@ -170,23 +186,26 @@ def syn_setup(core_meta_data):
             shutil.copyfile(f"{src_file}", f"{dest_file}")
 
 # Check if any *_setup.py modules exist (like sim_setup.py, fpga_setup.py, ...).
-# If so, get a lambda expression to execute them and add them to the 'modules' list of the 'submodules' key in the 'meta' dictionary
+# If so, get a lambda expression to execute them and add them to the 'modules' list of the 'submodules' variable in the 'python_module' 
 # This will allow these modules to be executed during setup
-#    meta: meta dictionary, should contain setup_dir
+#    python_module: python module of *_setup.py of the core/system, should contain setup_dir
 #    **kwargs: set of objects that will be accessible from inside the modules when they are executed
-def add_setup_lambdas(meta, **kwargs):
+def add_setup_lambdas(python_module, **kwargs):
     # Check if any *_setup.py modules exist. If so, get a lambda expression to execute them and add them to the 'modules' list
     for module_type, module_path in [('sim_setup','hardware/simulation/sim_setup.py'), ('fpga_setup','hardware/fpga/fpga_setup.py'), ('sw_setup','software/sw_setup.py')]:
-        full_module_path = os.path.join(meta['setup_dir'],module_path)
+        full_module_path = os.path.join(python_module.setup_dir,module_path)
         if os.path.isfile(full_module_path): 
+            # Make sure dictionary exists
+            if module_type not in python_module.submodules: 
+                python_module.submodules[module_type] = {'headers':[], 'modules':[]}
             # Append executable module to 'modules' list of the submodules dictionary
             # The lambda expression will be executed during setup
-            meta['submodules'][module_type]['modules'].append(get_module_lambda(full_module_path, meta=meta, **kwargs))
+            python_module.submodules[module_type]['modules'].append(get_module_lambda(full_module_path, **kwargs))
 
 #Get an executable lambda expression to run a given python module
 #    module_path: python module path
 #    **kwargs: set of objects that will be accessible from inside the module when it is executed
-#Example: get_module_lambda("sim_setup.py",meta=meta,confs=confs)
+#Example: get_module_lambda("sim_setup.py",setup_module=python_module)
 def get_module_lambda(module_path, **kwargs):
     module_name = os.path.basename(module_path).split('.')[0]
     spec = importlib.util.spec_from_file_location(module_name, module_path)
@@ -200,23 +219,21 @@ def get_module_lambda(module_path, **kwargs):
 
 # Setup simulation related files/modules
 # module: python module representing a *_setup.py file of the root directory of the core/system.
-def sw_setup(module):
-    core_meta_data = module.meta
-    core_flows = core_meta_data['flows']
-    build_dir = core_meta_data['build_dir']
-    setup_dir = core_meta_data['setup_dir']
-    #print(f"################# {core_meta_data['name']}") #DEBUG
+def sw_setup(python_module):
+    core_flows = python_module.flows
+    build_dir = python_module.build_dir
+    setup_dir = python_module.setup_dir
 
     # Make sure 'sw_setup' dictionary exists
-    if 'sw_setup' not in core_meta_data['submodules']: 
-        core_meta_data['submodules']['sw_setup'] = {'headers':[], 'modules':[]}
+    if 'sw_setup' not in python_module.submodules: 
+        python_module.submodules['sw_setup'] = {'headers':[], 'modules':[]}
 
-    sw_setup = core_meta_data['submodules']['sw_setup']
+    sw_setup = python_module.submodules['sw_setup']
     Cheaders = sw_setup['headers']
     sw_srcs = sw_setup['modules']
 
-    set_default_submodule_dirs(core_meta_data) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
-    submodule_dirs = core_meta_data['submodules']['dirs']
+    set_default_submodule_dirs(python_module) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
+    submodule_dirs = python_module.submodules['dirs']
 
     # append this core hw flows to config_build
     if "emb" not in core_flows: mk_conf.append_flows_config_build_mk(core_flows,["emb"],build_dir)
@@ -224,11 +241,10 @@ def sw_setup(module):
 
     # Copy software tree if it exists as this core may contain software sources to be used by others
     if os.path.isdir(f"{setup_dir}/software"):
-        #Use distutils copy_tree() to copy entire software directory and possibly merge with existing one
         shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
     #Add lambda functions to the sw_srcs. These functions call setup modules for software setup (sw_setup.py)
-    add_setup_lambdas(core_meta_data,confs=module.confs,ios=module.ios,regs=module.regs,blocks=module.blocks)
+    add_setup_lambdas(python_module,setup_module=python_module)
     #Setup any sw submodules by calling the 'sw_setup()' function from their *_setup.py module
     module_dependency_setup(sw_srcs, Cheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sw_setup") 
 
@@ -251,10 +267,10 @@ def python_setup(build_dir):
     copy_files( lib_dir, dest_dir, sim_srcs, '*.py' )
 
 
-def doc_setup( meta_core_data ):
-    core_flows = meta_core_data['flows']
-    build_dir = meta_core_data['build_dir']
-    setup_dir = meta_core_data['setup_dir']
+def doc_setup( python_module ):
+    core_flows = python_module.flows
+    build_dir = python_module.build_dir
+    setup_dir = python_module.setup_dir
 
     # For cores that have their own documentation
     if "doc" in core_flows: 
@@ -295,8 +311,8 @@ def iob_submodule_setup(build_dir, submodule_dir, module_parameters=None, functi
     #print(f"################# {function_2_call}") #DEBUG
     #Import <corename>_setup.py
     module = import_setup(submodule_dir)
-    module.meta['build_dir'] = build_dir
-    module.meta['setup_dir'] = submodule_dir
+    module.build_dir = build_dir
+    module.setup_dir = submodule_dir
     module.module_parameters = module_parameters
     # Split string to check if function is inside a module
     function_2_call=function_2_call.split('.')
@@ -307,8 +323,8 @@ def iob_submodule_setup(build_dir, submodule_dir, module_parameters=None, functi
        module_with_function = vars(module_with_function)[i]
     function_2_call=vars(module_with_function)[function_2_call[-1]]
     # Call setup function specified in function_2_call. Pass 'module' as argument if possible.
-    if 'module' in inspect.signature(function_2_call).parameters.keys():
-        function_2_call(module=module)
+    if 'python_module' in inspect.signature(function_2_call).parameters.keys():
+        function_2_call(python_module=module)
     else:
         function_2_call()
 
@@ -391,21 +407,21 @@ def create_Vheaders(dest_dir, Vheaders):
             sys.exit(f"{iob_colors.FAIL} {vh_name} is not an available header.{iob_colors.ENDC}")
 
 
-# Adds and fills 'dirs' dictionary inside 'submodules' dicionary of given core/system 'meta_data'
-def set_default_submodule_dirs(meta_data):
+# Adds and fills 'dirs' dictionary inside 'submodules' dicionary of given core/system _setup.py python module
+def set_default_submodule_dirs(python_module):
     #Make sure 'dirs' dictionary exists
-    if 'dirs' not in meta_data['submodules']:
-        meta_data['submodules']['dirs'] = {}
+    if 'dirs' not in python_module.submodules:
+        python_module.submodules['dirs'] = {}
 
-    if os.path.isdir(f"{meta_data['setup_dir']}/submodules"):
+    if os.path.isdir(f"{python_module.setup_dir}/submodules"):
         # Add default path for every submodule without a path
-        for submodule in os.listdir(f"{meta_data['setup_dir']}/submodules"):
-            if submodule not in meta_data['submodules']['dirs']:
-                meta_data['submodules']['dirs'].update({submodule:f"{meta_data['setup_dir']}/submodules/{submodule}"})
+        for submodule in os.listdir(f"{python_module.setup_dir}/submodules"):
+            if submodule not in python_module.submodules['dirs']:
+                python_module.submodules['dirs'].update({submodule:f"{python_module.setup_dir}/submodules/{submodule}"})
 
     #Make sure 'LIB' path exists
-    if 'LIB' not in meta_data['submodules']['dirs']:
-        meta_data['submodules']['dirs']['LIB'] = lib_dir
+    if 'LIB' not in python_module.submodules['dirs']:
+        python_module.submodules['dirs']['LIB'] = lib_dir
 
 
 def version_file(core_name, core_version, core_previous_version, build_dir):

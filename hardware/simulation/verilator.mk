@@ -19,7 +19,7 @@ SIM_USER=$(VSIM_USER)
 SIM_PROC=V$(VTOP)
 
 comp: $(VHDR) $(VSRC)
-	verilator $(VFLAGS) $(VSRC) $(NAME)_tb.cpp	
+	verilator $(VFLAGS) $(VSRC) src/$(NAME)_tb.cpp	
 	cd ./obj_dir && make -f $(SIM_PROC).mk
 
 exec:
