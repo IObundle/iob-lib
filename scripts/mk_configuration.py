@@ -158,7 +158,7 @@ def update_define(confs, define_name, should_set):
             if should_set: 
                 macro['val'] = '1'
             else:
-                confs.remove(macro)
+                macro['val'] = 'NA'
             break
     else:
         # Did not find define. Set it if should_set.
