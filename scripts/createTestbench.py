@@ -12,10 +12,10 @@ import createSystem
 # out_file: path to output file
 def create_system_testbench(setup_dir, submodule_dirs, top, peripherals_list, out_file):
     # Only create testbench if template is available
-    if not os.path.isfile(setup_dir+f"/hardware/simulation/{top}_tb.vt"): return
+    if not os.path.isfile(setup_dir+f"/hardware/simulation/src/{top}_tb.vt"): return
 
     # Read template file
-    template_file = open(setup_dir+f"/hardware/simulation/{top}_tb.vt", "r")
+    template_file = open(setup_dir+f"/hardware/simulation/src/{top}_tb.vt", "r")
     template_contents = template_file.readlines() 
     template_file.close()
 
