@@ -90,11 +90,11 @@ debug:
 	@echo TEST_LIST=$(TEST_LIST)
 
 grab:
-	while [ -f $(FPGA_GRABBED) ]; do echo "INFO: board being used..."; sleep 5; done && touch $(FPGA_GRABBED) && chown $(USER):dialout $(FPGA_GRABBED) && chmod 664 $(FPGA_GRABBED);\
+	while [ -f $(BOARD_GRABBED) ]; do echo "INFO: board being used..."; sleep 5; done && touch $(BOARD_GRABBED) && chown $(USER):dialout $(BOARD_GRABBED) && chmod 664 $(BOARD_GRABBED);\
 	bash -c "trap 'make release; exit' INT TERM KILL"
 
 release:
-	make kill-cnsl && rm $(FPGA_GRABBED)
+	make kill-cnsl && rm $(BOARD_GRABBED)
 
 release-remote:
 ifeq ($(BOARD_SERVER),)
