@@ -9,7 +9,7 @@ puts $NAME
 puts $BOARD
 puts $VSRC
 puts $IS_FPGA
-puts $RUN_EXTMEM
+puts $CUSTOM_ARGS
 
 
 #verilog sources
