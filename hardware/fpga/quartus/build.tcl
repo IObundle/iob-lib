@@ -4,7 +4,7 @@ set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
 set QIP [lindex $argv 3]
 set IS_FPGA [lindex $argv 4]
-set RUN_EXTMEM [lindex $argv 5]
+set USE_EXTMEM [lindex $argv 5]
 
 project_new $NAME -overwrite
 

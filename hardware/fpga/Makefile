@@ -27,8 +27,8 @@ ifneq ($(wildcard fpga_build.mk),)
 include fpga_build.mk
 endif
 
-include $(FPGA_TOOL)/$(FPGA_TOOL).mk
 include $(FPGA_TOOL)/$(BOARD)/board.mk
+include $(FPGA_TOOL)/$(FPGA_TOOL).mk
 
 #include the module's headers and sources
 VHDR=$(wildcard ../src/*.vh)
