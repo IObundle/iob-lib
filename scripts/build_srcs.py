@@ -145,6 +145,7 @@ def fpga_setup(core_meta_data):
 
 def lint_setup(core_meta_data):
     build_dir = core_meta_data['build_dir']
+    setup_dir = core_meta_data['setup_dir']
     core_name = core_meta_data['name']
     lint_dir = "hardware/lint"
 
@@ -157,6 +158,8 @@ def lint_setup(core_meta_data):
         with open(f"{build_dir}/{lint_dir}/{file}", "w") as sources:
             for line in lines:
                 sources.write(re.sub(r'IOB_CORE_NAME', core_name, line))
+
+    copy_files( f"{setup_dir}/{lint_dir}", f"{build_dir}/{lint_dir}", [], '*', copy_all = True )
 
 #synthesis
 def syn_setup(core_meta_data):
