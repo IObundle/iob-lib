@@ -16,7 +16,7 @@ FPGA_PROG=$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mo
 export RDI_VERBOSE = False
 
 $(FPGA_OBJ): $(VSRC) $(VHDR) $(wildcard *.sdc)
-	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mode batch -source vivado/build.tcl -tclargs $(NAME)_fpga_wrapper $(BOARD) "$(VSRC)" $(IS_FPGA) $(RUN_EXTMEM)
+	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mode batch -source vivado/build.tcl -tclargs $(NAME)_fpga_wrapper $(BOARD) "$(VSRC)" $(IS_FPGA) $(USE_DDR)
 
 vivado-clean:
 	@rm -rf .Xil
