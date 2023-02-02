@@ -100,7 +100,7 @@ release-remote:
 ifeq ($(BOARD_SERVER),)
 	make release
 else
-	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR)/$(FPGA_TOOL)/$(BOARD) release'
+	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) release BOARD=$(BOARD)'
 endif
 
 
