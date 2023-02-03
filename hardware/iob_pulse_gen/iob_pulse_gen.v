@@ -1,57 +1,36 @@
 `timescale 1ns / 1ps
 `include "iob_lib.vh"
 
-module iob_pulse_gen
-  #(
-    parameter START=0,
-    parameter DURATION=0
-    )
-  (
-   input  clk_i,
-   input  arst_i,
-   input  cke_i,
-   input  start_i,
-   output pulse_o
-   );
+module iob_pulse_gen #(
+    parameter START=5,
+    parameter DURATION=5
+    ) (
+    input  clk_i,
+    input  arst_i,
+    input  cke_i,
+    input  restart,
+    output pulse_o
+    );
 
-   //start detect
-   `IOB_WIRE(start_detected, 1)
-   `IOB_WIRE(start_detected_nxt, 1)
-   assign start_detected_nxt = start_detected | start_i;
-   
-   iob_reg
-     #(1,0)
-   start_detected_inst
-     (
-      .clk_i(clk_i),
-      .arst_i(arst_i),
-      .cke_i(cke_i),
-      .data_i(start_detected_nxt),
-      .data_o(start_detected)
-      );
+    localparam WIDTH = (START+DURATION)==1? 1: $clog2(START+DURATION);
 
-   //counter
-   `IOB_WIRE(cnt_en, 1)
-   localparam WIDTH = $clog2(START+DURATION+2);
-   `IOB_WIRE(cnt, WIDTH)   
+    wire [WIDTH-1:0] cnt;
+    wire pulse_start;
+    wire pulse_end;
 
-   //counter enable
-   assign cnt_en = start_detected & (cnt <= (START+DURATION));
+    //counter
+    iob_counter #(WIDTH,0)
+    cnt0 (
+        .clk_i(clk_i),
+        .arst_i(arst_i),
+        .cke_i(cke_i),
+        .rst_i(restart),
+        .en_i(pulse_end),
+        .data_o(cnt)
+        );
 
-   //counter
-   iob_counter
-     #(WIDTH,0)
-   cnt0
-     (
-      .clk_i(clk_i),
-      .arst_i(arst_i),
-      .cke_i(cke_i),
-      .rst_i(start_i),
-      .en_i(cnt_en),
-      .data_o(cnt)
-      );
+    assign pulse_start = (cnt >= START);
+    assign pulse_end = (cnt < (START+DURATION));
+    assign pulse_o = pulse_start&pulse_end;
 
-   //pulse
-   assign pulse_o = cnt_en & |cnt;
-   
 endmodule
