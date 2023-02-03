@@ -2,8 +2,8 @@
 `include "iob_lib.vh"
 
 module iob_pulse_gen #(
-    parameter START=5,
-    parameter DURATION=5
+    parameter START=0,
+    parameter DURATION=0
     ) (
     input  clk_i,
     input  arst_i,
@@ -12,11 +12,29 @@ module iob_pulse_gen #(
     output pulse_o
     );
 
-    localparam WIDTH = (START+DURATION)==1? 1: $clog2(START+DURATION);
+   localparam WIDTH = $clog2(START+DURATION+2);
 
-    wire [WIDTH-1:0] cnt;
-    wire pulse_start;
-    wire pulse_end;
+   //start detect
+   `IOB_WIRE(start_detected, 1)
+   `IOB_WIRE(start_detected_nxt, 1)
+   assign start_detected_nxt = start_detected | start_i;
+   
+   iob_reg #(1,0)
+   start_detected_inst
+     (
+      .clk_i(clk_i),
+      .arst_i(arst_i),
+      .cke_i(cke_i),
+      .data_i(start_detected_nxt),
+      .data_o(start_detected)
+      );
+
+   //counter
+   `IOB_WIRE(cnt_en, 1)
+   `IOB_WIRE(cnt, WIDTH)   
+
+   //counter enable
+   assign cnt_en = start_detected & (cnt <= (START+DURATION));
 
     //counter
     iob_counter #(WIDTH,0)
@@ -25,12 +43,11 @@ module iob_pulse_gen #(
         .arst_i(arst_i),
         .cke_i(cke_i),
         .rst_i(start_i),
-        .en_i(pulse_end),
+        .en_i(cnt_en),
         .data_o(cnt)
         );
 
-    assign pulse_start = (cnt >= START);
-    assign pulse_end = (cnt <= (START+DURATION));
-    assign pulse_o = pulse_start&pulse_end;
-
+   //pulse
+   assign pulse_o = cnt_en & |cnt;
+   
 endmodule
