@@ -8,7 +8,7 @@ module iob_pulse_gen #(
     input  clk_i,
     input  arst_i,
     input  cke_i,
-    input  restart,
+    input  start_i,
     output pulse_o
     );
 
@@ -24,13 +24,13 @@ module iob_pulse_gen #(
         .clk_i(clk_i),
         .arst_i(arst_i),
         .cke_i(cke_i),
-        .rst_i(restart),
+        .rst_i(start_i),
         .en_i(pulse_end),
         .data_o(cnt)
         );
 
     assign pulse_start = (cnt >= START);
-    assign pulse_end = (cnt < (START+DURATION));
+    assign pulse_end = (cnt <= (START+DURATION));
     assign pulse_o = pulse_start&pulse_end;
 
 endmodule
