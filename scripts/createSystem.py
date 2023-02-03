@@ -51,6 +51,7 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file, i
         # Insert reserved signals
         first_reversed_signal=True
         for signal in get_reserved_signals(port_list[instance['type']]):
+            if 'if_defined' in signal.keys(): template_contents.insert(start_index,"`endif\n")
             template_contents.insert(start_index,"      "+
                                      get_reserved_signal_connection(signal['name'],
                                                                     top.upper()+"_"+instance['name'],
@@ -59,14 +60,17 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file, i
             if first_reversed_signal:
                 template_contents[start_index]=template_contents[start_index][::-1].replace(",","",1)[::-1]
                 first_reversed_signal = False
+            if 'if_defined' in signal.keys(): template_contents.insert(start_index,f"`ifdef {top.upper()}_{signal['if_defined']}\n")
 
         # Insert io signals
         for signal in get_pio_signals(port_list[instance['type']]):
-            template_contents.insert(start_index, '      .{}({}),\n'.format(signal['name'],ios.get_peripheral_port_mapping(instance,signal['name'])))
+            if 'if_defined' in signal.keys(): template_contents.insert(start_index,"`endif\n")
+            template_contents.insert(start_index, '      .{}({}),\n'.format(signal['name'],ios.get_peripheral_port_mapping(instance,signal['name_without_prefix'])))
             # Remove comma at the end of last signal (first one to insert)
             if first_reversed_signal:
                 template_contents[start_index]=template_contents[start_index][::-1].replace(",","",1)[::-1]
                 first_reversed_signal = False
+            if 'if_defined' in signal.keys(): template_contents.insert(start_index,f"`ifdef {top.upper()}_{signal['if_defined']}\n")
 
         # Insert peripheral instance name
         template_contents.insert(start_index, "   {} (\n".format(instance['name']))

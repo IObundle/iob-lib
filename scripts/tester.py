@@ -2,10 +2,12 @@
 #
 #    tester.py: tester related functions
 #
-from submodule_utils import import_setup, get_module_io, add_prefix_to_parameters_in_port, eval_param_expression_from_config
+from submodule_utils import import_setup, get_table_ports, add_prefix_to_parameters_in_port, eval_param_expression_from_config, iob_soc_peripheral_setup, set_default_submodule_dirs
 from ios import get_interface_mapping
 from setup import setup
 import build_srcs
+import iob_soc
+import iob_colors
 
 # Add tester modules to the list of hw, sim, sw and fpga modules of the current core/system
 # meta: meta dictionary of the current system
@@ -28,7 +30,7 @@ def add_tester_modules(meta, tester_options):
 #wire_name: name of the wire to connect the bits of the port to.
 def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
     if not port_bits:
-        assert port_name not in io_dict, f"Error: Peripheral port {port_name} has already been previously mapped!"
+        assert port_name not in io_dict, f"{iob_colors.FAIL}Peripheral port {port_name} has already been previously mapped!{iob_colors.ENDC}"
         # Did not specify bits, connect all the entire port (all the bits)
         io_dict[port_name] = wire_name
     else:
@@ -37,7 +39,7 @@ def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
         # Map the selected bits to the corresponding wire bits
         # Each element in the bit list of this port will be a tuple containign the name of the wire to connect to and the bit of that wire.
         for wire_bit, bit in enumerate(port_bits):
-            assert not io_dict[port_name][bit], f"Error: Peripheral port {port_name} bit {bit} has already been previously mapped!"
+            assert not io_dict[port_name][bit], f"{iob_colors.FAIL}Peripheral port {port_name} bit {bit} has already been previously mapped!{iob_colors.ENDC}"
             io_dict[port_name][bit] = (wire_name, wire_bit)
 
 # Setup a Tester 
@@ -67,7 +69,7 @@ def setup_tester( python_module ):
                 confs.append(entry)
 
     #Create default submodule directories
-    build_srcs.set_default_submodule_dirs(meta_data)
+    set_default_submodule_dirs(meta_data)
     #Update submodule directories of Tester with new peripherals directories
     meta_data['submodules']['dirs'].update(module_parameters['extra_peripherals_dirs'])
 
@@ -100,7 +102,7 @@ def setup_tester( python_module ):
         if mapping[1]['corename']: mapping_items[1]=next(i for i in tester_peripherals_list if i['name'] == mapping[1]['corename'])
 
         #Make sure we are not mapping two external interfaces
-        assert mapping_items != [None, None], f"Error: {map_idx} Cannot map between two external interfaces!"
+        assert mapping_items != [None, None], f"{iob_colors.FAIL}{map_idx} Cannot map between two external interfaces!{iob_colors.ENDC}"
 
         # Store index if any of the entries is the external interface
         # Store -1 if we are not mapping to external interface
@@ -109,19 +111,26 @@ def setup_tester( python_module ):
         # List of tester IOs from ports of this mapping
         tester_mapping_ios=[]
         # Add peripherals table to ios of tester
-        ios.append({'name': f"portmap_{map_idx}", 'descr':f"IOs for peripherals based on portmap index {map_idx}", 'ports': tester_mapping_ios})
+        ios.append({'name': f"portmap_{map_idx}", 'descr':f"IOs for peripherals based on portmap index {map_idx}", 'ports': tester_mapping_ios, 'ios_table_prefix':True})
 
         # Import module of one of the given core types (to access its IO)
         module = import_setup(meta_data['submodules']['dirs'][mapping_items[0]['type']])
+        set_default_submodule_dirs(module.meta)
+        iob_soc_peripheral_setup(module)
+
         #Get ports of configured interface
-        interface_ports=get_module_io([ next(i for i in module.ios if i['name'] == mapping[0]['if_name']) ])
+        interface_table = next((i for i in module.ios if i['name'] == mapping[0]['if_name']), None) 
+        assert interface_table, f"{iob_colors.FAIL}Interface {mapping[0]['if_name']} of {mapping[0]['corename']} not found!{iob_colors.ENDC}"
+        interface_ports=get_table_ports(interface_table)
 
         #If mapping_items[1] is not external interface
         if mapping_external_interface!=1: 
             # Import module of one of the given core types (to access its IO)
             module2 = import_setup(meta_data['submodules']['dirs'][mapping_items[1]['type']])
             #Get ports of configured interface
-            interface_ports2=get_module_io([ next(i for i in module2.ios if i['name'] == mapping[1]['if_name']) ])
+            interface_table = next((i for i in module2.ios if i['name'] == mapping[1]['if_name']), None) 
+            assert interface_table, f"{iob_colors.FAIL}Interface {mapping[1]['if_name']} of {mapping[1]['corename']} not found!{iob_colors.ENDC}"
+            interface_ports2=get_table_ports(interface_table)
 
         # Check if should insert one port or every port in the interface
         if not mapping[0]['port']:
@@ -154,8 +163,11 @@ def setup_tester( python_module ):
         else:
             # Mapping configuration specified a port, therefore only insert singal for that port
 
-            port = next(i for i in interface_ports if i['name'] == mapping[0]['port'])
-            if mapping_external_interface!=1: port2 = next(i for i in interface_ports2 if i['name'] == mapping[1]['port'])
+            port = next((i for i in interface_ports if i['name'] == mapping[0]['port']),None)
+            assert port, f"{iob_colors.FAIL}Port {mapping[0]['port']} of {mapping[0]['if_name']} for {mapping[0]['corename']} not found!{iob_colors.ENDC}"
+            if mapping_external_interface!=1: 
+                port2 = next((i for i in interface_ports2 if i['name'] == mapping[1]['port']), None)
+                assert port2, f"{iob_colors.FAIL}Port {mapping[1]['port']} of {mapping[1]['if_name']} for {mapping[1]['corename']} not found!{iob_colors.ENDC}"
             #Get number of bits for this wire. If 'bits' was not specified, use the same size as the port of the peripheral
             if not mapping[0]['bits']:
                 # Mapping did not specify bits, use the same size as the port (will map all bits of the port)
@@ -185,4 +197,4 @@ def setup_tester( python_module ):
             if mapping_external_interface!=1: map_IO_to_wire(mapping_items[1]['IO'], mapping[1]['port'], eval_param_expression_from_config(port2['n_bits'],module2.confs,'max'), mapping[1]['bits'], wire_name)
 
     # Call setup function for the tester
-    setup(python_module, ios_prefix=True, peripheral_ios=False, internal_wires=peripheral_wires)
+    setup(python_module, peripheral_ios=False, internal_wires=peripheral_wires)
