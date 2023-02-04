@@ -5,7 +5,7 @@ import shutil
 import importlib
 # IObundle scripts imported:
 import if_gen
-from submodule_utils import import_setup
+from submodule_utils import import_setup, set_default_submodule_dirs
 import iob_colors
 import inspect
 import mk_configuration as mk_conf
@@ -405,24 +405,6 @@ def create_Vheaders(dest_dir, Vheaders):
             if_gen.write_vh_contents(vh_name[1], vh_name[2], vh_name[3], f_out)
         else: 
             sys.exit(f"{iob_colors.FAIL} {vh_name} is not an available header.{iob_colors.ENDC}")
-
-
-# Adds and fills 'dirs' dictionary inside 'submodules' dicionary of given core/system _setup.py python module
-def set_default_submodule_dirs(python_module):
-    #Make sure 'dirs' dictionary exists
-    if 'dirs' not in python_module.submodules:
-        python_module.submodules['dirs'] = {}
-
-    if os.path.isdir(f"{python_module.setup_dir}/submodules"):
-        # Add default path for every submodule without a path
-        for submodule in os.listdir(f"{python_module.setup_dir}/submodules"):
-            if submodule not in python_module.submodules['dirs']:
-                python_module.submodules['dirs'].update({submodule:f"{python_module.setup_dir}/submodules/{submodule}"})
-
-    #Make sure 'LIB' path exists
-    if 'LIB' not in python_module.submodules['dirs']:
-        python_module.submodules['dirs']['LIB'] = lib_dir
-
 
 def version_file(core_name, core_version, core_previous_version, build_dir):
     tex_dir = f"{build_dir}/document/tsrc"
