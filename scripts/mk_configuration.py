@@ -110,8 +110,8 @@ def config_for_board(top, flows_list, build_dir):
     available_configs = {
         'CYCLONEV-GT-DK':{'BAUD':'115200', 'FREQ':'50000000', 'MEM_NO_READ_ON_WRITE':'1', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'30'}, 
         'AES-KU040-DB-G':{'BAUD':'115200', 'FREQ':'100000000', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'30'},
-        'DE10-LITE':{'BAUD':'115200', 'FREQ':'50000000', 'DDR_DATA_W':'0', 'DDR_ADDR_W':'0'},
-        'BASYS3':{'BAUD':'115200', 'FREQ':'100000000', 'DDR_DATA_W':'0', 'DDR_ADDR_W':'0'},
+        'DE10-LITE':{'BAUD':'115200', 'FREQ':'50000000'},
+        'BASYS3':{'BAUD':'115200', 'FREQ':'100000000'},
         'SIMULATION':{'BAUD':'3000000', 'FREQ':'100000000', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'24'},
         }
 
