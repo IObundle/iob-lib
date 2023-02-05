@@ -75,6 +75,7 @@ ifeq ($(FPGA_SERVER),)
 	$(RELEASE_CMD)
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'
+endif
 
 clean: $(FPGA_TOOL)-clean
 	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga_build.mk" \) -delete
