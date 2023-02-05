@@ -56,7 +56,7 @@ def setup( python_module, no_overlap=False, peripheral_ios=True, internal_wires=
 
     # Build periphs_tmp.h
     if peripherals_list: periphs_tmp.create_periphs_tmp(next(i['val'] for i in confs if i['name'] == 'P'),
-                                   peripherals_list, f"{python_module.build_dir}/software/periphs.h")
+                                   peripherals_list, f"{python_module.build_dir}/software/{top}_periphs.h")
     # Try to build iob_soc.v if template is available
     createSystem.create_systemv(python_module.setup_dir, python_module.submodules['dirs'], python_module.name, peripherals_list, os.path.join(python_module.build_dir,f'hardware/src/{top}.v'), internal_wires=internal_wires)
     # Try to build system_tb.v if template is available
