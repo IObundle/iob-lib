@@ -6,7 +6,6 @@ SHELL:=bash
 #select board
 #default board
 BOARD ?=CYCLONEV-GT-DK
-BOARD_GRABBED=/tmp/$(BOARD).grabbed
 
 # Generate configuration when importing config_build.mk
 GEN_CONFIG:=1
@@ -53,20 +52,29 @@ endif
 
 #console start command
 CONSOLE_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
+GRAB_CMD=$(PYTHON_DIR)/board_client.py grab $(USER)
+RELEASE_CMD=$(PYTHON_DIR)/board_client.py release $(USER)
 
 #run fpga image
 run: build
 ifeq ($(NORUN),0)
 ifeq ($(BOARD_SERVER),)
 	cp $(EMB_DIR)/$(NAME)_firmware.bin .
-	bash -c "trap 'make release' INT TERM KILL; make grab; $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log; make release;"
+	bash -c "trap '$(RELEASE_CMD)' INT TERM KILL; $(GRAB_CMD); $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log; $(RELEASE_CMD);"
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
-	bash -c "trap 'make release-remote' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'"
+	bash -c "trap 'make release' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'"
 	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_FPGA_DIR)/run.log .
 endif
 endif
+
+release:
+ifeq ($(FPGA_SERVER),)
+	make kill-cnsl
+	$(RELEASE_CMD)
+else
+	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'
 
 clean: $(FPGA_TOOL)-clean
 	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga_build.mk" \) -delete
@@ -89,24 +97,6 @@ debug:
 	@echo FPGA_OBJ=$(FPGA_OBJ)
 	@echo TEST_LIST=$(TEST_LIST)
 
-grab:
-	while [ -f $(BOARD_GRABBED) ]; do echo "INFO: board being used..."; sleep 5; done && touch $(BOARD_GRABBED) && chown $(USER):dialout $(BOARD_GRABBED) && chmod 664 $(BOARD_GRABBED);\
-	bash -c "trap 'make release; exit' INT TERM KILL"
-
-release:
-	make kill-cnsl && rm $(BOARD_GRABBED)
-
-release-remote:
-ifeq ($(BOARD_SERVER),)
-	make release
-else
-	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) release BOARD=$(BOARD)'
-endif
-
-
-
 .PRECIOUS: $(FPGA_OBJ) test.log s_fw.bin
 
-.PHONY: run build \
-	grab release release-remote \
-	test clean debug
+.PHONY: run build test clean debug

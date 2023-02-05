@@ -261,7 +261,7 @@ def sw_setup(python_module):
         shutil.copy(f"{lib_dir}/scripts/console.mk", f"{build_dir}/console.mk")
 
 def python_setup(build_dir):
-    sim_srcs  = [ "sw_defines.py", "hw_defines.py", "console.py", "hex_split.py", "makehex.py" ]
+    sim_srcs  = [ "sw_defines.py", "hw_defines.py", "console.py", "hex_split.py", "makehex.py", "board_client.py" ]
     dest_dir  = f"{build_dir}/scripts"
     if not os.path.exists(dest_dir): os.mkdir(dest_dir)
     copy_files( lib_dir, dest_dir, sim_srcs, '*.py' )
