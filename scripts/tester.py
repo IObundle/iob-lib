@@ -206,3 +206,20 @@ def setup_tester( python_module ):
             contents.insert(-1,f"`define IOB_SOC_TESTER_DDR_DATA_W `{module_parameters['uut_name'].upper()}_DDR_DATA_W\n")
             file.seek(0)
             file.writelines(contents)
+
+    #Check if setup with INIT_MEM and RUN_EXTMEM (check if macro exists)
+    extmem_macro = next((i for i in confs if i['name']=='RUN_EXTMEM'), False)
+    initmem_macro = next((i for i in confs if i['name']=='INIT_MEM'), False)
+    if extmem_macro and extmem_macro['val'] != 'NA' and \
+       initmem_macro and initmem_macro['val'] != 'NA':
+        # Append init_ddr_contents.hex target to sw_build.mk
+        with open(f"{python_module.build_dir}/software/sw_build.mk", 'a') as file:
+            file.write("\n#Auto-generated target to create init_ddr_contents.hex\n")
+            file.write("HEX+=init_ddr_contents.hex\n")
+            file.write("# init file for external mem with firmware of both systems\n")
+            file.write("init_ddr_contents.hex: iob_soc_tester_firmware.hex\n")
+
+            sut_firmware_name = module_parameters['sut_fw_name'].replace('.c','') if 'sut_fw_name if' in module_parameters.keys() else ''
+            file.write(f"	../../scripts/joinHexFiles.py \"{sut_firmware_name}\" $^ $(call GET_TESTER_BUILD_MACRO,DDR_ADDR_W) > $@\n")
+        # Copy joinHexFiles.py from LIB
+        build_srcs.copy_files( "submodules/LIB", f"{python_module.build_dir}/scripts", [ "joinHexFiles.py" ], '*.py' )
