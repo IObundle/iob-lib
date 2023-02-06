@@ -35,6 +35,14 @@ class mkregs:
             else: return f"{b}"
         else: return f"((({a}) > ({b})) ? ({a}) : ({b}))"
 
+    def get_reg_table(self, regs, no_overlap):
+        # Create reg table
+        reg_table = []
+        for i_regs in regs:
+            reg_table += i_regs['regs']
+
+        return self.compute_addr(reg_table, no_overlap)
+
     def bceil(self, n, log2base):
         base = int(2**log2base)
         n = eval_param_expression_from_config(n, self.config,'max')

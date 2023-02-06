@@ -28,43 +28,43 @@ reserved_signals = \
 'iob_ready_o':'.iob_ready_o(slaves_resp[`ready(`/*<InstanceName>*/)])',
 'iob_rvalid_o':'.iob_rvalid_o(slaves_resp[`rvalid(`/*<InstanceName>*/)])',
 'trap_o':'.trap_o(trap_o[0])',
-'m_axi_awid':'.m_axi_awid    (m_axi_awid[0:0])',
-'m_axi_awaddr':'.m_axi_awaddr  (m_axi_awaddr[`DDR_ADDR_W-1:0])',
-'m_axi_awlen':'.m_axi_awlen   (m_axi_awlen[7:0])',
-'m_axi_awsize':'.m_axi_awsize  (m_axi_awsize[2:0])',
-'m_axi_awburst':'.m_axi_awburst (m_axi_awburst[1:0])',
-'m_axi_awlock':'.m_axi_awlock  (m_axi_awlock[0:0])',
-'m_axi_awcache':'.m_axi_awcache (m_axi_awcache[3:0])',
-'m_axi_awprot':'.m_axi_awprot  (m_axi_awprot[2:0])',
-'m_axi_awqos':'.m_axi_awqos   (m_axi_awqos[3:0])',
-'m_axi_awvalid':'.m_axi_awvalid (m_axi_awvalid[0:0])',
-'m_axi_awready':'.m_axi_awready (m_axi_awready[0:0])',
-'m_axi_wdata':'.m_axi_wdata   (m_axi_wdata[`DATA_W-1:0])',
-'m_axi_wstrb':'.m_axi_wstrb   (m_axi_wstrb[`DATA_W/8-1:0])',
-'m_axi_wlast':'.m_axi_wlast   (m_axi_wlast[0:0])',
-'m_axi_wvalid':'.m_axi_wvalid  (m_axi_wvalid[0:0])',
-'m_axi_wready':'.m_axi_wready  (m_axi_wready[0:0])',
-'m_axi_bid':'.m_axi_bid     (m_axi_bid[0:0])',
-'m_axi_bresp':'.m_axi_bresp   (m_axi_bresp[1:0])',
-'m_axi_bvalid':'.m_axi_bvalid  (m_axi_bvalid[0:0])',
-'m_axi_bready':'.m_axi_bready  (m_axi_bready[0:0])',
-'m_axi_arid':'.m_axi_arid    (m_axi_arid[0:0])',
-'m_axi_araddr':'.m_axi_araddr  (m_axi_araddr[`DDR_ADDR_W-1:0])',
-'m_axi_arlen':'.m_axi_arlen   (m_axi_arlen[7:0])',
-'m_axi_arsize':'.m_axi_arsize  (m_axi_arsize[2:0])',
-'m_axi_arburst':'.m_axi_arburst (m_axi_arburst[1:0])',
-'m_axi_arlock':'.m_axi_arlock  (m_axi_arlock[0:0])',
-'m_axi_arcache':'.m_axi_arcache (m_axi_arcache[3:0])',
-'m_axi_arprot':'.m_axi_arprot  (m_axi_arprot[2:0])',
-'m_axi_arqos':'.m_axi_arqos   (m_axi_arqos[3:0])',
-'m_axi_arvalid':'.m_axi_arvalid (m_axi_arvalid[0:0])',
-'m_axi_arready':'.m_axi_arready (m_axi_arready[0:0])',
-'m_axi_rid':'.m_axi_rid     (m_axi_rid[0:0])',
-'m_axi_rdata':'.m_axi_rdata   (m_axi_rdata[`DATA_W-1:0])',
-'m_axi_rresp':'.m_axi_rresp   (m_axi_rresp[1:0])',
-'m_axi_rlast':'.m_axi_rlast   (m_axi_rlast[0:0])',
-'m_axi_rvalid':'.m_axi_rvalid  (m_axi_rvalid[0:0])',
-'m_axi_rready':'.m_axi_rready  (m_axi_rready[0:0])',
+'axi_awid_o':'.axi_awid_o          (axi_awid[0:0])',
+'axi_awaddr_o':'.axi_awaddr_o      (axi_awaddr[`DDR_ADDR_W-1:0])',
+'axi_awlen_o':'.axi_awlen_o        (axi_awlen[7:0])',
+'axi_awsize_o':'.axi_awsize_o      (axi_awsize[2:0])',
+'axi_awburst_o':'.axi_awburst_o    (axi_awburst[1:0])',
+'axi_awlock_o':'.axi_awlock_o      (axi_awlock[0:0])',
+'axi_awcache_o':'.axi_awcache_o    (axi_awcache[3:0])',
+'axi_awprot_o':'.axi_awprot_o      (axi_awprot[2:0])',
+'axi_awqos_o':'.axi_awqos_o        (axi_awqos[3:0])',
+'axi_awvalid_o':'.axi_awvalid_o    (axi_awvalid[0:0])',
+'axi_awready_i':'.axi_awready_i    (axi_awready[0:0])',
+'axi_wdata_o':'.axi_wdata_o        (axi_wdata[`DATA_W-1:0])',
+'axi_wstrb_o':'.axi_wstrb_o        (axi_wstrb[`DATA_W/8-1:0])',
+'axi_wlast_o':'.axi_wlast_o        (axi_wlast[0:0])',
+'axi_wvalid_o':'.axi_wvalid_o      (axi_wvalid[0:0])',
+'axi_wready_i':'.axi_wready_i      (axi_wready[0:0])',
+'axi_bid_i':'.axi_bid_i            (axi_bid[0:0])',
+'axi_bresp_i':'.axi_bresp_i        (axi_bresp[1:0])',
+'axi_bvalid_i':'.axi_bvalid_i      (axi_bvalid[0:0])',
+'axi_bready_o':'.axi_bready_o      (axi_bready[0:0])',
+'axi_arid_o':'.axi_arid_o          (axi_arid[0:0])',
+'axi_araddr_o':'.axi_araddr_o      (axi_araddr[`DDR_ADDR_W-1:0])',
+'axi_arlen_o':'.axi_arlen_o        (axi_arlen[7:0])',
+'axi_arsize_o':'.axi_arsize_o      (axi_arsize[2:0])',
+'axi_arburst_o':'.axi_arburst_o    (axi_arburst[1:0])',
+'axi_arlock_o':'.axi_arlock_o      (axi_arlock[0:0])',
+'axi_arcache_o':'.axi_arcache_o    (axi_arcache[3:0])',
+'axi_arprot_o':'.axi_arprot_o      (axi_arprot[2:0])',
+'axi_arqos_o':'.axi_arqos_o        (axi_arqos[3:0])',
+'axi_arvalid_o':'.axi_arvalid_o    (axi_arvalid[0:0])',
+'axi_arready_i':'.axi_arready_i    (axi_arready[0:0])',
+'axi_rid_i':'.axi_rid_i            (axi_rid[0:0])',
+'axi_rdata_i':'.axi_rdata_i        (axi_rdata[`DATA_W-1:0])',
+'axi_rresp_i':'.axi_rresp_i        (axi_rresp[1:0])',
+'axi_rlast_i':'.axi_rlast_i        (axi_rlast[0:0])',
+'axi_rvalid_i':'.axi_rvalid_i      (axi_rvalid[0:0])',
+'axi_rready_o':'.axi_rready_o      (axi_rready[0:0])',
 }
 
 # Import the <corename>_setup.py from the given core directory
@@ -94,6 +94,119 @@ def get_short_port_type(port_type):
         return "O"
     else:
         return "IO"
+
+# Adds and fills 'dirs' dictionary inside 'submodules' dicionary of given core/system _setup.py python module
+def set_default_submodule_dirs(python_module):
+    #Make sure 'dirs' dictionary exists
+    if 'dirs' not in python_module.submodules:
+        python_module.submodules['dirs'] = {}
+
+    if os.path.isdir(f"{python_module.setup_dir}/submodules"):
+        # Add default path for every submodule without a path
+        for submodule in os.listdir(f"{python_module.setup_dir}/submodules"):
+            if submodule not in python_module.submodules['dirs']:
+                python_module.submodules['dirs'].update({submodule:f"{python_module.setup_dir}/submodules/{submodule}"})
+
+    #Make sure 'LIB' path exists
+    if 'LIB' not in python_module.submodules['dirs']:
+        python_module.submodules['dirs']['LIB'] = "submodules/LIB"
+
+
+# Get peripherals list from 'peripherals' table in blocks list
+#blocks: blocks dictionary, contains definition of peripheral instances
+#function returns peripherals list
+def get_peripherals_list(blocks):
+    # Get peripherals list from 'peripherals' table in blocks list
+    for table in blocks:
+        if table['name'] == 'peripherals':
+            peripherals_list = table['blocks']
+            break
+    else: # No peripherals found
+        peripherals_list = []
+    return peripherals_list
+
+# Get peripheral related macros
+#confs: confs dictionary to be filled with peripheral macros
+#peripherals_list: list of peripherals
+def get_peripheral_macros(confs, peripherals_list):
+    # Append macros with ID of each peripheral
+    confs.extend(get_periphs_id_as_macros(peripherals_list))
+    # Append macro with number of peripherals
+    confs.append({'name':'N_SLAVES', 'type':'M', 'val':get_n_periphs(peripherals_list), 'min':'NA', 'max':'NA', 'descr':"Number of peripherals"})
+    # Append macro with width of peripheral bus
+    confs.append({'name':'N_SLAVES_W', 'type':'M', 'val':get_n_periphs_w(peripherals_list), 'min':'NA', 'max':'NA', 'descr':"Peripheral bus width"})
+
+
+# Check if a module of certain type is in given modules list.
+def check_module_in_modules_list(module_type, modules_list):
+    for item in modules_list:
+        if type(item) == str:
+            if item == module_type: return True
+        elif type(item)== tuple:
+            if item[0] == module_type: return True
+    return False
+
+# Generate list of dictionaries with interfaces for each peripheral instance
+# Each dictionary is follows the format of a dictionary table in the
+# 'ios' list of the <corename>_setup.py
+# Example dictionary of a peripheral instance with one port:
+#    {'name': 'instance_name', 'descr':'instance description', 'ports': [
+#        {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
+#    ]}
+def get_peripheral_ios(peripherals_list, submodules):
+    port_list = {}
+    # Get port list for each type of peripheral used
+    for instance in peripherals_list:
+        # Make sure we have a hw_module for this peripheral type
+        assert check_module_in_modules_list(instance['type'],submodules["hw_setup"]["modules"]), f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
+        # Only insert ports of this peripheral type if we have not done so before
+        if instance['type'] not in port_list:
+            # Import <corename>_setup.py module
+            module = import_setup(submodules['dirs'][instance['type']])
+            # Extract only PIO signals from the peripheral (no reserved/known signals)
+            port_list[instance['type']]=get_pio_signals(get_module_io(module.ios))
+    
+    ios_list = []
+    # Append ports of each instance
+    for instance in peripherals_list:
+        ios_list.append({'name':instance['name'], 'descr':f"{instance['name']} interface signals", 'ports': port_list[instance['type']], 'ios_table_prefix':True})
+    return ios_list
+
+# This function is used to setup peripheral related configuration in the python module of iob-soc systems
+# python_module: Module of the iob-soc system being setup
+# append_peripheral_ios: Optional argument. Selects if should append peripheral IOs to 'ios' list
+def iob_soc_peripheral_setup(python_module, append_peripheral_ios=True):
+    # Get peripherals list from 'peripherals' table in blocks list
+    peripherals_list = get_peripherals_list(python_module.blocks)
+
+    if peripherals_list:
+        # Get port list, parameter list and top module name for each type of peripheral used
+        _, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, python_module.submodules['dirs'])
+        # Insert peripheral instance parameters in system parameters
+        # This causes the system to have a parameter for each parameter of each peripheral instance
+        for instance in peripherals_list:
+            for parameter in params_list[instance['type']]:
+                parameter_to_append = parameter.copy()
+                # Override parameter value if user specified a 'parameters' dictionary with an override value for this parameter.
+                if 'params' in instance and parameter['name'] in instance['params']:
+                    parameter_to_append['val'] = instance['params'][parameter['name']]
+                # Add instance name prefix to the name of the parameter. This makes this parameter unique to this instance
+                parameter_to_append['name'] = f"{instance['name']}_{parameter_to_append['name']}"
+                python_module.confs.append(parameter_to_append)
+    # Get peripheral related macros
+    if peripherals_list: get_peripheral_macros(python_module.confs, peripherals_list)
+    # Append peripherals IO 
+    if peripherals_list and append_peripheral_ios: python_module.ios.extend(get_peripheral_ios(peripherals_list, python_module.submodules))
+
+    return peripherals_list
+
+
+#Given a string and a list of possible suffixes, check if string given has a suffix from the list
+#Returns a turple:
+#        -(prefix, suffix): 'prefix' is the full_string with the suffix removed. 'suffix' is the string from the list that is a suffix of the full_string.
+#        -(None, None): if no suffix is found
+def find_suffix_from_list(full_string, list_of_suffix_strings):
+    return next(((full_string[:-len(i)], i) for i in list_of_suffix_strings if full_string.endswith(i)),(None, None))
 
 
 # Get path to build directory of directory
@@ -219,30 +332,49 @@ class if_gen_hack_list:
         #Append port to port dictionary
         self.port_list.append({'name':port.group(3), 'type':get_short_port_type(port.group(1)), 'n_bits':port.group(2), 'descr':port.group(4)})
 
-def if_gen_interface(interface_name):
+def if_gen_interface(interface_name, port_prefix):
     if_gen.create_signal_table(interface_name)
     # Create a virtual file object
     virtual_file_obj = if_gen_hack_list()
     # Tell if_gen to write ports in virtual file object
-    if_gen.write_vh_contents(interface_name, '', '', virtual_file_obj)
+    if_gen.write_vh_contents(interface_name, port_prefix, '', virtual_file_obj)
     # Extract port list from virtual file object
     return virtual_file_obj.port_list
 
+# Given a table from 'ios' dictionary, return its ports list
+# If table has a standard interface name (and empty port list) then it generates the port list with if_gen.py
+def get_table_ports(table):
+    # Check if this table is a standard interface (from if_gen.py)
+    # Note: the table['name'] may have a prefix, therefore we separate it before calling if_gen.
+    prefix, if_name = find_suffix_from_list(table['name'], if_gen.interfaces) 
+    if if_name:
+        # Interface is standard, generate ports
+        return if_gen_interface(if_name,prefix)
+    else:
+        # Interface is not standard, read ports
+        return table['ports'].copy()
+
 # Given ios object for the module, extract the list of ports.
-# Returns a list of dictionaries that describe each port.
+# It essencially removes de tables of each interface in 'ios'. 
+# Returns a list of dictionaries that describe each port. (The list contains ports from all tables in ios)
+# Also add certain table attributes to each signal of that table.
 # Example return list: 
 #[ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"},
 #  {'name':"rst_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral reset input"} ]
 def get_module_io(ios):
     module_signals = []
     for table in ios:
-        # Check if this table is a standard interface (from if_gen.py)
-        if table['name'] in if_gen.interfaces:
-            # Interface is standard, generate ports
-            module_signals.extend(if_gen_interface(table['name']))
-        else:
-            # Interface is not standard, read ports
-            module_signals.extend(table['ports'])
+        table_signals = get_table_ports(table)
+        # Add signal attributes
+        for signal in table_signals:
+            # Add ifdef attribute to every signal if table also has it
+            if 'if_defined' in table.keys(): signal['if_defined']=table['if_defined']
+
+            signal['name_without_prefix']=signal['name'] #Save the name without prefix in an attribute
+            # Add prefix xto signal name if ios_table_prefix is set
+            if 'ios_table_prefix' in table.keys() and table['ios_table_prefix']: 
+                signal['name']=table['name']+"_"+signal['name'] #Add prefix to the signal name
+        module_signals.extend(table_signals)
     return module_signals
 
 # string: string with parameter
@@ -251,7 +383,7 @@ def get_module_io(ios):
 def add_prefix_to_parameters_in_string(string, confs, prefix):
     for parameter in confs:
         if parameter['type'] in ['P','F']:
-            string = string.replace(parameter['name'], prefix+parameter['name'])
+            string = re.sub(f"((?:^.*[^a-zA-Z_])|^){parameter['name']}((?:[^a-zA-Z_].*$)|$)",f"\\g<1>{prefix}{parameter['name']}\\g<2>", string)
     return string
 
 # port: dictionary describing a port (IO). Example: {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
@@ -343,6 +475,9 @@ def get_peripherals_ports_params_top(peripherals_list, submodule_dirs):
         if instance['type'] not in port_list:
             # Import <corename>_setup.py module
             module = import_setup(submodule_dirs[instance['type']])
+            set_default_submodule_dirs(module)
+            iob_soc_peripheral_setup(module)
+
             # Append module IO, parameters, and top name
             port_list[instance['type']]=get_module_io(module.ios)
             params_list[instance['type']]=list(i for i in module.confs if i['type'] in ['P','F'])
