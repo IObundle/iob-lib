@@ -365,17 +365,30 @@ def module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs, 
 
 # Include Vheaders and hardware_srcs from given python module (module_name)
 def lib_module_setup(Vheaders, hardware_srcs, module_name):
-    for lib_module_path in Path(lib_dir).rglob(f"{module_name}.py"):
-        lib_module_name = os.path.basename(lib_module_path).split('.')[0]
-        spec = importlib.util.spec_from_file_location(lib_module_name, lib_module_path)
+    module_py_path = Path(lib_dir).rglob(f"{module_name}.py")
+    module_v_path = Path(lib_dir).rglob(f"{module_name}.v")
+    module_path = None
+    
+    for mod_path in Path(lib_dir).rglob(f"{module_name}.py"):
+        module_path = mod_path
+        break
+    if not module_path:
+        for mod_path in Path(lib_dir).rglob(f"{module_name}.v"):
+            module_path = mod_path
+            break
+    if not module_path: sys.exit(f"{iob_colors.FAIL} {module_name} is not a LIB module.{iob_colors.ENDC}")
+
+    extension = os.path.splitext(module_path)[1]
+    if extension == ".py":
+        lib_module_name = os.path.basename(module_path).split('.')[0]
+        spec = importlib.util.spec_from_file_location(lib_module_name, module_path)
         lib_module = importlib.util.module_from_spec(spec)
         sys.modules[lib_module_name]=lib_module
         spec.loader.exec_module(lib_module)
         Vheaders.extend(lib_module.v_headers)
         hardware_srcs.extend(lib_module.hw_modules)
-        break
-    else: sys.exit(f"{iob_colors.FAIL} {module_name} is not a LIB module.{iob_colors.ENDC}")
-
+    elif extension == ".v":
+        hardware_srcs.append(f"{module_name}.v")
 
 def copy_files(src_dir, dest_dir, sources = [], pattern = "*", copy_all = False):
     files_copied = []
