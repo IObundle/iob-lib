@@ -12,7 +12,7 @@ module iob_reset_sync
    wire [1:0] data;
    assign data = {sync_reg[0], 1'b0};
 
-   iob_reg #(2, 1) reg0
+   iob_reg #(2, 3) reg0
      (
       .clk_i(clk_i),
       .arst_i(arst_i),

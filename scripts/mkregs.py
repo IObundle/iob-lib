@@ -30,6 +30,9 @@ class mkregs:
     @staticmethod
     def verilog_max(a,b):
         if(a==b): return f"{a}"
+        elif(type(a)==int and type(b)==int): 
+            if (a>b): return f"{a}"
+            else: return f"{b}"
         else: return f"((({a}) > ({b})) ? ({a}) : ({b}))"
 
     def bceil(self, n, log2base):
@@ -85,7 +88,14 @@ class mkregs:
         if auto: #generate register
             f.write(f"`IOB_WIRE({name}_wen, 1)\n")
             f.write(f"assign {name}_wen = (iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
-            f.write(f"iob_reg_e #({n_bits},{rst_val}) {name}_datareg (clk_i, arst_i, cke_i, {name}_wen, {name}_wdata, {name}_o);\n")
+            f.write(f"iob_reg_e #({n_bits},{rst_val}) {name}_datareg (\n")
+            f.write(".clk_i (clk_i),\n")
+            f.write(".arst_i (arst_i),\n")
+            f.write(".cke_i (cke_i),\n")
+            f.write(f".en_i ({name}_wen),\n")
+            f.write(f".data_i ({name}_wdata),\n")
+            f.write(f".data_o ({name}_o)\n")
+            f.write(");\n")
         else: #compute wen
             f.write(f"assign {name}_wen_o = ({name}_addressed & iob_avalid_i)? |iob_wstrb_i: 1'b0;\n")
             
@@ -242,7 +252,7 @@ class mkregs:
 
         #extract address byte offset
         f_gen.write(f"`IOB_WIRE(byte_offset, ($clog2(DATA_W/8)+1))\n")
-        f_gen.write(f"iob_ctls #(.N(DATA_W/8), .MODE(0), .SYMBOL(0)) bo_inst (iob_wstrb_i, byte_offset);\n")
+        f_gen.write(f"iob_ctls #(.N(DATA_W/8), .MODE(0), .SYMBOL(0)) bo_inst (.data_i(iob_wstrb_i), .count_o(byte_offset));\n")
 
         #compute write address
         f_gen.write(f"`IOB_WIRE(waddr, ADDR_W)\n")
@@ -273,20 +283,44 @@ class mkregs:
         #ready output
         f_gen.write("//ready output\n")
         f_gen.write("`IOB_VAR(ready_nxt, 1)\n")
-        f_gen.write("iob_reg #(1,1) ready_reg_inst (clk_i, arst_i, cke_i, ready_nxt, iob_ready_o);\n\n")
+        f_gen.write("iob_reg #(1,1) ready_reg_inst (\n")
+        f_gen.write(".clk_i (clk_i),\n")
+        f_gen.write(".arst_i (arst_i),\n")
+        f_gen.write(".cke_i (cke_i),\n")
+        f_gen.write(".data_i (ready_nxt),\n")
+        f_gen.write(".data_o (iob_ready_o)\n")
+        f_gen.write(");\n\n")
         
         #rvalid output
         f_gen.write("//rvalid output\n")
         f_gen.write("`IOB_VAR(rvalid_nxt, 1)\n")
-        f_gen.write("iob_reg #(1,0) rvalid_reg_inst (clk_i, arst_i, cke_i, rvalid_nxt, iob_rvalid_o);\n\n")
-        
+        f_gen.write("iob_reg #(1,0) rvalid_reg_inst (\n")
+        f_gen.write(".clk_i (clk_i),\n")
+        f_gen.write(".arst_i (arst_i),\n")
+        f_gen.write(".cke_i (cke_i),\n")
+        f_gen.write(".data_i (rvalid_nxt),\n")
+        f_gen.write(".data_o (iob_rvalid_o)\n")
+        f_gen.write(");\n\n")
+
         #rdata output
         f_gen.write("//rdata output\n")
-        f_gen.write(f"iob_reg #({8*self.cpu_n_bytes},0) rdata_reg_inst (clk_i, arst_i, cke_i, rdata_int, iob_rdata_o);\n\n")
+        f_gen.write(f"iob_reg #({8*self.cpu_n_bytes},0) rdata_reg_inst (\n")
+        f_gen.write(".clk_i (clk_i),\n")
+        f_gen.write(".arst_i (arst_i),\n")
+        f_gen.write(".cke_i (cke_i),\n")
+        f_gen.write(".data_i (rdata_int),\n")
+        f_gen.write(".data_o (iob_rdata_o)\n")
+        f_gen.write(");\n\n")
         
         f_gen.write("`IOB_WIRE(pc, 1)\n")
         f_gen.write("`IOB_VAR(pc_nxt, 1)\n")
-        f_gen.write("iob_reg #(1,0) pc_reg (clk_i, arst_i, cke_i, pc_nxt, pc);\n\n")
+        f_gen.write("iob_reg #(1,0) pc_reg (\n")
+        f_gen.write(".clk_i (clk_i),\n")
+        f_gen.write(".arst_i (arst_i),\n")
+        f_gen.write(".cke_i (cke_i),\n")
+        f_gen.write(".data_i (pc_nxt),\n")
+        f_gen.write(".data_o (pc)\n")
+        f_gen.write(");\n\n")
 
         f_gen.write("`IOB_COMB begin\n")
 

@@ -167,5 +167,7 @@ puts "============================"
 puts "Synthesis Finished ........."
 puts "============================"
 
+write_hdl -mapped -v2001 > $OUTPUTS_DIR/${DESIGN}_synth.v 
+
 timestat FINAL
 quit

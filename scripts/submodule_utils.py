@@ -346,7 +346,7 @@ def get_peripherals_ports_params_top(peripherals_list, submodule_dirs):
             # Append module IO, parameters, and top name
             port_list[instance['type']]=get_module_io(module.ios)
             params_list[instance['type']]=list(i for i in module.confs if i['type'] in ['P','F'])
-            top_list[instance['type']]=module.meta['name']
+            top_list[instance['type']]=module.name
     return port_list, params_list, top_list
 
 # Find index of word in array with multiple strings

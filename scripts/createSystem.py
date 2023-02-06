@@ -17,7 +17,7 @@ def insert_header_files(template_contents, peripherals_list, submodule_dirs):
             module = import_setup(submodule_dirs[instance['type']])
             # Only insert swreg file if module has regiters
             if hasattr(module,'regs') and module.regs:
-                top = module.meta['name']
+                top = module.name
                 template_contents.insert(header_index, f'`include "{top}_swreg_def.vh"\n')
 
 

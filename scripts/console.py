@@ -180,7 +180,7 @@ def init_print():
         print()
     print(PROGNAME, end = '')
     print(': connecting...')
-    print()
+    print('', flush=True)
 
 def init_serial():
     global ser
@@ -196,7 +196,7 @@ def init_serial():
 
     # configure the serial connections (the parameters differs on the device connected to)
     ser = serial.Serial()
-    ser.port = "/dev/usb-uart"         # serial port
+    ser.port = sys.argv[sys.argv.index('-s')+1] #serial port from -s argument
     if ('-b' in sys.argv):
         if (len(sys.argv)<5): usage("PROGNAME: not enough program arguments")
         ser.baudrate = sys.argv[sys.argv.index('-b')+1]              # baudrate
@@ -222,7 +222,6 @@ def init_files():
 def init_console():
     global SerialFlag
     global ser
-    load_fw = False
 
     if ('-L' in sys.argv or '--local' in sys.argv):
         SerialFlag = False
@@ -245,16 +244,13 @@ def init_console():
             cnsl_perror("Error open serial port.")
     else:
         usage("PROGNAME: not enough program arguments")
-    if ('-f' in sys.argv): load_fw = True
 
     init_print()
-
-    return load_fw
 
 
 # Main function.
 def main():
-    load_fw = init_console()
+    init_console()
     gotENQ = False
     input_thread = Thread(target=getUserInput, args=[], daemon=True)
 
@@ -269,12 +265,8 @@ def main():
         if (byte == ENQ):
             if (not gotENQ):
                 gotENQ = True
-                if (load_fw):
-                    if SerialFlag: ser.write(FRX)
-                    else: tb_write(FRX)
-                else:
-                    if SerialFlag: ser.write(ACK)
-                    else: tb_write(ACK)
+                if SerialFlag: ser.write(ACK)
+                else: tb_write(ACK)
         elif (byte == EOT):
             print(PROGNAME, end = '')
             print(': exiting...')

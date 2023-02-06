@@ -5,14 +5,32 @@
 
 SHELL:=bash
 
+#select simulator
+#default simulator
+SIMULATOR ?=icarus
+
+# Generate configuration when importing config_build.mk
+GEN_CONFIG:=1
 include ../../config_build.mk
 
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 REMOTE_SIM_DIR=$(REMOTE_BUILD_DIR)/hardware/simulation
 
+#include simulation headers and sources
+VHDR+=$(wildcard ./src/*.vh)
+VSRC+=$(wildcard ./src/*.v)
+
+ifeq ($(SYN),)
 #include the module's headers and sources
-VHDR+=$(wildcard ../src/*.vh) $(wildcard ./src/*.vh)
-VSRC+=$(wildcard ../src/*.v) $(wildcard ./src/*.v)
+VHDR+=$(wildcard ../src/*.vh)
+VSRC+=$(wildcard ../src/*.v)
+else
+NODE ?= umc130
+include ../syn/$(NODE)/sim.mk
+VSRC+= ../syn/results/*.v
+../syn/%.v:
+	make -C ../syn build
+endif
 
 #exclude verilog testbench when using Verilator
 ifeq ($(SIMULATOR), verilator)
@@ -24,16 +42,15 @@ ifneq ($(wildcard sim_build.mk),)
 include sim_build.mk
 endif
 
-#select simulator
-#default simulator
-SIMULATOR?=icarus
 include $(SIMULATOR).mk
 
 UFLAGS+=VCD=$(VCD)
 UFLAGS+=COV=$(COV)
+UFLAGS+=SYN=$(SYN)
+UFLAGS+=NODE=$(NODE)
 UFLAGS+=COV_TEST=$(COV_TEST)
 
-build: $(VHDR) $(VSRC)
+build: $(VHDR) $(VSRC) $(HEX)
 ifeq ($(SIM_SERVER),)
 	make comp
 else
@@ -41,6 +58,8 @@ else
 	rsync $(SIM_SYNC_FLAGS) -avz --force --delete ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'
 endif
+
+CONSOLE_CMD=../../scripts/console.py -L
 
 run: build
 ifeq ($(SIM_SERVER),)
@@ -50,7 +69,7 @@ ifneq ($(CONSOLE_CMD),)
 endif
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make exec"
 else
-	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) exec SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
+	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
 ifeq ($(VCD),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
@@ -102,7 +121,7 @@ else
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make run-tests"
 endif
 ifneq ($(COV),1)
-	diff test.log test.expected
+	diff test.log src/test.expected
 else
 	@echo "INFO: simulation code coverage is reserved for internal use only."
 endif

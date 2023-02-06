@@ -4,6 +4,7 @@ set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
 set QIP [lindex $argv 3]
 set IS_FPGA [lindex $argv 4]
+set USE_EXTMEM [lindex $argv 5]
 
 project_new $NAME -overwrite
 
@@ -21,14 +22,8 @@ if [project_exists $NAME] {
 
 set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 
-#device data
-source quartus/$BOARD/device.tcl
-
-#user io data
-
-if [ file exists "io.tcl" ] {
-    source io.tcl
-}
+#board data
+source quartus/$BOARD/board.tcl
 
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
@@ -38,7 +33,7 @@ set_global_assignment -name SEARCH_PATH ../src
 
 #quartus IPs
 foreach file [split $QIP \ ] {
-    if {$file != ""} {
+    if {$file != "None"} {
         set_global_assignment -name QIP_FILE $file
     }
 }
@@ -53,22 +48,22 @@ foreach file [split $VSRC \ ] {
 
 
 if {$IS_FPGA != "1"} {
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+    set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+    set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+    set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 
 
-set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id $NAME:$NAME
+    set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id $NAME:$NAME
 
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id $NAME:$NAME
+    set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id $NAME:$NAME
 
-set_global_assignment -name PARTITION_COLOR 39423 -section_id $NAME:$NAME
+    set_global_assignment -name PARTITION_COLOR 39423 -section_id $NAME:$NAME
 
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+    set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 }
 
 set_global_assignment -name LAST_QUARTUS_VERSION "18.0.0 Standard Edition"
-set_global_assignment -name SDC_FILE quartus/$NAME.sdc
+set_global_assignment -name SDC_FILE quartus/$BOARD/$NAME.sdc
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
@@ -90,10 +85,11 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_map] $NAME"} result] {
     qexit -error
 }
 
-if [file exists "postmap.tcl"] {
- source "postmap.tcl"
+if [file exists "quartus/postmap.tcl"] {
+ source "quartus/postmap.tcl"
+} else {
+ exit 1
 }
-
 if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $NAME"} result] {
     qexit -error
 }
@@ -106,10 +102,10 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $NAME"} result] {
 if {$IS_FPGA != "1"} {
     if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
         qexit -error
-    } else {
-        if [catch {qexec "[file join $::quartus(binpath) quartus_asm] $NAME"} result] {
-            qexit -error
-        }
+    } 
+} else {
+    if [catch {qexec "[file join $::quartus(binpath) quartus_asm] $NAME"} result] {
+        qexit -error
     }
 }
 

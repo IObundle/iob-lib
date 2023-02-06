@@ -3,6 +3,8 @@
 # This makefile is used at build-time in $(BUILD_DIR)/sw/pc/Makefile
 #
 
+# Generate configuration when importing config_build.mk
+GEN_CONFIG:=1
 include ../../config_build.mk
 
 ifneq ($(wildcard ../../console.mk),)

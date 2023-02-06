@@ -8,16 +8,16 @@ from setup import setup
 import build_srcs
 
 # Add tester modules to the list of hw, sim, sw and fpga modules of the current core/system
-# meta: meta dictionary of the current system
+# python_module: python module of the current system
 # tester_options: dictionary with tester options
-def add_tester_modules(meta, tester_options):
+def add_tester_modules(python_module, tester_options):
     # Make sure lists exist
     for i in ['hw_setup','sim_setup','fpga_setup','sw_setup']:
-        if i not in meta['submodules']: meta['submodules'][i] = { 'headers' : [], 'modules': [] }
+        if i not in python_module.submodules: python_module.submodules[i] = { 'headers' : [], 'modules': [] }
 
     # Add tester to lists
     for i in ['hw_setup','sim_setup','fpga_setup','sw_setup']:
-        meta['submodules'][i]['modules'].append(('TESTER',tester_options))
+        python_module.submodules[i]['modules'].append(('TESTER',tester_options))
 
 #Given the io dictionary of ports, the port name (and size, and optional bit list) and a wire, it will map the selected bits of the port to the given wire.
 #io_dict: dictionary where keys represent port names, values are the mappings
@@ -48,7 +48,6 @@ def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
 #                     { {'corename':'UART1', 'if_name':'rs232', 'port':'', 'bits':[]}:{'corename':'UUT', 'if_name':'UART0', 'port':'', 'bits':[]} }
 #    - confs: Optional dictionary with extra macros/parameters or with overrides for existing ones
 def setup_tester( python_module ):
-    meta_data = python_module.meta
     ios = python_module.ios
     blocks = python_module.blocks
     module_parameters = python_module.module_parameters
@@ -67,9 +66,9 @@ def setup_tester( python_module ):
                 confs.append(entry)
 
     #Create default submodule directories
-    build_srcs.set_default_submodule_dirs(meta_data)
+    build_srcs.set_default_submodule_dirs(python_module)
     #Update submodule directories of Tester with new peripherals directories
-    meta_data['submodules']['dirs'].update(module_parameters['extra_peripherals_dirs'])
+    python_module.submodules['dirs'].update(module_parameters['extra_peripherals_dirs'])
 
     #Add extra peripherals to tester list (by updating original list)
     tester_peripherals_list=next(i['blocks'] for i in blocks if i['name'] == 'peripherals')
@@ -112,14 +111,14 @@ def setup_tester( python_module ):
         ios.append({'name': f"portmap_{map_idx}", 'descr':f"IOs for peripherals based on portmap index {map_idx}", 'ports': tester_mapping_ios})
 
         # Import module of one of the given core types (to access its IO)
-        module = import_setup(meta_data['submodules']['dirs'][mapping_items[0]['type']])
+        module = import_setup(python_module.submodules['dirs'][mapping_items[0]['type']])
         #Get ports of configured interface
         interface_ports=get_module_io([ next(i for i in module.ios if i['name'] == mapping[0]['if_name']) ])
 
         #If mapping_items[1] is not external interface
         if mapping_external_interface!=1: 
             # Import module of one of the given core types (to access its IO)
-            module2 = import_setup(meta_data['submodules']['dirs'][mapping_items[1]['type']])
+            module2 = import_setup(python_module.submodules['dirs'][mapping_items[1]['type']])
             #Get ports of configured interface
             interface_ports2=get_module_io([ next(i for i in module2.ios if i['name'] == mapping[1]['if_name']) ])
 

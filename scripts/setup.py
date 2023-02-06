@@ -23,29 +23,32 @@ def getf(obj, name, field):
 # peripheral_ios: Optional argument. Selects if should append peripheral IOs to 'ios' list
 # internal_wires: Optional argument. List of extra wires for creste_systemv to create inside this core/system module
 def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=True, internal_wires=None):
-    meta_data = python_module.meta
     confs = python_module.confs
     ios = python_module.ios
     regs = python_module.regs
     blocks = python_module.blocks
 
-    top = meta_data['name']
-    build_dir = meta_data['build_dir']
+    top = python_module.name
+    build_dir = python_module.build_dir
+
+    #Auto-add 'VERSION' macro
+    confs.append({'name':'VERSION', 'type':'M', 'val':"16'h"+build_srcs.version_str_to_digits(python_module.version), 'min':'NA', 'max':'NA', 'descr':"Product version."})
 
     # Check if should create build directory for this core/system
     #TODO: We need to find another way of checking this. Currently we can not configure another build_dir in *_setup.py because it will cause this to not build the directory!
-    create_build_dir = build_dir==f"../{meta_data['name']}_{meta_data['version']}"
+    create_build_dir = build_dir==f"../{python_module.name}_{python_module.version}"
 
-    build_srcs.set_default_submodule_dirs(meta_data)
+    build_srcs.set_default_submodule_dirs(python_module)
 
     #
     # Build directory
     #
     if create_build_dir:
         os.makedirs(build_dir, exist_ok=True)
-        mk_conf.config_build_mk(confs, meta_data, build_dir)
+        mk_conf.config_build_mk(python_module, build_dir)
+        mk_conf.config_for_board(top, python_module.flows, build_dir)
         build_srcs.build_dir_setup(python_module)
-    
+
     #
     # IOb-SoC related functions
     #
@@ -55,7 +58,7 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
 
     if peripherals_list:
         # Get port list, parameter list and top module name for each type of peripheral used
-        port_list, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, meta_data['submodules']['dirs'])
+        port_list, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, python_module.submodules['dirs'])
         # Insert peripheral instance parameters in system parameters
         # This causes the system to have a parameter for each parameter of each peripheral instance
         for instance in peripherals_list:
@@ -70,22 +73,31 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
     # Get peripheral related macros
     if peripherals_list: iob_soc.get_peripheral_macros(confs, peripherals_list)
     # Append peripherals IO 
-    if peripherals_list and peripheral_ios: ios.extend(ios_lib.get_peripheral_ios(peripherals_list, meta_data['submodules']))
+    if peripherals_list and peripheral_ios: ios.extend(ios_lib.get_peripheral_ios(peripherals_list, python_module.submodules))
     # Build periphs_tmp.h
     if peripherals_list: periphs_tmp.create_periphs_tmp(next(i['val'] for i in confs if i['name'] == 'P'),
-                                   peripherals_list, f"{meta_data['build_dir']}/software/periphs.h")
+                                   peripherals_list, f"{python_module.build_dir}/software/periphs.h")
     # Try to build iob_soc.v if template is available
-    createSystem.create_systemv(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],f'hardware/src/{top}.v'), internal_wires=internal_wires)
+    createSystem.create_systemv(python_module.setup_dir, python_module.submodules['dirs'], python_module.name, peripherals_list, os.path.join(python_module.build_dir,f'hardware/src/{top}.v'), internal_wires=internal_wires)
     # Try to build system_tb.v if template is available
-    createTestbench.create_system_testbench(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, os.path.join(meta_data['build_dir'],f'hardware/simulation/src/{top}_tb.v'))
+    createTestbench.create_system_testbench(python_module.setup_dir, python_module.submodules['dirs'], python_module.name, peripherals_list, os.path.join(python_module.build_dir,f'hardware/simulation/src/{top}_tb.v'))
     # Try to build system_top.v if template is available
-    createTopSystem.create_top_system(meta_data['setup_dir'], meta_data['submodules']['dirs'], meta_data['name'], peripherals_list, ios, confs, os.path.join(meta_data['build_dir'],f'hardware/simulation/src/{top}_top.v'))
+    createTopSystem.create_top_system(python_module.setup_dir, python_module.submodules['dirs'], python_module.name, peripherals_list, ios, confs, os.path.join(python_module.build_dir,f'hardware/simulation/src/{top}_top.v'))
 
 
     #
     # Build registers table
     #
     if regs:
+        # Make sure 'genera;' registers table exists
+        general_regs_table = next((i for i in regs if i['name']=='general'),None)
+        if not general_regs_table:
+            general_regs_table = {'name': 'general', 'descr':'General Registers.', 'regs': []}
+            regs.append(general_regs_table)
+        # Auto add 'VERSION' register in 'general' registers table
+        general_regs_table['regs'].append({'name':"VERSION", 'type':"R", 'n_bits':16, 'rst_val':build_srcs.version_str_to_digits(python_module.version), 'addr':-1, 'log2n_items':0, 'autologic':True, 'descr':"Product version."})
+
+        # Create reg table
         reg_table = []
         for i_regs in regs:
             reg_table += i_regs['regs']
@@ -95,44 +107,51 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
         mkregs_obj = mkregs.mkregs()
         mkregs_obj.config = confs
         reg_table = mkregs_obj.compute_addr(reg_table, no_overlap)
+        # Make sure 'hw_setup' dictionary exists
+        if 'hw_setup' not in python_module.submodules: python_module.submodules['hw_setup'] = {'headers':[], 'modules':[]}
         # Auto-add iob_ctls module
-        meta_data['submodules']['hw_setup']['modules'].append('iob_ctls')
+        python_module.submodules['hw_setup']['modules'].append('iob_ctls')
+        # Auto-add iob_s_port.vh
+        python_module.submodules['hw_setup']['headers'].append('iob_s_port')
+        # Auto-add cpu_iob_s_portmap.vh
+        #   [ file_prefix, interface_name, port_prefix, wire_prefix ]
+        python_module.submodules['hw_setup']['headers'].append([ 'cpu_', 'iob_s_portmap', '', 'cpu_' ])
 
         
     #
     # Generate hw
     #
-    # Make sure 'hw_setup' dictionary exists
-    if 'hw_setup' not in meta_data['submodules']: meta_data['submodules']['hw_setup'] = {'headers':[], 'modules':[]}
     # Build hardware
     build_srcs.hw_setup( python_module )
     if regs:
-        mkregs_obj.write_hwheader(reg_table, meta_data['build_dir']+'/hardware/src', top)
-        mkregs_obj.write_lparam_header(reg_table, meta_data['build_dir']+'/hardware/src', top)
-        mkregs_obj.write_hwcode(reg_table, meta_data['build_dir']+'/hardware/src', top)
-    mk_conf.params_vh(confs, top, meta_data['build_dir']+'/hardware/src')
-    mk_conf.conf_vh(confs, top, meta_data['build_dir']+'/hardware/src')
+        mkregs_obj.write_hwheader(reg_table, build_dir+'/hardware/src', top)
+        mkregs_obj.write_lparam_header(reg_table, build_dir+'/hardware/simulation/src', top)
+        mkregs_obj.write_hwcode(reg_table, build_dir+'/hardware/src', top)
+    mk_conf.params_vh(confs, top, build_dir+'/hardware/src')
 
-    ios_lib.generate_ios_header(ios, top, meta_data['build_dir']+'/hardware/src',prefix=ios_prefix)
+    mk_conf.conf_vh(confs, top, build_dir+'/hardware/src')
+
+    
+    ios_lib.generate_ios_header(ios, top, build_dir+'/hardware/src',prefix=ios_prefix)
 
     #
     # Generate sw
     #
     if regs:
-        if os.path.isdir(meta_data['setup_dir']+'/software/esrc'):
-            mkregs_obj.write_swheader(reg_table, meta_data['build_dir']+'/software/esrc', top)
-            mkregs_obj.write_swcode(reg_table, meta_data['build_dir']+'/software/esrc', top)
-        if os.path.isdir(meta_data['setup_dir']+'/software/psrc'): mkregs_obj.write_swheader(reg_table, meta_data['build_dir']+'/software/psrc', top)
-    if os.path.isdir(meta_data['setup_dir']+'/software/esrc'): mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/esrc')
-    if os.path.isdir(meta_data['setup_dir']+'/software/psrc'): mk_conf.conf_h(confs, top, meta_data['build_dir']+'/software/psrc')
+        if os.path.isdir(python_module.setup_dir+'/software/esrc'):
+            mkregs_obj.write_swheader(reg_table, python_module.build_dir+'/software/esrc', top)
+            mkregs_obj.write_swcode(reg_table, python_module.build_dir+'/software/esrc', top)
+        if os.path.isdir(python_module.setup_dir+'/software/psrc'): mkregs_obj.write_swheader(reg_table, python_module.build_dir+'/software/psrc', top)
+    if os.path.isdir(python_module.setup_dir+'/software/esrc'): mk_conf.conf_h(confs, top, python_module.build_dir+'/software/esrc')
+    if os.path.isdir(python_module.setup_dir+'/software/psrc'): mk_conf.conf_h(confs, top, python_module.build_dir+'/software/psrc')
 
     #
     # Generate TeX
     #
     # Only generate TeX of this core if creating build directory for it
-    if os.path.isdir(meta_data['build_dir']+"/document/tsrc") and create_build_dir:
-        mk_conf.generate_confs_tex(confs, meta_data['build_dir']+"/document/tsrc")
-        ios_lib.generate_ios_tex(ios, meta_data['build_dir']+"/document/tsrc")
+    if os.path.isdir(python_module.build_dir+"/document/tsrc") and create_build_dir:
+        mk_conf.generate_confs_tex(confs, python_module.build_dir+"/document/tsrc")
+        ios_lib.generate_ios_tex(ios, python_module.build_dir+"/document/tsrc")
         if regs:
             mkregs_obj.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
         blocks_lib.generate_blocks_tex(blocks, build_dir+"/document/tsrc")
@@ -142,13 +161,13 @@ def setup( python_module, no_overlap=False, ios_prefix=False, peripheral_ios=Tru
 #Print build directory of the core/system in the current directory (extracted from *_setup.py)
 def get_build_dir():
     module = import_setup(".")
-    print(module.meta['build_dir'])
+    print(module.build_dir)
 
 #Return white-space separated list of submodules directories of the core/system in the current directory (extracted from *_setup.py)
 def get_core_submodules_dirs():
     module = import_setup(".")
-    build_srcs.set_default_submodule_dirs(module.meta)
-    for key, value in module.meta['submodules']['dirs'].items():
+    build_srcs.set_default_submodule_dirs(module)
+    for key, value in module.submodules['dirs'].items():
         print(f"{key}_DIR={value}", end=" ")
 
 # If this script is called directly, run function given in first argument
