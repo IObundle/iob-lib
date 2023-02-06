@@ -22,15 +22,8 @@ if [project_exists $NAME] {
 
 set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 
-#device data
-source quartus/$BOARD/device.tcl
-
-#user io data
-
-set ioPath "quartus/$BOARD/io.tcl"
-if {[file exists $ioPath]} {
-    source $ioPath
-}
+#board data
+source quartus/$BOARD/board.tcl
 
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
@@ -92,10 +85,11 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_map] $NAME"} result] {
     qexit -error
 }
 
-if [file exists "postmap.tcl"] {
- source "postmap.tcl"
+if [file exists "quartus/postmap.tcl"] {
+ source "quartus/postmap.tcl"
+} else {
+ exit 1
 }
-
 if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $NAME"} result] {
     qexit -error
 }

@@ -12,8 +12,8 @@ FPGA_USER=$(QUARTUS_USER)
 FPGA_ENV=$(QUARTUSPATH)/nios2eds/nios2_command_shell.sh
 FPGA_PROG=$(FPGA_ENV) quartus_pgm -m jtag -c 1 -o 'p;$(NAME)_fpga_wrapper.sof'
 
-$(FPGA_OBJ): $(VHDR) $(VSRC) $(wildcard *.sdc) $(FPGA_DEPS)
-	$(FPGA_ENV) quartus_sh -t quartus/build.tcl $(NAME)_fpga_wrapper $(BOARD) "$(VSRC)" "None" $(IS_FPGA) $(USE_EXTMEM)
+$(FPGA_OBJ): $(VHDR) $(QIP) $(VSRC) $(wildcard *.sdc)
+	$(FPGA_ENV) quartus_sh -t quartus/build.tcl $(NAME)_fpga_wrapper $(BOARD) "$(VSRC)" $(QIP) $(IS_FPGA) $(USE_EXTMEM)
 	@mv output_files/*.fit.summary $(FPGA_LOG)
 	@mv output_files/$(FPGA_OBJ) $(FPGA_OBJ)
 
