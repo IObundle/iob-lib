@@ -6,7 +6,6 @@ from submodule_utils import import_setup, get_table_ports, add_prefix_to_paramet
 from ios import get_interface_mapping
 from setup import setup
 import build_srcs
-import iob_soc
 import iob_colors
 
 # Add tester modules to the list of hw, sim, sw and fpga modules of the current core/system

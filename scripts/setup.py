@@ -8,7 +8,6 @@ import ios as ios_lib
 import blocks as blocks_lib
 from submodule_utils import import_setup, iob_soc_peripheral_setup, set_default_submodule_dirs
 import build_srcs
-import iob_soc
 
 import periphs_tmp
 import createSystem
