@@ -197,3 +197,13 @@ def setup_tester( python_module ):
 
     # Call setup function for the tester
     setup(python_module, peripheral_ios=False, internal_wires=peripheral_wires)
+
+    # Add hardware DDR macros with same value as the sut
+    # FIXME: This requires the user to pass 'uut_name' variable just for this purpose. Maybe we should make the DDR_* macros global instead (without sut name as prefix).
+    if 'uut_name' in module_parameters.keys():
+        with open(f"{python_module.build_dir}/hardware/src/{python_module.name}_conf.vh", 'r+') as file:
+            contents = file.readlines()
+            contents.insert(-1,f"`define IOB_SOC_TESTER_DDR_ADDR_W `{module_parameters['uut_name'].upper()}_DDR_ADDR_W\n")
+            contents.insert(-1,f"`define IOB_SOC_TESTER_DDR_DATA_W `{module_parameters['uut_name'].upper()}_DDR_DATA_W\n")
+            file.seek(0)
+            file.writelines(contents)
