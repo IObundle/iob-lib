@@ -38,7 +38,7 @@ def conf_vh(macros, top_module, out_dir):
     fname = f"{core_prefix}CONF"
     file2create.write(f"`ifndef VH_{fname}_VH\n")
     file2create.write(f"`define VH_{fname}_VH\n\n")
-    file2create.write('`include "build_configuration.vh"\n\n')
+    #file2create.write('`include "build_configuration.vh"\n\n')
     for macro in macros:
         #Only insert macro if its is not a bool define, and if so only insert it if it is true
         if macro['val'] != 'NA':

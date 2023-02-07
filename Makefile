@@ -16,9 +16,7 @@ all: sim
 # Default module
 MODULE ?= iob_ram_2p
 MODULE_DIR ?= $(shell find hardware -name $(MODULE))
-ifneq ($(MODULE_DIR),)
-include $(MODULE_DIR)/hw_setup.mk
-else
+ifeq ($(MODULE_DIR),)
 $(info No such module $(MODULE))
 endif
 
