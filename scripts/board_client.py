@@ -20,4 +20,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         request += ' ' + sys.argv[2]
     s.sendall(request.encode())
     data = s.recv(1024)
-    print(data.decode())
+    print("Board "+data.decode())
