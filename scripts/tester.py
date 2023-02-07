@@ -204,6 +204,8 @@ def setup_tester( python_module ):
             contents = file.readlines()
             contents.insert(-1,f"`define IOB_SOC_TESTER_DDR_ADDR_W `{module_parameters['uut_name'].upper()}_DDR_ADDR_W\n")
             contents.insert(-1,f"`define IOB_SOC_TESTER_DDR_DATA_W `{module_parameters['uut_name'].upper()}_DDR_DATA_W\n")
+            contents.insert(-1,f"`define IOB_SOC_TESTER_FREQ `{module_parameters['uut_name'].upper()}_FREQ\n")
+            contents.insert(-1,f"`define IOB_SOC_TESTER_BAUD `{module_parameters['uut_name'].upper()}_BAUD\n")
             file.seek(0)
             file.writelines(contents)
 
@@ -219,7 +221,9 @@ def setup_tester( python_module ):
             file.write("# init file for external mem with firmware of both systems\n")
             file.write("init_ddr_contents.hex: iob_soc_tester_firmware.hex\n")
 
-            sut_firmware_name = module_parameters['sut_fw_name'].replace('.c','') if 'sut_fw_name if' in module_parameters.keys() else ''
-            file.write(f"	../../scripts/joinHexFiles.py \"{sut_firmware_name}\" $^ $(call GET_TESTER_BUILD_MACRO,DDR_ADDR_W) > $@\n")
+            sut_firmware_name = module_parameters['sut_fw_name'].replace('.c','')+'.hex' if 'sut_fw_name' in module_parameters.keys() else '-'
+            if 'uut_name' in module_parameters.keys(): ddr_macro_name = f"{module_parameters['uut_name'].upper()}_DDR_ADDR_W"
+            else: ddr_macro_name = "IOB_SOC_TESTER_DDR_ADDR_W"
+            file.write(f"	../../scripts/joinHexFiles.py {sut_firmware_name} $^ $(call GET_MACRO,{ddr_macro_name},../src/build_configuration.vh) > $@\n")
         # Copy joinHexFiles.py from LIB
         build_srcs.copy_files( "submodules/LIB", f"{python_module.build_dir}/scripts", [ "joinHexFiles.py" ], '*.py' )
