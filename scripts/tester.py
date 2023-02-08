@@ -197,12 +197,32 @@ def setup_tester( python_module ):
     # Call setup function for the tester
     setup(python_module, peripheral_ios=False, internal_wires=peripheral_wires)
 
-    # Add hardware DDR macros with same value as the sut
-    # FIXME: This requires the user to pass 'uut_name' variable just for this purpose. Maybe we should make the DDR_* macros global instead (without sut name as prefix).
+    # Add hardware build macros with same value as the ones for the UUT
     if 'uut_name' in module_parameters.keys():
         with open(f"{python_module.build_dir}/hardware/src/{python_module.name}_conf.vh", 'r+') as file:
             contents = file.readlines()
             contents.insert(-1,f"`define IOB_SOC_TESTER_DDR_ADDR_W `{module_parameters['uut_name'].upper()}_DDR_ADDR_W\n")
             contents.insert(-1,f"`define IOB_SOC_TESTER_DDR_DATA_W `{module_parameters['uut_name'].upper()}_DDR_DATA_W\n")
+            contents.insert(-1,f"`define IOB_SOC_TESTER_FREQ `{module_parameters['uut_name'].upper()}_FREQ\n")
+            contents.insert(-1,f"`define IOB_SOC_TESTER_BAUD `{module_parameters['uut_name'].upper()}_BAUD\n")
             file.seek(0)
             file.writelines(contents)
+
+    #Check if setup with INIT_MEM and USE_EXTMEM (check if macro exists)
+    extmem_macro = next((i for i in confs if i['name']=='USE_EXTMEM'), False)
+    initmem_macro = next((i for i in confs if i['name']=='INIT_MEM'), False)
+    if extmem_macro and extmem_macro['val'] != 'NA' and \
+       initmem_macro and initmem_macro['val'] != 'NA':
+        # Append init_ddr_contents.hex target to sw_build.mk
+        with open(f"{python_module.build_dir}/software/sw_build.mk", 'a') as file:
+            file.write("\n#Auto-generated target to create init_ddr_contents.hex\n")
+            file.write("HEX+=init_ddr_contents.hex\n")
+            file.write("# init file for external mem with firmware of both systems\n")
+            file.write("init_ddr_contents.hex: iob_soc_tester_firmware.hex\n")
+
+            sut_firmware_name = module_parameters['sut_fw_name'].replace('.c','')+'.hex' if 'sut_fw_name' in module_parameters.keys() else '-'
+            if 'uut_name' in module_parameters.keys(): ddr_macro_name = f"{module_parameters['uut_name'].upper()}_DDR_ADDR_W"
+            else: ddr_macro_name = "IOB_SOC_TESTER_DDR_ADDR_W"
+            file.write(f"	../../scripts/joinHexFiles.py {sut_firmware_name} $^ $(call GET_MACRO,{ddr_macro_name},../src/build_configuration.vh) > $@\n")
+        # Copy joinHexFiles.py from LIB
+        build_srcs.copy_files( "submodules/LIB", f"{python_module.build_dir}/scripts", [ "joinHexFiles.py" ], '*.py' )
