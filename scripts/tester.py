@@ -197,8 +197,7 @@ def setup_tester( python_module ):
     # Call setup function for the tester
     setup(python_module, peripheral_ios=False, internal_wires=peripheral_wires)
 
-    # Add hardware DDR macros with same value as the sut
-    # FIXME: This requires the user to pass 'uut_name' variable just for this purpose. Maybe we should make the DDR_* macros global instead (without sut name as prefix).
+    # Add hardware build macros with same value as the ones for the UUT
     if 'uut_name' in module_parameters.keys():
         with open(f"{python_module.build_dir}/hardware/src/{python_module.name}_conf.vh", 'r+') as file:
             contents = file.readlines()
@@ -209,8 +208,8 @@ def setup_tester( python_module ):
             file.seek(0)
             file.writelines(contents)
 
-    #Check if setup with INIT_MEM and RUN_EXTMEM (check if macro exists)
-    extmem_macro = next((i for i in confs if i['name']=='RUN_EXTMEM'), False)
+    #Check if setup with INIT_MEM and USE_EXTMEM (check if macro exists)
+    extmem_macro = next((i for i in confs if i['name']=='USE_EXTMEM'), False)
     initmem_macro = next((i for i in confs if i['name']=='INIT_MEM'), False)
     if extmem_macro and extmem_macro['val'] != 'NA' and \
        initmem_macro and initmem_macro['val'] != 'NA':
