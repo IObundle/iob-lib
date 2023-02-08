@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "iob_lib.vh"
 
 // test defines
 `define W_DATA_W 32
