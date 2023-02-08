@@ -34,7 +34,7 @@ endif
 INCLUDE=-Ihardware/include
 
 # asymmetric memory present
-IS_ASYM:=$(shell find $(BUILD_VSRC_DIR) -name "*asym*")
+IS_ASYM ?= 0
 
 #
 # Simulate with Icarus Verilog
@@ -44,18 +44,15 @@ VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
 $(BUILD_VSRC_DIR):
 	@mkdir $@
 
-copy_srcs: 
+copy_srcs: clean 
 	$(PYTHON_EXEC) ./scripts/lib_sim_setup.py $(MODULE)
 
-sim: clean $(BUILD_VSRC_DIR) copy_srcs
+sim: $(BUILD_VSRC_DIR)
 	@echo "Simulating module $(MODULE)"
-	@echo "here3 $(shell find $(BUILD_VSRC_DIR) -name "*asym*")"
-ifeq ($(shell find $(BUILD_VSRC_DIR) -name "*asym*"),)
-	@echo "here2"
+ifeq ($(IS_ASYM),0)
 	$(VLOG) $(wildcard $(BUILD_VSRC_DIR)/*.v)
 	@./a.out $(TEST_LOG)
 else
-	@echo "here"
 	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v)
 	@./a.out $(TEST_LOG); if [ $(VCD) != 0 ]; then mv uut.vcd uut1.vcd; fi
 	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(wildcard $(BUILD_VSRC_DIR)/*.v)

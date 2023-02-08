@@ -12,16 +12,14 @@ def lib_sim_setup (module_name):
 
     hardware_srcs = []
     Vheaders = []
+    sim_srcs = []
     lib_dir="."
-    lib_module_setup(Vheaders, hardware_srcs, module_name, lib_dir=".")
-    module_dependency_setup(hardware_srcs, Vheaders, "src", [], lib_dir=".")
+    lib_module_setup(Vheaders, hardware_srcs, module_name, lib_dir=".", add_sim_srcs=True)
+    module_dependency_setup(hardware_srcs, Vheaders, "src", [], lib_dir=".", add_sim_srcs=True)
 
     #Copy Hw
     if Vheaders: create_Vheaders( "src", Vheaders )
     if hardware_srcs: copy_files( ".", "src", hardware_srcs, '*.v' )
-
-    print(f"Headers {Vheaders}")
-    print(f"Srcs {hardware_srcs}")
     
     # Copy TB
     copy_files(".", "src", [], f"{module_name}_tb.v", copy_all = True)
