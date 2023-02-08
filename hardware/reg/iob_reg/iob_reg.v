@@ -15,11 +15,11 @@ module iob_reg
     );
 
    // prevent width mismatch
-   localparam [DATA_W-1:0] RST_VAL_INT = RST_VAL;
+   localparam RST_VAL_INT = RST_VAL;
    
    always @(posedge clk_i, posedge arst_i) begin
       if (arst_i) begin
-         data_o <= RST_VAL_INT;
+         data_o <= RST_VAL_INT[DATA_W-1:0];
       end else if (cke_i) begin
          data_o <= data_i;
       end
