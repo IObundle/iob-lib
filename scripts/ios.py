@@ -5,7 +5,7 @@
 
 from latex import write_table
 import if_gen
-from submodule_utils import get_submodule_directories, get_module_io, import_setup, get_pio_signals, if_gen_interface
+from submodule_utils import get_submodule_directories, get_module_io, import_setup, get_pio_signals, if_gen_interface, find_suffix_from_list
 import importlib.util
 import os
 import iob_colors
@@ -27,20 +27,28 @@ def reverse_port(port_type):
     else: return "I"
 
 #Given a known interface name, return its mapping
-def get_interface_mapping(if_name):
-    for interface in known_map_interfaces.items():
-        if if_name == interface[0]:
-            return interface[1]
-    #Interface is was not in 'known_map_interfaces'. Check if_gen.py
-    if if_name in if_gen.interfaces:
+# full_if_name: String with the name of an interface. It may contain a prefix.
+def get_interface_mapping(full_if_name):
+    #Note: the if_name may have a prefix, therefore we separate it before calling if_gen.
+    prefix, if_name = find_suffix_from_list(full_if_name, known_map_interfaces.keys()) 
+    if if_name:
+        return_dict = {}
+        # Add interface prefix to every signal
+        for signal_map in known_map_interfaces[if_name].items():
+            return_dict[prefix+signal_map[0]]=prefix+signal_map[1]
+        return return_dict
+    #Interface is was not in 'known_map_interfaces'. 
+    #Check `if_gen.py` has knows this interfaces. Note: the if_name may have a prefix, therefore we separate it before calling if_gen.
+    prefix, if_name = find_suffix_from_list(full_if_name, if_gen.interfaces) 
+    if if_name:
         if_mapping = {}
-        port_list = if_gen_interface(if_name)
+        port_list = if_gen_interface(if_name, prefix)
         for port in port_list:
             if_mapping[port['name']]=port['name'][:-1]+reverse_port(port['type']).lower()
         return if_mapping
 
     #Did not find known interface
-    assert False, f"{iob_colors.FAIL} Unknown mapping for ports of '{if_name}' interface.{iob_colors.ENDC}"
+    assert False, f"{iob_colors.FAIL} Unknown mapping for ports of '{full_if_name}' interface.{iob_colors.ENDC}"
 
 # Return full port type string based on given types: "I", "O" and "IO"
 # Maps "I", "O" and "IO" to "input", "output" and "inout", respectively.
@@ -75,54 +83,31 @@ def delete_last_comma(file_obj):
 # ios: list of tables, each of them containing a list of ports
 # Each table is a dictionary with fomat: {'name': '<table name>', 'descr':'<table description>', 'ports': [<list of ports>]}
 # Each port is a dictionary with fomat: {'name':"<port name>", 'type':"<port type>", 'n_bits':'<port width>', 'descr':"<port description>"},
-# prefix: If should add ios table name as a prefix to every signal in that table
-def generate_ios_header(ios, top_module, out_dir, prefix=False):
+def generate_ios_header(ios, top_module, out_dir):
     f_io = open(f"{out_dir}/{top_module}_io.vh", "w+")
 
     for table in ios:
-        # Check if this table is a standard interface (from if_gen.py)
+        # If table has 'ios_table_prefix' attribute set to True, append table name as a prefix to every port
+        if 'ios_table_prefix' in table.keys(): ios_table_prefix = table['ios_table_prefix']
+        else: ios_table_prefix = False
+
         if 'if_defined' in table.keys(): f_io.write(f"`ifdef {table['if_defined']}\n")
-        if table['name'] in if_gen.interfaces:
-            # Interface is standard, generate ports
-            if_gen.create_signal_table(table['name'])
-            if_gen.write_vh_contents(table['name'], '', table['name']+'_' if prefix else '', f_io)
+        # Check if this table is a standard interface (from if_gen.py)
+        # Note: the table['name'] may have a prefix, therefore we separate it before calling if_gen.
+        if_prefix, if_name = find_suffix_from_list(table['name'], if_gen.interfaces) 
+        if if_name:
+            if_gen.create_signal_table(if_name)
+            if_gen.write_vh_contents(if_name, f"{if_name+'_' if ios_table_prefix else ''}{if_prefix}", '', f_io)
         else:
             # Interface is not standard, read ports
             for port in table['ports']:
-                f_io.write(f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if prefix else ''}{port['name']}, //{port['descr']}\n")
+                f_io.write(f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if ios_table_prefix else ''}{port['name']}, //{port['descr']}\n")
         if 'if_defined' in table.keys(): f_io.write("`endif\n")
 
     # Find and remove last comma
     delete_last_comma(f_io)
 
     f_io.close()
-
-# Generate list of dictionaries with interfaces for each peripheral instance
-# Each dictionary is follows the format of a dictionary table in the
-# 'ios' list of the <corename>_setup.py
-# Example dictionary of a peripheral instance with one port:
-#    {'name': 'instance_name', 'descr':'instance description', 'ports': [
-#        {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
-#    ]}
-def get_peripheral_ios(peripherals_list, submodules):
-    port_list = {}
-    # Get port list for each type of peripheral used
-    for instance in peripherals_list:
-        # Make sure we have a hw_module for this peripheral type
-        assert instance['type'] in submodules["hw_setup"]["modules"], f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
-        # Only insert ports of this peripheral type if we have not done so before
-        if instance['type'] not in port_list:
-            # Import <corename>_setup.py module
-            module = import_setup(submodules['dirs'][instance['type']])
-            # Extract only PIO signals from the peripheral (no reserved/known signals)
-            port_list[instance['type']]=get_pio_signals(get_module_io(module.ios))
-    
-    ios_list = []
-    # Append ports of each instance
-    for instance in peripherals_list:
-        ios_list.append({'name':instance['name'], 'descr':f"{instance['name']} interface signals", 'ports': port_list[instance['type']]})
-    return ios_list
-
 
 # Generate if.tex file with list TeX tables of IOs
 def generate_if_tex(ios, out_dir):
@@ -191,7 +176,6 @@ def get_verilog_mapping(map_obj):
         if not map_wire_bit: break 
         wire, bit = map_wire_bit
         verilog_concat_string = f"{wire}[{bit}],{verilog_concat_string}"
-    #TODO: If mapping is a list of bits...
 
     verilog_concat_string = "{"+verilog_concat_string
     verilog_concat_string=verilog_concat_string[:-1]+"}" #Replace last comma by a '}'
