@@ -21,13 +21,13 @@ EMB_DIR = ../../software/embedded
 PYTHON_DIR = ../../scripts
 FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
 
-#include local fpga segment
+#include local fpga build segment
 ifneq ($(wildcard fpga_build.mk),)
 include fpga_build.mk
 endif
 
 include $(FPGA_TOOL)/$(BOARD)/board.mk
-include $(FPGA_TOOL)/$(FPGA_TOOL).mk
+include $(FPGA_TOOL)/build.mk
 
 #include the module's headers and sources
 VHDR=$(wildcard ../src/*.vh)
