@@ -12,6 +12,14 @@ for i in $TBS; do TB_DIRS+=" `dirname $i`" ; done
 for i in $TB_DIRS; do MODULES+=" `basename $i`" ; done
 
 #run tests
-for i in $MODULES; do make sim MODULE=$i VCD=0 TEST_LOG="| tee -a test.log"; done
+for i in $MODULES; do
+   make clean copy_srcs MODULE=$i
+   if [ -z `ls src | grep -i asym` ]; then
+      IS_ASYM=0
+   else
+      IS_ASYM=1
+   fi
+   make sim MODULE=$i IS_ASYM=$IS_ASYM VCD=0 TEST_LOG="| tee -a test.log"; 
+done
 
 if [ `grep -c "ERROR" test.log` != 0 ]; then exit 1; fi

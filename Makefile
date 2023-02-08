@@ -10,22 +10,17 @@ export
 LIB_DIR:=.
 BUILD_VSRC_DIR:=./src
 BUILD_SIM_DIR:=.
+	
+PYTHON_EXEC:=/usr/bin/env python3 -B
 
 all: sim
 
 # Default module
 MODULE ?= iob_ram_2p
 MODULE_DIR ?= $(shell find hardware -name $(MODULE))
-ifneq ($(MODULE_DIR),)
-include $(MODULE_DIR)/hw_setup.mk
-else
+ifeq ($(MODULE_DIR),)
 $(info No such module $(MODULE))
 endif
-
-SRC:=$(patsubst $(BUILD_SIM_DIR)/src/%, $(BUILD_VSRC_DIR)/%, $(SRC))
-
-# Testbench
-TB=$(wildcard $(MODULE_DIR)/*_tb.v)
 
 # Defines
 DEFINE=-DADDR_W=10 -DDATA_W=32
@@ -39,9 +34,7 @@ endif
 INCLUDE=-Ihardware/include
 
 # asymmetric memory present
-IS_ASYM=$(shell echo $(SRC) | grep asym)
-
-AXI_GEN:=./scripts/if_gen.py
+IS_ASYM ?= 0
 
 #
 # Simulate with Icarus Verilog
@@ -51,17 +44,20 @@ VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
 $(BUILD_VSRC_DIR):
 	@mkdir $@
 
-sim: $(BUILD_VSRC_DIR) $(SRC) $(TB)
+copy_srcs: clean 
+	$(PYTHON_EXEC) ./scripts/lib_sim_setup.py $(MODULE)
+
+sim: $(BUILD_VSRC_DIR)
 	@echo "Simulating module $(MODULE)"
-ifeq ($(IS_ASYM),)
-	$(VLOG) $(SRC) $(TB)
+ifeq ($(IS_ASYM),0)
+	$(VLOG) $(wildcard $(BUILD_VSRC_DIR)/*.v)
 	@./a.out $(TEST_LOG)
 else
-	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(SRC) $(TB)
+	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v)
 	@./a.out $(TEST_LOG); if [ $(VCD) != 0 ]; then mv uut.vcd uut1.vcd; fi
-	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(SRC) $(TB)
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(wildcard $(BUILD_VSRC_DIR)/*.v)
 	@./a.out $(TEST_LOG); if [ $(VCD) != 0 ]; then mv uut.vcd uut2.vcd; fi
-	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(SRC) $(TB)
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v)
 	@./a.out $(TEST_LOG); if [ $(VCD) != 0 ]; then mv uut.vcd uut3.vcd; fi
 endif
 ifeq ($(VCD),1)

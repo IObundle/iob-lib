@@ -1,3 +1,2 @@
-
 v_headers     = [  ]
-hw_modules    = [ 'iob_reset_sync.v', 'iob_reg.v' ]
+hw_modules    = [ 'iob_sipo_reg.v', 'iob_reg' ]
