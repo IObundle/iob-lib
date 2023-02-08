@@ -1,21 +1,33 @@
-module iob_prio_enc
-  #(
-    parameter N = 0;
-    )
-  (
-   input [N-1:0] data_i;
-   output [$clog2(N)] sel_o;
-   );
+`timescale 1ns / 1ps
 
-   genvar             i, j;
+module iob_prio_enc
+   #(
+      parameter WIDTH = 0,
+      // Priority: "LOWEST", "HIGHEST"
+      parameter PRIO = "LOWEST" //"LOWEST" -> smaller index
+   )
+   (
+   `IOB_INPUT(unencoded_i, WIDTH),
+   `IOB_OUTPUT_VAR(encoded_o, ($clog2(WIDTH)+1))
+   );
+      
+   integer i;
    generate
-      j = 1;
-      for (i=0; i<N; i=i+1)
-        if(j)
-          if(data_i[i]) begin
-             assign sel_o = i;
-             j=0;
-          end
+      if (PRIO == "LOWEST") begin
+         `IOB_COMB begin
+            encoded_o = {($clog2(WIDTH)+1){1'd0}};  //In case input is 0
+            for (i = WIDTH-1; i !=-1 ; i = i-1)
+               if (unencoded_i[i])
+                  encoded_o = i;
+         end
+      end else begin   //PRIO == "HIGHEST"
+         `IOB_COMB begin
+            encoded_o = WIDTH; //In case input is 0
+            for (i = 0; i !=WIDTH ; i = i+1)
+               if (unencoded_i[i])
+                  encoded_o = i;
+         end
+      end
    endgenerate
-   
+
 endmodule

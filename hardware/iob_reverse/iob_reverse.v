@@ -12,7 +12,7 @@ module iob_reverse
    genvar               i;
    generate
       for (i=0; i < DATA_W; i=i+1) begin : reverse
-         assign data_o[i] = data_i[DATA_W-1-i];
+         assign data_o[i] = data_i[(DATA_W-1)-i];
       end
    endgenerate
 
