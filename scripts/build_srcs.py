@@ -69,8 +69,6 @@ def hw_setup(python_module):
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, core_previous_version, build_dir)
 
-    #Add lambda functions to the hw_srcs. These functions call setup modules for hardware setup (hw_setup.py)
-    add_setup_lambdas(python_module,setup_module=python_module)
     #Setup any hw submodules by calling the 'main()' function from their *_setup.py module
     module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs, lib_dir=LIB_DIR)
 
@@ -108,7 +106,7 @@ def sim_setup(python_module):
         shutil.copytree(f"{setup_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
     #Add lambda functions to the sim_srcs. These functions call setup modules for simulation setup (sim_setup.py)
-    add_setup_lambdas(python_module,setup_module=python_module)
+    add_setup_lambdas(python_module,'sim_setup',setup_module=python_module)
     #Setup any sim submodules by calling the 'sim_setup()' function from their *_setup.py module
     module_dependency_setup(sim_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sim_setup", lib_dir=LIB_DIR) 
 
@@ -145,7 +143,7 @@ def fpga_setup(python_module):
         shutil.copytree(f"{setup_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
     #Add lambda functions to the fpga_srcs. These functions call setup modules for fpga setup (fpga_setup.py)
-    add_setup_lambdas(python_module,setup_module=python_module)
+    add_setup_lambdas(python_module,'fpga_setup',setup_module=python_module)
     #Setup any fpga submodules by calling the 'fpga_setup()' function from their *_setup.py module
     module_dependency_setup(fpga_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.fpga_setup", lib_dir=LIB_DIR) 
 
@@ -193,17 +191,17 @@ def syn_setup(python_module):
 # This will allow these modules to be executed during setup
 #    python_module: python module of *_setup.py of the core/system, should contain setup_dir
 #    **kwargs: set of objects that will be accessible from inside the modules when they are executed
-def add_setup_lambdas(python_module, **kwargs):
+def add_setup_lambdas(python_module, module_type, **kwargs):
     # Check if any *_setup.py modules exist. If so, get a lambda expression to execute them and add them to the 'modules' list
-    for module_type, module_path in [('sim_setup','hardware/simulation/sim_setup.py'), ('fpga_setup','hardware/fpga/fpga_setup.py'), ('sw_setup','software/sw_setup.py')]:
-        full_module_path = os.path.join(python_module.setup_dir,module_path)
-        if os.path.isfile(full_module_path): 
-            # Make sure dictionary exists
-            if module_type not in python_module.submodules: 
-                python_module.submodules[module_type] = {'headers':[], 'modules':[]}
-            # Append executable module to 'modules' list of the submodules dictionary
-            # The lambda expression will be executed during setup
-            python_module.submodules[module_type]['modules'].append(get_module_lambda(full_module_path, **kwargs))
+    module_path = {'sim_setup':'hardware/simulation/sim_setup.py', 'fpga_setup':'hardware/fpga/fpga_setup.py', 'sw_setup':'software/sw_setup.py'}[module_type]
+    full_module_path = os.path.join(python_module.setup_dir,module_path)
+    if os.path.isfile(full_module_path): 
+        # Make sure dictionary exists
+        if module_type not in python_module.submodules: 
+            python_module.submodules[module_type] = {'headers':[], 'modules':[]}
+        # Append executable module to 'modules' list of the submodules dictionary
+        # The lambda expression will be executed during setup
+        python_module.submodules[module_type]['modules'].append(get_module_lambda(full_module_path, **kwargs))
 
 #Get an executable lambda expression to run a given python module
 #    module_path: python module path
@@ -247,7 +245,7 @@ def sw_setup(python_module):
         shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
     #Add lambda functions to the sw_srcs. These functions call setup modules for software setup (sw_setup.py)
-    add_setup_lambdas(python_module,setup_module=python_module)
+    add_setup_lambdas(python_module,'sw_setup',setup_module=python_module)
     #Setup any sw submodules by calling the 'sw_setup()' function from their *_setup.py module
     module_dependency_setup(sw_srcs, Cheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sw_setup", lib_dir=LIB_DIR) 
 
