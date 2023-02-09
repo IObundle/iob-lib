@@ -44,10 +44,10 @@ VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
 $(BUILD_VSRC_DIR):
 	@mkdir $@
 
-copy_srcs: clean 
+copy_srcs: $(BUILD_VSRC_DIR) 
 	$(PYTHON_EXEC) ./scripts/lib_sim_setup.py $(MODULE)
 
-sim: $(BUILD_VSRC_DIR)
+sim: copy_srcs
 	@echo "Simulating module $(MODULE)"
 ifeq ($(IS_ASYM),0)
 	$(VLOG) $(wildcard $(BUILD_VSRC_DIR)/*.v)
