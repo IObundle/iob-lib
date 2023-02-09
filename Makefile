@@ -10,6 +10,14 @@ export
 LIB_DIR:=.
 BUILD_VSRC_DIR:=./hardware/src
 BUILD_SIM_DIR:=.
+REMOTE_BUILD_DIR:=$(USER)/iob-lib
+REMOTE_SRC_DIR:=$(REMOTE_BUILD_DIR)/hardware/src
+
+LINT_SERVER=$(SYNOPSYS_SERVER)
+LINT_USER=$(SYNOPSYS_USER)
+LINT_SSH_FLAGS=$(SYNOPSYS_SSH_FLAGS)
+LINT_SCP_FLAGS=$(SYNOPSYS_SCP_FLAGS)
+LINT_SYNC_FLAGS=$(SYNOPSYS_SYNC_FLAGS)
 	
 PYTHON_EXEC:=/usr/bin/env python3 -B
 
@@ -46,6 +54,22 @@ $(BUILD_VSRC_DIR):
 
 copy_srcs: $(BUILD_VSRC_DIR) 
 	$(PYTHON_EXEC) ./scripts/lib_sim_setup.py $(MODULE) $(BUILD_VSRC_DIR)
+	
+lint-run: clean copy_srcs
+	$(PYTHON_EXEC) ./scripts/lib_lint_setup.py $(MODULE)
+	touch $(BUILD_VSRC_DIR)/$(MODULE).sdc
+	rm -rf $(BUILD_VSRC_DIR)/*_tb.v
+	cd $(BUILD_VSRC_DIR) && ls *.v >> $(MODULE)_files.list
+	@echo "Linting module $(MODULE)"
+ifeq ($(LINT_SERVER),)
+	cd $(BUILD_VSRC_DIR) && (echo exit | spyglass -shell -project spyglass.prj -goals "lint/lint_rtl")
+else
+	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
+	rsync -avz --delete --exclude .git $(LINT_SYNC_FLAGS) . $(LINT_USER)@$(LINT_SERVER):$(REMOTE_BUILD_DIR)
+	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) 'make -C $(REMOTE_BUILD_DIR) lint-run'
+	mkdir -p spyglass_reports
+	scp $(LINT_SCP_FLAGS) $(LINT_USER)@$(LINT_SERVER):$(REMOTE_SRC_DIR)/spyglass/consolidated_reports/$(MODULE)_lint_lint_rtl/*.rpt spyglass_reports/.
+endif
 
 sim: copy_srcs
 	@echo "Simulating module $(MODULE)"
@@ -66,6 +90,7 @@ endif
 
 clean:
 	@rm -rf $(BUILD_VSRC_DIR)
+	@rm -rf spyglass_reports
 	@rm -f *.v *.vh *.c *.h *.tex
 	@rm -f *~ \#*\# a.out *.vcd *.pyc *.log
 
