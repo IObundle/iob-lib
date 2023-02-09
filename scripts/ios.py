@@ -91,7 +91,7 @@ def generate_ios_header(ios, top_module, out_dir):
         if 'ios_table_prefix' in table.keys(): ios_table_prefix = table['ios_table_prefix']
         else: ios_table_prefix = False
 
-        if 'if_defined' in table.keys(): f_io.write(f"`ifdef {table['if_defined']}\n")
+        if 'if_defined' in table.keys(): f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
         # Check if this table is a standard interface (from if_gen.py)
         # Note: the table['name'] may have a prefix, therefore we separate it before calling if_gen.
         if_prefix, if_name = find_suffix_from_list(table['name'], if_gen.interfaces) 

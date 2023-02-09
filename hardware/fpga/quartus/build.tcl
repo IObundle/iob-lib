@@ -5,6 +5,7 @@ set VSRC [lindex $argv 2]
 set QIP [lindex $argv 3]
 set IS_FPGA [lindex $argv 4]
 set USE_EXTMEM [lindex $argv 5]
+set SEED [lindex $argv 6]
 
 project_new $NAME -overwrite
 
@@ -33,7 +34,7 @@ set_global_assignment -name SEARCH_PATH ../src
 
 #quartus IPs
 foreach file [split $QIP \ ] {
-    if {$file != "None"} {
+    if { { file extension $QIP } == ".qip"} {
         set_global_assignment -name QIP_FILE $file
     }
 }
@@ -77,7 +78,7 @@ set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 # can use these assignments during compilation
 
 # random seed for fitting
-set_global_assignment -name SEED 23
+set_global_assignment -name SEED $SEED
 
 export_assignments
 
