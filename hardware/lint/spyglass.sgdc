@@ -1,0 +1,2 @@
+current_design IOB_CORE_NAME
+sdc_data -file IOB_CORE_NAME.sdc 
