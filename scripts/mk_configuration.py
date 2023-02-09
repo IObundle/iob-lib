@@ -40,10 +40,13 @@ def conf_vh(macros, top_module, out_dir):
     file2create.write(f"`define VH_{fname}_VH\n\n")
     for macro in macros:
         #Only insert macro if its is not a bool define, and if so only insert it if it is true
-        if macro['val'] != 'NA':
+        if type(macro['val'])!=bool:
             m_name = macro['name'].upper()
             m_default_val = macro['val']
             file2create.write(f"`define {core_prefix}{m_name} {m_default_val}\n")
+        elif macro['val']:
+            m_name = macro['name'].upper()
+            file2create.write(f"`define {core_prefix}{m_name} 1\n")
     file2create.write(f"\n`endif // VH_{fname}_VH\n")
 
 def conf_h(macros, top_module, out_dir):
@@ -56,11 +59,14 @@ def conf_h(macros, top_module, out_dir):
     file2create.write(f"#define H_{fname}_H\n\n")
     for macro in macros:
         #Only insert macro if its is not a bool define, and if so only insert it if it is true
-        if macro['val'] != 'NA':
+        if type(macro['val'])!=bool:
             m_name = macro['name'].upper()
             # Replace any Verilog specific syntax by equivalent C syntax
             m_default_val = re.sub("\d+'h","0x",macro['val'])
             file2create.write(f"#define {m_name} {str(m_default_val).replace('`','')}\n") #Remove Verilog macros ('`')
+        elif macro['val']:
+            m_name = macro['name'].upper()
+            file2create.write(f"#define {m_name} 1\n")
     file2create.write(f"\n#endif // H_{fname}_H\n")
 
     file2create.close()
@@ -95,7 +101,8 @@ def append_flows_config_build_mk(flows_list, flows_filter, build_dir):
 def generate_confs_tex(confs, out_dir):
     tex_table = []
     for conf in confs:
-        tex_table.append([conf['name'].replace('_','\_'), conf['type'], conf['min'], conf['val'].replace('_','\_'), conf['max'], conf['descr'].replace('_','\_')])
+        conf_val = conf['val'].replace('_','\_') if type(conf['val'])!=bool else '1'
+        tex_table.append([conf['name'].replace('_','\_'), conf['type'], conf['min'], conf_val, conf['max'], conf['descr'].replace('_','\_')])
 
     write_table(f"{out_dir}/confs",tex_table)
 
@@ -156,11 +163,11 @@ def update_define(confs, define_name, should_set):
         if macro['name']==define_name:
             # Found macro. Unset it if not 'should_set'
             if should_set: 
-                macro['val'] = '1'
+                macro['val'] = True
             else:
-                macro['val'] = 'NA'
+                macro['val'] = False 
             break
     else:
         # Did not find define. Set it if should_set.
         if should_set: 
-            confs.append({'name':define_name,'type':'M', 'val':'1', 'min':'0', 'max':'1', 'descr':"Define"})
+            confs.append({'name':define_name,'type':'M', 'val':True, 'min':'NA', 'max':'NA', 'descr':"Define"})
