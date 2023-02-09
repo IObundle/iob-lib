@@ -8,7 +8,7 @@ export
 
 #build here
 LIB_DIR:=.
-BUILD_VSRC_DIR:=./src
+BUILD_VSRC_DIR:=./hardware/src
 BUILD_SIM_DIR:=.
 	
 PYTHON_EXEC:=/usr/bin/env python3 -B
@@ -45,7 +45,7 @@ $(BUILD_VSRC_DIR):
 	@mkdir $@
 
 copy_srcs: $(BUILD_VSRC_DIR) 
-	$(PYTHON_EXEC) ./scripts/lib_sim_setup.py $(MODULE)
+	$(PYTHON_EXEC) ./scripts/lib_sim_setup.py $(MODULE) $(BUILD_VSRC_DIR)
 
 sim: copy_srcs
 	@echo "Simulating module $(MODULE)"
