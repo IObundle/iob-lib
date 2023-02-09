@@ -10,6 +10,6 @@ $(QIP):
 
 else
 
-QIP:=None
+QIP:=$(FPGA_TOOL)/$(BOARD)/alt_ddr3.qsys
 
 endif
