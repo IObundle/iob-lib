@@ -1,0 +1,2 @@
+waive -rule {  {CheckLocalParam-ML}  }  -comment {Created by juliani on 06-Oct-2021 14:02:36} 
+waive -rule {  {PartConnPort-ML}  }  -comment {Created by juliani on 15-Oct-2021 15:12:09}

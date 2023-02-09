@@ -398,7 +398,7 @@ def copy_files(src_dir, dest_dir, sources = [], pattern = "*", copy_all = False)
             if (file in sources) or copy_all:
                 src_file = path.resolve()
                 dest_file = f"{dest_dir}/{file}"
-                if os.path.isfile(src_file) and (not(os.path.isfile(dest_file)) or (os.stat(src_file).st_mtime > os.stat(dest_file).st_mtime)):
+                if os.path.isfile(src_file) and (not(os.path.isfile(dest_file)) or (os.stat(src_file).st_mtime < os.stat(dest_file).st_mtime)):
                     shutil.copy(src_file, dest_file)
                     files_copied.append(file)
                 elif not(os.path.isfile(src_file)): print(f"{iob_colors.WARNING}{src_file} is not a file.{iob_colors.ENDC}")

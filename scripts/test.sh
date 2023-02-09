@@ -14,7 +14,7 @@ for i in $TB_DIRS; do MODULES+=" `basename $i`" ; done
 #run tests
 for i in $MODULES; do
    make clean copy_srcs MODULE=$i
-   if [ -z `ls src | grep -i asym` ]; then
+   if [ -z `ls hardware/src | grep -i asym` ]; then
       IS_ASYM=0
    else
       IS_ASYM=1
