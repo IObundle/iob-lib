@@ -32,9 +32,11 @@ set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 #verilog heders search path
 set_global_assignment -name SEARCH_PATH ../src
 
+
+
 #quartus IPs
 foreach qip_file [split $QIP \ ] {
-    if { [ file extension $qip_file ] == ".qip"} {
+    if { [ file extension $qip_file ] == ".qip" } {
         set_global_assignment -name QIP_FILE $qip_file
     }
 }
