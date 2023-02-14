@@ -67,13 +67,13 @@ class mkregs:
         try:
             #Assume log2n_items is int
             log2n_items=int(log2n_items)
-            return log2n_items+log(n_bytes,2)
+            return log2n_items+ceil(log(n_bytes,2))
         except ValueError:
             #log2n_items is a string
             if n_bytes == 1 :
                 return log2n_items
             else :
-                return f"{log2n_items}+{log(n_bytes,2)}"
+                return f"{log2n_items}+{ceil(log(n_bytes,2))}"
             
 
 
