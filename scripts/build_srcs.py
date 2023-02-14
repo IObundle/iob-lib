@@ -311,10 +311,9 @@ def submodule_setup(build_dir, submodule_dir, module_parameters=None, function_2
 def iob_submodule_setup(build_dir, submodule_dir, module_parameters=None, function_2_call='main'):
     #print(f"################# {function_2_call}") #DEBUG
     #Import <corename>_setup.py
-    module = import_setup(submodule_dir)
+    module = import_setup(submodule_dir, module_parameters=module_parameters)
     module.build_dir = build_dir
     module.setup_dir = submodule_dir
-    module.module_parameters = module_parameters
     # Split string to check if function is inside a module
     function_2_call=function_2_call.split('.')
     # Check if function is inside other module(s)

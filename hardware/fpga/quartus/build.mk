@@ -19,5 +19,6 @@ $(FPGA_OBJ): $(VHDR) $(VSRC) $(QIP) $(wildcard *.sdc)
 
 quartus-clean:
 	@rm -rf incremental_db db output_files
+	@find ~ -maxdepth 1 -type d -empty -iname "sopc_altera_pll*" -delete
 
 .PHONY: quartus-clean
