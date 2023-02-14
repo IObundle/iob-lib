@@ -38,5 +38,5 @@ for i in $LINT_MODULES; do
    make lint-run MODULE=$i
    tail +33 spyglass_reports/moresimple.rpt > spyglass.rpt
    expected_file=$(find hardware -name $i*.expected) 
-   diff $expected_file spyglass.rpt
+   diff -q $expected_file spyglass.rpt
 done
