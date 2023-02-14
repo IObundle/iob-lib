@@ -29,11 +29,15 @@ class mkregs:
 
     @staticmethod
     def verilog_max(a,b):
-        if(a==b): return f"{a}"
-        elif(type(a)==int and type(b)==int): 
-            if (a>b): return f"{a}"
-            else: return f"{b}"
-        else: return f"((({a}) > ({b})) ? ({a}) : ({b}))"
+        if(a==b): return a
+        try:
+            #Assume a and b are int
+            a=int(a)
+            b=int(b)
+            return a if a>b else b
+        except ValueError:
+            #a or b is a string
+            return f"((({a}) > ({b})) ? ({a}) : ({b}))"
 
     def get_reg_table(self, regs, no_overlap):
         # Create reg table
@@ -59,16 +63,17 @@ class mkregs:
     # Generate symbolic expression string to caluclate addr_w in verilog
     @staticmethod
     def calc_verilog_addr_w(log2n_items, n_bytes):
-        if log2n_items == 0 :
+        n_bytes = int(n_bytes)
+        try:
+            #Assume log2n_items is int
+            log2n_items=int(log2n_items)
+            return log2n_items+log(n_bytes,2)
+        except ValueError:
+            #log2n_items is a string
             if n_bytes == 1 :
-                return f"0"
+                return log2n_items
             else :
-                return f"$clog2({int(n_bytes)})"
-        else :
-            if n_bytes == 1 :
-                return f"{log2n_items}"
-            else :
-                return f"{log2n_items}+$clog2({int(n_bytes)})"
+                return f"{log2n_items}+{log(n_bytes,2)}"
             
 
 
