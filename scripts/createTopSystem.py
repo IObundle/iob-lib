@@ -43,6 +43,12 @@ def create_top_system(setup_dir, submodule_dirs, top, peripherals_list, ios, con
             template_contents.insert(start_index, '               .{signal}({signal}),\n'.format(signal=table['name']+"_"+signal['name']))
         if pio_signals and 'if_defined' in table.keys(): template_contents.insert(start_index, f"`ifdef {table['if_defined']}\n")
 
+    # Delete PRAGMA comments
+    start_index = find_idx(template_contents, "IOB_PRAGMA_PWIRES")-1
+    template_contents.pop(start_index)
+    start_index = find_idx(template_contents, "IOB_PRAGMA_PPORTMAPS")-1
+    template_contents.pop(start_index)
+
     # Write output file
     output_file = open(out_file, "w")
     output_file.writelines(template_contents)
