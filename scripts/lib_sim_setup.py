@@ -1,15 +1,7 @@
 from build_srcs import lib_module_setup, create_Vheaders, copy_files, module_dependency_setup
-import iob_colors
 import sys
-from pathlib import Path
 
 def lib_sim_setup (module_name, dest_srcs_dir):
-    
-    for mod_path in Path("hardware").rglob(f"{module_name}_tb.v"):
-        tb_path = mod_path
-        break
-    else: sys.exit(f"{iob_colors.FAIL} {module_name} is not a LIB module.{iob_colors.ENDC}")
-
     hardware_srcs = []
     Vheaders = []
     sim_srcs = []
