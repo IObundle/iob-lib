@@ -3,6 +3,7 @@ pkgs.mkShell {
   name = "iob-soc-shell";
   buildInputs = with pkgs; [     
     bash
+    gnumake
     verilog
     verilator
     gtkwave

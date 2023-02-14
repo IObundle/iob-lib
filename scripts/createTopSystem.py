@@ -28,7 +28,7 @@ def create_top_system(setup_dir, submodule_dirs, top, peripherals_list, ios, con
         pio_signals = get_pio_signals(table['ports'])
 
         # Insert system IOs for peripheral
-        start_index = find_idx(template_contents, "PWIRES")
+        start_index = find_idx(template_contents, "IOB_PRAGMA_PWIRES")
         if pio_signals and 'if_defined' in table.keys(): template_contents.insert(start_index, "`endif\n")
         for signal in pio_signals:
             template_contents.insert(start_index, '   wire [{}-1:0] {}_{};\n'.format(add_prefix_to_parameters_in_string(signal['n_bits'],confs,"`"+top.upper()+"_"),
@@ -37,7 +37,7 @@ def create_top_system(setup_dir, submodule_dirs, top, peripherals_list, ios, con
         if pio_signals and 'if_defined' in table.keys(): template_contents.insert(start_index, f"`ifdef {table['if_defined']}\n")
 
         # Connect wires to soc port
-        start_index = find_idx(template_contents, "PORTS")
+        start_index = find_idx(template_contents, "IOB_PRAGMA_PPORTMAPS")
         if pio_signals and 'if_defined' in table.keys(): template_contents.insert(start_index, "`endif\n")
         for signal in pio_signals:
             template_contents.insert(start_index, '               .{signal}({signal}),\n'.format(signal=table['name']+"_"+signal['name']))

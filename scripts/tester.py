@@ -200,8 +200,8 @@ def setup_tester( python_module ):
     #Check if setup with INIT_MEM and USE_EXTMEM (check if macro exists)
     extmem_macro = next((i for i in confs if i['name']=='USE_EXTMEM'), False)
     initmem_macro = next((i for i in confs if i['name']=='INIT_MEM'), False)
-    if extmem_macro and extmem_macro['val'] != 'NA' and \
-       initmem_macro and initmem_macro['val'] != 'NA':
+    if extmem_macro and extmem_macro['val'] and \
+       initmem_macro and initmem_macro['val']:
         # Append init_ddr_contents.hex target to sw_build.mk
         with open(f"{python_module.build_dir}/software/sw_build.mk", 'a') as file:
             file.write("\n#Auto-generated target to create init_ddr_contents.hex\n")
