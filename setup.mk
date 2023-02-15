@@ -20,6 +20,10 @@ $(foreach entry, $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_core_submodul
 # establish build dir paths
 BUILD_DIR := $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_build_dir)
 
+BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
+
+BUILD_SIM_DIR := $(BUILD_DIR)/hardware/simulation
+
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
 

@@ -30,7 +30,7 @@ def setup( python_module, no_overlap=False, peripheral_ios=True, internal_wires=
     build_dir = python_module.build_dir
 
     #Auto-add 'VERSION' macro
-    confs.append({'name':'VERSION', 'type':'M', 'val':"16'h"+build_srcs.version_str_to_digits(python_module.version), 'min':'NA', 'max':'NA', 'descr':"Product version."})
+    confs.append({'name':'VERSION', 'type':'M', 'val':"16'h"+build_srcs.version_str_to_digits(python_module.version), 'min':'NA', 'max':'NA', 'descr':"Product version. This 16-bit macro uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234."})
 
     # Check if should create build directory for this core/system
     #TODO: We need to find another way of checking this. Currently we can not configure another build_dir in *_setup.py because it will cause this to not build the directory!
@@ -74,7 +74,7 @@ def setup( python_module, no_overlap=False, peripheral_ios=True, internal_wires=
             general_regs_table = {'name': 'general', 'descr':'General Registers.', 'regs': []}
             regs.append(general_regs_table)
         # Auto add 'VERSION' register in 'general' registers table
-        general_regs_table['regs'].append({'name':"VERSION", 'type':"R", 'n_bits':16, 'rst_val':build_srcs.version_str_to_digits(python_module.version), 'addr':-1, 'log2n_items':0, 'autologic':True, 'descr':"Product version."})
+        general_regs_table['regs'].append({'name':"VERSION", 'type':"R", 'n_bits':16, 'rst_val':build_srcs.version_str_to_digits(python_module.version), 'addr':-1, 'log2n_items':0, 'autologic':True, 'descr':"Product version.  This 16-bit register uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234."})
 
         # Create an instance of the mkregs class inside the mkregs module
         # This instance is only used locally, not affecting status of mkregs imported in other functions/modules
