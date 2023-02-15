@@ -55,6 +55,9 @@ $(BUILD_VSRC_DIR):
 copy_srcs: $(BUILD_VSRC_DIR) 
 	$(PYTHON_EXEC) ./scripts/lib_sim_setup.py $(MODULE) $(BUILD_VSRC_DIR)
 	
+lint-all:
+	./scripts/lint_all.sh
+
 lint-run: clean copy_srcs
 	$(PYTHON_EXEC) ./scripts/lib_lint_setup.py $(MODULE)
 	touch $(BUILD_VSRC_DIR)/$(MODULE).sdc
