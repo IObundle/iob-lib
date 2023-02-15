@@ -157,24 +157,25 @@ module iob_regfile_dp_tb;
 
    // Instantiate the Unit Under Test (UUT)
    iob_regfile_dp
-     #(
-       .ADDR_W(`ADDR_W),
-       .DATA_W(`DATA_W)
-       )
-   uut (
-        .clk_i    (clk),
-        .rst_i    (rst),
+   #(
+      .ADDR_W(`ADDR_W),
+      .DATA_W(`DATA_W)
+   ) uut (
+      .clk_i    (clk),
+      .arst_i   (1'd0),
+      .cke_i    (1'd1),
+      .rst_i    (rst),
 
-        .wdataA_i (wdataA),
-        .addrA_i  (addrA),
-        .weA_i    (enA),
-        .rdataA_o (rdataA),
+      .a_wdata_i (wdataA),
+      .a_addr_i  (addrA),
+      .a_wen_i   (enA),
+      .a_rdata_o (rdataA),
 
-        .wdataB_i (wdataB),
-        .addrB_i  (addrB),
-        .weB_i    (enB),
-        .rdataB_o (rdataB)
-        );
+      .b_wdata_i (wdataB),
+      .b_addr_i  (addrB),
+      .b_wen_i   (enB),
+      .b_rdata_o (rdataB)
+   );
 
    // system clock
    always #(clk_per/2) clk = ~clk;
