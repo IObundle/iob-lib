@@ -121,7 +121,7 @@ else
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make run-tests"
 endif
 ifneq ($(COV),1)
-	diff test.log src/test.expected
+	diff test.log test.expected
 else
 	@echo "INFO: simulation code coverage is reserved for internal use only."
 endif
