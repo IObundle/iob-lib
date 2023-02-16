@@ -3,7 +3,7 @@
 module iob_counter
   #(
     parameter DATA_W = 32,
-    parameter RST_VAL = 0
+    parameter RST_VAL = {DATA_W{1'b0}}
     )
    (
     input               clk_i,
