@@ -9,13 +9,13 @@
 
 module alt_iobuf
   (
-   input  i,
-   input  oe_i,
-   output o,
-   inout  io
-   );
+    input  in_i,
+    input  en_i,
+    output out_o,
+    inout  in_out_io
+  );
 
-   assign io = oe_i? i : 1'bz;
-   assign o = io;
+  assign in_out_io = en_i? in_i : 1'bz;
+  assign out_o = in_out_io;
 
 endmodule
