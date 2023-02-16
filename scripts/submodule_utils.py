@@ -185,7 +185,7 @@ def iob_soc_peripheral_setup(python_module, append_peripheral_ios=True):
 
     if peripherals_list:
         # Get port list, parameter list and top module name for each type of peripheral used
-        _, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, python_module.submodules['dirs'])
+        _, params_list, _ = get_peripherals_ports_params_top(peripherals_list, python_module.submodules['dirs'])
         # Insert peripheral instance parameters in system parameters
         # This causes the system to have a parameter for each parameter of each peripheral instance
         for instance in peripherals_list:

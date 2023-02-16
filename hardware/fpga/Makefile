@@ -26,6 +26,8 @@ ifneq ($(wildcard fpga_build.mk),)
 include fpga_build.mk
 endif
 
+NETLIST_NAME ?=$(NAME)_fpga_wrapper
+
 include $(FPGA_TOOL)/$(BOARD)/board.mk
 include $(FPGA_TOOL)/build.mk
 
@@ -37,6 +39,7 @@ ifneq ($(wildcard $(FPGA_TOOL)/$(BOARD)/$(NAME)_fpga_wrapper.v),)
 VSRC+=$(FPGA_TOOL)/$(BOARD)/$(NAME)_fpga_wrapper.v
 endif
 
+UFLAGS+=NETLIST_NAME=$(NETLIST_NAME)
 UFLAGS+=IS_FPGA=$(IS_FPGA)
 
 #build fpga image or netlist
@@ -49,6 +52,9 @@ else
 	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD) $(UFLAGS)'
 	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_OBJ) .
 	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_LOG) .
+ifneq ($(FPGA_STUB),)
+	scp $(FPGA_SCP_FLAGS) $(FPGA_USER)@$(FPGA_SERVER):$(REMOTE_FPGA_DIR)/$(FPGA_STUB) .
+endif
 endif
 
 #console start command

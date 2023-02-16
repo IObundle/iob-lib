@@ -2,12 +2,14 @@
 set NAME [lindex $argv 0]
 set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
-set IS_FPGA [lindex $argv 3]
-set CUSTOM_ARGS [lindex $argv 4]
+set VIP [lindex $argv 3]
+set IS_FPGA [lindex $argv 4]
+set CUSTOM_ARGS [lindex $argv 5]
 
 puts $NAME
 puts $BOARD
 puts $VSRC
+puts $VIP
 puts $IS_FPGA
 puts $CUSTOM_ARGS
 
@@ -17,6 +19,14 @@ foreach file [split $VSRC \ ] {
     puts $file
     if {$file != "" && $file != " " && $file != "\n"} {
         read_verilog -sv $file
+    }
+}
+
+#vivado IPs
+foreach file [split $VIP \ ] {
+    puts $file
+    if { [ file extension $file ] == ".edif" } {
+        read_edif $file
     }
 }
 
