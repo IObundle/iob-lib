@@ -55,7 +55,7 @@ module iob_fifo_sync
    iob_counter
      #(
        .DATA_W(W_ADDR_W),
-       .RST_VAL(0)
+       .RST_VAL({W_ADDR_W{1'd0}})
        )
    w_addr_cnt0
      (
@@ -76,7 +76,7 @@ module iob_fifo_sync
    iob_counter
      #(
        .DATA_W(R_ADDR_W),
-       .RST_VAL(0)
+       .RST_VAL({R_ADDR_W{1'd0}})
        )
    r_addr_cnt0
      (
@@ -99,7 +99,7 @@ module iob_fifo_sync
    iob_reg_r
      #(
        .DATA_W(ADDR_W+1),
-       .RST_VAL(0)
+       .RST_VAL({(ADDR_W+1){1'd0}})
        )
    level_reg0
      (
@@ -133,7 +133,7 @@ module iob_fifo_sync
    iob_reg
      #(
        .DATA_W(1),
-       .RST_VAL(1)
+       .RST_VAL(1'd1)
        )
    r_empty_reg0
      (
@@ -151,7 +151,7 @@ module iob_fifo_sync
    iob_reg
      #(
        .DATA_W(1),
-       .RST_VAL(0)
+       .RST_VAL(1'd0)
        )
    w_full_reg0
      (

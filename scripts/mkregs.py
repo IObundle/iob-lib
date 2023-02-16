@@ -79,7 +79,7 @@ class mkregs:
 
     def gen_wr_reg(self, row, f):
         name = row['name']
-        rst_val = row['rst_val']
+        rst_val = int(row['rst_val'])
         n_bits = row['n_bits']
         log2n_items = row['log2n_items']
         n_bytes = self.bceil(n_bits, 3)/8
@@ -99,9 +99,17 @@ class mkregs:
         f.write(f"assign {name}_addressed = (waddr >= {addr}) && (waddr < ({addr}+(2**({addr_w}))));\n")
 
         if auto: #generate register
+            #get number of bits needed to represent rst_val
+            rst_n_bits = ceil(log(rst_val+1,2))
+            #fill remaining bits with 0s
+            if isinstance(n_bits, str):
+                zeros_filling = "{(" + str(n_bits) + "-" + str(rst_n_bits) + "){1'd0}}"
+                rst_val_str = "{" + zeros_filling + "," + str(rst_n_bits) + "'d" + str(rst_val) + "}"
+            else:
+                rst_val_str =  str(n_bits) + "'d" + str(rst_val)
             f.write(f"`IOB_WIRE({name}_wen, 1)\n")
             f.write(f"assign {name}_wen = (iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
-            f.write(f"iob_reg_e #({n_bits},{rst_val}) {name}_datareg (\n")
+            f.write(f"iob_reg_e #({n_bits}, {rst_val_str}) {name}_datareg (\n")
             f.write(".clk_i (clk_i),\n")
             f.write(".arst_i (arst_i),\n")
             f.write(".cke_i (cke_i),\n")
@@ -296,7 +304,7 @@ class mkregs:
         #ready output
         f_gen.write("//ready output\n")
         f_gen.write("`IOB_VAR(ready_nxt, 1)\n")
-        f_gen.write("iob_reg #(1,1) ready_reg_inst (\n")
+        f_gen.write("iob_reg #(1, 1'd1) ready_reg_inst (\n")
         f_gen.write(".clk_i (clk_i),\n")
         f_gen.write(".arst_i (arst_i),\n")
         f_gen.write(".cke_i (cke_i),\n")
@@ -307,7 +315,7 @@ class mkregs:
         #rvalid output
         f_gen.write("//rvalid output\n")
         f_gen.write("`IOB_VAR(rvalid_nxt, 1)\n")
-        f_gen.write("iob_reg #(1,0) rvalid_reg_inst (\n")
+        f_gen.write("iob_reg #(1, 1'd0) rvalid_reg_inst (\n")
         f_gen.write(".clk_i (clk_i),\n")
         f_gen.write(".arst_i (arst_i),\n")
         f_gen.write(".cke_i (cke_i),\n")
@@ -317,7 +325,7 @@ class mkregs:
 
         #rdata output
         f_gen.write("//rdata output\n")
-        f_gen.write(f"iob_reg #({8*self.cpu_n_bytes},0) rdata_reg_inst (\n")
+        f_gen.write(f"iob_reg #({8*self.cpu_n_bytes}, {8*self.cpu_n_bytes}'d0) rdata_reg_inst (\n")
         f_gen.write(".clk_i (clk_i),\n")
         f_gen.write(".arst_i (arst_i),\n")
         f_gen.write(".cke_i (cke_i),\n")
@@ -327,7 +335,7 @@ class mkregs:
         
         f_gen.write("`IOB_WIRE(pc, 1)\n")
         f_gen.write("`IOB_VAR(pc_nxt, 1)\n")
-        f_gen.write("iob_reg #(1,0) pc_reg (\n")
+        f_gen.write("iob_reg #(1, 1'd0) pc_reg (\n")
         f_gen.write(".clk_i (clk_i),\n")
         f_gen.write(".arst_i (arst_i),\n")
         f_gen.write(".cke_i (cke_i),\n")
