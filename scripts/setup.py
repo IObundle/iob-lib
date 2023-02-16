@@ -13,6 +13,9 @@ import periphs_tmp
 import createSystem
 import createTestbench
 import createTopSystem
+import datetime
+
+
 
 def getf(obj, name, field):
     return int(obj[next(i for i in range(len(obj)) if obj[i]['name'] == name)][field])
@@ -147,6 +150,38 @@ def get_core_submodules_dirs():
     set_default_submodule_dirs(module)
     for key, value in module.submodules['dirs'].items():
         print(f"{key}_DIR={value}", end=" ")
+
+
+#Insert header in source files        
+def insert_header ():
+# invoked from the command line as:
+# python3 insert_header.py <header_file> <comment> <file1> <file2> <file3> ...
+# where 
+# <header_file> is the name of the header file to be inserted.
+# <comment> is the comment character to be used
+# <file1> <file2> <file3> ... are the files to be processed
+
+    x = datetime.datetime.now()
+
+    module = import_setup(".")
+
+    NAME, VERSION = module.name, module.version
+    
+    #header is in the file whose name is given in the second argument
+    f = open(sys.argv[2], 'r')
+    header = f.readlines()
+    print(header)
+    f.close()
+ 
+    for filename in sys.argv[4:]:
+        f = open(filename, 'r+')
+        content = f.read()
+        f.seek(0, 0)
+        for line in header:
+            f.write(sys.argv[3] + '  ' + f"{line}")
+        f.write('\n\n\n' + content)
+
+
 
 # If this script is called directly, run function given in first argument
 if __name__ == '__main__':
