@@ -53,9 +53,20 @@ def setup_tester( python_module ):
     blocks = python_module.blocks
     module_parameters = python_module.module_parameters
     confs = python_module.confs
+    submodules = python_module.submodules
+
+    #Add extra 'headers', 'modules' to corresponding lists if they exist (hw_setup, sw_setup, ...)
+    if 'extra_submodules' in module_parameters.keys(): 
+        for setup_type in ['hw_setup','sw_setup','sim_setup','fpga_setup']:
+            if setup_type in module_parameters['extra_submodules'].keys():
+                # Ensure tester has lists for that setup_type
+                if setup_type not in submodules.keys():
+                    submodules[setup_type] = {'headers':[],'modules':[]}
+                submodules[setup_type]['headers']+=module_parameters['extra_submodules'][setup_type]['headers']
+                submodules[setup_type]['modules']+=module_parameters['extra_submodules'][setup_type]['modules']
 
     #Override Tester confs if any are given in the 'confs' dictionary of the 'module_parameters' dictionary
-    if 'confs' in module_parameters: 
+    if 'confs' in module_parameters.keys(): 
         for entry in module_parameters['confs']:
             #If entry exists in confs, then update it
             for idx, entry2 in enumerate(confs):
@@ -69,7 +80,7 @@ def setup_tester( python_module ):
     #Create default submodule directories
     set_default_submodule_dirs(python_module)
     #Update submodule directories of Tester with new peripherals directories
-    python_module.submodules['dirs'].update(module_parameters['extra_peripherals_dirs'])
+    submodules['dirs'].update(module_parameters['extra_peripherals_dirs'])
 
     #Add extra peripherals to tester list (by updating original list)
     tester_peripherals_list=next(i['blocks'] for i in blocks if i['name'] == 'peripherals')
@@ -112,7 +123,7 @@ def setup_tester( python_module ):
         ios.append({'name': f"portmap_{map_idx}", 'descr':f"IOs for peripherals based on portmap index {map_idx}", 'ports': tester_mapping_ios, 'ios_table_prefix':True})
 
         # Import module of one of the given core types (to access its IO)
-        module = import_setup(python_module.submodules['dirs'][mapping_items[0]['type']])
+        module = import_setup(submodules['dirs'][mapping_items[0]['type']])
         set_default_submodule_dirs(module)
         iob_soc_peripheral_setup(module)
 
@@ -124,7 +135,7 @@ def setup_tester( python_module ):
         #If mapping_items[1] is not external interface
         if mapping_external_interface!=1: 
             # Import module of one of the given core types (to access its IO)
-            module2 = import_setup(python_module.submodules['dirs'][mapping_items[1]['type']])
+            module2 = import_setup(submodules['dirs'][mapping_items[1]['type']])
             #Get ports of configured interface
             interface_table = next((i for i in module2.ios if i['name'] == mapping[1]['if_name']), None) 
             assert interface_table, f"{iob_colors.FAIL}Interface {mapping[1]['if_name']} of {mapping[1]['corename']} not found!{iob_colors.ENDC}"

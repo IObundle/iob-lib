@@ -35,9 +35,11 @@ set_global_assignment -name SEARCH_PATH ../src
 
 
 #quartus IPs
-foreach qip_file [split $QIP \ ] {
-    if { [ file extension $qip_file ] == ".qip" } {
-        set_global_assignment -name QIP_FILE $qip_file
+foreach q_file [split $QIP \ ] {
+    if { [ file extension $q_file ] == ".qip" } {
+        set_global_assignment -name QIP_FILE $q_file
+    } elseif { [ file extension $q_file ] == ".qxp" } {
+        set_global_assignment -name QXP_FILE $q_file
     }
 }
 

@@ -36,10 +36,10 @@ module iob_merge
    always @(posedge clk_i, posedge arst_i)
      if(arst_i)
        sel_en <= 1'b1;
-     else if(s_req_o[`avalid(0)])
+     else if(s_req_o[`AVALID(0)])
        sel_en <= 1'b0;
-     else if(s_resp_i[`ready(0)])
-       sel_en <= ~s_req_o[`avalid(0)];
+     else if(s_resp_i[`READY(0)])
+       sel_en <= ~s_req_o[`AVALID(0)];
 
    
    //select master
@@ -49,14 +49,14 @@ module iob_merge
       for (k=0; k<N_MASTERS; k=k+1)
         if (~sel_en)
           sel = sel_reg;
-        else if( m_req_i[`avalid(k)] )
+        else if( m_req_i[`AVALID(k)] )
           sel = k[Nb-1:0];          
    end
    
    //
    //route master request to slave
    //  
-   assign s_req_o = m_req_i[`req(sel)];
+   assign s_req_o = m_req_i[`REQ(sel)];
 
    //
    //route response from slave to previously selected master
@@ -73,7 +73,7 @@ module iob_merge
    //route
    always @* begin
         m_resp_o = {(`RESP_W*N_MASTERS){1'b0}};
-        m_resp_o[`resp(sel_reg)] = s_resp_i;
+        m_resp_o[`RESP(sel_reg)] = s_resp_i;
    end
 
    

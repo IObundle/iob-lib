@@ -32,7 +32,7 @@ module iob_split
    //route master request to selected slave
    always @* begin
         s_req_o = {(`REQ_W*N_SLAVES){1'b0}};
-        s_req_o[`req(s_sel)] = m_req_i;
+        s_req_o[`REQ(s_sel)] = m_req_i;
    end
 
    //
@@ -49,6 +49,6 @@ module iob_split
    end
 
    //route
-    assign m_resp_o  = {s_resp_i[`rdata(s_sel_reg)], s_resp_i[`rvalid(s_sel_reg)], s_resp_i[`ready(s_sel_reg)]};
+    assign m_resp_o  = {s_resp_i[`RDATA(s_sel_reg)], s_resp_i[`RVALID(s_sel_reg)], s_resp_i[`READY(s_sel_reg)]};
 
 endmodule
