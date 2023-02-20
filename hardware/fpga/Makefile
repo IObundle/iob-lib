@@ -64,7 +64,7 @@ RELEASE_CMD=$(PYTHON_DIR)/board_client.py release $(USER)
 
 #run fpga image
 run: build
-ifeq ($(NORUN),0)
+ifneq ($(NORUN),1)
 ifeq ($(BOARD_SERVER),)
 	cp $(EMB_DIR)/$(NAME)_firmware.bin .
 	bash -c "trap '$(RELEASE_CMD)' INT TERM KILL; $(GRAB_CMD); $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log; $(RELEASE_CMD);"
