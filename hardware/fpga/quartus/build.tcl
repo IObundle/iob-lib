@@ -25,7 +25,7 @@ set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 
 #board data
 
-if {$IS_FPGA != "1"} {
+if {$IS_FPGA == "1"} {
     source quartus/$BOARD/board.tcl
 }
 

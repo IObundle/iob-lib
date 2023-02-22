@@ -31,7 +31,9 @@ foreach file [split $VIP \ ] {
 }
 
 #device data
-source vivado/$BOARD/device.tcl
+if {$IS_FPGA == "1"} {
+    source vivado/$BOARD/device.tcl
+}
 
 if { $IS_FPGA == "1" } {
     read_xdc vivado/$BOARD/$NAME.xdc
@@ -45,14 +47,15 @@ if {[file exists "vivado/custom_build.tcl"]} {
 
 if { $IS_FPGA == "1" } {
     synth_design -include_dirs ../src -part $PART -top $NAME -verbose
-    place_design
-    route_design -timing
 } else {
     synth_design -include_dirs ../src -part $PART -top $NAME -mode out_of_context -flatten_hierarchy none -verbose
 }
 
 opt_design
 
+place_design
+
+route_design -timing
 
 report_utilization
 
@@ -63,7 +66,7 @@ report_clock_interaction
 report_cdc -details
 
 file mkdir reports
-report_timing -file reports/timing.txt -from clk -to btxclk -max_paths 5
+report_timing -file reports/timing.txt -max_paths 30
 report_clocks -file reports/clocks.txt
 report_clock_interaction -file reports/clock_interaction.txt
 report_cdc -details -file reports/cdc.txt
