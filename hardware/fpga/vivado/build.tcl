@@ -23,7 +23,11 @@ foreach file [split $VSRC \ ] {
 #device data
 source vivado/$BOARD/device.tcl
 
-read_xdc vivado/$BOARD/$NAME.xdc
+if { $IS_FPGA == "1" } {
+    read_xdc vivado/$BOARD/$NAME.xdc
+} else {
+    read_xdc vivado/$NAME.xdc
+}
 
 if {[file exists "vivado/custom_build.tcl"]} {
     source "vivado/custom_build.tcl"

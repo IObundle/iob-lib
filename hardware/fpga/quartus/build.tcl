@@ -1,11 +1,11 @@
 #extract cli args
-set NAME [lindex $argv 0]
-set BOARD [lindex $argv 1]
-set VSRC [lindex $argv 2]
-set QIP [lindex $argv 3]
-set IS_FPGA [lindex $argv 4]
-set USE_EXTMEM [lindex $argv 5]
-set SEED [lindex $argv 6]
+set NAME [lindex $argv 1]
+set BOARD [lindex $argv 2]
+set VSRC [lindex $argv 3]
+set QIP [lindex $argv 4]
+set IS_FPGA [lindex $argv 5]
+set USE_EXTMEM [lindex $argv 6]
+set SEED [lindex $argv 7]
 
 project_new $NAME -overwrite
 
@@ -89,10 +89,11 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_map] $NAME"} result] {
 }
 
 if [file exists "quartus/postmap.tcl"] {
- source "quartus/postmap.tcl"
-} else {
- exit 1
+    source "quartus/postmap.tcl"
 }
+    
+
+
 if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $NAME"} result] {
     qexit -error
 }
@@ -103,7 +104,7 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $NAME"} result] {
 
 
 if {$IS_FPGA != "1"} {
-    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
+    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=output_files/$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
         qexit -error
     } 
 } else {

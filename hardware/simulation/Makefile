@@ -59,8 +59,6 @@ else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'
 endif
 
-CONSOLE_CMD=../../scripts/console.py -L
-
 run: build
 ifeq ($(SIM_SERVER),)
 ifneq ($(CONSOLE_CMD),)

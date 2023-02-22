@@ -97,7 +97,7 @@ module iob_fifo_async
    iob_sync
      #(
        .DATA_W(W_ADDR_W+1),
-       .RST_VAL(0)
+       .RST_VAL({(W_ADDR_W+1){1'd0}})
        )
    w_waddr_gray_sync0
      (
@@ -114,7 +114,7 @@ module iob_fifo_async
    iob_sync
      #(
        .DATA_W(R_ADDR_W+1),
-       .RST_VAL(0)
+       .RST_VAL({(R_ADDR_W+1){1'd0}})
        )
    r_raddr_gray_sync0
      (

@@ -4,8 +4,8 @@ module iob_counter
   #(
     parameter DATA_W = 21,
     parameter RST_VAL = {DATA_W{1'b0}}
-  )
-  (
+    )
+   (
     input               clk_i,
     input               arst_i,
     input               cke_i,
