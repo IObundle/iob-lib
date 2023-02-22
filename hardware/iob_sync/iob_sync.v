@@ -6,33 +6,29 @@ module iob_sync
     parameter RST_VAL = {DATA_W{1'b0}}
     )
   (
-   input               clk_i,
-   input               arst_i,
-   input               cke_i,
-   input [DATA_W-1:0]  signal_i,
-   output [DATA_W-1:0] signal_o
+   input                   clk_i,
+   input                   arst_i,
+   input [DATA_W-1:0]      signal_i,
+   output reg [DATA_W-1:0] signal_o
    );
 
-   wire [DATA_W-1:0]   sync;
+   reg [DATA_W-1:0]        sync;
 
-   iob_reg #(DATA_W, RST_VAL) reg0
-     (
-      .clk_i(clk_i),
-      .arst_i(arst_i),
-      .cke_i(cke_i),
-
-      .data_i(signal_i),
-      .data_o(sync)
-      );
-
-   iob_reg #(DATA_W, RST_VAL) reg1
-     (
-      .clk_i(clk_i),
-      .arst_i(arst_i),
-      .cke_i(cke_i),
-
-      .data_i(sync),
-      .data_o(signal_o)
-      );
-
+   // Synchronize the input signal
+   always @(posedge clk_i, posedge arst_i) begin
+      if (arst_i) begin
+         sync <= RST_VAL;
+      end else begin
+         sync <= signal_i;
+      end
+   end
+   
+   always @(posedge clk_i, posedge arst_i) begin
+      if (arst_i) begin
+         signal_o <= RST_VAL;
+      end else begin
+         signal_o <= sync;
+      end
+   end
+   
 endmodule

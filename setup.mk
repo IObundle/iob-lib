@@ -90,7 +90,7 @@ endif
 # generate quartus fitting results 
 $(BUILD_DIR)/doc/quartus.tex:
 	make -C $(BUILD_DIR) fpga-build BOARD=CYCLONEV-GT-DK
-	LOG=$(BUILD_FPGA_DIR)/quartus.log $(LIB_DIR)/scripts/quartus2tex.sh
+	LOG=$(BUILD_FPGA_DIR)/reports/$(wildcard *.fit.summary) $(LIB_DIR)/scripts/quartus2tex.sh
 	mv `basename $@` $(BUILD_DOC_DIR)
 
 # generate vivado fitting results 
