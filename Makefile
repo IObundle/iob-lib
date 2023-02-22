@@ -18,7 +18,7 @@ LINT_USER=$(SYNOPSYS_USER)
 LINT_SSH_FLAGS=$(SYNOPSYS_SSH_FLAGS)
 LINT_SCP_FLAGS=$(SYNOPSYS_SCP_FLAGS)
 LINT_SYNC_FLAGS=$(SYNOPSYS_SYNC_FLAGS)
-	
+
 PYTHON_EXEC:=/usr/bin/env python3 -B
 
 all: sim
@@ -54,7 +54,7 @@ $(BUILD_VSRC_DIR):
 
 copy_srcs: $(BUILD_VSRC_DIR) 
 	$(PYTHON_EXEC) ./scripts/lib_sim_setup.py $(MODULE) $(BUILD_VSRC_DIR)
-	
+
 lint-all:
 	./scripts/lint_all.sh
 
@@ -90,6 +90,9 @@ endif
 ifeq ($(VCD),1)
 	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &
 endif
+
+test:
+	./scripts/test.sh
 
 clean:
 	@rm -rf $(BUILD_VSRC_DIR)
