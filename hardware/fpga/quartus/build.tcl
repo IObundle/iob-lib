@@ -66,7 +66,7 @@ if {$IS_FPGA != "1"} {
 }
 
 set_global_assignment -name LAST_QUARTUS_VERSION "18.0.0 Standard Edition"
-set_global_assignment -name SDC_FILE quartus/$BOARD/$NAME.sdc
+set_global_assignment -name SDC_FILE quartus/$NAME.sdc
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
