@@ -24,9 +24,12 @@ if [project_exists $NAME] {
 set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 
 #board data
-source quartus/$BOARD/board.tcl
 
-set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+if {$IS_FPGA != "1"} {
+    source quartus/$BOARD/board.tcl
+}
+
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY reports
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 
 #verilog heders search path
@@ -104,7 +107,7 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $NAME"} result] {
 
 
 if {$IS_FPGA != "1"} {
-    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=output_files/$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
+    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
         qexit -error
     } 
 } else {

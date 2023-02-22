@@ -4,8 +4,6 @@ else
 FPGA_OBJ=$(FPGA_TOP).edif
 endif
 
-FPGA_LOG=vivado.log
-
 FPGA_SERVER=$(VIVADO_SERVER)
 FPGA_USER=$(VIVADO_USER)
 FPGA_ENV:= bash $(VIVADOPATH)/settings64.sh
@@ -17,7 +15,7 @@ export RDI_VERBOSE = False
 VIVADO_FLAGS= -nojournal -log vivado.log -mode batch -source vivado/build.tcl -tclargs $(FPGA_TOP) $(BOARD) "$(VSRC)" $(IS_FPGA) $(USE_EXTMEM)
 
 $(FPGA_OBJ): $(VSRC) $(VHDR) $(wildcard *.sdc)
-	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado $(VIVADO_FLAGS)
+	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado $(VIVADO_FLAGS) && mv vivado.log reports/
 
 vivado-clean:
 	@rm -rf .Xil
