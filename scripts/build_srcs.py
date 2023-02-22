@@ -73,7 +73,12 @@ def hw_setup(python_module):
     module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs, lib_dir=LIB_DIR)
 
     if Vheaders: create_Vheaders( f"{build_dir}/hardware/src", Vheaders )
-    if hardware_srcs: copy_files( LIB_DIR, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
+    if hardware_srcs: 
+        copy_files( LIB_DIR, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
+        # Remove duplicate files for fpga/src and simulation/src dir if they already exist in hardware/src
+        for file in hardware_srcs:
+            if os.path.isfile(f"{build_dir}/hardware/simulation/src/{file}"): os.remove(f"{build_dir}/hardware/simulation/src/{file}")
+            if os.path.isfile(f"{build_dir}/hardware/fpga/src/{file}"): os.remove(f"{build_dir}/hardware/fpga/src/{file}")
 
     # Copy LIB hw files
     copy_files( f"{LIB_DIR}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )

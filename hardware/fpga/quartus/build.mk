@@ -9,7 +9,7 @@ FPGA_LOG=quartus.log
 FPGA_SERVER=$(QUARTUS_SERVER)
 FPGA_USER=$(QUARTUS_USER)
 FPGA_ENV=$(QUARTUSPATH)/nios2eds/nios2_command_shell.sh
-FPGA_PROG=$(FPGA_ENV) quartus_pgm -m jtag -c 1 -o 'p;$(NAME)_fpga_wrapper.sof'
+FPGA_PROG=$(FPGA_ENV) quartus_pgm -m jtag -c 1 -o 'p;$(FPGA_TOP).sof'
 
 QUARTUS_FLAGS = -t quartus/build.tcl $(FPGA_TOP) $(BOARD) "$(VSRC)" "$(IP)" $(IS_FPGA) $(USE_EXTMEM) $(QUARTUS_SEED)
 

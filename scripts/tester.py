@@ -20,6 +20,10 @@ def add_tester_modules(python_module, tester_options):
     for i in ['hw_setup','sim_setup','fpga_setup','sw_setup']:
         python_module.submodules[i]['modules'].append(('TESTER',tester_options))
 
+    # Add tester flows to the UUT flows
+    # This is required if the UUT is creating the build directory because it handles the flows enabled in config_build.mk
+    python_module.flows += ' emb sim fpga'
+
 #Given the io dictionary of ports, the port name (and size, and optional bit list) and a wire, it will map the selected bits of the port to the given wire.
 #io_dict: dictionary where keys represent port names, values are the mappings
 #port_name: name of the port to map
@@ -41,15 +45,9 @@ def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
             assert not io_dict[port_name][bit], f"{iob_colors.FAIL}Peripheral port {port_name} bit {bit} has already been previously mapped!{iob_colors.ENDC}"
             io_dict[port_name][bit] = (wire_name, wire_bit)
 
-# Setup a Tester 
-# module_parameters is a dictionary that contains the following elements:
-#    - extra_peripherals: list of peripherals to append to the 'peripherals' table in the 'blocks' list of the Tester
-#    - extra_peripheral_dirs: dictionary with directories of each extra peripheral
-#    - peripheral_portmap: Dictionary where each key-value pair is a Mapping between two signals. Example
-#                     { {'corename':'UART1', 'if_name':'rs232', 'port':'', 'bits':[]}:{'corename':'UUT', 'if_name':'UART0', 'port':'', 'bits':[]} }
-#    - confs: Optional dictionary with extra macros/parameters or with overrides for existing ones
-def setup_tester( python_module ):
-    ios = python_module.ios
+# Update tester configuration based on module_parameters
+# python_module: Tester python module
+def update_tester_conf( python_module ):
     blocks = python_module.blocks
     module_parameters = python_module.module_parameters
     confs = python_module.confs
@@ -92,6 +90,23 @@ def setup_tester( python_module ):
                 break # Skip appending peripheral
         else: #this is a new peripheral since it did not update a default (existing) peripheral
             tester_peripherals_list.append(peripheral)
+
+
+# Setup a Tester 
+# module_parameters is a dictionary that contains the following elements:
+#    - extra_peripherals: list of peripherals to append to the 'peripherals' table in the 'blocks' list of the Tester
+#    - extra_peripheral_dirs: dictionary with directories of each extra peripheral
+#    - peripheral_portmap: Dictionary where each key-value pair is a Mapping between two signals. Example
+#                     { {'corename':'UART1', 'if_name':'rs232', 'port':'', 'bits':[]}:{'corename':'UUT', 'if_name':'UART0', 'port':'', 'bits':[]} }
+#    - confs: Optional dictionary with extra macros/parameters or with overrides for existing ones
+def setup_tester( python_module ):
+    blocks = python_module.blocks
+    ios = python_module.ios
+    module_parameters = python_module.module_parameters
+    confs = python_module.confs
+    submodules = python_module.submodules
+
+    tester_peripherals_list=next(i['blocks'] for i in blocks if i['name'] == 'peripherals')
 
     # Add 'IO" attribute to every peripheral of tester
     for peripheral in tester_peripherals_list:
