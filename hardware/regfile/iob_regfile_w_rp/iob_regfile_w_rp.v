@@ -1,14 +1,13 @@
 `timescale 1 ns / 1 ps
-`include "iob_lib.vh"
 
 module iob_regfile_w_rp
   #(
-    parameter WADDR_W = 0,
-    parameter WDATA_W = 0,
-    parameter RDATA_W = 0,
+    parameter WADDR_W = 3,
+    parameter WDATA_W = 21,
+    parameter RDATA_W = 21,
     parameter R = WDATA_W/RDATA_W
-    )
-   (
+  )
+  (
     input                              clk_i,
     input                              arst_i,
     input                              cke_i,
@@ -20,26 +19,28 @@ module iob_regfile_w_rp
 
     // Read Port
     output [((2**WADDR_W)*WDATA_W)-1 :0] rdata_o
-    );
+  );
 
-   wire [R*(2**WADDR_W)-1:0]             wstrb;
-   
-   genvar                               i, j;
-   generate
-      for (i=0; i < 2**WADDR_W; i=i+1) begin: rf
-         for (j=0; j < R; j=j+1) begin: rf_row
-            assign wstrb[i*R+j] = (waddr_i == i) & wstrb_i[j];
-            iob_reg_e #(RDATA_W, 1) iob_reg_rf_row_slice
-              (
-               .clk_i(clk_i),
-               .arst_i(arst_i),
-               .cke_i(cke_i),
-               .en_i(wstrb[i*R+j]),
-               .data_i(wdata_i[j*RDATA_W+:RDATA_W]),
-               .data_o(rdata_o[i*WDATA_W+j*RDATA_W+:RDATA_W])
-               );
-         end
+  wire [(R*(2**WADDR_W))-1:0]             wstrb;
+  
+  genvar                               col, row;
+  generate
+    for (col=0; col < (2**WADDR_W); col=col+1) begin: rf
+      for (row=0; row < R; row=row+1) begin: rf_row
+        assign wstrb[(col*R)+row] = (waddr_i == col) & wstrb_i[row];
+        iob_reg_e #(
+          RDATA_W, 
+          {{(RDATA_W-1){1'd0}}, 1'd1}
+        ) iob_reg_rf_row_slice (
+          .clk_i (clk_i),
+          .arst_i (arst_i),
+          .cke_i (cke_i),
+          .en_i (wstrb[(col*R)+row]),
+          .data_i (wdata_i[row*RDATA_W +: RDATA_W]),
+          .data_o (rdata_o[(col*WDATA_W)+(row*RDATA_W) +: RDATA_W])
+        );
       end
-   endgenerate
-   
+    end
+  endgenerate
+  
 endmodule

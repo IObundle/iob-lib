@@ -20,10 +20,10 @@ ID       Rule                        Alias                 Severity        File 
 [3]      NameLength                  (OpenMORE 5.2.1.5)    Guideline       apb2iob.v            48      2     Identifier 'pc' length is not between 3 and 40 characters
 [66]     NoConstSourceInAlways-ML                          Warning         apb2iob.v            70      10    Signal 'apb_ready_nxt' is assigned a constant value '1'd0' in implicit always block
 [2]      NoTopLogic                  (OpenMORE 5.6.8.1)    Guideline       apb2iob.v            61      5     Logic inferred at the top level
-[91]     RegInput-ML                 RegInput-ML           Warning         apb2iob.v            24      10    Input port 'iob_rdata_i[31:0]' is not registered [module:apb2iob]
-[94]     RegInput-ML                 RegInput-ML           Warning         iob_apb_s_port.vh    1       10    Input port 'apb_addr_i[31:0]' is not registered [module:apb2iob]
-[93]     RegInput-ML                 RegInput-ML           Warning         iob_apb_s_port.vh    5       10    Input port 'apb_wdata_i[31:0]' is not registered [module:apb2iob]
-[92]     RegInput-ML                 RegInput-ML           Warning         iob_apb_s_port.vh    6       10    Input port 'apb_wstrb_i[3:0]' is not registered [module:apb2iob]
+[91]     RegInput-ML                 RegInput-ML           Warning         apb2iob.v            24      10    Input port 'iob_rdata_i[20:0]' is not registered [module:apb2iob]
+[94]     RegInput-ML                 RegInput-ML           Warning         iob_apb_s_port.vh    1       10    Input port 'apb_addr_i[20:0]' is not registered [module:apb2iob]
+[93]     RegInput-ML                 RegInput-ML           Warning         iob_apb_s_port.vh    5       10    Input port 'apb_wdata_i[20:0]' is not registered [module:apb2iob]
+[92]     RegInput-ML                 RegInput-ML           Warning         iob_apb_s_port.vh    6       10    Input port 'apb_wstrb_i[1:0]' is not registered [module:apb2iob]
 [4]      STARC05-1.1.1.7             ActLowName            Recommended2    iob_apb_s_port.vh    2       5     Active low signal name 'apb_sel_i' must end with _X,_N,N
 [5]      W34                                               Info            iob_lib.vh           2       2     Macro 'LIBINC' is never used
 [6]      W34                                               Info            iob_lib.vh           8       2     Macro 'IOB_MAX' is never used
