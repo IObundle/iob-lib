@@ -1,20 +1,19 @@
 `timescale 1ns/1ps
-`include "iob_lib.vh"
 
 module iob_gray_counter 
-  #(
-    parameter   W = 1
-    )
+   #(
+      parameter   W = 1
+   )
    (
-    input          clk_i,
-    input          arst_i,
-    input          cke_i,
+      input          clk_i,
+      input          arst_i,
+      input          cke_i,
 
-    input          rst_i,
-    input          en_i,
+      input          rst_i,
+      input          en_i,
 
-    output [W-1:0] data_o
-    );
+      output [W-1:0] data_o
+   );
    
    wire [W-1:0]     bin_counter;
    wire [W-1:0]     bin_counter_nxt;
@@ -32,7 +31,7 @@ module iob_gray_counter
    endgenerate
    
    iob_reg_re #(W, {{(W-1){1'd0}}, 1'd1}) bin_counter_reg
-     (
+   (
       .clk_i(clk_i),
       .arst_i(arst_i),
       .cke_i(cke_i),
@@ -42,10 +41,10 @@ module iob_gray_counter
 
       .data_i(bin_counter_nxt),
       .data_o(bin_counter)
-      );
+   );
 
    iob_reg_re #(W, {W{1'd0}}) gray_counter_reg
-     (
+   (
       .clk_i(clk_i),
       .arst_i(arst_i),
       .cke_i(cke_i),
@@ -55,7 +54,7 @@ module iob_gray_counter
 
       .data_i(gray_counter_nxt),
       .data_o(gray_counter)
-     );
+   );
 
    assign data_o = gray_counter;
 

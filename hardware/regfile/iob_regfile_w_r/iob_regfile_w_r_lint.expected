@@ -1,0 +1,33 @@
+MORESIMPLE REPORT:
+
+
+############### BuiltIn -> RuleGroup=Design Read ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                    Alias                   Severity    File                                                                                   Line    Wt    Message
+======================================================================================
+[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob_regfile_w_r.v                                                                      3       2     Module iob_regfile_w_r is a top level design unit
+[59]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                          2       10    Domain Matrix for design "iob_regfile_w_r",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob_regfile_w_r/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob_regfile_w_r/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+############### Non-BuiltIn -> Goal=lint/lint_rtl ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                     Alias                 Severity     File                 Line    Wt    Message
+======================================================================================
+[3]      NoTopLogic               (OpenMORE 5.6.8.1)    Guideline    iob_regfile_w_r.v    33      5     Logic inferred at the top level
+[2]      NoTopLogic               (OpenMORE 5.6.8.1)    Guideline    iob_regfile_w_r.v    47      5     Logic inferred at the top level
+[5D]     RegInput-ML              RegInput-ML           Warning      iob_regfile_w_r.v    17      10    Input port 'wstrb_i[0]' is not registered [module:iob_regfile_w_r]
+[5C]     RegInput-ML              RegInput-ML           Warning      iob_regfile_w_r.v    22      10    Input port 'raddr_i[2:0]' is not registered [module:iob_regfile_w_r]
+[5B]     RegOutputs               (OpenMORE 5.6.1.1)    Guideline    iob_regfile_w_r.v    49      5     Port 'rdata_o[20:0]' is not driven by a register
+[10]     SignedUnsignedExpr-ML                          Warning      iob_regfile_w_r.v    33      5     Unsigned expression 'waddr_i' used with signed expression 'col' in comparison
+[51]     UnloadedOutTerm-ML                             Warning      iob_regfile_w_r.v    41      10    Detected unloaded(unconnected) output terminal iob_regfile_w_r.\rf[7].rf_row[0].iob_reg_rf_row_slice .data_o[20:0] (Connected to floating net 'regfile')
+[52]     UnloadedOutTerm-ML                             Warning      iob_regfile_w_r.v    41      10    Detected unloaded(unconnected) output terminal iob_regfile_w_r.\rf[6].rf_row[0].iob_reg_rf_row_slice .data_o[20:0] (Connected to floating net 'regfile')
+[53]     UnloadedOutTerm-ML                             Warning      iob_regfile_w_r.v    41      10    Detected unloaded(unconnected) output terminal iob_regfile_w_r.\rf[5].rf_row[0].iob_reg_rf_row_slice .data_o[20:0] (Connected to floating net 'regfile')
+[54]     UnloadedOutTerm-ML                             Warning      iob_regfile_w_r.v    41      10    Detected unloaded(unconnected) output terminal iob_regfile_w_r.\rf[4].rf_row[0].iob_reg_rf_row_slice .data_o[20:0] (Connected to floating net 'regfile')
+[55]     UnloadedOutTerm-ML                             Warning      iob_regfile_w_r.v    41      10    Detected unloaded(unconnected) output terminal iob_regfile_w_r.\rf[3].rf_row[0].iob_reg_rf_row_slice .data_o[20:0] (Connected to floating net 'regfile')
+[56]     UnloadedOutTerm-ML                             Warning      iob_regfile_w_r.v    41      10    Detected unloaded(unconnected) output terminal iob_regfile_w_r.\rf[2].rf_row[0].iob_reg_rf_row_slice .data_o[20:0] (Connected to floating net 'regfile')
+[57]     UnloadedOutTerm-ML                             Warning      iob_regfile_w_r.v    41      10    Detected unloaded(unconnected) output terminal iob_regfile_w_r.\rf[1].rf_row[0].iob_reg_rf_row_slice .data_o[20:0] (Connected to floating net 'regfile')
+[58]     UnloadedOutTerm-ML                             Warning      iob_regfile_w_r.v    41      10    Detected unloaded(unconnected) output terminal iob_regfile_w_r.\rf[0].rf_row[0].iob_reg_rf_row_slice .data_o[20:8] (Connected to floating net 'regfile')
+[E]      W468                                           Warning      iob_regfile_w_r.v    49      5     Variable/Signal 'regfile' is indexed by 'raddr' which cannot index the full range of this vector.[Hierarchy: ':iob_regfile_w_r']
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

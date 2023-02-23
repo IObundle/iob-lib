@@ -1,2 +1,2 @@
 v_headers     = [  ]
-hw_modules    = [ 'iob_counter.v', 'iob_reg_re' ]
+hw_modules    = [ 'iob_s2f_sync.v', 'iob_counter', 'iob_reg_re' ]
