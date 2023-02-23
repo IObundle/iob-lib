@@ -7,6 +7,7 @@ set IS_FPGA [lindex $argv 4]
 set USE_EXTMEM [lindex $argv 5]
 set SEED [lindex $argv 6]
 
+
 project_new $NAME -overwrite
 
 
@@ -25,9 +26,7 @@ set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 
 #board data
 
-if {$IS_FPGA == "1"} {
-    source quartus/$BOARD/board.tcl
-}
+source quartus/$BOARD/board.tcl
 
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY reports
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
@@ -56,17 +55,14 @@ foreach file [split $VSRC \ ] {
 
 
 if {$IS_FPGA != "1"} {
+
+    
     set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
     set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
     set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-
-
     set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id $NAME:$NAME
-
     set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id $NAME:$NAME
-
     set_global_assignment -name PARTITION_COLOR 39423 -section_id $NAME:$NAME
-
     set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 }
 
@@ -102,6 +98,7 @@ if [file exists "quartus/postmap.tcl"] {
 if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $NAME"} result] {
     qexit -error
 }
+
 
 if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $NAME"} result] {
     qexit -error
