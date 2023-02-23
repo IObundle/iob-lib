@@ -2,10 +2,10 @@
 
 module iob_modcnt_n
   #(
-    parameter DATA_W = 32,
-    parameter RST_VAL = 0
-    )
-   (
+    parameter DATA_W = 21,
+    parameter RST_VAL = {DATA_W{1'b0}}
+  )
+  (
 
     input               clk_i,
     input               arst_i,
@@ -18,22 +18,22 @@ module iob_modcnt_n
     output [DATA_W-1:0] data_o
     );
 
-   wire                 ld = (data_o == mod_i);
-   localparam [DATA_W-1:0] LD_VAL = 0;
+  wire ld_count = data_o == mod_i;
+  wire [DATA_W-1:0] ld_val = {DATA_W{1'b0}};
 
-   iob_counter_ld_n #(DATA_W, RST_VAL) cnt0
-     (
-      .clk_i(clk_i),
-      .arst_i(arst_i),
-      .cke_i(cke_i),
+  iob_counter_ld_n #(DATA_W, RST_VAL) cnt0
+  (
+    .clk_i(clk_i),
+    .arst_i(arst_i),
+    .cke_i(cke_i),
 
-      .rst_i(rst_i),
-      .en_i(en_i),
+    .rst_i(rst_i),
+    .en_i(en_i),
 
-      .ld_i(ld),
-      .ld_val_i(LD_VAL),
+    .ld_i(ld_count),
+    .ld_val_i(ld_val),
 
-      .data_o(data_o)
-      );
+    .data_o(data_o)
+  );
 
 endmodule

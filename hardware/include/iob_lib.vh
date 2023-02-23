@@ -71,7 +71,7 @@
 `define WSTRB_W_(D) D/8
 `define READY_W     1
 
-`define WRITE_W_(D) (D+`WSTRB_W_(D))
+`define WRITE_W_(D) (D+(`WSTRB_W_(D)))
 `define READ_W_(D)  (D)
 
 //DATA POSITIONS
@@ -85,22 +85,22 @@
 
 //CONCAT BUS WIDTHS
 //request part
-`define REQ_W_(A,D) (`VALID_W+A+`WRITE_W_(D))
+`define REQ_W_(A,D) ((`VALID_W+A)+`WRITE_W_(D))
 //response part
-`define RESP_W_(D)  (`READ_W_(D)+`VALID_W+`READY_W)
+`define RESP_W_(D)  ((`READ_W_(D)+`VALID_W)+`READY_W)
 
 
 /////////////////////////////////////////////////////////////////////////////////
 //FIELD RANGES
 
 //gets request section of cat bus
-`define REQ_(I,A,D) I*`REQ_W_(A,D) +: `REQ_W_(A,D)
+`define REQ_(I,A,D) (I*`REQ_W_(A,D)) +: `REQ_W_(A,D)
 
 //gets the response part of a cat bus section
-`define RESP_(I,D) I*`RESP_W_(D) +: `RESP_W_(D)
+`define RESP_(I,D) (I*`RESP_W_(D)) +: `RESP_W_(D)
 
 //gets the WRITE valid bit of cat bus section
-`define AVALID_(I,A,D) I*`REQ_W_(A,D) + `AVALID_P_(A,D)
+`define AVALID_(I,A,D) (I*`REQ_W_(A,D)) + `AVALID_P_(A,D)
 
 //gets the ADDRESS of cat bus section
 `define ADDRESS_(I,W,A,D) I*`REQ_W_(A,D)+`ADDR_P_(D)+W-1 -: W
