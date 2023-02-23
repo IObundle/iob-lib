@@ -47,7 +47,6 @@ module iob_regfile_async_w_rr
   ) iob_sync_regfile_synced (
     .clk_i (r_clk_i),
     .arst_i (r_arst_i),
-    .cke_i (r_cke_i),
     .signal_i (regfile_in),
     .signal_o (regfile_synced)
   );
