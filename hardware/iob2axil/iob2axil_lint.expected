@@ -1,0 +1,128 @@
+MORESIMPLE REPORT:
+
+
+############### BuiltIn -> RuleGroup=Design Read ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                    Alias                   Severity    File                                                                            Line    Wt    Message
+======================================================================================
+[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob2axil.v                                                                      5       2     Module iob2axil is a top level design unit
+[96]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                   2       10    Domain Matrix for design "iob2axil",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob2axil/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob2axil/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+############### Non-BuiltIn -> Goal=lint/lint_rtl ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                 Alias                 Severity       File                                                                             Line    Wt    Message
+======================================================================================
+[AD]     RegInput-ML          RegInput-ML           Warning        iob_axil_m_port.vh                                                               4       10    Input port 'axil_awready_i[0]' is not registered [module:iob2axil]
+[AC]     RegInput-ML          RegInput-ML           Warning        iob_axil_m_port.vh                                                               8       10    Input port 'axil_wready_i[0]' is not registered [module:iob2axil]
+[AB]     RegInput-ML          RegInput-ML           Warning        iob_axil_m_port.vh                                                               9       10    Input port 'axil_bresp_i[1:0]' is not registered [module:iob2axil]
+[AA]     RegInput-ML          RegInput-ML           Warning        iob_axil_m_port.vh                                                               10      10    Input port 'axil_bvalid_i[0]' is not registered [module:iob2axil]
+[A9]     RegInput-ML          RegInput-ML           Warning        iob_axil_m_port.vh                                                               15      10    Input port 'axil_arready_i[0]' is not registered [module:iob2axil]
+[A8]     RegInput-ML          RegInput-ML           Warning        iob_axil_m_port.vh                                                               16      10    Input port 'axil_rdata_i[20:0]' is not registered [module:iob2axil]
+[A7]     RegInput-ML          RegInput-ML           Warning        iob_axil_m_port.vh                                                               17      10    Input port 'axil_rresp_i[1:0]' is not registered [module:iob2axil]
+[A6]     RegInput-ML          RegInput-ML           Warning        iob_axil_m_port.vh                                                               18      10    Input port 'axil_rvalid_i[0]' is not registered [module:iob2axil]
+[A1]     RegInput-ML          RegInput-ML           Warning        iob_clkrst_port.vh                                                               3       10    Input port 'clk_i[0]' is not registered [module:iob2axil]
+[A0]     RegInput-ML          RegInput-ML           Warning        iob_clkrst_port.vh                                                               4       10    Input port 'arst_i[0]' is not registered [module:iob2axil]
+[A5]     RegInput-ML          RegInput-ML           Warning        iob_s_port.vh                                                                    1       10    Input port 'iob_avalid_i[0]' is not registered [module:iob2axil]
+[A4]     RegInput-ML          RegInput-ML           Warning        iob_s_port.vh                                                                    2       10    Input port 'iob_addr_i[20:0]' is not registered [module:iob2axil]
+[A3]     RegInput-ML          RegInput-ML           Warning        iob_s_port.vh                                                                    3       10    Input port 'iob_wdata_i[20:0]' is not registered [module:iob2axil]
+[A2]     RegInput-ML          RegInput-ML           Warning        iob_s_port.vh                                                                    4       10    Input port 'iob_wstrb_i[1:0]' is not registered [module:iob2axil]
+[98]     RegOutputs           (OpenMORE 5.6.1.1)    Guideline      iob2axil.v                                                                       32      5     Port 'iob_ready_o[0]' is not driven by a register
+[9E]     RegOutputs           (OpenMORE 5.6.1.1)    Guideline      iob2axil.v                                                                       39      5     Port 'axil_awvalid_o[0]' is not driven by a register
+[9F]     RegOutputs           (OpenMORE 5.6.1.1)    Guideline      iob2axil.v                                                                       41      5     Port 'axil_awprot_o[2:0]' is not driven by a register
+[9D]     RegOutputs           (OpenMORE 5.6.1.1)    Guideline      iob2axil.v                                                                       44      5     Port 'axil_wvalid_o[0]' is not driven by a register
+[9C]     RegOutputs           (OpenMORE 5.6.1.1)    Guideline      iob2axil.v                                                                       49      5     Port 'axil_bready_o[0]' is not driven by a register
+[9A]     RegOutputs           (OpenMORE 5.6.1.1)    Guideline      iob2axil.v                                                                       52      5     Port 'axil_arvalid_o[0]' is not driven by a register
+[9B]     RegOutputs           (OpenMORE 5.6.1.1)    Guideline      iob2axil.v                                                                       54      5     Port 'axil_arprot_o[2:0]' is not driven by a register
+[99]     RegOutputs           (OpenMORE 5.6.1.1)    Guideline      iob2axil.v                                                                       57      5     Port 'axil_rready_o[0]' is not driven by a register
+[2]      STARC-3.2.2.1        ParameterConstant     Recommended    iob2axil.v                                                                       32      2     Constant '8' is not parameterized
+[3]      STARC-3.2.2.1        ParameterConstant     Recommended    iob2axil.v                                                                       41      2     Constant '3'd2' is not parameterized
+[4]      STARC-3.2.2.1        ParameterConstant     Recommended    iob2axil.v                                                                       54      2     Constant '3'd2' is not parameterized
+[95]     UnloadedInPort-ML                          Warning        iob_axil_m_port.vh                                                               4       10    Detected unloaded(unconnected)input port iob2axil.axil_awready_i[0]
+[94]     UnloadedInPort-ML                          Warning        iob_axil_m_port.vh                                                               9       10    Detected unloaded(unconnected)input port iob2axil.axil_bresp_i[1:0]
+[93]     UnloadedInPort-ML                          Warning        iob_axil_m_port.vh                                                               10      10    Detected unloaded(unconnected)input port iob2axil.axil_bvalid_i[0]
+[92]     UnloadedInPort-ML                          Warning        iob_axil_m_port.vh                                                               17      10    Detected unloaded(unconnected)input port iob2axil.axil_rresp_i[1:0]
+[91]     UnloadedInPort-ML                          Warning        iob_clkrst_port.vh                                                               3       10    Detected unloaded(unconnected)input port iob2axil.clk_i[0]
+[90]     UnloadedInPort-ML                          Warning        iob_clkrst_port.vh                                                               4       10    Detected unloaded(unconnected)input port iob2axil.arst_i[0]
+[66]     W240                                       Warning        iob_axil_m_port.vh                                                               4       10    Input 'axil_awready_i[0]' declared but not read.[Hierarchy: ':iob2axil']
+[65]     W240                                       Warning        iob_axil_m_port.vh                                                               9       10    Input 'axil_bresp_i[1:0]' declared but not read.[Hierarchy: ':iob2axil']
+[64]     W240                                       Warning        iob_axil_m_port.vh                                                               10      10    Input 'axil_bvalid_i[0]' declared but not read.[Hierarchy: ':iob2axil']
+[63]     W240                                       Warning        iob_axil_m_port.vh                                                               17      10    Input 'axil_rresp_i[1:0]' declared but not read.[Hierarchy: ':iob2axil']
+[62]     W240                                       Warning        iob_clkrst_port.vh                                                               3       10    Input 'clk_i[0]' declared but not read.[Hierarchy: ':iob2axil']
+[67]     W240                                       Warning        iob_clkrst_port.vh                                                               4       10    Input 'arst_i[0]' declared but not read.[Hierarchy: ':iob2axil']
+[61]     W240                                       Info           ./spyglass/iob2axil/lint/lint_rtl/spyglass_reports/lint/SignalUsageReport.rpt    0       10    Please refer to 'SignalUsageReport.rpt' for details of violating bits
+[5]      W34                                        Info           iob_lib.vh                                                                       2       2     Macro 'LIBINC' is never used
+[6]      W34                                        Info           iob_lib.vh                                                                       8       2     Macro 'IOB_MAX' is never used
+[7]      W34                                        Info           iob_lib.vh                                                                       9       2     Macro 'IOB_MIN' is never used
+[8]      W34                                        Info           iob_lib.vh                                                                       10      2     Macro 'IOB_ABS' is never used
+[9]      W34                                        Info           iob_lib.vh                                                                       11      2     Macro 'IOB_MUX2' is never used
+[A]      W34                                        Info           iob_lib.vh                                                                       12      2     Macro 'IOB_COMB' is never used
+[B]      W34                                        Info           iob_lib.vh                                                                       13      2     Macro 'IOB_MUX' is never used
+[C]      W34                                        Info           iob_lib.vh                                                                       14      2     Macro 'IOB_DEMUX' is never used
+[D]      W34                                        Info           iob_lib.vh                                                                       18      2     Macro 'IOB_INPUT_SIGNED' is never used
+[E]      W34                                        Info           iob_lib.vh                                                                       19      2     Macro 'IOB_OUTPUT' is never used
+[F]      W34                                        Info           iob_lib.vh                                                                       20      2     Macro 'IOB_OUTPUT_VAR' is never used
+[10]     W34                                        Info           iob_lib.vh                                                                       21      2     Macro 'IOB_INOUT' is never used
+[11]     W34                                        Info           iob_lib.vh                                                                       24      2     Macro 'IOB_WIRE' is never used
+[12]     W34                                        Info           iob_lib.vh                                                                       25      2     Macro 'IOB_WIRE_SIGNED' is never used
+[13]     W34                                        Info           iob_lib.vh                                                                       26      2     Macro 'IOB_VAR' is never used
+[14]     W34                                        Info           iob_lib.vh                                                                       27      2     Macro 'IOB_VAR_SIGNED' is never used
+[15]     W34                                        Info           iob_lib.vh                                                                       28      2     Macro 'IOB_VAR2WIRE' is never used
+[16]     W34                                        Info           iob_lib.vh                                                                       30      2     Macro 'IOB_WIREARRAY_2D' is never used
+[17]     W34                                        Info           iob_lib.vh                                                                       31      2     Macro 'IOB_WIREARRAY_2D_SIGNED' is never used
+[18]     W34                                        Info           iob_lib.vh                                                                       32      2     Macro 'IOB_VARARRAY_2D' is never used
+[19]     W34                                        Info           iob_lib.vh                                                                       33      2     Macro 'IOB_VARARRAY_2D_SIGNED' is never used
+[1A]     W34                                        Info           iob_lib.vh                                                                       36      2     Macro 'IOB_NBYTES' is never used
+[1B]     W34                                        Info           iob_lib.vh                                                                       37      2     Macro 'IOB_NBYTES_W' is never used
+[1C]     W34                                        Info           iob_lib.vh                                                                       38      2     Macro 'IOB_BYTE_OFFSET' is never used
+[1D]     W34                                        Info           iob_lib.vh                                                                       39      2     Macro 'IOB_WORD_ADDR' is never used
+[1E]     W34                                        Info           iob_lib.vh                                                                       40      2     Macro 'IOB_GET_NBYTES' is never used
+[1F]     W34                                        Info           iob_lib.vh                                                                       41      2     Macro 'IOB_GET_WDATA' is never used
+[20]     W34                                        Info           iob_lib.vh                                                                       42      2     Macro 'IOB_GET_WSTRB' is never used
+[21]     W34                                        Info           iob_lib.vh                                                                       43      2     Macro 'IOB_GET_RDATA' is never used
+[22]     W34                                        Info           iob_lib.vh                                                                       51      2     Macro 'IOB_VAR_INIT' is never used
+[23]     W34                                        Info           iob_lib.vh                                                                       54      2     Macro 'IOB_CLOCK' is never used
+[24]     W34                                        Info           iob_lib.vh                                                                       57      2     Macro 'IOB_PULSE' is never used
+[25]     W34                                        Info           iob_lib.vh                                                                       60      2     Macro 'IOB_RESET_SYNC' is never used
+[26]     W34                                        Info           iob_lib.vh                                                                       70      2     Macro 'VALID_W' is never used
+[27]     W34                                        Info           iob_lib.vh                                                                       71      2     Macro 'WSTRB_W_' is never used
+[28]     W34                                        Info           iob_lib.vh                                                                       72      2     Macro 'READY_W' is never used
+[29]     W34                                        Info           iob_lib.vh                                                                       74      2     Macro 'WRITE_W_' is never used
+[2A]     W34                                        Info           iob_lib.vh                                                                       75      2     Macro 'READ_W_' is never used
+[2B]     W34                                        Info           iob_lib.vh                                                                       79      2     Macro 'WDATA_P_' is never used
+[2C]     W34                                        Info           iob_lib.vh                                                                       80      2     Macro 'ADDR_P_' is never used
+[2D]     W34                                        Info           iob_lib.vh                                                                       81      2     Macro 'AVALID_P_' is never used
+[2E]     W34                                        Info           iob_lib.vh                                                                       83      2     Macro 'RDATA_P' is never used
+[2F]     W34                                        Info           iob_lib.vh                                                                       88      2     Macro 'REQ_W_' is never used
+[30]     W34                                        Info           iob_lib.vh                                                                       90      2     Macro 'RESP_W_' is never used
+[31]     W34                                        Info           iob_lib.vh                                                                       97      2     Macro 'REQ_' is never used
+[32]     W34                                        Info           iob_lib.vh                                                                       100     2     Macro 'RESP_' is never used
+[33]     W34                                        Info           iob_lib.vh                                                                       103     2     Macro 'AVALID_' is never used
+[34]     W34                                        Info           iob_lib.vh                                                                       106     2     Macro 'ADDRESS_' is never used
+[35]     W34                                        Info           iob_lib.vh                                                                       109     2     Macro 'WDATA_' is never used
+[36]     W34                                        Info           iob_lib.vh                                                                       112     2     Macro 'WSTRB_' is never used
+[37]     W34                                        Info           iob_lib.vh                                                                       115     2     Macro 'WRITE_' is never used
+[38]     W34                                        Info           iob_lib.vh                                                                       118     2     Macro 'RDATA_' is never used
+[39]     W34                                        Info           iob_lib.vh                                                                       121     2     Macro 'RVALID_' is never used
+[3A]     W34                                        Info           iob_lib.vh                                                                       124     2     Macro 'READY_' is never used
+[3B]     W34                                        Info           iob_lib.vh                                                                       130     2     Macro 'WSTRB_W' is never used
+[3C]     W34                                        Info           iob_lib.vh                                                                       132     2     Macro 'WRITE_W' is never used
+[3D]     W34                                        Info           iob_lib.vh                                                                       133     2     Macro 'READ_W' is never used
+[3E]     W34                                        Info           iob_lib.vh                                                                       135     2     Macro 'WDATA_P' is never used
+[3F]     W34                                        Info           iob_lib.vh                                                                       136     2     Macro 'ADDR_P' is never used
+[40]     W34                                        Info           iob_lib.vh                                                                       137     2     Macro 'AVALID_P' is never used
+[41]     W34                                        Info           iob_lib.vh                                                                       139     2     Macro 'REQ_W' is never used
+[42]     W34                                        Info           iob_lib.vh                                                                       140     2     Macro 'RESP_W' is never used
+[43]     W34                                        Info           iob_lib.vh                                                                       142     2     Macro 'REQ' is never used
+[44]     W34                                        Info           iob_lib.vh                                                                       143     2     Macro 'RESP' is never used
+[45]     W34                                        Info           iob_lib.vh                                                                       144     2     Macro 'AVALID' is never used
+[46]     W34                                        Info           iob_lib.vh                                                                       145     2     Macro 'ADDRESS' is never used
+[47]     W34                                        Info           iob_lib.vh                                                                       146     2     Macro 'WDATA' is never used
+[48]     W34                                        Info           iob_lib.vh                                                                       147     2     Macro 'WSTRB' is never used
+[49]     W34                                        Info           iob_lib.vh                                                                       148     2     Macro 'WRITE' is never used
+[4A]     W34                                        Info           iob_lib.vh                                                                       149     2     Macro 'RDATA' is never used
+[4B]     W34                                        Info           iob_lib.vh                                                                       150     2     Macro 'RVALID' is never used
+[4C]     W34                                        Info           iob_lib.vh                                                                       151     2     Macro 'READY' is never used
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

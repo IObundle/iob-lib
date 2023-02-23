@@ -4,14 +4,14 @@ module iob_sync
   #(
     parameter DATA_W = 21,
     parameter RST_VAL = {DATA_W{1'b0}}
-    )
+  )
   (
-   input               clk_i,
-   input               arst_i,
-   input               cke_i,
-   input [DATA_W-1:0]  signal_i,
-   (* ASYNC_REG = "TRUE" *) output reg [DATA_W-1:0] signal_o
-   );
+    input               clk_i,
+    input               arst_i,
+    input               cke_i,
+    input [DATA_W-1:0]  signal_i,
+    (* ASYNC_REG = "TRUE" *) output reg [DATA_W-1:0] signal_o
+  );
 
   (* ASYNC_REG = "TRUE" *) reg [DATA_W-1:0] sync;
 

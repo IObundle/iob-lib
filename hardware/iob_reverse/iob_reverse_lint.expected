@@ -1,0 +1,19 @@
+MORESIMPLE REPORT:
+
+
+############### BuiltIn -> RuleGroup=Design Read ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                    Alias                   Severity    File                                                                               Line    Wt    Message
+======================================================================================
+[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob_reverse.v                                                                      3       2     Module iob_reverse is a top level design unit
+[B]      Domain_Matrix01                                 Info        spyglass.sgdc                                                                      2       10    Domain Matrix for design "iob_reverse",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob_reverse/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob_reverse/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+############### Non-BuiltIn -> Goal=lint/lint_rtl ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule           Alias          Severity    File             Line    Wt    Message
+======================================================================================
+[D]      RegInput-ML    RegInput-ML    Warning     iob_reverse.v    8       10    Input port 'data_i[20:0]' is not registered [module:iob_reverse]
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
