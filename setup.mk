@@ -4,8 +4,6 @@
 #
 
 SHELL=bash
-export
-unexport SETUP_ARGS
 
 SETUP_PYTHON_FILENAME=$(wildcard *_setup.py)
 

@@ -20,6 +20,10 @@ def add_tester_modules(python_module, tester_options):
     for i in ['hw_setup','sim_setup','fpga_setup','sw_setup']:
         python_module.submodules[i]['modules'].append(('TESTER',tester_options))
 
+    # Add tester flows to the UUT flows
+    # This is required if the UUT is creating the build directory because it handles the flows enabled in config_build.mk
+    python_module.flows += ' emb sim fpga'
+
 #Given the io dictionary of ports, the port name (and size, and optional bit list) and a wire, it will map the selected bits of the port to the given wire.
 #io_dict: dictionary where keys represent port names, values are the mappings
 #port_name: name of the port to map
@@ -41,21 +45,26 @@ def map_IO_to_wire(io_dict, port_name, port_size, port_bits, wire_name):
             assert not io_dict[port_name][bit], f"{iob_colors.FAIL}Peripheral port {port_name} bit {bit} has already been previously mapped!{iob_colors.ENDC}"
             io_dict[port_name][bit] = (wire_name, wire_bit)
 
-# Setup a Tester 
-# module_parameters is a dictionary that contains the following elements:
-#    - extra_peripherals: list of peripherals to append to the 'peripherals' table in the 'blocks' list of the Tester
-#    - extra_peripheral_dirs: dictionary with directories of each extra peripheral
-#    - peripheral_portmap: Dictionary where each key-value pair is a Mapping between two signals. Example
-#                     { {'corename':'UART1', 'if_name':'rs232', 'port':'', 'bits':[]}:{'corename':'UUT', 'if_name':'UART0', 'port':'', 'bits':[]} }
-#    - confs: Optional dictionary with extra macros/parameters or with overrides for existing ones
-def setup_tester( python_module ):
-    ios = python_module.ios
+# Update tester configuration based on module_parameters
+# python_module: Tester python module
+def update_tester_conf( python_module ):
     blocks = python_module.blocks
     module_parameters = python_module.module_parameters
     confs = python_module.confs
+    submodules = python_module.submodules
+
+    #Add extra 'headers', 'modules' to corresponding lists if they exist (hw_setup, sw_setup, ...)
+    if 'extra_submodules' in module_parameters.keys(): 
+        for setup_type in ['hw_setup','sw_setup','sim_setup','fpga_setup']:
+            if setup_type in module_parameters['extra_submodules'].keys():
+                # Ensure tester has lists for that setup_type
+                if setup_type not in submodules.keys():
+                    submodules[setup_type] = {'headers':[],'modules':[]}
+                submodules[setup_type]['headers']+=module_parameters['extra_submodules'][setup_type]['headers']
+                submodules[setup_type]['modules']+=module_parameters['extra_submodules'][setup_type]['modules']
 
     #Override Tester confs if any are given in the 'confs' dictionary of the 'module_parameters' dictionary
-    if 'confs' in module_parameters: 
+    if 'confs' in module_parameters.keys(): 
         for entry in module_parameters['confs']:
             #If entry exists in confs, then update it
             for idx, entry2 in enumerate(confs):
@@ -69,7 +78,7 @@ def setup_tester( python_module ):
     #Create default submodule directories
     set_default_submodule_dirs(python_module)
     #Update submodule directories of Tester with new peripherals directories
-    python_module.submodules['dirs'].update(module_parameters['extra_peripherals_dirs'])
+    submodules['dirs'].update(module_parameters['extra_peripherals_dirs'])
 
     #Add extra peripherals to tester list (by updating original list)
     tester_peripherals_list=next(i['blocks'] for i in blocks if i['name'] == 'peripherals')
@@ -81,6 +90,23 @@ def setup_tester( python_module ):
                 break # Skip appending peripheral
         else: #this is a new peripheral since it did not update a default (existing) peripheral
             tester_peripherals_list.append(peripheral)
+
+
+# Setup a Tester 
+# module_parameters is a dictionary that contains the following elements:
+#    - extra_peripherals: list of peripherals to append to the 'peripherals' table in the 'blocks' list of the Tester
+#    - extra_peripheral_dirs: dictionary with directories of each extra peripheral
+#    - peripheral_portmap: Dictionary where each key-value pair is a Mapping between two signals. Example
+#                     { {'corename':'UART1', 'if_name':'rs232', 'port':'', 'bits':[]}:{'corename':'UUT', 'if_name':'UART0', 'port':'', 'bits':[]} }
+#    - confs: Optional dictionary with extra macros/parameters or with overrides for existing ones
+def setup_tester( python_module ):
+    blocks = python_module.blocks
+    ios = python_module.ios
+    module_parameters = python_module.module_parameters
+    confs = python_module.confs
+    submodules = python_module.submodules
+
+    tester_peripherals_list=next(i['blocks'] for i in blocks if i['name'] == 'peripherals')
 
     # Add 'IO" attribute to every peripheral of tester
     for peripheral in tester_peripherals_list:
@@ -112,7 +138,7 @@ def setup_tester( python_module ):
         ios.append({'name': f"portmap_{map_idx}", 'descr':f"IOs for peripherals based on portmap index {map_idx}", 'ports': tester_mapping_ios, 'ios_table_prefix':True})
 
         # Import module of one of the given core types (to access its IO)
-        module = import_setup(python_module.submodules['dirs'][mapping_items[0]['type']])
+        module = import_setup(submodules['dirs'][mapping_items[0]['type']])
         set_default_submodule_dirs(module)
         iob_soc_peripheral_setup(module)
 
@@ -124,7 +150,7 @@ def setup_tester( python_module ):
         #If mapping_items[1] is not external interface
         if mapping_external_interface!=1: 
             # Import module of one of the given core types (to access its IO)
-            module2 = import_setup(python_module.submodules['dirs'][mapping_items[1]['type']])
+            module2 = import_setup(submodules['dirs'][mapping_items[1]['type']])
             #Get ports of configured interface
             interface_table = next((i for i in module2.ios if i['name'] == mapping[1]['if_name']), None) 
             assert interface_table, f"{iob_colors.FAIL}Interface {mapping[1]['if_name']} of {mapping[1]['corename']} not found!{iob_colors.ENDC}"

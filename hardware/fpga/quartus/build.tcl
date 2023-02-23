@@ -1,11 +1,11 @@
 #extract cli args
-set NAME [lindex $argv 1]
-set BOARD [lindex $argv 2]
-set VSRC [lindex $argv 3]
-set QIP [lindex $argv 4]
-set IS_FPGA [lindex $argv 5]
-set USE_EXTMEM [lindex $argv 6]
-set SEED [lindex $argv 7]
+set NAME [lindex $argv 0]
+set BOARD [lindex $argv 1]
+set VSRC [lindex $argv 2]
+set QIP [lindex $argv 3]
+set IS_FPGA [lindex $argv 4]
+set USE_EXTMEM [lindex $argv 5]
+set SEED [lindex $argv 6]
 
 project_new $NAME -overwrite
 
@@ -25,7 +25,7 @@ set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 
 #board data
 
-if {$IS_FPGA != "1"} {
+if {$IS_FPGA == "1"} {
     source quartus/$BOARD/board.tcl
 }
 
@@ -38,9 +38,11 @@ set_global_assignment -name SEARCH_PATH ../src
 
 
 #quartus IPs
-foreach qip_file [split $QIP \ ] {
-    if { [ file extension $qip_file ] == ".qip" } {
-        set_global_assignment -name QIP_FILE $qip_file
+foreach q_file [split $QIP \ ] {
+    if { [ file extension $q_file ] == ".qip" } {
+        set_global_assignment -name QIP_FILE $q_file
+    } elseif { [ file extension $q_file ] == ".qxp" } {
+        set_global_assignment -name QXP_FILE $q_file
     }
 }
 
