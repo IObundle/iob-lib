@@ -482,7 +482,7 @@ def parse_arguments():
 #
 # Create signal table
 #
-def create_signal_table(interface_name):
+def create_signal_table(interface_name, bus_size=1):
     global table
     table = []
 
@@ -504,6 +504,10 @@ def create_signal_table(interface_name):
 
     if (interface_name.find("apb_")>=0):
         table = make_apb()
+
+    if bus_size>1:
+        for signal in table:
+            signal['width'] = f"({bus_size}*{signal['width']})"
 
 #
 # Write to .vh file
