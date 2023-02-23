@@ -1,11 +1,12 @@
 #extract cli args
-set NAME [lindex $argv 1]
-set BOARD [lindex $argv 2]
-set VSRC [lindex $argv 3]
-set QIP [lindex $argv 4]
-set IS_FPGA [lindex $argv 5]
-set USE_EXTMEM [lindex $argv 6]
-set SEED [lindex $argv 7]
+set NAME [lindex $argv 0]
+set BOARD [lindex $argv 1]
+set VSRC [lindex $argv 2]
+set QIP [lindex $argv 3]
+set IS_FPGA [lindex $argv 4]
+set USE_EXTMEM [lindex $argv 5]
+set SEED [lindex $argv 6]
+
 
 project_new $NAME -overwrite
 
@@ -24,9 +25,10 @@ if [project_exists $NAME] {
 set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 
 #board data
+
 source quartus/$BOARD/board.tcl
 
-set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY reports
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 
 #verilog heders search path
@@ -35,9 +37,11 @@ set_global_assignment -name SEARCH_PATH ../src
 
 
 #quartus IPs
-foreach qip_file [split $QIP \ ] {
-    if { [ file extension $qip_file ] == ".qip" } {
-        set_global_assignment -name QIP_FILE $qip_file
+foreach q_file [split $QIP \ ] {
+    if { [ file extension $q_file ] == ".qip" } {
+        set_global_assignment -name QIP_FILE $q_file
+    } elseif { [ file extension $q_file ] == ".qxp" } {
+        set_global_assignment -name QXP_FILE $q_file
     }
 }
 
@@ -51,17 +55,14 @@ foreach file [split $VSRC \ ] {
 
 
 if {$IS_FPGA != "1"} {
+
+    
     set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
     set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
     set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-
-
     set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id $NAME:$NAME
-
     set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id $NAME:$NAME
-
     set_global_assignment -name PARTITION_COLOR 39423 -section_id $NAME:$NAME
-
     set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 }
 
@@ -98,13 +99,14 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $NAME"} result] {
     qexit -error
 }
 
+
 if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $NAME"} result] {
     qexit -error
 }
 
 
 if {$IS_FPGA != "1"} {
-    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=output_files/$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
+    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
         qexit -error
     } 
 } else {
