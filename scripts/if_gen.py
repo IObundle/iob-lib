@@ -330,27 +330,27 @@ def s_port(prefix, fout, bus_size=1):
 
 def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_end=1):
     for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+f"[{bus_start}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
 
 def m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_end=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+f"[{bus_start}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
 
 def s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_end=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+f"[{bus_start}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
 
 def m_m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_end=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+suffix(table[i]['signal'])+f"[{bus_start}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+suffix(table[i]['signal'])+f"[{bus_start}*{table[i]['width']}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
 
 def s_s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_end=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+f"[{bus_start}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+f"[{bus_start}*{table[i]['width']}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
 
 #
 # Wire
