@@ -53,7 +53,7 @@ module iob_fifo_async
 
   );
 
-  localparam [ADDR_W:0] FIFO_SIZE = (1 << ADDR_W); //in bytes
+  localparam [ADDR_W:0] FIFO_SIZE = {1'b1, {ADDR_W{1'b0}}}; //in bytes
 
   //binary read addresses on both domains
   wire [R_ADDR_W:0]        r_raddr_bin;
