@@ -1,0 +1,20 @@
+MORESIMPLE REPORT:
+
+
+############### BuiltIn -> RuleGroup=Design Read ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                    Alias                   Severity    File                                                                                Line    Wt    Message
+======================================================================================
+[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob_gray2bin.v                                                                      4       2     Module iob_gray2bin is a top level design unit
+[B]      Domain_Matrix01                                 Info        spyglass.sgdc                                                                       2       10    Domain Matrix for design "iob_gray2bin",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob_gray2bin/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob_gray2bin/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+############### Non-BuiltIn -> Goal=lint/lint_rtl ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule           Alias                 Severity     File              Line    Wt    Message
+======================================================================================
+[E]      RegInput-ML    RegInput-ML           Warning      iob_gray2bin.v    9       10    Input port 'gr_i[3:0]' is not registered [module:iob_gray2bin]
+[D]      RegOutputs     (OpenMORE 5.6.1.1)    Guideline    iob_gray2bin.v    17      5     Port 'bin_o[2:0]' is not driven by a register
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

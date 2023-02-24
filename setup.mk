@@ -4,7 +4,6 @@
 #
 
 SHELL=bash
-export
 
 SETUP_PYTHON_FILENAME=$(wildcard *_setup.py)
 
@@ -18,6 +17,10 @@ $(foreach entry, $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_core_submodul
 
 # establish build dir paths
 BUILD_DIR := $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_build_dir)
+
+BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
+
+BUILD_SIM_DIR := $(BUILD_DIR)/hardware/simulation
 
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
@@ -87,7 +90,7 @@ endif
 # generate quartus fitting results 
 $(BUILD_DIR)/doc/quartus.tex:
 	make -C $(BUILD_DIR) fpga-build BOARD=CYCLONEV-GT-DK
-	LOG=$(BUILD_FPGA_DIR)/quartus.log $(LIB_DIR)/scripts/quartus2tex.sh
+	LOG=$(BUILD_FPGA_DIR)/reports/$(wildcard *.fit.summary) $(LIB_DIR)/scripts/quartus2tex.sh
 	mv `basename $@` $(BUILD_DOC_DIR)
 
 # generate vivado fitting results 

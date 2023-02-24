@@ -2,12 +2,14 @@
 set NAME [lindex $argv 0]
 set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
-set IS_FPGA [lindex $argv 3]
-set CUSTOM_ARGS [lindex $argv 4]
+set VIP [lindex $argv 3]
+set IS_FPGA [lindex $argv 4]
+set CUSTOM_ARGS [lindex $argv 5]
 
 puts $NAME
 puts $BOARD
 puts $VSRC
+puts $VIP
 puts $IS_FPGA
 puts $CUSTOM_ARGS
 
@@ -20,10 +22,24 @@ foreach file [split $VSRC \ ] {
     }
 }
 
-#device data
-source vivado/$BOARD/device.tcl
+#vivado IPs
+foreach file [split $VIP \ ] {
+    puts $file
+    if { [ file extension $file ] == ".edif" } {
+        read_edif $file
+    }
+}
 
-read_xdc vivado/$BOARD/$NAME.xdc
+#device data
+if {$IS_FPGA == "1"} {
+    source vivado/$BOARD/device.tcl
+}
+
+if { $IS_FPGA == "1" } {
+    read_xdc vivado/$BOARD/$NAME.xdc
+} else {
+    read_xdc vivado/$NAME.xdc
+}
 
 if {[file exists "vivado/custom_build.tcl"]} {
     source "vivado/custom_build.tcl"
@@ -39,7 +55,7 @@ opt_design
 
 place_design
 
-route_design
+route_design -timing
 
 report_utilization
 

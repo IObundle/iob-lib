@@ -71,57 +71,57 @@
 `define WSTRB_W_(D) D/8
 `define READY_W     1
 
-`define WRITE_W_(D) (D+`WSTRB_W_(D))
+`define WRITE_W_(D) (D+(`WSTRB_W_(D)))
 `define READ_W_(D)  (D)
 
 //DATA POSITIONS
-//req bus
+//REQ bus
 `define WDATA_P_(D)    `WSTRB_W_(D)
 `define ADDR_P_(D)     (`WDATA_P_(D)+D)
 `define AVALID_P_(A,D) (`ADDR_P_(D)+A)
-//resp bus
+//RESP bus
 `define RDATA_P `VALID_W+`READY_W
 
 
 //CONCAT BUS WIDTHS
 //request part
-`define REQ_W_(A,D) (`VALID_W+A+`WRITE_W_(D))
+`define REQ_W_(A,D) ((`VALID_W+A)+`WRITE_W_(D))
 //response part
-`define RESP_W_(D)  (`READ_W_(D)+`VALID_W+`READY_W)
+`define RESP_W_(D)  ((`READ_W_(D)+`VALID_W)+`READY_W)
 
 
 /////////////////////////////////////////////////////////////////////////////////
 //FIELD RANGES
 
 //gets request section of cat bus
-`define req_(I,A,D) I*`REQ_W_(A,D) +: `REQ_W_(A,D)
+`define REQ_(I,A,D) (I*`REQ_W_(A,D)) +: `REQ_W_(A,D)
 
 //gets the response part of a cat bus section
-`define resp_(I,D) I*`RESP_W_(D) +: `RESP_W_(D)
+`define RESP_(I,D) (I*`RESP_W_(D)) +: `RESP_W_(D)
 
-//gets the write valid bit of cat bus section
-`define avalid_(I,A,D) I*`REQ_W_(A,D) + `AVALID_P_(A,D)
+//gets the WRITE valid bit of cat bus section
+`define AVALID_(I,A,D) (I*`REQ_W_(A,D)) + `AVALID_P_(A,D)
 
-//gets the address of cat bus section
-`define address_(I,W,A,D) I*`REQ_W_(A,D)+`ADDR_P_(D)+W-1 -: W
+//gets the ADDRESS of cat bus section
+`define ADDRESS_(I,W,A,D) I*`REQ_W_(A,D)+`ADDR_P_(D)+W-1 -: W
 
-//gets the wdata field of cat bus
-`define wdata_(I,A,D) I*`REQ_W_(A,D)+`WDATA_P_(D) +: D
+//gets the WDATA field of cat bus
+`define WDATA_(I,A,D) I*`REQ_W_(A,D)+`WDATA_P_(D) +: D
 
-//gets the wstrb field of cat bus
-`define wstrb_(I,A,D) I*`REQ_W_(A,D) +: `WSTRB_W_(D)
+//gets the WSTRB field of cat bus
+`define WSTRB_(I,A,D) I*`REQ_W_(A,D) +: `WSTRB_W_(D)
 
-//gets the write fields of cat bus
-`define write_(I,A,D) I*`REQ_W_(A,D) +: `WRITE_W_(D)
+//gets the WRITE fields of cat bus
+`define WRITE_(I,A,D) I*`REQ_W_(A,D) +: `WRITE_W_(D)
 
-//gets the rdata field of cat bus
-`define rdata_(I,D) I*`RESP_W_(D)+`RDATA_P +: D
+//gets the RDATA field of cat bus
+`define RDATA_(I,D) I*`RESP_W_(D)+`RDATA_P +: D
 
 //gets the read valid field of cat bus
-`define rvalid_(I,D) I*`RESP_W_(D)+`READY_W
+`define RVALID_(I,D) I*`RESP_W_(D)+`READY_W
 
-//gets the ready field of cat bus
-`define ready_(I,D) I*`RESP_W_(D)
+//gets the READY field of cat bus
+`define READY_(I,D) I*`RESP_W_(D)
 
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -139,16 +139,16 @@
 `define REQ_W    `REQ_W_(ADDR_W, DATA_W)
 `define RESP_W   `RESP_W_(DATA_W)
 
-`define req(I)       `req_(I, ADDR_W, DATA_W)
-`define resp(I)      `resp_(I, DATA_W)
-`define avalid(I)    `avalid_(I, ADDR_W, DATA_W)
-`define address(I,W) `address_(I, W, ADDR_W, DATA_W)
-`define wdata(I)     `wdata_(I, ADDR_W, DATA_W)
-`define wstrb(I)     `wstrb_(I, ADDR_W, DATA_W)
-`define write(I)     `write_(I, ADDR_W, DATA_W)
-`define rdata(I)     `rdata_(I, DATA_W)
-`define rvalid(I)    `rvalid_(I, DATA_W)
-`define ready(I)     `ready_(I, DATA_W)
+`define REQ(I)       `REQ_(I, ADDR_W, DATA_W)
+`define RESP(I)      `RESP_(I, DATA_W)
+`define AVALID(I)    `AVALID_(I, ADDR_W, DATA_W)
+`define ADDRESS(I,W) `ADDRESS_(I, W, ADDR_W, DATA_W)
+`define WDATA(I)     `WDATA_(I, ADDR_W, DATA_W)
+`define WSTRB(I)     `WSTRB_(I, ADDR_W, DATA_W)
+`define WRITE(I)     `WRITE_(I, ADDR_W, DATA_W)
+`define RDATA(I)     `RDATA_(I, DATA_W)
+`define RVALID(I)    `RVALID_(I, DATA_W)
+`define READY(I)     `READY_(I, DATA_W)
 
 `endif //  `ifndef LIBINC
            

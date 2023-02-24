@@ -5,9 +5,11 @@ import sys, os
 from submodule_utils import *
 import ios
 
-# Automatically include <corename>_swreg_def.vh verilog headers after PHEADER comment
+# Automatically include <corename>_swreg_def.vh verilog headers after IOB_PRAGMA_PHEADERS comment
 def insert_header_files(template_contents, peripherals_list, submodule_dirs):
-    header_index = find_idx(template_contents, "PHEADER")
+    header_index = find_idx(template_contents, "IOB_PRAGMA_PHEADERS")-1
+    template_contents.pop(header_index)
+
     # Get each type of peripheral used
     included_peripherals = []
     for instance in peripherals_list:
@@ -45,7 +47,7 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file, i
     # Insert IOs and Instances for this type of peripheral
     for instance in peripherals_list:
         # Insert peripheral instance (in reverse order of lines)
-        start_index = find_idx(template_contents, "endmodule")-1
+        start_index = find_idx(template_contents, "IOB_PRAGMA_PERIPHS")
         template_contents.insert(start_index, "      );\n")
 
         # Insert reserved signals
@@ -89,6 +91,10 @@ def create_systemv(setup_dir, submodule_dirs, top, peripherals_list, out_file, i
         # Insert peripheral comment
         template_contents.insert(start_index, "   // {}\n".format(instance['name']))
         template_contents.insert(start_index, "\n")
+
+    # Delete PRAGMA comment
+    start_index = find_idx(template_contents, "IOB_PRAGMA_PERIPHS")-1
+    template_contents.pop(start_index)
 
     # Insert internal module wires (if any)
     if internal_wires:

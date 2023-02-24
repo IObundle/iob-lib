@@ -2,12 +2,12 @@
 `include "iob_lib.vh"
 
 module iob_demux #(
-    parameter DATA_W = 0,
-    parameter N = 0
+    parameter DATA_W = 21,
+    parameter N = 21
     ) (
-    `IOB_INPUT(sel_i, $clog2(N)+($clog2(N)==0)),
+    `IOB_INPUT(sel_i, ($clog2(N)+($clog2(N)==0))),
     `IOB_INPUT(data_i, DATA_W),
-    `IOB_OUTPUT(data_o, N*DATA_W)
+    `IOB_OUTPUT(data_o, (N*DATA_W))
     );
 
     //integer i;
@@ -20,12 +20,7 @@ module iob_demux #(
     //        end
     //end
 
-    reg [N*DATA_W-1:0] data_int;
-    assign data_o = data_int << (sel_i*DATA_W);
-    // Alternative
-    always @* begin
-        data_int = {(N*DATA_W){1'b0}};
-        data_int[DATA_W-1:0] = data_i;
-    end
+    //Alternative
+    assign data_o = {{((N-1)*DATA_W){1'b0}}, data_i} << (sel_i*DATA_W);
 
 endmodule

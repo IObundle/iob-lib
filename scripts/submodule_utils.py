@@ -8,6 +8,7 @@ import re
 import math
 import importlib
 import if_gen
+import iob_colors
 
 # List of reserved signals
 # These signals are known by the python scripts and are always auto-connected using the matching Verilog the string.
@@ -20,13 +21,13 @@ reserved_signals = \
 'rst_i':'.rst_i(rst_i)',
 'reset':'.reset(rst_i)',
 'arst_i':'.arst_i(arst_i)',
-'iob_avalid_i':'.iob_avalid_i(slaves_req[`avalid(`/*<InstanceName>*/)])',
-'iob_addr_i':'.iob_addr_i(slaves_req[`address(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])',
-'iob_wdata_i':'.iob_wdata_i(slaves_req[`wdata(`/*<InstanceName>*/)])',
-'iob_wstrb_i':'.iob_wstrb_i(slaves_req[`wstrb(`/*<InstanceName>*/)])',
-'iob_rdata_o':'.iob_rdata_o(slaves_resp[`rdata(`/*<InstanceName>*/)])',
-'iob_ready_o':'.iob_ready_o(slaves_resp[`ready(`/*<InstanceName>*/)])',
-'iob_rvalid_o':'.iob_rvalid_o(slaves_resp[`rvalid(`/*<InstanceName>*/)])',
+'iob_avalid_i':'.iob_avalid_i(slaves_req[`AVALID(`/*<InstanceName>*/)])',
+'iob_addr_i':'.iob_addr_i(slaves_req[`ADDRESS(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])',
+'iob_wdata_i':'.iob_wdata_i(slaves_req[`WDATA(`/*<InstanceName>*/)])',
+'iob_wstrb_i':'.iob_wstrb_i(slaves_req[`WSTRB(`/*<InstanceName>*/)])',
+'iob_rdata_o':'.iob_rdata_o(slaves_resp[`RDATA(`/*<InstanceName>*/)])',
+'iob_ready_o':'.iob_ready_o(slaves_resp[`READY(`/*<InstanceName>*/)])',
+'iob_rvalid_o':'.iob_rvalid_o(slaves_resp[`RVALID(`/*<InstanceName>*/)])',
 'trap_o':'.trap_o(trap_o[0])',
 'axi_awid_o':'.axi_awid_o          (axi_awid_o      [0:0])',
 'axi_awaddr_o':'.axi_awaddr_o      (axi_awaddr_o    [AXI_ADDR_W-1:0])',
@@ -68,19 +69,22 @@ reserved_signals = \
 }
 
 # Import the <corename>_setup.py from the given core directory
-def import_setup(setup_dir):
+def import_setup(module_dir, **kwargs):
     #Find <corename>_setup.py file
-    for x in os.listdir(setup_dir):
+    for x in os.listdir(module_dir):
         if x.endswith("_setup.py"):
             filename = x
             break
     if 'filename' not in vars():
-        raise FileNotFoundError(f"Could not find a *_setup.py file in {setup_dir}")
+        raise FileNotFoundError(f"Could not find a *_setup.py file in {module_dir}")
     #Import <corename>_setup.py
     module_name = filename.split('.')[0]
-    spec = importlib.util.spec_from_file_location(module_name, setup_dir+"/"+filename)
+    spec = importlib.util.spec_from_file_location(module_name, module_dir+"/"+filename)
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name]=module
+    # Define objects given in the module
+    for key, value in kwargs.items():
+        vars(module)[key]=value
     spec.loader.exec_module(module)
 
     return module
@@ -158,7 +162,7 @@ def get_peripheral_ios(peripherals_list, submodules):
     # Get port list for each type of peripheral used
     for instance in peripherals_list:
         # Make sure we have a hw_module for this peripheral type
-        assert check_module_in_modules_list(instance['type'],submodules["hw_setup"]["modules"]), f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
+        #assert check_module_in_modules_list(instance['type'],submodules["hw_setup"]["modules"]), f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
         # Only insert ports of this peripheral type if we have not done so before
         if instance['type'] not in port_list:
             # Import <corename>_setup.py module
@@ -181,7 +185,7 @@ def iob_soc_peripheral_setup(python_module, append_peripheral_ios=True):
 
     if peripherals_list:
         # Get port list, parameter list and top module name for each type of peripheral used
-        _, params_list, top_list = get_peripherals_ports_params_top(peripherals_list, python_module.submodules['dirs'])
+        _, params_list, _ = get_peripherals_ports_params_top(peripherals_list, python_module.submodules['dirs'])
         # Insert peripheral instance parameters in system parameters
         # This causes the system to have a parameter for each parameter of each peripheral instance
         for instance in peripherals_list:

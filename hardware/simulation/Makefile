@@ -59,8 +59,6 @@ else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'
 endif
 
-CONSOLE_CMD=../../scripts/console.py -L
-
 run: build
 ifeq ($(SIM_SERVER),)
 ifneq ($(CONSOLE_CMD),)
@@ -121,7 +119,7 @@ else
 	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make run-tests"
 endif
 ifneq ($(COV),1)
-	diff test.log src/test.expected
+	diff test.log test.expected
 else
 	@echo "INFO: simulation code coverage is reserved for internal use only."
 endif

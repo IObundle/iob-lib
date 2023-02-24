@@ -13,6 +13,9 @@ import periphs_tmp
 import createSystem
 import createTestbench
 import createTopSystem
+import datetime
+
+
 
 def getf(obj, name, field):
     return int(obj[next(i for i in range(len(obj)) if obj[i]['name'] == name)][field])
@@ -30,7 +33,7 @@ def setup( python_module, no_overlap=False, peripheral_ios=True, internal_wires=
     build_dir = python_module.build_dir
 
     #Auto-add 'VERSION' macro
-    confs.append({'name':'VERSION', 'type':'M', 'val':"16'h"+build_srcs.version_str_to_digits(python_module.version), 'min':'NA', 'max':'NA', 'descr':"Product version."})
+    confs.append({'name':'VERSION', 'type':'M', 'val':"16'h"+build_srcs.version_str_to_digits(python_module.version), 'min':'NA', 'max':'NA', 'descr':"Product version. This 16-bit macro uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234."})
 
     # Check if should create build directory for this core/system
     #TODO: We need to find another way of checking this. Currently we can not configure another build_dir in *_setup.py because it will cause this to not build the directory!
@@ -74,7 +77,7 @@ def setup( python_module, no_overlap=False, peripheral_ios=True, internal_wires=
             general_regs_table = {'name': 'general', 'descr':'General Registers.', 'regs': []}
             regs.append(general_regs_table)
         # Auto add 'VERSION' register in 'general' registers table
-        general_regs_table['regs'].append({'name':"VERSION", 'type':"R", 'n_bits':16, 'rst_val':build_srcs.version_str_to_digits(python_module.version), 'addr':-1, 'log2n_items':0, 'autologic':True, 'descr':"Product version."})
+        general_regs_table['regs'].append({'name':"VERSION", 'type':"R", 'n_bits':16, 'rst_val':build_srcs.version_str_to_digits(python_module.version), 'addr':-1, 'log2n_items':0, 'autologic':True, 'descr':"Product version.  This 16-bit register uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234."})
 
         # Create an instance of the mkregs class inside the mkregs module
         # This instance is only used locally, not affecting status of mkregs imported in other functions/modules
@@ -113,13 +116,15 @@ def setup( python_module, no_overlap=False, peripheral_ios=True, internal_wires=
     #
     # Generate sw
     #
-    if regs:
-        if os.path.isdir(python_module.setup_dir+'/software/esrc'):
+    if os.path.isdir(python_module.build_dir+'/software'): 
+        os.makedirs(python_module.build_dir+'/software/esrc', exist_ok=True)
+        os.makedirs(python_module.build_dir+'/software/psrc', exist_ok=True)
+        if regs:
             mkregs_obj.write_swheader(reg_table, python_module.build_dir+'/software/esrc', top)
             mkregs_obj.write_swcode(reg_table, python_module.build_dir+'/software/esrc', top)
-        if os.path.isdir(python_module.setup_dir+'/software/psrc'): mkregs_obj.write_swheader(reg_table, python_module.build_dir+'/software/psrc', top)
-    if os.path.isdir(python_module.setup_dir+'/software/esrc'): mk_conf.conf_h(confs, top, python_module.build_dir+'/software/esrc')
-    if os.path.isdir(python_module.setup_dir+'/software/psrc'): mk_conf.conf_h(confs, top, python_module.build_dir+'/software/psrc')
+            mkregs_obj.write_swheader(reg_table, python_module.build_dir+'/software/psrc', top)
+        mk_conf.conf_h(confs, top, python_module.build_dir+'/software/esrc')
+        mk_conf.conf_h(confs, top, python_module.build_dir+'/software/psrc')
 
     #
     # Generate TeX
@@ -145,6 +150,38 @@ def get_core_submodules_dirs():
     set_default_submodule_dirs(module)
     for key, value in module.submodules['dirs'].items():
         print(f"{key}_DIR={value}", end=" ")
+
+
+#Insert header in source files        
+def insert_header ():
+# invoked from the command line as:
+# python3 insert_header.py <header_file> <comment> <file1> <file2> <file3> ...
+# where 
+# <header_file> is the name of the header file to be inserted.
+# <comment> is the comment character to be used
+# <file1> <file2> <file3> ... are the files to be processed
+
+    x = datetime.datetime.now()
+
+    module = import_setup(".")
+
+    NAME, VERSION = module.name, module.version
+    
+    #header is in the file whose name is given in the second argument
+    f = open(sys.argv[2], 'r')
+    header = f.readlines()
+    print(header)
+    f.close()
+ 
+    for filename in sys.argv[4:]:
+        f = open(filename, 'r+')
+        content = f.read()
+        f.seek(0, 0)
+        for line in header:
+            f.write(sys.argv[3] + '  ' + f"{line}")
+        f.write('\n\n\n' + content)
+
+
 
 # If this script is called directly, run function given in first argument
 if __name__ == '__main__':

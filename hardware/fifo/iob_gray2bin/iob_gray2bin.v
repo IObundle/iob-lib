@@ -2,19 +2,19 @@
 
 // Convert gray encoding to binary
 module iob_gray2bin
-  #(
-    parameter DATA_W = 4
-    )
+   #(
+      parameter DATA_W = 4
+   )
    (
-    input [DATA_W-1:0]  gr_i,
-    output [DATA_W-1:0] bin_o
-    );
+      input [DATA_W-1:0]  gr_i,
+      output [DATA_W-1:0] bin_o
+   );
 
-   genvar               i;
+   genvar               pos;
 
    generate
-      for(i=0; i < DATA_W; i=i+1) begin : gen_bin
-         assign bin_o[i] = ^gr_i[DATA_W-1:i];
+      for(pos=0; pos < DATA_W; pos=pos+1) begin : gen_bin
+         assign bin_o[pos] = ^gr_i[DATA_W-1:pos];
       end
    endgenerate
 
