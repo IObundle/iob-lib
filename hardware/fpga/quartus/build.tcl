@@ -68,10 +68,6 @@ if {$IS_FPGA != "1"} {
 
 set_global_assignment -name LAST_QUARTUS_VERSION "18.0.0 Standard Edition"
 set_global_assignment -name SDC_FILE quartus/$NAME.sdc
-set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
-set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
-set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
-set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 
 #------ Manually recompile and perform timing analysis again using qexec ------#
 
@@ -101,6 +97,10 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $NAME"} result] {
 
 
 if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $NAME"} result] {
+    qexit -error
+}
+
+if [catch {qexec "[file join $::quartus(binpath) quartus_sta] -t quartus/timing.tcl $NAME"} result] {
     qexit -error
 }
 

@@ -45,7 +45,7 @@ module iob_fifo_sync
     );
 
   localparam ADDR_W_DIFF = $clog2(N);
-  localparam [ADDR_W:0] FIFO_SIZE = (1 << ADDR_W); //in bytes
+  localparam [ADDR_W:0] FIFO_SIZE = {1'b1, {ADDR_W{1'b0}}}; //in bytes
 
   //effective write enable
   wire                   w_en_int = (w_en_i & (~w_full_o));
