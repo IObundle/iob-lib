@@ -328,29 +328,29 @@ def s_port(prefix, fout, bus_size=1):
 # Portmap
 #
 
-def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_end=1):
+def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_size}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
 
-def m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_end=1):
+def m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_size}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
 
-def s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_end=1):
+def s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_size}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
 
-def m_m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_end=1):
+def m_m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+suffix(table[i]['signal'])+f"[{bus_start}*{table[i]['width']}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+suffix(table[i]['signal'])+f"[{bus_start}*{table[i]['width']}+:{bus_size}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
 
-def s_s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_end=1):
+def s_s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+f"[{bus_start}*{table[i]['width']}+:{bus_end-bus_start}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+f"[{bus_start}*{table[i]['width']}+:{bus_size}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
 
 #
 # Wire
@@ -509,10 +509,10 @@ def create_signal_table(interface_name):
 # Write to .vh file
 #
 
-def write_vh_contents(interface_name, port_prefix, wire_prefix, file_object, bus_size=1, bus_start=0, bus_end=1):
+def write_vh_contents(interface_name, port_prefix, wire_prefix, file_object, bus_size=1, bus_start=0):
     func_name = interface_name.replace("axil_", "").replace("axi_", "").replace("write_", "").replace("read_", "").replace("iob_", "").replace("apb_", "").replace("ahb_", "")
     if (interface_name.find("portmap")+1):
-        eval(func_name+"(port_prefix, wire_prefix, file_object, bus_start=bus_start, bus_end=bus_end)")
+        eval(func_name+"(port_prefix, wire_prefix, file_object, bus_start=bus_start, bus_size=bus_size)")
     else:
         eval(func_name+"(wire_prefix, file_object, bus_size=bus_size)")
 

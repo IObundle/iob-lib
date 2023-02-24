@@ -427,7 +427,6 @@ def create_Vheaders(dest_dir, Vheaders):
             if_gen.write_vh_contents(vh_name['interface'], vh_name['port_prefix'], vh_name['wire_prefix'], f_out, 
                                      bus_size=vh_name['bus_size'] if 'bus_size' in vh_name.keys() else 1,
                                      bus_start=vh_name['bus_start'] if 'bus_start' in vh_name.keys() else 0,
-                                     bus_end=vh_name['bus_end'] if 'bus_end' in vh_name.keys() else 1,
                                      )
         else: 
             sys.exit(f"{iob_colors.FAIL} {vh_name} is not an available header.{iob_colors.ENDC}")
