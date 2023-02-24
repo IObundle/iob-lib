@@ -1,0 +1,20 @@
+MORESIMPLE REPORT:
+
+
+############### BuiltIn -> RuleGroup=Design Read ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                    Alias                   Severity    File                                                                                    Line    Wt    Message
+======================================================================================
+[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob_gray_counter.v                                                                      3       2     Module iob_gray_counter is a top level design unit
+[54]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                           2       10    Domain Matrix for design "iob_gray_counter",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob_gray_counter/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob_gray_counter/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+############### Non-BuiltIn -> Goal=lint/lint_rtl ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule          Alias                 Severity     File                  Line    Wt    Message
+======================================================================================
+[2]      NoTopLogic    (OpenMORE 5.6.8.1)    Guideline    iob_gray_counter.v    23      5     Logic inferred at the top level
+[3]      NoTopLogic    (OpenMORE 5.6.8.1)    Guideline    iob_gray_counter.v    27      5     Logic inferred at the top level
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

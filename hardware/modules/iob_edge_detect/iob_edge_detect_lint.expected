@@ -1,0 +1,21 @@
+MORESIMPLE REPORT:
+
+
+############### BuiltIn -> RuleGroup=Design Read ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                    Alias                   Severity    File                                                                                   Line    Wt    Message
+======================================================================================
+[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob_edge_detect.v                                                                      3       2     Module iob_edge_detect is a top level design unit
+[24]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                          2       10    Domain Matrix for design "iob_edge_detect",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob_edge_detect/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob_edge_detect/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+############### Non-BuiltIn -> Goal=lint/lint_rtl ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule           Alias                 Severity     File                 Line    Wt    Message
+======================================================================================
+[2]      NoTopLogic     (OpenMORE 5.6.8.1)    Guideline    iob_edge_detect.v    24      5     Logic inferred at the top level
+[27]     RegInput-ML    RegInput-ML           Warning      iob_edge_detect.v    8       10    Input port 'bit_i' is not registered [module:iob_edge_detect]
+[26]     RegOutputs     (OpenMORE 5.6.1.1)    Guideline    iob_edge_detect.v    24      5     Port 'detected_o' is not driven by a register
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
