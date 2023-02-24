@@ -514,7 +514,7 @@ def write_vh_contents(interface_name, port_prefix, wire_prefix, file_object, bus
     if (interface_name.find("portmap")+1):
         eval(func_name+"(port_prefix, wire_prefix, file_object, bus_start=bus_start, bus_end=bus_end)")
     else:
-        eval(func_name+"(port_prefix, file_object, bus_size=bus_size)")
+        eval(func_name+"(wire_prefix, file_object, bus_size=bus_size)")
 
 #
 # Main

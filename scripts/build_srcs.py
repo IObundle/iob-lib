@@ -424,7 +424,7 @@ def create_Vheaders(dest_dir, Vheaders):
         elif (type(vh_name) is dict) and (vh_name['interface'] in if_gen.interfaces):
             f_out = open (f"{dest_dir}/{vh_name['file_prefix']}{vh_name['interface']}.vh", 'w')
             if_gen.create_signal_table(vh_name['interface'])
-            if_gen.write_vh_contents(vh_name['interface'], vh_name['wire_prefix'], vh_name['port_prefix'], f_out, 
+            if_gen.write_vh_contents(vh_name['interface'], vh_name['port_prefix'], vh_name['wire_prefix'], f_out, 
                                      bus_size=vh_name['bus_size'] if 'bus_size' in vh_name.keys() else 1,
                                      bus_start=vh_name['bus_start'] if 'bus_start' in vh_name.keys() else 0,
                                      bus_end=vh_name['bus_end'] if 'bus_end' in vh_name.keys() else 1,
