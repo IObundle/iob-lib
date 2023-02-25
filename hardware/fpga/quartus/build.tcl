@@ -2,10 +2,11 @@
 set NAME [lindex $argv 0]
 set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
-set QIP [lindex $argv 3]
-set IS_FPGA [lindex $argv 4]
-set USE_EXTMEM [lindex $argv 5]
-set SEED [lindex $argv 6]
+set DEFINES [lindex $argv 3]
+set QIP [lindex $argv 4]
+set IS_FPGA [lindex $argv 5]
+set USE_EXTMEM [lindex $argv 6]
+set SEED [lindex $argv 7]
 
 
 project_new $NAME -overwrite
@@ -45,6 +46,12 @@ foreach q_file [split $QIP \ ] {
     }
 }
 
+#verilog macros
+foreach macro [split $DEFINES \ ] {
+    if {$macro != ""} {
+        set_global_assignment -name VERILOG_MACRO $macro
+    }
+}
 
 #verilog sources
 foreach file [split $VSRC \ ] {
