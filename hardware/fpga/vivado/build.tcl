@@ -30,20 +30,24 @@ foreach file [split $VIP \ ] {
     }
 }
 
-#device data
-if {$IS_FPGA == "1"} {
-    source vivado/$BOARD/device.tcl
-}
+#set board
+source vivado/$BOARD/board.tcl
 
+#read design constraints
 if { $IS_FPGA == "1" } {
     read_xdc vivado/$BOARD/$NAME.xdc
 } else {
     read_xdc vivado/$NAME.xdc
 }
 
+#set custom assignments
 if {[file exists "vivado/custom_build.tcl"]} {
     source "vivado/custom_build.tcl"
 }
+
+#
+# Flow
+#
 
 if { $IS_FPGA == "1" } {
     synth_design -include_dirs ../src -part $PART -top $NAME -verbose
@@ -66,7 +70,7 @@ report_clock_interaction
 report_cdc -details
 
 file mkdir reports
-report_timing -file reports/timing.txt -max_paths 30
+report_timing -file reports/timing.txt -max_paths 5
 report_clocks -file reports/clocks.txt
 report_clock_interaction -file reports/clock_interaction.txt
 report_cdc -details -file reports/cdc.txt

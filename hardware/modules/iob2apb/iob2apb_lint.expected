@@ -1,0 +1,109 @@
+MORESIMPLE REPORT:
+
+
+############### BuiltIn -> RuleGroup=Design Read ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                    Alias                   Severity    File                                                                           Line    Wt    Message
+======================================================================================
+[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob2apb.v                                                                      8       2     Module iob2apb is a top level design unit
+[91]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                  2       10    Domain Matrix for design "iob2apb",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob2apb/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob2apb/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+############### Non-BuiltIn -> Goal=lint/lint_rtl ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                        Alias                 Severity       File          Line    Wt    Message
+======================================================================================
+[93]     ClkHierName                 (OpenMORE 5.2.1.7)    Guideline      iob2apb.v     28      5     Clock signal name 'clk_i[0]' does not match lower-level name 'clk_i' (instance sel_reg)
+[94]     ClkHierName                 (OpenMORE 5.2.1.7)    Guideline      iob2apb.v     40      5     Clock signal name 'clk_i[0]' does not match lower-level name 'clk_i' (instance enable_reg)
+[95]     ClkHierName                 (OpenMORE 5.2.1.7)    Guideline      iob2apb.v     52      5     Clock signal name 'clk_i[0]' does not match lower-level name 'clk_i' (instance addr_reg)
+[96]     ClkHierName                 (OpenMORE 5.2.1.7)    Guideline      iob2apb.v     64      5     Clock signal name 'clk_i[0]' does not match lower-level name 'clk_i' (instance wstrb_reg)
+[97]     ClkHierName                 (OpenMORE 5.2.1.7)    Guideline      iob2apb.v     76      5     Clock signal name 'clk_i[0]' does not match lower-level name 'clk_i' (instance write_reg)
+[98]     ClkHierName                 (OpenMORE 5.2.1.7)    Guideline      iob2apb.v     88      5     Clock signal name 'clk_i[0]' does not match lower-level name 'clk_i' (instance wdata_reg)
+[99]     ClkHierName                 (OpenMORE 5.2.1.7)    Guideline      iob2apb.v     101     5     Clock signal name 'clk_i[0]' does not match lower-level name 'clk_i' (instance ready_reg)
+[9A]     ClkHierName                 (OpenMORE 5.2.1.7)    Guideline      iob2apb.v     113     5     Clock signal name 'clk_i[0]' does not match lower-level name 'clk_i' (instance rvalid_reg)
+[9B]     ClkHierName                 (OpenMORE 5.2.1.7)    Guideline      iob2apb.v     125     5     Clock signal name 'clk_i[0]' does not match lower-level name 'clk_i' (instance rdata_reg)
+[9C]     ClkHierName                 (OpenMORE 5.2.1.7)    Guideline      iob2apb.v     138     5     Clock signal name 'clk_i[0]' does not match lower-level name 'clk_i' (instance access_reg)
+[3]      NameLength                  (OpenMORE 5.2.1.5)    Guideline      iob2apb.v     136     2     Identifier 'pc' length is not between 3 and 40 characters
+[66]     NoConstSourceInAlways-ML                          Warning        iob2apb.v     161     10    Signal 'iob_rvalid_nxt' is assigned a constant value '1'd0' in implicit always block
+[67]     NoConstSourceInAlways-ML                          Warning        iob2apb.v     174     10    Signal 'apb_sel_nxt' is assigned a constant value '1'b1' in implicit always block
+[68]     NoConstSourceInAlways-ML                          Warning        iob2apb.v     176     10    Signal 'iob_ready_nxt' is assigned a constant value '1'b0' in implicit always block
+[69]     NoConstSourceInAlways-ML                          Warning        iob2apb.v     180     10    Signal 'apb_enable_nxt' is assigned a constant value '1'b1' in implicit always block
+[6A]     NoConstSourceInAlways-ML                          Warning        iob2apb.v     185     10    Signal 'iob_rvalid_nxt' is assigned a constant value '1'b1' in implicit always block
+[6B]     NoConstSourceInAlways-ML                          Warning        iob2apb.v     186     10    Signal 'iob_ready_nxt' is assigned a constant value '1'b1' in implicit always block
+[6C]     NoConstSourceInAlways-ML                          Warning        iob2apb.v     187     10    Signal 'pc_nxt' is assigned a constant value '1'd0' in implicit always block
+[6D]     NoConstSourceInAlways-ML                          Warning        iob2apb.v     188     10    Signal 'apb_sel_nxt' is assigned a constant value '1'b0' in implicit always block
+[6E]     NoConstSourceInAlways-ML                          Warning        iob2apb.v     189     10    Signal 'apb_enable_nxt' is assigned a constant value '1'b0' in implicit always block
+[2]      NoTopLogic                  (OpenMORE 5.6.8.1)    Guideline      iob2apb.v     149     5     Logic inferred at the top level
+[4]      STARC-3.2.2.1               ParameterConstant     Recommended    iob2apb.v     65      2     Constant '8' is not parameterized
+[5]      W34                                               Info           iob_lib.vh    2       2     Macro 'LIBINC' is never used
+[6]      W34                                               Info           iob_lib.vh    8       2     Macro 'IOB_MAX' is never used
+[7]      W34                                               Info           iob_lib.vh    9       2     Macro 'IOB_MIN' is never used
+[8]      W34                                               Info           iob_lib.vh    10      2     Macro 'IOB_ABS' is never used
+[9]      W34                                               Info           iob_lib.vh    11      2     Macro 'IOB_MUX2' is never used
+[A]      W34                                               Info           iob_lib.vh    13      2     Macro 'IOB_MUX' is never used
+[B]      W34                                               Info           iob_lib.vh    14      2     Macro 'IOB_DEMUX' is never used
+[C]      W34                                               Info           iob_lib.vh    18      2     Macro 'IOB_INPUT_SIGNED' is never used
+[D]      W34                                               Info           iob_lib.vh    19      2     Macro 'IOB_OUTPUT' is never used
+[E]      W34                                               Info           iob_lib.vh    20      2     Macro 'IOB_OUTPUT_VAR' is never used
+[F]      W34                                               Info           iob_lib.vh    21      2     Macro 'IOB_INOUT' is never used
+[10]     W34                                               Info           iob_lib.vh    25      2     Macro 'IOB_WIRE_SIGNED' is never used
+[11]     W34                                               Info           iob_lib.vh    27      2     Macro 'IOB_VAR_SIGNED' is never used
+[12]     W34                                               Info           iob_lib.vh    28      2     Macro 'IOB_VAR2WIRE' is never used
+[13]     W34                                               Info           iob_lib.vh    30      2     Macro 'IOB_WIREARRAY_2D' is never used
+[14]     W34                                               Info           iob_lib.vh    31      2     Macro 'IOB_WIREARRAY_2D_SIGNED' is never used
+[15]     W34                                               Info           iob_lib.vh    32      2     Macro 'IOB_VARARRAY_2D' is never used
+[16]     W34                                               Info           iob_lib.vh    33      2     Macro 'IOB_VARARRAY_2D_SIGNED' is never used
+[17]     W34                                               Info           iob_lib.vh    36      2     Macro 'IOB_NBYTES' is never used
+[18]     W34                                               Info           iob_lib.vh    37      2     Macro 'IOB_NBYTES_W' is never used
+[19]     W34                                               Info           iob_lib.vh    38      2     Macro 'IOB_BYTE_OFFSET' is never used
+[1A]     W34                                               Info           iob_lib.vh    39      2     Macro 'IOB_WORD_ADDR' is never used
+[1B]     W34                                               Info           iob_lib.vh    40      2     Macro 'IOB_GET_NBYTES' is never used
+[1C]     W34                                               Info           iob_lib.vh    41      2     Macro 'IOB_GET_WDATA' is never used
+[1D]     W34                                               Info           iob_lib.vh    42      2     Macro 'IOB_GET_WSTRB' is never used
+[1E]     W34                                               Info           iob_lib.vh    43      2     Macro 'IOB_GET_RDATA' is never used
+[1F]     W34                                               Info           iob_lib.vh    51      2     Macro 'IOB_VAR_INIT' is never used
+[20]     W34                                               Info           iob_lib.vh    54      2     Macro 'IOB_CLOCK' is never used
+[21]     W34                                               Info           iob_lib.vh    57      2     Macro 'IOB_PULSE' is never used
+[22]     W34                                               Info           iob_lib.vh    60      2     Macro 'IOB_RESET_SYNC' is never used
+[23]     W34                                               Info           iob_lib.vh    70      2     Macro 'VALID_W' is never used
+[24]     W34                                               Info           iob_lib.vh    71      2     Macro 'WSTRB_W_' is never used
+[25]     W34                                               Info           iob_lib.vh    72      2     Macro 'READY_W' is never used
+[26]     W34                                               Info           iob_lib.vh    74      2     Macro 'WRITE_W_' is never used
+[27]     W34                                               Info           iob_lib.vh    75      2     Macro 'READ_W_' is never used
+[28]     W34                                               Info           iob_lib.vh    79      2     Macro 'WDATA_P_' is never used
+[29]     W34                                               Info           iob_lib.vh    80      2     Macro 'ADDR_P_' is never used
+[2A]     W34                                               Info           iob_lib.vh    81      2     Macro 'AVALID_P_' is never used
+[2B]     W34                                               Info           iob_lib.vh    83      2     Macro 'RDATA_P' is never used
+[2C]     W34                                               Info           iob_lib.vh    88      2     Macro 'REQ_W_' is never used
+[2D]     W34                                               Info           iob_lib.vh    90      2     Macro 'RESP_W_' is never used
+[2E]     W34                                               Info           iob_lib.vh    97      2     Macro 'REQ_' is never used
+[2F]     W34                                               Info           iob_lib.vh    100     2     Macro 'RESP_' is never used
+[30]     W34                                               Info           iob_lib.vh    103     2     Macro 'AVALID_' is never used
+[31]     W34                                               Info           iob_lib.vh    106     2     Macro 'ADDRESS_' is never used
+[32]     W34                                               Info           iob_lib.vh    109     2     Macro 'WDATA_' is never used
+[33]     W34                                               Info           iob_lib.vh    112     2     Macro 'WSTRB_' is never used
+[34]     W34                                               Info           iob_lib.vh    115     2     Macro 'WRITE_' is never used
+[35]     W34                                               Info           iob_lib.vh    118     2     Macro 'RDATA_' is never used
+[36]     W34                                               Info           iob_lib.vh    121     2     Macro 'RVALID_' is never used
+[37]     W34                                               Info           iob_lib.vh    124     2     Macro 'READY_' is never used
+[38]     W34                                               Info           iob_lib.vh    130     2     Macro 'WSTRB_W' is never used
+[39]     W34                                               Info           iob_lib.vh    132     2     Macro 'WRITE_W' is never used
+[3A]     W34                                               Info           iob_lib.vh    133     2     Macro 'READ_W' is never used
+[3B]     W34                                               Info           iob_lib.vh    135     2     Macro 'WDATA_P' is never used
+[3C]     W34                                               Info           iob_lib.vh    136     2     Macro 'ADDR_P' is never used
+[3D]     W34                                               Info           iob_lib.vh    137     2     Macro 'AVALID_P' is never used
+[3E]     W34                                               Info           iob_lib.vh    139     2     Macro 'REQ_W' is never used
+[3F]     W34                                               Info           iob_lib.vh    140     2     Macro 'RESP_W' is never used
+[40]     W34                                               Info           iob_lib.vh    142     2     Macro 'REQ' is never used
+[41]     W34                                               Info           iob_lib.vh    143     2     Macro 'RESP' is never used
+[42]     W34                                               Info           iob_lib.vh    144     2     Macro 'AVALID' is never used
+[43]     W34                                               Info           iob_lib.vh    145     2     Macro 'ADDRESS' is never used
+[44]     W34                                               Info           iob_lib.vh    146     2     Macro 'WDATA' is never used
+[45]     W34                                               Info           iob_lib.vh    147     2     Macro 'WSTRB' is never used
+[46]     W34                                               Info           iob_lib.vh    148     2     Macro 'WRITE' is never used
+[47]     W34                                               Info           iob_lib.vh    149     2     Macro 'RDATA' is never used
+[48]     W34                                               Info           iob_lib.vh    150     2     Macro 'RVALID' is never used
+[49]     W34                                               Info           iob_lib.vh    151     2     Macro 'READY' is never used
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -81,7 +81,7 @@ def hw_setup(python_module):
             if os.path.isfile(f"{build_dir}/hardware/fpga/src/{file}"): os.remove(f"{build_dir}/hardware/fpga/src/{file}")
 
     # Copy LIB hw files
-    copy_files( f"{LIB_DIR}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
+    copy_files( f"{LIB_DIR}/hardware/modules", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
     # Copy Setup hw files
     copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
 
