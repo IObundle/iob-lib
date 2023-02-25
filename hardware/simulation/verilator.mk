@@ -8,6 +8,10 @@ VFLAGS+=-CFLAGS "-I../../../software/esrc"
 
 VFLAGS+=$(DEFINES)
 
+# Set build-time defines from the build_defines.txt file
+VFLAGS+=$(addprefix -D,$(file < ../../build_defines.txt))
+VFLAGS+=-CFLAGS "$(addprefix -D,$(file < ../../build_defines.txt))"
+
 ifeq ($(VCD),1)
 VFLAGS+=--trace
 VFLAGS+=-DVCD -CFLAGS "-DVCD"

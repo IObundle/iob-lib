@@ -24,6 +24,9 @@ ifeq ($(SYN),1)
 VFLAGS+=-define SYN
 endif
 
+# Set build-time defines from the build_defines.txt file
+VFLAGS+=$(addprefix -define ,$(file < ../../build_defines.txt))
+
 comp: $(VHDR) $(VSRC)
 	xmvlog $(VFLAGS) $(VSRC) && xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 
