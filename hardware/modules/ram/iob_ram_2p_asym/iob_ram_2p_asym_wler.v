@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "iob_lib.vh"
 
 module iob_ram_2p_asym_wler
   #(

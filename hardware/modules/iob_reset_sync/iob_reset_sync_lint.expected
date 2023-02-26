@@ -6,14 +6,15 @@ MORESIMPLE REPORT:
 ID       Rule                    Alias                   Severity    File                                                                                  Line    Wt    Message
 ======================================================================================
 [1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob_reset_sync.v                                                                      3       2     Module iob_reset_sync is a top level design unit
-[22]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                         2       10    Domain Matrix for design "iob_reset_sync",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[10]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                         2       10    Domain Matrix for design "iob_reset_sync",  based on the individual constraints defined in the SDC as inferred in the Sta mode
 [0]      ElabSummary             ElabSummary             Info        ./spyglass/iob_reset_sync/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob_reset_sync/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 ############### Non-BuiltIn -> Goal=lint/lint_rtl ###############
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-ID       Rule                Alias    Severity    File         Line    Wt    Message
+ID       Rule                Alias                  Severity     File                Line    Wt    Message
 ======================================================================================
-[24]     FlopDataConstant             Warning     iob_reg.v    21      10    Data pin D on Flop iob_reset_sync.sync_reg[0] (master RTL_FDPE) is tiedlow(connected to iob_reset_sync.data[0])
+[12]     FlopDataConstant                           Warning      iob_reset_sync.v    16      10    Data pin D on Flop iob_reset_sync.sync_reg[0] (master RTL_FDP) is tiedlow(connected to iob_reset_sync.VSS)
+[F]      RegOutName          (OpenMORE 5.2.1.13)    Guideline    iob_reset_sync.v    16      5     Register output name 'sync_reg' should end with regular expression /^(.*)_o/
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

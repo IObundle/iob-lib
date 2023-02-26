@@ -4,24 +4,19 @@ module iob_reset_sync
   (
     input  clk_i,
     input  arst_i,
-    input  cke_i,
-    output rst_o
+    output arst_o
   );
 
-  wire [1:0] sync_reg;
-  wire [1:0] data;
-  assign data = {sync_reg[0], 1'b0};
+  reg [1:0] sync;
 
-  iob_reg #(2, 2'd3) reg0
-  (
-    .clk_i(clk_i),
-    .arst_i(arst_i),
-    .cke_i(cke_i),
+  always @(posedge clk_i, posedge arst_i) begin
+    if (arst_i) begin
+      sync <= 2'd3;
+    end else begin
+      sync <= {sync[0], 1'b0};
+    end
+  end
 
-    .data_i(data),
-    .data_o(sync_reg)
-  );
-
-  assign rst_o = sync_reg[1];
+  assign arst_o = sync[1];
 
 endmodule
