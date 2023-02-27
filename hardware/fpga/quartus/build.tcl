@@ -3,7 +3,7 @@ set NAME [lindex $argv 0]
 set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
 set DEFINES [lindex $argv 3]
-set QIP [lindex $argv 4]
+set IP [lindex $argv 4]
 set IS_FPGA [lindex $argv 5]
 set USE_EXTMEM [lindex $argv 6]
 set SEED [lindex $argv 7]
@@ -29,11 +29,9 @@ set_global_assignment -name SEARCH_PATH ../src
 set_global_assignment -name SEARCH_PATH ./src
 
 #quartus IPs
-foreach q_file [split $QIP \ ] {
-    if { [ file extension $q_file ] == ".qip" } {
-        set_global_assignment -name QIP_FILE $q_file
-    } elseif { [ file extension $q_file ] == ".qxp" } {
-        set_global_assignment -name QXP_FILE $q_file
+foreach q_file [split $IP \ ] {
+    if { [ file extension $q_file ] == ".qsys" } {
+        set_global_assignment -name QSYS_FILE $q_file
     }
 }
 
