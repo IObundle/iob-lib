@@ -32,15 +32,14 @@ foreach file [split $VIP \ ] {
     }
 }
 
-#set board
+#read board propreties
 source vivado/$BOARD/board.tcl
 
+#set FPGA device
+set_property part $PART [current_project]
+
 #read design constraints
-if { $IS_FPGA == "1" } {
-    read_xdc vivado/$BOARD/$NAME.xdc
-} else {
-    read_xdc vivado/$NAME.xdc
-}
+read_xdc vivado/$BOARD/$NAME.xdc
 
 #set custom assignments
 if {[file exists "vivado/custom_build.tcl"]} {
@@ -72,7 +71,7 @@ report_clock_interaction
 report_cdc -details
 
 file mkdir reports
-report_timing -file reports/timing.txt -max_paths 5
+report_timing -file reports/timing.txt -max_paths 30
 report_clocks -file reports/clocks.txt
 report_clock_interaction -file reports/clock_interaction.txt
 report_cdc -details -file reports/cdc.txt
