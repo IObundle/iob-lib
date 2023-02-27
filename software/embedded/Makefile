@@ -23,6 +23,9 @@ LFLAGS ?= -Wl,-Bstatic,-T,$(TEMPLATE_LDS),--strip-debug
 LLIBS ?=-lgcc -lc -lnosys
 INCLUDES ?=-I. -I../esrc
 
+# Set build-time defines from the build_defines.txt file
+CFLAGS+=$(addprefix -D,$(file < ../../build_defines.txt))
+
 # include local build segment
 # all previously defined variables can be overwritten in this file
 ifneq ($(wildcard embed_build.mk),)

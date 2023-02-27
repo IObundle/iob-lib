@@ -34,15 +34,7 @@ setup: debug
 
 $(BUILD_DIR):
 	$(PYTHON_EXEC) ./$(SETUP_PYTHON_FILENAME) $(SETUP_ARGS)
-#
-#HARDWARE
-#
-# include local setup makefile segment
 
-#
-#SOFTWARE
-#
-# include local setup makefile segment
 
 #
 #DOCUMENT
@@ -75,17 +67,8 @@ SRC+=$(BUILD_DIR)/doc/quartus.tex
 endif
 
 ifeq ($(AMD_FPGA),1)
-$(BUILD_DIR)/doc/vivado.tex
+SRC+=$(BUILD_DIR)/doc/vivado.tex
 endif
-
-#
-# DELIVERY 
-#
-
-ifneq ($(wildcard config_delivery.mk),)
-include config_delivery.mk
-endif
-
 
 # generate quartus fitting results 
 $(BUILD_DIR)/doc/quartus.tex:
@@ -99,6 +82,15 @@ $(BUILD_DIR)/doc/vivado.tex:
 	LOG=$(BUILD_FPGA_DIR)/vivado.log $(LIB_DIR)/scripts/vivado2tex.sh
 	mv `basename $@` $(BUILD_DOC_DIR)
 
+endif
+
+
+#
+# DELIVERY 
+#
+
+ifneq ($(wildcard config_delivery.mk),)
+include config_delivery.mk
 endif
 
 

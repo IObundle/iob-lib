@@ -14,6 +14,9 @@ endif
 # compiler flags
 CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
 
+# Set build-time defines from the build_defines.txt file
+CFLAGS+=$(addprefix -D,$(file < ../../build_defines.txt))
+
 CONSOLE_CMD=../../scripts/console.py -L
 
 INCLUDE=-I.

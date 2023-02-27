@@ -39,7 +39,7 @@ DEFINE+= -DVCD
 endif
 
 # Includes
-INCLUDE=-Ihardware/include
+INCLUDE=-Ihardware/modules
 
 # asymmetric memory present
 IS_ASYM ?= 0

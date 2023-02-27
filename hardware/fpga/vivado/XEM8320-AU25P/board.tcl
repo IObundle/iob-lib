@@ -1,1 +1,2 @@
-set PART xcau25p-2ffvb676e-1-c
+set PART xcau25p-1CSGSPBGA1156-1
+

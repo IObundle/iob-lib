@@ -2,13 +2,15 @@
 set NAME [lindex $argv 0]
 set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
-set VIP [lindex $argv 3]
-set IS_FPGA [lindex $argv 4]
-set CUSTOM_ARGS [lindex $argv 5]
+set DEFINES [lindex $argv 3]
+set VIP [lindex $argv 4]
+set IS_FPGA [lindex $argv 5]
+set CUSTOM_ARGS [lindex $argv 6]
 
 puts $NAME
 puts $BOARD
 puts $VSRC
+puts $DEFINES
 puts $VIP
 puts $IS_FPGA
 puts $CUSTOM_ARGS
@@ -49,9 +51,9 @@ if {[file exists "vivado/custom_build.tcl"]} {
 #
 
 if { $IS_FPGA == "1" } {
-    synth_design -include_dirs ../src -part $PART -top $NAME -verbose
+    synth_design -include_dirs ../src -include_dirs ./src -verilog_define $DEFINES -part $PART -top $NAME -verbose
 } else {
-    synth_design -include_dirs ../src -part $PART -top $NAME -mode out_of_context -flatten_hierarchy none -verbose
+    synth_design -include_dirs ../src -include_dirs ./src -verilog_define $DEFINES -part $PART -top $NAME -mode out_of_context -flatten_hierarchy none -verbose
 }
 
 opt_design
