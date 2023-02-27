@@ -17,7 +17,7 @@ ENQ = b'\x05' # Enquiry in Hexadecimal
 ACK = b'\x06' # Acknowledgement in Hexadecimal
 FTX = b'\x07' # Receive file request
 FRX = b'\x08' # Send file request
-DC1 = b'\x11' # Device Control 1 <-> End of file transfers
+DC1 = b'\x11' # Device Control 1 <-> Receive request to disable iob-soc exclusive message identifiers
 
 
 def tb_write(data, number_of_bytes = 1, is_file = False):
@@ -281,7 +281,7 @@ def main():
             cnsl_sendfile()
         elif (byte == DC1):
             print(PROGNAME, end = '')
-            print(': end of file transfer')
+            print(': received request to disable iob-soc exclusive message identifiers')
             endFileTransfer()
             print(PROGNAME, end = '')
             print(': start reading user input')
