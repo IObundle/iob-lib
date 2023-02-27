@@ -49,6 +49,15 @@ foreach file [split $VSRC \ ] {
     }
 }
 
+
+
+if {$IS_FPGA != "1"} {
+    set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+    set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id $NAME:$NAME
+    set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+}
+
+
 set_global_assignment -name SDC_FILE quartus/$BOARD/$NAME.sdc
 
 set USE_QUARTUS_PRO 0
@@ -92,7 +101,7 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_sta] -t quartus/timing.
 }
 
 if {$IS_FPGA != "1"} {
-    if [catch {qexec "[file join $::quartus(binpath) quartus_eda] --resynthesis --format verilog $NAME"} result] {
+    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
         qexit -error
     }
 } else {
