@@ -13,7 +13,7 @@ FPGA_SYNC_FLAGS=$(QUARTUS_SYNC_FLAGS)
 ifeq ($(IS_FPGA),1)
 FPGA_OBJ:=$(FPGA_TOP).sof
 else
-FPGA_OBJ:=$(FPGA_TOP).qxp
+FPGA_OBJ:=resynthesis/$(FPGA_TOP).vqm
 endif
 
 
@@ -24,7 +24,6 @@ QUARTUS_FLAGS = -t quartus/build.tcl $(FPGA_TOP) $(BOARD) "$(VSRC)" "$(IP)" $(IS
 
 $(FPGA_OBJ): $(VHDR) $(VSRC) $(IP) $(wildcard $(BOARD)/*.sdc)
 	$(FPGA_ENV) quartus_sh $(QUARTUS_FLAGS)
-	@if [ -f reports/$(FPGA_OBJ) ]; then mv reports/$(FPGA_OBJ) $(FPGA_OBJ); fi
 
 quartus-clean:
 	@rm -rf incremental_db db reports

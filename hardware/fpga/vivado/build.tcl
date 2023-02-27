@@ -69,7 +69,7 @@ report_clock_interaction
 report_cdc -details
 
 file mkdir reports
-report_timing -file reports/timing.txt -max_paths 5
+report_timing -file reports/timing.txt -max_paths 30
 report_clocks -file reports/clocks.txt
 report_clock_interaction -file reports/clock_interaction.txt
 report_cdc -details -file reports/cdc.txt
