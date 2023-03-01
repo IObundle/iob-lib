@@ -102,16 +102,12 @@ module iob_fifo_sync_tb;
       end
       w_en = 0;
 
-      if(w_full != 1) begin
-         $display("ERROR: write proc: expecting w_full=1");
-         $fatal;
-      end
+      if(w_full != 1)
+         $fatal(1, "ERROR: write proc: expecting w_full=1");
       $display("INFO: write proc: w_full=1 as expected");
 
-      if(level != 2**ADDR_W) begin
-         $display("ERROR: write proc: expecting level = %.0f, but got level=%d", 2**ADDR_W, level);
-         $fatal;
-      end
+      if(level != 2**ADDR_W)
+         $fatal(1, "ERROR: write proc: expecting level = %.0f, but got level=%d", 2**ADDR_W, level);
       $display("INFO: write proc: level = %.0f as expected", 2**ADDR_W);
 
       //enable reads and wait for empty
@@ -157,10 +153,8 @@ module iob_fifo_sync_tb;
       while(!r_empty)  @(posedge clk) #1;
       $display("INFO: read proc: r_empty = 1 as expected");
 
-      if(level != 0) begin
-         $display("ERROR: read proc: expecting level = 0, but got level=%d", level);
-         $fatal;
-      end
+      if(level != 0)
+         $fatal(1, "ERROR: read proc: expecting level = 0, but got level=%d", level);
       $display("INFO: read proc: level = 0 as expected");
 
       //read data continuously from the FIFO
@@ -174,8 +168,7 @@ module iob_fifo_sync_tb;
 
       if(read !== test_data) begin
          $display("ERROR: read proc: data read does not match the test data.");
-         $display("read proc: data read XOR test data: %x", read^test_data);
-         $fatal;
+         $fatal(1, "read proc: data read XOR test data: %x", read^test_data);
       end
       $display("INFO: read proc: data read matches test data as expected");
 
