@@ -2,15 +2,17 @@
 
 module iob_ram_2p_asym_wgtr
   #(
-    parameter W_DATA_W = 0,
-    parameter R_DATA_W = 0,
-    parameter ADDR_W = 0, //higher ADDR_W (lower DATA_W)
+    parameter W_DATA_W = 42,
+    parameter R_DATA_W = 21,
+    parameter ADDR_W = 3, //higher ADDR_W (lower DATA_W)
     parameter R = W_DATA_W/R_DATA_W,
     parameter W_ADDR_W = ADDR_W-$clog2(R), //lower ADDR_W (higher DATA_W)
     parameter R_ADDR_W = ADDR_W
   )
   (
     input                 clk_i,
+    input                 arst_i,
+    input                 cke_i,
 
     //write port
     input                 w_en_i,
@@ -38,17 +40,17 @@ module iob_ram_2p_asym_wgtr
   assign ext_mem_w_addr_o = w_addr_i;
   assign ext_mem_w_data_o = w_data_i;
 
-   //register to hold the r_addr_i
-  wire [R_ADDR_W-1:0] r_addr_reg;
-  iob_reg_r #(
-    .DATA_W(R_ADDR_W)
+   //register to hold the LSBs of r_addr_i
+  wire [$clog2(R)-1:0] r_addr_lsbs_reg;
+  iob_reg #(
+    .DATA_W($clog2(R)),
+    .RST_VAL({$clog2(R){1'd0}})
   ) r_addr_reg_inst (
     .clk_i(clk_i),
-    .arst_i(1'b0),
-    .cke_i(1'b1),
-    .rst_i(1'b0),
-    .data_i(r_addr_i),
-    .data_o(r_addr_reg)
+    .arst_i(arst_i),
+    .cke_i(cke_i),
+    .data_i(r_addr_i[$clog2(R)-1:0]),
+    .data_o(r_addr_lsbs_reg)
   );
 
    //memory read port
@@ -58,8 +60,8 @@ module iob_ram_2p_asym_wgtr
         assign ext_mem_r_en_o = r_en_i;
         assign r_data = ext_mem_r_data_i;
     end else begin
-        assign ext_mem_r_en_o = r_en_i << r_addr_i[$clog2(R)-1:0];
-        assign r_data = ext_mem_r_data_i >> (r_addr_reg[$clog2(R)-1:0]*R_DATA_W);
+        assign ext_mem_r_en_o = {{(R-1){1'd0}},r_en_i} << r_addr_i[$clog2(R)-1:0];
+        assign r_data = ext_mem_r_data_i >> (r_addr_lsbs_reg*R_DATA_W);
     end
   endgenerate
   

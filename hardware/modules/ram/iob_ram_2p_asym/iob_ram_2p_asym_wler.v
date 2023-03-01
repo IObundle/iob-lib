@@ -2,9 +2,9 @@
 
 module iob_ram_2p_asym_wler
   #(
-    parameter W_DATA_W = 0,
-    parameter R_DATA_W = 0,
-    parameter ADDR_W = 0,//higher ADDR_W (lower DATA_W)
+    parameter W_DATA_W = 21,
+    parameter R_DATA_W = 42,
+    parameter ADDR_W = 3,//higher ADDR_W (lower DATA_W)
     parameter R = R_DATA_W/W_DATA_W,
     parameter R_ADDR_W = ADDR_W-$clog2(R),//lower ADDR_W (higher DATA_W)
     parameter W_ADDR_W = ADDR_W
@@ -37,8 +37,8 @@ module iob_ram_2p_asym_wler
          assign ext_mem_w_en_o = w_en_i;
          assign ext_mem_w_data_o = w_data_i;
       end else begin
-         assign ext_mem_w_en_o = w_en_i << w_addr_i[$clog2(R)-1:0];
-         assign ext_mem_w_data_o = w_data_i << (w_addr_i[$clog2(R)-1:0]*W_DATA_W);
+         assign ext_mem_w_en_o = {{(R-1){1'd0}},w_en_i} << w_addr_i[$clog2(R)-1:0];
+         assign ext_mem_w_data_o = {{(R_DATA_W-W_DATA_W){1'd0}},w_data_i} << (w_addr_i[$clog2(R)-1:0]*W_DATA_W);
       end
    endgenerate
    

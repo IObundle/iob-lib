@@ -158,6 +158,8 @@ module iob_fifo_sync
         .ADDR_W    (ADDR_W)
       ) iob_ram_2p_asym0 (
         .clk_i            (clk_i),
+        .arst_i           (arst_i),
+        .cke_i            (cke_i),
 
         .ext_mem_w_en_o   (ext_mem_w_en_o),
         .ext_mem_w_data_o (ext_mem_w_data_o),

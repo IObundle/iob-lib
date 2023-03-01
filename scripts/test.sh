@@ -21,5 +21,4 @@ for i in $MODULES; do
    fi
 
    make sim MODULE=$i IS_ASYM=$IS_ASYM VCD=0
-   echo $?
 done
