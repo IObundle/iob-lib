@@ -116,6 +116,8 @@ module iob_ram_2p_asym_tb;
          uut
            (
             .clk_i            (clk),
+            .arst_i           (1'd0),
+            .cke_i            (1'd1),
 
             .ext_mem_w_en_o   (ext_mem_w_en),
             .ext_mem_w_data_o (ext_mem_w_data),
