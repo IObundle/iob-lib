@@ -509,6 +509,8 @@ def create_signal_table(interface_name):
 # Write to .vh file
 #
 
+# port_prefix: Prefix for ports in a portmap file.
+# wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vh` file; Prefix for ports in a `*port.vh` file (these ports also create wires);
 def write_vh_contents(interface_name, port_prefix, wire_prefix, file_object, bus_size=1, bus_start=0):
     func_name = interface_name.replace("axil_", "").replace("axi_", "").replace("write_", "").replace("read_", "").replace("iob_", "").replace("apb_", "").replace("ahb_", "")
     if (interface_name.find("portmap")+1):

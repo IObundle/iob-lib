@@ -97,7 +97,7 @@ def generate_ios_header(ios, top_module, out_dir):
         if_prefix, if_name = find_suffix_from_list(table['name'], if_gen.interfaces) 
         if if_name:
             if_gen.create_signal_table(if_name)
-            if_gen.write_vh_contents(if_name, f"{if_name+'_' if ios_table_prefix else ''}{if_prefix}", '', f_io)
+            if_gen.write_vh_contents(if_name, '', f"{if_name+'_' if ios_table_prefix else ''}{if_prefix}", f_io)
         else:
             # Interface is not standard, read ports
             for port in table['ports']:
