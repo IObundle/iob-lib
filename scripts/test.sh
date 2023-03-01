@@ -21,6 +21,7 @@ for i in $MODULES; do
    fi
 
    make sim MODULE=$i IS_ASYM=$IS_ASYM VCD=0 TEST_LOG="| tee -a test.log"
+   echo $?
 done
 
 if [ `grep -c "ERROR" test.log` != 0 ]; then exit 1; fi
