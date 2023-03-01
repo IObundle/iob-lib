@@ -89,7 +89,11 @@ else
 	./a.out $(TEST_LOG) && if [ $(VCD) != 0 ]; then mv uut.vcd uut3.vcd; fi
 endif
 ifeq ($(VCD),1)
+ifeq ($(IS_ASYM),0)
 	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &
+else
+	@if [ ! `pgrep gtkwave` ]; then gtkwave uut1.vcd; fi &
+endif
 endif
 
 test:
