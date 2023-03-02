@@ -4,7 +4,7 @@
 // test defines
 `define MAXADDR_W 10
 
-module iob_ram_2p_asym_tb;
+module iob_asym_converter_tb;
 
    // determine W_ADDR_W and R_ADDR_W
    localparam W_DATA_W = `W_DATA_W;
@@ -106,7 +106,7 @@ module iob_ram_2p_asym_tb;
    end
 
    // instantiate the Unit Under Test (UUT)
-   iob_ram_2p_asym #(
+   iob_asym_converter #(
       .W_DATA_W(W_DATA_W),
       .R_DATA_W(R_DATA_W),
       .ADDR_W(MAXADDR_W)

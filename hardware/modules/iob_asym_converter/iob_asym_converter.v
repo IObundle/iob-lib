@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 `include "iob_lib.vh"
 
-module iob_ram_2p_asym
+module iob_asym_converter
   #(
     parameter
     W_DATA_W = 42,
@@ -83,7 +83,7 @@ module iob_ram_2p_asym
       assign ext_mem_r_en_o = {R{r_en_i}};
       assign ext_mem_r_addr_o = r_addr_i;
       assign r_data_o = ext_mem_r_data_i;
-      
+
     end else begin //W_DATA_W == R_DATA_W
       //memory write port
       assign ext_mem_w_en_o = w_en_i;

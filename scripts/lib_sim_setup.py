@@ -16,7 +16,7 @@ def lib_sim_setup (module_name, dest_srcs_dir):
     # Copy TB
     copy_files(lib_dir, dest_srcs_dir, [], f"{module_name}_tb.v", copy_all = True)
     # Copy LIB hw files
-    copy_files( "hardware/include", dest_srcs_dir, [], '*.vh', copy_all = True )
+    copy_files( "hardware/modules", dest_srcs_dir, [], 'iob_lib.vh', copy_all = True )
     
 if __name__ == "__main__":
     lib_sim_setup(sys.argv[1], sys.argv[2])

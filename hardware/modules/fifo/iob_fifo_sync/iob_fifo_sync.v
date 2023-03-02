@@ -151,11 +151,11 @@ module iob_fifo_sync
   );
 
   //FIFO memory
-  iob_ram_2p_asym #(
+  iob_asym_converter #(
     .W_DATA_W  (W_DATA_W),
     .R_DATA_W  (R_DATA_W),
     .ADDR_W    (ADDR_W)
-  ) iob_ram_2p_asym0 (
+  ) iob_asym_converter0 (
     .clk_i            (clk_i),
     .arst_i           (arst_i),
     .cke_i            (cke_i),
