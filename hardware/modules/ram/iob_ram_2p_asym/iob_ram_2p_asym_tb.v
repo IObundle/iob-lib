@@ -34,6 +34,7 @@ module iob_ram_2p_asym_tb;
 
    // external memory 
    // write port
+   wire ext_mem_clk;
    wire [R-1:0] ext_mem_w_en;
    wire [MINADDR_W-1:0] ext_mem_w_addr;
    wire [MAXDATA_W-1:0] ext_mem_w_data;
@@ -95,7 +96,7 @@ module iob_ram_2p_asym_tb;
          r_data_expected = test_data[i*R_DATA_W +: R_DATA_W];
          if(r_data !== r_data_expected) begin
             $display("Read addr=%x, got %x, expected %x", r_addr, r_data, r_data_expected);
-            $error("Test failed");
+            $fatal(1, "Test failed");
          end
       end
 
@@ -105,80 +106,48 @@ module iob_ram_2p_asym_tb;
    end
 
    // instantiate the Unit Under Test (UUT)
-   generate
-      if (W_DATA_W > R_DATA_W) begin
-         iob_ram_2p_asym_wgtr
-           #(
-             .W_DATA_W(W_DATA_W),
-             .R_DATA_W(R_DATA_W),
-             .ADDR_W(MAXADDR_W)
-             )
-         uut
-           (
-            .clk_i            (clk),
-            .arst_i           (1'd0),
-            .cke_i            (1'd1),
+   iob_ram_2p_asym #(
+      .W_DATA_W(W_DATA_W),
+      .R_DATA_W(R_DATA_W),
+      .ADDR_W(MAXADDR_W)
+   ) uut (
+      .clk_i            (clk),
+      .arst_i           (1'd0),
+      .cke_i            (1'd1),
 
-            .ext_mem_w_en_o   (ext_mem_w_en),
-            .ext_mem_w_data_o (ext_mem_w_data),
-            .ext_mem_w_addr_o (ext_mem_w_addr),
-            .ext_mem_r_en_o   (ext_mem_r_en),
-            .ext_mem_r_addr_o (ext_mem_r_addr),
-            .ext_mem_r_data_i (ext_mem_r_data),
+      .ext_mem_clk_o    (ext_mem_clk),
+      .ext_mem_w_en_o   (ext_mem_w_en),
+      .ext_mem_w_data_o (ext_mem_w_data),
+      .ext_mem_w_addr_o (ext_mem_w_addr),
+      .ext_mem_r_en_o   (ext_mem_r_en),
+      .ext_mem_r_addr_o (ext_mem_r_addr),
+      .ext_mem_r_data_i (ext_mem_r_data),
 
-            .w_en_i           (w_en),
-            .w_addr_i         (w_addr),
-            .w_data_i         (w_data),
+      .w_en_i           (w_en),
+      .w_addr_i         (w_addr),
+      .w_data_i         (w_data),
 
-            .r_en_i           (r_en),
-            .r_addr_i         (r_addr),
-            .r_data_o         (r_data)
-            );
-      end else begin
-         iob_ram_2p_asym_wler
-           #(
-             .W_DATA_W(W_DATA_W),
-             .R_DATA_W(R_DATA_W),
-             .ADDR_W(MAXADDR_W)
-             )
-         uut
-           (
-            .ext_mem_w_en_o   (ext_mem_w_en),
-            .ext_mem_w_data_o (ext_mem_w_data),
-            .ext_mem_w_addr_o (ext_mem_w_addr),
-            .ext_mem_r_en_o   (ext_mem_r_en),
-            .ext_mem_r_addr_o (ext_mem_r_addr),
-            .ext_mem_r_data_i (ext_mem_r_data),
-
-            .w_en_i           (w_en),
-            .w_addr_i         (w_addr),
-            .w_data_i         (w_data),
-
-            .r_en_i           (r_en),
-            .r_addr_i         (r_addr),
-            .r_data_o         (r_data)
-            );
-      end
-   endgenerate
+      .r_en_i           (r_en),
+      .r_addr_i         (r_addr),
+      .r_data_o         (r_data)
+   );
 
    genvar p;
-   generate
-      for(p=0; p < R; p=p+1) begin
-         iob_ram_2p
-            #(
-              .DATA_W(MINDATA_W),
-              .ADDR_W(MINADDR_W)
-              )
-         iob_ram_2p_inst
-            (
-             .clk_i     (clk),
-             .w_en_i    (ext_mem_w_en[p]),
-             .w_addr_i  (ext_mem_w_addr),
-             .w_data_i  (ext_mem_w_data[p*MINDATA_W +: MINDATA_W]),
-             .r_en_i    (ext_mem_r_en[p]),
-             .r_addr_i  (ext_mem_r_addr),
-             .r_data_o  (ext_mem_r_data[p*MINDATA_W +: MINDATA_W])
+   generate 
+      for(p = 0;p < R; p = p + 1) begin
+         iob_ram_2p #(
+            .DATA_W(MINDATA_W),
+            .ADDR_W(MINADDR_W)
+         ) iob_ram_2p_inst (
+            .clk_i(ext_mem_clk),
+            .w_en_i(ext_mem_w_en[p]),
+            .w_addr_i(ext_mem_w_addr),
+            .w_data_i(ext_mem_w_data[p*MINDATA_W +: MINDATA_W]),
+            .r_en_i(ext_mem_r_en[p]),
+            .r_addr_i(ext_mem_r_addr),
+            .r_data_o(ext_mem_r_data[p*MINDATA_W +: MINDATA_W])
          );
-   end endgenerate
+      end
+   endgenerate
 
 endmodule

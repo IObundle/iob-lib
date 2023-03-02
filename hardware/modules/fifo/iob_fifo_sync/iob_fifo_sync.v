@@ -33,6 +33,7 @@ module iob_fifo_sync
     `IOB_OUTPUT(r_empty_o, 1),
 
     //write port
+    `IOB_OUTPUT(ext_mem_clk_o, 1),
     `IOB_OUTPUT(ext_mem_w_en_o, R),
     `IOB_OUTPUT(ext_mem_w_addr_o, MINADDR_W),
     `IOB_OUTPUT(ext_mem_w_data_o, MAXDATA_W),
@@ -149,55 +150,31 @@ module iob_fifo_sync
     .data_o (w_full_o)
   );
 
-   //FIFO memory
-  generate
-    if (W_DATA_W > R_DATA_W) begin
-      iob_ram_2p_asym_wgtr #(
-        .W_DATA_W  (W_DATA_W),
-        .R_DATA_W  (R_DATA_W),
-        .ADDR_W    (ADDR_W)
-      ) iob_ram_2p_asym0 (
-        .clk_i            (clk_i),
-        .arst_i           (arst_i),
-        .cke_i            (cke_i),
+  //FIFO memory
+  iob_ram_2p_asym #(
+    .W_DATA_W  (W_DATA_W),
+    .R_DATA_W  (R_DATA_W),
+    .ADDR_W    (ADDR_W)
+  ) iob_ram_2p_asym0 (
+    .clk_i            (clk_i),
+    .arst_i           (arst_i),
+    .cke_i            (cke_i),
 
-        .ext_mem_w_en_o   (ext_mem_w_en_o),
-        .ext_mem_w_data_o (ext_mem_w_data_o),
-        .ext_mem_w_addr_o (ext_mem_w_addr_o),
-        .ext_mem_r_en_o   (ext_mem_r_en_o),
-        .ext_mem_r_addr_o (ext_mem_r_addr_o),
-        .ext_mem_r_data_i (ext_mem_r_data_i),
+    .w_en_i           (w_en_int),
+    .w_addr_i         (w_addr),
+    .w_data_i         (w_data_i),
 
-        .w_en_i           (w_en_int),
-        .w_addr_i         (w_addr),
-        .w_data_i         (w_data_i),
+    .r_en_i           (r_en_int),
+    .r_addr_i         (r_addr),
+    .r_data_o         (r_data_o),
 
-        .r_en_i           (r_en_int),
-        .r_addr_i         (r_addr),
-        .r_data_o         (r_data_o)
-      );
-    end else begin
-      iob_ram_2p_asym_wler #(
-        .W_DATA_W  (W_DATA_W),
-        .R_DATA_W  (R_DATA_W),
-        .ADDR_W    (ADDR_W)
-      ) iob_ram_2p_asym0 (
-        .ext_mem_w_en_o   (ext_mem_w_en_o),
-        .ext_mem_w_data_o (ext_mem_w_data_o),
-        .ext_mem_w_addr_o (ext_mem_w_addr_o),
-        .ext_mem_r_en_o   (ext_mem_r_en_o),
-        .ext_mem_r_addr_o (ext_mem_r_addr_o),
-        .ext_mem_r_data_i (ext_mem_r_data_i),
-
-        .w_en_i           (w_en_int),
-        .w_addr_i         (w_addr),
-        .w_data_i         (w_data_i),
-
-        .r_en_i           (r_en_int),
-        .r_addr_i         (r_addr),
-        .r_data_o         (r_data_o)
-      );
-    end
-  endgenerate
+    .ext_mem_clk_o    (ext_mem_clk_o),
+    .ext_mem_w_en_o   (ext_mem_w_en_o),
+    .ext_mem_w_data_o (ext_mem_w_data_o),
+    .ext_mem_w_addr_o (ext_mem_w_addr_o),
+    .ext_mem_r_en_o   (ext_mem_r_en_o),
+    .ext_mem_r_addr_o (ext_mem_r_addr_o),
+    .ext_mem_r_data_i (ext_mem_r_data_i)
+  );
 
 endmodule

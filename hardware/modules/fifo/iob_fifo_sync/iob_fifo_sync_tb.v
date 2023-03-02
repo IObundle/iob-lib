@@ -42,6 +42,7 @@ module iob_fifo_sync_tb;
    reg [TESTSIZE*MINDATA_W-1:0] read;
 
    //FIFO memory
+   wire                 ext_mem_clk;
    wire [R-1:0]         ext_mem_w_en;
    wire [MAXDATA_W-1:0]	ext_mem_w_data;
    wire [MINADDR_W-1:0] ext_mem_w_addr;
@@ -184,6 +185,7 @@ module iob_fifo_sync_tb;
       .cke_i            (cke),
       .rst_i            (reset),
 
+      .ext_mem_clk_o    (ext_mem_clk),
       .ext_mem_w_en_o   (ext_mem_w_en),
       .ext_mem_w_addr_o (ext_mem_w_addr),
       .ext_mem_w_data_o (ext_mem_w_data),
@@ -204,21 +206,18 @@ module iob_fifo_sync_tb;
    genvar p;
    generate 
       for(p = 0;p < R; p = p + 1) begin
-         iob_ram_2p 
-              #(
-                .DATA_W(MINDATA_W),
-                .ADDR_W(MINADDR_W)
-                )
-         iob_ram_2p_inst
-              (
-               .clk_i(clk),
-               .w_en_i(ext_mem_w_en[p]),
-               .w_addr_i(ext_mem_w_addr),
-               .w_data_i(ext_mem_w_data[p*MINDATA_W +: MINDATA_W]),
-               .r_en_i(ext_mem_r_en[p]),
-               .r_addr_i(ext_mem_r_addr),
-               .r_data_o(ext_mem_r_data[p*MINDATA_W +: MINDATA_W])
-               );
+         iob_ram_2p #(
+            .DATA_W(MINDATA_W),
+            .ADDR_W(MINADDR_W)
+         ) iob_ram_2p_inst (
+            .clk_i(ext_mem_clk),
+            .w_en_i(ext_mem_w_en[p]),
+            .w_addr_i(ext_mem_w_addr),
+            .w_data_i(ext_mem_w_data[p*MINDATA_W +: MINDATA_W]),
+            .r_en_i(ext_mem_r_en[p]),
+            .r_addr_i(ext_mem_r_addr),
+            .r_data_o(ext_mem_r_data[p*MINDATA_W +: MINDATA_W])
+         );
       end
    endgenerate
 
