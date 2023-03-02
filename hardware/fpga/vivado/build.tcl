@@ -67,14 +67,14 @@ report_clock_interaction
 report_cdc -details
 
 file mkdir reports
-report_clocks -file reports/$NAME\_clocks.rpt
-report_clock_interaction -file reports/$NAME\_clock_interaction.rpt
-report_cdc -details -file reports/$NAME\_cdc.rpt
-report_synchronizer_mtbf -file reports/$NAME\_synchronizer_mtbf.rpt
-report_utilization -hierarchical -file reports/$NAME\_utilization.rpt
-report_timing -file reports/$NAME\_timing.rpt
-report_timing_summary -file reports/$NAME\_timing_summary.rpt
-report_timing -file reports/$NAME\_timing_paths.rpt -max_paths 30
+report_clocks -file reports/$NAME\_$PART\_clocks.rpt
+report_clock_interaction -file reports/$NAME\_$PART\_clock_interaction.rpt
+report_cdc -details -file reports/$NAME\_$PART\_cdc.rpt
+report_synchronizer_mtbf -file reports/$NAME\_$PART\_synchronizer_mtbf.rpt
+report_utilization -file reports/$NAME\_$PART\_utilization.rpt
+report_timing -file reports/$NAME\_$PART\_timing.rpt
+report_timing_summary -file reports/$NAME\_$PART\_timing_summary.rpt
+report_timing -file reports/$NAME\_$PART\_timing_paths.rpt -max_paths 30
 
 
 if { $IS_FPGA == "1" } {
