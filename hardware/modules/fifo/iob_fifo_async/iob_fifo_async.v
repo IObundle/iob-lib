@@ -6,7 +6,7 @@ module iob_fifo_async
   #(
     parameter W_DATA_W = 21,
     parameter R_DATA_W = 21,
-    parameter ADDR_W = 21, //higher ADDR_W lower DATA_W
+    parameter ADDR_W = 3, //higher ADDR_W lower DATA_W
     //determine W_ADDR_W and R_ADDR_W
     parameter MAXDATA_W = `IOB_MAX(W_DATA_W, R_DATA_W),
     parameter MINDATA_W = `IOB_MIN(W_DATA_W, R_DATA_W),
@@ -20,14 +20,18 @@ module iob_fifo_async
 
     //memory write port
     `IOB_OUTPUT(ext_mem_w_clk_o, 1),
-    `IOB_OUTPUT(ext_mem_w_en_o, 1),
-    `IOB_OUTPUT(ext_mem_w_addr_o, W_ADDR_W),
-    `IOB_OUTPUT(ext_mem_w_data_o, W_DATA_W),
+    `IOB_OUTPUT(ext_mem_w_arst_o, 1),
+    `IOB_OUTPUT(ext_mem_w_cke_o, 1),
+    `IOB_OUTPUT(ext_mem_w_en_o, R),
+    `IOB_OUTPUT(ext_mem_w_addr_o, MINADDR_W),
+    `IOB_OUTPUT(ext_mem_w_data_o, MAXDATA_W),
     //memory read port
     `IOB_OUTPUT(ext_mem_r_clk_o, 1),
-    `IOB_OUTPUT(ext_mem_r_en_o, 1),
-    `IOB_OUTPUT(ext_mem_r_addr_o, R_ADDR_W),
-    `IOB_INPUT(ext_mem_r_data_i, R_DATA_W),
+    `IOB_OUTPUT(ext_mem_r_arst_o, 1),
+    `IOB_OUTPUT(ext_mem_r_cke_o, 1),
+    `IOB_OUTPUT(ext_mem_r_en_o, R),
+    `IOB_OUTPUT(ext_mem_r_addr_o, MINADDR_W),
+    `IOB_INPUT(ext_mem_r_data_i, MAXDATA_W),
     
     //read port
     input                 r_clk_i,
@@ -219,14 +223,42 @@ module iob_fifo_async
     .bin_o (w_raddr_bin)
     );
 
-  // FIFO memory
+  wire [W_ADDR_W-1:0] w_addr;
+  wire [R_ADDR_W-1:0] r_addr;
+  assign w_addr = w_waddr_bin[W_ADDR_W-1:0];
+  assign r_addr = r_raddr_bin[R_ADDR_W-1:0];
+
   assign ext_mem_w_clk_o = w_clk_i;
-  assign ext_mem_w_en_o = w_en_int;
-  assign ext_mem_w_addr_o = w_waddr_bin[W_ADDR_W-1:0];
-  assign ext_mem_w_data_o = w_data_i;
-  assign ext_mem_r_clk_o = r_clk_i;
-  assign ext_mem_r_en_o = r_en_int;
-  assign ext_mem_r_addr_o = r_raddr_bin[R_ADDR_W-1:0];
-  assign r_data_o = ext_mem_r_data_i;
+  assign ext_mem_w_arst_o = w_arst_i;
+  assign ext_mem_w_cke_o = w_cke_i;
+
+  // FIFO memory
+  iob_asym_converter #(
+    .W_DATA_W  (W_DATA_W),
+    .R_DATA_W  (R_DATA_W),
+    .ADDR_W    (ADDR_W)
+  ) iob_asym_converter0 (
+    .clk_i            (r_clk_i),
+    .arst_i           (r_arst_i),
+    .cke_i            (r_cke_i),
+
+    .w_en_i           (w_en_int),
+    .w_addr_i         (w_addr),
+    .w_data_i         (w_data_i),
+
+    .r_en_i           (r_en_int),
+    .r_addr_i         (r_addr),
+    .r_data_o         (r_data_o),
+
+    .ext_mem_clk_o    (ext_mem_r_clk_o),
+    .ext_mem_arst_o   (ext_mem_r_arst_o),
+    .ext_mem_cke_o    (ext_mem_r_cke_o),
+    .ext_mem_w_en_o   (ext_mem_w_en_o),
+    .ext_mem_w_addr_o (ext_mem_w_addr_o),
+    .ext_mem_w_data_o (ext_mem_w_data_o),
+    .ext_mem_r_en_o   (ext_mem_r_en_o),
+    .ext_mem_r_addr_o (ext_mem_r_addr_o),
+    .ext_mem_r_data_i (ext_mem_r_data_i)
+  );
 
 endmodule
