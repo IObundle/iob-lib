@@ -62,21 +62,20 @@ place_design
 
 route_design -timing
 
-report_utilization
-
-report_timing
-
 report_clocks
 report_clock_interaction
 report_cdc -details
 
 file mkdir reports
-report_timing -file reports/timing.txt -max_paths 30
-report_clocks -file reports/clocks.txt
-report_clock_interaction -file reports/clock_interaction.txt
-report_cdc -details -file reports/cdc.txt
-report_synchronizer_mtbf -file reports/synchronizer_mtbf.txt
-report_utilization -hierarchical -file reports/utilization.txt
+report_clocks -file reports/$NAME\_clocks.rpt
+report_clock_interaction -file reports/$NAME\_clock_interaction.rpt
+report_cdc -details -file reports/$NAME\_cdc.rpt
+report_synchronizer_mtbf -file reports/$NAME\_synchronizer_mtbf.rpt
+report_utilization -hierarchical -file reports/$NAME\_utilization.rpt
+report_timing -file reports/$NAME\_timing.rpt
+report_timing_summary -file reports/$NAME\_timing_summary.rpt
+report_timing -file reports/$NAME\_timing_paths.rpt -max_paths 30
+
 
 if { $IS_FPGA == "1" } {
     write_bitstream -force $NAME.bit
