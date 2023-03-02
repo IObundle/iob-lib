@@ -20,7 +20,7 @@ endif
 
 # Determine the object to build
 ifeq ($(IS_FPGA),1)
-FPGA_OBJ:=reports/$(FPGA_TOP).sof
+FPGA_OBJ:=$(FPGA_TOP).sof
 else
 ifeq ($(USE_QUARTUS_PRO),1)
 FPGA_OBJ:=resynthesis/$(FPGA_TOP).vqm
@@ -41,6 +41,7 @@ QUARTUS_FLAGS = -t quartus/build.tcl $(FPGA_TOP) $(BOARD) "$(VSRC)" "$(DEFINES) 
 
 $(FPGA_OBJ): $(VHDR) $(VSRC) $(IP) $(wildcard $(BOARD)/*.sdc)
 	$(FPGA_ENV) quartus_sh $(QUARTUS_FLAGS)
+	mv reports/$@ .
 
 quartus-clean:
 	@rm -rf incremental_db db reports
