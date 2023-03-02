@@ -34,6 +34,8 @@ module iob_fifo_sync
 
     //write port
     `IOB_OUTPUT(ext_mem_clk_o, 1),
+    `IOB_OUTPUT(ext_mem_arst_o, 1),
+    `IOB_OUTPUT(ext_mem_cke_o, 1),
     `IOB_OUTPUT(ext_mem_w_en_o, R),
     `IOB_OUTPUT(ext_mem_w_addr_o, MINADDR_W),
     `IOB_OUTPUT(ext_mem_w_data_o, MAXDATA_W),
@@ -169,9 +171,11 @@ module iob_fifo_sync
     .r_data_o         (r_data_o),
 
     .ext_mem_clk_o    (ext_mem_clk_o),
+    .ext_mem_arst_o   (ext_mem_arst_o),
+    .ext_mem_cke_o    (ext_mem_cke_o),
     .ext_mem_w_en_o   (ext_mem_w_en_o),
-    .ext_mem_w_data_o (ext_mem_w_data_o),
     .ext_mem_w_addr_o (ext_mem_w_addr_o),
+    .ext_mem_w_data_o (ext_mem_w_data_o),
     .ext_mem_r_en_o   (ext_mem_r_en_o),
     .ext_mem_r_addr_o (ext_mem_r_addr_o),
     .ext_mem_r_data_i (ext_mem_r_data_i)

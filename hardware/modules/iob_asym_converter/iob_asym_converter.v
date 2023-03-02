@@ -32,6 +32,8 @@ module iob_asym_converter
 
     //external memory write port
     `IOB_OUTPUT(ext_mem_clk_o, 1),
+    `IOB_OUTPUT(ext_mem_arst_o, 1),
+    `IOB_OUTPUT(ext_mem_cke_o, 1),
     `IOB_OUTPUT(ext_mem_w_en_o, R),
     `IOB_OUTPUT(ext_mem_w_addr_o, MINADDR_W),
     `IOB_OUTPUT(ext_mem_w_data_o, MAXDATA_W),
@@ -43,6 +45,8 @@ module iob_asym_converter
     );
 
   assign ext_mem_clk_o = clk_i;
+  assign ext_mem_arst_o = arst_i;
+  assign ext_mem_cke_o = cke_i;
 
   //Generate the RAM based on the parameters
   generate
