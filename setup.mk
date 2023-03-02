@@ -5,6 +5,15 @@
 
 SHELL=bash
 
+
+help:
+	@echo The following targets are available:
+	@echo "  setup:  Setup the build directory"
+	@echo "  clean:  Remove the build directory"
+	@echo "  debug:  Print all source files in the build directory"
+
+
+
 SETUP_PYTHON_FILENAME=$(wildcard *_setup.py)
 
 # python scripts directory
@@ -102,7 +111,7 @@ python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
 debug: $(BUILD_DIR) $(SRC)
-	@echo SRC=$(SRC)
+	@for i in $(SRC); do echo $$i; done
 
 
 .PHONY: setup clean debug
