@@ -75,20 +75,25 @@ else
 endif
 
 sim: copy_srcs
+	set -e;
 	@echo "Simulating module $(MODULE)"
 ifeq ($(IS_ASYM),0)
-	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v)
-	./a.out $(TEST_LOG)
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
+	./a.out $(TEST_LOG);
 else
-	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v)
-	./a.out $(TEST_LOG); if [ $(VCD) != 0 ]; then mv uut.vcd uut1.vcd; fi
-	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(wildcard $(BUILD_VSRC_DIR)/*.v)
-	./a.out $(TEST_LOG); if [ $(VCD) != 0 ]; then mv uut.vcd uut2.vcd; fi
-	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v)
-	./a.out $(TEST_LOG); if [ $(VCD) != 0 ]; then mv uut.vcd uut3.vcd; fi
+	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
+	./a.out $(TEST_LOG) && if [ $(VCD) != 0 ]; then mv uut.vcd uut1.vcd; fi 
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
+	./a.out $(TEST_LOG) && if [ $(VCD) != 0 ]; then mv uut.vcd uut2.vcd; fi
+	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
+	./a.out $(TEST_LOG) && if [ $(VCD) != 0 ]; then mv uut.vcd uut3.vcd; fi
 endif
 ifeq ($(VCD),1)
+ifeq ($(IS_ASYM),0)
 	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &
+else
+	@if [ ! `pgrep gtkwave` ]; then gtkwave uut1.vcd; fi &
+endif
 endif
 
 test:

@@ -20,8 +20,5 @@ for i in $MODULES; do
       IS_ASYM=1
    fi
 
-   make sim MODULE=$i IS_ASYM=$IS_ASYM VCD=0 TEST_LOG="| tee -a test.log"
-   echo $?
+   make sim MODULE=$i IS_ASYM=$IS_ASYM VCD=0
 done
-
-if [ `grep -c "ERROR" test.log` != 0 ]; then exit 1; fi

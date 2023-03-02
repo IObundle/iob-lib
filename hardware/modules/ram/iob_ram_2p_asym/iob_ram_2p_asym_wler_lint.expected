@@ -1,0 +1,26 @@
+MORESIMPLE REPORT:
+
+
+############### BuiltIn -> RuleGroup=Design Read ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                    Alias                   Severity    File                                                                                        Line    Wt    Message
+======================================================================================
+[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob_ram_2p_asym_wler.v                                                                      3       2     Module iob_ram_2p_asym_wler is a top level design unit
+[37]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                               2       10    Domain Matrix for design "iob_ram_2p_asym_wler",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob_ram_2p_asym_wler/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob_ram_2p_asym_wler/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+############### Non-BuiltIn -> Goal=lint/lint_rtl ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule           Alias                 Severity     File                      Line    Wt    Message
+======================================================================================
+[3B]     RegInput-ML    RegInput-ML           Warning      iob_ram_2p_asym_wler.v    14      10    Input port 'w_en_i' is not registered [module:iob_ram_2p_asym_wler]
+[40]     RegInput-ML    RegInput-ML           Warning      iob_ram_2p_asym_wler.v    15      10    Input port 'w_addr_i[2:0]' is not registered [module:iob_ram_2p_asym_wler]
+[3F]     RegInput-ML    RegInput-ML           Warning      iob_ram_2p_asym_wler.v    16      10    Input port 'w_data_i[20:0]' is not registered [module:iob_ram_2p_asym_wler]
+[3C]     RegInput-ML    RegInput-ML           Warning      iob_ram_2p_asym_wler.v    18      10    Input port 'r_en_i' is not registered [module:iob_ram_2p_asym_wler]
+[3E]     RegInput-ML    RegInput-ML           Warning      iob_ram_2p_asym_wler.v    19      10    Input port 'r_addr_i[1:0]' is not registered [module:iob_ram_2p_asym_wler]
+[3D]     RegInput-ML    RegInput-ML           Warning      iob_ram_2p_asym_wler.v    30      10    Input port 'ext_mem_r_data_i[41:0]' is not registered [module:iob_ram_2p_asym_wler]
+[3A]     RegOutputs     (OpenMORE 5.6.1.1)    Guideline    iob_ram_2p_asym_wler.v    40      5     Port 'ext_mem_w_en_o[1:0]' is not driven by a register
+[39]     RegOutputs     (OpenMORE 5.6.1.1)    Guideline    iob_ram_2p_asym_wler.v    41      5     Port 'ext_mem_w_data_o[41:0]' is not driven by a register
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
