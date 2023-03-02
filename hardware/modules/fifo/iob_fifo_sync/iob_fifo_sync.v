@@ -10,8 +10,8 @@ module iob_fifo_sync
     //determine W_ADDR_W and R_ADDR_W
     MAXDATA_W = `IOB_MAX(W_DATA_W, R_DATA_W),
     MINDATA_W = `IOB_MIN(W_DATA_W, R_DATA_W),
-    N = MAXDATA_W/MINDATA_W,
-    MINADDR_W = ADDR_W-$clog2(N),//lower ADDR_W (higher DATA_W)
+    R = MAXDATA_W/MINDATA_W,
+    MINADDR_W = ADDR_W-$clog2(R),//lower ADDR_W (higher DATA_W)
     W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
     R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
   )
@@ -23,28 +23,29 @@ module iob_fifo_sync
     `IOB_INPUT(rst_i, 1),
 
     //write port
-    `IOB_OUTPUT(ext_mem_w_en_o, N),
-    `IOB_OUTPUT(ext_mem_w_addr_o, (MINADDR_W*N)),
-    `IOB_OUTPUT(ext_mem_w_data_o, (MINDATA_W*N)),
-    //read port
-    `IOB_OUTPUT(ext_mem_r_en_o, 1),
-    `IOB_OUTPUT(ext_mem_r_addr_o, (MINADDR_W*N)),
-    `IOB_INPUT(ext_mem_r_data_i, (MINDATA_W*N)),
+    `IOB_INPUT(w_en_i, 1),
+    `IOB_INPUT(w_data_i, W_DATA_W),
+    `IOB_OUTPUT(w_full_o, 1),
 
     //read port
     `IOB_INPUT(r_en_i, 1),
     `IOB_OUTPUT(r_data_o, R_DATA_W),
     `IOB_OUTPUT(r_empty_o, 1),
+
     //write port
-    `IOB_INPUT(w_en_i, 1),
-    `IOB_INPUT(w_data_i, W_DATA_W),
-    `IOB_OUTPUT(w_full_o, 1),
+    `IOB_OUTPUT(ext_mem_w_en_o, R),
+    `IOB_OUTPUT(ext_mem_w_addr_o, MINADDR_W),
+    `IOB_OUTPUT(ext_mem_w_data_o, MAXDATA_W),
+    //read port
+    `IOB_OUTPUT(ext_mem_r_en_o, R),
+    `IOB_OUTPUT(ext_mem_r_addr_o, MINADDR_W),
+    `IOB_INPUT(ext_mem_r_data_i, MAXDATA_W),
 
     //FIFO level
     `IOB_OUTPUT(level_o, (ADDR_W+1))
     );
 
-  localparam ADDR_W_DIFF = $clog2(N);
+  localparam ADDR_W_DIFF = $clog2(R);
   localparam [ADDR_W:0] FIFO_SIZE = {1'b1, {ADDR_W{1'b0}}}; //in bytes
 
   //effective write enable
@@ -157,6 +158,8 @@ module iob_fifo_sync
         .ADDR_W    (ADDR_W)
       ) iob_ram_2p_asym0 (
         .clk_i            (clk_i),
+        .arst_i           (arst_i),
+        .cke_i            (cke_i),
 
         .ext_mem_w_en_o   (ext_mem_w_en_o),
         .ext_mem_w_data_o (ext_mem_w_data_o),

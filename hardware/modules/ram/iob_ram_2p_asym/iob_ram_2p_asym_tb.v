@@ -2,8 +2,6 @@
 `include "iob_lib.vh"
 
 // test defines
-`define W_DATA_W 32
-`define R_DATA_W 8
 `define MAXADDR_W 10
 
 module iob_ram_2p_asym_tb;
@@ -17,31 +15,33 @@ module iob_ram_2p_asym_tb;
    localparam MINADDR_W = MAXADDR_W - $clog2(MAXDATA_W/MINDATA_W);
    localparam W_ADDR_W = W_DATA_W == MINDATA_W? MAXADDR_W: MINADDR_W;
    localparam R_ADDR_W = R_DATA_W == MINDATA_W? MAXADDR_W: MINADDR_W;
-   localparam N = MAXDATA_W/MINDATA_W;
+   localparam R = MAXDATA_W/MINDATA_W;
 
-   reg clk = 0;
-
-   // external write port
-   wire [N-1:0]        ext_mem_w_en;
-   wire [N*MINADDR_W-1:0] ext_mem_w_addr;
-   wire [N*MINDATA_W-1:0] ext_mem_w_data;
-   // external read port
-   wire                ext_mem_r_en;
-   wire [N*MINADDR_W-1:0] ext_mem_r_addr;
-   reg  [N*MINDATA_W-1:0] ext_mem_r_data;
-
+   // system clock
+   `IOB_CLOCK(clk, 10)
+   
    // write port
    reg w_en = 0;
    reg [W_DATA_W-1:0] w_data;
    reg [W_ADDR_W-1:0] w_addr;
+
    // read port
    reg                r_en = 0;
-   wire [R_DATA_W-1:0] r_data;
    reg [R_ADDR_W-1:0]  r_addr;
+   wire [R_DATA_W-1:0] r_data;
 
-   // system clock
-   localparam clk_per = 10; //ns
-   always #(clk_per/2) clk = ~clk;
+
+
+   // external memory 
+   // write port
+   wire [R-1:0] ext_mem_w_en;
+   wire [MINADDR_W-1:0] ext_mem_w_addr;
+   wire [MAXDATA_W-1:0] ext_mem_w_data;
+   // read port
+   wire [R-1:0]         ext_mem_r_en;
+   wire [MINADDR_W-1:0] ext_mem_r_addr;
+   wire [MAXDATA_W-1:0] ext_mem_r_data;
+
 
    localparam seq_ini = 10;
    integer             i;
@@ -50,6 +50,11 @@ module iob_ram_2p_asym_tb;
    reg [R_DATA_W-1:0]             r_data_expected;
 
    initial begin
+
+`ifdef VCD
+      $dumpfile("uut.vcd");
+      $dumpvars();
+`endif
 
       $display("W_DATA_W=%d", W_DATA_W);
       $display("W_ADDR_W=%d", W_ADDR_W);
@@ -67,11 +72,7 @@ module iob_ram_2p_asym_tb;
       for (i=0; i < 2**W_ADDR_W; i=i+1)
         test_data[i*W_DATA_W +: W_DATA_W] = i+seq_ini;
 
-      // optional VCD
-`ifdef VCD
-      $dumpfile("uut.vcd");
-      $dumpvars();
-`endif
+      //wait 4 cycles
       repeat(4) @(posedge clk) #1;
 
       // write all the locations of RAM
@@ -83,7 +84,6 @@ module iob_ram_2p_asym_tb;
          @(posedge clk) #1;
       end
       w_en = 0;
-
       @(posedge clk) #1;
 
       // read all the locations of RAM
@@ -93,11 +93,15 @@ module iob_ram_2p_asym_tb;
          @(posedge clk) #1;
          // verify response
          r_data_expected = test_data[i*R_DATA_W +: R_DATA_W];
-         if(r_data !== r_data_expected)
-           $display("ERROR: read addr=%x, got %x, expected %x", r_addr, r_data, r_data_expected);
+         if(r_data !== r_data_expected) begin
+            $display("Read addr=%x, got %x, expected %x", r_addr, r_data, r_data_expected);
+            $error("Test failed");
+         end
       end
 
-      #(5*clk_per) $finish;
+      //wait 5 cycles and finish
+      repeat(5) @(posedge clk) #1;
+      $finish;
    end
 
    // instantiate the Unit Under Test (UUT)
@@ -107,12 +111,13 @@ module iob_ram_2p_asym_tb;
            #(
              .W_DATA_W(W_DATA_W),
              .R_DATA_W(R_DATA_W),
-             .ADDR_W(MAXADDR_W),
-             .N(N)
+             .ADDR_W(MAXADDR_W)
              )
          uut
            (
             .clk_i            (clk),
+            .arst_i           (1'd0),
+            .cke_i            (1'd1),
 
             .ext_mem_w_en_o   (ext_mem_w_en),
             .ext_mem_w_data_o (ext_mem_w_data),
@@ -134,8 +139,7 @@ module iob_ram_2p_asym_tb;
            #(
              .W_DATA_W(W_DATA_W),
              .R_DATA_W(R_DATA_W),
-             .ADDR_W(MAXADDR_W),
-             .N(N)
+             .ADDR_W(MAXADDR_W)
              )
          uut
            (
@@ -158,37 +162,23 @@ module iob_ram_2p_asym_tb;
    endgenerate
 
    genvar p;
-   generate for(p=0; p < N; p=p+1) begin
-      wire mem_w_en;
-      wire [MINDATA_W-1:0]	mem_w_data;
-      wire [MINADDR_W-1:0]	mem_w_addr;
-      wire mem_r_en;
-      wire [MINADDR_W-1:0]  mem_r_addr;
-      wire [MINDATA_W-1:0]  mem_r_data;
-
-      assign mem_w_en = ext_mem_w_en[p];
-      assign mem_w_addr = ext_mem_w_addr[p*MINADDR_W +: MINADDR_W];
-      assign mem_w_data = ext_mem_w_data[p*MINDATA_W +: MINDATA_W];
-      assign mem_r_en = ext_mem_r_en;
-      assign mem_r_addr = ext_mem_r_addr[p*MINADDR_W +: MINADDR_W];
-
-      iob_ram_2p
-        #(
-          .DATA_W(MINDATA_W),
-          .ADDR_W(MINADDR_W)
-          )
-      iob_ram_2p_inst
-        (
-         .clk_i     (clk),
-         .w_en_i    (mem_w_en),
-         .w_addr_i  (mem_w_addr),
-         .w_data_i  (mem_w_data),
-         .r_en_i    (mem_r_en),
-         .r_addr_i  (mem_r_addr),
-         .r_data_o  (mem_r_data)
+   generate
+      for(p=0; p < R; p=p+1) begin
+         iob_ram_2p
+            #(
+              .DATA_W(MINDATA_W),
+              .ADDR_W(MINADDR_W)
+              )
+         iob_ram_2p_inst
+            (
+             .clk_i     (clk),
+             .w_en_i    (ext_mem_w_en[p]),
+             .w_addr_i  (ext_mem_w_addr),
+             .w_data_i  (ext_mem_w_data[p*MINDATA_W +: MINDATA_W]),
+             .r_en_i    (ext_mem_r_en[p]),
+             .r_addr_i  (ext_mem_r_addr),
+             .r_data_o  (ext_mem_r_data[p*MINDATA_W +: MINDATA_W])
          );
-
-      assign ext_mem_r_data[p*MINDATA_W +: MINDATA_W] = mem_r_data;
    end endgenerate
 
 endmodule

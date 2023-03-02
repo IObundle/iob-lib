@@ -53,11 +53,11 @@ module iob_rom_dp_tb;
          @(posedge clk) #1;
          if(i+seq_ini != r_data_a) begin
             $display("ERROR: Port A - read error in position %d, where expected data=%h but r_data=%h", i, i+seq_ini, r_data_a);
-            $finish;
+            $fatal;
          end
          if (seq_ini+2**`ADDR_W-1-i != r_data_b) begin
             $display("ERROR: Port B - read error in position %d, where expected data=%h but r_data=%h", 2**`ADDR_W-1-i, seq_ini+2**`ADDR_W-1-i, r_data_b);
-            $finish;
+            $fatal;
          end
       end
 

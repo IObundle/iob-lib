@@ -59,7 +59,7 @@ module iob_ram_sp_tb;
          @(posedge clk) #1;
          if(i+seq_ini != data_out) begin
             $display("ERROR: read error in data_out. \n \t i=%0d; data = %h when it should have been %0h", i, i+seq_ini, data_out);
-            $finish;
+            $fatal;
          end
       end
 

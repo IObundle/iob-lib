@@ -61,7 +61,7 @@ module iob_ram_sp_be_tb;
          @(posedge clk) #1;
          if(i+seq_ini != data_out) begin
             $display("ERROR: write error in position %d, where data=%h but data_out=%h", i, i+seq_ini, data_out);
-            $finish;
+            $fatal;
          end
       end
 
@@ -74,7 +74,7 @@ module iob_ram_sp_be_tb;
          @(posedge clk) #1;
          if(i+seq_ini == data_out) begin
             $display("ERROR: read error in position %d, where data and data_out are '%h' but should not be the same", i, data_out);
-            $finish;
+            $fatal;
          end
       end
 

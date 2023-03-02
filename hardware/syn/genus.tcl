@@ -155,7 +155,7 @@ report_gates > $OUTPUTS_DIR/${DESIGN}_gates.rpt
 
 report_clocks > $OUTPUTS_DIR/${DESIGN}_clk.rpt
 
-report_timing -max_paths 10 > $OUTPUTS_DIR/${DESIGN}_timing.rpt
+report_timing -max_paths 30 > $OUTPUTS_DIR/${DESIGN}_timing.rpt
 
 report_power -by_hierarchy -format %.2f -levels 2  -unit uW  > $OUTPUTS_DIR/${DESIGN}_power.rpt
 

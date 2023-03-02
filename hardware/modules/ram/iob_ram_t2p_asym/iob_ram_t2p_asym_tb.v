@@ -87,8 +87,10 @@ module iob_ram_t2p_asym_tb;
          @(posedge r_clk) #1;
          //verify response
          r_data_expected = test_data[i*`R_DATA_W +: `R_DATA_W];
-         if(r_data !== r_data_expected)
-           $display("ERROR: read addr=%x, got %x, expected %x", r_addr, r_data, r_data_expected);
+         if(r_data !== r_data_expected) begin
+            $display("ERROR: read addr=%x, got %x, expected %x", r_addr, r_data, r_data_expected);
+            $fatal;
+         end
       end
       
       #(5*clk_per_w) $finish;

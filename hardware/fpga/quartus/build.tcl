@@ -7,6 +7,7 @@ set IP [lindex $argv 4]
 set IS_FPGA [lindex $argv 5]
 set USE_EXTMEM [lindex $argv 6]
 set SEED [lindex $argv 7]
+set USE_QUARTUS_PRO [lindex $argv 8]
 
 project_new $NAME -overwrite
 
@@ -60,12 +61,6 @@ if {$IS_FPGA != "1"} {
 
 set_global_assignment -name SDC_FILE quartus/$BOARD/$NAME.sdc
 
-set USE_QUARTUS_PRO 0
-
-if { $BOARD == "DK-DEV-10CX220-A" || $BOARD == "DK-DEV-AGF014E2ES" } {
-    set USE_QUARTUS_PRO 1
-}
-
 # random seed for fitting
 set_global_assignment -name SEED $SEED
 
@@ -101,8 +96,14 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_sta] -t quartus/timing.
 }
 
 if {$IS_FPGA != "1"} {
-    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
-        qexit -error
+    if { $USE_QUARTUS_PRO == 1 } {
+        if [catch {qexec "[file join $::quartus(binpath) quartus_eda] --resynthesis --format verilog $NAME"} result] {
+            qexit -error
+        }
+    } else {
+        if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
+            qexit -error
+        }
     }
 } else {
     if [catch {qexec "[file join $::quartus(binpath) quartus_asm] $NAME"} result] {

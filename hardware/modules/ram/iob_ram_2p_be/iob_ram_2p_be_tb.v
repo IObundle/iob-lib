@@ -62,7 +62,7 @@ module iob_ram_2p_be_tb;
          @(posedge clk) #1;
          if(r_data != 0) begin
             $display("ERROR: with r_en = 0, at position %0d, r_data should be 0 but is %d", i, r_data);
-            $finish;
+            $fatal;
          end
       end
 
@@ -75,7 +75,7 @@ module iob_ram_2p_be_tb;
          @(posedge clk) #1;
          if(r_data != i+seq_ini) begin
             $display("ERROR: on position %0d, r_data is %d where it should be %0d", i, r_data, i+seq_ini);
-            $finish;
+            $fatal;
          end
       end
 

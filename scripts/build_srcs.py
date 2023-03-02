@@ -344,29 +344,36 @@ def module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs, 
     # Do this by setting up submodules and including hardware modules/headers
     while(True):
         # Handle each entry, skipping .v and .vh entries
-        for hardware_src in hardware_srcs:
+        for idx, hardware_src in enumerate(hardware_srcs):
             #print(f"############ {hardware_src} {function_2_call}") # DEBUG
+            # Entry is a tuple, therefore it contains optional parameters
+            if type(hardware_src)==tuple: 
+                # Save optional_parameters in a variable
+                optional_parameters=hardware_src[1]
+                # Convert hardware_src to a string
+                hardware_src=hardware_src[0]
+            else: optional_parameters = None
+
             # Entry is a function
             if callable(hardware_src):
                 hardware_src()
-                hardware_srcs.remove(hardware_src)
+                hardware_srcs.pop(idx)
                 break
-            # Entry is a 'submodule' (may be a tuple if optional parameters are given)
-            elif type(hardware_src)==tuple or hardware_src in submodule_dirs:
-                if type(hardware_src)==tuple: submodule_setup(build_dir, submodule_dirs[hardware_src[0]], module_parameters=hardware_src[1], function_2_call=function_2_call)
-                else: submodule_setup(build_dir, submodule_dirs[hardware_src], function_2_call=function_2_call)
-                hardware_srcs.remove(hardware_src)
+            # Entry is a 'submodule'
+            elif hardware_src in submodule_dirs:
+                submodule_setup(build_dir, submodule_dirs[hardware_src], function_2_call=function_2_call, module_parameters=optional_parameters)
+                hardware_srcs.pop(idx)
                 break
             # Entry is a 'python include'
             elif not(hardware_src.endswith(".v") or hardware_src.endswith(".vh")):
-                lib_module_setup(Vheaders, hardware_srcs, hardware_src, lib_dir, add_sim_srcs=False, add_fpga_srcs=False)
-                hardware_srcs.remove(hardware_src)
+                lib_module_setup(Vheaders, hardware_srcs, hardware_src, lib_dir, add_sim_srcs=False, add_fpga_srcs=False, module_parameters=optional_parameters)
+                hardware_srcs.pop(idx)
                 break
         # Did not find any non .v or .vh entry
         else: break
 
 # Include Vheaders and hardware_srcs from given python module (module_name)
-def lib_module_setup(Vheaders, hardware_srcs, module_name, lib_dir=LIB_DIR, add_sim_srcs=False, add_fpga_srcs=False):
+def lib_module_setup(Vheaders, hardware_srcs, module_name, lib_dir=LIB_DIR, add_sim_srcs=False, add_fpga_srcs=False, module_parameters=None):
     module_path = None
     
     for mod_path in Path(lib_dir).rglob(f"{module_name}.py"):
@@ -384,6 +391,7 @@ def lib_module_setup(Vheaders, hardware_srcs, module_name, lib_dir=LIB_DIR, add_
         spec = importlib.util.spec_from_file_location(lib_module_name, module_path)
         lib_module = importlib.util.module_from_spec(spec)
         sys.modules[lib_module_name]=lib_module
+        if module_parameters: lib_module.module_parameters=module_parameters
         spec.loader.exec_module(lib_module)
         Vheaders.extend(lib_module.v_headers)
         hardware_srcs.extend(lib_module.hw_modules)
