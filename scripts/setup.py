@@ -113,6 +113,12 @@ def setup( python_module, no_overlap=False):
             mkregs_obj.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
         blocks_lib.generate_blocks_tex(blocks, build_dir+"/document/tsrc")
 
+# Check if the given python_module is the top module (return true) or is a submodule (return false)
+# The check is based on the presence of the 'not_top_module' variable, set by the build_srcs.py script
+def is_top_module(python_module):
+    if 'not_top_module' in vars(python_module) and python_module.not_top_module: return False
+    else: return True
+
 
 
 #Print build directory of the core/system in the current directory (extracted from *_setup.py)
