@@ -31,7 +31,7 @@ def setup( python_module, no_overlap=False):
 
     # Check if should create build directory for this core/system
     #TODO: We need to find another way of checking this. Currently we can not configure another build_dir in *_setup.py because it will cause this to not build the directory!
-    create_build_dir = build_dir==f"../{python_module.name}_{python_module.version}"
+    create_build_dir = is_top_module(python_module)
 
     set_default_submodule_dirs(python_module)
 
@@ -41,7 +41,6 @@ def setup( python_module, no_overlap=False):
     if create_build_dir:
         os.makedirs(build_dir, exist_ok=True)
         mk_conf.config_build_mk(python_module, build_dir)
-        mk_conf.config_for_board(top, python_module.flows, build_dir)
         build_srcs.build_dir_setup(python_module)
 
     #

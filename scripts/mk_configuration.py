@@ -106,47 +106,6 @@ def generate_confs_tex(confs, out_dir):
 
     write_table(f"{out_dir}/confs",tex_table)
 
-
-# Create build-time board/simulation configuration in config_build.mk
-#top: Name of this core/system
-#flows_list: list of flows of this core/system
-#build_dir: path to build directory
-def config_for_board(top, flows_list, build_dir):
-    available_configs = {
-        'CYCLONEV-GT-DK':{'BAUD':'115200', 'FREQ':'50000000', 'MEM_NO_READ_ON_WRITE':'1', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'30', 'MEM_ADDR_W':'24', 'INTEL':'1'}, 
-        'AES-KU040-DB-G':{'BAUD':'115200', 'FREQ':'100000000', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'30', 'MEM_ADDR_W':'24', 'XILINX':'1'},
-        'DE10-LITE':{'BAUD':'115200', 'FREQ':'50000000', 'INTEL':'1'},
-        'BASYS3':{'BAUD':'115200', 'FREQ':'100000000', 'XILINX':'1'},
-        'SIMULATION':{'BAUD':'3000000', 'FREQ':'100000000', 'DDR_DATA_W':'32', 'DDR_ADDR_W':'24', 'MEM_ADDR_W':'24', 'SIMULATION':'1'},
-        }
-
-    # Set config based on value of BOARD variable
-    file = open(f"{build_dir}/config_build.mk", "a")
-
-    file.write(f"\n#################### Script to generate build-time defines file ####################\n")
-
-    # Make script to select what configuration to use
-    file.write("ifneq ($(GEN_CONFIG),)\n")
-    file.write("ifneq ($(BOARD),)\n")
-    file.write("CONFIG:=$(BOARD)\n")
-    file.write("else\n")
-    file.write("CONFIG:=SIMULATION\n")
-    file.write("endif\n")
-
-    # Make script to write 'build_defines.txt' files at build time
-    for name, config in available_configs.items():
-        file.write(f"ifeq ($(CONFIG),{name})\n")
-        # Create 'build_defines.txt'
-        file.write(f"$(shell rm -f ../../build_defines.txt)\n")
-        for key, value in config.items():
-            file.write(f"$(shell echo -n ' {key}={value}' >> ../../build_defines.txt)\n")
-
-        file.write("endif\n")
-
-    file.write("endif\n")
-    file.write(f"################ End of script to generate build-time defines file #################\n\n")
-    file.close()
-
 # Select if a define from the confs dictionary is set or not
 # define_name: name of the macro in confs (its called define because it is unvalued, it is either set or unset)
 # should_set: Select if define should be set or not

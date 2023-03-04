@@ -9,8 +9,6 @@ SHELL:=bash
 #default simulator
 SIMULATOR ?=icarus
 
-# Generate configuration when importing config_build.mk
-GEN_CONFIG:=1
 include ../../config_build.mk
 
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
