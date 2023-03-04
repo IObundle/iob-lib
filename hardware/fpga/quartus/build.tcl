@@ -22,6 +22,8 @@ set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 #board data
 source quartus/$BOARD/board.tcl
 
+set_global_assignment -name FAMILY $FAMILY
+set_global_assignment -name DEVICE $PART
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY reports
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 
@@ -112,3 +114,8 @@ if {$IS_FPGA != "1"} {
 }
 
 project_close
+
+#rename report files
+file rename reports/$NAME.fit.summary reports/$NAME\_$PART.fit.summary
+file rename reports/$NAME.sta.summary reports/$NAME\_$PART.sta.summary
+

@@ -28,6 +28,10 @@ endif
 
 FPGA_TOP ?=$(NAME)_fpga_wrapper
 
+ifeq ($(FPGA_TOOL),)
+$(error Cannot find FPGA toolchain for board $(BOARD). Please make sure that the board name is correct and that the board is supported by the FPGA toolchain)
+endif
+
 include $(FPGA_TOOL)/$(BOARD)/board.mk
 include $(FPGA_TOOL)/build.mk
 

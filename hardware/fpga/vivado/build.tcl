@@ -39,7 +39,9 @@ source vivado/$BOARD/board.tcl
 set_property part $PART [current_project]
 
 #read design constraints
-read_xdc vivado/$BOARD/$NAME.xdc
+read_xdc vivado/$BOARD/$NAME\_dev.sdc
+read_xdc ../src/$NAME.sdc
+read_xdc vivado/$NAME\_tool.sdc
 
 #set custom assignments
 if {[file exists "vivado/custom_build.tcl"]} {
