@@ -60,8 +60,9 @@ if {$IS_FPGA != "1"} {
     set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 }
 
-
-set_global_assignment -name SDC_FILE quartus/$BOARD/$NAME.sdc
+set_global_assignment -name SDC_FILE quartus/$BOARD/$NAME\_dev.sdc
+set_global_assignment -name SDC_FILE ./src/$NAME.sdc
+set_global_assignment -name SDC_FILE quartus/$NAME\_tool.sdc
 
 # random seed for fitting
 set_global_assignment -name SEED $SEED
@@ -81,9 +82,8 @@ if {$USE_QUARTUS_PRO == 1} {
 }
 
 if [file exists "quartus/postmap.tcl"] {
-    source "quartus/postmap.tcl"
+    source quartus/postmap.tcl
 }
-    
 
 if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $NAME"} result] {
     qexit -error
