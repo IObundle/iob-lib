@@ -32,11 +32,23 @@ ifneq ($(wildcard embed_build.mk),)
 include embed_build.mk
 endif
 
-build: $(UTARGETS)
-
+build: bsp.h $(UTARGETS)
 %.elf: $(TEMPLATE_LDS) $(HDR) $(SRC)
 	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(LFLAGS) $(DEFINES) $(INCLUDES) $(SRC) $(LLIBS)
 	$(TOOLCHAIN_PREFIX)objcopy -O binary $@ $(*F).bin
+
+ifneq ($(BOARD),)
+FPGA_TOOL:=$(shell find ../../hardware/fpga -name $(BOARD) | cut -d"/" -f2)
+endif
+
+# Create bsp.h based on bsp.vh
+bsp.h:
+ifneq ($(BOARD),)
+	cp ../../hardware/fpga/$(FPGA_TOOL)/$(BOARD)/bsp.vh $@
+else
+	cp ../../hardware/simulation/bsp.vh $@
+endif
+	sed -i 's/`/#/' $@
 
 clean:
 	@rm -rf *.bin *.elf *.map *.hex

@@ -30,7 +30,6 @@ def setup( python_module, no_overlap=False):
     confs.append({'name':'VERSION', 'type':'M', 'val':"16'h"+build_srcs.version_str_to_digits(python_module.version), 'min':'NA', 'max':'NA', 'descr':"Product version. This 16-bit macro uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234."})
 
     # Check if should create build directory for this core/system
-    #TODO: We need to find another way of checking this. Currently we can not configure another build_dir in *_setup.py because it will cause this to not build the directory!
     create_build_dir = is_top_module(python_module)
 
     set_default_submodule_dirs(python_module)
