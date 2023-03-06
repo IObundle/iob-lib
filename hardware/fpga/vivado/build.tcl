@@ -38,10 +38,6 @@ source vivado/$BOARD/board.tcl
 #set FPGA device
 set_property part $PART [current_project]
 
-#read design constraints
-read_xdc vivado/$BOARD/$NAME\_dev.sdc
-read_xdc ./src/$NAME.sdc
-read_xdc vivado/$NAME\_tool.sdc
 
 #set custom assignments
 if {[file exists "vivado/custom_build.tcl"]} {
@@ -53,10 +49,29 @@ if {[file exists "vivado/custom_build.tcl"]} {
 #
 
 if { $IS_FPGA == "1" } {
+#read design constraints
+    read_xdc vivado/$BOARD/$NAME\_dev.sdc
+    read_xdc ./src/$NAME.sdc
     synth_design -include_dirs ../src -include_dirs ./src -verilog_define $DEFINES -part $PART -top $NAME -verbose
 } else {
-    synth_design -include_dirs ../src -include_dirs ./src -verilog_define $DEFINES -part $PART -top $NAME -mode out_of_context -flatten_hierarchy none -verbose
+#read design constraints
+    read_xdc -mode out_of_context vivado/$BOARD/$NAME\_dev.sdc
+    read_xdc -mode out_of_context ./src/$NAME.sdc
+    synth_design -include_dirs ../src -include_dirs ./src -verilog_define $DEFINES -part $PART -top $NAME -mode out_of_context -flatten_hierarchy rebuilt -verbose
 }
+
+set_property HD.PARTPIN_RANGE SLICE_X0Y0:SLICE_X29Y29 [all_inputs]
+set_property HD.PARTPIN_RANGE SLICE_X0Y0:SLICE_X29Y29 [all_outputs]
+
+set_property HD.CLK_SRC BUFGCTRL_X0Y0 [get_ports clk_i]
+set_property HD.CLK_SRC BUFGCTRL_X0Y1 [get_ports mclk_i]
+set_property HD.CLK_SRC BUFGCTRL_X0Y2 [get_ports btxclk_i]
+set_property HD.CLK_SRC BUFGCTRL_X0Y3 [get_ports brxclk_i]
+set_property ASYNC_REG TRUE [get_cells -hier {sync*[*]}]
+set_property ASYNC_REG TRUE [get_cells -hier {signal_o*[*]}]
+set_property HD.PARTITION 1 [current_design]
+
+
 
 opt_design
 

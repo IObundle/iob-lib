@@ -9,6 +9,8 @@ set USE_EXTMEM [lindex $argv 6]
 set SEED [lindex $argv 7]
 set USE_QUARTUS_PRO [lindex $argv 8]
 
+load_package flow
+
 project_new $NAME -overwrite
 
 if [project_exists $NAME] {
@@ -52,63 +54,102 @@ foreach file [split $VSRC \ ] {
     }
 }
 
-
-
 if {$IS_FPGA != "1"} {
-    set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-    set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id $NAME:$NAME
-    set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+    set_global_assignment -name INCREMENTAL_COMPILATION_EXPORT_NETLIST_TYPE POST_FIT
+    set_global_assignment -name INCREMENTAL_COMPILATION_EXPORT_ROUTING OFF
 }
+
 
 set_global_assignment -name SDC_FILE quartus/$BOARD/$NAME\_dev.sdc
 set_global_assignment -name SDC_FILE ./src/$NAME.sdc
+puts [open quartus/$NAME\_tool.sdc w] "derive_clock_uncertainty"
 set_global_assignment -name SDC_FILE quartus/$NAME\_tool.sdc
+
+
 
 # random seed for fitting
 set_global_assignment -name SEED $SEED
 
 export_assignments
 
+#Full compilation
+if {$IS_FPGA == "1"} {
+    if {[catch {execute_flow -compile} result]} {
+        puts "\nResult: $result\n"
+        puts "ERROR: Compilation failed. See report files.\n"
+    } else {
+        puts "\nINFO: Compilation was successful.\n"
+    }
+}
+
+
 if {$USE_QUARTUS_PRO == 1} {
-
-    if [catch {qexec "[file join $::quartus(binpath) quartus_syn] $NAME"} result] {
-        qexit -error
-    }
-
+    set synth_tool "syn"
 } else {
-    if [catch {qexec "[file join $::quartus(binpath) quartus_map] $NAME"} result] {
-        qexit -error
-    }
+    set synth_tool "map"
+}
+
+#Incremental compilation
+#run quartus pro synthesis
+if {[catch {execute_module -tool $synth_tool} result]} {
+    puts "\nResult: $result\n"
+    puts "ERROR: Synthesis failed. See report files.\n"
+    qexit -error
+} else {
+    puts "\nINFO: Synthesis was successful.\n"
+}
+
+#assign virtual pins
+set name_ids [get_names -filter * -node_type pin]
+foreach_in_collection name_id $name_ids {
+    set pin_name [get_name_info -info full_path $name_id]
+    post_message "Making VIRTUAL_PIN assignment to $pin_name"
+    set_instance_assignment -to $pin_name -name VIRTUAL_PIN ON
+}
+
+export_assignments
+
+#rerun quartus pro synthesis to apply virtual pin assignments
+if {[catch {execute_module -tool $synth_tool} result]} {
+    puts "\nResult: $result\n"
+    puts "ERROR: Synthesis failed. See report files.\n"
+    qexit -error
+} else {
+    puts "\nINFO: Synthesis was successful.\n"
 }
 
 if [file exists "quartus/postmap.tcl"] {
     source quartus/postmap.tcl
 }
 
-if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $NAME"} result] {
+#run quartus pro fit
+if {[catch {execute_module -tool fit} result]} {
+    puts "\nResult: $result\n"
+    puts "ERROR: Fit failed. See report files.\n"
     qexit -error
+} else {
+    puts "\nINFO: Fit was successful.\n"
 }
 
-if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $NAME"} result] {
+#run quartus pro sta
+if {[catch {execute_module -tool sta} result]} {
+    puts "\nResult: $result\n"
+    puts "ERROR: STA failed. See report files.\n"
     qexit -error
+} else {
+    puts "\nINFO: STA was successful.\n"
 }
 
-if [catch {qexec "[file join $::quartus(binpath) quartus_sta] -t quartus/timing.tcl $NAME"} result] {
-    qexit -error
-}
-
-if {$IS_FPGA != "1"} {
-    if { $USE_QUARTUS_PRO == 1 } {
-        if [catch {qexec "[file join $::quartus(binpath) quartus_eda] --resynthesis --format verilog $NAME"} result] {
-            qexit -error
-        }
-    } else {
-        if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
-            qexit -error
-        }
+#write netlist
+if {$USE_QUARTUS_PRO == 1} {
+    if [catch {execute_module -tool eda -args "--resynthesis --format verilog"} result] {
+        qexit -error
     }
 } else {
-    if [catch {qexec "[file join $::quartus(binpath) quartus_asm] $NAME"} result] {
+    if [catch {execute_module -tool cdb -args "--help"} result] {
+        qexit -error
+    }
+    if [catch {execute_module -tool cdb -args "--vqm=resynthesis/$NAME.vqm"} result] {
         qexit -error
     }
 }
@@ -118,4 +159,5 @@ project_close
 #rename report files
 file rename reports/$NAME.fit.summary reports/$NAME\_$PART.fit.summary
 file rename reports/$NAME.sta.summary reports/$NAME\_$PART.sta.summary
+
 
