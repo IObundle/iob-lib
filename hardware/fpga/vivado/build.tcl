@@ -7,15 +7,6 @@ set VIP [lindex $argv 4]
 set IS_FPGA [lindex $argv 5]
 set CUSTOM_ARGS [lindex $argv 6]
 
-puts $NAME
-puts $BOARD
-puts $VSRC
-puts $DEFINES
-puts $VIP
-puts $IS_FPGA
-puts $CUSTOM_ARGS
-
-
 #verilog sources
 foreach file [split $VSRC \ ] {
     puts $file
@@ -39,17 +30,13 @@ source vivado/$BOARD/board.tcl
 set_property part $PART [current_project]
 
 
-#set custom assignments
-if {[file exists "vivado/custom_build.tcl"]} {
-    source "vivado/custom_build.tcl"
+#set pre-map custom assignments
+if {[file exists "vivado/premap.tcl"]} {
+    source "vivado/premap.tcl"
 }
 
-#
-# Flow
-#
-
+#read design constraints and synthesize design
 if { $IS_FPGA == "1" } {
-#read design constraints
     read_xdc vivado/$BOARD/$NAME\_dev.sdc
     read_xdc ./src/$NAME.sdc
     synth_design -include_dirs ../src -include_dirs ./src -verilog_define $DEFINES -part $PART -top $NAME -verbose
@@ -60,18 +47,10 @@ if { $IS_FPGA == "1" } {
     synth_design -include_dirs ../src -include_dirs ./src -verilog_define $DEFINES -part $PART -top $NAME -mode out_of_context -flatten_hierarchy rebuilt -verbose
 }
 
-set_property HD.PARTPIN_RANGE SLICE_X0Y0:SLICE_X29Y29 [all_inputs]
-set_property HD.PARTPIN_RANGE SLICE_X0Y0:SLICE_X29Y29 [all_outputs]
-
-set_property HD.CLK_SRC BUFGCTRL_X0Y0 [get_ports clk_i]
-set_property HD.CLK_SRC BUFGCTRL_X0Y1 [get_ports mclk_i]
-set_property HD.CLK_SRC BUFGCTRL_X0Y2 [get_ports btxclk_i]
-set_property HD.CLK_SRC BUFGCTRL_X0Y3 [get_ports brxclk_i]
-set_property ASYNC_REG TRUE [get_cells -hier {sync*[*]}]
-set_property ASYNC_REG TRUE [get_cells -hier {signal_o*[*]}]
-set_property HD.PARTITION 1 [current_design]
-
-
+#set post-map custom assignments
+if {[file exists "vivado/postmap.tcl"]} {
+    source "vivado/postmap.tcl"
+}
 
 opt_design
 
