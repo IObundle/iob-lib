@@ -13,7 +13,7 @@ FPGA_SYNC_FLAGS=$(VIVADO_SYNC_FLAGS)
 ifeq ($(IS_FPGA),1)
 FPGA_OBJ=$(FPGA_TOP).bit
 else
-FPGA_OBJ=$(FPGA_TOP).edif
+FPGA_OBJ=$(FPGA_TOP)_netlist.v
 FPGA_STUB=$(FPGA_TOP)_stub.v
 endif
 

@@ -22,7 +22,7 @@ endif
 ifeq ($(IS_FPGA),1)
 FPGA_OBJ:=reports/$(FPGA_TOP).sof
 else
-FPGA_OBJ:=resynthesis/$(FPGA_TOP).vqm
+FPGA_OBJ:=resynthesis/$(FPGA_TOP)_netlist.v
 endif
 
 # Set the Nios command shell to use

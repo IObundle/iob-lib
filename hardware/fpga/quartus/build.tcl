@@ -146,13 +146,11 @@ if {$USE_QUARTUS_PRO == 1} {
         qexit -error
     }
 } else {
-    if [catch {execute_module -tool cdb -args "--help"} result] {
-        qexit -error
-    }
-    if [catch {execute_module -tool cdb -args "--vqm=resynthesis/$NAME.vqm"} result] {
+    if [catch {execute_module -tool cdb -args "--vqm=resynthesis/$NAME"} result] {
         qexit -error
     }
 }
+file rename resynthesis/$NAME.vqm resynthesis/$NAME\_netlist.v
 
 project_close
 

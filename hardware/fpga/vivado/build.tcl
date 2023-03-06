@@ -97,6 +97,6 @@ report_timing -file reports/$NAME\_$PART\_timing_paths.rpt -max_paths 30
 if { $IS_FPGA == "1" } {
     write_bitstream -force $NAME.bit
 } else {
-    write_edif -force $NAME.edif
+    write_verilog -force $NAME\_netlist.v
     write_verilog -force -mode synth_stub ${NAME}_stub.v
 }
