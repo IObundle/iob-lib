@@ -6,13 +6,9 @@ import mk_configuration as mk_conf
 import mkregs
 import ios as ios_lib
 import blocks as blocks_lib
-from submodule_utils import import_setup, iob_soc_peripheral_setup, set_default_submodule_dirs
+from submodule_utils import import_setup, set_default_submodule_dirs
 import build_srcs
 
-import periphs_tmp
-import createSystem
-import createTestbench
-import createTopSystem
 import datetime
 
 
@@ -21,9 +17,7 @@ def getf(obj, name, field):
     return int(obj[next(i for i in range(len(obj)) if obj[i]['name'] == name)][field])
 
 # no_overlap: Optional argument. Selects if read/write addresses should not overlap
-# peripheral_ios: Optional argument. Selects if should append peripheral IOs to 'ios' list
-# internal_wires: Optional argument. List of extra wires for creste_systemv to create inside this core/system module
-def setup( python_module, no_overlap=False, peripheral_ios=True, internal_wires=None):
+def setup( python_module, no_overlap=False):
     confs = python_module.confs
     ios = python_module.ios
     regs = python_module.regs
@@ -49,23 +43,6 @@ def setup( python_module, no_overlap=False, peripheral_ios=True, internal_wires=
         mk_conf.config_build_mk(python_module, build_dir)
         mk_conf.config_for_board(top, python_module.flows, build_dir)
         build_srcs.build_dir_setup(python_module)
-
-    #
-    # IOb-SoC related functions
-    #
-
-    peripherals_list = iob_soc_peripheral_setup(python_module, append_peripheral_ios=peripheral_ios)
-
-    # Build periphs_tmp.h
-    if peripherals_list: periphs_tmp.create_periphs_tmp(next(i['val'] for i in confs if i['name'] == 'P'),
-                                   peripherals_list, f"{python_module.build_dir}/software/{top}_periphs.h")
-    # Try to build iob_soc.v if template is available
-    createSystem.create_systemv(python_module.setup_dir, python_module.submodules['dirs'], python_module.name, peripherals_list, os.path.join(python_module.build_dir,f'hardware/src/{top}.v'), internal_wires=internal_wires)
-    # Try to build system_tb.v if template is available
-    createTestbench.create_system_testbench(python_module.setup_dir, python_module.submodules['dirs'], python_module.name, peripherals_list, os.path.join(python_module.build_dir,f'hardware/simulation/src/{top}_tb.v'))
-    # Try to build system_top.v if template is available
-    createTopSystem.create_top_system(python_module.setup_dir, python_module.submodules['dirs'], python_module.name, peripherals_list, ios, confs, os.path.join(python_module.build_dir,f'hardware/simulation/src/{top}_top.v'))
-
 
     #
     # Build registers table
@@ -94,8 +71,7 @@ def setup( python_module, no_overlap=False, peripheral_ios=True, internal_wires=
         # Auto-add iob_s_port.vh
         python_module.submodules['hw_setup']['headers'].append('iob_s_port')
         # Auto-add cpu_iob_s_portmap.vh
-        #   [ file_prefix, interface_name, port_prefix, wire_prefix ]
-        python_module.submodules['hw_setup']['headers'].append([ 'cpu_', 'iob_s_portmap', '', 'cpu_' ])
+        python_module.submodules['hw_setup']['headers'].append({ 'file_prefix':'cpu_', 'interface':'iob_s_portmap', 'wire_prefix':'', 'port_prefix':'cpu_' })
 
         
     #

@@ -2,49 +2,50 @@
 set NAME [lindex $argv 0]
 set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
-set QIP [lindex $argv 3]
-set IS_FPGA [lindex $argv 4]
-set USE_EXTMEM [lindex $argv 5]
-set SEED [lindex $argv 6]
+set DEFINES [lindex $argv 3]
+set IP [lindex $argv 4]
+set IS_FPGA [lindex $argv 5]
+set USE_EXTMEM [lindex $argv 6]
+set SEED [lindex $argv 7]
+set USE_QUARTUS_PRO [lindex $argv 8]
 
+load_package flow
 
 project_new $NAME -overwrite
 
-
-#------ Create or open project ------#
 if [project_exists $NAME] {
-
-    #------ Project already exists -- open project -------#
     project_open $NAME -force
 } else {
-
-    #------ Project does not exist -- create new project ------#
     project_new $NAME
 }
 
 set_global_assignment -name TOP_LEVEL_ENTITY $NAME
 
 #board data
-
 source quartus/$BOARD/board.tcl
 
+set_global_assignment -name FAMILY $FAMILY
+set_global_assignment -name DEVICE $PART
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY reports
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 
 #verilog heders search path
 set_global_assignment -name SEARCH_PATH ../src
-
-
+set_global_assignment -name SEARCH_PATH ./src
 
 #quartus IPs
-foreach q_file [split $QIP \ ] {
-    if { [ file extension $q_file ] == ".qip" } {
-        set_global_assignment -name QIP_FILE $q_file
-    } elseif { [ file extension $q_file ] == ".qxp" } {
-        set_global_assignment -name QXP_FILE $q_file
+foreach q_file [split $IP \ ] {
+    if { [ file extension $q_file ] == ".qsys" } {
+        set_global_assignment -name QSYS_FILE $q_file
     }
 }
 
+#verilog macros
+foreach macro [split $DEFINES \ ] {
+    if {$macro != ""} {
+        set_global_assignment -name VERILOG_MACRO $macro
+    }
+}
 
 #verilog sources
 foreach file [split $VSRC \ ] {
@@ -53,66 +54,108 @@ foreach file [split $VSRC \ ] {
     }
 }
 
-
 if {$IS_FPGA != "1"} {
-
-    
-    set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-    set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-    set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-    set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id $NAME:$NAME
-    set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id $NAME:$NAME
-    set_global_assignment -name PARTITION_COLOR 39423 -section_id $NAME:$NAME
-    set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+    set_global_assignment -name INCREMENTAL_COMPILATION_EXPORT_NETLIST_TYPE POST_FIT
+    set_global_assignment -name INCREMENTAL_COMPILATION_EXPORT_ROUTING OFF
 }
 
-set_global_assignment -name LAST_QUARTUS_VERSION "18.0.0 Standard Edition"
-set_global_assignment -name SDC_FILE quartus/$NAME.sdc
 
-#------ Manually recompile and perform timing analysis again using qexec ------#
+set_global_assignment -name SDC_FILE quartus/$BOARD/$NAME\_dev.sdc
+set_global_assignment -name SDC_FILE ./src/$NAME.sdc
+puts [open quartus/$NAME\_tool.sdc w] "derive_clock_uncertainty"
+set_global_assignment -name SDC_FILE quartus/$NAME\_tool.sdc
 
-# Write these assignments to the
-# Quartus Prime Settings File (.qsf) so that
-# the Quartus Prime command-line executables
-# can use these assignments during compilation
+
 
 # random seed for fitting
 set_global_assignment -name SEED $SEED
 
 export_assignments
 
-if [catch {qexec "[file join $::quartus(binpath) quartus_map] $NAME"} result] {
-    qexit -error
-}
-
-if [file exists "quartus/postmap.tcl"] {
-    source "quartus/postmap.tcl"
-}
-    
-
-
-if [catch {qexec "[file join $::quartus(binpath) quartus_fit] $NAME"} result] {
-    qexit -error
-}
-
-
-if [catch {qexec "[file join $::quartus(binpath) quartus_sta] $NAME"} result] {
-    qexit -error
-}
-
-if [catch {qexec "[file join $::quartus(binpath) quartus_sta] -t quartus/timing.tcl $NAME"} result] {
-    qexit -error
-}
-
-
-if {$IS_FPGA != "1"} {
-    if [catch {qexec "[file join $::quartus(binpath) quartus_cdb] $NAME --incremental_compilation_export=$NAME.qxp --incremental_compilation_export_post_synth=on"} result] {
-        qexit -error
-    } 
-} else {
-    if [catch {qexec "[file join $::quartus(binpath) quartus_asm] $NAME"} result] {
-        qexit -error
+#Full compilation
+if {$IS_FPGA == "1"} {
+    if {[catch {execute_flow -compile} result]} {
+        puts "\nResult: $result\n"
+        puts "ERROR: Compilation failed. See report files.\n"
+    } else {
+        puts "\nINFO: Compilation was successful.\n"
     }
 }
 
+
+if {$USE_QUARTUS_PRO == 1} {
+    set synth_tool "syn"
+} else {
+    set synth_tool "map"
+}
+
+#Incremental compilation
+#run quartus pro synthesis
+if {[catch {execute_module -tool $synth_tool} result]} {
+    puts "\nResult: $result\n"
+    puts "ERROR: Synthesis failed. See report files.\n"
+    qexit -error
+} else {
+    puts "\nINFO: Synthesis was successful.\n"
+}
+
+#assign virtual pins
+set name_ids [get_names -filter * -node_type pin]
+foreach_in_collection name_id $name_ids {
+    set pin_name [get_name_info -info full_path $name_id]
+    post_message "Making VIRTUAL_PIN assignment to $pin_name"
+    set_instance_assignment -to $pin_name -name VIRTUAL_PIN ON
+}
+
+export_assignments
+
+#rerun quartus pro synthesis to apply virtual pin assignments
+if {[catch {execute_module -tool $synth_tool} result]} {
+    puts "\nResult: $result\n"
+    puts "ERROR: Synthesis failed. See report files.\n"
+    qexit -error
+} else {
+    puts "\nINFO: Synthesis was successful.\n"
+}
+
+if [file exists "quartus/postmap.tcl"] {
+    source quartus/postmap.tcl
+}
+
+#run quartus pro fit
+if {[catch {execute_module -tool fit} result]} {
+    puts "\nResult: $result\n"
+    puts "ERROR: Fit failed. See report files.\n"
+    qexit -error
+} else {
+    puts "\nINFO: Fit was successful.\n"
+}
+
+#run quartus pro sta
+if {[catch {execute_module -tool sta} result]} {
+    puts "\nResult: $result\n"
+    puts "ERROR: STA failed. See report files.\n"
+    qexit -error
+} else {
+    puts "\nINFO: STA was successful.\n"
+}
+
+#write netlist
+if {$USE_QUARTUS_PRO == 1} {
+    if [catch {execute_module -tool eda -args "--resynthesis --format verilog"} result] {
+        qexit -error
+    }
+} else {
+    if [catch {execute_module -tool cdb -args "--vqm=resynthesis/$NAME"} result] {
+        qexit -error
+    }
+}
+file rename resynthesis/$NAME.vqm resynthesis/$NAME\_netlist.v
+
 project_close
+
+#rename report files
+file rename reports/$NAME.fit.summary reports/$NAME\_$PART.fit.summary
+file rename reports/$NAME.sta.summary reports/$NAME\_$PART.sta.summary
+
+

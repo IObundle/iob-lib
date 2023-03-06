@@ -1,2 +1,3 @@
-set_global_assignment -name FAMILY "Arria 10"
-
+set FAMILY "Arria 10"
+set PART "10AX115R4F40I3SG"
+         

@@ -15,6 +15,8 @@ EFLAGS=-debug_access+nomemcbk+dmptf -licqueue -debug_region+cell -notice +bidir+
 
 #+lint=all
 
+# Set build-time defines from the build_defines.txt file
+SFLAGS+=$(addprefix +define+,$(file < ../../build_defines.txt))
 
 comp: $(VHDR) $(VSRC)
 	vlogan $(SFLAGS) $(VSRC) && vcs $(EFLAGS) $(NAME)_tb
