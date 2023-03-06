@@ -61,12 +61,13 @@ if {$IS_FPGA != "1"} {
 
 
 #read design constraints
-set_global_assignment -name SDC_FILE quartus/$BOARD/$NAME\_dev.sdc
+set_global_assignment -name SDC_FILE ./quartus/$BOARD/$NAME\_dev.sdc
 set_global_assignment -name SDC_FILE ./src/$NAME.sdc
-if {[file exists "quartus/$NAME\_tool.sdc"]} {
-    puts [open quartus/$NAME\_tool.sdc w] "derive_clock_uncertainty"
+
+if {[file exists "quartus/$NAME\_tool.sdc"] == 0} {
+    puts [open "quartus/$NAME\_tool.sdc" w] "derive_clock_uncertainty"
 }
-set_global_assignment -name SDC_FILE quartus/$NAME\_tool.sdc
+set_global_assignment -name SDC_FILE ./quartus/$NAME\_tool.sdc
 
 
 

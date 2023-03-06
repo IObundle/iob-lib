@@ -18,6 +18,9 @@ ifeq ($(BOARD),DK-DEV-AGF014E2ES)
 		USE_QUARTUS_PRO=1
 endif
 
+# Use Quartus Pro regardless of the board
+# USE_QUARTUS_PRO=1
+
 # Determine the object to build
 ifeq ($(IS_FPGA),1)
 FPGA_OBJ:=reports/$(FPGA_TOP).sof
