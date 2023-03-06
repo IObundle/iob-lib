@@ -12,9 +12,6 @@ ifeq ($(VCD),1)
 SFLAGS+=+define+VCD
 endif
 
-# Set build-time defines from the build_defines.txt file
-SFLAGS+=$(addprefix +define+,$(file < ../../build_defines.txt))
-
 comp: $(VHDR) $(VSRC) 
 	vlog $(CFLAGS) $(VSRC)
 

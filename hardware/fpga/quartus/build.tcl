@@ -28,6 +28,7 @@ set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 #verilog heders search path
 set_global_assignment -name SEARCH_PATH ../src
 set_global_assignment -name SEARCH_PATH ./src
+set_global_assignment -name SEARCH_PATH quartus/$BOARD
 
 #quartus IPs
 foreach q_file [split $IP \ ] {

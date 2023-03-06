@@ -23,9 +23,6 @@ LFLAGS ?= -Wl,-Bstatic,-T,$(TEMPLATE_LDS),--strip-debug
 LLIBS ?=-lgcc -lc -lnosys
 INCLUDES ?=-I. -I../esrc
 
-# Set build-time defines from the build_defines.txt file
-CFLAGS+=$(addprefix -D,$(file < ../../build_defines.txt))
-
 # include local build segment
 # all previously defined variables can be overwritten in this file
 ifneq ($(wildcard embed_build.mk),)
@@ -38,7 +35,7 @@ build: bsp.h $(UTARGETS)
 	$(TOOLCHAIN_PREFIX)objcopy -O binary $@ $(*F).bin
 
 ifneq ($(BOARD),)
-FPGA_TOOL:=$(shell find ../../hardware/fpga -name $(BOARD) | cut -d"/" -f2)
+FPGA_TOOL:=$(shell find ../../hardware/fpga -name $(BOARD) | cut -d"/" -f5)
 endif
 
 # Create bsp.h based on bsp.vh

@@ -23,8 +23,6 @@ FPGA_PROG=$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado -nojournal -log vivado.log -mo
 # work-around for http://svn.clifford.at/handicraft/2016/vivadosig11
 export RDI_VERBOSE = False
 
-# Set build-time defines from the build_defines.txt file
-DEFINES+=$(file < ../../build_defines.txt)
 VIVADO_FLAGS= -nojournal -log vivado.log -mode batch -source vivado/build.tcl -tclargs $(FPGA_TOP) $(BOARD) "$(VSRC)" "$(DEFINES)" "$(IP)" $(IS_FPGA) $(USE_EXTMEM)
 
 $(FPGA_OBJ): $(VSRC) $(VHDR) $(IP) $(wildcard $(BOARD)/*.sdc)

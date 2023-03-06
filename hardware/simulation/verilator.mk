@@ -5,12 +5,10 @@ VFLAGS+=-Wno-lint
 VFLAGS+=--timing
 # Include embedded headers
 VFLAGS+=-CFLAGS "-I../../../software/esrc"
+# Include bsp.h
+VFLAGS+=-CFLAGS "-I.."
 
 VFLAGS+=$(DEFINES)
-
-# Set build-time defines from the build_defines.txt file
-VFLAGS+=$(addprefix -D,$(file < ../../build_defines.txt))
-VFLAGS+=-CFLAGS "$(addprefix -D,$(file < ../../build_defines.txt))"
 
 ifeq ($(VCD),1)
 VFLAGS+=--trace
@@ -21,9 +19,14 @@ SIM_SERVER=$(VSIM_SERVER)
 SIM_USER=$(VSIM_USER)
 
 SIM_PROC=V$(VTOP)
+#
+# Create bsp.h based on bsp.vh of simulation
+bsp.h:
+	cp bsp.vh $@
+	sed -i 's/`/#/' $@
 
-comp: $(VHDR) $(VSRC)
-	verilator $(VFLAGS) $(VSRC) src/$(NAME)_tb.cpp	
+comp: bsp.h $(VHDR) $(VSRC)
+	verilator $(VFLAGS) $(VSRC) src/$(NAME)_tb.cpp
 	cd ./obj_dir && make -f $(SIM_PROC).mk
 
 exec:

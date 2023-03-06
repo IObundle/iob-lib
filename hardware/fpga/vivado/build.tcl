@@ -51,9 +51,9 @@ if {[file exists "vivado/custom_build.tcl"]} {
 #
 
 if { $IS_FPGA == "1" } {
-    synth_design -include_dirs ../src -include_dirs ./src -verilog_define $DEFINES -part $PART -top $NAME -verbose
+    synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -verilog_define $DEFINES -part $PART -top $NAME -verbose
 } else {
-    synth_design -include_dirs ../src -include_dirs ./src -verilog_define $DEFINES -part $PART -top $NAME -mode out_of_context -flatten_hierarchy none -verbose
+    synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -verilog_define $DEFINES -part $PART -top $NAME -mode out_of_context -flatten_hierarchy none -verbose
 }
 
 opt_design

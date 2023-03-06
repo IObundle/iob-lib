@@ -35,8 +35,6 @@ FPGA_ENV=$(QUARTUSPATH)/nios2eds/nios2_command_shell.sh
 # Set the Quartus command to porgram the FPGA
 FPGA_PROG=$(FPGA_ENV) quartus_pgm -m jtag -c 1 -o 'p;$(FPGA_TOP).sof'
 
-# Set build-time defines from the build_defines.txt file
-DEFINES:=$(file < ../../build_defines.txt)
 QUARTUS_FLAGS = -t quartus/build.tcl $(FPGA_TOP) $(BOARD) "$(VSRC)" "$(DEFINES) " "$(IP) " $(IS_FPGA) $(USE_EXTMEM) $(QUARTUS_SEED) $(USE_QUARTUS_PRO)
 
 $(FPGA_OBJ): $(VHDR) $(VSRC) $(IP) $(wildcard $(BOARD)/*.sdc)
