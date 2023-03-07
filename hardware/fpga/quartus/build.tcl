@@ -85,6 +85,7 @@ if {$IS_FPGA == "1"} {
     } else {
         puts "\nINFO: Compilation was successful.\n"
     }
+    qexit -success
 }
 
 
@@ -104,25 +105,23 @@ if {[catch {execute_module -tool $synth_tool} result]} {
     puts "\nINFO: Synthesis was successful.\n"
 }
 
-if {$IS_FPGA != "1"} {
-    #assign virtual pins
-    set name_ids [get_names -filter * -node_type pin]
-    foreach_in_collection name_id $name_ids {
-        set pin_name [get_name_info -info full_path $name_id]
-        post_message "Making VIRTUAL_PIN assignment to $pin_name"
-        set_instance_assignment -to $pin_name -name VIRTUAL_PIN ON
-    }
-    
-    export_assignments
+#assign virtual pins
+set name_ids [get_names -filter * -node_type pin]
+foreach_in_collection name_id $name_ids {
+    set pin_name [get_name_info -info full_path $name_id]
+    post_message "Making VIRTUAL_PIN assignment to $pin_name"
+    set_instance_assignment -to $pin_name -name VIRTUAL_PIN ON
+}
 
-    #rerun quartus pro synthesis to apply virtual pin assignments
-    if {[catch {execute_module -tool $synth_tool} result]} {
-        puts "\nResult: $result\n"
-        puts "ERROR: Synthesis failed. See report files.\n"
-        qexit -error
-    } else {
-        puts "\nINFO: Synthesis was successful.\n"
-    }
+export_assignments
+
+#rerun quartus pro synthesis to apply virtual pin assignments
+if {[catch {execute_module -tool $synth_tool} result]} {
+    puts "\nResult: $result\n"
+    puts "ERROR: Synthesis failed. See report files.\n"
+    qexit -error
+} else {
+    puts "\nINFO: Synthesis was successful.\n"
 }
 
 if [file exists "quartus/postmap.tcl"] {
