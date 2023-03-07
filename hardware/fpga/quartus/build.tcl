@@ -82,10 +82,11 @@ if {$IS_FPGA == "1"} {
     if {[catch {execute_flow -compile} result]} {
         puts "\nResult: $result\n"
         puts "ERROR: Compilation failed. See report files.\n"
+        qexit -error
     } else {
         puts "\nINFO: Compilation was successful.\n"
+        qexit -success
     }
-    qexit -success
 }
 
 
