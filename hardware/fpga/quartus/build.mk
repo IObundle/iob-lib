@@ -10,7 +10,7 @@ FPGA_SCP_FLAGS=$(QUARTUS_SCP_FLAGS)
 FPGA_SYNC_FLAGS=$(QUARTUS_SYNC_FLAGS)
 
 # Determine the Quartus edition to use (default to Standard)
-USE_QUARTUS_PRO=0
+USE_QUARTUS_PRO ?=0
 ifeq ($(BOARD),DK-DEV-10CX220-A)
 		USE_QUARTUS_PRO=1
 endif
@@ -18,8 +18,6 @@ ifeq ($(BOARD),DK-DEV-AGF014E2ES)
 		USE_QUARTUS_PRO=1
 endif
 
-# Use Quartus Pro regardless of the board
-# USE_QUARTUS_PRO=1
 
 # Determine the object to build
 ifeq ($(IS_FPGA),1)

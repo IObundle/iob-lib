@@ -154,7 +154,13 @@ if {$USE_QUARTUS_PRO == 1} {
         qexit -error
     }
 }
-file rename resynthesis/$NAME.vqm resynthesis/$NAME\_netlist.v
+
+#rename netlist
+set netlist_file "resynthesis/$NAME\_netlist.v"
+if {[file exists $netlist_file] == 1} {
+    file delete $netlist_file
+}
+file rename resynthesis/$NAME.vqm $netlist_file
 
 project_close
 
