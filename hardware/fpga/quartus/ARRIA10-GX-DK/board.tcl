@@ -1,3 +1,5 @@
-set_global_assignment -name FAMILY "Arria 10"
-#set_global_assignment -name DEVICE 10AX115S2F45I1SG2
+set FAMILY "Arria 10"
+set PART "10AX115R4F40I3SG"
 
+#use the following part to experiment with a faster speed grade
+#set PART "10AS016E3F27E1HG"

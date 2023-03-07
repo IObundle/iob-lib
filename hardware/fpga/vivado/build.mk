@@ -13,7 +13,7 @@ FPGA_SYNC_FLAGS=$(VIVADO_SYNC_FLAGS)
 ifeq ($(IS_FPGA),1)
 FPGA_OBJ=$(FPGA_TOP).bit
 else
-FPGA_OBJ=$(FPGA_TOP).edif
+FPGA_OBJ=$(FPGA_TOP)_netlist.v
 FPGA_STUB=$(FPGA_TOP)_stub.v
 endif
 
@@ -26,7 +26,7 @@ export RDI_VERBOSE = False
 VIVADO_FLAGS= -nojournal -log vivado.log -mode batch -source vivado/build.tcl -tclargs $(FPGA_TOP) $(BOARD) "$(VSRC)" "$(DEFINES)" "$(IP)" $(IS_FPGA) $(USE_EXTMEM)
 
 $(FPGA_OBJ): $(VSRC) $(VHDR) $(IP) $(wildcard $(BOARD)/*.sdc)
-	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado $(VIVADO_FLAGS) && mv vivado.log reports/
+	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado $(VIVADO_FLAGS) && sleep 1 && mv vivado.log reports/
 
 vivado-clean:
 	@rm -rf .Xil

@@ -17,7 +17,7 @@ def copy_without_override(src, dst):
     if not os.path.isfile(dst):
         shutil.copy2(src, dst)
 
-# build_dir_setup should only be called by the main core. Therefor, executed only one time.
+# build_dir_setup should only be called by the main core. Therefore, executed only one time.
 def build_dir_setup(python_module):
     build_dir = python_module.build_dir
     setup_dir = python_module.setup_dir
@@ -84,6 +84,7 @@ def hw_setup(python_module):
     copy_files( f"{LIB_DIR}/hardware/modules", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
     # Copy Setup hw files
     copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
+    copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.sdc*', copy_all = True )
 
 # Setup simulation related files/modules
 # module: python module representing a *_setup.py file of the root directory of the core/system.
