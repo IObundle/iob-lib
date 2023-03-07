@@ -5,8 +5,9 @@ module iob2wishbone #(
     parameter WB_DATA_W = 32  // Width of data bus in bits
     /*parameter WB_NON_ESSENTIAL = 0 // Enable non-essential wishbone interface signals (disabled by default)*/
   ) (
-    input wire clk,
-    input wire rst,
+    input wire clk_i,
+    input wire arst_i,
+    input wire cke_i,
 
     //
     // Wishbone master interface
@@ -27,24 +28,31 @@ module iob2wishbone #(
     //
     // Native slave interface
     //
-    input wire                   valid,
-    input wire [WB_ADDR_W-1:0]   addr,
-    input wire [WB_DATA_W-1:0]   wdata,
-    input wire [WB_DATA_W/8-1:0] wstrb,
-    output reg [WB_DATA_W-1:0]   rdata,
-    output wire                  ready
+    input  wire                   avalid_i,
+    input  wire [WB_ADDR_W-1:0]   addr_i,
+    input  wire [WB_DATA_W-1:0]   wdata_i,
+    input  wire [WB_DATA_W/8-1:0] wstrb_i,
+    output wire [WB_DATA_W-1:0]   rdata_o,
+    output wire                   rvalid_o,
+    output wire                   ready_o
   );
 
-  assign wishbone_addr   = addr[WB_ADDR_W-1:0];
-  assign wishbone_data_w = wdata;
-  assign wishbone_we     = (| wstrb);
-  assign wishbone_sel    = 1<<addr[1:0];
-  assign wishbone_stb    = valid&(~ready);
-  assign wishbone_cyc    = valid;
+  reg  avalid_reg;
+  wire avalid_reg_rst;
+  assign avalid_reg_rst = (wishbone_ack | wishbone_err);
+  iob_reg_r #(1, 0) iob_reg_r_0 (clk_i, arst_i, cke_i, avalid_reg_rst, avalid_i, avalid_reg);
+
+  assign wishbone_addr   = addr_i[WB_ADDR_W-1:0];
+  assign wishbone_data_w = wdata_i;
+  assign wishbone_we     = (| wstrb_i);
+  assign wishbone_sel    = 1<<addr_i[1:0];
+  assign wishbone_stb    = avalid_i&(~ready_o);
+  assign wishbone_cyc    = avalid_i;
   assign wishbone_cti    = 3'b000;
   assign wishbone_bte    = 2'b00;
   
-  assign rdata = wishbone_data_r;
-  assign ready = (wishbone_ack | wishbone_err);
+  assign rdata_o  = wishbone_data_r;
+  assign rvalid_o = (wishbone_ack & ~wishbone_we);
+  assign ready_o  = ~(avalid_reg | avalid_reg_rst);
 
 endmodule
