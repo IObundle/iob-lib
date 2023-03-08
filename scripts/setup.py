@@ -30,8 +30,7 @@ def setup( python_module, no_overlap=False):
     confs.append({'name':'VERSION', 'type':'M', 'val':"16'h"+build_srcs.version_str_to_digits(python_module.version), 'min':'NA', 'max':'NA', 'descr':"Product version. This 16-bit macro uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234."})
 
     # Check if should create build directory for this core/system
-    #TODO: We need to find another way of checking this. Currently we can not configure another build_dir in *_setup.py because it will cause this to not build the directory!
-    create_build_dir = build_dir==f"../{python_module.name}_{python_module.version}"
+    create_build_dir = is_top_module(python_module)
 
     set_default_submodule_dirs(python_module)
 
@@ -41,7 +40,6 @@ def setup( python_module, no_overlap=False):
     if create_build_dir:
         os.makedirs(build_dir, exist_ok=True)
         mk_conf.config_build_mk(python_module, build_dir)
-        mk_conf.config_for_board(top, python_module.flows, build_dir)
         build_srcs.build_dir_setup(python_module)
 
     #
@@ -112,6 +110,12 @@ def setup( python_module, no_overlap=False):
         if regs:
             mkregs_obj.generate_regs_tex(regs, reg_table, build_dir+"/document/tsrc")
         blocks_lib.generate_blocks_tex(blocks, build_dir+"/document/tsrc")
+
+# Check if the given python_module is the top module (return true) or is a submodule (return false)
+# The check is based on the presence of the 'not_top_module' variable, set by the build_srcs.py script
+def is_top_module(python_module):
+    if 'not_top_module' in vars(python_module) and python_module.not_top_module: return False
+    else: return True
 
 
 

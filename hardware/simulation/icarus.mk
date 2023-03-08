@@ -8,9 +8,6 @@ ifneq ($(VTOP),)
 VFLAGS+=-s $(VTOP)
 endif
 
-# Set build-time defines from the build_defines.txt file
-VFLAGS+=$(addprefix -D,$(file < ../../build_defines.txt))
-
 SIM_SERVER=$(IVSIM_SERVER)
 SIM_USER=$(IVSIM_USER)
 

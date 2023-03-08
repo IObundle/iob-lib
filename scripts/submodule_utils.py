@@ -479,8 +479,6 @@ def get_peripherals_ports_params_top(peripherals_list, submodule_dirs):
         if instance['type'] not in port_list:
             # Import <corename>_setup.py module
             module = import_setup(submodule_dirs[instance['type']])
-            set_default_submodule_dirs(module)
-            iob_soc_peripheral_setup(module)
 
             # Append module IO, parameters, and top name
             port_list[instance['type']]=get_module_io(module.ios)

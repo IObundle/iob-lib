@@ -3,8 +3,6 @@
 # This makefile is used at build-time in $(BUILD_DIR)/sw/pc/Makefile
 #
 
-# Generate configuration when importing config_build.mk
-GEN_CONFIG:=1
 include ../../config_build.mk
 
 ifneq ($(wildcard ../../console.mk),)
@@ -13,9 +11,6 @@ endif
 
 # compiler flags
 CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
-
-# Set build-time defines from the build_defines.txt file
-CFLAGS+=$(addprefix -D,$(file < ../../build_defines.txt))
 
 CONSOLE_CMD=../../scripts/console.py -L
 
@@ -37,13 +32,19 @@ endif
 fw_emul: $(HDR) $(SRC)
 	gcc -o $@ $(CFLAGS) $(INCLUDE) $(SRC) -lgcc -lc
 
-build: fw_emul
+build: bsp.h fw_emul
 	@echo "build"
 
 run: build
 	@rm -f soc2cnsl cnsl2soc
 	$(CONSOLE_CMD) $(TEST_LOG) &
 	bash -c "trap 'make kill-cnsl' INT TERM KILL EXIT; ./fw_emul $(TEST_LOG)"
+
+
+# Create bsp.h based on bsp.vh of simulation
+bsp.h:
+	cp ../../hardware/simulation/bsp.vh $@
+	sed -i 's/`/#/' $@
 
 test: clean $(TEST_LIST)
 	diff test.log test.expected

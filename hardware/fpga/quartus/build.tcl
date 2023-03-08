@@ -3,7 +3,7 @@ set NAME [lindex $argv 0]
 set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
 set DEFINES [lindex $argv 3]
-set IP [lindex $argv 4]
+set QIP [lindex $argv 4]
 set IS_FPGA [lindex $argv 5]
 set USE_EXTMEM [lindex $argv 6]
 set SEED [lindex $argv 7]
@@ -13,7 +13,7 @@ load_package flow
 
 project_new $NAME -overwrite
 
-if [project_exists $NAME] {
+if {[project_exists $NAME]} {
     project_open $NAME -force
 } else {
     project_new $NAME
@@ -32,9 +32,10 @@ set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 #verilog heders search path
 set_global_assignment -name SEARCH_PATH ../src
 set_global_assignment -name SEARCH_PATH ./src
+set_global_assignment -name SEARCH_PATH quartus/$BOARD
 
 #quartus IPs
-foreach q_file [split $IP \ ] {
+foreach q_file [split $QIP \ ] {
     if { [ file extension $q_file ] == ".qsys" } {
         set_global_assignment -name QSYS_FILE $q_file
     }
@@ -72,17 +73,6 @@ set_global_assignment -name SEED $SEED
 
 export_assignments
 
-#Full compilation
-if {$IS_FPGA == "1"} {
-    if {[catch {execute_flow -compile} result]} {
-        puts "\nResult: $result\n"
-        puts "ERROR: Compilation failed. See report files.\n"
-    } else {
-        puts "\nINFO: Compilation was successful.\n"
-    }
-}
-
-
 if {$USE_QUARTUS_PRO == 1} {
     set synth_tool "syn"
 } else {
@@ -99,27 +89,29 @@ if {[catch {execute_module -tool $synth_tool} result]} {
     puts "\nINFO: Synthesis was successful.\n"
 }
 
-#assign virtual pins
-set name_ids [get_names -filter * -node_type pin]
-foreach_in_collection name_id $name_ids {
-    set pin_name [get_name_info -info full_path $name_id]
-    post_message "Making VIRTUAL_PIN assignment to $pin_name"
-    set_instance_assignment -to $pin_name -name VIRTUAL_PIN ON
-}
-
-export_assignments
-
-#rerun quartus pro synthesis to apply virtual pin assignments
-if {[catch {execute_module -tool $synth_tool} result]} {
-    puts "\nResult: $result\n"
-    puts "ERROR: Synthesis failed. See report files.\n"
-    qexit -error
-} else {
-    puts "\nINFO: Synthesis was successful.\n"
+if {$IS_FPGA != "1"} {
+    #assign virtual pins
+    set name_ids [get_names -filter * -node_type pin]
+    foreach_in_collection name_id $name_ids {
+        set pin_name [get_name_info -info full_path $name_id]
+        post_message "Making VIRTUAL_PIN assignment to $pin_name"
+        set_instance_assignment -to $pin_name -name VIRTUAL_PIN ON
+    }
+    
+    export_assignments
+    
+    #rerun quartus pro synthesis to apply virtual pin assignments
+    if {[catch {execute_module -tool $synth_tool} result]} {
+        puts "\nResult: $result\n"
+        puts "ERROR: Synthesis failed. See report files.\n"
+        qexit -error
+    } else {
+        puts "\nINFO: Synthesis was successful.\n"
+    }
 }
 
 #read post-synthesis script
-if [file exists "quartus/postmap.tcl"] {
+if {[file exists "quartus/postmap.tcl"]} {
     source quartus/postmap.tcl
 }
 
@@ -152,24 +144,29 @@ if [catch {qexec "[file join $::quartus(binpath) quartus_sta] -t quartus/timing.
     qexit -error
 }
 
-
-#write netlist
-if {$USE_QUARTUS_PRO == 1} {
-    if [catch {execute_module -tool eda -args "--resynthesis --format verilog"} result] {
-        qexit -error
+if {$IS_FPGA != "1"} {
+    #write netlist
+    if {$USE_QUARTUS_PRO == 1} {
+        if {[catch {execute_module -tool eda -args "--resynthesis --format verilog"} result]} {
+            qexit -error
+        }
+    } else {
+        if {[catch {execute_module -tool cdb -args "--vqm=resynthesis/$NAME"} result]} {
+            qexit -error
+        }
     }
+    
+    #rename netlist
+    set netlist_file "resynthesis/$NAME\_netlist.v"
+    if {[file exists $netlist_file] == 1} {
+        file delete $netlist_file
+    }
+    file rename resynthesis/$NAME.vqm $netlist_file
 } else {
-    if [catch {execute_module -tool cdb -args "--vqm=resynthesis/$NAME"} result] {
+    if {[catch {execute_module -tool asm} result]} {
         qexit -error
     }
 }
-
-#rename netlist
-set netlist_file "resynthesis/$NAME\_netlist.v"
-if {[file exists $netlist_file] == 1} {
-    file delete $netlist_file
-}
-file rename resynthesis/$NAME.vqm $netlist_file
 
 project_close
 
