@@ -69,6 +69,10 @@ def hw_setup(python_module):
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, core_previous_version, build_dir)
 
+    # Copy Setup hw files
+    copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
+    copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.sdc*', copy_all = True )
+
     #Setup any hw submodules by calling the 'main()' function from their *_setup.py module
     module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs, lib_dir=LIB_DIR)
 
@@ -82,9 +86,6 @@ def hw_setup(python_module):
 
     # Copy LIB hw files
     copy_files( f"{LIB_DIR}/hardware/modules", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
-    # Copy Setup hw files
-    copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
-    copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.sdc*', copy_all = True )
 
 # Setup simulation related files/modules
 # module: python module representing a *_setup.py file of the root directory of the core/system.
