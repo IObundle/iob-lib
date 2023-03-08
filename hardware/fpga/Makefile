@@ -45,6 +45,7 @@ endif
 
 UFLAGS+=FPGA_TOP=$(FPGA_TOP)
 UFLAGS+=IS_FPGA=$(IS_FPGA)
+UFLAGS+=USE_QUARTUS_PRO=$(USE_QUARTUS_PRO)
 
 #build fpga image or netlist
 build: $(VHDR) $(VSRC) $(HEX)
