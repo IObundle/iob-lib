@@ -45,6 +45,7 @@ if { $IS_FPGA == "1" } {
     if {[file exists "vivado/$NAME\_tool.sdc"]} {
         read_xdc vivado/$NAME\_tool.sdc
     } else {
+        puts "ERROR: vivado/$NAME\_tool.sdc not found!"
         exit 1
     }
     read_xdc ./src/$NAME.sdc
