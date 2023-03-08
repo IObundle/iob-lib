@@ -40,7 +40,6 @@ QUARTUS_FLAGS = -t quartus/build.tcl $(FPGA_TOP) $(BOARD) "$(VSRC)" "$(DEFINES) 
 
 $(FPGA_OBJ): $(VHDR) $(VSRC) $(IP) $(wildcard $(BOARD)/*.sdc)
 	$(FPGA_ENV) quartus_sh $(QUARTUS_FLAGS)
-	mv reports/$@ .
 
 quartus-clean:
 	@rm -rf incremental_db db reports
