@@ -35,15 +35,28 @@ if {[file exists "vivado/premap.tcl"]} {
     source "vivado/premap.tcl"
 }
 
+
+
 #read design constraints and synthesize design
 if { $IS_FPGA == "1" } {
+    puts "Synthesizing for FPGA"
     read_xdc vivado/$BOARD/$NAME\_dev.sdc
+    read_xdc ./src/$NAME.sdc
+    if {[file exists "vivado/$NAME\_tool.sdc"]} {
+        read_xdc vivado/$NAME\_tool.sdc
+    } else {
+        exit 1
+    }
     read_xdc ./src/$NAME.sdc
     synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -verilog_define $DEFINES -part $PART -top $NAME -verbose
 } else {
-#read design constraints
+    #read design constraints
+    puts "Out of context synthesis"
     read_xdc -mode out_of_context vivado/$BOARD/$NAME\_dev.sdc
     read_xdc -mode out_of_context ./src/$NAME.sdc
+    if {[file exists "vivado/$NAME\_tool.sdc"]} {
+        read_xdc -mode out_of_context vivado/$NAME\_tool.sdc
+    }
     synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -verilog_define $DEFINES -part $PART -top $NAME -mode out_of_context -flatten_hierarchy rebuilt -verbose
 }
 
@@ -61,6 +74,7 @@ route_design -timing
 report_clocks
 report_clock_interaction
 report_cdc -details
+report_bus_skew
 
 file mkdir reports
 report_clocks -file reports/$NAME\_$PART\_clocks.rpt

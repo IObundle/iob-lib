@@ -61,15 +61,11 @@ if {$IS_FPGA != "1"} {
 }
 
 
-#read design constraints
+#read synthesis design constraints
 set_global_assignment -name SDC_FILE ./quartus/$BOARD/$NAME\_dev.sdc
 set_global_assignment -name SDC_FILE ./src/$NAME.sdc
 
-if {[file exists "quartus/$NAME\_tool.sdc"] == 0} {
-    puts [open "quartus/$NAME\_tool.sdc" w] "derive_clock_uncertainty"
-}
-set_global_assignment -name SDC_FILE ./quartus/$NAME\_tool.sdc
-
+set_global_assignment -name SYNCHRONIZER_IDENTIFICATION Forced
 
 
 # random seed for fitting
@@ -114,11 +110,18 @@ if {$IS_FPGA != "1"} {
     }
 }
 
+#read post-synthesis script
 if {[file exists "quartus/postmap.tcl"]} {
     source quartus/postmap.tcl
 }
 
-#run quartus pro fit
+#read implementation design constraints
+if {[file exists "quartus/$NAME\_tool.sdc"] == 0} {
+    puts [open "quartus/$NAME\_tool.sdc" w] "derive_clock_uncertainty"
+}
+set_global_assignment -name SDC_FILE ./quartus/$NAME\_tool.sdc
+
+#run quartus fit
 if {[catch {execute_module -tool fit} result]} {
     puts "\nResult: $result\n"
     puts "ERROR: Fit failed. See report files.\n"
@@ -127,13 +130,18 @@ if {[catch {execute_module -tool fit} result]} {
     puts "\nINFO: Fit was successful.\n"
 }
 
-#run quartus pro sta
+#run quartus sta
 if {[catch {execute_module -tool sta} result]} {
     puts "\nResult: $result\n"
     puts "ERROR: STA failed. See report files.\n"
     qexit -error
 } else {
     puts "\nINFO: STA was successful.\n"
+}
+
+#run quartus sta to generate reports
+if [catch {qexec "[file join $::quartus(binpath) quartus_sta] -t quartus/timing.tcl $NAME"} result] {
+    qexit -error
 }
 
 if {$IS_FPGA != "1"} {
