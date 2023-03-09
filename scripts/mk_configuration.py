@@ -62,7 +62,7 @@ def conf_h(macros, top_module, out_dir):
         if type(macro['val'])!=bool:
             m_name = macro['name'].upper()
             # Replace any Verilog specific syntax by equivalent C syntax
-            m_default_val = re.sub("\d+'h","0x",macro['val'])
+            m_default_val = re.sub("\d+'h","0x",str(macro['val']))
             file2create.write(f"#define {m_name} {str(m_default_val).replace('`','')}\n") #Remove Verilog macros ('`')
         elif macro['val']:
             m_name = macro['name'].upper()
