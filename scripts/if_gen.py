@@ -317,12 +317,18 @@ def remove_iob_macro(direction):
 def m_port(prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write(remove_iob_macro(table[i]['signal'])+' ['+f"{bus_size}*"+table[i]['width']+'-1:0] '+prefix+table[i]['name']+suffix(table[i]['signal'])+', //'+top_macro+table[i]['description']+'\n')
+            if bus_size == 1:
+                fout.write(remove_iob_macro(table[i]['signal'])+' ['+table[i]['width']+'-1] '+prefix+table[i]['name']+suffix(table[i]['signal'])+', //'+top_macro+table[i]['description']+'\n')
+            else:
+                fout.write(remove_iob_macro(table[i]['signal'])+' [('+f"{bus_size}*"+table[i]['width']+')-1:0] '+prefix+table[i]['name']+suffix(table[i]['signal'])+', //'+top_macro+table[i]['description']+'\n')
     
 def s_port(prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write(remove_iob_macro(reverse(table[i]['signal']))+' ['+f"{bus_size}*"+table[i]['width']+'-1:0] '+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', //'+top_macro+table[i]['description']+'\n')
+            if bus_size == 1:
+                fout.write(remove_iob_macro(reverse(table[i]['signal']))+' ['+table[i]['width']+'-1:0] '+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', //'+top_macro+table[i]['description']+'\n')
+            else:
+                fout.write(remove_iob_macro(reverse(table[i]['signal']))+' [('+f"{bus_size}*"+table[i]['width']+')-1:0] '+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', //'+top_macro+table[i]['description']+'\n')
 
 #
 # Portmap
