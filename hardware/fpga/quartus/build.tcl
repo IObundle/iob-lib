@@ -166,6 +166,8 @@ if {$IS_FPGA != "1"} {
     if {[catch {execute_module -tool asm} result]} {
         qexit -error
     }
+    #Move bitstream out of the reports directory
+    file rename reports/$NAME.sof $NAME.sof
 }
 
 project_close
