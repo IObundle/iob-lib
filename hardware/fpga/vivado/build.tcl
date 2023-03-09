@@ -36,7 +36,6 @@ if {[file exists "vivado/premap.tcl"]} {
 }
 
 
-
 #read design constraints and synthesize design
 if { $IS_FPGA == "1" } {
     puts "Synthesizing for FPGA"
@@ -55,6 +54,11 @@ if { $IS_FPGA == "1" } {
         read_xdc -mode out_of_context vivado/$NAME\_tool.sdc
     }
     synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -verilog_define $DEFINES -part $PART -top $NAME -mode out_of_context -flatten_hierarchy rebuilt -verbose
+}
+
+#set waiver
+if {[file exists "vivado/waiver.tcl"]} {
+    source "vivado/waiver.tcl"
 }
 
 #set post-map custom assignments
