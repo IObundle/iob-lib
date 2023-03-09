@@ -41,20 +41,16 @@ if {[file exists "vivado/premap.tcl"]} {
 if { $IS_FPGA == "1" } {
     puts "Synthesizing for FPGA"
     read_xdc vivado/$BOARD/$NAME\_dev.sdc
-    read_xdc ./src/$NAME.sdc
+    read_xdc ../src/$NAME.sdc
     if {[file exists "vivado/$NAME\_tool.sdc"]} {
         read_xdc vivado/$NAME\_tool.sdc
-    } else {
-        puts "ERROR: vivado/$NAME\_tool.sdc not found!"
-        exit 1
     }
-    read_xdc ./src/$NAME.sdc
     synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -verilog_define $DEFINES -part $PART -top $NAME -verbose
 } else {
     #read design constraints
     puts "Out of context synthesis"
     read_xdc -mode out_of_context vivado/$BOARD/$NAME\_dev.sdc
-    read_xdc -mode out_of_context ./src/$NAME.sdc
+    read_xdc -mode out_of_context ../src/$NAME.sdc
     if {[file exists "vivado/$NAME\_tool.sdc"]} {
         read_xdc -mode out_of_context vivado/$NAME\_tool.sdc
     }
