@@ -11,7 +11,7 @@ module axis2axi_tb;
    // 
    parameter ADDR_W = 24;
    parameter DATA_W = 32;
-   parameter BURST_W = 3; // Change burst size. A BURST_W of 0 is allowed, the AXI interface sends one value at a time
+   parameter BURST_W = 2; // Change burst size. A BURST_W of 0 is allowed, the AXI interface sends one value at a time
 
    // Change this parameters to add a delay, either to the AXI stream or to the AXI connection (0 is valid and will not add any delay)
    parameter DELAY_AXIS_IN = 3;
@@ -87,7 +87,7 @@ module axis2axi_tb;
    `IOB_WIRE(ddr_axi_rlast, 1) //Read channel last word
 
    // Iterators
-   integer            i, seq_ini;
+   integer            i;
 
    initial begin
 
@@ -99,6 +99,7 @@ module axis2axi_tb;
    //
    // Init signals
    //
+   i = 0;
    addr_in = 0;
    set_in_config = 0;
    axis_in_data = 0;
@@ -388,7 +389,8 @@ AxiDelay #(
 
    .clk_i       (clk),
    .cke_i       (1'b1),
-   .rst_i       (rst)
+   .rst_i       (rst),
+   .arst_i      (1'b0)
    );
 
    axi_ram

@@ -23,7 +23,8 @@ module axis2axi_out #(
 
    `IOB_INPUT(clk_i,1),
    `IOB_INPUT(cke_i,1),
-   `IOB_INPUT(rst_i,1)
+   `IOB_INPUT(rst_i,1),
+   `IOB_INPUT(arst_i,1)
 );
 
 localparam BURST_SIZE = 2**BURST_W;
@@ -42,12 +43,15 @@ assign m_axi_arqos   = `AXI_QOS_W'd0;
 // Regs to assign to outputs
 reg arvalid_int;
 reg [23:0] araddr_int;
-reg [`AXI_LEN_W-1:0] arlen_int;
+wire [`AXI_LEN_W-1:0] arlen_int;
 
 // State regs
-reg [1:0] state;
-reg [AXI_ADDR_W-1:0] current_address;
-reg [AXI_ADDR_W-1:0] current_length;
+reg [1:0] state_nxt;
+reg [AXI_ADDR_W-1:0] next_address,next_length;
+
+// Instantiation wires
+wire [AXI_ADDR_W-1:0] current_address,current_length;
+wire [1:0] state;
 
 // Logical wires and combinatorial regs
 wire doing_global_transfer = (state != 2'h0);
@@ -72,6 +76,7 @@ begin
    else if(normal_burst_possible)
       burst_size = BURST_SIZE;
 end
+wire [BURST_W:0] transfer_len = burst_size - 1;
 
 // Assignment to outputs
 assign axis_out_data_o = m_axi_rdata;
@@ -82,44 +87,43 @@ assign m_axi_araddr = araddr_int;
 assign m_axi_arlen = arlen_int;
 assign m_axi_arvalid = arvalid_int;
 
-// State machine
 localparam WAIT_START=2'h0, BEGIN_LOCAL=2'h1, TRANSFER=2'h2, END_LOCAL=2'h3;
-always @(posedge clk_i,posedge rst_i)
+`IOB_COMB
 begin
-   if(rst_i) begin
-      state <= WAIT_START;
-      current_address <= 0;
-      arvalid_int <= 0;
-      araddr_int <= 0;
-      arlen_int <= 0;
-      current_length <= 0;
-   end else begin
-      case(state)
-      WAIT_START: if(set_out_config_i) begin
-         current_address <=  addr_out_i;
-         current_length <= out_length_i;
-         state <= BEGIN_LOCAL;
-      end
-      BEGIN_LOCAL: begin
-         arvalid_int <= 1'b1;
-         araddr_int <= current_address;
-         arlen_int <= burst_size - 1;
-         current_address <= current_address + (burst_size << 2);
-         current_length <= current_length - burst_size;
-         state <= TRANSFER;
-      end
-      TRANSFER: if(m_axi_arready) begin
-         arvalid_int <= 1'b0;
-         state <= END_LOCAL;
-      end
-      END_LOCAL: if(m_axi_rlast && m_axi_rvalid && m_axi_rready) begin
-         if(current_length == 0)
-            state <= WAIT_START;
-         else 
-            state <= BEGIN_LOCAL;
-      end
-      endcase
+   state_nxt = state;
+   arvalid_int = 1'b0;
+   next_address = current_address;
+   next_length = current_length;
+
+   case(state)
+   WAIT_START: if(set_out_config_i) begin
+      next_address = addr_out_i;
+      next_length = out_length_i;
+      state_nxt = BEGIN_LOCAL;
    end
+   BEGIN_LOCAL: begin
+      next_length = current_length - burst_size;
+         state_nxt = TRANSFER;
+   end
+   TRANSFER: begin
+      araddr_int = current_address;
+      arvalid_int = 1'b1;
+      if(m_axi_arready)
+         state_nxt = END_LOCAL;
+   end
+   END_LOCAL: if(m_axi_rlast && m_axi_rvalid && m_axi_rready) begin
+      next_address = current_address + ((m_axi_arlen + 1) << 2);
+      if(current_length == 0)
+         state_nxt = WAIT_START;
+      else 
+         state_nxt = BEGIN_LOCAL;
+   end
+   endcase
 end
+
+iob_reg_re #(`AXI_LEN_W,0) _1 (clk_i,arst_i,cke_i,rst_i,(state == BEGIN_LOCAL),transfer_len,arlen_int);
+iob_reg_r #(AXI_ADDR_W,0) _2 (clk_i,arst_i,cke_i,rst_i,next_address,current_address);
+iob_reg_r #(AXI_ADDR_W,0) _3 (clk_i,arst_i,cke_i,rst_i,next_length,current_length);
+iob_reg_r #(2,0) _4 (clk_i,arst_i,cke_i,rst_i,state_nxt,state);
 
 endmodule

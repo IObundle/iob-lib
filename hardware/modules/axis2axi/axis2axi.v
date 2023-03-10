@@ -39,7 +39,8 @@ module axis2axi
 
    `IOB_INPUT(clk_i,1),
    `IOB_INPUT(cke_i,1),
-   `IOB_INPUT(rst_i,1)
+   `IOB_INPUT(rst_i,1),
+   `IOB_INPUT(arst_i,1)
 );
 
 axis2axi_in #(
@@ -67,7 +68,8 @@ axis2axi_in #(
    
    .clk_i(clk_i),
    .cke_i(cke_i),
-   .rst_i(rst_i)
+   .rst_i(rst_i),
+   .arst_i(arst_i)
    );
 
 axis2axi_out #(
@@ -89,7 +91,8 @@ axis2axi_out #(
    
    .clk_i(clk_i),
    .cke_i(cke_i),
-   .rst_i(rst_i)
+   .rst_i(rst_i),
+   .arst_i(arst_i)
    );
 
 endmodule

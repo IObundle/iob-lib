@@ -19,6 +19,7 @@ VSRC += $(LIB_DIR)/submodules/VERILOG_AXI/rtl/axi_ram.v
 VSRC += $(LIB_DIR)/hardware/modules/ram/iob_ram_t2p/iob_ram_t2p.v
 VSRC += iob_reg.v
 VSRC += iob_reg_r.v
+VSRC += iob_reg_e.v
 VSRC += iob_reg_re.v
 VSRC += iob_counter.v
 VSRC += iob_asym_converter.v

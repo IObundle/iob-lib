@@ -30,7 +30,8 @@ module axis2axi_in #(
 
    `IOB_INPUT(clk_i,1),
    `IOB_INPUT(cke_i,1),
-   `IOB_INPUT(rst_i,1)
+   `IOB_INPUT(rst_i,1),
+   `IOB_INPUT(arst_i,1)
 );
 
 localparam BURST_SIZE = 2**BURST_W;
@@ -49,28 +50,27 @@ assign m_axi_wstrb = 4'b1111;
 assign m_axi_bready = 1'b1;
 assign m_axi_wid = 1'b0;
 
-// Regs to assign to outputs
-reg awvalid_int;
-reg [23:0] awaddr_int;
-reg [`AXI_LEN_W-1:0] awlen_int;
-reg wvalid_int;
-
 // State regs
-reg [1:0] state;
-
-reg [AXI_ADDR_W-1:0] current_address;
-reg [BURST_SIZE-1:0] transfer_count;
+reg awvalid_int;
+reg wvalid_int;
+reg [1:0] state_nxt;
+reg [AXI_ADDR_W-1:0] next_address;
 
 // Instantiation wires
+wire [1:0] state;
+wire [BURST_SIZE-1:0] transfer_count;
+wire [AXI_ADDR_W-1:0] current_address;
 wire [AXI_DATA_W-1:0] fifo_data;
 wire fifo_empty,fifo_full;
 wire [BUFFER_W:0] fifo_level;
+wire [`AXI_LEN_W-1:0] awlen_int;
 
 // Logical wires
 wire doing_transfer = (state != 2'b00);
 wire normal_burst_possible = (fifo_level >= BURST_SIZE);
 wire last_burst_possible = (fifo_level > 0 && fifo_level < BURST_SIZE && !axis_in_valid_i);
 wire start_transfer = (normal_burst_possible || last_burst_possible) && !doing_transfer;
+wire transfer = m_axi_wready && m_axi_wvalid;
 wire read_next = (m_axi_wready && !m_axi_wlast);
 wire [15:0] boundary_transfer_len = (16'h1000 - current_address[11:0]) >> 2;
 wire last_transfer = (transfer_count == m_axi_awlen);
@@ -78,7 +78,7 @@ wire fifo_read_enable = (read_next || start_transfer);  // Start_transfer puts t
 
 // Combinatorial
 reg [BURST_W:0] burst_size;
-always @*
+`IOB_COMB
 begin
    burst_size = 0;
    
@@ -93,9 +93,11 @@ begin
       burst_size = BURST_SIZE;
 end
 
+wire [BURST_W:0] transfer_len = burst_size - 1;
+
 // Assignment to outputs
 assign m_axi_awvalid = awvalid_int;
-assign m_axi_awaddr = awaddr_int;
+assign m_axi_awaddr = current_address;
 assign m_axi_awlen = awlen_int;
 assign m_axi_wvalid = wvalid_int;
 assign m_axi_wdata = fifo_data;
@@ -106,49 +108,42 @@ assign axis_in_ready_o = !fifo_full;
 
 // State machine
 localparam WAIT_DATA=2'h0, START_TRANSFER=2'h1, TRANSFER=2'h2, WAIT_BRESP=2'h3;
-always @(posedge clk_i,posedge rst_i)
+`IOB_COMB
 begin
-   if(rst_i) begin
-      awvalid_int <= 0;
-      awaddr_int <= 0;
-      awlen_int <= 0;
-      wvalid_int <= 0;
-      current_address <= 0;
-      state <= 0;
-      transfer_count <= 0;
-   end else begin
-      if(set_in_config_i) begin
-         current_address <= addr_in_i;
-      end
+   state_nxt = state;
+   awvalid_int = 1'b0;
+   wvalid_int = 1'b0;
+   next_address = current_address;
 
-      case (state)
-      WAIT_DATA: if(start_transfer) begin
-         awvalid_int <= 1'b1;
-         awaddr_int <= current_address;
-         current_address <= current_address + (burst_size << 2);
-         awlen_int <= burst_size - 1;
-         state <= START_TRANSFER;
-         transfer_count <= 0;
-      end
-      START_TRANSFER: if(m_axi_awready) begin
-         awvalid_int <= 1'b0;
-         wvalid_int <= 1'b1; // Since we can only send less or equal to the amount present on our FIFO, we can set m_axi_wvalid to 1. We always have a value to send 
-         state <= TRANSFER;
-      end
-      TRANSFER: if(m_axi_wready && m_axi_wvalid) begin
-         transfer_count <= transfer_count + 1;
-         if(last_transfer) begin 
-            wvalid_int <= 1'b0;
-            state <= WAIT_BRESP;
-         end
-      end
-      WAIT_BRESP: if(m_axi_bvalid) begin
-         // Do something with the response?
-         state <= WAIT_DATA;
-      end
-      endcase
+   if(set_in_config_i)
+      next_address = addr_in_i;
+
+   case (state)
+   WAIT_DATA: if(start_transfer) begin
+      state_nxt = START_TRANSFER;
    end
+   START_TRANSFER: begin
+      awvalid_int = 1'b1;
+      if(m_axi_awready)
+         state_nxt = TRANSFER;
+   end
+   TRANSFER: begin
+      wvalid_int = 1'b1; // Since we can only send a burst of less or equal to the FIFO level, we can set m_axi_wvalid to 1. We always have a value to send 
+      if(transfer && m_axi_wlast && last_transfer) begin
+         next_address = current_address + ((m_axi_awlen + 1) << 2);
+         state_nxt = WAIT_BRESP;
+      end
+   end
+   WAIT_BRESP: if(m_axi_bvalid) begin
+      state_nxt = WAIT_DATA;
+   end
+   endcase
 end
+
+iob_counter #(BURST_SIZE,0) _ (clk_i,arst_i,cke_i,(state == WAIT_DATA),(state == TRANSFER && transfer),transfer_count);
+iob_reg_re #(`AXI_LEN_W,0) _1 (clk_i,arst_i,cke_i,rst_i,(state == WAIT_DATA && start_transfer),transfer_len,awlen_int);
+iob_reg_r #(AXI_ADDR_W,0) _2 (clk_i,arst_i,cke_i,rst_i,next_address,current_address);
+iob_reg_r #(2,0) _3 (clk_i,arst_i,cke_i,rst_i,state_nxt,state);
 
 iob_fifo_sync
   #(.W_DATA_W(AXI_DATA_W),
@@ -182,7 +177,7 @@ iob_fifo_sync
    .clk_i(clk_i),
    .cke_i(cke_i),
    .rst_i(rst_i),
-   .arst_i(1'b0)
+   .arst_i(arst_i)
    );
 
 endmodule
