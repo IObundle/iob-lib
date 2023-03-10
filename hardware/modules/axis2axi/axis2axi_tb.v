@@ -32,11 +32,14 @@ module axis2axi_tb;
    reg rst = 0;
 
    // Control I/F
-   reg [ADDR_W-1:0] addr_in;
-   reg set_in_config;
-   reg [ADDR_W-1:0] addr_out;
-   reg [ADDR_W-1:0] out_length;
-   reg set_out_config;
+   reg [ADDR_W-1:0] config_in_addr;
+   reg [ADDR_W-1:0] config_out_addr;
+   reg [ADDR_W-1:0] config_out_length;
+
+   reg config_in_valid;
+   reg config_out_valid;
+   wire config_in_ready;
+   wire config_out_ready;
 
    // AXI Stream in
    reg [DATA_W-1:0] axis_in_data;
@@ -101,14 +104,15 @@ module axis2axi_tb;
    // Init signals
    //
    i = 0;
-   addr_in = 0;
-   set_in_config = 0;
+   config_in_addr = 0;
+   config_out_addr = 0;
+   config_out_length = 0;
+   config_in_valid = 0;
+   config_out_valid = 0;
+
    axis_in_data = 0;
    axis_in_valid = 0;
    delayed_axis_out_ready = 0;
-   addr_out = 0;
-   out_length = 0;
-   set_out_config = 0;
 
    // Assert reset
    #100 rst = 1;
@@ -138,6 +142,7 @@ module axis2axi_tb;
    AxiStreamOutRun(16'h1ffc,2);
    AxiStreamOutRun(16'h2ffc,10);
    AxiStreamOutRun(16'h3fd8,40);
+   AxiStreamOutRun(16'h5000,0);
 
    repeat (100) @(posedge clk) #1;
 
@@ -148,12 +153,14 @@ task AxiStreamInRun(input[31:0] address, startValue,runLength);
 begin
    $display("Making an AXI Stream In run from %h to %h",address,address + runLength  * 4);
    
-   addr_in = address;
-   set_in_config = 1;
+   config_in_addr = address;
+   config_in_valid = 1;
+
+   while(!config_in_ready) @(posedge clk) #1;
 
    @(posedge clk) #1;
 
-   set_in_config = 0;
+   config_in_valid = 0;
 
    @(posedge clk) #1;
 
@@ -176,26 +183,28 @@ task AxiStreamOutRun(input[31:0] address,runLength);
 begin
    $display("Making an AXI Stream Out run from %h to %h",address,address + runLength * 4);
    
-   addr_out = address;
-   out_length = runLength;
-   set_out_config = 1;
+   config_out_addr = address;
+   config_out_length = runLength;
+   config_out_valid = 1;
+
+   while(!config_out_ready) @(posedge clk) #1;
 
    @(posedge clk) #1;
 
-   set_out_config = 0;
+   config_out_valid = 0;
 
    @(posedge clk) #1;
 
    delayed_axis_out_ready = 1;
    $write("Values read:");
-   for(i = 0; i < runLength; i = i + 1) begin
-      while(!delayed_axis_out_valid) @(posedge clk) #1;
-      
-      $write(" %02d",axis_out_data);
+   while(!config_out_ready) begin
+      if(delayed_axis_out_valid) 
+         $write(" %02d",axis_out_data);
 
       @(posedge clk) #1;
    end
 
+   delayed_axis_out_ready = 0;
    repeat(100) @(posedge clk) #1;
    $display("\n");
 end
@@ -332,11 +341,14 @@ AxiDelay #(
    //
    // Control I/F
    //
-   .addr_in_i(addr_in),
-   .set_in_config_i(set_in_config),
-   .addr_out_i(addr_out),
-   .out_length_i(out_length),
-   .set_out_config_i(set_out_config),
+   .config_in_addr_i(config_in_addr),
+   .config_in_valid_i(config_in_valid),
+   .config_in_ready_o(config_in_ready),
+
+   .config_out_addr_i(config_out_addr),
+   .config_out_length_i(config_out_length),
+   .config_out_valid_i(config_out_valid),
+   .config_out_ready_o(config_out_ready),
 
    // AXI Stream In
    .axis_in_data_i(axis_in_data),

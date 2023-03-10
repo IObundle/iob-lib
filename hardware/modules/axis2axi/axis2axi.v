@@ -1,14 +1,19 @@
 `timescale 1ns / 1ps
 
 // Simple AXI Stream (AXIS) to AXI adapter
-// Address (and length for reads) are set by filling the associated configuration wires and then asserting the set_*_config_i wires for a cycle.
-// This unit breaks down an AXIS stream into multiple bursts of maximum size (2**BURST_W). 
-// At the end of each burst, the address is updated automatically providing a transparent way of reading and writing to a AXI device.
+// Address (and length for reads) are set by using the config_in or config_out interfaces. They both use a AXI like handshake process (when valid && ready == 1, store and initiate transfer).
+// The config_*_ready_o interfaces can also be used directly to probe the state of the transfer. When asserted, they indicate that the unit does not currently have any AXI connection active or no data in the FIFO to flush.
 
-// For AXIS In streams, the unit uses a FIFO transparently. The unit flushes the FIFO when axis_in_valid_i is deasserted. 
+// This unit breaks down an AXI Stream into multiple bursts of AXI. For AXIS IN, this is performed transparently. For AXIS OUT, a length argument is required
 
-// For AXIS Out streams, the length is required but it can be any value, it is not limited to the AXI maximum length.
-// The AXIS Out stream is activated after asserting set_out_config_i. Afterwards, the AXIS Out stream must acknowledge the full amount of data requested otherwise the unit will block.
+// AXIS IN:
+// After configuring the AXIS IN stream, the axis_in interface can be used. There is no limit to the amount of data that can be sent. This unit breaks down data into multiple bursts as required and also handles 4k boundaries.
+
+// AXIS OUT:
+// After configuring the AXIS OUT stream, the axis_out interface can be used. The unit will produce a length amount of data. 
+// Length is given as the amount of dwords. A length of 1 means that one transfer is performed. (A length of zero does nothing)
+// If the axis_out interface is stalled permanently before completing the full transfer, the unit might block the entire system, as it will continue to keep a AXI connection alive.
+// If for some reason the user realises that it requested a length bigger then need, the user still needs to keep consuming data out of the axis_out interface. Only when config_out_ready_o is asserted is the transfer fully completed
 
 module axis2axi
    #( 
@@ -20,12 +25,14 @@ module axis2axi
       parameter BUFFER_W = BURST_W + 1
 )(
    // Configuration
-   `IOB_INPUT(addr_in_i,AXI_ADDR_W),
-   `IOB_INPUT(set_in_config_i,1),
+   `IOB_INPUT(config_in_addr_i,AXI_ADDR_W),
+   `IOB_INPUT(config_in_valid_i,1),
+   `IOB_OUTPUT(config_in_ready_o,1),
 
-   `IOB_INPUT(addr_out_i,AXI_ADDR_W),
-   `IOB_INPUT(out_length_i,AXI_ADDR_W),
-   `IOB_INPUT(set_out_config_i,1), // Setting this to 1 will start the transfer. Deassert before transfer ends otherwise it will a new one.
+   `IOB_INPUT(config_out_addr_i,AXI_ADDR_W),
+   `IOB_INPUT(config_out_length_i,AXI_ADDR_W),
+   `IOB_INPUT(config_out_valid_i,1),
+   `IOB_OUTPUT(config_out_ready_o,1),
 
    // Buffer memory external interfaces
    `IOB_OUTPUT(ext_mem_w_en_o, 1),
@@ -61,8 +68,9 @@ axis2axi_in #(
    )
    axis2axi_in_inst
    (
-   .addr_in_i(addr_in_i),
-   .set_in_config_i(set_in_config_i),
+   .config_in_addr_i(config_in_addr_i),
+   .config_in_valid_i(config_in_valid_i),
+   .config_in_ready_o(config_in_ready_o),
    
    .ext_mem_w_en_o(ext_mem_w_en_o),
    .ext_mem_w_data_o(ext_mem_w_data_o),
@@ -90,10 +98,11 @@ axis2axi_out #(
    )
    axis2axi_out_inst
    (
-   .addr_out_i(addr_out_i),
-   .out_length_i(out_length_i),
-   .set_out_config_i(set_out_config_i),
-   
+   .config_out_addr_i(config_out_addr_i),
+   .config_out_length_i(config_out_length_i),
+   .config_out_valid_i(config_out_valid_i),
+   .config_out_ready_o(config_out_ready_o),
+
    .axis_out_data_o(axis_out_data_o),
    .axis_out_valid_o(axis_out_valid_o),
    .axis_out_ready_i(axis_out_ready_i),
