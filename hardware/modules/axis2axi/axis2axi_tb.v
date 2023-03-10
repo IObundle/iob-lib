@@ -4,6 +4,8 @@
 
 `define CLK_PER 10
 
+//`define AXIS_2_AXI_MANUAL_TB 1
+
 module axis2axi_tb;
 
    // Change this parameters between tests to check.
@@ -125,7 +127,9 @@ module axis2axi_tb;
    repeat (10) @(posedge clk) #1;
 
    // Axi In Tests
+   `ifdef AXIS_2_AXI_MANUAL_TB
    $display("=== AXI Stream In ===");
+   `endif
    AxiStreamInRun(16'h0000,0,4);
    AxiStreamInRun(16'h0100,0,16);
    AxiStreamInRun(16'h0ffc,0,1);
@@ -135,24 +139,34 @@ module axis2axi_tb;
 
    repeat (100) @(posedge clk) #1;
    // Axi Out Tests
+   `ifdef AXIS_2_AXI_MANUAL_TB
    $display("=== AXI Stream Out ===");
+   `endif
    AxiStreamOutRun(16'h0000,4);
    AxiStreamOutRun(16'h0100,16);
    AxiStreamOutRun(16'h0ffc,1);
    AxiStreamOutRun(16'h1ffc,2);
    AxiStreamOutRun(16'h2ffc,10);
    AxiStreamOutRun(16'h3fd8,40);
-   AxiStreamOutRun(16'h5000,0);
+   AxiStreamOutRun(16'h5000,0); // A zero out run should produce no value
 
    repeat (100) @(posedge clk) #1;
+
+   $display("%c[1;34m",27);
+   $display("Test completed successfully.");
+   $display("%c[0m",27);
+
+   repeat (10) @(posedge clk) #1;
 
    $finish;
 end
 
 task AxiStreamInRun(input[31:0] address, startValue,runLength);
 begin
+   `ifdef AXIS_2_AXI_MANUAL_TB
    $display("Making an AXI Stream In run from %h to %h",address,address + runLength  * 4);
-   
+   `endif
+
    config_in_addr = address;
    config_in_valid = 1;
 
@@ -169,20 +183,31 @@ begin
    for(i = 0; i < runLength; i = i + 1) begin
       while(!axis_in_ready) @(posedge clk) #1;
       
+      if(axis_in_data != i) begin
+         $display("Error on run from %h to %h, index: %d",address,address + runLength  * 4,i);   
+         $fatal;
+      end
+
       @(posedge clk) #1;
       axis_in_data = axis_in_data + 1;
    end
    axis_in_valid = 0;
 
    repeat(100) @(posedge clk) #1;
+
+   `ifdef AXIS_2_AXI_MANUAL_TB   
    $display("");
+   `endif
 end
 endtask
 
+integer readIndex;
 task AxiStreamOutRun(input[31:0] address,runLength);
 begin
+   `ifdef AXIS_2_AXI_MANUAL_TB
    $display("Making an AXI Stream Out run from %h to %h",address,address + runLength * 4);
-   
+   `endif
+
    config_out_addr = address;
    config_out_length = runLength;
    config_out_valid = 1;
@@ -196,20 +221,34 @@ begin
    @(posedge clk) #1;
 
    delayed_axis_out_ready = 1;
+   readIndex = 0;
+   `ifdef AXIS_2_AXI_MANUAL_TB
    $write("Values read:");
+   `endif
    while(!config_out_ready) begin
-      if(delayed_axis_out_valid) 
+      if(delayed_axis_out_valid) begin
+         if(axis_out_data != readIndex) begin
+            $write("Error on run from %h to %h,index: %d",address,address + runLength * 4,readIndex);
+            $fatal;
+         end
+         readIndex = readIndex + 1;
+         `ifdef AXIS_2_AXI_MANUAL_TB
          $write(" %02d",axis_out_data);
+         `endif
+      end
 
       @(posedge clk) #1;
    end
 
    delayed_axis_out_ready = 0;
    repeat(100) @(posedge clk) #1;
+   `ifdef AXIS_2_AXI_MANUAL_TB
    $display("\n");
+   `endif
 end
 endtask
 
+`ifdef AXIS_2_AXI_MANUAL_TB
 // Detect writes and store them for display
 reg [4:0] writeCounter;
 reg [31:0] writtenData[7:0];
@@ -230,11 +269,12 @@ begin
          for(writeCounterIndex = 0;writeCounterIndex < writeCounter;writeCounterIndex = writeCounterIndex+1) begin
             $write(" %02d",writtenData[writeCounterIndex]);
          end
-         writeCounter = 0;
          $display("");
+         writeCounter = 0;
       end
    end
 end
+`endif
 
 // External memory instantiation
 wire ext_mem_w_en,ext_mem_r_en;
