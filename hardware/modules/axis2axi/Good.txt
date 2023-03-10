@@ -1,0 +1,57 @@
+iverilog ../../../hardware/modules/fifo/iob_fifo_sync/iob_fifo_sync.v ../../../hardware/modules/axis2axi/axis2axi.v ../../../hardware/modules/axis2axi/axis2axi_in.v ../../../hardware/modules/axis2axi/axis2axi_out.v ../../../submodules/VERILOG_AXI/rtl/axi_ram.v ../../../hardware/modules/ram/iob_ram_t2p/iob_ram_t2p.v iob_reg.v iob_reg_r.v iob_reg_re.v iob_counter.v iob_asym_converter.v axis2axi_tb.v AxiDelay.v  -I. -I../../../submodules/AXI/hardware/include -I../../../hardware/modules -DVCD
+./a.out
+VCD info: dumpfile uut.vcd opened for output.
+=== AXI Stream In ===
+Making an AXI Stream In run from 00000000 to 00000010
+Written to address 000000: 00
+Written to address 000004: 01 02 03
+
+Making an AXI Stream In run from 00000100 to 00000140
+Written to address 000100: 00
+Written to address 000104: 01
+Written to address 000108: 02 03 04 05
+Written to address 000118: 06 07 08 09 10 11
+Written to address 000130: 12 13 14 15
+
+Making an AXI Stream In run from 00000ffc to 00001000
+Written to address 000ffc: 00
+
+Making an AXI Stream In run from 00001ffc to 00002004
+Written to address 001ffc: 00
+Written to address 002000: 01
+
+Making an AXI Stream In run from 00002ffc to 00003024
+Written to address 002ffc: 00
+Written to address 003000: 01 02
+Written to address 003008: 03 04 05 06
+Written to address 003018: 07 08 09
+
+Making an AXI Stream In run from 00003fd8 to 00004078
+Written to address 003fd8: 00
+Written to address 003fdc: 01 02
+Written to address 003fe4: 03 04 05 06 07
+Written to address 003ff8: 08 09
+Written to address 004000: 10 11 12 13 14 15 16
+Written to address 00401c: 17 18 19 20 21 22 23 24
+Written to address 00403c: 25 26 27 28 29 30 31 32
+Written to address 00405c: 33 34 35 36 37 38 39
+
+=== AXI Stream Out ===
+Making an AXI Stream Out run from 00000000 to 00000010
+Values read: 00 01 02 03
+
+Making an AXI Stream Out run from 00000100 to 00000140
+Values read: 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+
+Making an AXI Stream Out run from 00000ffc to 00001000
+Values read: 00
+
+Making an AXI Stream Out run from 00001ffc to 00002004
+Values read: 00 01
+
+Making an AXI Stream Out run from 00002ffc to 00003024
+Values read: 00 01 02 03 04 05 06 07 08 09
+
+Making an AXI Stream Out run from 00003fd8 to 00004078
+Values read: 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39
+
