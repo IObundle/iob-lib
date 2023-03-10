@@ -1,11 +1,12 @@
 `timescale 1ns / 1ps
 
 `include "iob_lib.vh"
-`include "axi.vh"
 
 module axis2axi_out #(
    parameter AXI_ADDR_W = 0,
    parameter AXI_DATA_W = 32, // We currently only support 4 byte transfer
+   parameter AXI_LEN_W = 8,
+   parameter AXI_ID_W = 1,
    parameter BURST_W = 0
 )(
    // Configuration
@@ -19,7 +20,7 @@ module axis2axi_out #(
    `IOB_INPUT(axis_out_ready_i,1),
 
    // Axi master interface
-   `include "m_axi_read_m_port.vh"
+   `include "iob_axi_m_read_port.vh"
 
    `IOB_INPUT(clk_i,1),
    `IOB_INPUT(cke_i,1),
@@ -32,18 +33,18 @@ localparam BUFFER_W = BURST_W + 1;
 localparam BUFFER_SIZE = 2**BUFFER_W;
 
 // Constants
-assign m_axi_arid = `AXI_ID_W'd0;
-assign m_axi_arsize  = `AXI_SIZE_W'd2;
-assign m_axi_arburst = `AXI_BURST_W'd1;
-assign m_axi_arlock  = `AXI_LOCK_W'b0;
-assign m_axi_arcache = `AXI_CACHE_W'd2;
-assign m_axi_arprot  = `AXI_PROT_W'd2;
-assign m_axi_arqos   = `AXI_QOS_W'd0;
+assign axi_arid_o = 0;
+assign axi_arsize_o  = 2;
+assign axi_arburst_o = 1;
+assign axi_arlock_o  = 0;
+assign axi_arcache_o = 2;
+assign axi_arprot_o  = 2;
+assign axi_arqos_o   = 0;
 
 // Regs to assign to outputs
 reg arvalid_int;
 reg [23:0] araddr_int;
-wire [`AXI_LEN_W-1:0] arlen_int;
+wire [BURST_W:0] arlen_int;
 
 // State regs
 reg [1:0] state_nxt;
@@ -79,13 +80,13 @@ end
 wire [BURST_W:0] transfer_len = burst_size - 1;
 
 // Assignment to outputs
-assign axis_out_data_o = m_axi_rdata;
-assign axis_out_valid_o = (doing_local_transfer && m_axi_rvalid);
-assign m_axi_rready = (doing_local_transfer && axis_out_ready_i);
+assign axis_out_data_o = axi_rdata_i;
+assign axis_out_valid_o = (doing_local_transfer && axi_rvalid_i);
+assign axi_rready_o = (doing_local_transfer && axis_out_ready_i);
 
-assign m_axi_araddr = araddr_int;
-assign m_axi_arlen = arlen_int;
-assign m_axi_arvalid = arvalid_int;
+assign axi_araddr_o = araddr_int;
+assign axi_arlen_o = arlen_int;
+assign axi_arvalid_o = arvalid_int;
 
 localparam WAIT_START=2'h0, BEGIN_LOCAL=2'h1, TRANSFER=2'h2, END_LOCAL=2'h3;
 `IOB_COMB
@@ -108,11 +109,11 @@ begin
    TRANSFER: begin
       araddr_int = current_address;
       arvalid_int = 1'b1;
-      if(m_axi_arready)
+      if(axi_arready_i)
          state_nxt = END_LOCAL;
    end
-   END_LOCAL: if(m_axi_rlast && m_axi_rvalid && m_axi_rready) begin
-      next_address = current_address + ((m_axi_arlen + 1) << 2);
+   END_LOCAL: if(axi_rlast_i && axi_rvalid_i && axi_rready_o) begin
+      next_address = current_address + ((axi_arlen_o + 1) << 2);
       if(current_length == 0)
          state_nxt = WAIT_START;
       else 
@@ -121,7 +122,7 @@ begin
    endcase
 end
 
-iob_reg_re #(`AXI_LEN_W,0) _1 (clk_i,arst_i,cke_i,rst_i,(state == BEGIN_LOCAL),transfer_len,arlen_int);
+iob_reg_re #(BURST_W+1,0) _1 (clk_i,arst_i,cke_i,rst_i,(state == BEGIN_LOCAL),transfer_len,arlen_int);
 iob_reg_r #(AXI_ADDR_W,0) _2 (clk_i,arst_i,cke_i,rst_i,next_address,current_address);
 iob_reg_r #(AXI_ADDR_W,0) _3 (clk_i,arst_i,cke_i,rst_i,next_length,current_length);
 iob_reg_r #(2,0) _4 (clk_i,arst_i,cke_i,rst_i,state_nxt,state);

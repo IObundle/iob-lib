@@ -1,12 +1,23 @@
+`timescale 1ns / 1ps
+
+// Simple AXI Stream (AXIS) to AXI adapter
+// Address (and length for reads) are set by filling the associated configuration wires and then asserting the set_*_config_i wires for a cycle.
+// This unit breaks down an AXIS stream into multiple bursts of maximum size (2**BURST_W). 
+// At the end of each burst, the address is updated automatically providing a transparent way of reading and writing to a AXI device.
+
+// For AXIS In streams, the unit uses a FIFO transparently. The unit flushes the FIFO when axis_in_valid_i is deasserted. 
+
+// For AXIS Out streams, the length is required but it can be any value, it is not limited to the AXI maximum length.
+// The AXIS Out stream is activated after asserting set_out_config_i. Afterwards, the AXIS Out stream must acknowledge the full amount of data requested otherwise the unit will block.
 
 module axis2axi
    #( 
       parameter AXI_ADDR_W = 0,
       parameter AXI_DATA_W = 32, // We currently only support 4 byte transfer
+      parameter AXI_LEN_W = 8,
+      parameter AXI_ID_W = 1,
       parameter BURST_W = 0,
-      parameter BURST_SIZE = 2**BURST_W,
-      parameter BUFFER_W = BURST_W + 1,
-      parameter BUFFER_SIZE = 2**BUFFER_W
+      parameter BUFFER_W = BURST_W + 1
 )(
    // Configuration
    `IOB_INPUT(addr_in_i,AXI_ADDR_W),
@@ -35,7 +46,7 @@ module axis2axi
    `IOB_INPUT(axis_out_ready_i,1),
 
    // AXI master interface
-   `include "m_axi_m_port.vh"
+   `include "iob_axi_m_port.vh"
 
    `IOB_INPUT(clk_i,1),
    `IOB_INPUT(cke_i,1),
@@ -64,7 +75,7 @@ axis2axi_in #(
    .axis_in_valid_i(axis_in_valid_i),
    .axis_in_ready_o(axis_in_ready_o),
 
-   `include "m_axi_write_portmap.vh"
+   `include "iob_axi_m_m_write_portmap.vh"
    
    .clk_i(clk_i),
    .cke_i(cke_i),
@@ -87,7 +98,7 @@ axis2axi_out #(
    .axis_out_valid_o(axis_out_valid_o),
    .axis_out_ready_i(axis_out_ready_i),
 
-   `include "m_axi_read_portmap.vh"
+   `include "iob_axi_m_m_read_portmap.vh"
    
    .clk_i(clk_i),
    .cke_i(cke_i),

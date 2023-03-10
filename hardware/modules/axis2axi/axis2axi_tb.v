@@ -1,7 +1,6 @@
 `timescale 1ns / 1ps
 
 `include "iob_lib.vh"
-`include "axi.vh"
 
 `define CLK_PER 10
 
@@ -20,8 +19,10 @@ module axis2axi_tb;
    parameter DELAY_AXI_WRITE = 5;
 
    // Do not change these
-   localparam AXI_ADDR_W = ADDR_W;
-   localparam AXI_DATA_W = DATA_W;
+   parameter AXI_ADDR_W = ADDR_W;
+   parameter AXI_DATA_W = DATA_W;
+   parameter AXI_LEN_W = 8;
+   parameter AXI_ID_W = 1; 
 
    // Clock
    reg clk = 1;
@@ -56,7 +57,7 @@ module axis2axi_tb;
    `IOB_WIRE(ddr_axi_awlen, 8) //Address write channel burst length
    `IOB_WIRE(ddr_axi_awsize, 3) //Address write channel burst size. This signal indicates the size of each transfer in the burst
    `IOB_WIRE(ddr_axi_awburst, 2) //Address write channel burst type
-   `IOB_WIRE(ddr_axi_awlock, 1) //Address write channel lock type
+   `IOB_WIRE(ddr_axi_awlock, 2) //Address write channel lock type
    `IOB_WIRE(ddr_axi_awcache, 4) //Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
    `IOB_WIRE(ddr_axi_awprot, 3) //Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
    `IOB_WIRE(ddr_axi_awqos, 4) //Address write channel quality of service
@@ -75,7 +76,7 @@ module axis2axi_tb;
    `IOB_WIRE(ddr_axi_arlen, 8) //Address read channel burst length
    `IOB_WIRE(ddr_axi_arsize, 3) //Address read channel burst size. This signal indicates the size of each transfer in the burst
    `IOB_WIRE(ddr_axi_arburst, 2) //Address read channel burst type
-   `IOB_WIRE(ddr_axi_arlock, 1) //Address read channel lock type
+   `IOB_WIRE(ddr_axi_arlock, 2) //Address read channel lock type
    `IOB_WIRE(ddr_axi_arcache, 4) //Address read channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
    `IOB_WIRE(ddr_axi_arprot, 3) //Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
    `IOB_WIRE(ddr_axi_arqos, 4) //Address read channel quality of service
@@ -312,8 +313,10 @@ AxiDelay #(
 
    axis2axi
    #(
-      .AXI_ADDR_W(ADDR_W),
-      .AXI_DATA_W(DATA_W),
+      .AXI_ADDR_W(AXI_ADDR_W),
+      .AXI_DATA_W(AXI_DATA_W),
+      .AXI_LEN_W(AXI_LEN_W),
+      .AXI_ID_W(AXI_ID_W),
       .BURST_W(BURST_W)
    )
    uut
@@ -348,44 +351,44 @@ AxiDelay #(
    //
    // AXI-4 full master I/F
    //
-   .m_axi_awid(ddr_axi_awid), //Address write channel ID
-   .m_axi_awaddr(ddr_axi_awaddr), //Address write channel address
-   .m_axi_awlen(ddr_axi_awlen), //Address write channel burst length
-   .m_axi_awsize(ddr_axi_awsize), //Address write channel burst size. This signal indicates the size of each transfer in the burst
-   .m_axi_awburst(ddr_axi_awburst), //Address write channel burst type
-   .m_axi_awlock(ddr_axi_awlock), //Address write channel lock type
-   .m_axi_awcache(ddr_axi_awcache), //Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
-   .m_axi_awprot(ddr_axi_awprot), //Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
-   .m_axi_awqos(ddr_axi_awqos), //Address write channel quality of service
-   .m_axi_awvalid(ddr_axi_awvalid), //Address write channel valid
-   .m_axi_awready(ddr_axi_awready), //Address write channel ready
-   .m_axi_wid(ddr_axi_wid), //Write channel ID
-   .m_axi_wdata(ddr_axi_wdata), //Write channel data
-   .m_axi_wstrb(ddr_axi_wstrb), //Write channel write strobe
-   .m_axi_wlast(ddr_axi_wlast), //Write channel last word flag
-   .m_axi_wvalid(m_wvalid), //Write channel valid
-   .m_axi_wready(m_wready), //Write channel ready
-   .m_axi_bid(ddr_axi_bid), //Write response channel ID
-   .m_axi_bresp(ddr_axi_bresp), //Write response channel response
-   .m_axi_bvalid(ddr_axi_bvalid), //Write response channel valid
-   .m_axi_bready(ddr_axi_bready), //Write response channel ready
-   .m_axi_arid(ddr_axi_arid), //Address read channel ID
-   .m_axi_araddr(ddr_axi_araddr), //Address read channel address
-   .m_axi_arlen(ddr_axi_arlen), //Address read channel burst length
-   .m_axi_arsize(ddr_axi_arsize), //Address read channel burst size. This signal indicates the size of each transfer in the burst
-   .m_axi_arburst(ddr_axi_arburst), //Address read channel burst type
-   .m_axi_arlock(ddr_axi_arlock), //Address read channel lock type
-   .m_axi_arcache(ddr_axi_arcache), //Address read channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
-   .m_axi_arprot(ddr_axi_arprot), //Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
-   .m_axi_arqos(ddr_axi_arqos), //Address read channel quality of service
-   .m_axi_arvalid(ddr_axi_arvalid), //Address read channel valid
-   .m_axi_arready(ddr_axi_arready), //Address read channel ready
-   .m_axi_rid(ddr_axi_rid), //Read channel ID
-   .m_axi_rdata(ddr_axi_rdata), //Read channel data
-   .m_axi_rresp(ddr_axi_rresp), //Read channel response
-   .m_axi_rlast(ddr_axi_rlast), //Read channel last word
-   .m_axi_rvalid(m_rvalid), //Read channel valid
-   .m_axi_rready(m_rready), //Read channel ready
+   .axi_awid_o(ddr_axi_awid), //Address write channel ID
+   .axi_awaddr_o(ddr_axi_awaddr), //Address write channel address
+   .axi_awlen_o(ddr_axi_awlen), //Address write channel burst length
+   .axi_awsize_o(ddr_axi_awsize), //Address write channel burst size. This signal indicates the size of each transfer in the burst
+   .axi_awburst_o(ddr_axi_awburst), //Address write channel burst type
+   .axi_awlock_o(ddr_axi_awlock), //Address write channel lock type
+   .axi_awcache_o(ddr_axi_awcache), //Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
+   .axi_awprot_o(ddr_axi_awprot), //Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
+   .axi_awqos_o(ddr_axi_awqos), //Address write channel quality of service
+   .axi_awvalid_o(ddr_axi_awvalid), //Address write channel valid
+   .axi_awready_i(ddr_axi_awready), //Address write channel ready
+   //.axi_wid_o(ddr_axi_wid), //Write channel ID
+   .axi_wdata_o(ddr_axi_wdata), //Write channel data
+   .axi_wstrb_o(ddr_axi_wstrb), //Write channel write strobe
+   .axi_wlast_o(ddr_axi_wlast), //Write channel last word flag
+   .axi_wvalid_o(m_wvalid), //Write channel valid
+   .axi_wready_i(m_wready), //Write channel ready
+   .axi_bid_i(ddr_axi_bid), //Write response channel ID
+   .axi_bresp_i(ddr_axi_bresp), //Write response channel response
+   .axi_bvalid_i(ddr_axi_bvalid), //Write response channel valid
+   .axi_bready_o(ddr_axi_bready), //Write response channel ready
+   .axi_arid_o(ddr_axi_arid), //Address read channel ID
+   .axi_araddr_o(ddr_axi_araddr), //Address read channel address
+   .axi_arlen_o(ddr_axi_arlen), //Address read channel burst length
+   .axi_arsize_o(ddr_axi_arsize), //Address read channel burst size. This signal indicates the size of each transfer in the burst
+   .axi_arburst_o(ddr_axi_arburst), //Address read channel burst type
+   .axi_arlock_o(ddr_axi_arlock), //Address read channel lock type
+   .axi_arcache_o(ddr_axi_arcache), //Address read channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
+   .axi_arprot_o(ddr_axi_arprot), //Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
+   .axi_arqos_o(ddr_axi_arqos), //Address read channel quality of service
+   .axi_arvalid_o(ddr_axi_arvalid), //Address read channel valid
+   .axi_arready_i(ddr_axi_arready), //Address read channel ready
+   .axi_rid_i(ddr_axi_rid), //Read channel ID
+   .axi_rdata_i(ddr_axi_rdata), //Read channel data
+   .axi_rresp_i(ddr_axi_rresp), //Read channel response
+   .axi_rlast_i(ddr_axi_rlast), //Read channel last word
+   .axi_rvalid_i(m_rvalid), //Read channel valid
+   .axi_rready_o(m_rready), //Read channel ready
 
    .clk_i       (clk),
    .cke_i       (1'b1),
@@ -414,8 +417,9 @@ AxiDelay #(
      .axi_awlen_i    (ddr_axi_awlen),
      .axi_awsize_i   (ddr_axi_awsize),
      .axi_awburst_i  (ddr_axi_awburst),
-     .axi_awlock_i   ({1'b1,ddr_axi_awlock}),
+     .axi_awlock_i   (ddr_axi_awlock),
      .axi_awprot_i   (ddr_axi_awprot),
+     .axi_awqos_i    (ddr_axi_awqos),
      .axi_awcache_i  (ddr_axi_awcache),
      .axi_awvalid_i  (ddr_axi_awvalid),
      .axi_awready_o  (ddr_axi_awready),
@@ -439,9 +443,10 @@ AxiDelay #(
      .axi_arlen_i    (ddr_axi_arlen),
      .axi_arsize_i   (ddr_axi_arsize),
      .axi_arburst_i  (ddr_axi_arburst),
-     .axi_arlock_i   ({1'b1,ddr_axi_arlock}),
+     .axi_arlock_i   (ddr_axi_arlock),
      .axi_arcache_i  (ddr_axi_arcache),
      .axi_arprot_i   (ddr_axi_arprot),
+     .axi_arqos_i    (ddr_axi_arqos),
      .axi_arvalid_i  (ddr_axi_arvalid),
      .axi_arready_o  (ddr_axi_arready),
 
