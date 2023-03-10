@@ -2,21 +2,15 @@
 
 `include "iob_lib.vh"
 
+// Check axis2axi.v for information on how this unit works
+
 module axis2axi_in #( 
    parameter AXI_ADDR_W = 0,
-   parameter AXI_DATA_W = 32, // We currently only support 4 byte transfer
+   parameter AXI_DATA_W = 32, // We currently only support 4 byte transfers
    parameter AXI_LEN_W = 8,
    parameter AXI_ID_W = 1,
    parameter BURST_W = 0
 )(
-   // Buffer memory external interfaces
-   `IOB_OUTPUT(ext_mem_w_en_o, 1),
-   `IOB_OUTPUT(ext_mem_w_data_o, AXI_DATA_W),
-   `IOB_OUTPUT(ext_mem_w_addr_o, BUFFER_W),
-   `IOB_OUTPUT(ext_mem_r_en_o, 1),
-   `IOB_OUTPUT(ext_mem_r_addr_o, BUFFER_W),
-   `IOB_INPUT(ext_mem_r_data_i, AXI_DATA_W),
-   
    // Configuration
    `IOB_INPUT(config_in_addr_i,AXI_ADDR_W),
    `IOB_INPUT(config_in_valid_i,1),
@@ -29,6 +23,14 @@ module axis2axi_in #(
 
    // Axi master interface
    `include "iob_axi_m_write_port.vh"
+
+   // External memory interfaces
+   `IOB_OUTPUT(ext_mem_w_en_o, 1),
+   `IOB_OUTPUT(ext_mem_w_data_o, AXI_DATA_W),
+   `IOB_OUTPUT(ext_mem_w_addr_o, BUFFER_W),
+   `IOB_OUTPUT(ext_mem_r_en_o, 1),
+   `IOB_OUTPUT(ext_mem_r_addr_o, BUFFER_W),
+   `IOB_INPUT(ext_mem_r_data_i, AXI_DATA_W),   
 
    `IOB_INPUT(clk_i,1),
    `IOB_INPUT(cke_i,1),

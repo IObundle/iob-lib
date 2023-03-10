@@ -2,9 +2,11 @@
 
 `include "iob_lib.vh"
 
+// Check axis2axi for information on how this unit works
+
 module axis2axi_out #(
    parameter AXI_ADDR_W = 0,
-   parameter AXI_DATA_W = 32, // We currently only support 4 byte transfer
+   parameter AXI_DATA_W = 32, // We currently only support 4 byte transfers
    parameter AXI_LEN_W = 8,
    parameter AXI_ID_W = 1,
    parameter BURST_W = 0
