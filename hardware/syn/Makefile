@@ -34,7 +34,7 @@ SYN_SCP_FLAGS=$(CADENCE_SCP_FLAGS)
 SYN_SYNC_FLAGS=$(CADENCE_SYNC_FLAGS)
 
 synth: $(VHDR) $(VSRC)
-	genus -batch -files genus.tcl
+	genus -batch -files build.tcl
 
 
 UFLAGS+=COV=$(COV)
