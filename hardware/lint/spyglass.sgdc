@@ -1,2 +1,2 @@
 current_design IOB_CORE_NAME
-sdc_data -file IOB_CORE_NAME.sdc 
+sdcschema -type ../syn/umc130/IOB_CORE_NAME_dev.sdc ../src/IOB_CORE_NAME_wrapper.sdc ../syn/IOB_CORE_NAME_tool.sdc 
