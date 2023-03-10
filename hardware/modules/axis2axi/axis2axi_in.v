@@ -75,26 +75,42 @@ wire last_burst_possible = (fifo_level > 0 && fifo_level < BURST_SIZE && !axis_i
 wire start_transfer = (normal_burst_possible || last_burst_possible) && !doing_transfer;
 wire transfer = axi_wready_i && axi_wvalid_o;
 wire read_next = (axi_wready_i && !axi_wlast_o);
-wire [15:0] boundary_transfer_len = (16'h1000 - current_address[11:0]) >> 2;
 wire last_transfer = (transfer_count == axi_awlen_o);
 wire fifo_read_enable = (read_next || start_transfer);  // Start_transfer puts the first valid data on r_data and offsets fifo read by one cycle which lines up perfectly with the way the m_axi_wready signal works
 
-// Combinatorial
-reg [BURST_W:0] burst_size;
+wire [BURST_W:0] burst_size;
+
+reg [BURST_W:0] non_boundary_burst_size;
 `IOB_COMB
 begin
-   burst_size = 0;
+   non_boundary_burst_size = 0;
    
    if(last_burst_possible) begin
-      if(fifo_level < boundary_transfer_len)
-         burst_size = fifo_level;
-      else
-         burst_size = boundary_transfer_len;
-   end else if(boundary_transfer_len < BURST_SIZE)
-      burst_size = boundary_transfer_len;
-   else if(normal_burst_possible)
-      burst_size = BURST_SIZE;
+      non_boundary_burst_size = fifo_level;
+   end if(normal_burst_possible)
+      non_boundary_burst_size = BURST_SIZE;
 end
+
+generate
+if(AXI_ADDR_W >= 13) begin // 4k boundary can only happen to LEN higher or equal to 13
+
+wire [12:0] boundary_transfer_len = (13'h1000 - current_address[11:0]) >> 2;
+
+reg [BURST_W:0] boundary_burst_size;
+`IOB_COMB
+begin
+   boundary_burst_size = non_boundary_burst_size;
+
+   if(non_boundary_burst_size > boundary_transfer_len)
+      boundary_burst_size = boundary_transfer_len;
+end
+
+assign burst_size = boundary_burst_size;
+
+end else begin
+assign burst_size = non_boundary_burst_size;
+end
+endgenerate
 
 wire [BURST_W:0] transfer_len = burst_size - 1;
 

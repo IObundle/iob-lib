@@ -64,6 +64,8 @@ module axis2axi
 axis2axi_in #(
    .AXI_ADDR_W(AXI_ADDR_W),
    .AXI_DATA_W(AXI_DATA_W),
+   .AXI_LEN_W(AXI_LEN_W),
+   .AXI_ID_W(AXI_ID_W),
    .BURST_W(BURST_W)
    )
    axis2axi_in_inst
@@ -94,6 +96,8 @@ axis2axi_in #(
 axis2axi_out #(
    .AXI_ADDR_W(AXI_ADDR_W),
    .AXI_DATA_W(AXI_DATA_W),
+   .AXI_LEN_W(AXI_LEN_W),
+   .AXI_ID_W(AXI_ID_W),
    .BURST_W(BURST_W)
    )
    axis2axi_out_inst

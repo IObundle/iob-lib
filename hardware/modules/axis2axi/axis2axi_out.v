@@ -64,22 +64,40 @@ wire [15:0] boundary_transfer_len = (16'h1000 - current_address[11:0]) >> 2;
 wire normal_burst_possible = (current_length >= BURST_SIZE);
 wire last_burst_possible = (current_length < BURST_SIZE);
 
-// Combinatorial
-reg [BUFFER_SIZE-1:0] burst_size;
-always @*
+wire [BURST_W:0] burst_size;
+
+reg [BURST_W:0] non_boundary_burst_size;
+`IOB_COMB
 begin
-   burst_size = 0;
+   non_boundary_burst_size = 0;
    
    if(last_burst_possible) begin
-      if(current_length < boundary_transfer_len)
-         burst_size = current_length;
-      else
-         burst_size = boundary_transfer_len;
-   end else if(boundary_transfer_len < BURST_SIZE)
-      burst_size = boundary_transfer_len;
-   else if(normal_burst_possible)
-      burst_size = BURST_SIZE;
+      non_boundary_burst_size = current_length;
+   end if(normal_burst_possible)
+      non_boundary_burst_size = BURST_SIZE;
 end
+
+generate
+if(AXI_ADDR_W >= 13) begin // 4k boundary can only happen to LEN higher or equal to 13
+
+wire [12:0] boundary_transfer_len = (13'h1000 - current_address[11:0]) >> 2;
+
+reg [BURST_W:0] boundary_burst_size;
+`IOB_COMB
+begin
+   boundary_burst_size = non_boundary_burst_size;
+
+   if(non_boundary_burst_size > boundary_transfer_len)
+      boundary_burst_size = boundary_transfer_len;
+end
+
+assign burst_size = boundary_burst_size;
+
+end else begin
+assign burst_size = non_boundary_burst_size;
+end
+endgenerate
+
 wire [BURST_W:0] transfer_len = burst_size - 1;
 
 // Assignment to outputs
