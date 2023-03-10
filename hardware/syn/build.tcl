@@ -118,11 +118,9 @@ check_design -unresolved
 
 # add optimization constraints
 #----------------------------------------------------------------------
-set clk_period  1000.0
-set mclk_period 500.0
-
+read_sdc -stop_on_error ./$NODE/$DESIGN\_dev.sdc
 read_sdc -stop_on_error ../src/$DESIGN\_wrapper.sdc
-read_sdc -stop_on_error ./$DESIGN.sdc
+read_sdc -stop_on_error ./$DESIGN\_tool.sdc
 
 check_timing_intent 
 
