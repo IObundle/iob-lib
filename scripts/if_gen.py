@@ -317,12 +317,30 @@ def remove_iob_macro(direction):
 def m_port(prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write(remove_iob_macro(table[i]['signal'])+' ['+f"{bus_size}*"+table[i]['width']+'-1:0] '+prefix+table[i]['name']+suffix(table[i]['signal'])+', //'+top_macro+table[i]['description']+'\n')
+            port_direction = remove_iob_macro(table[i]['signal'])
+            name = prefix+table[i]['name']+suffix(table[i]['signal'])
+            if bus_size == 1:
+                width = table[i]['width']
+            else:
+                width = '('+str(bus_size)+'*'+table[i]['width']+')'
+            bus_width = ' ['+width+'-1:0] '
+            description = '//'+top_macro+table[i]['description']
+            # Write port
+            fout.write(port_direction+bus_width+name+', '+description+'\n')
     
 def s_port(prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write(remove_iob_macro(reverse(table[i]['signal']))+' ['+f"{bus_size}*"+table[i]['width']+'-1:0] '+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', //'+top_macro+table[i]['description']+'\n')
+            port_direction = remove_iob_macro(reverse(table[i]['signal']))
+            name = prefix+table[i]['name']+suffix(reverse(table[i]['signal']))
+            if bus_size == 1:
+                width = table[i]['width']
+            else:
+                width = '('+str(bus_size)+'*'+table[i]['width']+')'
+            bus_width = ' ['+width+'-1:0] '
+            description = '//'+top_macro+table[i]['description']
+            # Write port
+            fout.write(port_direction+bus_width+name+', '+description+'\n')
 
 #
 # Portmap
@@ -330,27 +348,82 @@ def s_port(prefix, fout, bus_size=1):
 
 def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_size}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+        port = port_prefix+table[i]['name']
+        if bus_start == 0:
+            bus_start_index = str(0)
+        else:
+            bus_start_index = str(bus_start)+'*'+table[i]['width']
+        if bus_size == 1:
+            bus_select_size = table[i]['width']
+        else:
+            bus_select_size = str(bus_size)+'*'+table[i]['width']
+        connection = wire_prefix+table[i]['name']+'['+bus_start_index+'+:'+bus_select_size+']'
+        description = '//'+table[i]['description']
+        fout.write('.'+port+'('+connection+'), '+description+'\n')
 
 def m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_size}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            port = port_prefix+table[i]['name']+suffix(table[i]['signal'])
+            if bus_start == 0:
+                bus_start_index = str(0)
+            else:
+                bus_start_index = str(bus_start)+'*'+table[i]['width']
+            if bus_size == 1:
+                bus_select_size = table[i]['width']
+            else:
+                bus_select_size = str(bus_size)+'*'+table[i]['width']
+            connection = wire_prefix+table[i]['name']+'['+bus_start_index+'+:'+bus_select_size+']'        
+            description = '//'+table[i]['description']
+            fout.write('.'+port+'('+connection+'), '+description+'\n')
 
 def s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+f"[{bus_start}*{table[i]['width']}+:{bus_size}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            port = port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))
+            if bus_start == 0:
+                bus_start_index = str(0)
+            else:
+                bus_start_index = str(bus_start)+'*'+table[i]['width']
+            if bus_size == 1:
+                bus_select_size = table[i]['width']
+            else:
+                bus_select_size = str(bus_size)+'*'+table[i]['width']
+            connection = wire_prefix+table[i]['name']+'['+bus_start_index+'+:'+bus_select_size+']'        
+            description = '//'+table[i]['description']
+            fout.write('.'+port+'('+connection+'), '+description+'\n')
 
 def m_m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+suffix(table[i]['signal'])+f"[{bus_start}*{table[i]['width']}+:{bus_size}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
-
+            port = port_prefix+table[i]['name']+suffix(table[i]['signal'])
+            if bus_start == 0:
+                bus_start_index = str(0)
+            else:
+                bus_start_index = str(bus_start)+'*'+table[i]['width']
+            if bus_size == 1:
+                bus_select_size = table[i]['width']
+            else:
+                bus_select_size = str(bus_size)+'*'+table[i]['width']
+            connection = wire_prefix+table[i]['name']+suffix(table[i]['signal'])+'['+bus_start_index+'+:'+bus_select_size+']'
+            description = '//'+table[i]['description']
+            fout.write('.'+port+'('+connection+'), '+description+'\n')
+        
 def s_s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+f"[{bus_start}*{table[i]['width']}+:{bus_size}*{table[i]['width']}]"+'), //'+table[i]['description']+'\n')
+            port = port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))
+            if bus_start == 0:
+                bus_start_index = str(0)
+            else:
+                bus_start_index = str(bus_start)+'*'+table[i]['width']
+            if bus_size == 1:
+                bus_select_size = table[i]['width']
+            else:
+                bus_select_size = str(bus_size)+'*'+table[i]['width']
+            connection = wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'['+bus_start_index+'+:'+bus_select_size+']'
+            description = '//'+table[i]['description']
+            fout.write('.'+port+'('+connection+'), '+description+'\n')
 
 #
 # Wire
