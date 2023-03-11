@@ -38,7 +38,7 @@ build: bsp.h fw_emul
 run: build
 	@rm -f soc2cnsl cnsl2soc
 	$(CONSOLE_CMD) $(TEST_LOG) &
-	bash -c "trap 'make kill-cnsl' INT TERM KILL EXIT; ./fw_emul $(TEST_LOG)"
+	bash -c "trap 'make -s kill-cnsl' INT TERM KILL EXIT; ./fw_emul $(TEST_LOG)"
 
 
 # Create bsp.h based on bsp.vh of simulation

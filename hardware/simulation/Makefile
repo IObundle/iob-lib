@@ -63,9 +63,9 @@ ifneq ($(CONSOLE_CMD),)
 	@rm -f soc2cnsl cnsl2soc
 	$(CONSOLE_CMD) $(TEST_LOG) &
 endif
-	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make exec"
+	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make exec"
 else
-	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
+	bash -c "trap 'make -s kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
 ifeq ($(VCD),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
@@ -106,7 +106,7 @@ test: very-clean clean-test-log
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(SIM_SYNC_FLAGS) -avz --force --delete ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
-	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) run-tests SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
+	bash -c "trap 'make -s kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) run-tests SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
 ifeq ($(COV),1)
 	sleep 1 && sync && scp -r $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/cov_work .
@@ -114,7 +114,7 @@ ifeq ($(COV),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_detail.rpt .
 endif
 else
-	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make run-tests"
+	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make run-tests"
 endif
 ifneq ($(COV),1)
 	diff test.log test.expected
