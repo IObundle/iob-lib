@@ -387,7 +387,7 @@ def get_module_io(ios):
 def add_prefix_to_parameters_in_string(string, confs, prefix):
     for parameter in confs:
         if parameter['type'] in ['P','F']:
-            string = re.sub(f"((?:^.*[^a-zA-Z_])|^){parameter['name']}((?:[^a-zA-Z_].*$)|$)",f"\\g<1>{prefix}{parameter['name']}\\g<2>", string)
+            string = re.sub(f"((?:^.*[^a-zA-Z_])|^){parameter['name']}((?:[^a-zA-Z_].*$)|$)",f"\\g<1>{prefix}{parameter['name']}\\g<2>", str(string))
     return string
 
 # port: dictionary describing a port (IO). Example: {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
