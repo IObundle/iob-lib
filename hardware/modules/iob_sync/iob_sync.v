@@ -12,13 +12,13 @@ module iob_sync
     output reg [DATA_W-1:0] signal_o
   );
 
-  reg [DATA_W-1:0] sync;
+  reg [DATA_W-1:0] synchronizer;
 
   always @(posedge clk_i, posedge arst_i) begin
     if (arst_i) begin
-      sync <= RST_VAL;
+      synchronizer <= RST_VAL;
     end else begin
-      sync <= signal_i;
+      synchronizer <= signal_i;
     end
   end
 
@@ -26,7 +26,7 @@ module iob_sync
     if (arst_i) begin
       signal_o <= RST_VAL;
     end else begin
-      signal_o <= sync;
+      signal_o <= synchronizer;
     end
   end
 
