@@ -25,8 +25,11 @@ export RDI_VERBOSE = False
 
 VIVADO_FLAGS= -nojournal -log vivado.log -mode batch -source vivado/build.tcl -tclargs $(FPGA_TOP) $(BOARD) "$(VSRC)" "$(DEFINES)" "$(IP)" $(IS_FPGA) $(USE_EXTMEM)
 
-$(FPGA_OBJ): $(VSRC) $(VHDR) $(IP) $(wildcard $(BOARD)/*.sdc)
-	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado $(VIVADO_FLAGS) && sleep 1 && mv vivado.log reports/
+$(FPGA_OBJ): vivado.log
+	mv vivado.log reports/
+
+vivado.log: $(VSRC) $(VHDR) $(IP) $(wildcard $(BOARD)/*.sdc)
+	$(FPGA_ENV) && $(VIVADOPATH)/bin/vivado $(VIVADO_FLAGS) 
 
 vivado-clean:
 	@rm -rf .Xil
