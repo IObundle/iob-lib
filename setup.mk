@@ -104,7 +104,7 @@ endif
 
 
 clean:
-	@rm -rf $(CORE)_V*
+	@rm -rf ../$(CORE)_V*
 
 # Remove all __pycache__ folders with python bytecode
 python-cache-clean:
