@@ -66,7 +66,6 @@ endif
 	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make exec"
 else
 	bash -c "trap 'make -s kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
-	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
 ifeq ($(VCD),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
 endif
@@ -114,12 +113,7 @@ ifeq ($(COV),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_detail.rpt .
 endif
 else
-	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make run-tests"
-endif
-ifneq ($(COV),1)
-	diff test.log test.expected
-else
-	@echo "INFO: simulation code coverage is reserved for internal use only."
+	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make run-tests; diff test.log test.expected"
 endif
 
 run-tests: $(TEST_LIST)

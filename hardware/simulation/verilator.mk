@@ -29,7 +29,7 @@ comp: bsp.h $(VHDR) $(VSRC)
 	cd ./obj_dir && make -f $(SIM_PROC).mk
 
 exec:
-	./obj_dir/$(SIM_PROC) | tee -a test.log
+	./obj_dir/$(SIM_PROC)
 
 clean: gen-clean
 	@rm -rf obj_dir

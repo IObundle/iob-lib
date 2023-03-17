@@ -19,7 +19,7 @@ $(SIM_PROC): $(VHDR) $(VSRC)
 	iverilog $(VFLAGS) $(VSRC)
 
 exec:
-	./$(SIM_PROC) | tee -a test.log
+	./$(SIM_PROC)
 
 clean: gen-clean
 	@rm -f $(SIM_PROC)
