@@ -113,10 +113,11 @@ ifeq ($(COV),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_detail.rpt .
 endif
 else
-	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make run-tests; diff test.log test.expected"
+	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make run-tests" && cat test.log >> acc.log
 endif
 
 run-tests: $(TEST_LIST)
+	diff acc.log test.expected
 
 gen-clean:
 	@rm -f *.hex
