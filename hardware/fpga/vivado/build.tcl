@@ -72,7 +72,6 @@ report_clock_interaction
 report_cdc -details
 report_bus_skew
 
-file mkdir reports
 report_clocks -file reports/$NAME\_$PART\_clocks.rpt
 report_clock_interaction -file reports/$NAME\_$PART\_clock_interaction.rpt
 report_cdc -details -file reports/$NAME\_$PART\_cdc.rpt
