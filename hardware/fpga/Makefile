@@ -62,7 +62,7 @@ endif
 
 #console start command
 CONSOLE_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
-GRAB_CMD=$(PYTHON_DIR)/board_client.py grab $(USER)
+GRAB_CMD=while $(PYTHON_DIR)/board_client.py grab $(USER) | grep "busy" --color=never; do sleep 10; done
 RELEASE_CMD=$(PYTHON_DIR)/board_client.py release $(USER)
 
 #run fpga image
