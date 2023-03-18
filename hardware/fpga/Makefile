@@ -70,12 +70,12 @@ run: build
 ifneq ($(NORUN),1)
 ifeq ($(BOARD_SERVER),)
 	cp $(EMB_DIR)/$(NAME)_firmware.bin .
-	bash -c "trap '$(RELEASE_CMD)' INT TERM KILL; $(GRAB_CMD); $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log; $(RELEASE_CMD);"
+	bash -c "trap '$(RELEASE_CMD)' INT TERM KILL; $(GRAB_CMD); $(FPGA_PROG); $(CONSOLE_CMD); $(RELEASE_CMD);"
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
 	bash -c "trap 'make -s release' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD) $(UFLAGS)'"
-	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_FPGA_DIR)/run.log .
+	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_FPGA_DIR)/test.log .
 endif
 endif
 
@@ -98,6 +98,7 @@ endif
 endif
 
 test: debug $(TEST_LIST)
+	diff test.log test.expected
 
 debug:
 	@echo SIMULATOR=$(SIMULATOR)

@@ -101,6 +101,7 @@ ifeq ($(VCD),1)
 	make waves
 endif
 
+# ssh's remote server to run all tests; otherwise, it takes a lot of time to ssh for each individual test
 test: very-clean clean-test-log
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
@@ -113,11 +114,11 @@ ifeq ($(COV),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_detail.rpt .
 endif
 else
-	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make run-tests" && cat test.log >> acc.log
+	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make run-tests"
 endif
 
 run-tests: $(TEST_LIST)
-	diff acc.log test.expected
+	diff test.log test.expected
 
 gen-clean:
 	@rm -f *.hex
