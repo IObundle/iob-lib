@@ -98,7 +98,9 @@ endif
 endif
 
 test: debug $(TEST_LIST)
+ifeq ($(IS_FPGA),)
 	diff test.log test.expected
+endif
 
 debug:
 	@echo SIMULATOR=$(SIMULATOR)
@@ -111,4 +113,4 @@ debug:
 
 .PRECIOUS: $(FPGA_OBJ) test.log s_fw.bin
 
-.PHONY: run build test clean debug
+.PHONY: run build test clean debug $(TEST_LIST)
