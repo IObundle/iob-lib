@@ -99,6 +99,11 @@ endif
 test:
 	./scripts/test.sh
 
+# update board server. Requires sudo privileges
+board_server_install:
+	cp scripts/board_server.py /usr/local/bin/board_server.py
+	systemctl restart board_server
+
 clean:
 	@rm -rf $(BUILD_VSRC_DIR)
 	@rm -rf spyglass_reports
@@ -107,4 +112,4 @@ clean:
 
 debug:
 
-.PHONY: all sim clean debug
+.PHONY: all sim board_server_install clean debug
