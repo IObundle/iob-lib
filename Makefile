@@ -102,7 +102,7 @@ test:
 # update board server. Requires sudo privileges
 board_server_install:
 	cp scripts/board_server.py /usr/local/bin/board_server.py
-	systemtcl restart board_server
+	systemctl restart board_server
 
 clean:
 	@rm -rf $(BUILD_VSRC_DIR)
