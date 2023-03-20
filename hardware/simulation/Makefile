@@ -88,8 +88,8 @@ fix-vcd:
 	@echo "" >> $(VCD_FILE)
 
 kill-sim:
-	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
-	kill -9 $$(ps aux | grep $(USER) | grep console | grep python3 | grep -v grep | awk '{print $$2}'); fi
+	@if [ "`pgrep -a -u $$UID | grep console | grep python3 | grep -v grep`" ]; then \
+	kill -9 $$(pgrep -a -u $$UID | grep console | grep python3 | grep -v grep | sed 's/ .*//'); fi
 	@if [ -e *.vcd ]; then make fix-vcd; fi
 
 kill-remote-sim:
