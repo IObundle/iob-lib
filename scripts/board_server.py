@@ -39,7 +39,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     response = 'grabbed'
                     timer = time.time()
                 else:
-                    response = 'Board is busy; please wait.'
+                    response = 'Board is busy; try again later.'
                 conn.sendall(response.encode())
             elif data.startswith('release'):
                 released_user_name = data.split()[1]
