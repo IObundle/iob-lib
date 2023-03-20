@@ -104,6 +104,11 @@ sim-test:
 test: clean sim-test
 	@if [ `grep -c "ERROR" test.log` != 0 ]; then exit 1; fi
 
+# update board server. Requires sudo privileges
+board_server_install:
+	cp software/python/board_server.py /usr/local/bin/board_server.py
+	systemctl restart board_server
+
 #
 # Clean
 #
