@@ -61,7 +61,7 @@ run: build
 ifeq ($(SIM_SERVER),)
 ifneq ($(CONSOLE_CMD),)
 	@rm -f soc2cnsl cnsl2soc
-	$(CONSOLE_CMD) $(TEST_LOG) &
+	$(CONSOLE_CMD) &
 endif
 	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make exec"
 else
