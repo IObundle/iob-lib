@@ -22,7 +22,7 @@ ifeq ($(SYN),1)
 VFLAGS+=-define SYN
 endif
 
-comp: $(VHDR) $(VSRC)
+comp: $(VHDR) $(VSRC) $(HEX)
 	xmvlog $(VFLAGS) $(VSRC) && xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 
 exec: comp

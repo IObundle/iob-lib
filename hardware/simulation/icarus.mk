@@ -15,7 +15,7 @@ SIM_OBJ=a.out
 
 comp: $(SIM_OBJ)
 
-$(SIM_OBJ): $(VHDR) $(VSRC)
+$(SIM_OBJ): $(VHDR) $(VSRC) $(HEX)
 	iverilog $(VFLAGS) $(VSRC)
 
 exec: comp

@@ -24,7 +24,7 @@ bsp.h:
 	cp bsp.vh $@
 	sed -i 's/`/#/' $@
 
-comp: bsp.h $(VHDR) $(VSRC)
+comp: bsp.h $(VHDR) $(VSRC) $(HEX)
 	verilator $(VFLAGS) $(VSRC) src/$(NAME)_tb.cpp
 	cd ./obj_dir && make -f $(SIM_OBJ).mk
 
