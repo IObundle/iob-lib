@@ -59,8 +59,8 @@ def tb_read(number_of_bytes, is_file = False):
                 read_percentage = new_percentage
                 if (not read_percentage%10): print("%3d %c" % (read_percentage, '%'))
         f.close()
-        f = open('./soc2cnsl',"w")
-        f.close()
+        # remove byte from file
+        f = open('./soc2cnsl',"w"); f.close()
     return data
 
 def serial_read(number_of_bytes):

@@ -17,7 +17,7 @@ endif
 SIM_SERVER=$(VSIM_SERVER)
 SIM_USER=$(VSIM_USER)
 
-SIM_PROC=V$(VTOP)
+SIM_OBJ=V$(VTOP)
 #
 # Create bsp.h based on bsp.vh of simulation
 bsp.h:
@@ -26,10 +26,10 @@ bsp.h:
 
 comp: bsp.h $(VHDR) $(VSRC)
 	verilator $(VFLAGS) $(VSRC) src/$(NAME)_tb.cpp
-	cd ./obj_dir && make -f $(SIM_PROC).mk
+	cd ./obj_dir && make -f $(SIM_OBJ).mk
 
-exec:
-	./obj_dir/$(SIM_PROC)
+exec: comp
+	./obj_dir/$(SIM_OBJ)
 
 clean: gen-clean
 	@rm -rf obj_dir
