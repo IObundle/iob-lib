@@ -37,8 +37,8 @@ build: bsp.h fw_emul
 
 run: build
 	@rm -f soc2cnsl cnsl2soc
-	$(CONSOLE_CMD) $(TEST_LOG) &
-	bash -c "trap 'make kill-cnsl &> /dev/null' INT TERM KILL EXIT; ./fw_emul $(TEST_LOG)"
+	$(CONSOLE_CMD) &
+	bash -c "trap 'make kill-cnsl &> /dev/null' INT TERM KILL EXIT; ./fw_emul"
 
 
 # Create bsp.h based on bsp.vh of simulation
@@ -47,7 +47,7 @@ bsp.h:
 	sed -i 's/`/#/' $@
 
 test: clean $(TEST_LIST)
-	diff test.log test.expected
+	test "$$(cat test.log)" = "Test passed!"
 
 # TODO add to iob-soc custom clean list
 # CLEAN_LIST+=kill-cnsl

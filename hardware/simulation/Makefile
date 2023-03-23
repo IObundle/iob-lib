@@ -118,7 +118,7 @@ else
 endif
 
 run-tests: $(TEST_LIST)
-	diff test.log test.expected
+	test "$$(cat test.log)" = "Test passed!"
 
 gen-clean:
 	@rm -f *.hex

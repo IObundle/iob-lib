@@ -99,7 +99,7 @@ endif
 
 test: debug $(TEST_LIST)
 ifeq ($(IS_FPGA),)
-	diff test.log test.expected
+	test "$$(cat test.log)" = "Test passed!"
 endif
 
 debug:
