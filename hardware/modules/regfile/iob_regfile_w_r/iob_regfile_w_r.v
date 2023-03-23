@@ -6,21 +6,23 @@ module iob_regfile_w_r
     parameter WDATA_W = 21,
     parameter RDATA_W = 21,
     parameter R = WDATA_W/RDATA_W,
-    parameter RADDR_W = WADDR_W+$clog2(R)
+    parameter RADDR_W = WADDR_W+$clog2(R),
+    parameter WADDR_W_INT = (WADDR_W>0)? WADDR_W: 1,
+    parameter RADDR_W_INT = (RADDR_W>0)? RADDR_W: 1
   )
   (
-    input                clk_i,
-    input                arst_i,
-    input                cke_i,
+    input                     clk_i,
+    input                     arst_i,
+    input                     cke_i,
     
     // Write Port
-    input [R-1:0]        wstrb_i,
-    input [WADDR_W-1:0]  waddr_i,
-    input [WDATA_W-1:0]  wdata_i,
+    input [R-1:0]             wstrb_i,
+    input [WADDR_W_INT-1:0]   waddr_i,
+    input [WDATA_W-1:0]       wdata_i,
 
     // Read Port
-    input [RADDR_W-1:0]  raddr_i,
-    output [RDATA_W-1:0] rdata_o
+    input [RADDR_W_INT-1:0]   raddr_i,
+    output [RDATA_W-1:0]      rdata_o
   );
   
   wire [(R*(2**WADDR_W))-1:0] wstrb;
@@ -44,7 +46,7 @@ module iob_regfile_w_r
     end
   endgenerate
 
-  wire [RADDR_W-1:0] raddr = (wstrb_i == 0) ? raddr_i : {RADDR_W{1'b0}};
+  wire [RADDR_W_INT-1:0] raddr = (wstrb_i == 0) ? raddr_i : {RADDR_W_INT{1'b0}};
   
   assign rdata_o = regfile[raddr+:RDATA_W];
   
