@@ -62,15 +62,15 @@ endif
 
 #console start command
 CONSOLE_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
-GRAB_CMD=while $(PYTHON_DIR)/board_client.py grab $(USER) | grep "busy" --color=never; do sleep 10; done
-RELEASE_CMD=$(PYTHON_DIR)/board_client.py release $(USER)
+BOARD_GRAB_CMD=while $(PYTHON_DIR)/board_client.py grab | grep "busy" --color=never; do sleep 10; done
+BOARD_RELEASE_CMD=$(PYTHON_DIR)/board_client.py release
 
 #run fpga image
 run: build
 ifneq ($(NORUN),1)
 ifeq ($(BOARD_SERVER),)
 	cp $(EMB_DIR)/$(NAME)_firmware.bin .
-	bash -c "trap 'make release &> /dev/null' INT TERM KILL EXIT; $(GRAB_CMD); $(FPGA_PROG); $(CONSOLE_CMD);"
+	bash -c "trap 'make release &> /dev/null' INT TERM KILL EXIT; $(BOARD_GRAB_CMD); $(FPGA_PROG); $(CONSOLE_CMD);"
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
@@ -82,7 +82,7 @@ endif
 release:
 ifeq ($(FPGA_SERVER),)
 	make kill-cnsl
-	$(RELEASE_CMD)
+	$(BOARD_RELEASE_CMD)
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'
 endif

@@ -99,17 +99,11 @@ endif
 test:
 	./scripts/test.sh
 
-# update board server. Requires sudo privileges
+# Install board server and client
 board_server_install:
-	cp scripts/board_server.py /usr/local/bin/board_server.py
-	systemctl restart board_server
-
-
-# Install board server and client. Requires sudo privileges
-board_server_install:
-	cp scripts/board_client.py /usr/local/bin/
-	cp scripts/board_server.py /usr/local/bin/
-	systemctl restart board_server
+	sudo cp scripts/board_client.py /usr/local/bin/
+	sudo cp scripts/board_server.py /usr/local/bin/
+	sudo systemctl restart board_server
 
 
 clean:

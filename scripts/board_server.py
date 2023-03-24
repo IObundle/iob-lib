@@ -61,7 +61,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 if board_status == 'idle':
                     response = 'idle'
                 else:
-                    response = f'{board_status} {user_name} for {grab_timeout} seconds'
+                    response = f'{board_status} by {user_name} for {grab_timeout} seconds'
                 conn.sendall(response.encode())
             elif data.startswith('grab'):
                 try:
