@@ -23,7 +23,12 @@ except IndexError:
 
 # Send the request to the server
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
+    try:
+        s.connect((HOST, PORT))
+    except:
+        print('Could not connect to server')
+        sys.exit()
+
     if request == 'grab':
         request += f'{request} {user} {timeout}'
     elif request == 'release':
