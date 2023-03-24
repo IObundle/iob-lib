@@ -1,5 +1,29 @@
 #!/usr/bin/env python3
 
+# This is a simple server that will listen for connections on port 50007 from clients that want to use an FPGA board.
+# To install and run this server do the following:
+#
+# 0. Install Python 3.6 or later
+#
+# 1. write the file /etc/systemd/system/board_server.service with the following contents:
+#[Unit]
+#Description=board server service
+#After=network.target
+#StartLimitIntervalSec=0[Service]
+#
+#[Service]
+#Type=simple
+#Restart=always
+#RestartSec=1
+#ExecStart=/usr/local/bin/board_server.py
+#
+#[Install]
+#WantedBy=multi-user.target
+#
+#3. run the following command from the root of this repository:
+# sudo make board_server_install
+
+
 import time
 import socket
 
