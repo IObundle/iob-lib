@@ -32,23 +32,29 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     response = f'{board_status} {user_name}'
                 conn.sendall(response.encode())
             elif data.startswith('grab'):
-                grabbed_user_name = data.split()[1]
-                if board_status == 'idle':
-                    board_status = 'grabbed'
-                    user_name = grabbed_user_name
-                    response = 'grabbed'
-                    timer = time.time()
-                else:
-                    response = 'Board is busy; try again later.'
+                try:
+                    grabbed_user_name = data.split()[1]
+                    if board_status == 'idle':
+                        board_status = 'grabbed'
+                        user_name = grabbed_user_name
+                        response = 'grabbed'
+                        timer = time.time()
+                    else:
+                        response = 'Board is busy; try again later.'
+                except IndexError:
+                    response = 'missing username'
                 conn.sendall(response.encode())
             elif data.startswith('release'):
-                released_user_name = data.split()[1]
-                if released_user_name == user_name:
-                    board_status = 'idle'
-                    user_name = ''
-                    response = 'released'
-                else:
-                    response = 'Access denied'
+                try:
+                    released_user_name = data.split()[1]
+                    if released_user_name == user_name:
+                        board_status = 'idle'
+                        user_name = ''
+                        response = 'released'
+                    else:
+                        response = 'Access denied'
+                except IndexError:
+                    response = 'missing username'
                 conn.sendall(response.encode())
             if time.time() - timer >= 300:
                 board_status = 'idle'
