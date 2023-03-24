@@ -21,6 +21,9 @@ foreach file [split $VIP \ ] {
     if { [ file extension $file ] == ".edif" } {
         read_edif $file
     }
+    if { [ file extension $file ] == ".v" } {
+        read_verilog $file
+    }
 }
 
 #read board propreties

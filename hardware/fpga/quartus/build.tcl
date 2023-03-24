@@ -39,6 +39,9 @@ foreach q_file [split $QIP \ ] {
     if { [ file extension $q_file ] == ".qsys" } {
         set_global_assignment -name QSYS_FILE $q_file
     }
+    if { [ file extension $q_file ] == ".v" } {
+        set_global_assignment -name VQM_FILE $q_file
+    }
 }
 
 #verilog macros
