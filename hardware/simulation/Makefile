@@ -9,8 +9,6 @@ SHELL:=bash
 #default simulator
 SIMULATOR ?=icarus
 
-# Generate configuration when importing config_build.mk
-GEN_CONFIG:=1
 include ../../config_build.mk
 
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
@@ -59,18 +57,15 @@ else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'
 endif
 
-CONSOLE_CMD=../../scripts/console.py -L
-
-run: build
+run:
 ifeq ($(SIM_SERVER),)
 ifneq ($(CONSOLE_CMD),)
 	@rm -f soc2cnsl cnsl2soc
-	$(CONSOLE_CMD) $(TEST_LOG) &
+	$(CONSOLE_CMD) &
 endif
-	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make exec"
+	bash -c "trap 'make kill-sim &> /dev/null' INT TERM KILL EXIT; make exec"
 else
-	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
-	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
+	bash -c "trap 'make kill-remote-sim &> /dev/null' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
 ifeq ($(VCD),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
 endif
@@ -93,8 +88,8 @@ fix-vcd:
 	@echo "" >> $(VCD_FILE)
 
 kill-sim:
-	@if [ "`ps aux | grep $(USER) | grep console | grep python3 | grep -v grep`" ]; then \
-	kill -9 $$(ps aux | grep $(USER) | grep console | grep python3 | grep -v grep | awk '{print $$2}'); fi
+	@if [ "`pgrep -a -u $$UID | grep console | grep python3 | grep -v grep`" ]; then \
+	kill -9 $$(pgrep -a -u $$UID | grep console | grep python3 | grep -v grep | sed 's/ .*//'); fi
 	@if [ -e *.vcd ]; then make fix-vcd; fi
 
 kill-remote-sim:
@@ -106,11 +101,12 @@ ifeq ($(VCD),1)
 	make waves
 endif
 
+# ssh's remote server to run all tests; otherwise, it takes a lot of time to ssh for each individual test
 test: very-clean clean-test-log
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(SIM_SYNC_FLAGS) -avz --force --delete ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
-	bash -c "trap 'make kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) run-tests SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
+	bash -c "trap 'make kill-remote-sim &> /dev/null' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) run-tests SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
 ifeq ($(COV),1)
 	sleep 1 && sync && scp -r $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/cov_work .
@@ -118,18 +114,15 @@ ifeq ($(COV),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_detail.rpt .
 endif
 else
-	bash -c "trap 'make kill-sim' INT TERM KILL EXIT; make run-tests"
-endif
-ifneq ($(COV),1)
-	diff test.log src/test.expected
-else
-	@echo "INFO: simulation code coverage is reserved for internal use only."
+	bash -c "trap 'make kill-sim &> /dev/null' INT TERM KILL EXIT; make run-tests"
 endif
 
 run-tests: $(TEST_LIST)
+	test "$$(cat test.log)" = "Test passed!"
 
 gen-clean:
-	@rm -f *.vh *.hex
+	@rm -f *.hex
+	@find . -maxdepth 1 -name "*.vh" -not \( -name "bsp.vh" -o -name "uut_build.mk" \) -delete
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -f $(REMOTE_SIM_DIR)/Makefile ]; then make -C $(REMOTE_SIM_DIR) $@; fi'
 endif

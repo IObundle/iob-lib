@@ -92,13 +92,13 @@ interfaces=[
 #
 
 iob=[ \
-{'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',          'name':'iob_avalid', 'default':'0', 'description':'Request valid.'}, \
-{'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'ADDR_W',     'name':'iob_addr',  'default':'0', 'description':'Address.'}, \
-{'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'DATA_W',     'name':'iob_wdata', 'default':'0', 'description':'Write data.'}, \
-{'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'(DATA_W/8)', 'name':'iob_wstrb', 'default':'0', 'description':'Write strobe.'}, \
-{'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',          'name':'iob_rvalid','default':'0', 'description':'Read data valid.'}, \
-{'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'DATA_W',     'name':'iob_rdata', 'default':'0', 'description':'Read data.'}, \
-{'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',          'name':'iob_ready', 'default':'0', 'description':'Interface ready.'}, \
+{'master':1, 'slave':1, 'signal':'output', 'width':'1',          'name':'iob_avalid', 'default':'0', 'description':'Request valid.'}, \
+{'master':1, 'slave':1, 'signal':'output', 'width':'ADDR_W',     'name':'iob_addr',  'default':'0', 'description':'Address.'}, \
+{'master':1, 'slave':1, 'signal':'output', 'width':'DATA_W',     'name':'iob_wdata', 'default':'0', 'description':'Write data.'}, \
+{'master':1, 'slave':1, 'signal':'output', 'width':'(DATA_W/8)', 'name':'iob_wstrb', 'default':'0', 'description':'Write strobe.'}, \
+{'master':1, 'slave':1, 'signal':'input',  'width':'1',          'name':'iob_rvalid','default':'0', 'description':'Read data valid.'}, \
+{'master':1, 'slave':1, 'signal':'input',  'width':'DATA_W',     'name':'iob_rdata', 'default':'0', 'description':'Read data.'}, \
+{'master':1, 'slave':1, 'signal':'input',  'width':'1',          'name':'iob_ready', 'default':'0', 'description':'Interface ready.'}, \
 ]
 
 #
@@ -115,46 +115,46 @@ AXI_QOS_W = '4'
 AXI_RESP_W = '2'
 
 axi_write=[ \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ID_W',       'name':'axi_awid',    'default':'0', 'description':'Address write channel ID.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ADDR_W',     'name':'axi_awaddr',  'default':'0', 'description':'Address write channel address.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_LEN_W',      'name':'axi_awlen',   'default':'0', 'description':'Address write channel burst length.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_SIZE_W,      'name':'axi_awsize',  'default':'2', 'description':'Address write channel burst size. This signal indicates the size of each transfer in the burst.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_BURST_W,     'name':'axi_awburst', 'default':'1', 'description':'Address write channel burst type.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_LOCK_W,      'name':'axi_awlock',  'default':'0', 'description':'Address write channel lock type.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_CACHE_W,     'name':'axi_awcache', 'default':'2', 'description':'Address write channel memory type. Transactions set with Normal, Non-cacheable, Modifiable, and Bufferable (0011).'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_PROT_W,      'name':'axi_awprot',  'default':'2', 'description':'Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_QOS_W,       'name':'axi_awqos',   'default':'0', 'description':'Address write channel quality of service.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_awvalid', 'default':'0', 'description':'Address write channel valid.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_awready', 'default':'1', 'description':'Address write channel ready.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_DATA_W',     'name':'axi_wdata',   'default':'0', 'description':'Write channel data.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'(AXI_DATA_W/8)', 'name':'axi_wstrb',   'default':'0', 'description':'Write channel write strobe.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_wlast',   'default':'0', 'description':'Write channel last word flag.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_wvalid',  'default':'0', 'description':'Write channel valid.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_wready',  'default':'1', 'description':'Write channel ready.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_ID_W',       'name':'axi_bid',     'default':'0', 'description':'Write response channel ID.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width': AXI_RESP_W,      'name':'axi_bresp',   'default':'0', 'description':'Write response channel response.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_bvalid',  'default':'0', 'description':'Write response channel valid.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_bready',  'default':'1', 'description':'Write response channel ready.'} \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width':'AXI_ID_W',       'name':'axi_awid',    'default':'0', 'description':'Address write channel ID.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width':'AXI_ADDR_W',     'name':'axi_awaddr',  'default':'0', 'description':'Address write channel address.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width':'AXI_LEN_W',      'name':'axi_awlen',   'default':'0', 'description':'Address write channel burst length.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_SIZE_W,      'name':'axi_awsize',  'default':'2', 'description':'Address write channel burst size. This signal indicates the size of each transfer in the burst.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_BURST_W,     'name':'axi_awburst', 'default':'1', 'description':'Address write channel burst type.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_LOCK_W,      'name':'axi_awlock',  'default':'0', 'description':'Address write channel lock type.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_CACHE_W,     'name':'axi_awcache', 'default':'2', 'description':'Address write channel memory type. Transactions set with Normal, Non-cacheable, Modifiable, and Bufferable (0011).'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_PROT_W,      'name':'axi_awprot',  'default':'2', 'description':'Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_QOS_W,       'name':'axi_awqos',   'default':'0', 'description':'Address write channel quality of service.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'axi_awvalid', 'default':'0', 'description':'Address write channel valid.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'input',  'width':'1',              'name':'axi_awready', 'default':'1', 'description':'Address write channel ready.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width':'AXI_DATA_W',     'name':'axi_wdata',   'default':'0', 'description':'Write channel data.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width':'(AXI_DATA_W/8)', 'name':'axi_wstrb',   'default':'0', 'description':'Write channel write strobe.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'axi_wlast',   'default':'0', 'description':'Write channel last word flag.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'axi_wvalid',  'default':'0', 'description':'Write channel valid.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'input',  'width':'1',              'name':'axi_wready',  'default':'1', 'description':'Write channel ready.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'input',  'width':'AXI_ID_W',       'name':'axi_bid',     'default':'0', 'description':'Write response channel ID.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'input',  'width': AXI_RESP_W,      'name':'axi_bresp',   'default':'0', 'description':'Write response channel response.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'input',  'width':'1',              'name':'axi_bvalid',  'default':'0', 'description':'Write response channel valid.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'axi_bready',  'default':'1', 'description':'Write response channel ready.'} \
 ]
 
 axi_read=[ \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ID_W',       'name':'axi_arid',    'default':'0', 'description':'Address read channel ID.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_ADDR_W',     'name':'axi_araddr',  'default':'0', 'description':'Address read channel address.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AXI_LEN_W',      'name':'axi_arlen',   'default':'0', 'description':'Address read channel burst length.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_SIZE_W,      'name':'axi_arsize',  'default':'2', 'description':'Address read channel burst size. This signal indicates the size of each transfer in the burst.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_BURST_W,     'name':'axi_arburst', 'default':'1', 'description':'Address read channel burst type.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_LOCK_W,      'name':'axi_arlock',  'default':'0', 'description':'Address read channel lock type.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_CACHE_W,     'name':'axi_arcache', 'default':'2', 'description':'Address read channel memory type. Transactions set with Normal, Non-cacheable, Modifiable, and Bufferable (0011).'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_PROT_W,      'name':'axi_arprot',  'default':'2', 'description':'Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AXI_QOS_W,       'name':'axi_arqos',   'default':'0', 'description':'Address read channel quality of service.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_arvalid', 'default':'0', 'description':'Address read channel valid.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_arready', 'default':'1', 'description':'Address read channel ready.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_ID_W',       'name':'axi_rid',     'default':'0', 'description':'Read channel ID.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AXI_DATA_W',     'name':'axi_rdata',   'default':'0', 'description':'Read channel data.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width': AXI_RESP_W,      'name':'axi_rresp',   'default':'0', 'description':'Read channel response.'}, \
-{'lite':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_rlast',   'default':'0', 'description':'Read channel last word.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'axi_rvalid',  'default':'0', 'description':'Read channel valid.'}, \
-{'lite':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'axi_rready' , 'default':'1', 'description':'Read channel ready.'} \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width':'AXI_ID_W',       'name':'axi_arid',    'default':'0', 'description':'Address read channel ID.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width':'AXI_ADDR_W',     'name':'axi_araddr',  'default':'0', 'description':'Address read channel address.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width':'AXI_LEN_W',      'name':'axi_arlen',   'default':'0', 'description':'Address read channel burst length.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_SIZE_W,      'name':'axi_arsize',  'default':'2', 'description':'Address read channel burst size. This signal indicates the size of each transfer in the burst.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_BURST_W,     'name':'axi_arburst', 'default':'1', 'description':'Address read channel burst type.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_LOCK_W,      'name':'axi_arlock',  'default':'0', 'description':'Address read channel lock type.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_CACHE_W,     'name':'axi_arcache', 'default':'2', 'description':'Address read channel memory type. Transactions set with Normal, Non-cacheable, Modifiable, and Bufferable (0011).'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_PROT_W,      'name':'axi_arprot',  'default':'2', 'description':'Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'output', 'width': AXI_QOS_W,       'name':'axi_arqos',   'default':'0', 'description':'Address read channel quality of service.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'axi_arvalid', 'default':'0', 'description':'Address read channel valid.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'input',  'width':'1',              'name':'axi_arready', 'default':'1', 'description':'Address read channel ready.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'input',  'width':'AXI_ID_W',       'name':'axi_rid',     'default':'0', 'description':'Read channel ID.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'input',  'width':'AXI_DATA_W',     'name':'axi_rdata',   'default':'0', 'description':'Read channel data.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'input',  'width': AXI_RESP_W,      'name':'axi_rresp',   'default':'0', 'description':'Read channel response.'}, \
+{'lite':0, 'master':1, 'slave':1, 'signal':'input',  'width':'1',              'name':'axi_rlast',   'default':'0', 'description':'Read channel last word.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'input',  'width':'1',              'name':'axi_rvalid',  'default':'0', 'description':'Read channel valid.'}, \
+{'lite':1, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'axi_rready' , 'default':'1', 'description':'Read channel ready.'} \
 ]
 
 #
@@ -168,26 +168,26 @@ AHB_SIZE_W = '3'
 AHB_TRANS_W = '2'
 
 amba=[ \
-{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AHB_ADDR_W',     'name':'ahb_addr',     'default':'0', 'description':'Byte address of the transfer.'}, \
-{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AHB_BURST_W,     'name':'ahb_burst',    'default':'0', 'description':'Burst type.'}, \
-{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_mastlock', 'default':'0', 'description':'Transfer is part of a lock sequence.'}, \
-{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AHB_PROT_W,      'name':'ahb_prot',     'default':'1', 'description':'Protection type. Transactions set with Data, User access, Non-bufferrable, and Non-cacheable attributes (0001).'}, \
-{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AHB_SIZE_W,      'name':'ahb_size',     'default':'2', 'description':'Burst size. This signal indicates the size of each transfer in the burst.'}, \
-{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_nonsec',   'default':'0', 'description':'Non-secure transfer.'}, \
-{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_excl',     'default':'0', 'description':'Exclusive transfer.'}, \
-{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AHB_MASTER_W',   'name':'ahb_master',   'default':'0', 'description':'Master ID.'}, \
-{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width': AHB_TRANS_W,     'name':'ahb_trans',    'default':'0', 'description':'Transfer type. This signal indicates the type of the transfer.'}, \
-{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_sel',      'default':'0', 'description':'Slave select.'}, \
-{'ahb':0, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_enable',   'default':'0', 'description':'Enable. This signal indicates the number of clock cycles of the transfer.'}, \
-{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_write',    'default':'0', 'description':'Write. This signal indicates the direction of the operation.'}, \
-{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'AHB_DATA_W',     'name':'ahb_wdata',    'default':'0', 'description':'Write data.'}, \
-{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'(AHB_DATA_W/8)', 'name':'ahb_wstrb',    'default':'0', 'description':'Write strobe.'}, \
-{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'AHB_DATA_W',     'name':'ahb_rdata',    'default':'0', 'description':'Read data.'}, \
-{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_ready',    'default':'0', 'description':'Ready. This signal indicates the end of a transfer.'}, \
-{'ahb':1, 'apb':0, 'master':0, 'slave':1, 'signal':'`IOB_OUTPUT(', 'width':'1',              'name':'ahb_ready',    'default':'0', 'description':'Ready input. This signal indicates the end of the last transfer.'}, \
-{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_resp',     'default':'0', 'description':'Transfer response.'}, \
-{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_exokay',   'default':'1', 'description':'Exclusive transfer response.'}, \
-{'ahb':0, 'apb':0, 'master':1, 'slave':1, 'signal':'`IOB_INPUT(',  'width':'1',              'name':'ahb_slverr',   'default':'0', 'description':'Slave error. This signal indicates if the transfer has falied.'} \
+{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'output', 'width':'AHB_ADDR_W',     'name':'ahb_addr',     'default':'0', 'description':'Byte address of the transfer.'}, \
+{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'output', 'width': AHB_BURST_W,     'name':'ahb_burst',    'default':'0', 'description':'Burst type.'}, \
+{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'ahb_mastlock', 'default':'0', 'description':'Transfer is part of a lock sequence.'}, \
+{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'output', 'width': AHB_PROT_W,      'name':'ahb_prot',     'default':'1', 'description':'Protection type. Transactions set with Data, User access, Non-bufferrable, and Non-cacheable attributes (0001).'}, \
+{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'output', 'width': AHB_SIZE_W,      'name':'ahb_size',     'default':'2', 'description':'Burst size. This signal indicates the size of each transfer in the burst.'}, \
+{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'ahb_nonsec',   'default':'0', 'description':'Non-secure transfer.'}, \
+{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'ahb_excl',     'default':'0', 'description':'Exclusive transfer.'}, \
+{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'output', 'width':'AHB_MASTER_W',   'name':'ahb_master',   'default':'0', 'description':'Master ID.'}, \
+{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'output', 'width': AHB_TRANS_W,     'name':'ahb_trans',    'default':'0', 'description':'Transfer type. This signal indicates the type of the transfer.'}, \
+{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'ahb_sel',      'default':'0', 'description':'Slave select.'}, \
+{'ahb':0, 'apb':1, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'ahb_enable',   'default':'0', 'description':'Enable. This signal indicates the number of clock cycles of the transfer.'}, \
+{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'output', 'width':'1',              'name':'ahb_write',    'default':'0', 'description':'Write. This signal indicates the direction of the operation.'}, \
+{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'output', 'width':'AHB_DATA_W',     'name':'ahb_wdata',    'default':'0', 'description':'Write data.'}, \
+{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'output', 'width':'(AHB_DATA_W/8)', 'name':'ahb_wstrb',    'default':'0', 'description':'Write strobe.'}, \
+{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'input',  'width':'AHB_DATA_W',     'name':'ahb_rdata',    'default':'0', 'description':'Read data.'}, \
+{'ahb':1, 'apb':1, 'master':1, 'slave':1, 'signal':'input',  'width':'1',              'name':'ahb_ready',    'default':'0', 'description':'Ready. This signal indicates the end of a transfer.'}, \
+{'ahb':1, 'apb':0, 'master':0, 'slave':1, 'signal':'output', 'width':'1',              'name':'ahb_ready',    'default':'0', 'description':'Ready input. This signal indicates the end of the last transfer.'}, \
+{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'input',  'width':'1',              'name':'ahb_resp',     'default':'0', 'description':'Transfer response.'}, \
+{'ahb':1, 'apb':0, 'master':1, 'slave':1, 'signal':'input',  'width':'1',              'name':'ahb_exokay',   'default':'1', 'description':'Exclusive transfer response.'}, \
+{'ahb':0, 'apb':0, 'master':1, 'slave':1, 'signal':'input',  'width':'1',              'name':'ahb_slverr',   'default':'0', 'description':'Slave error. This signal indicates if the transfer has falied.'} \
 ]
 
 top_macro = ''
@@ -275,107 +275,165 @@ def make_apb():
 #
 
 def reverse(direction):
-    if direction == '`IOB_INPUT(':
-        return '`IOB_OUTPUT('
-    elif direction == '`IOB_OUTPUT(':
-        return '`IOB_INPUT('
+    if direction == 'input':
+        return 'output'
+    elif direction == 'output':
+        return 'input'
     else:
         print("ERROR: reverse_direction : invalid argument")
         quit()
         
 def tbsignal(direction):
-    if direction == '`IOB_INPUT(':
-        return '`IOB_WIRE('
-    elif direction == '`IOB_OUTPUT(':
-        return '`IOB_VAR_INIT('
+    if direction == 'input':
+        return 'wire'
+    elif direction == 'output':
+        return 'reg'
     else:
         print("ERROR: tb_reciprocal : invalid argument")
         quit()
 
 def suffix(direction):
-    if direction == '`IOB_INPUT(' or direction == '`IOB_VAR_INIT(':
+    if direction == 'input' or direction == 'reg':
         return '_i'
-    elif direction == '`IOB_OUTPUT(' or direction == '`IOB_WIRE(':
+    elif direction == 'output' or direction == 'wire':
         return '_o'
     else:
         print("ERROR: get_signal_suffix : invalid argument")
-        quit()
-
-def remove_iob_macro(direction):
-    if direction == '`IOB_INPUT(':
-        return 'input'
-    elif direction == '`IOB_OUTPUT(':
-        return 'output'
-    else:
-        print("ERROR: remove_iob_macro : invalid argument")
         quit()
 
 #
 # Port
 #
 
-def m_port(prefix, fout):
+# Write port with given direction, bus width, name and description to file
+def write_port(direction, width, name, description, fout):
+    fout.write(direction+width+name+', //'+description+'\n')
+
+def m_port(prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write(remove_iob_macro(table[i]['signal'])+' ['+table[i]['width']+'-1:0] '+prefix+table[i]['name']+suffix(table[i]['signal'])+', //'+top_macro+table[i]['description']+'\n')
+            port_direction = table[i]['signal']
+            name = prefix+table[i]['name']+suffix(table[i]['signal'])
+            if bus_size == 1:
+                width = table[i]['width']
+            else:
+                width = '('+str(bus_size)+'*'+table[i]['width']+')'
+            bus_width = ' ['+width+'-1:0] '
+            description = top_macro+table[i]['description']
+            # Write port
+            write_port(port_direction, bus_width, name, description, fout)
     
-def s_port(prefix, fout):
+def s_port(prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write(remove_iob_macro(reverse(table[i]['signal']))+' ['+table[i]['width']+'-1:0] '+prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+', //'+top_macro+table[i]['description']+'\n')
+            port_direction = reverse(table[i]['signal'])
+            name = prefix+table[i]['name']+suffix(reverse(table[i]['signal']))
+            if bus_size == 1:
+                width = table[i]['width']
+            else:
+                width = '('+str(bus_size)+'*'+table[i]['width']+')'
+            bus_width = ' ['+width+'-1:0] '
+            description = top_macro+table[i]['description']
+            # Write port
+            write_port(port_direction, bus_width, name, description, fout)
 
 #
 # Portmap
 #
 
-def portmap(port_prefix, wire_prefix, fout):
-    for i in range(len(table)):
-        fout.write('.'+port_prefix+table[i]['name']+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
+# Write portmap with given port, connection name, width, bus start, bus size and description to file
+def write_portmap(port, connection_name, width, bus_start, bus_size, description, fout):
+    if bus_start == 0:
+        bus_start_index = str(0)
+    else:
+        bus_start_index = str(bus_start)+'*'+width
+    if bus_size == 1:
+        bus_select_size = width
+    else:
+        bus_select_size = str(bus_size)+'*'+width
+    connection = connection_name+'['+bus_start_index+'+:'+bus_select_size+']'   
+    fout.write('.'+port+'('+connection+'), //'+description+'\n')
 
-def m_portmap(port_prefix, wire_prefix, fout):
+def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        port = port_prefix+table[i]['name']
+        connection_name = wire_prefix+table[i]['name']
+        write_portmap(port, connection_name, table[i]['width'], bus_start, bus_size, table[i]['description'], fout)
+
+def m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
+            port = port_prefix+table[i]['name']+suffix(table[i]['signal'])
+            connection_name = wire_prefix+table[i]['name']
+            write_portmap(port, connection_name, table[i]['width'], bus_start, bus_size, table[i]['description'], fout)
 
-def s_portmap(port_prefix, wire_prefix, fout):
+def s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+'), //'+table[i]['description']+'\n')
+            port = port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))
+            connection_name = wire_prefix+table[i]['name']     
+            write_portmap(port, connection_name, table[i]['width'], bus_start, bus_size, table[i]['description'], fout)
 
-def m_m_portmap(port_prefix, wire_prefix, fout):
+
+def m_m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(table[i]['signal'])+'('+wire_prefix+table[i]['name']+suffix(table[i]['signal'])+'), //'+table[i]['description']+'\n')
+            port = port_prefix+table[i]['name']+suffix(table[i]['signal'])
+            connection_name = wire_prefix+table[i]['name']+suffix(table[i]['signal'])
+            write_portmap(port, connection_name, table[i]['width'], bus_start, bus_size, table[i]['description'], fout)
 
-def s_s_portmap(port_prefix, wire_prefix, fout):
+        
+def s_s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            fout.write('.'+port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'('+wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))+'), //'+table[i]['description']+'\n')
+            port = port_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))
+            connection_name = wire_prefix+table[i]['name']+suffix(reverse(table[i]['signal']))
+            write_portmap(port, connection_name, table[i]['width'], bus_start, bus_size, table[i]['description'], fout)
 
 #
 # Wire
 #
 
-def wire(prefix, fout):
-    for i in range(len(table)):
-        fout.write('`IOB_WIRE('+prefix+table[i]['name']+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+# Write wire with given name, bus size, width and description to file
+def write_wire(name, bus_size, width, description, fout):
+    if bus_size == 1:
+        bus_width = ' ['+width+'-1:0] '
+    else:
+        bus_width = ' ['+str(bus_size)+'*'+width+'-1:0] '
+    fout.write('wire'+bus_width+name+'; //'+description+'\n')
 
-def m_tb_wire(prefix, fout):
+# Write reg with given name, bus size, width, initial value and description to file
+def write_reg(name, bus_size, width, default, description, fout):
+    if bus_size == 1:
+        bus_width = ' ['+width+'-1:0] '
+    else:
+        bus_width = ' ['+str(bus_size)+'*'+width+'-1:0] '
+    fout.write('reg'+bus_width+name+' = '+default+'; //'+description+'\n')
+
+# Write tb wire with given tb_signal, prefix, name, bus size, width and description to file
+def write_tb_wire(tb_signal, prefix, name, bus_size, width, description, fout, default='0'):
+        signal_name = prefix+name+suffix(tb_signal)
+        if tb_signal == 'reg':
+            write_reg(signal_name, bus_size, width, default, description, fout)
+        else:
+            write_wire(signal_name, bus_size, width, description, fout)
+
+def wire(prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        write_wire(prefix+table[i]['name'], bus_size, table[i]['width'], table[i]['description'], fout)
+
+def m_tb_wire(prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]['slave'] == 1:
-            if tbsignal(table[i]['signal']) == '`IOB_VAR_INIT(':
-                fout.write(tbsignal(table[i]['signal'])+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+', '+table[i]['width']+', '+table[i]['default']+') //'+table[i]['description']+'\n')
-            else:
-                fout.write(tbsignal(table[i]['signal'])+prefix+table[i]['name']+suffix(tbsignal(table[i]['signal']))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+            tb_signal = tbsignal(table[i]['signal'])
+            write_tb_wire(tb_signal, prefix, table[i]['name'], bus_size, table[i]['width'], table[i]['description'], fout, table[i]['default'])
     fout.write('\n')
     
-def s_tb_wire(prefix, fout):
+def s_tb_wire(prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]['master'] == 1:
-            if tbsignal(reverse(table[i]['signal'])) == '`IOB_VAR_INIT(':
-                fout.write(tbsignal(reverse(table[i]['signal']))+prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+', '+table[i]['width']+', '+table[i]['default']+') //'+table[i]['description']+'\n')
-            else:
-                fout.write(tbsignal(reverse(table[i]['signal']))+prefix+table[i]['name']+suffix(tbsignal(reverse(table[i]['signal'])))+', '+table[i]['width']+') //'+table[i]['description']+'\n')
+            tb_signal = tbsignal(reverse(table[i]['signal']))
+            write_tb_wire(tb_signal, prefix, table[i]['name'], bus_size, table[i]['width'], table[i]['description'], fout, table[i]['default'])
     fout.write('\n')
 
 #
@@ -509,12 +567,14 @@ def create_signal_table(interface_name):
 # Write to .vh file
 #
 
-def write_vh_contents(interface_name, port_prefix, wire_prefix, file_object):
+# port_prefix: Prefix for ports in a portmap file.
+# wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vh` file; Prefix for ports in a `*port.vh` file (these ports also create wires);
+def write_vh_contents(interface_name, port_prefix, wire_prefix, file_object, bus_size=1, bus_start=0):
     func_name = interface_name.replace("axil_", "").replace("axi_", "").replace("write_", "").replace("read_", "").replace("iob_", "").replace("apb_", "").replace("ahb_", "")
     if (interface_name.find("portmap")+1):
-        eval(func_name+"('"+port_prefix+"','"+wire_prefix+"', file_object)")
+        eval(func_name+"(port_prefix, wire_prefix, file_object, bus_start=bus_start, bus_size=bus_size)")
     else:
-        eval(func_name+"('"+port_prefix+"', file_object)")
+        eval(func_name+"(wire_prefix, file_object, bus_size=bus_size)")
 
 #
 # Main

@@ -3,8 +3,6 @@
 # This makefile is used at build-time in $(BUILD_DIR)/sw/pc/Makefile
 #
 
-# Generate configuration when importing config_build.mk
-GEN_CONFIG:=1
 include ../../config_build.mk
 
 ifneq ($(wildcard ../../console.mk),)
@@ -34,16 +32,22 @@ endif
 fw_emul: $(HDR) $(SRC)
 	gcc -o $@ $(CFLAGS) $(INCLUDE) $(SRC) -lgcc -lc
 
-build: fw_emul
+build: bsp.h fw_emul
 	@echo "build"
 
 run: build
 	@rm -f soc2cnsl cnsl2soc
-	$(CONSOLE_CMD) $(TEST_LOG) &
-	bash -c "trap 'make kill-cnsl' INT TERM KILL EXIT; ./fw_emul $(TEST_LOG)"
+	$(CONSOLE_CMD) &
+	bash -c "trap 'make kill-cnsl &> /dev/null' INT TERM KILL EXIT; ./fw_emul"
+
+
+# Create bsp.h based on bsp.vh of simulation
+bsp.h:
+	cp ../../hardware/simulation/bsp.vh $@
+	sed -i 's/`/#/' $@
 
 test: clean $(TEST_LIST)
-	diff test.log test.expected
+	test "$$(cat test.log)" = "Test passed!"
 
 # TODO add to iob-soc custom clean list
 # CLEAN_LIST+=kill-cnsl

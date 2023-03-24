@@ -1,0 +1,19 @@
+MORESIMPLE REPORT:
+
+
+############### BuiltIn -> RuleGroup=Design Read ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                    Alias                   Severity    File                                                                                     Line    Wt    Message
+======================================================================================
+[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob_f2s_1bit_sync.v                                                                      3       2     Module iob_f2s_1bit_sync is a top level design unit
+[22]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                            2       10    Domain Matrix for design "iob_f2s_1bit_sync",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob_f2s_1bit_sync/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob_f2s_1bit_sync/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+############### Non-BuiltIn -> Goal=lint/lint_rtl ###############
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID       Rule                Alias    Severity    File         Line    Wt    Message
+======================================================================================
+[24]     FlopDataConstant             Warning     iob_reg.v    21      10    Data pin D on Flop iob_f2s_1bit_sync.sync[0] (master RTL_FDPE) is tiedlow(connected to iob_f2s_1bit_sync.data[0])
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -4,8 +4,6 @@ SIM_SSH_FLAGS=$(CADENCE_SSH_FLAGS)
 SIM_SCP_FLAGS=$(CADENCE_SCP_FLAGS)
 SIM_SYNC_FLAGS=$(CADENCE_SYNC_FLAGS)
 
-SIM_PROC=xmsim
-
 COV_TEST?=test
 
 SFLAGS = -errormax 15 -status
@@ -24,10 +22,10 @@ ifeq ($(SYN),1)
 VFLAGS+=-define SYN
 endif
 
-comp: $(VHDR) $(VSRC)
+comp: $(VHDR) $(VSRC) $(HEX)
 	xmvlog $(VFLAGS) $(VSRC) && xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 
-exec: xmelab.log
+exec: comp
 	sync && sleep 1 && xmsim $(SFLAGS) $(COV_SFLAGS) worklib.$(NAME)_tb:module
 ifeq ($(COV),1)
 	ls -d cov_work/scope/* > all_ucd_file

@@ -34,7 +34,7 @@ SYN_SCP_FLAGS=$(CADENCE_SCP_FLAGS)
 SYN_SYNC_FLAGS=$(CADENCE_SYNC_FLAGS)
 
 synth: $(VHDR) $(VSRC)
-	genus -batch -files run_genus.tcl
+	genus -batch -files build.tcl
 
 
 UFLAGS+=COV=$(COV)
@@ -60,7 +60,7 @@ config.tcl:
 	@echo "set VSRC [glob $(VSRC)]" >> $@
 
 clean:
-	find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.tcl -o -name \*.sdc \) -delete
+	find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.tcl -o -name \*.sdc -o -name syn_build.mk \) -delete
 	@rm -rf ../../*.vh config.tcl fv results st_part_log
 ifneq ($(SYN_SERVER),)
 	ssh $(SYN_SSH_FLAGS) $(SYN_USER)@$(SYN_SERVER) 'if [ -f $(REMOTE_SYN_DIR)/Makefile ]; then make -C $(REMOTE_SYN_DIR) $@; fi'

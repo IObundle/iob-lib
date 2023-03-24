@@ -56,13 +56,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     response = f'{board_status} {user_name}'
                 conn.sendall(response.encode())
             elif data.startswith('grab'):
-                user_name = data.split()[1]
+                grabbed_user_name = data.split()[1]
                 if board_status == 'idle':
                     board_status = 'grabbed'
+                    user_name = grabbed_user_name
                     response = 'grabbed'
                     timer = time.time()
                 else:
-                    response = 'Board is busy; please wait.'
+                    response = 'Board is busy; try again later.'
                 conn.sendall(response.encode())
             elif data.startswith('release'):
                 released_user_name = data.split()[1]

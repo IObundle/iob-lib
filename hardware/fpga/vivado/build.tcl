@@ -2,15 +2,10 @@
 set NAME [lindex $argv 0]
 set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
-set IS_FPGA [lindex $argv 3]
-set CUSTOM_ARGS [lindex $argv 4]
-
-puts $NAME
-puts $BOARD
-puts $VSRC
-puts $IS_FPGA
-puts $CUSTOM_ARGS
-
+set DEFINES [lindex $argv 3]
+set VIP [lindex $argv 4]
+set IS_FPGA [lindex $argv 5]
+set CUSTOM_ARGS [lindex $argv 6]
 
 #verilog sources
 foreach file [split $VSRC \ ] {
@@ -20,46 +15,76 @@ foreach file [split $VSRC \ ] {
     }
 }
 
-#device data
-source vivado/$BOARD/device.tcl
-
-read_xdc vivado/$BOARD/$NAME.xdc
-
-if {[file exists "vivado/custom_build.tcl"]} {
-    source "vivado/custom_build.tcl"
+#vivado IPs
+foreach file [split $VIP \ ] {
+    puts $file
+    if { [ file extension $file ] == ".edif" } {
+        read_edif $file
+    }
 }
 
+#read board propreties
+source vivado/$BOARD/board.tcl
+
+#set FPGA device
+set_property part $PART [current_project]
+
+
+#set pre-map custom assignments
+if {[file exists "vivado/premap.tcl"]} {
+    source "vivado/premap.tcl"
+}
+
+
+#read design constraints and synthesize design
 if { $IS_FPGA == "1" } {
-    synth_design -include_dirs ../src -part $PART -top $NAME -verbose
+    puts "Synthesizing for FPGA"
+    read_xdc vivado/$BOARD/$NAME\_dev.sdc
+    read_xdc ../src/$NAME.sdc
+    if {[file exists "vivado/$NAME\_tool.sdc"]} {
+        read_xdc vivado/$NAME\_tool.sdc
+    }
+    synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -verilog_define $DEFINES -part $PART -top $NAME -verbose
 } else {
-    synth_design -include_dirs ../src -part $PART -top $NAME -mode out_of_context -flatten_hierarchy none -verbose
+    #read design constraints
+    puts "Out of context synthesis"
+    read_xdc -mode out_of_context vivado/$BOARD/$NAME\_dev.sdc
+    read_xdc -mode out_of_context ../src/$NAME.sdc
+    if {[file exists "vivado/$NAME\_tool.sdc"]} {
+        read_xdc -mode out_of_context vivado/$NAME\_tool.sdc
+    }
+    synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -verilog_define $DEFINES -part $PART -top $NAME -mode out_of_context -flatten_hierarchy rebuilt -verbose
+}
+
+#set post-map custom assignments
+if {[file exists "vivado/postmap.tcl"]} {
+    source "vivado/postmap.tcl"
 }
 
 opt_design
 
 place_design
 
-route_design
-
-report_utilization
-
-report_timing
+route_design -timing
 
 report_clocks
 report_clock_interaction
 report_cdc -details
+report_bus_skew
 
-file mkdir reports
-report_timing -file reports/timing.txt -max_paths 30
-report_clocks -file reports/clocks.txt
-report_clock_interaction -file reports/clock_interaction.txt
-report_cdc -details -file reports/cdc.txt
-report_synchronizer_mtbf -file reports/synchronizer_mtbf.txt
-report_utilization -hierarchical -file reports/utilization.txt
+report_clocks -file reports/$NAME\_$PART\_clocks.rpt
+report_clock_interaction -file reports/$NAME\_$PART\_clock_interaction.rpt
+report_cdc -details -file reports/$NAME\_$PART\_cdc.rpt
+report_synchronizer_mtbf -file reports/$NAME\_$PART\_synchronizer_mtbf.rpt
+report_utilization -file reports/$NAME\_$PART\_utilization.rpt
+report_timing -file reports/$NAME\_$PART\_timing.rpt
+report_timing_summary -file reports/$NAME\_$PART\_timing_summary.rpt
+report_timing -file reports/$NAME\_$PART\_timing_paths.rpt -max_paths 30
+
 
 if { $IS_FPGA == "1" } {
     write_bitstream -force $NAME.bit
 } else {
-    write_edif -force $NAME.edif
+    write_verilog -force $NAME\_netlist.v
     write_verilog -force -mode synth_stub ${NAME}_stub.v
 }

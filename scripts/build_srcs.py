@@ -17,7 +17,7 @@ def copy_without_override(src, dst):
     if not os.path.isfile(dst):
         shutil.copy2(src, dst)
 
-# build_dir_setup should only be called by the main core. Therefor, executed only one time.
+# build_dir_setup should only be called by the main core. Therefore, executed only one time.
 def build_dir_setup(python_module):
     build_dir = python_module.build_dir
     setup_dir = python_module.setup_dir
@@ -69,16 +69,23 @@ def hw_setup(python_module):
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, core_previous_version, build_dir)
 
+    # Copy Setup hw files
+    copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
+    copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.sdc*', copy_all = True )
+
     #Setup any hw submodules by calling the 'main()' function from their *_setup.py module
     module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs, lib_dir=LIB_DIR)
 
     if Vheaders: create_Vheaders( f"{build_dir}/hardware/src", Vheaders )
-    if hardware_srcs: copy_files( LIB_DIR, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
+    if hardware_srcs: 
+        copy_files( LIB_DIR, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
+        # Remove duplicate files for fpga/src and simulation/src dir if they already exist in hardware/src
+        for file in hardware_srcs:
+            if os.path.isfile(f"{build_dir}/hardware/simulation/src/{file}"): os.remove(f"{build_dir}/hardware/simulation/src/{file}")
+            if os.path.isfile(f"{build_dir}/hardware/fpga/src/{file}"): os.remove(f"{build_dir}/hardware/fpga/src/{file}")
 
     # Copy LIB hw files
-    copy_files( f"{LIB_DIR}/hardware/include", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
-    # Copy Setup hw files
-    copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
+    copy_files( f"{LIB_DIR}/hardware/modules", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
 
 # Setup simulation related files/modules
 # module: python module representing a *_setup.py file of the root directory of the core/system.
@@ -105,8 +112,8 @@ def sim_setup(python_module):
     if 'sim' in core_flows:
         shutil.copytree(f"{setup_dir}/{sim_dir}", f"{build_dir}/{sim_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
-    #Add lambda functions to the sim_srcs. These functions call setup modules for simulation setup (sim_setup.py)
-    add_setup_lambdas(python_module,'sim_setup',setup_module=python_module)
+    #Add functions to the sim_srcs. These functions call setup modules for simulation setup (sim_setup.py)
+    add_setup_functions(python_module,'sim_setup',setup_module=python_module)
     #Setup any sim submodules by calling the 'sim_setup()' function from their *_setup.py module
     module_dependency_setup(sim_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sim_setup", lib_dir=LIB_DIR) 
 
@@ -142,8 +149,8 @@ def fpga_setup(python_module):
     if 'fpga' in core_flows:
         shutil.copytree(f"{setup_dir}/{fpga_dir}", f"{build_dir}/{fpga_dir}", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
-    #Add lambda functions to the fpga_srcs. These functions call setup modules for fpga setup (fpga_setup.py)
-    add_setup_lambdas(python_module,'fpga_setup',setup_module=python_module)
+    #Add functions to the fpga_srcs. These functions call setup modules for fpga setup (fpga_setup.py)
+    add_setup_functions(python_module,'fpga_setup',setup_module=python_module)
     #Setup any fpga submodules by calling the 'fpga_setup()' function from their *_setup.py module
     module_dependency_setup(fpga_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.fpga_setup", lib_dir=LIB_DIR) 
 
@@ -187,12 +194,12 @@ def syn_setup(python_module):
             shutil.copyfile(f"{src_file}", f"{dest_file}")
 
 # Check if any *_setup.py modules exist (like sim_setup.py, fpga_setup.py, ...).
-# If so, get a lambda expression to execute them and add them to the 'modules' list of the 'submodules' variable in the 'python_module' 
+# If so, get a function to execute them and add them to the 'modules' list of the 'submodules' variable in the 'python_module' 
 # This will allow these modules to be executed during setup
 #    python_module: python module of *_setup.py of the core/system, should contain setup_dir
 #    **kwargs: set of objects that will be accessible from inside the modules when they are executed
-def add_setup_lambdas(python_module, module_type, **kwargs):
-    # Check if any *_setup.py modules exist. If so, get a lambda expression to execute them and add them to the 'modules' list
+def add_setup_functions(python_module, module_type, **kwargs):
+    # Check if any *_setup.py modules exist. If so, get a function to execute them and add them to the 'modules' list
     module_path = {'sim_setup':'hardware/simulation/sim_setup.py', 'fpga_setup':'hardware/fpga/fpga_setup.py', 'sw_setup':'software/sw_setup.py'}[module_type]
     full_module_path = os.path.join(python_module.setup_dir,module_path)
     if os.path.isfile(full_module_path): 
@@ -200,22 +207,26 @@ def add_setup_lambdas(python_module, module_type, **kwargs):
         if module_type not in python_module.submodules: 
             python_module.submodules[module_type] = {'headers':[], 'modules':[]}
         # Append executable module to 'modules' list of the submodules dictionary
-        # The lambda expression will be executed during setup
-        python_module.submodules[module_type]['modules'].append(get_module_lambda(full_module_path, **kwargs))
+        # The fuctions will be executed during setup
+        python_module.submodules[module_type]['modules'].append(get_module_function(full_module_path, **kwargs))
 
-#Get an executable lambda expression to run a given python module
+#Get an executable function to run a given python module
 #    module_path: python module path
 #    **kwargs: set of objects that will be accessible from inside the module when it is executed
-#Example: get_module_lambda("sim_setup.py",setup_module=python_module)
-def get_module_lambda(module_path, **kwargs):
-    module_name = os.path.basename(module_path).split('.')[0]
-    spec = importlib.util.spec_from_file_location(module_name, module_path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name]=module
-    # Define objects given in the module
-    for key, value in kwargs.items():
-        vars(module)[key]=value
-    return lambda: spec.loader.exec_module(module)
+#Example: get_module_function("sim_setup.py",setup_module=python_module)
+def get_module_function(module_path, **kwargs):
+    # Create function to execute module if it exists
+    def module_function():
+        if os.path.isfile(module_path):
+            module_name = os.path.basename(module_path).split('.')[0]
+            spec = importlib.util.spec_from_file_location(module_name, module_path)
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name]=module
+            # Define module objects given via kwargs
+            for key, value in kwargs.items():
+                vars(module)[key]=value
+            spec.loader.exec_module(module)
+    return module_function
 
 
 # Setup simulation related files/modules
@@ -244,8 +255,8 @@ def sw_setup(python_module):
     if os.path.isdir(f"{setup_dir}/software"):
         shutil.copytree(f"{setup_dir}/software", f"{build_dir}/software", dirs_exist_ok=True, copy_function=copy_without_override, ignore=shutil.ignore_patterns('*_setup*'))
 
-    #Add lambda functions to the sw_srcs. These functions call setup modules for software setup (sw_setup.py)
-    add_setup_lambdas(python_module,'sw_setup',setup_module=python_module)
+    #Add functions to the sw_srcs. These functions call setup modules for software setup (sw_setup.py)
+    add_setup_functions(python_module,'sw_setup',setup_module=python_module)
     #Setup any sw submodules by calling the 'sw_setup()' function from their *_setup.py module
     module_dependency_setup(sw_srcs, Cheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sw_setup", lib_dir=LIB_DIR) 
 
@@ -311,10 +322,9 @@ def submodule_setup(build_dir, submodule_dir, module_parameters=None, function_2
 def iob_submodule_setup(build_dir, submodule_dir, module_parameters=None, function_2_call='main'):
     #print(f"################# {function_2_call}") #DEBUG
     #Import <corename>_setup.py
-    module = import_setup(submodule_dir)
-    module.build_dir = build_dir
-    module.setup_dir = submodule_dir
-    module.module_parameters = module_parameters
+    # Always set he 'not_top_module' to True, in order to signal that the module was imported
+    # Always set a build_dir and submodule_dir by default
+    module = import_setup(submodule_dir, not_top_module=True, build_dir=build_dir, setup_dir=submodule_dir, module_parameters=module_parameters)
     # Split string to check if function is inside a module
     function_2_call=function_2_call.split('.')
     # Check if function is inside other module(s)
@@ -335,34 +345,41 @@ def iob_submodule_setup(build_dir, submodule_dir, module_parameters=None, functi
 #                   - python include: This entry defines a python module that contains a list of other hardware modules/headers.
 #                   - verilog source:  This entry defines either a verilog header (.vh) or verilog source (.v) file to include.
 # function_2_call: optional argument. Name of the function to call for module setup. By default is the 'main' function.
-def module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs, function_2_call='main', lib_dir=LIB_DIR, add_sim_srcs=False):
+def module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs, function_2_call='main', lib_dir=LIB_DIR, add_sim_srcs=False, add_fpga_srcs=False):
     # Remove all non *.v and *.vh entries from hardware_srcs
     # Do this by setting up submodules and including hardware modules/headers
     while(True):
         # Handle each entry, skipping .v and .vh entries
-        for hardware_src in hardware_srcs:
+        for idx, hardware_src in enumerate(hardware_srcs):
             #print(f"############ {hardware_src} {function_2_call}") # DEBUG
+            # Entry is a tuple, therefore it contains optional parameters
+            if type(hardware_src)==tuple: 
+                # Save optional_parameters in a variable
+                optional_parameters=hardware_src[1]
+                # Convert hardware_src to a string
+                hardware_src=hardware_src[0]
+            else: optional_parameters = None
+
             # Entry is a function
             if callable(hardware_src):
                 hardware_src()
-                hardware_srcs.remove(hardware_src)
+                hardware_srcs.pop(idx)
                 break
-            # Entry is a 'submodule' (may be a tuple if optional parameters are given)
-            elif type(hardware_src)==tuple or hardware_src in submodule_dirs:
-                if type(hardware_src)==tuple: submodule_setup(build_dir, submodule_dirs[hardware_src[0]], module_parameters=hardware_src[1], function_2_call=function_2_call)
-                else: submodule_setup(build_dir, submodule_dirs[hardware_src], function_2_call=function_2_call)
-                hardware_srcs.remove(hardware_src)
+            # Entry is a 'submodule'
+            elif hardware_src in submodule_dirs:
+                submodule_setup(build_dir, submodule_dirs[hardware_src], function_2_call=function_2_call, module_parameters=optional_parameters)
+                hardware_srcs.pop(idx)
                 break
             # Entry is a 'python include'
             elif not(hardware_src.endswith(".v") or hardware_src.endswith(".vh")):
-                lib_module_setup(Vheaders, hardware_srcs, hardware_src, lib_dir, add_sim_srcs=False)
-                hardware_srcs.remove(hardware_src)
+                lib_module_setup(Vheaders, hardware_srcs, hardware_src, lib_dir, add_sim_srcs=False, add_fpga_srcs=False, module_parameters=optional_parameters)
+                hardware_srcs.pop(idx)
                 break
         # Did not find any non .v or .vh entry
         else: break
 
 # Include Vheaders and hardware_srcs from given python module (module_name)
-def lib_module_setup(Vheaders, hardware_srcs, module_name, lib_dir=LIB_DIR, add_sim_srcs=False):
+def lib_module_setup(Vheaders, hardware_srcs, module_name, lib_dir=LIB_DIR, add_sim_srcs=False, add_fpga_srcs=False, module_parameters=None):
     module_path = None
     
     for mod_path in Path(lib_dir).rglob(f"{module_name}.py"):
@@ -380,12 +397,16 @@ def lib_module_setup(Vheaders, hardware_srcs, module_name, lib_dir=LIB_DIR, add_
         spec = importlib.util.spec_from_file_location(lib_module_name, module_path)
         lib_module = importlib.util.module_from_spec(spec)
         sys.modules[lib_module_name]=lib_module
+        if module_parameters: lib_module.module_parameters=module_parameters
         spec.loader.exec_module(lib_module)
         Vheaders.extend(lib_module.v_headers)
         hardware_srcs.extend(lib_module.hw_modules)
         if add_sim_srcs and (hasattr(lib_module,'sim_v_headers') or hasattr(lib_module,'sim_modules')):
             Vheaders.extend(lib_module.sim_v_headers)
             hardware_srcs.extend(lib_module.sim_modules)
+        if add_fpga_srcs and (hasattr(lib_module,'fpga_v_headers') or hasattr(lib_module,'fpga_modules')):
+            Vheaders.extend(lib_module.fpga_v_headers)
+            hardware_srcs.extend(lib_module.fpga_modules)
     elif extension == ".v":
         hardware_srcs.append(f"{module_name}.v")
 
@@ -414,10 +435,13 @@ def create_Vheaders(dest_dir, Vheaders):
             f_out = open (f"{dest_dir}/{file_prefix}{vh_name}.vh", 'w')
             if_gen.create_signal_table(vh_name)
             if_gen.write_vh_contents(vh_name, '', '', f_out)
-        elif (type(vh_name) is list) and (vh_name[1] in if_gen.interfaces):
-            f_out = open (f"{dest_dir}/{vh_name[0]}{vh_name[1]}.vh", 'w')
-            if_gen.create_signal_table(vh_name[1])
-            if_gen.write_vh_contents(vh_name[1], vh_name[2], vh_name[3], f_out)
+        elif (type(vh_name) is dict) and (vh_name['interface'] in if_gen.interfaces):
+            f_out = open (f"{dest_dir}/{vh_name['file_prefix']}{vh_name['interface']}.vh", 'w')
+            if_gen.create_signal_table(vh_name['interface'])
+            if_gen.write_vh_contents(vh_name['interface'], vh_name['port_prefix'], vh_name['wire_prefix'], f_out, 
+                                     bus_size=vh_name['bus_size'] if 'bus_size' in vh_name.keys() else 1,
+                                     bus_start=vh_name['bus_start'] if 'bus_start' in vh_name.keys() else 0,
+                                     )
         else: 
             sys.exit(f"{iob_colors.FAIL} {vh_name} is not an available header.{iob_colors.ENDC}")
 

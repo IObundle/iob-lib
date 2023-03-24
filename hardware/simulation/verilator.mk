@@ -2,9 +2,10 @@ VTOP?=$(NAME)
 
 VFLAGS+=--cc --exe -I. -I../src -Isrc --top-module $(VTOP)
 VFLAGS+=-Wno-lint
-VFLAGS+=--timing
 # Include embedded headers
 VFLAGS+=-CFLAGS "-I../../../software/esrc"
+# Include bsp.h
+VFLAGS+=-CFLAGS "-I.."
 
 VFLAGS+=$(DEFINES)
 
@@ -16,14 +17,19 @@ endif
 SIM_SERVER=$(VSIM_SERVER)
 SIM_USER=$(VSIM_USER)
 
-SIM_PROC=V$(VTOP)
+SIM_OBJ=V$(VTOP)
+#
+# Create bsp.h based on bsp.vh of simulation
+bsp.h:
+	cp bsp.vh $@
+	sed -i 's/`/#/' $@
 
-comp: $(VHDR) $(VSRC)
-	verilator $(VFLAGS) $(VSRC) src/$(NAME)_tb.cpp	
-	cd ./obj_dir && make -f $(SIM_PROC).mk
+comp: bsp.h $(VHDR) $(VSRC) $(HEX)
+	verilator $(VFLAGS) $(VSRC) src/$(NAME)_tb.cpp
+	cd ./obj_dir && make -f $(SIM_OBJ).mk
 
-exec:
-	./obj_dir/$(SIM_PROC) | tee -a test.log
+exec: comp
+	./obj_dir/$(SIM_OBJ)
 
 clean: gen-clean
 	@rm -rf obj_dir

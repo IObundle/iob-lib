@@ -4,7 +4,15 @@
 #
 
 SHELL=bash
-export
+
+
+help:
+	@echo The following targets are available:
+	@echo "  setup:  Setup the build directory"
+	@echo "  clean:  Remove the build directory"
+	@echo "  debug:  Print all source files in the build directory"
+
+
 
 SETUP_PYTHON_FILENAME=$(wildcard *_setup.py)
 
@@ -19,6 +27,10 @@ $(foreach entry, $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_core_submodul
 # establish build dir paths
 BUILD_DIR := $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_build_dir)
 
+BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
+
+BUILD_SIM_DIR := $(BUILD_DIR)/hardware/simulation
+
 BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
 BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
 
@@ -31,15 +43,7 @@ setup: debug
 
 $(BUILD_DIR):
 	$(PYTHON_EXEC) ./$(SETUP_PYTHON_FILENAME) $(SETUP_ARGS)
-#
-#HARDWARE
-#
-# include local setup makefile segment
 
-#
-#SOFTWARE
-#
-# include local setup makefile segment
 
 #
 #DOCUMENT
@@ -72,22 +76,13 @@ SRC+=$(BUILD_DIR)/doc/quartus.tex
 endif
 
 ifeq ($(AMD_FPGA),1)
-$(BUILD_DIR)/doc/vivado.tex
+SRC+=$(BUILD_DIR)/doc/vivado.tex
 endif
-
-#
-# DELIVERY 
-#
-
-ifneq ($(wildcard config_delivery.mk),)
-include config_delivery.mk
-endif
-
 
 # generate quartus fitting results 
 $(BUILD_DIR)/doc/quartus.tex:
 	make -C $(BUILD_DIR) fpga-build BOARD=CYCLONEV-GT-DK
-	LOG=$(BUILD_FPGA_DIR)/quartus.log $(LIB_DIR)/scripts/quartus2tex.sh
+	LOG=$(BUILD_FPGA_DIR)/reports/$(wildcard *.fit.summary) $(LIB_DIR)/scripts/quartus2tex.sh
 	mv `basename $@` $(BUILD_DOC_DIR)
 
 # generate vivado fitting results 
@@ -99,15 +94,24 @@ $(BUILD_DIR)/doc/vivado.tex:
 endif
 
 
+#
+# DELIVERY 
+#
+
+ifneq ($(wildcard config_delivery.mk),)
+include config_delivery.mk
+endif
+
+
 clean:
-	@rm -rf $(BUILD_DIR)
+	@rm -rf ../$(CORE)_V*
 
 # Remove all __pycache__ folders with python bytecode
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
 debug: $(BUILD_DIR) $(SRC)
-	@echo SRC=$(SRC)
+	@for i in $(SRC); do echo $$i; done
 
 
 .PHONY: setup clean debug
