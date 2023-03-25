@@ -22,6 +22,8 @@
 #
 #3. run the following command from the root of this repository:
 # sudo make board_server_install
+#
+
 
 
 import time
@@ -61,7 +63,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 if board_status == 'idle':
                     response = 'idle'
                 else:
-                    response = f'{board_status} by {user_name} for {grab_timeout} seconds'
+                    time_remaining = grab_timeout - (time.time() - timer)
+                    response = f'{board_status} by {user_name} for {time_remaining} seconds'
                 conn.sendall(response.encode())
             elif data.startswith('grab'):
                 try:
@@ -76,7 +79,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         timer = time.time()
                         response = f'grabbed for {grab_timeout} seconds'
                     else:
-                        response = 'Board is busy; try again later.'
+                        time_remaining = grab_timeout - (time.time() - timer)
+                        response = f'{board_status} by {user_name} for {time_remaining} seconds. Try later.'
                 except IndexError:
                     response = 'missing username'
                 conn.sendall(response.encode())
@@ -87,8 +91,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         board_status = 'idle'
                         user_name = ''
                         response = 'released'
-                    else:
-                        response = 'Access denied'
+                    elif board_status != 'idle':
+                        time_remaining = grab_timeout - (time.time() - timer)
+                        response = f'{board_status} by {user_name} for {time_remaining} seconds. Cannot release.'
                 except IndexError:
                     response = 'missing username'
                 conn.sendall(response.encode())

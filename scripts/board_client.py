@@ -4,22 +4,30 @@ import sys
 import socket
 import os
 
+def perror():
+    print('Usage: client.py [grab|release] [timeout (seconds)]')
+    sys.exit(1)
+
 # Define the server's IP and port
 HOST = 'localhost'  # Use the loopback interface
 PORT = 50007  # Use the same port as the server
 
-# Check the command line arguments before making connection
-if len(sys.argv) < 2:
-    print('Usage: client.py <query|grab|release> [timeout (seconds)]')
-    sys.exit()
-
-request = sys.argv[1]
-user = os.environ['USER']
 timeout = ''
-try:
-    timeout = sys.argv[2] # only used for grab
-except IndexError:
-    timeout = ''
+
+# Check the command line arguments before making connection
+if len(sys.argv) > 1:
+    request = sys.argv[1]
+    if sys.argv[1] == 'grab':
+        if len(sys.argv) == 3:
+            timeout = sys.argv[2]
+        elif len(sys.argv) != 2:
+            perror()
+    elif sys.argv[1] != 'release':
+        perror()
+else:
+    request = 'query'
+
+user = os.environ['USER']
 
 # Send the request to the server
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
