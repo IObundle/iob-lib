@@ -10,6 +10,7 @@ include config_build.mk
 
 # default FPGA board
 BOARD ?= CYCLONEV-GT-DK
+BSP_H ?= software/embedded/bsp.h
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -52,7 +53,7 @@ help:
 #
 ifneq ($(filter emb, $(FLOWS)),)
 EMB_DIR=software/embedded
-fw-build: software/embedded/bsp.h
+fw-build: $(BSP_H)
 	make -C $(EMB_DIR) build
 
 fw-clean:
@@ -64,13 +65,13 @@ endif
 #
 ifneq ($(filter pc-emul, $(FLOWS)),)
 PC_DIR=software/pc-emul
-pc-emul-build: fw-build software/embedded/bsp.h
+pc-emul-build: fw-build $(BSP_H)
 	make -C $(PC_DIR) build
 
-pc-emul-run: software/embedded/bsp.h
+pc-emul-run: $(BSP_H)
 	make -C $(PC_DIR) run
 
-pc-emul-test:
+pc-emul-test: $(BSP_H)
 	make -C $(PC_DIR) test
 
 pc-emul-clean:
@@ -102,10 +103,10 @@ endif
 #
 ifneq ($(filter sim, $(FLOWS)),)
 SIM_DIR=hardware/simulation
-sim-build: software/embedded/bsp.h
+sim-build: $(BSP_H)
 	make -C $(SIM_DIR) build
 
-sim-run: software/embedded/bsp.h
+sim-run: $(BSP_H)
 	make -C $(SIM_DIR) run
 
 sim-waves:
@@ -117,7 +118,7 @@ sim-debug:
 sim-clean:
 	make -C $(SIM_DIR) clean
 
-sim-test: 
+sim-test: $(BSP_H)
 	make -C $(SIM_DIR) test
 
 cov-test: sim-clean
@@ -131,13 +132,13 @@ endif
 #
 ifneq ($(filter fpga, $(FLOWS)),)
 FPGA_DIR=hardware/fpga
-fpga-build: software/embedded/bsp.h
+fpga-build: $(BSP_H)
 	make -C $(FPGA_DIR) build
 
-fpga-run: software/embedded/bsp.h
+fpga-run: $(BSP_H)
 	make -C $(FPGA_DIR) run
 
-fpga-test: 
+fpga-test: $(BSP_H)
 	make -C $(FPGA_DIR) test
 
 fpga-debug: 
@@ -166,7 +167,7 @@ syn-test: syn-clean syn-build
 #
 ifneq ($(filter doc, $(FLOWS)),)
 DOC_DIR=document
-doc-build: software/embedded/bsp.h
+doc-build: $(BSP_H)
 	make -C $(DOC_DIR) build
 
 doc-debug: 
@@ -205,7 +206,7 @@ debug:
 #
 # Create bsp.h based on bsp.vh
 #
-software/embedded/bsp.h:
+$(BSP_H):
 	if [ `echo $(MAKECMDGOALS) | grep -c fpga` -eq 0 ]; then cp $(SIM_DIR)/bsp.vh $@; else cp $(FPGA_DIR)/*/$(BOARD)/bsp.vh $@; fi  && sed -i 's/`/#/' $@
 
 #
@@ -213,7 +214,7 @@ software/embedded/bsp.h:
 #
 
 clean: fw-clean pc-emul-clean lint-clean sim-clean fpga-clean doc-clean
-	rm -f software/embedded/bsp.h
+	rm -f $(BSP_H)
 
 
 .PHONY: fw-build \
