@@ -3,25 +3,11 @@
 # This is a simple server that will listen for connections on port 50007 from clients that want to use an FPGA board.
 # To install and run this server do the following:
 #
-# 0. Install Python 3.6 or later
+# 1. Install Python 3.6 or later
 #
-# 1. write the file /etc/systemd/system/board_server.service with the following contents:
-#[Unit]
-#Description=board server service
-#After=network.target
-#StartLimitIntervalSec=0[Service]
+# 2. run the following command from the root of this repository:
 #
-#[Service]
-#Type=simple
-#Restart=always
-#RestartSec=1
-#ExecStart=/usr/local/bin/board_server.py
-#
-#[Install]
-#WantedBy=multi-user.target
-#
-#3. run the following command from the root of this repository:
-# sudo make board_server_install
+#         > sudo make board_server_install
 #
 
 
@@ -54,18 +40,20 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         except TimeoutError:
             continue
         with conn:
-            print('Connected by', addr)
-            data = conn.recv(1024)
+            while True:
+                try:
+                    data = conn.recv(1024)
+                finally:
+                    continue
+                
             if not data:
                 continue
             data = data.decode()
+            response = 'idle'
             if data == 'query':
-                if board_status == 'idle':
-                    response = 'idle'
-                else:
+                if board_status != 'idle':
                     time_remaining = grab_timeout - (time.time() - timer)
                     response = f'{board_status} by {user_name} for {time_remaining} seconds'
-                conn.sendall(response.encode())
             elif data.startswith('grab'):
                 try:
                     grabbed_user_name = data.split()[1]
@@ -80,10 +68,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         response = f'grabbed for {grab_timeout} seconds'
                     else:
                         time_remaining = grab_timeout - (time.time() - timer)
-                        response = f'{board_status} by {user_name} for {time_remaining} seconds. Try later.'
+                        response = f'{board_status} by {user_name} for {time_remaining} seconds. Please try later.'
                 except IndexError:
                     response = 'missing username'
-                conn.sendall(response.encode())
             elif data.startswith('release'):
                 try:
                     released_user_name = data.split()[1]
@@ -96,7 +83,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         response = f'{board_status} by {user_name} for {time_remaining} seconds. Cannot release.'
                 except IndexError:
                     response = 'missing username'
+
+        while True:
+            try:
                 conn.sendall(response.encode())
+            finally:
+                continue
 
         if time.time() - timer >= grab_timeout:
             board_status = 'idle'
