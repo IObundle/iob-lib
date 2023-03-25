@@ -4,8 +4,6 @@ VFLAGS+=--cc --exe -I. -I../src -Isrc --top-module $(VTOP)
 VFLAGS+=-Wno-lint
 # Include embedded headers
 VFLAGS+=-CFLAGS "-I../../../software/esrc"
-# Include bsp.h
-VFLAGS+=-CFLAGS "-I.."
 
 VFLAGS+=$(DEFINES)
 
@@ -18,13 +16,8 @@ SIM_SERVER=$(VSIM_SERVER)
 SIM_USER=$(VSIM_USER)
 
 SIM_OBJ=V$(VTOP)
-#
-# Create bsp.h based on bsp.vh of simulation
-bsp.h:
-	cp bsp.vh $@
-	sed -i 's/`/#/' $@
 
-comp: bsp.h $(VHDR) $(VSRC) $(HEX)
+comp: $(VHDR) $(VSRC) $(HEX)
 	verilator $(VFLAGS) $(VSRC) src/$(NAME)_tb.cpp
 	cd ./obj_dir && make -f $(SIM_OBJ).mk
 

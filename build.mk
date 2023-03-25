@@ -8,6 +8,9 @@ export
 
 include config_build.mk
 
+# default FPGA board
+BOARD ?= CYCLONEV-GT-DK
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  fw-build          to build the firmware"
@@ -17,12 +20,12 @@ help:
 	@echo "  pc-emul-run       to run the emulator for PC"
 	@echo "  lint-run          to run the linter"
 	@echo "  lint-clean        to clean the linter"
-	@echo "  lint-test				 to run the linter test"
+	@echo "  lint-test	   to run the linter test"
 	@echo "  sim-build         to build the RTL simulator"
 	@echo "  sim-clean         to clean the RTL simulator"
 	@echo "  sim-run           to run the RTL simulator"
 	@echo "  sim-test          to run the RTL simulator test"
-	@echo "  sim-waves				 to run the RTL simulator with waves"
+	@echo "  sim-waves	   to run the RTL simulator with waves"
 	@echo "  sim-debug         to print important simulation Makefile variables"
 	@echo "  cov-test          to run the RTL simulator test with coverage"
 	@echo "  fpga-build        to build the RTL simulator"
@@ -36,9 +39,9 @@ help:
 	@echo "  doc-clean         to clean the RTL simulator"
 	@echo "  doc-run           to run the RTL simulator"
 	@echo "  doc-test          to run the RTL simulator test"
-	@echo "  test 						 to run all tests"
-	@echo "  ptest 					   to run all production tests"
-	@echo "  dtest 					   to run all delivery tests"
+	@echo "  test 		   to run all tests"
+	@echo "  ptest 		   to run all production tests"
+	@echo "  dtest 		   to run all delivery tests"
 	@echo "  debug             to print important Makefile variables"
 	@echo "  clean             to clean all the build files"
 
@@ -49,7 +52,7 @@ help:
 #
 ifneq ($(filter emb, $(FLOWS)),)
 EMB_DIR=software/embedded
-fw-build:
+fw-build: software/embedded/bsp.h
 	make -C $(EMB_DIR) build
 
 fw-clean:
@@ -61,10 +64,10 @@ endif
 #
 ifneq ($(filter pc-emul, $(FLOWS)),)
 PC_DIR=software/pc-emul
-pc-emul-build: fw-build
+pc-emul-build: fw-build software/pc-emul/bsp.h
 	make -C $(PC_DIR) build
 
-pc-emul-run:
+pc-emul-run: software/embedded/bsp.h
 	make -C $(PC_DIR) run
 
 pc-emul-test:
@@ -99,10 +102,10 @@ endif
 #
 ifneq ($(filter sim, $(FLOWS)),)
 SIM_DIR=hardware/simulation
-sim-build: 
+sim-build: software/embedded/bsp.h
 	make -C $(SIM_DIR) build
 
-sim-run:
+sim-run: software/embedded/bsp.h
 	make -C $(SIM_DIR) run
 
 sim-waves:
@@ -128,10 +131,10 @@ endif
 #
 ifneq ($(filter fpga, $(FLOWS)),)
 FPGA_DIR=hardware/fpga
-fpga-build: 
+fpga-build: software/embedded/bsp.h
 	make -C $(FPGA_DIR) build
 
-fpga-run: 
+fpga-run: software/embedded/bsp.h
 	make -C $(FPGA_DIR) run
 
 fpga-test: 
@@ -163,7 +166,7 @@ syn-test: syn-clean syn-build
 #
 ifneq ($(filter doc, $(FLOWS)),)
 DOC_DIR=document
-doc-build: 
+doc-build: software/embedded/bsp.h
 	make -C $(DOC_DIR) build
 
 doc-debug: 
@@ -197,11 +200,20 @@ dtest: sim-test syn-test fpga-test
 debug:
 	@echo $(FLOWS)
 
+
+
+#
+# Create bsp.h based on bsp.vh
+#
+software/embedded/bsp.h:
+	if [ `echo $(MAKECMDGOALS) | grep -c fpga` -eq 0 ]; then cp $(SIM_DIR)/bsp.vh $@; else cp $(FPGA_DIR)/*/$(BOARD)/bsp.vh $@; fi  && sed -i 's/`/#/' $@
+
 #
 # CLEAN
 #
 
 clean: fw-clean pc-emul-clean lint-clean sim-clean fpga-clean doc-clean
+	rm -f software/embedded/bsp.h
 
 
 .PHONY: fw-build \

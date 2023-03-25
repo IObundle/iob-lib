@@ -32,19 +32,13 @@ endif
 fw_emul: $(HDR) $(SRC)
 	gcc -o $@ $(CFLAGS) $(INCLUDE) $(SRC) -lgcc -lc
 
-build: bsp.h fw_emul
+build: fw_emul
 	@echo "build"
 
 run: build
 	@rm -f soc2cnsl cnsl2soc
 	$(CONSOLE_CMD) &
 	bash -c "trap 'make kill-cnsl &> /dev/null' INT TERM KILL EXIT; ./fw_emul"
-
-
-# Create bsp.h based on bsp.vh of simulation
-bsp.h:
-	cp ../../hardware/simulation/bsp.vh $@
-	sed -i 's/`/#/' $@
 
 test: clean $(TEST_LIST)
 	test "$$(cat test.log)" = "Test passed!"
