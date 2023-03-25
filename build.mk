@@ -64,7 +64,7 @@ endif
 #
 ifneq ($(filter pc-emul, $(FLOWS)),)
 PC_DIR=software/pc-emul
-pc-emul-build: fw-build software/pc-emul/bsp.h
+pc-emul-build: fw-build software/embedded/bsp.h
 	make -C $(PC_DIR) build
 
 pc-emul-run: software/embedded/bsp.h
