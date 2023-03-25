@@ -14,8 +14,7 @@ CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
 
 CONSOLE_CMD=../../scripts/console.py -L
 
-INCLUDE=-I.
-INCLUDE+=-I../src
+INCLUDE=-I. -I../src -I../embedded
 
 HDR=$(wildcard *.h)
 HDR+=$(wildcard ../psrc/*.h)

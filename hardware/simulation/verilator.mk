@@ -3,7 +3,7 @@ VTOP?=$(NAME)
 VFLAGS+=--cc --exe -I. -I../src -Isrc --top-module $(VTOP)
 VFLAGS+=-Wno-lint
 # Include embedded headers
-VFLAGS+=-CFLAGS "-I../../../software/esrc"
+VFLAGS+=-CFLAGS "-I../../../software/esrc -I../../../software/embedded"
 
 VFLAGS+=$(DEFINES)
 
