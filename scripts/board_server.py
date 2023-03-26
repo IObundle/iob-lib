@@ -104,6 +104,6 @@ while True:
     response = get_response(request)
     if DEBUG:
         print(f'Got response: {response}')
-    response = response.encode('utf-8')
-    conn.sendall(response)
-    
+    conn.sendall(response.encode('utf-8'))
+
+
