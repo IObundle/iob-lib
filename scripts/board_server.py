@@ -18,79 +18,76 @@ import socket
 # Define the server's IP and port
 HOST = 'localhost'  # Listen on all available interfaces
 PORT = 50007  # Use a non-privileged port
-DEFAULT_GRAB_TIMEOUT = 300  # 5 minutes
 SOCKET_TIMEOUT = 1  # 1 second for socket blocking operations
 
-# Initialize the board status and user name
+def get_remaining_time():
+    return duration - (time.time() - start_time)
+
+def form_response(request)
+    if data.startswith('grab'):
+        grabbed_user_name = data.split()[1]
+        if board_status == 'idle':
+            board_status = 'grabbed'
+            user_name = grabbed_user_name
+            grab_timeout = int(data.split()[2])
+                except IndexError:
+                    grab_timeout = DEFAULT_GRAB_TIMEOUT
+                    current_time = time.time()
+                    response = f'grabbed for {grab_timeout} seconds'
+                else:
+                    time_remaining = grab_timeout - (time.time() - current_time)
+                    response = f'{board_status} by {user_name} for {time_remaining} seconds. Please try later.'
+        except IndexError:
+            response = 'missing username'
+    elif data.startswith('release'):
+        try:
+            released_user_name = data.split()[1]
+            if released_user_name == user_name:
+                board_status = 'idle'
+                user_name = ''
+                response = 'released'
+            elif board_status != 'idle':
+                        time_remaining = grab_timeout - (time.time() - current_time)
+                        response = f'{board_status} by {user_name} for {time_remaining} seconds. Cannot release.'
+        except IndexError:
+            response = 'missing username'
+        
+
+        
+    return response
+
+
+# Init
 board_status = 'idle'
-user_name = ''
-grab_timeout = DEFAULT_GRAB_TIMEOUT
-timer = time.time()
+current_time = time.time()
 
 # Start the server
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.bind((HOST, PORT))
-    s.listen()
-    print('Server is ready to receive requests...')
-    # timeout accept and recv
-    s.settimeout(SOCKET_TIMEOUT) 
-    while True:
-        try:
-            conn, addr = s.accept()
-        except TimeoutError:
-            continue
-        with conn:
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((HOST, PORT))
+s.listen()
+s.settimeout(SOCKET_TIMEOUT) 
+
+# Loop forever
+
+while True:
+    conn, addr = s.accept()
+    request = conn.recv(1024).decode()
+
+    if board_status == 'idle':
+        response = f'{board_status}'
+    else:
+        time_remaining = grab_timeout - (time.time() - current_time)        
+        response = f'{board_status} by {user_name} for {time_remaining} seconds'
+
+    
             while True:
                 try:
-                    data = conn.recv(1024)
+                    conn.sendall(response.encode())
                 finally:
-                    continue
-                
-            if not data:
                 continue
-            data = data.decode()
-            response = 'idle'
-            if data == 'query':
-                if board_status != 'idle':
-                    time_remaining = grab_timeout - (time.time() - timer)
-                    response = f'{board_status} by {user_name} for {time_remaining} seconds'
-            elif data.startswith('grab'):
-                try:
-                    grabbed_user_name = data.split()[1]
-                    if board_status == 'idle':
-                        board_status = 'grabbed'
-                        user_name = grabbed_user_name
-                        try:
-                            grab_timeout = int(data.split()[2])
-                        except IndexError:
-                            grab_timeout = DEFAULT_GRAB_TIMEOUT
-                        timer = time.time()
-                        response = f'grabbed for {grab_timeout} seconds'
-                    else:
-                        time_remaining = grab_timeout - (time.time() - timer)
-                        response = f'{board_status} by {user_name} for {time_remaining} seconds. Please try later.'
-                except IndexError:
-                    response = 'missing username'
-            elif data.startswith('release'):
-                try:
-                    released_user_name = data.split()[1]
-                    if released_user_name == user_name:
-                        board_status = 'idle'
-                        user_name = ''
-                        response = 'released'
-                    elif board_status != 'idle':
-                        time_remaining = grab_timeout - (time.time() - timer)
-                        response = f'{board_status} by {user_name} for {time_remaining} seconds. Cannot release.'
-                except IndexError:
-                    response = 'missing username'
-
-        while True:
-            try:
-                conn.sendall(response.encode())
-            finally:
-                continue
-
-        if time.time() - timer >= grab_timeout:
+            
+            if time.time() - current_time >= grab_timeout:
             board_status = 'idle'
             user_name = ''
-            timer = time.time()
+            current_time = time.time()
