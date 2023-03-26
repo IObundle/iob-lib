@@ -63,7 +63,7 @@ endif
 #console start command
 CONSOLE_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
 
-BOARD_GRAB_CMD=board_client.py grab
+BOARD_GRAB_CMD=board_client.py grab 300
 BOARD_RELEASE_CMD=board_client.py release
 
 #run fpga image
