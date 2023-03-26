@@ -1,93 +1,109 @@
 #!/usr/bin/env python3
 
+DEBUG = False
+
+
 # This is a simple server that will listen for connections on port 50007 from clients that want to use an FPGA board.
 # To install and run this server do the following:
-#
 # 1. Install Python 3.6 or later
-#
 # 2. run the following command from the root of this repository:
-#
 #         > sudo make board_server_install
+
+# To uninstall the server run:
+#        > sudo make board_server_uninstall
 #
-
-
+# To check if the server is running run:
+#        > sudo make board_server_status
 
 import time
 import socket
 
-# Define the server's IP and port
+# Define the server's IP, port and version
+# Must match the client's IP and port
+
 HOST = 'localhost'  # Listen on all available interfaces
 PORT = 50007  # Use a non-privileged port
-SOCKET_TIMEOUT = 1  # 1 second for socket blocking operations
+VERSION = 'V0.1'
+
+# user and duration board is needed 
+USER = ''
+DURATION = '300'  # 5 minutes
+
+# Init board status
+board_status = 'idle'
+grab_time = time.time()
+
 
 def get_remaining_time():
-    return duration - (time.time() - start_time)
+    global DURATION
+    return str(int(DURATION) - (time.time() - grab_time))
 
-def form_response(request)
-    if data.startswith('grab'):
-        grabbed_user_name = data.split()[1]
+
+def get_response(request):
+    global board_status
+    global grab_time
+    global USER
+    global DURATION
+    
+    # check client's version
+    if VERSION not in request:
+        return "ERROR: Wrong version"
+
+    if get_remaining_time() <= '0.1':
+        board_status = 'idle'
+        USER = ''
+        if DEBUG:
+            print('Board released due to timeout')
+
+    if request.startswith('query'):
+        if board_status == 'idle':
+            response =  'Board is idle'
+        else:
+            time_remaining = get_remaining_time()
+            response =  f'Board is grabbed by user {USER} for {time_remaining} seconds'
+    
+    elif request.startswith('grab'):
         if board_status == 'idle':
             board_status = 'grabbed'
-            user_name = grabbed_user_name
-            grab_timeout = int(data.split()[2])
-                except IndexError:
-                    grab_timeout = DEFAULT_GRAB_TIMEOUT
-                    current_time = time.time()
-                    response = f'grabbed for {grab_timeout} seconds'
-                else:
-                    time_remaining = grab_timeout - (time.time() - current_time)
-                    response = f'{board_status} by {user_name} for {time_remaining} seconds. Please try later.'
-        except IndexError:
-            response = 'missing username'
-    elif data.startswith('release'):
-        try:
-            released_user_name = data.split()[1]
-            if released_user_name == user_name:
-                board_status = 'idle'
-                user_name = ''
-                response = 'released'
-            elif board_status != 'idle':
-                        time_remaining = grab_timeout - (time.time() - current_time)
-                        response = f'{board_status} by {user_name} for {time_remaining} seconds. Cannot release.'
-        except IndexError:
-            response = 'missing username'
-        
+            grab_time = time.time()
+            USER = request.split()[1]
+            DURATION = request.split()[2]
+            response =  f'Success: board grabbed by {USER} for {DURATION} seconds.'
+        else:
+            time_remaining = get_remaining_time()
+            response =  f'Failure: board grabbed by {USER} for {time_remaining} seconds.'
 
-        
+    elif request.startswith('release'):
+        if board_status == 'idle':
+            response =  'ERROR: board already idle.'
+        elif board_status == 'grabbed':
+            requesting_user = request.split()[1]
+            if requesting_user == USER:
+                board_status = 'idle'
+                USER = ''
+                response =  'Success: board released.'
+            else:
+                response = f'ERROR: cannot release board in use by another user ({USER})'
+
+    if DEBUG:
+        print(f'Returning response: \"{response}\"')
     return response
 
-
-# Init
-board_status = 'idle'
-current_time = time.time()
-
-# Start the server
-
+# Create a TCP/IP socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
 s.listen()
-s.settimeout(SOCKET_TIMEOUT) 
 
 # Loop forever
-
 while True:
+        
     conn, addr = s.accept()
-    request = conn.recv(1024).decode()
-
-    if board_status == 'idle':
-        response = f'{board_status}'
-    else:
-        time_remaining = grab_timeout - (time.time() - current_time)        
-        response = f'{board_status} by {user_name} for {time_remaining} seconds'
-
+    request = conn.recv(1024).decode('utf-8')
+    if DEBUG:
+        print(f'Received request: {request}')
+    response = get_response(request)
+    if DEBUG:
+        print(f'Got response: {response}')
+    response = response.encode('utf-8')
+    conn.sendall(response)
     
-            while True:
-                try:
-                    conn.sendall(response.encode())
-                finally:
-                continue
-            
-            if time.time() - current_time >= grab_timeout:
-            board_status = 'idle'
-            user_name = ''
-            current_time = time.time()

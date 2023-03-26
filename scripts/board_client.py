@@ -1,70 +1,87 @@
 #!/usr/bin/env python3
 
+DEBUG = False
+
 import sys
 import socket
 import os
+import time
 
-# Define the server's IP and port
+# Define the client's IP, port and version
+# Must match the server's
 HOST = 'localhost'  # Use the loopback interface
 PORT = 50007  # Use the same port as the server
-DEFAULT_DURATION = 300  # 5 minutes
-USER = os.environ['USER']
+VERSION = 'V0.1'
 
-SOCKET_TIMEOUT = 10  # 1 second for socket blocking operations
-VERSION = '0.1'
+# user and duration board is needed 
+USER = os.environ['USER']
+DURATION = '15' # Default duration is 5 seconds
 
 
 def perror():
-    print('Usage: client.py [grab [duration in seconds] | release]')
+    n = len(sys.argv)
+    print(f'Usage: client.py [grab [duration in seconds] | release] {n}')
     sys.exit(1)
-
 
 # Check the command line arguments
 if len(sys.argv) == 1:
-    request = 'query'
+    command = 'query'
 else:
-    request = sys.argv[1]
-    if sys.argv[1] == 'grab':
-        if len(sys.argv) == 3:
-            duration = sys.argv[2]
-        else
-            duration = DEFAULT_DURATION
-    elif sys.argv[1] == 'release':
-        request = 'query'
-    else:
+    command = sys.argv[1]
+
+if command == 'grab':
+    if len(sys.argv) == 3:
+        try:
+            DURATION = int(sys.argv[2])
+        except ValueError:
+            perror()
+    if len(sys.argv) > 3:
         perror()
+elif command != 'release' and command != 'query':
+    perror()
 
 # Form the request
-if request == 'grab':
-    request += f'{request} {USER} {duration} {VERSION}'
-elif request == 'release':
-    request += f'{request} {USER} {VERSION}'
-elif request == 'query':
-    request += f'{request} {VERSION}'
+request = ''
+if command == 'grab':
+    request += f'{command} {USER} {DURATION} {VERSION}'
+elif command == 'release':
+    request += f'{command} {USER} {VERSION}'
+elif command == 'query':
+    request += f'{command} {VERSION}'
+
+if DEBUG:
+    print(f'DEBUG: Request is \"{request}\"')
 
 
-# Create a socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.settimeout(SOCKET_TIMEOUT) 
-
-# Send the request to the server
-try:
-    s.connect((HOST, PORT))
-except:
-    print('Could not connect to server')
-    sys.exit()
-
-try:
-    s.sendall(request.encode())
-except:
-    print('Could not send request to server')
-    sys.exit()
-
-# Receive the response from the server
-try:
-    data = s.recv(1024)
-except:
-    print('Could not receive response from server')
-    sys.exit()
+while True:
+    # Create a socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(10) 
     
-print("Board "+data.decode())
+    # Connect with the server
+    try:
+        s.connect((HOST, PORT))
+    except:
+        print('Could not connect to server')
+        sys.exit()
+
+    # Send the request to the server
+    s.sendall(request.encode('utf-8'))
+
+    # Receive the response from the server
+    response = s.recv(1024).decode()
+    print(response)
+
+    # Process the response
+    if 'ERROR' in response:
+        sys.exit(1)
+            
+    if 'grab' in request and 'Failure' in response:
+        time_remaining = float(response.split(' ')[-2])
+        print('Trying again in', time_remaining, 'seconds')
+        s.close()
+        time.sleep(time_remaining)
+    else:
+        sys.exit(0)
+
+
