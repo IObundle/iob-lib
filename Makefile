@@ -101,7 +101,6 @@ test:
 
 # Install board server and client
 board_server_install:
-	sudo systemctl stop board_server && \
 	sudo cp scripts/board_client.py /usr/local/bin/ && \
 	sudo cp scripts/board_server.py /usr/local/bin/ && \
 	sudo cp scripts/board_server.service /etc/systemd/system/ && \

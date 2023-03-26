@@ -79,6 +79,7 @@ else
 endif
 endif
 
+# release the board
 release:
 ifeq ($(FPGA_SERVER),)
 	make kill-cnsl
@@ -87,13 +88,14 @@ else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'
 endif
 
+# clean
 clean: $(FPGA_TOOL)-clean
 	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga_build.mk" -o -name "uut_build.mk" \) -delete
 	@rm -rf resynthesis *.hex
 ifneq ($(FPGA_SERVER),)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD); fi'
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'rm -rf $(REMOTE_BUILD_DIR); fi'
 ifneq ($(BOARD_SERVER),)
-	ssh $(BOARD_SSH_FLAGS) $(BOARD_USER)@$(BOARD_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD); fi'
+	ssh $(BOARD_SSH_FLAGS) $(BOARD_USER)@$(BOARD_SERVER) 'rm -rf  $(REMOTE_BUILD_DIR); fi'
 endif
 endif
 

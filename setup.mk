@@ -104,7 +104,7 @@ endif
 
 
 clean:
-	@rm -rf ../$(CORE)_V*
+	make -C $(BUILD_DIR) clean && rm -rf $(BUILD_DIR)
 
 # Remove all __pycache__ folders with python bytecode
 python-cache-clean:
