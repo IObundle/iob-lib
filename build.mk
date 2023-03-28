@@ -10,7 +10,7 @@ include config_build.mk
 
 # default FPGA board
 BOARD ?= CYCLONEV-GT-DK
-BSP_H ?= software/embedded/bsp.h
+BSP_H ?= $(wildcard software/embedded/bsp.h)
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
