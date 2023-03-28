@@ -207,7 +207,11 @@ debug:
 # Create bsp.h based on bsp.vh
 #
 $(BSP_H):
-	if [ `echo $(MAKECMDGOALS) | grep -c fpga` -eq 0 ]; then cp $(SIM_DIR)/bsp.vh $@; else cp $(FPGA_DIR)/*/$(BOARD)/bsp.vh $@; fi  && sed -i 's/`/#/' $@
+	if [ `echo $(MAKECMDGOALS) | grep -c fpga` -eq 0 ]; then\
+		[ -f $(SIM_DIR)/bsp.vh ] && cp $(SIM_DIR)/bsp.vh $@;\
+	else\
+		[ -e $(FPGA_DIR)/*/$(BOARD)/bsp.vh ] && cp $(FPGA_DIR)/*/$(BOARD)/bsp.vh $@;\
+	fi  && touch $@ && sed -i 's/`/#/' $@
 
 #
 # CLEAN
