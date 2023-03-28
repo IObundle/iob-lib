@@ -61,8 +61,9 @@ endif
 endif
 
 #console start command
-CONSOLE_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
+CONSOLE_START_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
 
+#board client commands
 BOARD_GRAB_CMD=board_client.py grab 300
 BOARD_RELEASE_CMD=board_client.py release
 
@@ -71,7 +72,7 @@ run: build
 ifneq ($(NORUN),1)
 ifeq ($(BOARD_SERVER),)
 	cp $(EMB_DIR)/$(NAME)_firmware.bin .
-	bash -c "trap 'make release &> /dev/null' INT TERM KILL EXIT; $(BOARD_GRAB_CMD); $(FPGA_PROG); $(CONSOLE_CMD);"
+	bash -c "trap 'make release &> /dev/null' INT TERM KILL EXIT; $(BOARD_GRAB_CMD); $(FPGA_PROG); $(CONSOLE_START_CMD);"
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
@@ -82,7 +83,7 @@ endif
 
 # release the board
 release:
-ifeq ($(FPGA_SERVER),)
+ifeq ($(BOARD_SERVER),)
 	make kill-cnsl
 	$(BOARD_RELEASE_CMD)
 else
