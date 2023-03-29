@@ -60,7 +60,9 @@ def hw_setup(python_module):
         python_module.submodules['hw_setup'] = {'headers':[], 'modules':[]}
 
     core_hw_setup = python_module.submodules['hw_setup']
+    # This list can only contain strings or tuples describing interfaces to be generated with_if_gen.py. Future improvement: allow .vh files in this list to copy from LIB
     Vheaders = core_hw_setup['headers']
+    # This list may contain .v files, LIB python_modules, or functions to be called.
     hardware_srcs = core_hw_setup['modules']
 
     set_default_submodule_dirs(python_module) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
@@ -69,7 +71,7 @@ def hw_setup(python_module):
     # create module's *_version.vh Verilog Header
     version_file(core_name, core_version, core_previous_version, build_dir)
 
-    # Copy Setup hw files
+    # Copy Setup hw files (all .v and .sdc files under LIB/hardware/src)
     copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.v*', copy_all = True )
     copy_files( f"{setup_dir}/hardware/src", f"{build_dir}/hardware/src", [], '*.sdc*', copy_all = True )
 
@@ -78,13 +80,14 @@ def hw_setup(python_module):
 
     if Vheaders: create_Vheaders( f"{build_dir}/hardware/src", Vheaders )
     if hardware_srcs: 
-        copy_files( LIB_DIR, f"{build_dir}/hardware/src", hardware_srcs, '*.v' )
+        # Copy every .v file from LIB that is in the hw_srcs list
+        copy_files( LIB_DIR, f"{build_dir}/hardware/src", hardware_srcs, '*.v*' )
         # Remove duplicate files for fpga/src and simulation/src dir if they already exist in hardware/src
         for file in hardware_srcs:
             if os.path.isfile(f"{build_dir}/hardware/simulation/src/{file}"): os.remove(f"{build_dir}/hardware/simulation/src/{file}")
             if os.path.isfile(f"{build_dir}/hardware/fpga/src/{file}"): os.remove(f"{build_dir}/hardware/fpga/src/{file}")
 
-    # Copy LIB hw files
+    # Copy LIB header files (all .vh files under LIB/hardware/src)
     copy_files( f"{LIB_DIR}/hardware/modules", f"{build_dir}/hardware/src", [], '*.vh', copy_all = True )
 
 # Setup simulation related files/modules
@@ -118,6 +121,7 @@ def sim_setup(python_module):
     module_dependency_setup(sim_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sim_setup", lib_dir=LIB_DIR) 
 
     if Vheaders: create_Vheaders( f"{build_dir}/{sim_dir}/src", Vheaders )
+    # Copy every .v file from LIB that is in the sim_srcs list
     if sim_srcs: copy_files( LIB_DIR, f"{build_dir}/{sim_dir}/src", sim_srcs, '*.v*' )
 
     # Copy LIB sim files
@@ -155,6 +159,7 @@ def fpga_setup(python_module):
     module_dependency_setup(fpga_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.fpga_setup", lib_dir=LIB_DIR) 
 
     if Vheaders: create_Vheaders( f"{build_dir}/{fpga_dir}/src", Vheaders )
+    # Copy every .v file from LIB that is in the fpga_srcs list
     if fpga_srcs: copy_files( LIB_DIR, f"{build_dir}/{fpga_dir}/src", fpga_srcs, '*.v*' )
 
     # Copy LIB fpga files
@@ -241,7 +246,9 @@ def sw_setup(python_module):
         python_module.submodules['sw_setup'] = {'headers':[], 'modules':[]}
 
     sw_setup = python_module.submodules['sw_setup']
-    Cheaders = sw_setup['headers']
+    # This can only contain .h files
+    sw_headers = sw_setup['headers']
+    # This list may contain .c files, LIB python_modules, or functions to be called.
     sw_srcs = sw_setup['modules']
 
     set_default_submodule_dirs(python_module) # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
@@ -258,10 +265,12 @@ def sw_setup(python_module):
     #Add functions to the sw_srcs. These functions call setup modules for software setup (sw_setup.py)
     add_setup_functions(python_module,'sw_setup',setup_module=python_module)
     #Setup any sw submodules by calling the 'sw_setup()' function from their *_setup.py module
-    module_dependency_setup(sw_srcs, Cheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sw_setup", lib_dir=LIB_DIR) 
+    module_dependency_setup(sw_srcs, sw_headers, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sw_setup", lib_dir=LIB_DIR) 
 
-    ##if Cheaders: create_Cheaders( f"{build_dir}/software/src", Cheaders ) #FIXME: Should create and call create_Cheaders() for software
-    if sw_srcs: copy_files( LIB_DIR, f"{build_dir}/software/src", sw_srcs, '*.c*' )
+    # Copy every .h file of the sw_headers list from LIB
+    if sw_headers: copy_files( LIB_DIR+"/software", f"{build_dir}/software/src", sw_srcs, '*.h' ) 
+    # Copy every .c file of the sw_srcs list from LIB
+    if sw_srcs: copy_files( LIB_DIR+"/software", f"{build_dir}/software/src", sw_srcs, '*.c' )
 
     # Copy LIB software files
     if "pc-emul" in core_flows: copy_files(f"{LIB_DIR}/software/pc-emul", f"{build_dir}/software/pc-emul", copy_all = True)
@@ -343,55 +352,76 @@ def iob_submodule_setup(build_dir, submodule_dir, module_parameters=None, functi
 #                   - function: This entry defines a function to call.
 #                   - submodule: This entry defines a submodule to include (may contain *_setup.py or just a set of sources). Can be a tuple, where the first item is the submodule, the second item is a dictionary with module parameters.
 #                   - python include: This entry defines a python module that contains a list of other hardware modules/headers.
-#                   - verilog source:  This entry defines either a verilog header (.vh) or verilog source (.v) file to include.
+#                   - verilog source:  This entry defines either a C source (.c) or verilog source (.c) file to include.
 # function_2_call: optional argument. Name of the function to call for module setup. By default is the 'main' function.
-def module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs, function_2_call='main', lib_dir=LIB_DIR, add_sim_srcs=False, add_fpga_srcs=False):
-    # Remove all non *.v and *.vh entries from hardware_srcs
-    # Do this by setting up submodules and including hardware modules/headers
+def module_dependency_setup(srcs, headers, build_dir, submodule_dirs, function_2_call='main', lib_dir=LIB_DIR):
+    # Remove all non *.v and *.vh entries from srcs
+    # Do this by setting up submodules and including modules
     while(True):
         # Handle each entry, skipping .v and .vh entries
-        for idx, hardware_src in enumerate(hardware_srcs):
-            #print(f"############ {hardware_src} {function_2_call}") # DEBUG
+        for idx, src in enumerate(srcs):
+            #print(f"############ {src} {function_2_call}") # DEBUG
             # Entry is a tuple, therefore it contains optional parameters
-            if type(hardware_src)==tuple: 
+            if type(src)==tuple: 
                 # Save optional_parameters in a variable
-                optional_parameters=hardware_src[1]
-                # Convert hardware_src to a string
-                hardware_src=hardware_src[0]
+                optional_parameters=src[1]
+                # Convert src to a string
+                src=src[0]
             else: optional_parameters = None
 
             # Entry is a function
-            if callable(hardware_src):
-                hardware_src()
-                hardware_srcs.pop(idx)
+            if callable(src):
+                src()
+                srcs.pop(idx)
                 break
             # Entry is a 'submodule'
-            elif hardware_src in submodule_dirs:
-                submodule_setup(build_dir, submodule_dirs[hardware_src], function_2_call=function_2_call, module_parameters=optional_parameters)
-                hardware_srcs.pop(idx)
+            elif src in submodule_dirs:
+                submodule_setup(build_dir, submodule_dirs[src], function_2_call=function_2_call, module_parameters=optional_parameters)
+                srcs.pop(idx)
                 break
-            # Entry is a 'python include'
-            elif not(hardware_src.endswith(".v") or hardware_src.endswith(".vh")):
-                lib_module_setup(Vheaders, hardware_srcs, hardware_src, lib_dir, add_sim_srcs=False, add_fpga_srcs=False, module_parameters=optional_parameters)
-                hardware_srcs.pop(idx)
+            # Entry is a 'python include' (software)
+            elif 'sw_setup' in function_2_call and\
+                not src.endswith(".c"):
+                lib_module_setup(headers, srcs, src, lib_dir, module_parameters=optional_parameters, module_extension='.c')
+                srcs.pop(idx)
                 break
-        # Did not find any non .v or .vh entry
+            # Entry is a 'python include' (hardware)
+            elif not src.endswith(".v"):
+                lib_module_setup(headers, srcs, src, lib_dir,
+                                 add_sim_srcs=True if 'sim_setup' in function_2_call else False,
+                                 add_fpga_srcs=True if 'fpga_setup' in function_2_call else False,
+                                 module_parameters=optional_parameters)
+                srcs.pop(idx)
+                break
+        # Did not find any non .v or .c entry
         else: break
 
-# Include Vheaders and hardware_srcs from given python module (module_name)
-def lib_module_setup(Vheaders, hardware_srcs, module_name, lib_dir=LIB_DIR, add_sim_srcs=False, add_fpga_srcs=False, module_parameters=None):
+# Include headers and srcs from given python module (module_name)
+# headers: List of headers that will be appedend by the list of headers in the .py module.
+# srcs: List of srcs that will be appedend by the list of srcs in the .py module.
+# module_name: name of the python module to include. Can also be the name of a src module (with the same extension as passed in the module_extension parameter).
+# LIB_DIR: root directory of the LIB
+# add_sim_srcs: If True, then the list of simulation sources will be appended to the srcs list
+# add_fpga_srcs: If True, then the list of FPGA sources will be appended to the srcs list
+# module_parameters: optional argument. Allows passing an optional object with parameters to a hardware module.
+# module_extension: Select module file extension (.v for hardware, .c for software)
+def lib_module_setup(headers, srcs, module_name, lib_dir=LIB_DIR, add_sim_srcs=False, add_fpga_srcs=False, module_parameters=None, module_extension='.v'):
     module_path = None
     
+    # Search for module_name.py
     for mod_path in Path(lib_dir).rglob(f"{module_name}.py"):
         module_path = mod_path
         break
+    # If module_name.py is not found, search for module_name.module_extension
     if not module_path:
-        for mod_path in Path(lib_dir).rglob(f"{module_name}.v"):
+        for mod_path in Path(lib_dir).rglob(f"{module_name}{module_extension}"):
             module_path = mod_path
             break
+    # Exit if module is not found
     if not module_path: sys.exit(f"{iob_colors.FAIL} {module_name} is not a LIB module.{iob_colors.ENDC}")
 
     extension = os.path.splitext(module_path)[1]
+    # If module_name.py is found, import the headers and srcs lists from it
     if extension == ".py":
         lib_module_name = os.path.basename(module_path).split('.')[0]
         spec = importlib.util.spec_from_file_location(lib_module_name, module_path)
@@ -399,16 +429,17 @@ def lib_module_setup(Vheaders, hardware_srcs, module_name, lib_dir=LIB_DIR, add_
         sys.modules[lib_module_name]=lib_module
         if module_parameters: lib_module.module_parameters=module_parameters
         spec.loader.exec_module(lib_module)
-        Vheaders.extend(lib_module.v_headers)
-        hardware_srcs.extend(lib_module.hw_modules)
-        if add_sim_srcs and (hasattr(lib_module,'sim_v_headers') or hasattr(lib_module,'sim_modules')):
-            Vheaders.extend(lib_module.sim_v_headers)
-            hardware_srcs.extend(lib_module.sim_modules)
-        if add_fpga_srcs and (hasattr(lib_module,'fpga_v_headers') or hasattr(lib_module,'fpga_modules')):
-            Vheaders.extend(lib_module.fpga_v_headers)
-            hardware_srcs.extend(lib_module.fpga_modules)
-    elif extension == ".v":
-        hardware_srcs.append(f"{module_name}.v")
+        headers.extend(lib_module.headers)
+        srcs.extend(lib_module.modules)
+        if add_sim_srcs and (hasattr(lib_module,'sim_headers') and hasattr(lib_module,'sim_modules')):
+            headers.extend(lib_module.sim_headers)
+            srcs.extend(lib_module.sim_modules)
+        if add_fpga_srcs and (hasattr(lib_module,'fpga_headers') and hasattr(lib_module,'fpga_modules')):
+            headers.extend(lib_module.fpga_headers)
+            srcs.extend(lib_module.fpga_modules)
+    # If module_name.module_extension is found, add it to the srcs list
+    elif extension == module_extension:
+        srcs.append(f"{module_name}{module_extension}")
 
 def copy_files(src_dir, dest_dir, sources = [], pattern = "*", copy_all = False):
     files_copied = []
@@ -427,6 +458,7 @@ def copy_files(src_dir, dest_dir, sources = [], pattern = "*", copy_all = False)
     return files_copied
 
 
+# Create verilog headers for the interfaces in Vheaders list, using if_gen.py
 def create_Vheaders(dest_dir, Vheaders):
     for vh_name in Vheaders:
         if (type(vh_name) is str) and (vh_name in if_gen.interfaces):

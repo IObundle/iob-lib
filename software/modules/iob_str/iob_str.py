@@ -1,3 +1,3 @@
-h_headers     = [ 'iob_str.h' ]
-c_modules    = [ 'iob_str.c' ]
+headers = [ 'iob_str.h' ]
+modules = [ 'iob_str.c' ]
 
