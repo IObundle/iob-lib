@@ -46,7 +46,7 @@ UFLAGS+=IS_FPGA=$(IS_FPGA)
 UFLAGS+=USE_QUARTUS_PRO=$(USE_QUARTUS_PRO)
 
 #build fpga image or netlist
-build: $(VHDR) $(VSRC) $(HEX)
+build: $(VHDR) $(VSRC) $(BUILD_DEPS)
 ifeq ($(FPGA_SERVER),)
 	make $(FPGA_OBJ)
 else 
@@ -68,7 +68,7 @@ BOARD_GRAB_CMD=board_client.py grab 300
 BOARD_RELEASE_CMD=board_client.py release
 
 #run fpga image
-run: build
+run: build $(RUN_DEPS)
 ifneq ($(NORUN),1)
 ifeq ($(BOARD_SERVER),)
 	cp $(EMB_DIR)/$(NAME)_firmware.bin .

@@ -31,7 +31,7 @@ endif
 
 build: $(UTARGETS)
 %.elf: $(TEMPLATE_LDS) $(HDR) $(SRC)
-	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(LFLAGS) $(DEFINES) $(INCLUDES) $(SRC) $(LLIBS)
+	$(TOOLCHAIN_PREFIX)gcc -o $@ $(CFLAGS) $(LFLAGS) $(INCLUDES) $(SRC) $(LLIBS)
 	$(TOOLCHAIN_PREFIX)objcopy -O binary $@ $(*F).bin
 
 ifneq ($(BOARD),)
