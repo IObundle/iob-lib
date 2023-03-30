@@ -63,7 +63,7 @@ while True:
         s.connect((HOST, PORT))
     except:
         print('Could not connect to server')
-        sys.exit()
+        sys.exit(1)
 
     # Send the request to the server
     s.sendall(request.encode('utf-8'))
