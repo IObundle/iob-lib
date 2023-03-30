@@ -15,7 +15,7 @@ endif
 
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
-EMB_DIR = ../../software/embedded
+EMB_DIR = ../../software
 PYTHON_DIR = ../../scripts
 FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
 

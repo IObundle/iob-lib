@@ -60,7 +60,7 @@ def hw_setup(python_module):
         python_module.submodules['hw_setup'] = {'headers':[], 'modules':[]}
 
     core_hw_setup = python_module.submodules['hw_setup']
-    # This list can only contain strings or tuples describing interfaces to be generated with_if_gen.py. Future improvement: allow .vh files in this list to copy from LIB
+    # This list may contain .vh files or strings or tuples describing interfaces to be generated with_if_gen.py
     Vheaders = core_hw_setup['headers']
     # This list may contain .v files, LIB python_modules, or functions to be called.
     hardware_srcs = core_hw_setup['modules']
@@ -78,7 +78,11 @@ def hw_setup(python_module):
     #Setup any hw submodules by calling the 'main()' function from their *_setup.py module
     module_dependency_setup(hardware_srcs, Vheaders, build_dir, submodule_dirs, lib_dir=LIB_DIR)
 
-    if Vheaders: create_Vheaders( f"{build_dir}/hardware/src", Vheaders )
+    # Create if_gen interfaces and copy every .vh file from LIB in the Vheaders list.
+    if Vheaders:
+        create_if_gen_headers( f"{build_dir}/hardware/src", Vheaders )
+        copy_files( LIB_DIR, f"{build_dir}/hardware/src", Vheaders, '*.vh' )
+
     if hardware_srcs: 
         # Copy every .v file from LIB that is in the hw_srcs list
         copy_files( LIB_DIR, f"{build_dir}/hardware/src", hardware_srcs, '*.v*' )
@@ -120,7 +124,10 @@ def sim_setup(python_module):
     #Setup any sim submodules by calling the 'sim_setup()' function from their *_setup.py module
     module_dependency_setup(sim_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sim_setup", lib_dir=LIB_DIR) 
 
-    if Vheaders: create_Vheaders( f"{build_dir}/{sim_dir}/src", Vheaders )
+    # Create if_gen interfaces and copy every .vh file from LIB in the Vheaders list.
+    if Vheaders:
+        create_if_gen_headers( f"{build_dir}/{sim_dir}/src", Vheaders )
+        copy_files( LIB_DIR, f"{build_dir}/{sim_dir}/src", Vheaders, '*.vh' )
     # Copy every .v file from LIB that is in the sim_srcs list
     if sim_srcs: copy_files( LIB_DIR, f"{build_dir}/{sim_dir}/src", sim_srcs, '*.v*' )
 
@@ -158,7 +165,10 @@ def fpga_setup(python_module):
     #Setup any fpga submodules by calling the 'fpga_setup()' function from their *_setup.py module
     module_dependency_setup(fpga_srcs, Vheaders, build_dir, submodule_dirs, function_2_call="setup.build_srcs.fpga_setup", lib_dir=LIB_DIR) 
 
-    if Vheaders: create_Vheaders( f"{build_dir}/{fpga_dir}/src", Vheaders )
+    # Create if_gen interfaces and copy every .vh file from LIB in the Vheaders list.
+    if Vheaders:
+        create_if_gen_headers( f"{build_dir}/{fpga_dir}/src", Vheaders )
+        copy_files( LIB_DIR, f"{build_dir}/{fpga_dir}/src", Vheaders, '*.vh' )
     # Copy every .v file from LIB that is in the fpga_srcs list
     if fpga_srcs: copy_files( LIB_DIR, f"{build_dir}/{fpga_dir}/src", fpga_srcs, '*.v*' )
 
@@ -268,16 +278,15 @@ def sw_setup(python_module):
     module_dependency_setup(sw_srcs, sw_headers, build_dir, submodule_dirs, function_2_call="setup.build_srcs.sw_setup", lib_dir=LIB_DIR) 
 
     # Copy every .h file of the sw_headers list from LIB
-    if sw_headers: copy_files( LIB_DIR+"/software", f"{build_dir}/software/src", sw_srcs, '*.h' ) 
+    if sw_headers: copy_files( LIB_DIR+"/software", f"{build_dir}/software/src", sw_headers, '*.h' ) 
     # Copy every .c file of the sw_srcs list from LIB
     if sw_srcs: copy_files( LIB_DIR+"/software", f"{build_dir}/software/src", sw_srcs, '*.c' )
 
-    # Copy LIB software files
-    if "pc-emul" in core_flows: copy_files(f"{LIB_DIR}/software/pc-emul", f"{build_dir}/software/pc-emul", copy_all = True)
-    if "emb" in core_flows: copy_files(f"{LIB_DIR}/software/embedded", f"{build_dir}/software/embedded", copy_all = True)
-
-    # Create 'scripts/' directory and console.mk
     if 'emb' in core_flows or 'pc-emul' in core_flows:
+        # Copy LIB software Makefile
+        shutil.copy(f"{LIB_DIR}/software/Makefile", f"{build_dir}/software")
+
+        # Create 'scripts/' directory and console.mk
         python_setup(build_dir)
         shutil.copy(f"{LIB_DIR}/scripts/console.mk", f"{build_dir}/console.mk")
 
@@ -380,11 +389,11 @@ def module_dependency_setup(srcs, headers, build_dir, submodule_dirs, function_2
                 srcs.pop(idx)
                 break
             # Entry is a 'python include' (software)
-            elif 'sw_setup' in function_2_call and\
-                not src.endswith(".c"):
-                lib_module_setup(headers, srcs, src, lib_dir, module_parameters=optional_parameters, module_extension='.c')
-                srcs.pop(idx)
-                break
+            elif 'sw_setup' in function_2_call:
+                if not src.endswith(".c"):
+                    lib_module_setup(headers, srcs, src, lib_dir, module_parameters=optional_parameters, module_extension='.c')
+                    srcs.pop(idx)
+                    break
             # Entry is a 'python include' (hardware)
             elif not src.endswith(".v"):
                 lib_module_setup(headers, srcs, src, lib_dir,
@@ -459,9 +468,15 @@ def copy_files(src_dir, dest_dir, sources = [], pattern = "*", copy_all = False)
 
 
 # Create verilog headers for the interfaces in Vheaders list, using if_gen.py
-def create_Vheaders(dest_dir, Vheaders):
+# This function will remove all if_gen entries from the Vheaders list. It will leave the .vh files in that list.
+def create_if_gen_headers(dest_dir, Vheaders):
+    non_if_gen_interfaces = []
     for vh_name in Vheaders:
-        if (type(vh_name) is str) and (vh_name in if_gen.interfaces):
+        if type(vh_name) == str and vh_name.endswith(".vh"):
+            # Save this entry as a .vh file. 
+            non_if_gen_interfaces.append(vh_name)
+            continue # Skip if_gen for this entry
+        elif (type(vh_name) is str) and (vh_name in if_gen.interfaces):
             if 'iob_' in vh_name: file_prefix = ''
             else: file_prefix = 'iob_'
             f_out = open (f"{dest_dir}/{file_prefix}{vh_name}.vh", 'w')
@@ -476,6 +491,8 @@ def create_Vheaders(dest_dir, Vheaders):
                                      )
         else: 
             sys.exit(f"{iob_colors.FAIL} {vh_name} is not an available header.{iob_colors.ENDC}")
+    # Save the list of non if_gen interfaces (will only contain .vh files)
+    Vheaders = non_if_gen_interfaces
 
 def version_file(core_name, core_version, core_previous_version, build_dir):
     tex_dir = f"{build_dir}/document/tsrc"

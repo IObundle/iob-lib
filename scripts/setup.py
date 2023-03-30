@@ -91,14 +91,11 @@ def setup( python_module, no_overlap=False):
     # Generate sw
     #
     if os.path.isdir(python_module.build_dir+'/software'): 
-        os.makedirs(python_module.build_dir+'/software/esrc', exist_ok=True)
-        os.makedirs(python_module.build_dir+'/software/psrc', exist_ok=True)
         if regs:
-            mkregs_obj.write_swheader(reg_table, python_module.build_dir+'/software/esrc', top)
-            mkregs_obj.write_swcode(reg_table, python_module.build_dir+'/software/esrc', top)
-            mkregs_obj.write_swheader(reg_table, python_module.build_dir+'/software/psrc', top)
-        mk_conf.conf_h(confs, top, python_module.build_dir+'/software/esrc')
-        mk_conf.conf_h(confs, top, python_module.build_dir+'/software/psrc')
+            mkregs_obj.write_swheader(reg_table, python_module.build_dir+'/software/src', top)
+            mkregs_obj.write_swcode(reg_table, python_module.build_dir+'/software/src', top)
+            mkregs_obj.write_swheader(reg_table, python_module.build_dir+'/software/src', top)
+        mk_conf.conf_h(confs, top, python_module.build_dir+'/software/src')
 
     #
     # Generate TeX
