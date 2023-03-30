@@ -142,13 +142,15 @@ if {[catch {execute_module -tool sta} result]} {
     puts "\nINFO: STA was successful.\n"
 }
 
-#run quartus sta to generate reports
-if [catch {qexec "[file join $::quartus(binpath) quartus_sta] -t quartus/timing.tcl $NAME"} result] {
-    qexit -error
-}
+
     
 if {$IS_FPGA != "1"} {
-    
+
+    #run quartus sta to generate reports
+    if [catch {qexec "[file join $::quartus(binpath) quartus_sta] -t quartus/timing.tcl $NAME"} result] {
+        qexit -error
+    }
+
     #write netlist
     if {$USE_QUARTUS_PRO == 1} {
         if {[catch {execute_module -tool eda -args "--resynthesis --format verilog"} result]} {

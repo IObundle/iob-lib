@@ -6,7 +6,7 @@ StartLimitIntervalSec=0[Service]
 [Service]
 Type=simple
 Restart=always
-RestartSec=1
+RestartSec=10s
 ExecStart=/usr/local/bin/board_server.py
 
 [Install]
