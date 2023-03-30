@@ -12,7 +12,7 @@ def lib_sim_setup (module_name, dest_srcs_dir):
     #Copy Hw
     if Vheaders: 
         create_if_gen_headers( dest_srcs_dir, Vheaders )
-        copy_files( LIB_DIR, dest_srcs_dir, Vheaders, '*.vh' )
+        copy_files( lib_dir, dest_srcs_dir, Vheaders, '*.vh' )
     if hardware_srcs: copy_files( lib_dir, dest_srcs_dir, hardware_srcs, '*.v' )
     
     # Copy TB
