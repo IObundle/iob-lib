@@ -2,10 +2,9 @@
 set NAME [lindex $argv 0]
 set BOARD [lindex $argv 1]
 set VSRC [lindex $argv 2]
-set DEFINES [lindex $argv 3]
-set VIP [lindex $argv 4]
-set IS_FPGA [lindex $argv 5]
-set CUSTOM_ARGS [lindex $argv 6]
+set VIP [lindex $argv 3]
+set IS_FPGA [lindex $argv 4]
+set CUSTOM_ARGS [lindex $argv 5]
 
 #verilog sources
 foreach file [split $VSRC \ ] {
@@ -47,7 +46,7 @@ if { $IS_FPGA == "1" } {
     if {[file exists "vivado/$NAME\_tool.sdc"]} {
         read_xdc vivado/$NAME\_tool.sdc
     }
-    synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -verilog_define $DEFINES -part $PART -top $NAME -verbose
+    synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -part $PART -top $NAME -verbose
 } else {
     #read design constraints
     puts "Out of context synthesis"
@@ -56,7 +55,7 @@ if { $IS_FPGA == "1" } {
     if {[file exists "vivado/$NAME\_tool.sdc"]} {
         read_xdc -mode out_of_context vivado/$NAME\_tool.sdc
     }
-    synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -verilog_define $DEFINES -part $PART -top $NAME -mode out_of_context -flatten_hierarchy rebuilt -verbose
+    synth_design -include_dirs ../src -include_dirs ./src -include_dirs ./vivado/$BOARD -part $PART -top $NAME -mode out_of_context -flatten_hierarchy rebuilt -verbose
 }
 
 #set post-map custom assignments

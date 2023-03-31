@@ -1,4 +1,4 @@
-VFLAGS+=-W all -g2005-sv -I. -I../src -Isrc $(DEFINES)
+VFLAGS+=-W all -g2005-sv -I. -I../src -Isrc
 
 ifeq ($(VCD),1)
 VFLAGS+=-DVCD

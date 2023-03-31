@@ -65,6 +65,7 @@ ifneq ($(CONSOLE_CMD),)
 endif
 	bash -c "trap 'make kill-sim &> /dev/null' INT TERM KILL EXIT; make exec"
 else
+	rsync $(SIM_SYNC_FLAGS) -avz --force --delete ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
 	bash -c "trap 'make kill-remote-sim &> /dev/null' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
 ifeq ($(VCD),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
@@ -124,7 +125,7 @@ gen-clean:
 	@rm -f *.hex
 	@find . -maxdepth 1 -name "*.vh" -not \( -name "bsp.vh" -o -name "uut_build.mk" \) -delete
 ifneq ($(SIM_SERVER),)
-	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'rm -rf $(REMOTE_BUILD_DIR); fi'
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'rm -rf $(REMOTE_BUILD_DIR)'
 endif
 
 clean-test-log:

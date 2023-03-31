@@ -10,7 +10,7 @@ include config_build.mk
 
 # default FPGA board
 BOARD ?= CYCLONEV-GT-DK
-BSP_H ?= software/embedded/bsp.h
+BSP_H ?= software/bsp.h
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -52,30 +52,29 @@ help:
 # EMBEDDED SOFTWARE
 #
 ifneq ($(filter emb, $(FLOWS)),)
-EMB_DIR=software/embedded
+SW_DIR=software
 fw-build: $(BSP_H)
-	make -C $(EMB_DIR) build
+	make -C $(SW_DIR) build
 
 fw-clean:
-	make -C $(EMB_DIR) clean
+	make -C $(SW_DIR) clean
 endif
 
 #
 # PC EMUL
 #
 ifneq ($(filter pc-emul, $(FLOWS)),)
-PC_DIR=software/pc-emul
 pc-emul-build: fw-build $(BSP_H)
-	make -C $(PC_DIR) build
+	make -C $(SW_DIR) build_emul
 
 pc-emul-run: $(BSP_H)
-	make -C $(PC_DIR) run
+	make -C $(SW_DIR) run_emul
 
 pc-emul-test: $(BSP_H)
-	make -C $(PC_DIR) test
+	make -C $(SW_DIR) test_emul
 
 pc-emul-clean:
-	make -C $(PC_DIR) clean
+	make -C $(SW_DIR) clean
 endif
 
 
