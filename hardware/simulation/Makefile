@@ -49,8 +49,10 @@ UFLAGS+=NODE=$(NODE)
 UFLAGS+=COV_TEST=$(COV_TEST)
 
 remote_build_dir:
+ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(SIM_SYNC_FLAGS) -avz --force --delete ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
+endif
 
 build: $(VHDR) $(VSRC) $(HEX) remote_build_dir
 ifeq ($(SIM_SERVER),)
