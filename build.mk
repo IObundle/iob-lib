@@ -64,7 +64,7 @@ endif
 # PC EMUL
 #
 ifneq ($(filter pc-emul, $(FLOWS)),)
-pc-emul-build: fw-build $(BSP_H)
+pc-emul-build: fw-build
 	make -C $(SW_DIR) build_emul
 
 pc-emul-run: $(BSP_H)
@@ -102,10 +102,10 @@ endif
 #
 ifneq ($(filter sim, $(FLOWS)),)
 SIM_DIR=hardware/simulation
-sim-build: fw-build $(BSP_H)
+sim-build: fw-build
 	make -C $(SIM_DIR) build
 
-sim-run: fw-build $(BSP_H)
+sim-run: fw-build
 	make -C $(SIM_DIR) run
 
 sim-waves:
@@ -117,7 +117,7 @@ sim-debug:
 sim-clean:
 	make -C $(SIM_DIR) clean
 
-sim-test: fw-build $(BSP_H)
+sim-test: fw-build
 	make -C $(SIM_DIR) test
 
 cov-test: sim-clean
@@ -131,13 +131,13 @@ endif
 #
 ifneq ($(filter fpga, $(FLOWS)),)
 FPGA_DIR=hardware/fpga
-fpga-build: fw-build $(BSP_H)
+fpga-build: fw-build
 	make -C $(FPGA_DIR) build
 
-fpga-run: fw-build $(BSP_H)
+fpga-run: fw-build
 	make -C $(FPGA_DIR) run
 
-fpga-test: fw-build $(BSP_H)
+fpga-test: fw-build
 	make -C $(FPGA_DIR) test
 
 fpga-debug: 
