@@ -142,11 +142,7 @@ class mkregs:
         for row in table:
             name = row['name']
             n_bits = row['n_bits']
-            log2n_items = row['log2n_items']
-            n_bytes = self.bceil(n_bits, 3)/8
             auto = row['autologic']
-     
-            
             if row['type'] == 'W':
                 if auto:
                     f.write(f"\t`IOB_OUTPUT({name}_o, {self.verilog_max(n_bits,1)}),\n")
@@ -168,10 +164,7 @@ class mkregs:
         for row in table:
             name = row['name']
             n_bits = row['n_bits']
-            log2n_items = row['log2n_items']
-            n_bytes = self.bceil(n_bits, 3)/8
             auto = row['autologic']
-            rst_val = row['rst_val']
 
             if row['type'] == 'W':
                 if auto:
@@ -193,9 +186,6 @@ class mkregs:
     def gen_portmap(self, table, f):
         for row in table:
             name = row['name']
-            n_bits = row['n_bits']
-            log2n_items = row['log2n_items']
-            n_bytes = self.bceil(n_bits, 3)/8
             auto = row['autologic']
 
             if row['type'] == 'W':
