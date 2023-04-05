@@ -102,10 +102,10 @@ endif
 #
 ifneq ($(filter sim, $(FLOWS)),)
 SIM_DIR=hardware/simulation
-sim-build: $(BSP_H)
+sim-build: fw-build $(BSP_H)
 	make -C $(SIM_DIR) build
 
-sim-run: $(BSP_H)
+sim-run: fw-build $(BSP_H)
 	make -C $(SIM_DIR) run
 
 sim-waves:
@@ -117,7 +117,7 @@ sim-debug:
 sim-clean:
 	make -C $(SIM_DIR) clean
 
-sim-test: $(BSP_H)
+sim-test: fw-build $(BSP_H)
 	make -C $(SIM_DIR) test
 
 cov-test: sim-clean
@@ -131,13 +131,13 @@ endif
 #
 ifneq ($(filter fpga, $(FLOWS)),)
 FPGA_DIR=hardware/fpga
-fpga-build: $(BSP_H)
+fpga-build: fw-build $(BSP_H)
 	make -C $(FPGA_DIR) build
 
-fpga-run: $(BSP_H)
+fpga-run: fw-build $(BSP_H)
 	make -C $(FPGA_DIR) run
 
-fpga-test: $(BSP_H)
+fpga-test: fw-build $(BSP_H)
 	make -C $(FPGA_DIR) test
 
 fpga-debug: 
