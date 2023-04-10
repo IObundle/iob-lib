@@ -8,7 +8,6 @@ module iob_regfile_2p
   )
   (
     input                     clk_i,
-    input                     arst_i,
     input                     cke_i,
     
     // Write Port
@@ -22,17 +21,10 @@ module iob_regfile_2p
   );
 
   reg [DATA_W-1:0] regfile [(2**ADDR_W)-1:0];
-  
-  genvar addr;
-  generate
-    for (addr=0; addr < (2**ADDR_W); addr=addr+1) begin: register_file
-      always @(posedge clk_i)
-        if (rst_i)
-          regfile[addr] <= {DATA_W{1'b0}};
-        else if (wen_i && (waddr_i == addr))
-          regfile[addr] <= w_data_i;
-    end
-  endgenerate
+
+  always @(posedge clk_i)
+    if (cke_i && wen_i)
+      regfile[addr] <= wdata_i;
 
   assign rdata_o = regfile[raddr_i];
   
