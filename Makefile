@@ -118,6 +118,15 @@ board_server_uninstall:
 board_server_status:
 	systemctl status board_server
 
+format-setup: requirements_dev.txt
+	python3 -m pip install -r $<
+
+format:
+	@./scripts/black_format.py
+
+format-check:
+	@./scripts/black_format.py --check
+
 clean:
 	@rm -rf $(BUILD_VSRC_DIR)
 	@rm -rf spyglass_reports
@@ -126,4 +135,7 @@ clean:
 
 debug:
 
-.PHONY: all sim board_server_install clean debug
+.PHONY: all sim \ 
+	board_server_install \ 
+	format-setup format format-check \ 
+	clean debug
