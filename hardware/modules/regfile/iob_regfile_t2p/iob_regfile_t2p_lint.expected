@@ -5,9 +5,9 @@ MORESIMPLE REPORT:
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ID       Rule                    Alias                   Severity    File                                                                                          Line    Wt    Message
 ======================================================================================
-[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob_regfile_async_w_rr.v                                                                      4       2     Module iob_regfile_async_w_rr is a top level design unit
-[8B]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                                 2       10    Domain Matrix for design "iob_regfile_async_w_rr",  based on the individual constraints defined in the SDC as inferred in the Sta mode
-[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob_regfile_async_w_rr/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob_regfile_async_w_rr/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
+[1]      DetectTopDesignUnits    DetectTopDesignUnits    Info        iob_regfile_t2p.v                                                                      4       2     Module iob_regfile_t2p is a top level design unit
+[8B]     Domain_Matrix01                                 Info        spyglass.sgdc                                                                                 2       10    Domain Matrix for design "iob_regfile_t2p",  based on the individual constraints defined in the SDC as inferred in the Sta mode
+[0]      ElabSummary             ElabSummary             Info        ./spyglass/iob_regfile_t2p/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt    0       2     Please refer file './spyglass/iob_regfile_t2p/lint/lint_rtl/spyglass_reports/SpyGlass/elab_summary.rpt' for elab summary report
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -15,12 +15,12 @@ ID       Rule                    Alias                   Severity    File       
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ID       Rule                     Alias                  Severity     File                        Line    Wt    Message
 ======================================================================================
-[8D]     ClkHierName              (OpenMORE 5.2.1.7)     Guideline    iob_regfile_async_w_rr.v    44      5     Clock signal name 'r_clk_i' does not match lower-level name 'clk_i' (instance iob_sync_regfile_synced)
-[3]      NoTopLogic               (OpenMORE 5.6.8.1)     Guideline    iob_regfile_async_w_rr.v    33      5     Logic inferred at the top level
-[2]      NoTopLogic               (OpenMORE 5.6.8.1)     Guideline    iob_regfile_async_w_rr.v    56      5     Logic inferred at the top level
-[87]     RegOutName               (OpenMORE 5.2.1.13)    Guideline    iob_regfile_async_w_rr.v    37      5     Register output name 'regfile_in' should end with regular expression /^(.*)_o/
+[8D]     ClkHierName              (OpenMORE 5.2.1.7)     Guideline    iob_regfile_t2p.v    44      5     Clock signal name 'r_clk_i' does not match lower-level name 'clk_i' (instance iob_sync_regfile_synced)
+[3]      NoTopLogic               (OpenMORE 5.6.8.1)     Guideline    iob_regfile_t2p.v    33      5     Logic inferred at the top level
+[2]      NoTopLogic               (OpenMORE 5.6.8.1)     Guideline    iob_regfile_t2p.v    56      5     Logic inferred at the top level
+[87]     RegOutName               (OpenMORE 5.2.1.13)    Guideline    iob_regfile_t2p.v    37      5     Register output name 'regfile_in' should end with regular expression /^(.*)_o/
 [86]     RegOutName               (OpenMORE 5.2.1.13)    Guideline    iob_sync.v                  22      5     Register output name 'sync' should end with regular expression /^(.*)_o/
-[55]     SignedUnsignedExpr-ML                           Warning      iob_regfile_async_w_rr.v    36      5     Unsigned expression 'w_addr_i' used with signed expression 'addr' in comparison
+[55]     SignedUnsignedExpr-ML                           Warning      iob_regfile_t2p.v    36      5     Unsigned expression 'w_addr_i' used with signed expression 'addr' in comparison
 [4]      W34                                             Info         iob_lib.vh                  2       2     Macro 'LIBINC' is never used
 [5]      W34                                             Info         iob_lib.vh                  8       2     Macro 'IOB_MAX' is never used
 [6]      W34                                             Info         iob_lib.vh                  9       2     Macro 'IOB_MIN' is never used
