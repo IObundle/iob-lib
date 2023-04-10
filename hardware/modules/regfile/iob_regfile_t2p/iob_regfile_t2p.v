@@ -1,7 +1,7 @@
 `timescale 1 ns / 1 ps
 `include "iob_lib.vh"
 
-module iob_regfile_async_w_rr
+module iob_regfile_t2p
   #(
     parameter ADDR_W = 3,
     parameter DATA_W = 21
