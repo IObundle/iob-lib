@@ -1,6 +1,6 @@
 `timescale 1 ns / 1 ps
 
-module iob_regfile_readpar
+module iob_regfile_2p_readpar
   #(
     parameter WADDR_W = 3,
     parameter WDATA_W = 21,
