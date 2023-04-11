@@ -33,6 +33,6 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Install python dependencies
-        run: python3 -m pip install -r requirements_dev.txt
+        run: make format-install
       - name: Python black check
         run: ./scripts/black_format.py --check

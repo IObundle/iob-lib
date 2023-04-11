@@ -118,8 +118,8 @@ board_server_uninstall:
 board_server_status:
 	systemctl status board_server
 
-format-setup: requirements_dev.txt
-	python3 -m pip install -r $<
+format-install:
+	python3 -m pip install black==22.3.0
 
 format:
 	@./scripts/black_format.py
@@ -137,5 +137,5 @@ debug:
 
 .PHONY: all sim \ 
 	board_server_install \ 
-	format-setup format format-check \ 
+	format-install format format-check \ 
 	clean debug
