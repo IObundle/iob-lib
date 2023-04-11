@@ -46,5 +46,5 @@ jobs:
           submodules: 'recursive'
       - name: Install llvm / clang
         run: ./scripts/clang_install.py
-      - name: Python black check
-        run: ./scripts/black_format.py --check
+      - name: Clang Format check
+        run: ./scripts/clang_format.py --check
