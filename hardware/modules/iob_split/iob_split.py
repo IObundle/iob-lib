@@ -1,2 +1,2 @@
-headers     = [  ]
-modules    = [ 'iob_split.v' ]
+headers = []
+modules = ["iob_split.v"]
