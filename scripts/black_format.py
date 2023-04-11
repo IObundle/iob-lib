@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-import subprocess
 import argparse
-import pkg_resources
+import subprocess
 
 
 if __name__ == "__main__":

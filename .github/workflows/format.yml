@@ -33,6 +33,18 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Install python dependencies
-        run: make format-install
+        run: make format-install-python
+      - name: Python black check
+        run: ./scripts/black_format.py --check
+  clang-format-check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      - name: Install llvm / clang
+        run: ./scripts/clang_install.py
       - name: Python black check
         run: ./scripts/black_format.py --check
