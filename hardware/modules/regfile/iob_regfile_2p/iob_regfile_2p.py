@@ -1,2 +1,2 @@
-headers     = [  ]
-modules    = [ 'iob_regfile_2p.v']
+headers = []
+modules = ["iob_regfile_2p.v"]

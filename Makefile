@@ -118,6 +118,22 @@ board_server_uninstall:
 board_server_status:
 	systemctl status board_server
 
+format-install-python:
+	python3 -m pip install black==22.3.0
+
+format-install-clang:
+	@./scripts/clang_install.py
+
+format-install-all: format-install-python format-install-clang
+
+format:
+	@./scripts/black_format.py
+	@./scripts/clang_format.py
+
+format-check:
+	@./scripts/black_format.py --check
+	@./scripts/clang_format.py --check
+
 clean:
 	@rm -rf $(BUILD_VSRC_DIR)
 	@rm -rf spyglass_reports
@@ -126,4 +142,8 @@ clean:
 
 debug:
 
-.PHONY: all sim board_server_install clean debug
+.PHONY: all sim \ 
+	board_server_install \ 
+	format-install-all format-install-python format-install-clang \
+	format format-check \ 
+	clean debug

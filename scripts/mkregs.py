@@ -18,97 +18,117 @@ class mkregs:
 
     @staticmethod
     def boffset(n, n_bytes):
-        return 8*(n%n_bytes)
+        return 8 * (n % n_bytes)
 
     @staticmethod
     def bfloor(n, log2base):
         base = int(2**log2base)
-        if n%base == 0:
+        if n % base == 0:
             return n
-        return base*int(n/base)
+        return base * int(n / base)
 
     @staticmethod
-    def verilog_max(a,b):
-        if(a==b): return a
+    def verilog_max(a, b):
+        if a == b:
+            return a
         try:
-            #Assume a and b are int
-            a=int(a)
-            b=int(b)
-            return a if a>b else b
+            # Assume a and b are int
+            a = int(a)
+            b = int(b)
+            return a if a > b else b
         except ValueError:
-            #a or b is a string
+            # a or b is a string
             return f"((({a}) > ({b})) ? ({a}) : ({b}))"
 
     def get_reg_table(self, regs, no_overlap):
         # Create reg table
         reg_table = []
         for i_regs in regs:
-            reg_table += i_regs['regs']
+            reg_table += i_regs["regs"]
 
         return self.compute_addr(reg_table, no_overlap)
 
     def bceil(self, n, log2base):
         base = int(2**log2base)
-        n = eval_param_expression_from_config(n, self.config,'max')
-        #print(f"{n} of {type(n)} and {base}")
-        if n%base == 0:
+        n = eval_param_expression_from_config(n, self.config, "max")
+        # print(f"{n} of {type(n)} and {base}")
+        if n % base == 0:
             return n
         else:
-            return int(base*ceil(n/base))
+            return int(base * ceil(n / base))
 
     # Calculate numeric value of addr_w, replacing params by their max value
     def calc_addr_w(self, log2n_items, n_bytes):
-            return int(ceil(eval_param_expression_from_config(log2n_items, self.config,'max')+log(n_bytes,2)))
+        return int(
+            ceil(
+                eval_param_expression_from_config(log2n_items, self.config, "max")
+                + log(n_bytes, 2)
+            )
+        )
 
     # Generate symbolic expression string to caluclate addr_w in verilog
     @staticmethod
     def calc_verilog_addr_w(log2n_items, n_bytes):
         n_bytes = int(n_bytes)
         try:
-            #Assume log2n_items is int
-            log2n_items=int(log2n_items)
-            return log2n_items+ceil(log(n_bytes,2))
+            # Assume log2n_items is int
+            log2n_items = int(log2n_items)
+            return log2n_items + ceil(log(n_bytes, 2))
         except ValueError:
-            #log2n_items is a string
-            if n_bytes == 1 :
+            # log2n_items is a string
+            if n_bytes == 1:
                 return log2n_items
-            else :
+            else:
                 return f"{log2n_items}+{ceil(log(n_bytes,2))}"
-            
-
 
     def gen_wr_reg(self, row, f):
-        name = row['name']
-        rst_val = int(row['rst_val'])
-        n_bits = row['n_bits']
-        log2n_items = row['log2n_items']
-        n_bytes = self.bceil(n_bits, 3)/8
-        addr = row['addr']
-        addr_w = self.calc_verilog_addr_w(log2n_items,n_bytes)
-        auto = row['autologic']
+        name = row["name"]
+        rst_val = int(row["rst_val"])
+        n_bits = row["n_bits"]
+        log2n_items = row["log2n_items"]
+        n_bytes = self.bceil(n_bits, 3) / 8
+        addr = row["addr"]
+        addr_w = self.calc_verilog_addr_w(log2n_items, n_bytes)
+        auto = row["autologic"]
 
-        f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n")
+        f.write(
+            f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n"
+        )
 
-        #compute wdata with only the needed bits
+        # compute wdata with only the needed bits
         if auto:
             f.write(f"`IOB_WIRE({name}_wdata, {self.verilog_max(n_bits,1)})\n")
-            f.write(f"assign {name}_wdata = iob_wdata_i[{self.boffset(addr,self.cpu_n_bytes)}+:{self.verilog_max(n_bits,1)}];\n")
+            f.write(
+                f"assign {name}_wdata = iob_wdata_i[{self.boffset(addr,self.cpu_n_bytes)}+:{self.verilog_max(n_bits,1)}];\n"
+            )
 
-        #check if address in range
+        # check if address in range
         f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
-        f.write(f"assign {name}_addressed = (waddr >= {addr}) && (waddr < ({addr}+(2**({addr_w}))));\n")
+        f.write(
+            f"assign {name}_addressed = (waddr >= {addr}) && (waddr < ({addr}+(2**({addr_w}))));\n"
+        )
 
-        if auto: #generate register
-            #get number of bits needed to represent rst_val
-            rst_n_bits = ceil(log(rst_val+1,2))
-            #fill remaining bits with 0s
+        if auto:  # generate register
+            # get number of bits needed to represent rst_val
+            rst_n_bits = ceil(log(rst_val + 1, 2))
+            # fill remaining bits with 0s
             if isinstance(n_bits, str):
                 zeros_filling = "{(" + str(n_bits) + "-" + str(rst_n_bits) + "){1'd0}}"
-                rst_val_str = "{" + zeros_filling + "," + str(rst_n_bits) + "'d" + str(rst_val) + "}"
+                rst_val_str = (
+                    "{"
+                    + zeros_filling
+                    + ","
+                    + str(rst_n_bits)
+                    + "'d"
+                    + str(rst_val)
+                    + "}"
+                )
             else:
-                rst_val_str =  str(n_bits) + "'d" + str(rst_val)
+                rst_val_str = str(n_bits) + "'d" + str(rst_val)
             f.write(f"`IOB_WIRE({name}_wen, 1)\n")
-            f.write(f"assign {name}_wen = (iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n")
+            f.write(
+                f"assign {name}_wen = (iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n"
+            )
             f.write(f"iob_reg_e #({n_bits}, {rst_val_str}) {name}_datareg (\n")
             f.write(".clk_i (clk_i),\n")
             f.write(".arst_i (arst_i),\n")
@@ -117,63 +137,71 @@ class mkregs:
             f.write(f".data_i ({name}_wdata),\n")
             f.write(f".data_o ({name}_o)\n")
             f.write(");\n")
-        else: #compute wen
-            f.write(f"assign {name}_wen_o = ({name}_addressed & iob_avalid_i)? |iob_wstrb_i: 1'b0;\n")
-            
+        else:  # compute wen
+            f.write(
+                f"assign {name}_wen_o = ({name}_addressed & iob_avalid_i)? |iob_wstrb_i: 1'b0;\n"
+            )
+
     def gen_rd_reg(self, row, f):
-        name = row['name']
-        rst_val = row['rst_val']
-        n_bits = row['n_bits']
-        log2n_items = row['log2n_items']
-        n_bytes = self.bceil(n_bits, 3)/8
-        addr = row['addr']
-        addr_w = self.calc_verilog_addr_w(log2n_items,n_bytes)
-        auto = row['autologic']
+        name = row["name"]
+        rst_val = row["rst_val"]
+        n_bits = row["n_bits"]
+        log2n_items = row["log2n_items"]
+        n_bytes = self.bceil(n_bits, 3) / 8
+        addr = row["addr"]
+        addr_w = self.calc_verilog_addr_w(log2n_items, n_bytes)
+        auto = row["autologic"]
 
-        f.write(f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n")
+        f.write(
+            f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n"
+        )
 
-        if not auto: #output read enable
+        if not auto:  # output read enable
             f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
-            f.write(f"assign {name}_addressed = (iob_addr_i >= {addr}) && (iob_addr_i < ({addr}+(2**({addr_w}))));\n")
-            f.write(f"assign {name}_ren_o = {name}_addressed & iob_avalid_i & (~|iob_wstrb_i);\n")
+            f.write(
+                f"assign {name}_addressed = (iob_addr_i >= {addr}) && (iob_addr_i < ({addr}+(2**({addr_w}))));\n"
+            )
+            f.write(
+                f"assign {name}_ren_o = {name}_addressed & iob_avalid_i & (~|iob_wstrb_i);\n"
+            )
 
     # generate ports for swreg module
     def gen_port(self, table, f):
         for row in table:
-            name = row['name']
-            n_bits = row['n_bits']
-            auto = row['autologic']
-            if row['type'] == 'W':
+            name = row["name"]
+            n_bits = row["n_bits"]
+            auto = row["autologic"]
+            if row["type"] == "W":
                 if auto:
                     f.write(f"\t`IOB_OUTPUT({name}_o, {self.verilog_max(n_bits,1)}),\n")
                 else:
                     f.write(f"\t`IOB_OUTPUT({name}_wen_o, 1),\n")
-            elif row['type'] == 'R':
+            elif row["type"] == "R":
                 f.write(f"\t`IOB_INPUT({name}_i, {self.verilog_max(n_bits,1)}),\n")
                 if not auto:
                     f.write(f"\t`IOB_OUTPUT({name}_ren_o, 1),\n")
                     f.write(f"\t`IOB_INPUT({name}_rvalid_i, 1),\n")
             if not auto:
                 f.write(f"\t`IOB_INPUT({name}_ready_i, 1),\n")
-                
+
         f.write(f"\t`IOB_OUTPUT(iob_ready_nxt_o, 1),\n")
         f.write(f"\t`IOB_OUTPUT(iob_rvalid_nxt_o, 1),\n")
 
     # generate wires to connect instance in top module
     def gen_inst_wire(self, table, f):
         for row in table:
-            name = row['name']
-            n_bits = row['n_bits']
-            auto = row['autologic']
+            name = row["name"]
+            n_bits = row["n_bits"]
+            auto = row["autologic"]
 
-            if row['type'] == 'W':
+            if row["type"] == "W":
                 if auto:
                     f.write(f"`IOB_WIRE({name}, {self.verilog_max(n_bits,1)})\n")
                 else:
                     f.write(f"`IOB_WIRE({name}_wen, 1)\n")
-            elif row['type'] == 'R':
+            elif row["type"] == "R":
                 f.write(f"`IOB_WIRE({name}, {self.verilog_max(n_bits,1)})\n")
-                if not row['autologic']:
+                if not row["autologic"]:
                     f.write(f"`IOB_WIRE({name}_rvalid, 1)\n")
                     f.write(f"`IOB_WIRE({name}_ren, 1)\n")
             if not auto:
@@ -185,10 +213,10 @@ class mkregs:
     # generate portmap for swreg instance in top module
     def gen_portmap(self, table, f):
         for row in table:
-            name = row['name']
-            auto = row['autologic']
+            name = row["name"]
+            auto = row["autologic"]
 
-            if row['type'] == 'W':
+            if row["type"] == "W":
                 if auto:
                     f.write(f"\t.{name}_o({name}),\n")
                 else:
@@ -204,7 +232,6 @@ class mkregs:
         f.write(f"\t.iob_ready_nxt_o(iob_ready_nxt),\n")
         f.write(f"\t.iob_rvalid_nxt_o(iob_rvalid_nxt),\n")
 
-
     def write_hwcode(self, table, out_dir, top):
 
         #
@@ -218,7 +245,7 @@ class mkregs:
         # connection wires
         self.gen_inst_wire(table, f_inst)
 
-        f_inst.write(f'{top}_swreg_gen #(\n')
+        f_inst.write(f"{top}_swreg_gen #(\n")
         f_inst.write(f'\t`include "{top}_inst_params.vh"\n')
         f_inst.write("\n) swreg_0 (\n")
         self.gen_portmap(table, f_inst)
@@ -238,13 +265,13 @@ class mkregs:
 
         # iob library
         f_gen.write(f'`include "iob_lib.vh"\n')
-        
+
         # macros
         f_gen.write(f'`include "{top}_conf.vh"\n')
         f_gen.write(f'`include "{top}_swreg_def.vh"\n\n')
 
         # declaration
-        f_gen.write(f'module {top}_swreg_gen\n')
+        f_gen.write(f"module {top}_swreg_gen\n")
 
         # parameters
         f_gen.write("#(\n")
@@ -258,26 +285,27 @@ class mkregs:
         f_gen.write('\t`include "iob_clkenrst_port.vh"\n')
         f_gen.write(");\n\n")
 
-        #write address
+        # write address
         f_gen.write("\n//write address\n")
 
-        #extract address byte offset
+        # extract address byte offset
         f_gen.write(f"`IOB_WIRE(byte_offset, ($clog2(DATA_W/8)+1))\n")
-        f_gen.write(f"iob_ctls #(.N(DATA_W/8), .MODE(0), .SYMBOL(0)) bo_inst (.data_i(iob_wstrb_i), .count_o(byte_offset));\n")
+        f_gen.write(
+            f"iob_ctls #(.N(DATA_W/8), .MODE(0), .SYMBOL(0)) bo_inst (.data_i(iob_wstrb_i), .count_o(byte_offset));\n"
+        )
 
-        #compute write address
+        # compute write address
         f_gen.write(f"`IOB_WIRE(waddr, ADDR_W)\n")
         f_gen.write(f"assign waddr = `IOB_WORD_ADDR(iob_addr_i) + byte_offset;\n")
 
         # insert write register logic
         for row in table:
-            if row['type'] == 'W':
+            if row["type"] == "W":
                 self.gen_wr_reg(row, f_gen)
-
 
         # insert read register logic
         for row in table:
-            if row['type'] == 'R':
+            if row["type"] == "R":
                 self.gen_rd_reg(row, f_gen)
 
         #
@@ -290,8 +318,8 @@ class mkregs:
         f_gen.write(f"`IOB_VAR(rvalid_int, 1)\n")
         f_gen.write(f"`IOB_VAR(wready_int, 1)\n")
         f_gen.write(f"`IOB_VAR(rready_int, 1)\n\n")
-        
-        #ready output
+
+        # ready output
         f_gen.write("//ready output\n")
         f_gen.write("`IOB_VAR(ready_nxt, 1)\n")
         f_gen.write("iob_reg #(1, 1'd1) ready_reg_inst (\n")
@@ -301,8 +329,8 @@ class mkregs:
         f_gen.write(".data_i (ready_nxt),\n")
         f_gen.write(".data_o (iob_ready_o)\n")
         f_gen.write(");\n\n")
-        
-        #rvalid output
+
+        # rvalid output
         f_gen.write("//rvalid output\n")
         f_gen.write("`IOB_VAR(rvalid_nxt, 1)\n")
         f_gen.write("iob_reg #(1, 1'd0) rvalid_reg_inst (\n")
@@ -313,16 +341,18 @@ class mkregs:
         f_gen.write(".data_o (iob_rvalid_o)\n")
         f_gen.write(");\n\n")
 
-        #rdata output
+        # rdata output
         f_gen.write("//rdata output\n")
-        f_gen.write(f"iob_reg #({8*self.cpu_n_bytes}, {8*self.cpu_n_bytes}'d0) rdata_reg_inst (\n")
+        f_gen.write(
+            f"iob_reg #({8*self.cpu_n_bytes}, {8*self.cpu_n_bytes}'d0) rdata_reg_inst (\n"
+        )
         f_gen.write(".clk_i (clk_i),\n")
         f_gen.write(".arst_i (arst_i),\n")
         f_gen.write(".cke_i (cke_i),\n")
         f_gen.write(".data_i (rdata_int),\n")
         f_gen.write(".data_o (iob_rdata_o)\n")
         f_gen.write(");\n\n")
-        
+
         f_gen.write("`IOB_WIRE(pc, 1)\n")
         f_gen.write("`IOB_VAR(pc_nxt, 1)\n")
         f_gen.write("iob_reg #(1, 1'd0) pc_reg (\n")
@@ -339,49 +369,69 @@ class mkregs:
         f_gen.write(f"\trready_int = 1'b1;\n")
         f_gen.write(f"\trvalid_int = 1'b1;\n")
         f_gen.write(f"\twready_int = 1'b1;\n\n")
-        
 
-        #read register response
+        # read register response
         for row in table:
-            name = row['name']
-            addr = row['addr']
-            n_bits = row['n_bits']
-            log2n_items = row['log2n_items']
-            n_bytes = int(self.bceil(n_bits, 3)/8)
-            addr_last = int(addr + ((2**eval_param_expression_from_config(log2n_items, self.config,'max'))-1)*n_bytes)
-            addr_w = self.calc_addr_w(log2n_items,n_bytes)
-            addr_w_base = max(log(self.cpu_n_bytes,2), addr_w)
-            auto = row['autologic']
+            name = row["name"]
+            addr = row["addr"]
+            n_bits = row["n_bits"]
+            log2n_items = row["log2n_items"]
+            n_bytes = int(self.bceil(n_bits, 3) / 8)
+            addr_last = int(
+                addr
+                + (
+                    (
+                        2
+                        ** eval_param_expression_from_config(
+                            log2n_items, self.config, "max"
+                        )
+                    )
+                    - 1
+                )
+                * n_bytes
+            )
+            addr_w = self.calc_addr_w(log2n_items, n_bytes)
+            addr_w_base = max(log(self.cpu_n_bytes, 2), addr_w)
+            auto = row["autologic"]
 
-            if row['type'] == 'R':
-                if self.bfloor(addr, addr_w_base) == self.bfloor(addr_last, addr_w_base) :
-                    f_gen.write(f"\tif(`IOB_WORD_ADDR(iob_addr_i) == {self.bfloor(addr, addr_w_base)}) ")
-                else :
-                    f_gen.write(f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {self.bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {self.bfloor(addr_last, addr_w_base)})) ")
+            if row["type"] == "R":
+                if self.bfloor(addr, addr_w_base) == self.bfloor(
+                    addr_last, addr_w_base
+                ):
+                    f_gen.write(
+                        f"\tif(`IOB_WORD_ADDR(iob_addr_i) == {self.bfloor(addr, addr_w_base)}) "
+                    )
+                else:
+                    f_gen.write(
+                        f"\tif((`IOB_WORD_ADDR(iob_addr_i) >= {self.bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {self.bfloor(addr_last, addr_w_base)})) "
+                    )
                 f_gen.write(f"begin\n")
-                f_gen.write(f"\t\trdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n")
+                f_gen.write(
+                    f"\t\trdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n"
+                )
                 if not auto:
                     f_gen.write(f"\t\trready_int = {name}_ready_i;\n")
                     f_gen.write(f"\t\trvalid_int = {name}_rvalid_i;\n")
                 f_gen.write(f"\tend\n\n")
 
-
-        #write register response
+        # write register response
         for row in table:
-            name = row['name']
-            addr = row['addr']
-            n_bits = row['n_bits']
-            log2n_items = row['log2n_items']
-            n_bytes = int(self.bceil(n_bits, 3)/8)
-            addr_w = self.calc_addr_w(log2n_items,n_bytes)
-            auto = row['autologic']
+            name = row["name"]
+            addr = row["addr"]
+            n_bits = row["n_bits"]
+            log2n_items = row["log2n_items"]
+            n_bytes = int(self.bceil(n_bits, 3) / 8)
+            addr_w = self.calc_addr_w(log2n_items, n_bytes)
+            auto = row["autologic"]
 
-            if row['type'] == 'W':
+            if row["type"] == "W":
                 if not auto:
                     # get wready
-                    f_gen.write(f"\tif((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n")
+                    f_gen.write(
+                        f"\tif((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n"
+                    )
                     f_gen.write(f"\t\twready_int = {name}_ready_i;\n\n")
-        
+
         f_gen.write("\tready_nxt = (|iob_wstrb_i)? wready_int: rready_int;\n")
         f_gen.write("\trvalid_nxt = iob_rvalid_o;\n")
         f_gen.write("\tpc_nxt = pc + 1'b1;\n\n")
@@ -400,11 +450,11 @@ class mkregs:
 
         f_gen.write("end //IOB_COMB\n\n")
 
-        #ready_nxt output
+        # ready_nxt output
         f_gen.write("//ready_nxt output\n")
         f_gen.write("assign iob_ready_nxt_o = ready_nxt;\n")
-     
-        #rvalid_nxt output
+
+        # rvalid_nxt output
         f_gen.write("//rvalid_nxt output\n")
         f_gen.write("assign iob_rvalid_nxt_o = rvalid_nxt;\n\n")
 
@@ -425,15 +475,22 @@ class mkregs:
         macro_prefix = f"{top}_".upper()
         f_def.write("//addresses\n")
         for row in table:
-            name = row['name']
-            n_bits = row['n_bits']
-            n_bytes = self.bceil(n_bits, 3)/8
-            log2n_items = row['log2n_items']
-            addr_w = int(ceil(eval_param_expression_from_config(log2n_items, self.config,'val')+log(n_bytes,2)))
+            name = row["name"]
+            n_bits = row["n_bits"]
+            n_bytes = self.bceil(n_bits, 3) / 8
+            log2n_items = row["log2n_items"]
+            addr_w = int(
+                ceil(
+                    eval_param_expression_from_config(log2n_items, self.config, "val")
+                    + log(n_bytes, 2)
+                )
+            )
             f_def.write(f"localparam {macro_prefix}{name}_ADDR = {row['addr']};\n")
-            if eval_param_expression_from_config(log2n_items, self.config,'val')>0:
+            if eval_param_expression_from_config(log2n_items, self.config, "val") > 0:
                 f_def.write(f"localparam {macro_prefix}{name}_ADDR_W = {addr_w};\n")
-            f_def.write(f"localparam {macro_prefix}{name}_W = {eval_param_expression_from_config(n_bits, self.config,'val')};\n\n")
+            f_def.write(
+                f"localparam {macro_prefix}{name}_W = {eval_param_expression_from_config(n_bits, self.config,'val')};\n\n"
+            )
         f_def.close()
 
     # Generate *_swreg_def.vh file. Macros from this file should only be used inside the instance of the core/system since they may contain parameters which are only known by the instance.
@@ -449,16 +506,19 @@ class mkregs:
         macro_prefix = f"{top}_".upper()
         f_def.write("//addresses\n")
         for row in table:
-            name = row['name']
-            n_bits = row['n_bits']
-            n_bytes = self.bceil(n_bits, 3)/8
-            log2n_items = row['log2n_items']
+            name = row["name"]
+            n_bits = row["n_bits"]
+            n_bytes = self.bceil(n_bits, 3) / 8
+            log2n_items = row["log2n_items"]
             f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
-            if eval_param_expression_from_config(log2n_items, self.config,'max')>0:
-                f_def.write(f"`define {macro_prefix}{name}_ADDR_W {self.verilog_max(self.calc_verilog_addr_w(log2n_items,n_bytes),1)}\n")
-            f_def.write(f"`define {macro_prefix}{name}_W {self.verilog_max(n_bits,1)}\n\n")
+            if eval_param_expression_from_config(log2n_items, self.config, "max") > 0:
+                f_def.write(
+                    f"`define {macro_prefix}{name}_ADDR_W {self.verilog_max(self.calc_verilog_addr_w(log2n_items,n_bytes),1)}\n"
+                )
+            f_def.write(
+                f"`define {macro_prefix}{name}_W {self.verilog_max(n_bits,1)}\n\n"
+            )
         f_def.close()
-
 
     # Get C type from swreg n_bytes
     # uses unsigned int types from C stdint library
@@ -470,7 +530,6 @@ class mkregs:
         except:
             print(f"Error: register {name} has invalid number of bytes {n_bytes}.")
         return type_try
-
 
     def write_swheader(self, table, out_dir, top):
         os.makedirs(out_dir, exist_ok=True)
@@ -485,7 +544,7 @@ class mkregs:
 
         fswhdr.write("//Addresses\n")
         for row in table:
-            name = row['name']
+            name = row["name"]
             if row["type"] == "W":
                 fswhdr.write(f"#define {core_prefix}{name} {row['addr']}\n")
             if row["type"] == "R":
@@ -493,9 +552,9 @@ class mkregs:
 
         fswhdr.write("\n//Data widths (bit)\n")
         for row in table:
-            name = row['name']
-            n_bits = row['n_bits']
-            n_bytes = int(self.bceil(n_bits, 3)/8)
+            name = row["name"]
+            n_bits = row["n_bits"]
+            n_bytes = int(self.bceil(n_bits, 3) / 8)
             if row["type"] == "W":
                 fswhdr.write(f"#define {core_prefix}{name}_W {n_bytes*8}\n")
             if row["type"] == "R":
@@ -506,19 +565,21 @@ class mkregs:
 
         fswhdr.write("\n// Core Setters and Getters\n")
         for row in table:
-            name = row['name']
-            n_bits = row['n_bits']
-            log2n_items = row['log2n_items']
-            n_bytes = self.bceil(n_bits, 3)/8
+            name = row["name"]
+            n_bits = row["n_bits"]
+            log2n_items = row["log2n_items"]
+            n_bytes = self.bceil(n_bits, 3) / 8
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
             if row["type"] == "W":
                 sw_type = self.swreg_type(name, n_bytes)
                 addr_arg = ""
                 if addr_w / n_bytes > 1:
                     addr_arg = ", int addr"
-                fswhdr.write(f"void {core_prefix}SET_{name}({sw_type} value{addr_arg});\n")
+                fswhdr.write(
+                    f"void {core_prefix}SET_{name}({sw_type} value{addr_arg});\n"
+                )
             if row["type"] == "R":
-                sw_type = self.swreg_type(name, n_bytes  )
+                sw_type = self.swreg_type(name, n_bytes)
                 addr_arg = ""
                 if addr_w / n_bytes > 1:
                     addr_arg = "int addr"
@@ -527,7 +588,6 @@ class mkregs:
         fswhdr.write(f"\n#endif // H_{core_prefix}_SWREG_H\n")
 
         fswhdr.close()
-
 
     def write_swcode(self, table, out_dir, top):
         os.makedirs(out_dir, exist_ok=True)
@@ -544,10 +604,10 @@ class mkregs:
         fsw.write("\n// Core Setters and Getters\n")
 
         for row in table:
-            name = row['name']
-            n_bits = row['n_bits']
-            log2n_items = row['log2n_items']
-            n_bytes = self.bceil(n_bits, 3)/8
+            name = row["name"]
+            n_bits = row["n_bits"]
+            log2n_items = row["log2n_items"]
+            n_bytes = self.bceil(n_bits, 3) / 8
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
             if row["type"] == "W":
                 sw_type = self.swreg_type(name, n_bytes)
@@ -557,8 +617,12 @@ class mkregs:
                 if addr_w / n_bytes > 1:
                     addr_arg = ", int addr"
                     addr_shift = f" + (addr << {int(log(n_bytes, 2))})"
-                fsw.write(f"void {core_prefix}SET_{name}({sw_type} value{addr_arg}) {{\n")
-                fsw.write(f"\t(*( (volatile {sw_type} *) ( (base) + ({core_prefix}{name}){addr_shift}) ) = (value));\n")
+                fsw.write(
+                    f"void {core_prefix}SET_{name}({sw_type} value{addr_arg}) {{\n"
+                )
+                fsw.write(
+                    f"\t(*( (volatile {sw_type} *) ( (base) + ({core_prefix}{name}){addr_shift}) ) = (value));\n"
+                )
                 fsw.write("}\n\n")
             if row["type"] == "R":
                 sw_type = self.swreg_type(name, n_bytes)
@@ -568,11 +632,13 @@ class mkregs:
                     addr_arg = "int addr"
                     addr_shift = f" + (addr << {int(log(n_bytes, 2))})"
                 fsw.write(f"{sw_type} {core_prefix}GET_{name}({addr_arg}) {{\n")
-                fsw.write(f"\treturn (*( (volatile {sw_type} *) ( (base) + ({core_prefix}{name}){addr_shift}) ));\n")
+                fsw.write(
+                    f"\treturn (*( (volatile {sw_type} *) ( (base) + ({core_prefix}{name}){addr_shift}) ));\n"
+                )
                 fsw.write("}\n\n")
         fsw.close()
 
-    # check if address is aligned 
+    # check if address is aligned
     @staticmethod
     def check_alignment(addr, addr_w):
         if addr % (2**addr_w) != 0:
@@ -594,44 +660,43 @@ class mkregs:
         tmp = []
 
         for row in table:
-            addr = row['addr']
-            addr_type = row['type']
-            n_bits = row['n_bits']
-            log2n_items = row['log2n_items']
-            n_bytes = self.bceil(n_bits, 3)/8
-            addr_w = self.calc_addr_w(log2n_items,n_bytes)
-            if addr >= 0: #manual address
+            addr = row["addr"]
+            addr_type = row["type"]
+            n_bits = row["n_bits"]
+            log2n_items = row["log2n_items"]
+            n_bytes = self.bceil(n_bits, 3) / 8
+            addr_w = self.calc_addr_w(log2n_items, n_bytes)
+            if addr >= 0:  # manual address
                 self.check_alignment(addr, addr_w)
                 self.check_overlap(addr, addr_type, read_addr, write_addr)
                 addr_tmp = addr
-            elif addr_type == 'R': #auto address
+            elif addr_type == "R":  # auto address
                 read_addr = self.bceil(read_addr, addr_w)
                 addr_tmp = read_addr
-            elif addr_type == 'W':
+            elif addr_type == "W":
                 write_addr = self.bceil(write_addr, addr_w)
                 addr_tmp = write_addr
             if no_overlap:
                 addr_tmp = max(read_addr, write_addr)
 
-            #save address temporarily in list
-            tmp.append(addr_tmp);
+            # save address temporarily in list
+            tmp.append(addr_tmp)
 
-            #update addresses
-            addr_tmp+= 2**addr_w
-            if addr_type == 'R':
+            # update addresses
+            addr_tmp += 2**addr_w
+            if addr_type == "R":
                 read_addr = addr_tmp
-            elif addr_type == 'W':
+            elif addr_type == "W":
                 write_addr = addr_tmp
             if no_overlap:
                 read_addr = addr_tmp
                 write_addr = addr_tmp
 
-        #update reg addresses
+        # update reg addresses
         for i in range(len(tmp)):
-            table[i]['addr']=tmp[i]
+            table[i]["addr"] = tmp[i]
 
-                
-        #update core address space size
+        # update core address space size
         self.core_addr_w = int(ceil(log(max(read_addr, write_addr), 2)))
 
         return table
@@ -642,16 +707,16 @@ class mkregs:
         os.makedirs(out_dir, exist_ok=True)
         swreg_file = open(f"{out_dir}/swreg.tex", "w")
 
-        swreg_file.write(\
-    '''
+        swreg_file.write(
+            """
     The software accessible registers of the core are described in the following
     tables. The tables give information on the name, read/write capability, address, width in bits, and a textual description.
-    '''
+    """
         )
 
         for table in regs:
-            swreg_file.write(\
-    '''
+            swreg_file.write(
+                """
     \\begin{table}[H]
       \centering
       \\begin{tabularx}{\\textwidth}{|l|c|c|c|c|X|}
@@ -660,13 +725,19 @@ class mkregs:
         \\rowcolor{iob-green}
         {\\bf Name} & {\\bf R/W} & {\\bf Addr} & {\\bf Width} & {\\bf Default} & {\\bf Description} \\\\ \hline
 
-        \input '''+table['name']+'''_swreg_tab
+        \input """
+                + table["name"]
+                + """_swreg_tab
      
       \end{tabularx}
-      \caption{'''+table['descr'].replace('_','\_')+'''}
-      \label{'''+table['name']+'''_swreg_tab:is}
+      \caption{"""
+                + table["descr"].replace("_", "\_")
+                + """}
+      \label{"""
+                + table["name"]
+                + """_swreg_tab:is}
     \end{table}
-    '''
+    """
             )
 
         swreg_file.write("\clearpage")
@@ -680,14 +751,25 @@ class mkregs:
     def generate_regs_tex(cls, regs, regs_with_addr, out_dir):
         os.makedirs(out_dir, exist_ok=True)
         # Create swreg.tex file
-        cls.generate_swreg_tex(regs,out_dir)
+        cls.generate_swreg_tex(regs, out_dir)
 
         for table in regs:
             tex_table = []
-            for reg in table['regs']:
-                tex_table.append([reg['name'].replace('_','\_'), reg['type'],
-                                 # Find address of matching register in regs_with_addr list
-                                 next(register['addr'] for register in regs_with_addr if register['name'] == reg['name']),
-                                 str(reg['n_bits']).replace('_','\_'), str(reg['rst_val']).replace('_','\_'), reg['descr'].replace('_','\_')])
+            for reg in table["regs"]:
+                tex_table.append(
+                    [
+                        reg["name"].replace("_", "\_"),
+                        reg["type"],
+                        # Find address of matching register in regs_with_addr list
+                        next(
+                            register["addr"]
+                            for register in regs_with_addr
+                            if register["name"] == reg["name"]
+                        ),
+                        str(reg["n_bits"]).replace("_", "\_"),
+                        str(reg["rst_val"]).replace("_", "\_"),
+                        reg["descr"].replace("_", "\_"),
+                    ]
+                )
 
-            write_table(f"{out_dir}/{table['name']}_swreg",tex_table)
+            write_table(f"{out_dir}/{table['name']}_swreg", tex_table)
