@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
   iob_xoshiro256_init(seed);
 
   printf("xoshiro PRNG sequence:\n");
-  for (i = 0; i < (N_GEN/8+1); i++) {
+  for (i = 0; i < (N_GEN / 8 + 1); i++) {
     printf("\t%d:%lx\n", i, iob_xoshiro256_next());
   }
 
