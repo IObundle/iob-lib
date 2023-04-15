@@ -3,26 +3,27 @@
 
 SHELL:=bash
 
-#select board
-#default board
-BOARD ?=CYCLONEV-GT-DK
-
 include ../../config_build.mk
 
 ifneq ($(wildcard ../../console.mk),)
 include ../../console.mk
 endif
 
-REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
-REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
-EMB_DIR = ../../software
-PYTHON_DIR = ../../scripts
-FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
-
 #include local fpga build segment
 ifneq ($(wildcard fpga_build.mk),)
 include fpga_build.mk
 endif
+
+REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
+REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
+EMB_DIR = ../../software
+PYTHON_DIR = ../../scripts
+
+#default board
+BOARD ?= CYCLONEV-GT-DK
+
+#fpga toolchain
+FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
 
 FPGA_TOP ?=$(NAME)_fpga_wrapper
 
