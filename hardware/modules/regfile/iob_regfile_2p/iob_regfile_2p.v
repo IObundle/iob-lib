@@ -5,15 +5,14 @@ module iob_regfile_2p
   #(
     parameter W_DATA_W = 21,
     parameter R_DATA_W = 21,
-    parameter ADDR_W = 21, //higher ADDR_W lower DATA_W
-    parameter ADDR_W_INT = (ADDR_W>0)? ADDR_W: 1,
+    parameter ADDR_W = 21, //address width for lower DATA_W
     //determine W_ADDR_W and R_ADDR_W
     parameter MAXDATA_W = `IOB_MAX(W_DATA_W, R_DATA_W),
     parameter MINDATA_W = `IOB_MIN(W_DATA_W, R_DATA_W),
     parameter R = MAXDATA_W/MINDATA_W,
-    parameter MAXADDR_W = ADDR_W_INT+$clog2(R),//lower ADDR_W (higher DATA_W)
-    parameter W_ADDR_W = (W_DATA_W == MAXDATA_W) ? ADDR_W_INT : MAXADDR_W,
-    parameter R_ADDR_W = (R_DATA_W == MAXDATA_W) ? ADDR_W_INT : MAXADDR_W,
+    parameter MAXADDR_W = ADDR_W+$clog2(R),//address width for higher DATA_W
+    parameter W_ADDR_W = (W_DATA_W == MAXDATA_W) ? ADDR_W : MAXADDR_W,
+    parameter R_ADDR_W = (R_DATA_W == MAXDATA_W) ? ADDR_W : MAXADDR_W,
     parameter WSTRB_W = (W_DATA_W == MAXDATA_W) ? R : 1
   )
   (
