@@ -82,7 +82,7 @@ report_utilization -file reports/$NAME\_$PART\_utilization.rpt
 report_timing -file reports/$NAME\_$PART\_timing.rpt
 report_timing_summary -file reports/$NAME\_$PART\_timing_summary.rpt
 report_timing -file reports/$NAME\_$PART\_timing_paths.rpt -max_paths 30
-
+report_bus_skew -file reports/$NAME\_$PART\_bus_skew.rpt
 
 if { $IS_FPGA == "1" } {
     write_bitstream -force $NAME.bit
