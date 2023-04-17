@@ -3,28 +3,27 @@
 
 SHELL:=bash
 
-#select board
-#default board
-BOARD ?=CYCLONEV-GT-DK
-
-# Generate configuration when importing config_build.mk
-GEN_CONFIG:=1
 include ../../config_build.mk
 
 ifneq ($(wildcard ../../console.mk),)
 include ../../console.mk
 endif
 
-REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
-REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
-EMB_DIR = ../../software/embedded
-PYTHON_DIR = ../../scripts
-FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
-
 #include local fpga build segment
 ifneq ($(wildcard fpga_build.mk),)
 include fpga_build.mk
 endif
+
+REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
+REMOTE_FPGA_DIR=$(REMOTE_BUILD_DIR)/hardware/fpga
+EMB_DIR = ../../software
+PYTHON_DIR = ../../scripts
+
+#default board
+BOARD ?= CYCLONEV-GT-DK
+
+#fpga toolchain
+FPGA_TOOL:=$(shell find . -name $(BOARD) | cut -d"/" -f2)
 
 FPGA_TOP ?=$(NAME)_fpga_wrapper
 
@@ -45,9 +44,10 @@ endif
 
 UFLAGS+=FPGA_TOP=$(FPGA_TOP)
 UFLAGS+=IS_FPGA=$(IS_FPGA)
+UFLAGS+=USE_QUARTUS_PRO=$(USE_QUARTUS_PRO)
 
 #build fpga image or netlist
-build: $(VHDR) $(VSRC) $(HEX)
+build: $(VHDR) $(VSRC) $(BUILD_DEPS)
 ifeq ($(FPGA_SERVER),)
 	make $(FPGA_OBJ)
 else 
@@ -62,43 +62,50 @@ endif
 endif
 
 #console start command
-CONSOLE_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
-GRAB_CMD=$(PYTHON_DIR)/board_client.py grab $(USER)
-RELEASE_CMD=$(PYTHON_DIR)/board_client.py release $(USER)
+CONSOLE_START_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
+
+#board client commands
+BOARD_GRAB_CMD=board_client.py grab 300
+BOARD_RELEASE_CMD=board_client.py release
 
 #run fpga image
-run: build
+run: build $(RUN_DEPS)
 ifneq ($(NORUN),1)
 ifeq ($(BOARD_SERVER),)
 	cp $(EMB_DIR)/$(NAME)_firmware.bin .
-	bash -c "trap '$(RELEASE_CMD)' INT TERM KILL; $(GRAB_CMD); $(FPGA_PROG); $(CONSOLE_CMD) | tee run.log; $(RELEASE_CMD);"
+	bash -c "trap 'make release &> /dev/null' INT TERM KILL EXIT; $(BOARD_GRAB_CMD); $(FPGA_PROG); $(CONSOLE_START_CMD);"
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
-	bash -c "trap 'make release' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD) $(UFLAGS)'"
-	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_FPGA_DIR)/run.log .
+	bash -c "trap 'make release &> /dev/null' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD) $(UFLAGS)'"
+	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_FPGA_DIR)/*.log . 2> /dev/null | true
 endif
 endif
 
+# release the board
 release:
-ifeq ($(FPGA_SERVER),)
+ifeq ($(BOARD_SERVER),)
 	make kill-cnsl
-	$(RELEASE_CMD)
+	$(BOARD_RELEASE_CMD)
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'
 endif
 
+# clean
 clean: $(FPGA_TOOL)-clean
-	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga_build.mk" \) -delete
+	find . -maxdepth 1 -type f -not \( -name "Makefile" -o -name "fpga_build.mk" -o -name "uut_build.mk" \) -delete
 	@rm -rf resynthesis *.hex
 ifneq ($(FPGA_SERVER),)
-	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD); fi'
+	ssh $(FPGA_SSH_FLAGS) $(FPGA_USER)@$(FPGA_SERVER) 'rm -rf $(REMOTE_BUILD_DIR)'
 ifneq ($(BOARD_SERVER),)
-	ssh $(BOARD_SSH_FLAGS) $(BOARD_USER)@$(BOARD_SERVER) 'if [ -f $(REMOTE_FPGA_DIR)/Makefile ]; then make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD); fi'
+	ssh $(BOARD_SSH_FLAGS) $(BOARD_USER)@$(BOARD_SERVER) 'rm -rf  $(REMOTE_BUILD_DIR)'
 endif
 endif
 
 test: debug $(TEST_LIST)
+ifeq ($(IS_FPGA),)
+	test "$$(cat test.log)" = "Test passed!"
+endif
 
 debug:
 	@echo SIMULATOR=$(SIMULATOR)
@@ -111,4 +118,4 @@ debug:
 
 .PRECIOUS: $(FPGA_OBJ) test.log s_fw.bin
 
-.PHONY: run build test clean debug
+.PHONY: run build test clean debug $(TEST_LIST)

@@ -7,18 +7,16 @@ module iob_clkbuf
    output clk_o
    );
 
-   wire   clk_int;
+   wire   clk_int = n_i ? ~clk_i : clk_i;
 
 `ifdef XILINX
    BUFG BUFG_inst
      (
-      .I(clk_i),
-      .O(clk_int)
+      .I(clk_int),
+      .O(clk_o)
       );
 `else
-   assign clk_int = clk_i;
+   assign clk_o = clk_int;
 `endif
-
-   assign clk_o = n_i^clk_int;
 
 endmodule

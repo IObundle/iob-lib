@@ -1,11 +1,12 @@
 `timescale 1 ns / 1 ps
 
-module iob_regfile_w_rp
+module iob_regfile_2p_readpar
   #(
     parameter WADDR_W = 3,
     parameter WDATA_W = 21,
     parameter RDATA_W = 21,
-    parameter R = WDATA_W/RDATA_W
+    parameter R = WDATA_W/RDATA_W,
+    parameter WADDR_W_INT = (WADDR_W>0)? WADDR_W: 1
   )
   (
     input                              clk_i,
@@ -14,7 +15,7 @@ module iob_regfile_w_rp
 
     // Write Port
     input [R-1:0]                      wstrb_i,
-    input [WADDR_W-1:0]                waddr_i,
+    input [WADDR_W_INT-1:0]            waddr_i,
     input [WDATA_W-1:0]                wdata_i,
 
     // Read Port

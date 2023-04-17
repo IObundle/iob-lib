@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------
 # Copyright (c) 2017 CAST, Inc.
+# Copyright (c) 2023 IObundle, Lda.
 #
 # Please review the terms of the license agreement before using this
 # file.  If you are not an authorized user, please destroy this source
@@ -117,7 +118,9 @@ check_design -unresolved
 
 # add optimization constraints
 #----------------------------------------------------------------------
-read_sdc -stop_on_error $DESIGN.sdc
+read_sdc -stop_on_error ./$NODE/$DESIGN\_dev.sdc
+read_sdc -stop_on_error ../src/$DESIGN\_wrapper.sdc
+read_sdc -stop_on_error ./$DESIGN\_tool.sdc
 
 check_timing_intent 
 
@@ -156,6 +159,22 @@ report_gates > $OUTPUTS_DIR/${DESIGN}_gates.rpt
 report_clocks > $OUTPUTS_DIR/${DESIGN}_clk.rpt
 
 report_timing -max_paths 30 > $OUTPUTS_DIR/${DESIGN}_timing.rpt
+report_timing -from [get_clocks clk] -to [get_clocks mclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+report_timing -from [get_clocks clk] -to [get_clocks btxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+report_timing -from [get_clocks clk] -to [get_clocks brxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+
+report_timing -from [get_clocks mclk] -to [get_clocks clk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+report_timing -from [get_clocks mclk] -to [get_clocks btxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+report_timing -from [get_clocks mclk] -to [get_clocks brxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+
+report_timing -from [get_clocks btxclk] -to [get_clocks clk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+report_timing -from [get_clocks btxclk] -to [get_clocks mclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+report_timing -from [get_clocks btxclk] -to [get_clocks brxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+
+report_timing -from [get_clocks brxclk] -to [get_clocks clk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+report_timing -from [get_clocks brxclk] -to [get_clocks mclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+report_timing -from [get_clocks brxclk] -to [get_clocks btxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
+
 
 report_power -by_hierarchy -format %.2f -levels 2  -unit uW  > $OUTPUTS_DIR/${DESIGN}_power.rpt
 

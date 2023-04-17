@@ -39,7 +39,7 @@ DEFINE+= -DVCD
 endif
 
 # Includes
-INCLUDE=-Ihardware/modules
+INCLUDE=-Ihardware/modules -Ihardware/src
 
 # asymmetric memory present
 IS_ASYM ?= 0
@@ -99,6 +99,41 @@ endif
 test:
 	./scripts/test.sh
 
+# Install board server and client
+board_server_install:
+	sudo cp scripts/board_client.py /usr/local/bin/ && \
+	sudo cp scripts/board_server.py /usr/local/bin/ && \
+	sudo cp scripts/board_server.service /etc/systemd/system/ && \
+	sudo systemctl daemon-reload && \
+	sudo systemctl restart board_server
+
+board_server_uninstall:
+	sudo systemctl stop board_server && \
+	sudo systemctl disable board_server && \
+	sudo rm /usr/local/bin/board_client.py && \
+	sudo rm /usr/local/bin/board_server.py && \
+	sudo rm /etc/systemd/system/board_server.service && \
+	sudo systemctl daemon-reload
+
+board_server_status:
+	systemctl status board_server
+
+format-install-python:
+	python3 -m pip install black==22.3.0
+
+format-install-clang:
+	@./scripts/clang_install.py
+
+format-install-all: format-install-python format-install-clang
+
+format:
+	@./scripts/black_format.py
+	@./scripts/clang_format.py
+
+format-check:
+	@./scripts/black_format.py --check
+	@./scripts/clang_format.py --check
+
 clean:
 	@rm -rf $(BUILD_VSRC_DIR)
 	@rm -rf spyglass_reports
@@ -107,4 +142,8 @@ clean:
 
 debug:
 
-.PHONY: all sim clean debug
+.PHONY: all sim \ 
+	board_server_install \ 
+	format-install-all format-install-python format-install-clang \
+	format format-check \ 
+	clean debug

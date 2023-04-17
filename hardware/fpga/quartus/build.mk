@@ -10,7 +10,7 @@ FPGA_SCP_FLAGS=$(QUARTUS_SCP_FLAGS)
 FPGA_SYNC_FLAGS=$(QUARTUS_SYNC_FLAGS)
 
 # Determine the Quartus edition to use (default to Standard)
-USE_QUARTUS_PRO=0
+USE_QUARTUS_PRO ?=0
 ifeq ($(BOARD),DK-DEV-10CX220-A)
 		USE_QUARTUS_PRO=1
 endif
@@ -18,9 +18,10 @@ ifeq ($(BOARD),DK-DEV-AGF014E2ES)
 		USE_QUARTUS_PRO=1
 endif
 
+
 # Determine the object to build
 ifeq ($(IS_FPGA),1)
-FPGA_OBJ:=reports/$(FPGA_TOP).sof
+FPGA_OBJ:=$(FPGA_TOP).sof
 else
 FPGA_OBJ:=resynthesis/$(FPGA_TOP)_netlist.v
 endif
@@ -35,9 +36,7 @@ endif
 # Set the Quartus command to porgram the FPGA
 FPGA_PROG=$(FPGA_ENV) quartus_pgm -m jtag -c 1 -o 'p;$(FPGA_TOP).sof'
 
-# Set build-time defines from the build_defines.txt file
-DEFINES:=$(file < ../../build_defines.txt)
-QUARTUS_FLAGS = -t quartus/build.tcl $(FPGA_TOP) $(BOARD) "$(VSRC)" "$(DEFINES) " "$(IP) " $(IS_FPGA) $(USE_EXTMEM) $(QUARTUS_SEED) $(USE_QUARTUS_PRO)
+QUARTUS_FLAGS = -t quartus/build.tcl $(FPGA_TOP) $(BOARD) "$(VSRC)" "$(IP) " $(IS_FPGA) $(USE_EXTMEM) $(QUARTUS_SEED) $(USE_QUARTUS_PRO)
 
 $(FPGA_OBJ): $(VHDR) $(VSRC) $(IP) $(wildcard $(BOARD)/*.sdc)
 	$(FPGA_ENV) quartus_sh $(QUARTUS_FLAGS)

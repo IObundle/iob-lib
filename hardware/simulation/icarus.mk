@@ -1,4 +1,4 @@
-VFLAGS+=-W all -g2005-sv -I. -I../src -Isrc $(DEFINES)
+VFLAGS+=-W all -g2005-sv -I. -I../src -Isrc
 
 ifeq ($(VCD),1)
 VFLAGS+=-DVCD
@@ -8,24 +8,21 @@ ifneq ($(VTOP),)
 VFLAGS+=-s $(VTOP)
 endif
 
-# Set build-time defines from the build_defines.txt file
-VFLAGS+=$(addprefix -D,$(file < ../../build_defines.txt))
-
 SIM_SERVER=$(IVSIM_SERVER)
 SIM_USER=$(IVSIM_USER)
 
-SIM_PROC=a.out
+SIM_OBJ=a.out
 
-comp: $(SIM_PROC)
+comp: $(SIM_OBJ)
 
-$(SIM_PROC): $(VHDR) $(VSRC)
+$(SIM_OBJ): $(VHDR) $(VSRC) $(HEX)
 	iverilog $(VFLAGS) $(VSRC)
 
-exec:
-	./$(SIM_PROC) | tee -a test.log
+exec: comp
+	./$(SIM_OBJ)
 
 clean: gen-clean
-	@rm -f $(SIM_PROC)
+	@rm -f $(SIM_OBJ)
 
 very-clean: clean
 

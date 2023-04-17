@@ -2,15 +2,8 @@ VTOP?=$(NAME)
 
 VFLAGS+=--cc --exe -I. -I../src -Isrc --top-module $(VTOP)
 VFLAGS+=-Wno-lint
-VFLAGS+=--timing
 # Include embedded headers
-VFLAGS+=-CFLAGS "-I../../../software/esrc"
-
-VFLAGS+=$(DEFINES)
-
-# Set build-time defines from the build_defines.txt file
-VFLAGS+=$(addprefix -D,$(file < ../../build_defines.txt))
-VFLAGS+=-CFLAGS "$(addprefix -D,$(file < ../../build_defines.txt))"
+VFLAGS+=-CFLAGS "-I../../../software/src -I../../../software"
 
 ifeq ($(VCD),1)
 VFLAGS+=--trace
@@ -20,14 +13,14 @@ endif
 SIM_SERVER=$(VSIM_SERVER)
 SIM_USER=$(VSIM_USER)
 
-SIM_PROC=V$(VTOP)
+SIM_OBJ=V$(VTOP)
 
-comp: $(VHDR) $(VSRC)
-	verilator $(VFLAGS) $(VSRC) src/$(NAME)_tb.cpp	
-	cd ./obj_dir && make -f $(SIM_PROC).mk
+comp: $(VHDR) $(VSRC) $(HEX)
+	verilator $(VFLAGS) $(VSRC) src/$(NAME)_tb.cpp
+	cd ./obj_dir && make -f $(SIM_OBJ).mk
 
-exec:
-	./obj_dir/$(SIM_PROC) | tee -a test.log
+exec: comp
+	./obj_dir/$(SIM_OBJ)
 
 clean: gen-clean
 	@rm -rf obj_dir

@@ -3,7 +3,8 @@
 module iob_sync
   #(
     parameter DATA_W = 21,
-    parameter RST_VAL = {DATA_W{1'b0}}
+    parameter RST_VAL = {DATA_W{1'b0}},
+    parameter CLKEDGE = "posedge"
   )
   (
     input                   clk_i,
@@ -12,22 +13,40 @@ module iob_sync
     output reg [DATA_W-1:0] signal_o
   );
 
-  reg [DATA_W-1:0] sync;
+  reg [DATA_W-1:0]         synchronizer;
 
-  always @(posedge clk_i, posedge arst_i) begin
-    if (arst_i) begin
-      sync <= RST_VAL;
-    end else begin
-      sync <= signal_i;
-    end
-  end
-
-  always @(posedge clk_i, posedge arst_i) begin
-    if (arst_i) begin
-      signal_o <= RST_VAL;
-    end else begin
-      signal_o <= sync;
-    end
-  end
+  generate if (CLKEDGE == "posedge") begin : positive_edge
+     always @(posedge clk_i, posedge arst_i) begin
+        if (arst_i) begin
+           synchronizer <= RST_VAL;
+        end else begin
+           synchronizer <= signal_i;
+        end
+     end
+     
+     always @(posedge clk_i, posedge arst_i) begin
+        if (arst_i) begin
+           signal_o <= RST_VAL;
+        end else begin
+           signal_o <= synchronizer;
+        end
+     end
+  end else begin : negative_edge
+     always @(negedge clk_i, posedge arst_i) begin
+        if (arst_i) begin
+           synchronizer <= RST_VAL;
+        end else begin
+           synchronizer <= signal_i;
+        end
+     end
+     
+     always @(negedge clk_i, posedge arst_i) begin
+        if (arst_i) begin
+           signal_o <= RST_VAL;
+        end else begin
+           signal_o <= synchronizer;
+        end
+     end
+  end endgenerate
 
 endmodule

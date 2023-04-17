@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
-
 `include "iob_lib.vh"
+
 
 module iob_merge
   #(
@@ -29,10 +29,10 @@ module iob_merge
    //                               
    //priority encoder: most significant bus has priority   
    //
-   reg [Nb-1:0] sel, sel_reg;
+   reg [Nb-1:0]                        sel, sel_reg;
    
    //select enable
-   reg sel_en; 
+   reg                                 sel_en; 
    always @(posedge clk_i, posedge arst_i)
      if(arst_i)
        sel_en <= 1'b1;
@@ -43,7 +43,7 @@ module iob_merge
 
    
    //select master
-   integer k; 
+   integer                             k; 
    always @* begin
       sel = {Nb{1'b0}};
       for (k=0; k<N_MASTERS; k=k+1)
@@ -56,7 +56,13 @@ module iob_merge
    //
    //route master request to slave
    //  
-   assign s_req_o = m_req_i[`REQ(sel)];
+   integer                             i;
+   always @* begin
+      s_req_o = {`REQ_W{1'b0}};
+      for (i=0; i<N_MASTERS; i=i+1)
+        if( i == sel )
+          s_req_o = m_req_i[`REQ(i)];
+   end
 
    //
    //route response from slave to previously selected master
@@ -71,9 +77,13 @@ module iob_merge
    end
    
    //route
+   integer                             j;
    always @* begin
-        m_resp_o = {(`RESP_W*N_MASTERS){1'b0}};
-        m_resp_o[`RESP(sel_reg)] = s_resp_i;
+      for (j=0; j<N_MASTERS; j=j+1)
+        if( j == sel_reg )
+          m_resp_o[`RESP(j)] = s_resp_i;
+        else
+          m_resp_o[`RESP(j)] = {`RESP_W{1'b0}};
    end
 
    

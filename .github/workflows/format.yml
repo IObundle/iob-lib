@@ -1,0 +1,50 @@
+name: Format
+
+# Set default shell as interactive (source ~/.bashrc)
+defaults:
+  run:
+    shell: bash -ieo pipefail {0}
+
+# Run only one instance of this workflow at a time
+# cancel-in-progress: stop running workflow and run latest instead
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+      - build-lib
+      - python-setup
+  # Don't forget to require approval for all outside collaborators
+  pull_request:
+    branches: '*'
+  # Allow manual workflow runs
+  workflow_dispatch:
+
+jobs:
+  python-black-check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      - name: Install python dependencies
+        run: make format-install-python
+      - name: Python black check
+        run: ./scripts/black_format.py --check
+  clang-format-check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      - name: Install llvm / clang
+        run: ./scripts/clang_install.py
+      - name: Clang Format check
+        run: ./scripts/clang_format.py --check
