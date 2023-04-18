@@ -5,10 +5,6 @@ SHELL:=bash
 
 include ../../config_build.mk
 
-ifneq ($(wildcard ../../console.mk),)
-include ../../console.mk
-endif
-
 #include local fpga build segment
 ifneq ($(wildcard fpga_build.mk),)
 include fpga_build.mk
@@ -64,31 +60,21 @@ endif
 #console start command
 CONSOLE_START_CMD=$(PYTHON_DIR)/console.py -s /dev/usb-uart
 
-#board client commands
-BOARD_GRAB_CMD=board_client.py grab 300
-BOARD_RELEASE_CMD=board_client.py release
+#board client command
+BOARD_GRAB_CMD=../../scripts/board_client.py grab 300
 
 #run fpga image
 run: build $(RUN_DEPS)
 ifneq ($(NORUN),1)
 ifeq ($(BOARD_SERVER),)
 	cp $(EMB_DIR)/$(NAME)_firmware.bin .
-	bash -c "trap 'make release &> /dev/null' INT TERM KILL EXIT; $(BOARD_GRAB_CMD); $(FPGA_PROG); $(CONSOLE_START_CMD);"
+	$(BOARD_GRAB_CMD) -p '$(FPGA_PROG)' -c '$(CONSOLE_START_CMD)'
 else
 	ssh $(BOARD_USER)@$(BOARD_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(BOARD_SYNC_FLAGS) -avz --delete --force ../.. $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_BUILD_DIR)
-	bash -c "trap 'make release &> /dev/null' INT TERM KILL; ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD) $(UFLAGS)'"
+	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD) $(UFLAGS)'
 	scp $(BOARD_USER)@$(BOARD_SERVER):$(REMOTE_FPGA_DIR)/*.log . 2> /dev/null | true
 endif
-endif
-
-# release the board
-release:
-ifeq ($(BOARD_SERVER),)
-	make kill-cnsl
-	$(BOARD_RELEASE_CMD)
-else
-	ssh $(BOARD_USER)@$(BOARD_SERVER) 'make -C $(REMOTE_FPGA_DIR) $@ BOARD=$(BOARD)'
 endif
 
 # clean

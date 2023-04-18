@@ -61,15 +61,18 @@ else
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'
 endif
 
+#board client command
+BOARD_GRAB_CMD=../../scripts/board_client.py grab 300
+
 run: remote_build_dir
 ifeq ($(SIM_SERVER),)
 ifneq ($(CONSOLE_CMD),)
-	@rm -f soc2cnsl cnsl2soc
-	$(CONSOLE_CMD) &
-endif
-	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make exec"
+	$(BOARD_GRAB_CMD) -s 'make exec' -c '$(CONSOLE_CMD)'
 else
-	bash -c "trap 'make -s kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
+	$(BOARD_GRAB_CMD) -s 'make exec'
+endif
+else
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'
 ifeq ($(VCD),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
 endif
@@ -91,26 +94,12 @@ fix-vcd:
 	@tail -n 1 $(VCD_FILE) | wc -c | xargs -I {} truncate $(VCD_FILE) -s -{}
 	@echo "" >> $(VCD_FILE)
 
-kill-sim:
-	@if [ "`pgrep -a -u $$UID | grep console | grep python3 | grep -v grep`" ]; then \
-	kill -9 $$(pgrep -a -u $$UID | grep console | grep python3 | grep -v grep | sed 's/ .*//'); fi
-	@if [ -e *.vcd ]; then make fix-vcd; fi
-
-kill-remote-sim:
-	@echo "INFO: Remote simulator $(SIMULATOR) will be killed"
-	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'killall -q -u $(SIM_USER) -9 $(SIM_PROC); \
-	make -C $(REMOTE_SIM_DIR) kill-sim'
-ifeq ($(VCD),1)
-	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.vcd .
-	make waves
-endif
-
 # ssh's remote server to run all tests; otherwise, it takes a lot of time to ssh for each individual test
 test: very-clean clean-test-log
 ifneq ($(SIM_SERVER),)
 	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
 	rsync $(SIM_SYNC_FLAGS) -avz --force --delete ../.. $(SIM_USER)@$(SIM_SERVER):$(REMOTE_BUILD_DIR)
-	bash -c "trap 'make -s kill-remote-sim' INT TERM KILL; ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) run-tests SIMULATOR=$(SIMULATOR) $(UFLAGS)'"
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) run-tests SIMULATOR=$(SIMULATOR) $(UFLAGS)'
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
 ifeq ($(COV),1)
 	sleep 1 && sync && scp -r $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/cov_work .
@@ -118,7 +107,7 @@ ifeq ($(COV),1)
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_detail.rpt .
 endif
 else
-	bash -c "trap 'make -s kill-sim' INT TERM KILL EXIT; make run-tests"
+	make run-tests
 endif
 
 run-tests: $(TEST_LIST)
@@ -143,4 +132,4 @@ debug:
 
 .PRECIOUS: uut.vcd
 
-.PHONY: build run remote_build_dir waves fix-vcd kill-sim kill-remote-sim test run-tests gen-clean clean-test-log debug
+.PHONY: build run remote_build_dir waves fix-vcd test run-tests gen-clean clean-test-log debug

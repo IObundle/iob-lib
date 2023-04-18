@@ -31,14 +31,10 @@ INCLUDES ?=-I. -Isrc
 #         PC emulation settings         #
 #########################################
 
-ifneq ($(wildcard ../console.mk),)
-include ../console.mk
-endif
-
 # compiler flags
 EMUL_CFLAGS=-Os -std=gnu99 -Wl,--strip-debug
 
-CONSOLE_CMD=../scripts/console.py -L
+CONSOLE_CMD=rm -f soc2cnsl cnsl2soc; ../scripts/console.py -L
 
 EMUL_INCLUDES=-I. -Isrc
 
@@ -87,10 +83,11 @@ fw_emul: $(EMUL_HDR) $(EMUL_SRC)
 build_emul: fw_emul
 	@echo "build"
 
+#board client command
+BOARD_GRAB_CMD=../scripts/board_client.py grab 300
+
 run_emul: build_emul
-	@rm -f soc2cnsl cnsl2soc
-	$(CONSOLE_CMD) &
-	bash -c "trap 'make kill-cnsl &> /dev/null' INT TERM KILL EXIT; ./fw_emul"
+	$(BOARD_GRAB_CMD) -s './fw_emul' -c '$(CONSOLE_CMD)'
 
 test_emul: clean $(EMUL_TEST_LIST)
 	test "$$(cat test.log)" = "Test passed!"
@@ -102,7 +99,7 @@ test_emul: clean $(EMUL_TEST_LIST)
 #########################################
 
 # TODO add to iob-soc custom clean list
-# CLEAN_LIST+=kill-cnsl
+# CLEAN_LIST+=
 
 clean: $(CLEAN_LIST)
 	@rm -rf *.bin *.elf *.map *.hex
