@@ -9,6 +9,7 @@ from latex import write_table
 from submodule_utils import eval_param_expression_from_config
 import re
 
+
 # Use a class for the entire module, as it may be imported multiple times, but must have instance variables (multiple cores/submodules have different registers)
 class mkregs:
     def __init__(self):
@@ -233,7 +234,6 @@ class mkregs:
         f.write(f"\t.iob_rvalid_nxt_o(iob_rvalid_nxt),\n")
 
     def write_hwcode(self, table, out_dir, top):
-
         #
         # SWREG INSTANCE
         #

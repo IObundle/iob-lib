@@ -99,7 +99,6 @@ s.listen()
 
 # Loop forever
 while True:
-
     conn, addr = s.accept()
     request = conn.recv(1024).decode("utf-8")
     if DEBUG:

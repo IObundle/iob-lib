@@ -8,7 +8,6 @@ import sys
 LLVM_VERSION = "15"
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
         prog="clang_install",
         description="""Install clang tools.

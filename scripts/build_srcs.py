@@ -13,6 +13,7 @@ import mk_configuration as mk_conf
 
 LIB_DIR = "submodules/LIB"
 
+
 # Copy a file if destination does not exist
 def copy_without_override(src, dst):
     if not os.path.isfile(dst):
