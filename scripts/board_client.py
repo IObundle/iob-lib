@@ -25,7 +25,7 @@ import iob_colors
 # Must match the server's
 HOST = "localhost"  # Use the loopback interface
 PORT = 50007  # Use the same port as the server
-VERSION = "V0.1"
+VERSION = "V0.2"
 
 # user and duration board is needed
 USER = os.environ["USER"]
