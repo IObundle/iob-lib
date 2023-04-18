@@ -45,7 +45,7 @@ else:
     command = sys.argv[1]
 
 if command == "grab":
-    if len(sys.argv) == 3:
+    if len(sys.argv) > 2:
         try:
             DURATION = int(sys.argv[2])
         except ValueError:
@@ -140,48 +140,71 @@ if command != "grab" or fpga_prog_command:
 if command != "grab": sys.exit(0)
 # Lines below will only run if command=="grab" and request successful
 
+def exit_program(exit_code):
+    # Release the board if -p is given
+    if fpga_prog_command:
+        release_board()
+
+    sys.exit(exit_code)
+
+
+# List of processes to kill when terminating board_client
+proc_list = []
+# Function to kill all processes from proc_list and exit with error.
+def kill_processes(signal=None, frame=None):
+    for proc in proc_list:
+        proc.terminate()
+        try:
+            # Wait for process to terminate gracefully
+            proc.wait(2)
+        except subprocess.TimeoutExpired:
+            # Process did not terminate gracefully, kill it
+            proc.kill()
+    exit_program(1)
+
+signal.signal(signal.SIGINT, kill_processes)
+signal.signal(signal.SIGTERM, kill_processes)
+
 # Launch simulator in parallel if -s was given
 sim_proc=None
 if simulator_run_command:
     print(f'{iob_colors.INFO}Running simulator{iob_colors.ENDC}')
     sim_proc = subprocess.Popen(simulator_run_command, stdout=sys.stdout, stderr=sys.stderr, shell=True)
+    # Add the simulator process to the list of processes to kill
+    proc_list.append(sim_proc)
 
-    def kill_simulator(signal=None, frame=None):
-        print(f'{iob_colors.INFO}Killing simulator{iob_colors.ENDC}')
-        # Debug write to file
-        #with open("simulator_kill.txt", "w") as f:
-        #    f.write("killed")
-        sim_proc.terminate()
-    signal.signal(signal.SIGINT, kill_simulator)
-    signal.signal(signal.SIGTERM, kill_simulator)
+# Function to wait for a process to finish
+# If the process times out, kill all other processes
+def proc_wait(proc, timeout):
+    try:
+        proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        print(f'{iob_colors.FAIL}Board grab duration expired!{iob_colors.ENDC}')
+        kill_processes()
 
-exit_code=0
-try:
-    start_time = time.time()
-    # Program the FPGA if -p is given
-    if fpga_prog_command:
-        print(f'{iob_colors.INFO}Programming FPGA{iob_colors.ENDC}')
-        subprocess.run(fpga_prog_command, stdout=sys.stdout, stderr=sys.stderr, shell=True, timeout=DURATION)
-    remaining_duration = int(DURATION) - (time.time()-start_time)
+# Start counting time since start of FPGA programming
+start_time = time.time()
 
-    # Run the console
-    if console_command:
-        print(f'{iob_colors.INFO}Running console{iob_colors.ENDC}')
-        subprocess.run(console_command, stdout=sys.stdout, stderr=sys.stderr, shell=True, timeout=remaining_duration)
-    else:
-        print(f'{iob_colors.INFO}Waiting for simulator to finish{iob_colors.ENDC}')
-        sim_proc.wait(timeout=remaining_duration)
-
-except subprocess.TimeoutExpired:
-    print(f'{iob_colors.FAIL}Board grab duration expired!{iob_colors.ENDC}')
-    exit_code=1
-    # Kill the simulator if -s was given and console timed out
-    if simulator_run_command: kill_simulator()
-
-# Release the board if -p is given
+# Program the FPGA if -p is given
 if fpga_prog_command:
-    release_board()
+    print(f'{iob_colors.INFO}Programming FPGA{iob_colors.ENDC}')
+    fpga_prog_proc = subprocess.Popen(fpga_prog_command, stdout=sys.stdout, stderr=sys.stderr, shell=True)
+    proc_list.append(fpga_prog_proc)
+    proc_wait(fpga_prog_proc, DURATION)
 
-sys.exit(exit_code)
+# Update time passed
+remaining_duration = int(DURATION) - (time.time()-start_time)
 
-#TODO: Check if parent process is sshd. If parent process changes, terminate the program (it means sshd stopped).
+# Choose whether to run console or just wait for simulator to finish
+if console_command:
+    # Run console and wait for completion/timeout.
+    print(f'{iob_colors.INFO}Running console{iob_colors.ENDC}')
+    console_proc = subprocess.Popen(console_command, stdout=sys.stdout, stderr=sys.stderr, shell=True)
+    proc_list.append(console_proc)
+    proc_wait(console_proc, remaining_duration)
+else:
+    # Console not running. Wait for simulator completion/timeout.
+    print(f'{iob_colors.INFO}Waiting for simulator to finish{iob_colors.ENDC}')
+    proc_wait(sim_proc, remaining_duration)
+
+exit_program(0)
