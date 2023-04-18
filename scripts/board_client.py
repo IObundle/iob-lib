@@ -151,15 +151,16 @@ def exit_program(exit_code):
 # List of processes to kill when terminating board_client
 proc_list = []
 # Function to kill all processes from proc_list and exit with error.
-def kill_processes(signal=None, frame=None):
+def kill_processes(sig=None, frame=None):
     for proc in proc_list:
-        proc.terminate()
+        # Gracefully terminate process group (the process and its children)
+        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
         try:
             # Wait for process to terminate gracefully
             proc.wait(2)
         except subprocess.TimeoutExpired:
             # Process did not terminate gracefully, kill it
-            proc.kill()
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
     exit_program(1)
 
 signal.signal(signal.SIGINT, kill_processes)
@@ -169,7 +170,7 @@ signal.signal(signal.SIGTERM, kill_processes)
 sim_proc=None
 if simulator_run_command:
     print(f'{iob_colors.INFO}Running simulator{iob_colors.ENDC}')
-    sim_proc = subprocess.Popen(simulator_run_command, stdout=sys.stdout, stderr=sys.stderr, shell=True)
+    sim_proc = subprocess.Popen(simulator_run_command, stdout=sys.stdout, stderr=sys.stderr, shell=True, start_new_session=True)
     # Add the simulator process to the list of processes to kill
     proc_list.append(sim_proc)
 
@@ -188,7 +189,7 @@ start_time = time.time()
 # Program the FPGA if -p is given
 if fpga_prog_command:
     print(f'{iob_colors.INFO}Programming FPGA{iob_colors.ENDC}')
-    fpga_prog_proc = subprocess.Popen(fpga_prog_command, stdout=sys.stdout, stderr=sys.stderr, shell=True)
+    fpga_prog_proc = subprocess.Popen(fpga_prog_command, stdout=sys.stdout, stderr=sys.stderr, shell=True, start_new_session=True)
     proc_list.append(fpga_prog_proc)
     proc_wait(fpga_prog_proc, DURATION)
 
@@ -199,12 +200,14 @@ remaining_duration = int(DURATION) - (time.time()-start_time)
 if console_command:
     # Run console and wait for completion/timeout.
     print(f'{iob_colors.INFO}Running console{iob_colors.ENDC}')
-    console_proc = subprocess.Popen(console_command, stdout=sys.stdout, stderr=sys.stderr, shell=True)
+    console_proc = subprocess.Popen(console_command, stdout=sys.stdout, stderr=sys.stderr, shell=True, start_new_session=True)
     proc_list.append(console_proc)
     proc_wait(console_proc, remaining_duration)
-else:
-    # Console not running. Wait for simulator completion/timeout.
-    print(f'{iob_colors.INFO}Waiting for simulator to finish{iob_colors.ENDC}')
-    proc_wait(sim_proc, remaining_duration)
+
+    # Update time passed
+    remaining_duration = int(DURATION) - (time.time()-remaining_duration)
+
+print(f'{iob_colors.INFO}Waiting for simulator to finish{iob_colors.ENDC}')
+proc_wait(sim_proc, remaining_duration)
 
 exit_program(0)
