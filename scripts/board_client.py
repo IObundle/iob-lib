@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-DEBUG = False
-
 import sys
 import socket
 import os
@@ -9,30 +7,29 @@ import time
 import subprocess
 import signal
 import iob_colors
+import argparse
 
-# import ctypes
-
-# Tell system to send a SIGTERM signal to this process if the parent process os killed
-# This is needed to ensure this program is killed on remote machines when the parent `sshd` process also terminates.
-# Define constants for prctl options and signals
-# PR_SET_PDEATHSIG = 1
-# SIGTERM = 15
-## Load the libc library
-# libc = ctypes.CDLL("libc.so.6")
-## Call prctl with PR_SET_PDEATHSIG and SIGTERM
-# libc.prctl(PR_SET_PDEATHSIG, SIGTERM)
+DEBUG = False
 
 # Define the client's IP, port and version
 # Must match the server's
 HOST = "localhost"  # Use the loopback interface
 PORT = 50007  # Use the same port as the server
-VERSION = "V0.2"
+VERSION = "V0.1"
 
 # user and duration board is needed
 USER = os.environ["USER"]
 DURATION = "15"  # Default duration is 5 seconds
 
+# List of processes to kill when terminating board_client
+proc_list = []
 
+# Variables to store the commands to run
+console_command = None
+fpga_prog_command = None
+simulator_run_command = None
+
+# Print usage and exit
 def perror():
     print(
         f"Usage: client.py [grab [duration in seconds] -c [console launch command] [-p [fpga program command] | -s [simulator run command]] | release]"
@@ -40,47 +37,7 @@ def perror():
     print("If -p is given then -c is required. If -s is given then -c is optional.")
     sys.exit(1)
 
-
-# Check the command line arguments
-if len(sys.argv) == 1:
-    command = "query"
-else:
-    command = sys.argv[1]
-
-if command == "grab":
-    if len(sys.argv) > 2:
-        try:
-            DURATION = int(sys.argv[2])
-        except ValueError:
-            perror()
-elif command != "release" and command != "query":
-    perror()
-
-# Console run command is only required with -p
-console_command = None
-if "-c" in sys.argv:
-    console_command = sys.argv[sys.argv.index("-c") + 1]
-
-# FPGA program command is optional
-fpga_prog_command = None
-if "-p" in sys.argv:
-    fpga_prog_command = sys.argv[sys.argv.index("-p") + 1]
-
-# Simulator run command is optional
-simulator_run_command = None
-if "-s" in sys.argv:
-    simulator_run_command = sys.argv[sys.argv.index("-s") + 1]
-
-# Ensure either -p or -s is given with grab command
-assert command != "grab" or bool(fpga_prog_command) != bool(
-    simulator_run_command
-), "Either -p or -s must be present with 'grab' command. (Cannot be both)"
-
-# Ensure -c is given with -p
-assert not fpga_prog_command or console_command, "-c must be present with -p"
-
-
-# Function to form the request
+# Function to form a request
 def form_request(command):
     request = ""
     if command == "grab":
@@ -90,12 +47,6 @@ def form_request(command):
     elif command == "query":
         request += f"{command} {VERSION}"
     return request
-
-
-request = form_request(command)
-if DEBUG:
-    print(f'{iob_colors.OKBLUE}DEBUG: Request is "{request}"{iob_colors.ENDC}')
-
 
 # Function to send the request
 def send_request(request):
@@ -134,39 +85,10 @@ def send_request(request):
         else:
             break
 
-
-# Function to release the board
+# Function to send a request to release the board
 def release_board(signal=None, frame=None):
     request = form_request("release")
     send_request(request)
-
-
-# If we will grab the FPGA board (-p was given), then ensure we release it when terminating board_client
-if command == "grab" and fpga_prog_command:
-    signal.signal(signal.SIGINT, release_board)
-    signal.signal(signal.SIGTERM, release_board)
-
-# Connect to server if command is not "grab", or if the -p argument was given
-if command != "grab" or fpga_prog_command:
-    send_request(request)
-
-# End program if command is not "grab"
-if command != "grab":
-    sys.exit(0)
-# Lines below will only run if command=="grab" and request successful
-
-
-def exit_program(exit_code):
-    # Release the board if -p is given
-    if fpga_prog_command:
-        release_board()
-
-    sys.exit(exit_code)
-
-
-# List of processes to kill when terminating board_client
-proc_list = []
-
 
 # Function to kill all processes from proc_list and exit with error.
 def kill_processes(sig=None, frame=None):
@@ -181,24 +103,13 @@ def kill_processes(sig=None, frame=None):
             os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
     exit_program(1)
 
+# Exit the program and release the board if -p is given
+def exit_program(exit_code):
+    # Release the board if -p is given
+    if fpga_prog_command:
+        release_board()
 
-signal.signal(signal.SIGINT, kill_processes)
-signal.signal(signal.SIGTERM, kill_processes)
-
-# Launch simulator in parallel if -s was given
-sim_proc = None
-if simulator_run_command:
-    print(f"{iob_colors.INFO}Running simulator{iob_colors.ENDC}")
-    sim_proc = subprocess.Popen(
-        simulator_run_command,
-        stdout=sys.stdout,
-        stderr=sys.stderr,
-        shell=True,
-        start_new_session=True,
-    )
-    # Add the simulator process to the list of processes to kill
-    proc_list.append(sim_proc)
-
+    sys.exit(exit_code)
 
 # Function to wait for a process to finish
 # If the process times out, kill all other processes
@@ -210,43 +121,121 @@ def proc_wait(proc, timeout):
         kill_processes()
 
 
-# Start counting time since start of FPGA programming
-start_time = time.time()
 
-# Program the FPGA if -p is given
-if fpga_prog_command:
-    print(f"{iob_colors.INFO}Programming FPGA{iob_colors.ENDC}")
-    fpga_prog_proc = subprocess.Popen(
-        fpga_prog_command,
-        stdout=sys.stdout,
-        stderr=sys.stderr,
-        shell=True,
-        start_new_session=True,
-    )
-    proc_list.append(fpga_prog_proc)
-    proc_wait(fpga_prog_proc, DURATION)
+if __name__=="__main__":
+    # Call kill_processes() when signals are received
+    signal.signal(signal.SIGINT, kill_processes)
+    signal.signal(signal.SIGTERM, kill_processes)
 
-# Update time passed
-remaining_duration = int(DURATION) - (time.time() - start_time)
+    parser = argparse.ArgumentParser(
+                        prog='board_client.py',
+                        description='Client to grab FPGA board and manage simulation and console processes.',
+                        epilog='If -p is given then -c is required. If -s is given then -c is optional.')
 
-# Choose whether to run console or just wait for simulator to finish
-if console_command:
-    # Run console and wait for completion/timeout.
-    print(f"{iob_colors.INFO}Running console{iob_colors.ENDC}")
-    console_proc = subprocess.Popen(
-        console_command,
-        stdout=sys.stdout,
-        stderr=sys.stderr,
-        shell=True,
-        start_new_session=True,
-    )
-    proc_list.append(console_proc)
-    proc_wait(console_proc, remaining_duration)
+    # Add command argument with default value
+    parser.add_argument('command', nargs='?', default='query', help='Command to send to server. Can be "grab", "release" or "query".')
+
+    # Add optional duration argument only available if command=grab
+    parser.add_argument('duration', nargs='?', default=DURATION, help='Duration in seconds to grab the board.')
+
+    # Add -c argument
+    parser.add_argument('-c', '--console', default=None, help='Command to launch the console.')
+
+    # Add -p argument
+    parser.add_argument('-p', '--program', default=None, help='Command to program the FPGA. Cannot be used with `-s` argument. Requires `-c` argument aswell.')
+
+    # Add -s argument
+    parser.add_argument('-s', '--simulate', default=None, help='Command to run the simulator. Cannot be used with `-p` argument.')
+
+    # Assign arguments to variables
+    command = parser.parse_args().command
+    DURATION = parser.parse_args().duration
+    console_command = parser.parse_args().console
+    fpga_prog_command = parser.parse_args().program
+    simulator_run_command = parser.parse_args().simulate
+
+    # Ensure either `-p` or `-s` is given with grab command, to either program fpga or run simulation, respectively.
+    assert command != "grab" or bool(fpga_prog_command) != bool(
+        simulator_run_command
+    ), f"{iob_colors.FAIL}Either `-p` or `-s` must be present with 'grab' command. (Cannot be both){iob_colors.ENDC}"
+
+    # Ensure -c is given with -p
+    assert not fpga_prog_command or console_command, f"{iob_colors.FAIL}Argument `-c` must be present with `-p`.{iob_colors.ENDC}"
+
+    request = form_request(command)
+    if DEBUG:
+        print(f'{iob_colors.OKBLUE}DEBUG: Request is "{request}"{iob_colors.ENDC}')
+
+
+    # If we will grab the FPGA board (-p was given), then ensure we release it when terminating board_client.py via signal interruption
+    if command == "grab" and fpga_prog_command:
+        signal.signal(signal.SIGINT, release_board)
+        signal.signal(signal.SIGTERM, release_board)
+
+    # Don't send request if command is "grab" and we are in simulation mode
+    if command != "grab" or fpga_prog_command:
+        send_request(request)
+
+    # End program if command is not "grab"
+    if command != "grab":
+        sys.exit(0)
+
+    # Lines below will only run if command=="grab" and request successful
+
+    # Launch simulator in the background if -s was given
+    sim_proc = None
+    if simulator_run_command:
+        print(f"{iob_colors.INFO}Running simulator{iob_colors.ENDC}")
+        sim_proc = subprocess.Popen(
+            simulator_run_command,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            shell=True,
+            start_new_session=True,
+        )
+        # Add the simulator process to the list of processes to kill
+        proc_list.append(sim_proc)
+
+
+    # Start counting time since start of FPGA programming
+    start_time = time.time()
+
+    # Program the FPGA if -p is given and wait
+    if fpga_prog_command:
+        print(f"{iob_colors.INFO}Programming FPGA{iob_colors.ENDC}")
+        fpga_prog_proc = subprocess.Popen(
+            fpga_prog_command,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            shell=True,
+            start_new_session=True,
+        )
+        proc_list.append(fpga_prog_proc)
+        proc_wait(fpga_prog_proc, int(DURATION))
 
     # Update time passed
-    remaining_duration = int(DURATION) - (time.time() - remaining_duration)
+    remaining_duration = int(DURATION) - (time.time() - start_time)
 
-print(f"{iob_colors.INFO}Waiting for simulator to finish{iob_colors.ENDC}")
-proc_wait(sim_proc, remaining_duration)
+    # Run console if -c is given and wait
+    if console_command:
+        # Run console and wait for completion/timeout.
+        print(f"{iob_colors.INFO}Running console{iob_colors.ENDC}")
+        console_proc = subprocess.Popen(
+            console_command,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            shell=True,
+            start_new_session=True,
+        )
+        proc_list.append(console_proc)
+        proc_wait(console_proc, remaining_duration)
 
-exit_program(0)
+        # Update time passed
+        remaining_duration = int(DURATION) - (time.time() - remaining_duration)
+
+    # Wait for simulator to finish
+    if simulator_run_command:
+        print(f"{iob_colors.INFO}Waiting for simulator to finish{iob_colors.ENDC}")
+        proc_wait(sim_proc, remaining_duration)
+
+    exit_program(0)
