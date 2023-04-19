@@ -15,7 +15,7 @@ DEBUG = False
 # Must match the server's
 HOST = "localhost"  # Use the loopback interface
 PORT = 50007  # Use the same port as the server
-VERSION = "V0.1"
+VERSION = "V0.2"
 
 # user and duration board is needed
 USER = os.environ["USER"]
@@ -95,10 +95,19 @@ def release_board(signal=None, frame=None):
     send_request(request)
 
 
+# Exit the program and release the board if -p is given
+def exit_program(exit_code):
+    # Release the board if -p is given
+    if fpga_prog_command:
+        release_board()
+
+    sys.exit(exit_code)
+
+
 # Function to kill all processes from proc_list and exit with error.
 def kill_processes(sig=None, frame=None):
     for proc in proc_list:
-        #Check if process is still running
+        # Check if process is still running
         if proc.poll() is None:
             # Gracefully terminate process group (the process and its children)
             os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
@@ -109,15 +118,6 @@ def kill_processes(sig=None, frame=None):
                 # Process did not terminate gracefully, kill it
                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
     exit_program(1)
-
-
-# Exit the program and release the board if -p is given
-def exit_program(exit_code):
-    # Release the board if -p is given
-    if fpga_prog_command:
-        release_board()
-
-    sys.exit(exit_code)
 
 
 # Function to wait for a process to finish
@@ -131,10 +131,6 @@ def proc_wait(proc, timeout):
 
 
 if __name__ == "__main__":
-    # Call kill_processes() when signals are received
-    signal.signal(signal.SIGINT, kill_processes)
-    signal.signal(signal.SIGTERM, kill_processes)
-
     parser = argparse.ArgumentParser(
         prog="board_client.py",
         description="Client to grab FPGA board and manage simulation and console processes.",
@@ -199,17 +195,16 @@ if __name__ == "__main__":
     if DEBUG:
         print(f'{iob_colors.OKBLUE}DEBUG: Request is "{request}"{iob_colors.ENDC}')
 
-    # If we will grab the FPGA board (-p was given), then ensure we release it when terminating board_client.py via signal interruption
-    if command == "grab" and fpga_prog_command:
-        signal.signal(signal.SIGINT, release_board)
-        signal.signal(signal.SIGTERM, release_board)
-
     # Don't send request if command is "grab" and we are in simulation mode
     if command != "grab" or fpga_prog_command:
         send_request(request)
 
-    # End program if command is not "grab"
-    if command != "grab":
+    if command == "grab":
+        # Call `kill_processes()` when termination signals are received
+        signal.signal(signal.SIGINT, kill_processes)
+        signal.signal(signal.SIGTERM, kill_processes)
+    else:
+        # End program if command is not "grab"
         sys.exit(0)
 
     # Lines below will only run if command=="grab" and request successful
