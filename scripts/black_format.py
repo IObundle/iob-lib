@@ -5,7 +5,6 @@ import subprocess
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
         prog="black_format",
         description="""Python Black format script.

@@ -67,6 +67,7 @@ reserved_signals = {
     "axi_rready_o": ".axi_rready_o      (axi_rready_o  [1-1:0])",
 }
 
+
 # Import the <corename>_setup.py from the given core directory
 def import_setup(module_dir, **kwargs):
     # Find <corename>_setup.py file
@@ -315,7 +316,6 @@ def eval_param_expression(param_expression, params_dict):
 # confs: list of dictionaries, each of which describes a parameter and has attributes: 'name', 'val' and 'max'.
 # param_attribute: name of the attribute in the paramater that contains the value to replace in string given. Attribute names are: 'val', 'min, or 'max'.
 def eval_param_expression_from_config(param_expression, confs, param_attribute):
-
     # Create parameter dictionary with correct values to be replaced in string
     params_dict = {}
     for param in confs:
