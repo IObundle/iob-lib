@@ -29,6 +29,7 @@ console_command = None
 fpga_prog_command = None
 simulator_run_command = None
 
+
 # Print usage and exit
 def perror():
     print(
@@ -36,6 +37,7 @@ def perror():
     )
     print("If -p is given then -c is required. If -s is given then -c is optional.")
     sys.exit(1)
+
 
 # Function to form a request
 def form_request(command):
@@ -47,6 +49,7 @@ def form_request(command):
     elif command == "query":
         request += f"{command} {VERSION}"
     return request
+
 
 # Function to send the request
 def send_request(request):
@@ -85,23 +88,28 @@ def send_request(request):
         else:
             break
 
+
 # Function to send a request to release the board
 def release_board(signal=None, frame=None):
     request = form_request("release")
     send_request(request)
 
+
 # Function to kill all processes from proc_list and exit with error.
 def kill_processes(sig=None, frame=None):
     for proc in proc_list:
-        # Gracefully terminate process group (the process and its children)
-        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-        try:
-            # Wait for process to terminate gracefully
-            proc.wait(2)
-        except subprocess.TimeoutExpired:
-            # Process did not terminate gracefully, kill it
-            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        #Check if process is still running
+        if proc.poll() is None:
+            # Gracefully terminate process group (the process and its children)
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+            try:
+                # Wait for process to terminate gracefully
+                proc.wait(2)
+            except subprocess.TimeoutExpired:
+                # Process did not terminate gracefully, kill it
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
     exit_program(1)
+
 
 # Exit the program and release the board if -p is given
 def exit_program(exit_code):
@@ -110,6 +118,7 @@ def exit_program(exit_code):
         release_board()
 
     sys.exit(exit_code)
+
 
 # Function to wait for a process to finish
 # If the process times out, kill all other processes
@@ -121,31 +130,53 @@ def proc_wait(proc, timeout):
         kill_processes()
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     # Call kill_processes() when signals are received
     signal.signal(signal.SIGINT, kill_processes)
     signal.signal(signal.SIGTERM, kill_processes)
 
     parser = argparse.ArgumentParser(
-                        prog='board_client.py',
-                        description='Client to grab FPGA board and manage simulation and console processes.',
-                        epilog='If -p is given then -c is required. If -s is given then -c is optional.')
+        prog="board_client.py",
+        description="Client to grab FPGA board and manage simulation and console processes.",
+        epilog="If -p is given then -c is required. If -s is given then -c is optional.",
+    )
 
     # Add command argument with default value
-    parser.add_argument('command', nargs='?', default='query', help='Command to send to server. Can be "grab", "release" or "query".')
+    parser.add_argument(
+        "command",
+        nargs="?",
+        default="query",
+        help='Command to send to server. Can be "grab", "release" or "query".',
+    )
 
     # Add optional duration argument only available if command=grab
-    parser.add_argument('duration', nargs='?', default=DURATION, help='Duration in seconds to grab the board.')
+    parser.add_argument(
+        "duration",
+        nargs="?",
+        default=DURATION,
+        help="Duration in seconds to grab the board.",
+    )
 
     # Add -c argument
-    parser.add_argument('-c', '--console', default=None, help='Command to launch the console.')
+    parser.add_argument(
+        "-c", "--console", default=None, help="Command to launch the console."
+    )
 
     # Add -p argument
-    parser.add_argument('-p', '--program', default=None, help='Command to program the FPGA. Cannot be used with `-s` argument. Requires `-c` argument aswell.')
+    parser.add_argument(
+        "-p",
+        "--program",
+        default=None,
+        help="Command to program the FPGA. Cannot be used with `-s` argument. Requires `-c` argument aswell.",
+    )
 
     # Add -s argument
-    parser.add_argument('-s', '--simulate', default=None, help='Command to run the simulator. Cannot be used with `-p` argument.')
+    parser.add_argument(
+        "-s",
+        "--simulate",
+        default=None,
+        help="Command to run the simulator. Cannot be used with `-p` argument.",
+    )
 
     # Assign arguments to variables
     command = parser.parse_args().command
@@ -160,12 +191,13 @@ if __name__=="__main__":
     ), f"{iob_colors.FAIL}Either `-p` or `-s` must be present with 'grab' command. (Cannot be both){iob_colors.ENDC}"
 
     # Ensure -c is given with -p
-    assert not fpga_prog_command or console_command, f"{iob_colors.FAIL}Argument `-c` must be present with `-p`.{iob_colors.ENDC}"
+    assert (
+        not fpga_prog_command or console_command
+    ), f"{iob_colors.FAIL}Argument `-c` must be present with `-p`.{iob_colors.ENDC}"
 
     request = form_request(command)
     if DEBUG:
         print(f'{iob_colors.OKBLUE}DEBUG: Request is "{request}"{iob_colors.ENDC}')
-
 
     # If we will grab the FPGA board (-p was given), then ensure we release it when terminating board_client.py via signal interruption
     if command == "grab" and fpga_prog_command:
@@ -195,7 +227,6 @@ if __name__=="__main__":
         )
         # Add the simulator process to the list of processes to kill
         proc_list.append(sim_proc)
-
 
     # Start counting time since start of FPGA programming
     start_time = time.time()
