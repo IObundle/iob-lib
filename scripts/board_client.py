@@ -123,10 +123,11 @@ def kill_processes(sig=None, frame=None):
             except subprocess.TimeoutExpired:
                 # Process did not terminate gracefully, kill it
                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-    if sig in [signal.SIGINT, signal.SIGTERM]:
-        exit_program(0)
-    else:
+    # Dont throw an error if the function is called from signal handler
+    if sig is None:
         exit_program(1)
+    else:
+        exit_program(0)
 
 
 # Function to wait for a process to finish
