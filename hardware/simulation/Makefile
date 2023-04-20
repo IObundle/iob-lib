@@ -67,7 +67,11 @@ BOARD_GRAB_CMD=../../scripts/board_client.py grab $(GRAB_TIMEOUT)
 
 run: remote_build_dir
 ifeq ($(SIM_SERVER),)
+ifneq ($(CONSOLE_CMD),)
 	$(BOARD_GRAB_CMD) -s 'make exec' -c '$(CONSOLE_CMD)'
+else
+	make exec
+endif
 else
 	ssh -t $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'
 ifeq ($(VCD),1)
