@@ -17,8 +17,6 @@ reserved_signals = {
     "clk_i": ".clk_i(clk_i)",
     "cke_i": ".cke_i(cke_i)",
     "en_i": ".en_i(en_i)",
-    "rst_i": ".rst_i(rst_i)",
-    "reset": ".reset(rst_i)",
     "arst_i": ".arst_i(arst_i)",
     "iob_avalid_i": ".iob_avalid_i(slaves_req[`AVALID(`/*<InstanceName>*/)])",
     "iob_addr_i": ".iob_addr_i(slaves_req[`ADDRESS(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])",
