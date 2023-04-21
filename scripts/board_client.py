@@ -267,7 +267,7 @@ if __name__ == "__main__":
         proc_wait(console_proc, remaining_duration)
 
         # Update time passed
-        remaining_duration = int(DURATION) - (time.time() - remaining_duration)
+        remaining_duration = int(DURATION) - (time.time() - start_time)
 
     # Wait for simulator to finish
     if simulator_run_command:
