@@ -194,7 +194,9 @@ def get_peripheral_ios(peripherals_list, submodules):
             # Import <corename>_setup.py module
             module = import_setup(submodules["dirs"][instance["type"]])
             # Extract only PIO signals from the peripheral (no reserved/known signals)
-            port_list[instance["type"]] = get_pio_signals(get_module_io(module.ios, module.confs, instance["name"]))
+            port_list[instance["type"]] = get_pio_signals(
+                get_module_io(module.ios, module.confs, instance["name"])
+            )
 
     ios_list = []
     # Append ports of each instance
@@ -464,7 +466,9 @@ def get_module_io(ios, confs=None, corename=None):
 
             # Add corename prefix to parameters in port width, if `confs` and `corename` are given
             if confs and corename:
-                signal["n_bits"] = add_prefix_to_parameters_in_port(signal,confs,corename+"_")["n_bits"]
+                signal["n_bits"] = add_prefix_to_parameters_in_port(
+                    signal, confs, corename + "_"
+                )["n_bits"]
         module_signals.extend(table_signals)
     return module_signals
 

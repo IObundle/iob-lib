@@ -8,10 +8,13 @@ import subprocess
 import signal
 import argparse
 import importlib.util
+
 if importlib.util.find_spec("iob_colors") is not None:
     import iob_colors
 else:
-    print("Module `iob_colors.py` not found. Please set the `PYTHONPATH` environment variable with the location of this module.")
+    print(
+        "Module `iob_colors.py` not found. Please set the `PYTHONPATH` environment variable with the location of this module."
+    )
     print("For example: `export PYTHONPATH=<Path to iob-lib>/scripts`")
     sys.exit(1)
 
