@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S python3 -B
 
 import sys
 import socket
@@ -6,8 +6,17 @@ import os
 import time
 import subprocess
 import signal
-import iob_colors
 import argparse
+import importlib.util
+
+if importlib.util.find_spec("iob_colors") is not None:
+    import iob_colors
+else:
+    print(
+        "Module `iob_colors.py` not found. Please set the `PYTHONPATH` environment variable with the location of this module."
+    )
+    print("For example: `export PYTHONPATH=<Path to iob-lib>/scripts`")
+    sys.exit(1)
 
 DEBUG = False
 
@@ -117,7 +126,11 @@ def kill_processes(sig=None, frame=None):
             except subprocess.TimeoutExpired:
                 # Process did not terminate gracefully, kill it
                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-    exit_program(1)
+    # Dont throw an error if the function is called from signal handler
+    if sig is None:
+        exit_program(1)
+    else:
+        exit_program(0)
 
 
 # Function to wait for a process to finish
@@ -257,7 +270,7 @@ if __name__ == "__main__":
         proc_wait(console_proc, remaining_duration)
 
         # Update time passed
-        remaining_duration = int(DURATION) - (time.time() - remaining_duration)
+        remaining_duration = int(DURATION) - (time.time() - start_time)
 
     # Wait for simulator to finish
     if simulator_run_command:
