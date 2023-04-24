@@ -214,8 +214,7 @@ def get_peripheral_ios(peripherals_list, submodules):
 
 # This function is used to setup peripheral related configuration in the python module of iob-soc systems
 # python_module: Module of the iob-soc system being setup
-# append_peripheral_ios: Optional argument. Selects if should append peripheral IOs to 'ios' list
-def iob_soc_peripheral_setup(python_module, append_peripheral_ios=True):
+def iob_soc_peripheral_setup(python_module):
     # Get peripherals list from 'peripherals' table in blocks list
     peripherals_list = get_peripherals_list(python_module.blocks)
 
@@ -240,11 +239,6 @@ def iob_soc_peripheral_setup(python_module, append_peripheral_ios=True):
     # Get peripheral related macros
     if peripherals_list:
         get_peripheral_macros(python_module.confs, peripherals_list)
-    # Append peripherals IO
-    if peripherals_list and append_peripheral_ios:
-        python_module.ios.extend(
-            get_peripheral_ios(peripherals_list, python_module.submodules)
-        )
 
     return peripherals_list
 
