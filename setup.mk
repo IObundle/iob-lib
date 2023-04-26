@@ -38,6 +38,11 @@ BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 
+format:
+	$(LIB_DIR)/scripts/black_format.py
+
+format-check:
+	$(LIB_DIR)/scripts/black_format.py --check
 
 setup: debug
 
@@ -111,7 +116,7 @@ clean:
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-debug: $(BUILD_DIR) $(SRC)
+debug: format-check $(BUILD_DIR) $(SRC)
 	@for i in $(SRC); do echo $$i; done
 
 
