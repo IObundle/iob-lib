@@ -44,6 +44,17 @@ setup: debug
 $(BUILD_DIR):
 	$(PYTHON_EXEC) ./$(SETUP_PYTHON_FILENAME) $(SETUP_ARGS)
 
+verilog-format-check:
+	# Run linter on all verilog files of setup directory
+	verible-verilog-lint `find . -name *.v -not -path "*/submodules/*" | tr '\n' ' '`
+	# Run linter on all verilog files of build directory (includes generated files)
+	#verible-verilog-lint `find $(BUILD_DIR) -name *.v  | tr '\n' ' '`
+
+verilog-format:
+	# Run formatter on all verilog files of setup directory
+	verible-verilog-format --inplace `find . -name *.v -not -path "*/submodules/*" | tr '\n' ' '`
+	# Run formatter on all verilog files of build directory (includes generated files)
+	#verible-verilog-format --inplace `find $(BUILD_DIR) -name *.v  | tr '\n' ' '`
 
 #
 #DOCUMENT
@@ -111,8 +122,8 @@ clean:
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-debug: $(BUILD_DIR) $(SRC)
+debug: verilog-format-check $(BUILD_DIR) $(SRC)
 	@for i in $(SRC); do echo $$i; done
 
 
-.PHONY: setup clean debug
+.PHONY: setup clean debug verilog-format-check verilog-format
