@@ -44,8 +44,6 @@ python-format:
 python-format-check:
 	$(LIB_DIR)/scripts/black_format.py --check
 
-format-check: python-format-check
-
 setup: debug
 
 $(BUILD_DIR):
@@ -118,7 +116,7 @@ clean:
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-debug: format-check $(BUILD_DIR) $(SRC)
+debug: python-format-check $(BUILD_DIR) $(SRC)
 	@for i in $(SRC); do echo $$i; done
 
 
