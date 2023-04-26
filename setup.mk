@@ -41,8 +41,10 @@ BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 python-format:
 	$(LIB_DIR)/scripts/black_format.py
 
-format-check:
+python-format-check:
 	$(LIB_DIR)/scripts/black_format.py --check
+
+format-check: python-format-check
 
 setup: debug
 
