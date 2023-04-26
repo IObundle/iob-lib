@@ -38,7 +38,7 @@ BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 
-format:
+python-format:
 	$(LIB_DIR)/scripts/black_format.py
 
 format-check:
