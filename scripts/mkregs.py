@@ -117,7 +117,9 @@ class mkregs:
                 if rst_val != 0:
                     # get number of bits needed to represent rst_val
                     rst_n_bits = ceil(log(rst_val + 1, 2))
-                    zeros_filling = "{(" + str(n_bits) + "-" + str(rst_n_bits) + "){1'd0}}"
+                    zeros_filling = (
+                        "{(" + str(n_bits) + "-" + str(rst_n_bits) + "){1'd0}}"
+                    )
                     rst_val_str = (
                         "{"
                         + zeros_filling
