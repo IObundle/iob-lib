@@ -38,11 +38,17 @@ BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 
+python-format:
+	$(LIB_DIR)/scripts/black_format.py
 
-setup: debug
+python-format-check:
+	$(LIB_DIR)/scripts/black_format.py --check
 
-$(BUILD_DIR):
-	$(PYTHON_EXEC) ./$(SETUP_PYTHON_FILENAME) $(SETUP_ARGS)
+verilog-format:
+	# Run formatter on all verilog files of setup directory
+	verible-verilog-format --inplace `find . -name *.v -not -path "*/submodules/*" | tr '\n' ' '`
+	# Run formatter on all verilog files of build directory (includes generated files)
+	#verible-verilog-format --inplace `find $(BUILD_DIR) -name *.v  | tr '\n' ' '`
 
 verilog-format-check:
 	# Run linter on all verilog files of setup directory
@@ -50,11 +56,10 @@ verilog-format-check:
 	# Run linter on all verilog files of build directory (includes generated files)
 	#verible-verilog-lint `find $(BUILD_DIR) -name *.v  | tr '\n' ' '`
 
-verilog-format:
-	# Run formatter on all verilog files of setup directory
-	verible-verilog-format --inplace `find . -name *.v -not -path "*/submodules/*" | tr '\n' ' '`
-	# Run formatter on all verilog files of build directory (includes generated files)
-	#verible-verilog-format --inplace `find $(BUILD_DIR) -name *.v  | tr '\n' ' '`
+setup: debug
+
+$(BUILD_DIR):
+	$(PYTHON_EXEC) ./$(SETUP_PYTHON_FILENAME) $(SETUP_ARGS)
 
 #
 #DOCUMENT
@@ -122,8 +127,8 @@ clean:
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-debug: verilog-format-check $(BUILD_DIR) $(SRC)
+debug: python-format-check verilog-format-check $(BUILD_DIR) $(SRC)
 	@for i in $(SRC); do echo $$i; done
 
 
-.PHONY: setup clean debug verilog-format-check verilog-format
+.PHONY: setup clean debug python-format-check verilog-format-check verilog-format
