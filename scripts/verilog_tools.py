@@ -17,13 +17,12 @@ def replace_includes(search_paths=[]):
                 if file.endswith(".v") or file.endswith(".sv"):
                     verilog_files.append(os.path.join(root, file))
                 if file.endswith(".vh"):
-                    if file in verilog_header_files:
-                        if file not in duplicates:
-                            duplicates.append(file)
-                            print(
-                                f"{iob_colors.INFO}Duplicate verilog header file '{file}' found. Will not replace include.{iob_colors.ENDC}"
-                            )
-                    else:
+                    if file in verilog_header_files and file not in duplicates:
+                        duplicates.append(file)
+                        print(
+                            f"{iob_colors.INFO}Duplicate verilog header file '{file}' found. Will not replace include.{iob_colors.ENDC}"
+                        )
+                    if file not in verilog_header_files:
                         verilog_header_files[file] = root
 
     # Search contents of the verilog files for `include statements
