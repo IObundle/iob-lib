@@ -912,6 +912,7 @@ def suffix(direction):
 # Port
 #
 
+
 # Write port with given direction, bus width, name and description to file
 def write_port(direction, width, name, description, fout):
     fout.write(direction + width + name + ", //" + description + "\n")
@@ -950,6 +951,7 @@ def s_port(prefix, fout, bus_size=1):
 #
 # Portmap
 #
+
 
 # Write portmap with given port, connection name, width, bus start, bus size and description to file
 def write_portmap(port, connection_name, width, bus_start, bus_size, description, fout):
@@ -1051,6 +1053,7 @@ def s_s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
 #
 # Wire
 #
+
 
 # Write wire with given name, bus size, width and description to file
 def write_wire(name, bus_size, width, description, fout):
@@ -1268,6 +1271,7 @@ def create_signal_table(interface_name):
 # Write to .vh file
 #
 
+
 # port_prefix: Prefix for ports in a portmap file.
 # wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vh` file; Prefix for ports in a `*port.vh` file (these ports also create wires);
 def write_vh_contents(
@@ -1297,7 +1301,6 @@ def write_vh_contents(
 
 
 def main():
-
     args = parse_arguments()
 
     # bus type

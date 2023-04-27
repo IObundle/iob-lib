@@ -17,8 +17,6 @@ reserved_signals = {
     "clk_i": ".clk_i(clk_i)",
     "cke_i": ".cke_i(cke_i)",
     "en_i": ".en_i(en_i)",
-    "rst_i": ".rst_i(rst_i)",
-    "reset": ".reset(rst_i)",
     "arst_i": ".arst_i(arst_i)",
     "iob_avalid_i": ".iob_avalid_i(slaves_req[`AVALID(`/*<InstanceName>*/)])",
     "iob_addr_i": ".iob_addr_i(slaves_req[`ADDRESS(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])",
@@ -66,6 +64,7 @@ reserved_signals = {
     "axi_rvalid_i": ".axi_rvalid_i      (axi_rvalid_i  [1-1:0])",
     "axi_rready_o": ".axi_rready_o      (axi_rready_o  [1-1:0])",
 }
+
 
 # Import the <corename>_setup.py from the given core directory
 def import_setup(module_dir, **kwargs):
@@ -195,7 +194,9 @@ def get_peripheral_ios(peripherals_list, submodules):
             # Import <corename>_setup.py module
             module = import_setup(submodules["dirs"][instance["type"]])
             # Extract only PIO signals from the peripheral (no reserved/known signals)
-            port_list[instance["type"]] = get_pio_signals(get_module_io(module.ios))
+            port_list[instance["type"]] = get_pio_signals(
+                get_module_io(module.ios, module.confs, instance["name"])
+            )
 
     ios_list = []
     # Append ports of each instance
@@ -315,7 +316,6 @@ def eval_param_expression(param_expression, params_dict):
 # confs: list of dictionaries, each of which describes a parameter and has attributes: 'name', 'val' and 'max'.
 # param_attribute: name of the attribute in the paramater that contains the value to replace in string given. Attribute names are: 'val', 'min, or 'max'.
 def eval_param_expression_from_config(param_expression, confs, param_attribute):
-
     # Create parameter dictionary with correct values to be replaced in string
     params_dict = {}
     for param in confs:
@@ -443,7 +443,9 @@ def get_table_ports(table):
 # Example return list:
 # [ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"},
 #  {'name':"rst_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral reset input"} ]
-def get_module_io(ios):
+#
+# The `confs` and `corename` are optional parameters that should be provided togheter. If they are set, this function will add the `corename` as a prefix to any parameters in the port widths that are also present in the `confs` dictionary.
+def get_module_io(ios, confs=None, corename=None):
     module_signals = []
     for table in ios:
         table_signals = get_table_ports(table)
@@ -456,11 +458,17 @@ def get_module_io(ios):
             signal["name_without_prefix"] = signal[
                 "name"
             ]  # Save the name without prefix in an attribute
-            # Add prefix xto signal name if ios_table_prefix is set
+            # Add prefix to signal name if ios_table_prefix is set
             if "ios_table_prefix" in table.keys() and table["ios_table_prefix"]:
                 signal["name"] = (
                     table["name"] + "_" + signal["name"]
                 )  # Add prefix to the signal name
+
+            # Add corename prefix to parameters in port width, if `confs` and `corename` are given
+            if confs and corename:
+                signal["n_bits"] = add_prefix_to_parameters_in_port(
+                    signal, confs, corename + "_"
+                )["n_bits"]
         module_signals.extend(table_signals)
     return module_signals
 

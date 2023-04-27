@@ -13,6 +13,7 @@ import mk_configuration as mk_conf
 
 LIB_DIR = "submodules/LIB"
 
+
 # Copy a file if destination does not exist
 def copy_without_override(src, dst):
     if not os.path.isfile(dst):
@@ -394,24 +395,24 @@ def sw_setup(python_module):
         # Copy LIB software Makefile
         shutil.copy(f"{LIB_DIR}/software/Makefile", f"{build_dir}/software")
 
-        # Create 'scripts/' directory and console.mk
+        # Create 'scripts/' directory
         python_setup(build_dir)
-        shutil.copy(f"{LIB_DIR}/scripts/console.mk", f"{build_dir}/console.mk")
 
 
 def python_setup(build_dir):
-    sim_srcs = [
+    scripts = [
         "sw_defines.py",
         "hw_defines.py",
         "console.py",
         "hex_split.py",
         "makehex.py",
         "board_client.py",
+        "iob_colors.py",
     ]
     dest_dir = f"{build_dir}/scripts"
     if not os.path.exists(dest_dir):
         os.mkdir(dest_dir)
-    copy_files(LIB_DIR, dest_dir, sim_srcs, "*.py")
+    copy_files(LIB_DIR, dest_dir, scripts, "*.py")
 
 
 def doc_setup(python_module):

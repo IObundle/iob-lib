@@ -4,7 +4,8 @@
 module iob_counter_ld
   #(
     parameter DATA_W = 21,
-    parameter RST_VAL = {DATA_W{1'b0}}
+    parameter RST_VAL = {DATA_W{1'b0}},
+    parameter CLKEDGE = "posedge"
   )
   (
     input               clk_i,
@@ -23,17 +24,23 @@ module iob_counter_ld
   wire [DATA_W-1:0]    data;
   assign data = ld_i? ld_val_i: data_o + 1'b1;
 
-  iob_reg_re #(DATA_W, RST_VAL) reg0
-  (
-    .clk_i(clk_i),
-    .arst_i(arst_i),
-    .cke_i(cke_i),
+  iob_reg_re 
+    #(
+      .DATA_W(DATA_W),
+      .RST_VAL(RST_VAL),
+      .CLKEDGE(CLKEDGE)
+      ) 
+  reg0
+    (
+     .clk_i(clk_i),
+     .arst_i(arst_i),
+     .cke_i(cke_i),
 
-    .rst_i(rst_i),
-    .en_i(en_i),
+     .rst_i(rst_i),
+     .en_i(en_i),
 
-    .data_i(data),
-    .data_o(data_o)
-  );
-
+     .data_i(data),
+     .data_o(data_o)
+     );
+  
 endmodule

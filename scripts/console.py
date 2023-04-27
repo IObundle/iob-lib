@@ -268,8 +268,8 @@ def init_console():
             time.sleep(2)
             ser.port = sys.argv[sys.argv.index("-s") + 1]
             ser.open()
-            ser.flushInput()
-            ser.flushOutput()
+            ser.reset_input_buffer()
+            ser.reset_output_buffer()
         except Exception:
             cnsl_perror("Error open serial port.")
     else:

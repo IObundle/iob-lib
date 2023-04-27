@@ -19,6 +19,7 @@ if os.path.isfile(argv[2]):
 else:
     file2_contents = []
 
+
 # Trim lines of zeros from end of file
 def trimEndingZeros(data):
     data_size = len(data)

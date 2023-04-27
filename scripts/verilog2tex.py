@@ -19,7 +19,6 @@ Parse top-level parameters and macros
 
 
 def param_parse(topv, param_defaults, defines):
-
     param_defaults.update(defines)
 
     params = []
@@ -108,7 +107,6 @@ Parse block diagram modules
 
 
 def block_parse(block):
-
     b_list = []
 
     for line in block:
@@ -133,7 +131,6 @@ def block_parse(block):
 
 
 def io_parse(io_lines, params, defines):
-
     table_found = 0
     table_name = ""
     table = []
@@ -200,7 +197,6 @@ def io_parse(io_lines, params, defines):
 
 
 def swreg_parse(pregs):
-
     table = []
     for i in range(len(pregs)):
         table.append(pregs[i]["regs"])
@@ -249,7 +245,6 @@ def header_parse(vh, defines):
 
 
 def verilog2tex(pregs, top, vh, v):
-
     # macro dictionary
     defines = {}
 

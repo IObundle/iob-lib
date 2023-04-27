@@ -6,6 +6,7 @@
 from latex import write_table
 from submodule_utils import get_peripherals
 
+
 # Generate blocks.tex file with list TeX tables of blocks (Verilog modules)
 def generate_blocks_list_tex(blocks, out_dir):
     blocks_file = open(f"{out_dir}/blocks.tex", "w")

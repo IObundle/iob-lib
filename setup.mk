@@ -38,6 +38,11 @@ BUILD_DOC_DIR = $(BUILD_DIR)/document
 BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 
+python-format:
+	$(LIB_DIR)/scripts/black_format.py
+
+python-format-check:
+	$(LIB_DIR)/scripts/black_format.py --check
 
 setup: debug
 
@@ -104,13 +109,14 @@ endif
 
 
 clean:
-	@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi && rm -rf $(BUILD_DIR)
+	-@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
+	@rm -rf $(BUILD_DIR)
 
 # Remove all __pycache__ folders with python bytecode
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-debug: $(BUILD_DIR) $(SRC)
+debug: python-format-check $(BUILD_DIR) $(SRC)
 	@for i in $(SRC); do echo $$i; done
 
 
