@@ -11,5 +11,7 @@ pkgs.mkShell {
     python3Packages.parse
     (texlive.combine { inherit (texlive) scheme-medium multirow lipsum catchfile nowidow enumitem placeins xltabular ltablex titlesec makecell ; })
     (callPackage ./riscv-gnu-toolchain.nix { })
+    verible
+    black
   ];
 }
