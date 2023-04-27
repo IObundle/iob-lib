@@ -87,6 +87,8 @@ class mkregs:
         n_bits = row["n_bits"]
         log2n_items = row["log2n_items"]
         n_bytes = self.bceil(n_bits, 3) / 8
+        if n_bytes == 3:
+            n_bytes = 4
         addr = row["addr"]
         addr_w = self.calc_verilog_addr_w(log2n_items, n_bytes)
         auto = row["autologic"]
@@ -109,20 +111,23 @@ class mkregs:
         )
 
         if auto:  # generate register
-            # get number of bits needed to represent rst_val
-            rst_n_bits = ceil(log(rst_val + 1, 2))
             # fill remaining bits with 0s
             if isinstance(n_bits, str):
-                zeros_filling = "{(" + str(n_bits) + "-" + str(rst_n_bits) + "){1'd0}}"
-                rst_val_str = (
-                    "{"
-                    + zeros_filling
-                    + ","
-                    + str(rst_n_bits)
-                    + "'d"
-                    + str(rst_val)
-                    + "}"
-                )
+                if rst_val != 0:
+                    # get number of bits needed to represent rst_val
+                    rst_n_bits = ceil(log(rst_val + 1, 2))
+                    zeros_filling = "{(" + str(n_bits) + "-" + str(rst_n_bits) + "){1'd0}}"
+                    rst_val_str = (
+                        "{"
+                        + zeros_filling
+                        + ","
+                        + str(rst_n_bits)
+                        + "'d"
+                        + str(rst_val)
+                        + "}"
+                    )
+                else:
+                    rst_val_str = "{" + str(n_bits) + "{1'd0}}"
             else:
                 rst_val_str = str(n_bits) + "'d" + str(rst_val)
             f.write(f"`IOB_WIRE({name}_wen, 1)\n")
@@ -148,6 +153,8 @@ class mkregs:
         n_bits = row["n_bits"]
         log2n_items = row["log2n_items"]
         n_bytes = self.bceil(n_bits, 3) / 8
+        if n_bytes == 3:
+            n_bytes = 4
         addr = row["addr"]
         addr_w = self.calc_verilog_addr_w(log2n_items, n_bytes)
         auto = row["autologic"]
@@ -377,6 +384,8 @@ class mkregs:
             n_bits = row["n_bits"]
             log2n_items = row["log2n_items"]
             n_bytes = int(self.bceil(n_bits, 3) / 8)
+            if n_bytes == 3:
+                n_bytes = 4
             addr_last = int(
                 addr
                 + (
@@ -421,6 +430,8 @@ class mkregs:
             n_bits = row["n_bits"]
             log2n_items = row["log2n_items"]
             n_bytes = int(self.bceil(n_bits, 3) / 8)
+            if n_bytes == 3:
+                n_bytes = 4
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
             auto = row["autologic"]
 
@@ -478,6 +489,8 @@ class mkregs:
             name = row["name"]
             n_bits = row["n_bits"]
             n_bytes = self.bceil(n_bits, 3) / 8
+            if n_bytes == 3:
+                n_bytes = 4
             log2n_items = row["log2n_items"]
             addr_w = int(
                 ceil(
@@ -509,6 +522,8 @@ class mkregs:
             name = row["name"]
             n_bits = row["n_bits"]
             n_bytes = self.bceil(n_bits, 3) / 8
+            if n_bytes == 3:
+                n_bytes = 4
             log2n_items = row["log2n_items"]
             f_def.write(f"`define {macro_prefix}{name}_ADDR {row['addr']}\n")
             if eval_param_expression_from_config(log2n_items, self.config, "max") > 0:
@@ -524,7 +539,7 @@ class mkregs:
     # uses unsigned int types from C stdint library
     @staticmethod
     def swreg_type(name, n_bytes):
-        type_dict = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t", 8: "uint64_t"}
+        type_dict = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}
         try:
             type_try = type_dict[n_bytes]
         except:
@@ -555,6 +570,8 @@ class mkregs:
             name = row["name"]
             n_bits = row["n_bits"]
             n_bytes = int(self.bceil(n_bits, 3) / 8)
+            if n_bytes == 3:
+                n_bytes = 4
             if row["type"] == "W":
                 fswhdr.write(f"#define {core_prefix}{name}_W {n_bytes*8}\n")
             if row["type"] == "R":
@@ -569,6 +586,8 @@ class mkregs:
             n_bits = row["n_bits"]
             log2n_items = row["log2n_items"]
             n_bytes = self.bceil(n_bits, 3) / 8
+            if n_bytes == 3:
+                n_bytes = 4
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
             if row["type"] == "W":
                 sw_type = self.swreg_type(name, n_bytes)
@@ -608,6 +627,8 @@ class mkregs:
             n_bits = row["n_bits"]
             log2n_items = row["log2n_items"]
             n_bytes = self.bceil(n_bits, 3) / 8
+            if n_bytes == 3:
+                n_bytes = 4
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
             if row["type"] == "W":
                 sw_type = self.swreg_type(name, n_bytes)
@@ -665,6 +686,8 @@ class mkregs:
             n_bits = row["n_bits"]
             log2n_items = row["log2n_items"]
             n_bytes = self.bceil(n_bits, 3) / 8
+            if n_bytes == 3:
+                n_bytes = 4
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
             if addr >= 0:  # manual address
                 self.check_alignment(addr, addr_w)
