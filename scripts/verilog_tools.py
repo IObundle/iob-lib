@@ -20,13 +20,15 @@ def replace_includes(search_paths=[]):
                     if file in verilog_header_files:
                         if file not in duplicates:
                             duplicates.append(file)
-                            print(f"{iob_colors.INFO}Duplicate verilog header file '{file}' found. Will not replace include.{iob_colors.ENDC}")
+                            print(
+                                f"{iob_colors.INFO}Duplicate verilog header file '{file}' found. Will not replace include.{iob_colors.ENDC}"
+                            )
                     else:
                         verilog_header_files[file] = root
 
     # Search contents of the verilog files for `include statements
     for verilog_file in verilog_files:
-        #print(f"{iob_colors.INFO}Replacing includes in '{verilog_file}'{iob_colors.ENDC}")
+        # print(f"{iob_colors.INFO}Replacing includes in '{verilog_file}'{iob_colors.ENDC}")
         with open(verilog_file, "r") as f:
             lines = f.readlines()
         new_lines = []
@@ -35,16 +37,17 @@ def replace_includes(search_paths=[]):
             # Check if line starts with `include, ignoring spaces and tabs
             if line.lstrip().startswith("`include"):
                 # Get filename from `include statement
-                filename = line.split("`include")[
-                    1].strip().strip('"').strip("'")
+                filename = line.split("`include")[1].strip().strip('"').strip("'")
                 # Don't include duplicates
-                if filename in duplicates: 
+                if filename in duplicates:
                     new_lines.append(line)
                     continue
                 # Dont include files that don't exist
                 if filename not in verilog_header_files:
                     new_lines.append(line)
-                    print(f"{iob_colors.WARNING}File '{filename}' not found. Not replacing include.{iob_colors.ENDC}")
+                    print(
+                        f"{iob_colors.WARNING}File '{filename}' not found. Not replacing include.{iob_colors.ENDC}"
+                    )
                     continue
                 # Include verilog header contents in the new_lines list
                 with open(verilog_header_files[filename] + "/" + filename, "r") as f:
