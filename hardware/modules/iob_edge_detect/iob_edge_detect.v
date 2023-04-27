@@ -17,7 +17,7 @@ module iob_edge_detect #
   iob_reg #
     (
      .DATA_W(2), 
-     .RST_VAL(2'b1),
+     .RST_VAL(2'b11),
      .CLKEDGE(CLKEDGE)
      )
   reg0
