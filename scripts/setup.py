@@ -8,6 +8,7 @@ import ios as ios_lib
 import blocks as blocks_lib
 from submodule_utils import import_setup, set_default_submodule_dirs
 import build_srcs
+import verilog_tools
 
 import datetime
 
@@ -92,15 +93,8 @@ def setup(python_module, no_overlap=False):
         python_module.submodules["hw_setup"]["modules"].append("iob_ctls")
         # Auto-add iob_s_port.vh
         python_module.submodules["hw_setup"]["headers"].append("iob_s_port")
-        # Auto-add cpu_iob_s_portmap.vh
-        python_module.submodules["hw_setup"]["headers"].append(
-            {
-                "file_prefix": "cpu_",
-                "interface": "iob_s_portmap",
-                "wire_prefix": "",
-                "port_prefix": "cpu_",
-            }
-        )
+        # Auto-add iob_s_portmap.vh
+        python_module.submodules["hw_setup"]["headers"].append("iob_s_portmap")
 
     #
     # Generate hw
@@ -118,6 +112,10 @@ def setup(python_module, no_overlap=False):
     mk_conf.conf_vh(confs, top, build_dir + "/hardware/src")
 
     ios_lib.generate_ios_header(ios, top, build_dir + "/hardware/src")
+
+    # Replace Verilog includes by Verilog header file contents
+    if create_build_dir:
+        verilog_tools.replace_includes([build_dir + "/hardware"])
 
     #
     # Generate sw
