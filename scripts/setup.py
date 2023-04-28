@@ -92,15 +92,8 @@ def setup(python_module, no_overlap=False):
         python_module.submodules["hw_setup"]["modules"].append("iob_ctls")
         # Auto-add iob_s_port.vh
         python_module.submodules["hw_setup"]["headers"].append("iob_s_port")
-        # Auto-add cpu_iob_s_portmap.vh
-        python_module.submodules["hw_setup"]["headers"].append(
-            {
-                "file_prefix": "cpu_",
-                "interface": "iob_s_portmap",
-                "wire_prefix": "",
-                "port_prefix": "cpu_",
-            }
-        )
+        # Auto-add iob_s_portmap.vh
+        python_module.submodules["hw_setup"]["headers"].append("iob_s_portmap")
 
     #
     # Generate hw
