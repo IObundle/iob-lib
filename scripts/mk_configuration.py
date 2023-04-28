@@ -123,10 +123,10 @@ def generate_confs_tex(confs, out_dir):
         tex_table.append(
             [
                 conf["name"].replace("_", "\_"),
-                conf["type"],
-                conf["min"],
+                conf["type"].replace("_", "\_"),
+                conf["min"].replace("_", "\_"),
                 conf_val,
-                conf["max"],
+                conf["max"].replace("_", "\_"),
                 conf["descr"].replace("_", "\_"),
             ]
         )

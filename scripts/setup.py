@@ -8,6 +8,7 @@ import ios as ios_lib
 import blocks as blocks_lib
 from submodule_utils import import_setup, set_default_submodule_dirs
 import build_srcs
+import verilog_tools
 
 import datetime
 
@@ -111,6 +112,10 @@ def setup(python_module, no_overlap=False):
     mk_conf.conf_vh(confs, top, build_dir + "/hardware/src")
 
     ios_lib.generate_ios_header(ios, top, build_dir + "/hardware/src")
+
+    # Replace Verilog includes by Verilog header file contents
+    if create_build_dir:
+        verilog_tools.replace_includes([build_dir + "/hardware"])
 
     #
     # Generate sw
