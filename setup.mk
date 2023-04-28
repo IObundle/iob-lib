@@ -111,6 +111,9 @@ endif
 clean:
 	-@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
 	@rm -rf $(BUILD_DIR)
+ifneq ($(wildcard config_delivery.mk),)
+	make delivery-clean
+endif
 
 # Remove all __pycache__ folders with python bytecode
 python-cache-clean:
