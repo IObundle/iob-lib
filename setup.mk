@@ -46,13 +46,13 @@ python-format-check:
 
 verilog-format:
 	# Run formatter on all verilog files of setup directory
-	verible-verilog-format --inplace `find . -name *.v -not -path "*/submodules/*" | tr '\n' ' '`
+	verible-verilog-format --inplace `find . -name *.v -name *.vh -not -path "*/submodules/*" | tr '\n' ' '`
 	# Run formatter on all verilog files of build directory (includes generated files)
 	#verible-verilog-format --inplace `find $(BUILD_DIR) -name *.v  | tr '\n' ' '`
 
 verilog-format-check:
 	# Run linter on all verilog files of setup directory
-	verible-verilog-lint `find . -name *.v -not -path "*/submodules/*" | tr '\n' ' '`
+	#verible-verilog-lint `find . -name *.v -name *.vh -not -path "*/submodules/*" | tr '\n' ' '`
 	# Run linter on all verilog files of build directory (includes generated files)
 	#verible-verilog-lint `find $(BUILD_DIR) -name *.v  | tr '\n' ' '`
 
