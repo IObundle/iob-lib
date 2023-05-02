@@ -27,16 +27,26 @@ def replace_includes(search_paths=[]):
 
     # Search contents of the verilog files for `include statements
     for verilog_file in verilog_files:
+        found_module_start = False  # Used to check if we are parsing inside a Verilog module
         # print(f"{iob_colors.INFO}Replacing includes in '{verilog_file}'{iob_colors.ENDC}")
         with open(verilog_file, "r") as f:
             lines = f.readlines()
         new_lines = []
         # Search for lines starting with `include inside the verilog file
         for line in lines:
+            if not found_module_start:
+                # Check if line starts with Verilog module, ignoring spaces and tabs
+                if line.lstrip().startswith("module "):
+                    found_module_start = True
+                # Ignore lines before module start
+                new_lines.append(line)
+                continue
+
             # Check if line starts with `include, ignoring spaces and tabs
             if line.lstrip().startswith("`include"):
                 # Get filename from `include statement
-                filename = line.split("`include")[1].split("//")[0].strip().strip('"').strip("'")
+                filename = line.split("`include")[1].split(
+                    "//")[0].strip().strip('"').strip("'")
                 # Don't include duplicates
                 if filename in duplicates:
                     new_lines.append(line)
