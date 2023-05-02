@@ -302,6 +302,7 @@ def add_setup_functions(python_module, module_type, **kwargs):
         "sim_setup": "hardware/simulation/sim_setup.py",
         "fpga_setup": "hardware/fpga/fpga_setup.py",
         "sw_setup": "software/sw_setup.py",
+        "doc_setup": "document/doc_setup.py",
     }[module_type]
     full_module_path = os.path.join(python_module.setup_dir, module_path)
     if os.path.isfile(full_module_path):
@@ -448,6 +449,9 @@ def doc_setup(python_module):
 
     # General documentation
     write_git_revision_short_hash(f"{build_dir}/document/tsrc")
+
+    # Add doc_setup.py to list of document
+    add_setup_functions(python_module, "doc_setup", setup_module=python_module)
 
 
 def write_git_revision_short_hash(dst_dir):
