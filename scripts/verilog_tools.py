@@ -36,7 +36,7 @@ def replace_includes(search_paths=[]):
             # Check if line starts with `include, ignoring spaces and tabs
             if line.lstrip().startswith("`include"):
                 # Get filename from `include statement
-                filename = line.split("`include")[1].strip().strip('"').strip("'")
+                filename = line.split("`include")[1].split("//")[0].strip().strip('"').strip("'")
                 # Don't include duplicates
                 if filename in duplicates:
                     new_lines.append(line)
