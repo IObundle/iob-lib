@@ -3,5 +3,4 @@
 `define MEM_NO_READ_ON_WRITE 1
 `define DDR_DATA_W 32
 `define DDR_ADDR_W 28
-`define MEM_ADDR_W 24
 `define INTEL 1

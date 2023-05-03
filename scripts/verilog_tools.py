@@ -2,6 +2,8 @@
 import os
 import iob_colors
 
+DEBUG = False
+
 # Function to search recursively for every verilog file inside the search_path
 # Find include statements inside those files and replace them by the contents of the included file
 
@@ -19,7 +21,7 @@ def replace_includes(search_paths=[]):
                 if file.endswith(".vh"):
                     if file in verilog_header_files and file not in duplicates:
                         duplicates.append(file)
-                        print(
+                        if DEBUG: print(
                             f"{iob_colors.INFO}Duplicate verilog header file '{file}' found. Will not replace include.{iob_colors.ENDC}"
                         )
                     if file not in verilog_header_files:
@@ -61,7 +63,7 @@ def replace_includes(search_paths=[]):
                 # Dont include files that don't exist
                 if filename not in verilog_header_files:
                     new_lines.append(line)
-                    print(
+                    if DEBUG: print(
                         f"{iob_colors.WARNING}File '{filename}' not found. Not replacing include.{iob_colors.ENDC}"
                     )
                     continue
