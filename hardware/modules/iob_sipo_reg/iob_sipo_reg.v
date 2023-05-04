@@ -20,7 +20,13 @@ module iob_sipo_reg
   wire [DATA_W-1:0]   data;
   assign data = {p_o[DATA_W-2:0], s_i};
 
-  iob_reg #(DATA_W, 0) reg0
+  iob_reg #
+  (
+    .DATA_W (DATA_W),
+    .RST_VAL (0),
+    .CLKEDGE ("posedge")
+  ) 
+  reg0
   (
     .clk_i(clk_i),
     .arst_i(arst_i),
