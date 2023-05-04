@@ -19,15 +19,20 @@ module iob_pulse_gen #(
    `IOB_WIRE(start_detected_nxt, 1)
    assign start_detected_nxt = start_detected | start_i;
    
-   iob_reg #(1,0)
+   iob_reg #
+   (
+    .DATA_W (1),
+    .RST_VAL (0),
+    .CLKEDGE ("posedge")
+   )
    start_detected_inst
-     (
-      .clk_i(clk_i),
-      .arst_i(arst_i),
-      .cke_i(cke_i),
-      .data_i(start_detected_nxt),
-      .data_o(start_detected)
-      );
+   (
+    .clk_i(clk_i),
+    .arst_i(arst_i),
+    .cke_i(cke_i),
+    .data_i(start_detected_nxt),
+    .data_o(start_detected)
+   );
 
    //counter
    `IOB_WIRE(cnt_en, 1)

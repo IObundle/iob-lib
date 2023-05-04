@@ -32,8 +32,12 @@ module apb2iob
   // APB outputs
   `IOB_VAR(apb_ready_nxt, 1)
 
-  iob_reg
-    #(1,0)
+  iob_reg #
+  (
+    .DATA_W (1),
+    .RST_VAL (1'b0),
+    .CLKEDGE ("posedge")
+  )
   apb_ready_reg_inst
   (
     .clk_i(clk_i),
@@ -47,8 +51,12 @@ module apb2iob
 
   `IOB_WIRE(pc, 1)
   `IOB_VAR(pc_nxt, 1)
-  iob_reg
-    #(1,0)
+  iob_reg #
+  (
+    .DATA_W (1),
+    .RST_VAL (1'b0),
+    .CLKEDGE ("posedge")
+  )
   pc_reg
   (
     .clk_i(clk_i),

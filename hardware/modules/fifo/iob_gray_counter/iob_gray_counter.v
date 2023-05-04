@@ -30,7 +30,13 @@ module iob_gray_counter
       end 
    endgenerate
    
-   iob_reg_re #(W, {{(W-1){1'd0}}, 1'd1}) bin_counter_reg
+   iob_reg_re #
+   (
+      .DATA_W (W),
+      .RST_VAL ({{(W-1){1'd0}}, 1'd1}),
+      .CLKEDGE ("posedge")
+   )  
+   bin_counter_reg
    (
       .clk_i(clk_i),
       .arst_i(arst_i),
@@ -43,7 +49,13 @@ module iob_gray_counter
       .data_o(bin_counter)
    );
 
-   iob_reg_re #(W, {W{1'd0}}) gray_counter_reg
+   iob_reg_re #
+   (
+      .DATA_W (W),
+      .RST_VAL ({W{1'd0}}),
+      .CLKEDGE ("posedge")   
+   ) 
+   gray_counter_reg
    (
       .clk_i(clk_i),
       .arst_i(arst_i),

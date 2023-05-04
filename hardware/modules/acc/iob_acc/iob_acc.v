@@ -20,7 +20,13 @@ module iob_acc
   wire [DATA_W-1:0]    data;
   assign data = data_o + incr_i;
 
-  iob_reg_re #(DATA_W, RST_VAL) reg0
+  iob_reg_re #
+  (
+    .DATA_W (DATA_W),
+    .RST_VAL (RST_VAL),
+    .CLKEDGE ("posedge")  
+  ) 
+  reg0
   (
     .clk_i(clk_i),
     .arst_i(arst_i),
