@@ -9,6 +9,7 @@ import blocks as blocks_lib
 from submodule_utils import import_setup, set_default_submodule_dirs
 import build_srcs
 import verilog_tools
+import shutil
 
 import datetime
 
@@ -39,18 +40,18 @@ def setup(python_module, no_overlap=False):
         }
     )
 
-    # Check if should create build directory for this core/system
-    create_build_dir = is_top_module(python_module)
-
+    # Fill `dirs` dictionary with default values
     set_default_submodule_dirs(python_module)
 
     #
     # Build directory
     #
-    if create_build_dir:
-        os.makedirs(build_dir, exist_ok=True)
+    if is_top_module(python_module):
+        os.makedirs(build_dir, exist_ok=True)  # Create build directory
         mk_conf.config_build_mk(python_module, build_dir)
-        build_srcs.build_dir_setup(python_module)
+        os.makedirs(f"{build_dir}/hardware/src", exist_ok=True)  # Create HARDWARE directories
+        shutil.copyfile(f"{build_srcs.LIB_DIR}/build.mk", f"{build_dir}/Makefile")  # Copy generic MAKEFILE
+        # Setup DELIVERY directories: TODO
 
     #
     # Build registers table
@@ -97,10 +98,21 @@ def setup(python_module, no_overlap=False):
         python_module.submodules["hw_setup"]["headers"].append("iob_s_portmap")
 
     #
+    # Setup submodules
+    #
+
+
+    #
+    # Setup flows
+    #
+    build_srcs.setup_flows(python_module)
+
+
+    #
     # Generate hw
     #
     # Build hardware
-    build_srcs.hw_setup(python_module)
+    #build_srcs.hw_setup(python_module)
     if regs:
         mkregs_obj.write_hwheader(reg_table, build_dir + "/hardware/src", top)
         mkregs_obj.write_lparam_header(
@@ -114,7 +126,7 @@ def setup(python_module, no_overlap=False):
     ios_lib.generate_ios_header(ios, top, build_dir + "/hardware/src")
 
     # Replace Verilog includes by Verilog header file contents
-    if create_build_dir:
+    if is_top_module(python_module):
         verilog_tools.replace_includes([build_dir + "/hardware"])
 
     #
@@ -136,8 +148,8 @@ def setup(python_module, no_overlap=False):
     #
     # Generate TeX
     #
-    # Only generate TeX of this core if creating build directory for it
-    if os.path.isdir(python_module.build_dir + "/document/tsrc") and create_build_dir:
+    # Only generate TeX of this core if it is the top module
+    if os.path.isdir(python_module.build_dir + "/document/tsrc") and is_top_module(python_module):
         mk_conf.generate_confs_tex(confs, python_module.build_dir + "/document/tsrc")
         ios_lib.generate_ios_tex(ios, python_module.build_dir + "/document/tsrc")
         if regs:
