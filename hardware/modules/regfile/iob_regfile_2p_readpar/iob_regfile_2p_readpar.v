@@ -30,8 +30,9 @@ module iob_regfile_2p_readpar
       for (row=0; row < R; row=row+1) begin: rf_row
         assign wstrb[(col*R)+row] = (waddr_i == col) & wstrb_i[row];
         iob_reg_e #(
-          RDATA_W, 
-          {{(RDATA_W-1){1'd0}}, 1'd1}
+          .DATA_W (RDATA_W), 
+          .RST_VAL ({{(RDATA_W-1){1'd0}}, 1'd1}),
+          .CLKEDGE ("posedge")
         ) iob_reg_rf_row_slice (
           .clk_i (clk_i),
           .arst_i (arst_i),

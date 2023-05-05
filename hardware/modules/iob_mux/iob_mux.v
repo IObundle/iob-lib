@@ -9,11 +9,16 @@ module iob_mux
   (
     `IOB_INPUT(sel_i, ($clog2(N)+($clog2(N)==0))),
     `IOB_INPUT(data_i, (N*DATA_W)),
-    `IOB_OUTPUT(data_o, DATA_W)
+    `IOB_OUTPUT_VAR(data_o, DATA_W)
   );
 
-  `IOB_WIRE(data_int, (N*DATA_W))
-  assign data_int = data_i >> (sel_i*DATA_W);
-  assign data_o = data_int[DATA_W-1:0];
+  integer i;
+  always @* begin
+    data_o = {DATA_W{1'b0}};
+    for (i=0; i<N; i=i+1) begin : gen_mux
+      if (i==sel_i)
+        data_o = data_i[i*DATA_W+:DATA_W];
+    end
+  end
 
 endmodule
