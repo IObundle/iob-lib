@@ -17,6 +17,8 @@ def processLine(line) :
     # Remove breakline characters
     line = line.replace('\r', '')
     line = line.replace('\n', '')
+    # Remove comments
+    line = line[:line.find('//')]
     
     mi = line.find('`IOB_')
     lpi = line.find('(')
