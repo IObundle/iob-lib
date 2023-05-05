@@ -24,8 +24,6 @@ def copy_without_override(src, dst):
 
 # This function sets up the flows for this core
 def flows_setup(python_module):
-    build_dir = python_module.build_dir
-    setup_dir = python_module.setup_dir
     core_flows = python_module.flows
 
     # Setup simulation
@@ -35,6 +33,9 @@ def flows_setup(python_module):
     # Setup fpga
     if 'fpga' in core_flows:
         fpga_setup(python_module)
+
+    # Setup harware
+    hw_setup(python_module)
 
     if "lint" in core_flows:
         lint_setup(python_module)
@@ -76,6 +77,7 @@ def hw_setup(python_module):
     submodule_dirs = python_module.submodules["dirs"]
 
     # create module's *_version.vh Verilog Header
+    # TODO: Deprecated file?
     version_file(core_name, core_version, core_previous_version, build_dir)
 
     # Copy Setup hw files (all .v and .sdc files under LIB/hardware/src)
@@ -544,6 +546,11 @@ def import_submodules(python_module):
             if item not in submodule_dirs:
                 continue
 
+            # Only allow submodule sin hw_setup list. (The other processes will be handled by the setup function of the module).
+            # Note: Maybe we should create a dedicated list to import submodules? This way it won't be as confusing as to why only the 'hw_setup' list is used for submodules.
+            #       The outer for loop of this function, only exists to execute this asser and warn the user if he is not using hw_setup. Otherwise we could just use the 'hw_setup' list.
+            assert setup_type == "hw_setup", f"{iob_colors.FAIL}Only 'hw_setup' list can contain submodules. '{setup_type}' list contains '{item}' submodule.{iob_colors.ENDC}"
+
             # Only import if the item has a _setup.py file
             for fname in os.listdir(submodule_dirs[item]):
                 if fname.endswith("_setup.py"):
@@ -565,6 +572,14 @@ def import_submodules(python_module):
             modules_dictionary += import_submodules(module)
 
     return modules_dictionary
+
+
+def submodule_setup(python_module);
+    modules_dictionary = python_module.modules_dictionary
+
+    #TODO: Run submodule setup by the order they appear in modules_dictionary
+    
+
 
 
 # srcs: list that may contain 4 types of entries:

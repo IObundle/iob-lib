@@ -97,22 +97,27 @@ def setup(python_module, no_overlap=False):
         # Auto-add iob_s_portmap.vh
         python_module.submodules["hw_setup"]["headers"].append("iob_s_portmap")
 
+
+    # Create dictionary with all imported submodules or use the existing one
+    if is_top_module(python_module):
+        python_module.modules_dictionary=import_submodules(python_module)
+
     #
     # Setup submodules
     #
+    build_srcs.submodules_setup(python_module)
+
 
 
     #
     # Setup flows
     #
-    build_srcs.setup_flows(python_module)
+    build_srcs.flows_setup(python_module)
 
 
     #
     # Generate hw
     #
-    # Build hardware
-    #build_srcs.hw_setup(python_module)
     if regs:
         mkregs_obj.write_hwheader(reg_table, build_dir + "/hardware/src", top)
         mkregs_obj.write_lparam_header(

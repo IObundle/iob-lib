@@ -102,6 +102,7 @@ def get_short_port_type(port_type):
 
 
 # Adds and fills 'dirs' dictionary inside 'submodules' dicionary of given core/system _setup.py python module
+#       To implement this, we can either: crate a global dictionary with all submodules; or we can do a BFS search for submodules every time we call this function, starting from the root current working directory.
 def set_default_submodule_dirs(python_module):
     # Make sure 'dirs' dictionary exists
     if "dirs" not in python_module.submodules:
