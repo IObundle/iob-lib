@@ -54,9 +54,7 @@
 `define IOB_PULSE(VAR, PRE, DURATION, POST) #PRE VAR=1; #DURATION VAR=0; #POST;
    
 //RESET SYNCHRONIZER
-`define IOB_RESET_SYNC(CLK, RST_IN, RST_OUT) \
-   always @(posedge CLK, posedge RST_IN) \
-   if(RST_IN) RST_OUT = 1; else RST_OUT = #1 RST_IN;
+`define IOB_RESET_SYNC(CLK, RST_IN, RST_OUT) always @(posedge CLK, posedge RST_IN) if(RST_IN) RST_OUT = 1; else RST_OUT = #1 RST_IN;
 
 
 //
