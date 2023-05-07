@@ -32,41 +32,41 @@ module axis2axi
       parameter BUFFER_W = BURST_W + 1
 )(
    // Configuration (AXIS In)
-   `IOB_INPUT(config_in_addr_i,AXI_ADDR_W),
-   `IOB_INPUT(config_in_valid_i,1),
-   `IOB_OUTPUT(config_in_ready_o,1),
+   input [AXI_ADDR_W-1:0] config_in_addr_i,
+   input [1-1:0] config_in_valid_i,
+   output [1-1:0] config_in_ready_o,
 
    // AXIS In
-   `IOB_INPUT(axis_in_data_i,AXI_DATA_W),
-   `IOB_INPUT(axis_in_valid_i,1),
-   `IOB_OUTPUT(axis_in_ready_o,1),
+   input [AXI_DATA_W-1:0] axis_in_data_i,
+   input [1-1:0] axis_in_valid_i,
+   output [1-1:0] axis_in_ready_o,
 
    // Configuration (AXIS Out)
-   `IOB_INPUT(config_out_addr_i,AXI_ADDR_W),
-   `IOB_INPUT(config_out_length_i,AXI_ADDR_W),
-   `IOB_INPUT(config_out_valid_i,1),
-   `IOB_OUTPUT(config_out_ready_o,1),
+   input [AXI_ADDR_W-1:0] config_out_addr_i,
+   input [AXI_ADDR_W-1:0] config_out_length_i,
+   input [1-1:0] config_out_valid_i,
+   output [1-1:0] config_out_ready_o,
 
    // AXIS Out
-   `IOB_OUTPUT(axis_out_data_o,AXI_DATA_W),
-   `IOB_OUTPUT(axis_out_valid_o,1),
-   `IOB_INPUT(axis_out_ready_i,1),
+   output [AXI_DATA_W-1:0] axis_out_data_o,
+   output [1-1:0] axis_out_valid_o,
+   input [1-1:0] axis_out_ready_i,
 
    // AXI master interface
    `include "iob_axi_m_port.vh"
 
    // External memory interfaces
-   `IOB_OUTPUT(ext_mem_w_en_o, 1),
-   `IOB_OUTPUT(ext_mem_w_data_o, AXI_DATA_W),
-   `IOB_OUTPUT(ext_mem_w_addr_o, BUFFER_W),
-   `IOB_OUTPUT(ext_mem_r_en_o, 1),
-   `IOB_OUTPUT(ext_mem_r_addr_o, BUFFER_W),
-   `IOB_INPUT(ext_mem_r_data_i, AXI_DATA_W),
+   output [1-1:0] ext_mem_w_en_o,
+   output [AXI_DATA_W-1:0] ext_mem_w_data_o,
+   output [BUFFER_W-1:0] ext_mem_w_addr_o,
+   output [1-1:0] ext_mem_r_en_o,
+   output [BUFFER_W-1:0] ext_mem_r_addr_o,
+   input [AXI_DATA_W-1:0] ext_mem_r_data_i,
 
-   `IOB_INPUT(clk_i,1),
-   `IOB_INPUT(cke_i,1),
-   `IOB_INPUT(rst_i,1),
-   `IOB_INPUT(arst_i,1)
+   input [1-1:0] clk_i,
+   input [1-1:0] cke_i,
+   input [1-1:0] rst_i,
+   input [1-1:0] arst_i
 );
 
 axis2axi_in #(

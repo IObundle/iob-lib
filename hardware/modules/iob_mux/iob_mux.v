@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "iob_lib.vh"
+
 
 module iob_mux
   #(
@@ -7,9 +7,9 @@ module iob_mux
     parameter N = 21
   )
   (
-    `IOB_INPUT(sel_i, ($clog2(N)+($clog2(N)==0))),
-    `IOB_INPUT(data_i, (N*DATA_W)),
-    `IOB_OUTPUT_VAR(data_o, DATA_W)
+    input [($clog2(N)+($clog2(N)==0))-1:0] sel_i,
+    input [(N*DATA_W)-1:0] data_i,
+    output reg [DATA_W-1:0] data_o
   );
 
   integer i;

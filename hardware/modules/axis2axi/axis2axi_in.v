@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-`include "iob_lib.vh"
+
 
 // Check axis2axi.v for information on how this unit works
 
@@ -12,30 +12,30 @@ module axis2axi_in #(
    parameter BURST_W = 0
 )(
    // Configuration
-   `IOB_INPUT(config_in_addr_i,AXI_ADDR_W),
-   `IOB_INPUT(config_in_valid_i,1),
-   `IOB_OUTPUT(config_in_ready_o,1),
+   input [AXI_ADDR_W-1:0] config_in_addr_i,
+   input [1-1:0] config_in_valid_i,
+   output [1-1:0] config_in_ready_o,
 
    // Axi stream input
-   `IOB_INPUT(axis_in_data_i,AXI_DATA_W),
-   `IOB_INPUT(axis_in_valid_i,1),
-   `IOB_OUTPUT(axis_in_ready_o,1),
+   input [AXI_DATA_W-1:0] axis_in_data_i,
+   input [1-1:0] axis_in_valid_i,
+   output [1-1:0] axis_in_ready_o,
 
    // Axi master interface
    `include "iob_axi_m_write_port.vh"
 
    // External memory interfaces
-   `IOB_OUTPUT(ext_mem_w_en_o, 1),
-   `IOB_OUTPUT(ext_mem_w_data_o, AXI_DATA_W),
-   `IOB_OUTPUT(ext_mem_w_addr_o, BUFFER_W),
-   `IOB_OUTPUT(ext_mem_r_en_o, 1),
-   `IOB_OUTPUT(ext_mem_r_addr_o, BUFFER_W),
-   `IOB_INPUT(ext_mem_r_data_i, AXI_DATA_W),   
+   output [1-1:0] ext_mem_w_en_o,
+   output [AXI_DATA_W-1:0] ext_mem_w_data_o,
+   output [BUFFER_W-1:0] ext_mem_w_addr_o,
+   output [1-1:0] ext_mem_r_en_o,
+   output [BUFFER_W-1:0] ext_mem_r_addr_o,
+   input [AXI_DATA_W-1:0] ext_mem_r_data_i,   
 
-   `IOB_INPUT(clk_i,1),
-   `IOB_INPUT(cke_i,1),
-   `IOB_INPUT(rst_i,1),
-   `IOB_INPUT(arst_i,1)
+   input [1-1:0] clk_i,
+   input [1-1:0] cke_i,
+   input [1-1:0] rst_i,
+   input [1-1:0] arst_i
 );
 
 localparam BURST_SIZE = 2**BURST_W;
@@ -83,7 +83,7 @@ wire fifo_read_enable = (read_next || start_transfer);  // Start_transfer puts t
 wire [BURST_W:0] burst_size;
 
 reg [BURST_W:0] non_boundary_burst_size;
-`IOB_COMB
+always @*
 begin
    non_boundary_burst_size = 0;
    
@@ -99,7 +99,7 @@ if(AXI_ADDR_W >= 13) begin // 4k boundary can only happen to LEN higher or equal
 wire [12:0] boundary_transfer_len = (13'h1000 - current_address[11:0]) >> 2;
 
 reg [BURST_W:0] boundary_burst_size;
-`IOB_COMB
+always @*
 begin
    boundary_burst_size = non_boundary_burst_size;
 
@@ -129,7 +129,7 @@ assign axis_in_ready_o = !fifo_full;
 assign config_in_ready_o = (fifo_empty && state == WAIT_DATA);
 
 // State machine
-`IOB_COMB
+always @*
 begin
    state_nxt = state;
    awvalid_int = 1'b0;

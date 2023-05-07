@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "iob_lib.vh"
+
 
 //
 // IOb slave interface to APB master interface
@@ -24,7 +24,7 @@ module iob2apb
   );
 
   //APB outputs
-  `IOB_VAR(apb_sel_nxt, 1)
+  reg [1-1:0] apb_sel_nxt;
   iob_reg
     #(1,0)
   sel_reg
@@ -36,7 +36,7 @@ module iob2apb
     .data_o(apb_sel_o)
     );
 
-  `IOB_VAR(apb_enable_nxt, 1)
+  reg [1-1:0] apb_enable_nxt;
   iob_reg
     #(1,0)
   enable_reg
@@ -48,7 +48,7 @@ module iob2apb
     .data_o(apb_enable_o)
     );
 
-  `IOB_VAR(apb_addr_nxt, ADDR_W)
+  reg [ADDR_W-1:0] apb_addr_nxt;
   iob_reg
     #(ADDR_W,0)
   addr_reg
@@ -60,7 +60,7 @@ module iob2apb
     .data_o(apb_addr_o)
     );
 
-  `IOB_VAR(apb_wstrb_nxt, (DATA_W/8))
+  reg [(DATA_W/8)-1:0] apb_wstrb_nxt;
   iob_reg
     #(DATA_W/8,0)
   wstrb_reg
@@ -72,7 +72,7 @@ module iob2apb
     .data_o(apb_wstrb_o)
     );
 
-  `IOB_VAR(apb_write_nxt, 1)
+  reg [1-1:0] apb_write_nxt;
   iob_reg
     #(1,0)
   write_reg
@@ -84,7 +84,7 @@ module iob2apb
     .data_o(apb_write_o)
     );
 
-  `IOB_VAR(apb_wdata_nxt, DATA_W)
+  reg [DATA_W-1:0] apb_wdata_nxt;
   iob_reg
     #(DATA_W,0)
   wdata_reg
@@ -97,7 +97,7 @@ module iob2apb
     );
 
   //IOb outputs
-  `IOB_VAR(iob_ready_nxt, 1)
+  reg [1-1:0] iob_ready_nxt;
   iob_reg
     #(1,1)
   ready_reg
@@ -109,7 +109,7 @@ module iob2apb
     .data_o(iob_ready_o)
     );
 
-  `IOB_VAR(iob_rvalid_nxt, 1)
+  reg [1-1:0] iob_rvalid_nxt;
   iob_reg
     #(1,0)
   rvalid_reg
@@ -121,7 +121,7 @@ module iob2apb
     .data_o(iob_rvalid_o)
     );
 
-  `IOB_VAR(iob_rdata_nxt, DATA_W)
+  reg [DATA_W-1:0] iob_rdata_nxt;
   iob_reg
     #(DATA_W,0)
   rdata_reg
@@ -133,8 +133,8 @@ module iob2apb
     .data_o(iob_rdata_o)
     );
   
-  `IOB_WIRE(pc, 1)
-  `IOB_VAR(pc_nxt, 1)
+  wire [1-1:0] pc;
+  reg [1-1:0] pc_nxt;
   iob_reg
     #(1,0)
   access_reg
@@ -146,7 +146,7 @@ module iob2apb
     .data_o(pc)
     );
   
-  `IOB_COMB begin
+  always @* begin
     
     pc_nxt = pc+1'b1;
     

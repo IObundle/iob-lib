@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-`include "iob_lib.vh"
+
 
 module iob_fifo_async
   #(
@@ -19,19 +19,19 @@ module iob_fifo_async
   (
 
     //memory write port
-    `IOB_OUTPUT(ext_mem_w_clk_o, 1),
-    `IOB_OUTPUT(ext_mem_w_arst_o, 1),
-    `IOB_OUTPUT(ext_mem_w_cke_o, 1),
-    `IOB_OUTPUT(ext_mem_w_en_o, R),
-    `IOB_OUTPUT(ext_mem_w_addr_o, MINADDR_W),
-    `IOB_OUTPUT(ext_mem_w_data_o, MAXDATA_W),
+    output [1-1:0] ext_mem_w_clk_o,
+    output [1-1:0] ext_mem_w_arst_o,
+    output [1-1:0] ext_mem_w_cke_o,
+    output [R-1:0] ext_mem_w_en_o,
+    output [MINADDR_W-1:0] ext_mem_w_addr_o,
+    output [MAXDATA_W-1:0] ext_mem_w_data_o,
     //memory read port
-    `IOB_OUTPUT(ext_mem_r_clk_o, 1),
-    `IOB_OUTPUT(ext_mem_r_arst_o, 1),
-    `IOB_OUTPUT(ext_mem_r_cke_o, 1),
-    `IOB_OUTPUT(ext_mem_r_en_o, R),
-    `IOB_OUTPUT(ext_mem_r_addr_o, MINADDR_W),
-    `IOB_INPUT(ext_mem_r_data_i, MAXDATA_W),
+    output [1-1:0] ext_mem_r_clk_o,
+    output [1-1:0] ext_mem_r_arst_o,
+    output [1-1:0] ext_mem_r_cke_o,
+    output [R-1:0] ext_mem_r_en_o,
+    output [MINADDR_W-1:0] ext_mem_r_addr_o,
+    input [MAXDATA_W-1:0] ext_mem_r_data_i,
     
     //read port
     input                 r_clk_i,
@@ -129,7 +129,7 @@ module iob_fifo_async
 
 
   //READ DOMAIN FIFO LEVEL
-  `IOB_WIRE(r_level_int, (ADDR_W+1))
+  wire [(ADDR_W+1)-1:0] r_level_int;
   assign r_level_int = r_waddr_bin_n - r_raddr_bin_n;
   assign r_level_o = r_level_int[0+:(ADDR_W+1)];
   
@@ -138,7 +138,7 @@ module iob_fifo_async
   assign r_full_o = (r_level_int > (FIFO_SIZE-{2'd0, R_INCR}));
 
   //WRITE DOMAIN FIFO LEVEL
-  `IOB_WIRE(w_level_int, (ADDR_W+1))
+  wire [(ADDR_W+1)-1:0] w_level_int;
   assign w_level_int = w_waddr_bin_n - w_raddr_bin_n;
   assign w_level_o = w_level_int[0+:(ADDR_W+1)];
 

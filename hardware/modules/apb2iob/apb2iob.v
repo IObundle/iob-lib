@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "iob_lib.vh"
+
 
 //
 // APB slave port to IOb master interface
@@ -30,7 +30,7 @@ module apb2iob
 
 
   // APB outputs
-  `IOB_VAR(apb_ready_nxt, 1)
+  reg [1-1:0] apb_ready_nxt;
 
   iob_reg #
   (
@@ -49,8 +49,8 @@ module apb2iob
 
   assign apb_rdata_o = iob_rdata_i;
 
-  `IOB_WIRE(pc, 1)
-  `IOB_VAR(pc_nxt, 1)
+  wire [1-1:0] pc;
+  reg [1-1:0] pc_nxt;
   iob_reg #
   (
     .DATA_W (1),
@@ -66,7 +66,7 @@ module apb2iob
     .data_o(pc)
   );
 
-  `IOB_COMB begin
+  always @* begin
       
     pc_nxt = pc+1'b1;
     apb_ready_nxt = apb_write_i? iob_ready_nxt_i : iob_rvalid_nxt_i;

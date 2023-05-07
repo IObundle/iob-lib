@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "iob_lib.vh"
+
 
 //test defines
 `define ADDR_W 4
@@ -27,11 +27,11 @@ module iob_fifo_async_tb;
 
   //write reset 
   reg w_arst = 0;
-  `IOB_RESET_SYNC(w_clk, arst, w_arst)
+  always @(posedge w_clk, posedge arst) if(arst) w_arst = 1; else w_arst = #1 arst;
 
   //read reset 
   reg r_arst = 0;
-  `IOB_RESET_SYNC(r_clk, arst, r_arst)
+  always @(posedge r_clk, posedge arst) if(arst) r_arst = 1; else r_arst = #1 arst;
 
   //write clock
   `IOB_CLOCK(w_clk, 10)
@@ -154,14 +154,14 @@ module iob_fifo_async_tb;
     #100 $finish;
   end
 
-  `IOB_WIRE(ext_mem_w_clk, 1)
-  `IOB_WIRE(ext_mem_w_en, R)
-  `IOB_WIRE(ext_mem_w_addr, MINADDR_W)
-  `IOB_WIRE(ext_mem_w_data, MAXDATA_W)
-  `IOB_WIRE(ext_mem_r_clk, 1)
-  `IOB_WIRE(ext_mem_r_en, R)
-  `IOB_WIRE(ext_mem_r_addr, MINADDR_W)
-  `IOB_WIRE(ext_mem_r_data, MAXDATA_W)
+  wire [1-1:0] ext_mem_w_clk;
+  wire [R-1:0] ext_mem_w_en;
+  wire [MINADDR_W-1:0] ext_mem_w_addr;
+  wire [MAXDATA_W-1:0] ext_mem_w_data;
+  wire [1-1:0] ext_mem_r_clk;
+  wire [R-1:0] ext_mem_r_en;
+  wire [MINADDR_W-1:0] ext_mem_r_addr;
+  wire [MAXDATA_W-1:0] ext_mem_r_data;
 
   // FIFO memory
   genvar p;

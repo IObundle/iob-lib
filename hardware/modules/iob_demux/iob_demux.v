@@ -1,13 +1,13 @@
 `timescale 1ns / 1ps
-`include "iob_lib.vh"
+
 
 module iob_demux #(
     parameter DATA_W = 21,
     parameter N = 21
     ) (
-    `IOB_INPUT(sel_i, ($clog2(N)+($clog2(N)==0))),
-    `IOB_INPUT(data_i, DATA_W),
-    `IOB_OUTPUT(data_o, (N*DATA_W))
+    input [($clog2(N)+($clog2(N)==0))-1:0] sel_i,
+    input [DATA_W-1:0] data_i,
+    output [(N*DATA_W)-1:0] data_o
     );
 
     //integer i;

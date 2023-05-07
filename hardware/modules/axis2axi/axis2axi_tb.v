@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-`include "iob_lib.vh"
+
 
 `define CLK_PER 10
 
@@ -57,40 +57,40 @@ module axis2axi_tb;
    reg delayed_axis_out_ready;
 
    // AXI-4 full master I/F
-   `IOB_WIRE(ddr_axi_awid, 1) //Address write channel ID
-   `IOB_WIRE(ddr_axi_awaddr, AXI_ADDR_W) //Address write channel address
-   `IOB_WIRE(ddr_axi_awlen, 8) //Address write channel burst length
-   `IOB_WIRE(ddr_axi_awsize, 3) //Address write channel burst size. This signal indicates the size of each transfer in the burst
-   `IOB_WIRE(ddr_axi_awburst, 2) //Address write channel burst type
-   `IOB_WIRE(ddr_axi_awlock, 2) //Address write channel lock type
-   `IOB_WIRE(ddr_axi_awcache, 4) //Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
-   `IOB_WIRE(ddr_axi_awprot, 3) //Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
-   `IOB_WIRE(ddr_axi_awqos, 4) //Address write channel quality of service
-   `IOB_WIRE(ddr_axi_awvalid, 1) //Address write channel valid
-   `IOB_WIRE(ddr_axi_awready, 1) //Address write channel ready
-   `IOB_WIRE(ddr_axi_wid, 1) //Write channel ID
-   `IOB_WIRE(ddr_axi_wdata, AXI_DATA_W) //Write channel data
-   `IOB_WIRE(ddr_axi_wstrb, (AXI_DATA_W/8)) //Write channel write strobe
-   `IOB_WIRE(ddr_axi_wlast, 1) //Write channel last word flag
-   `IOB_WIRE(ddr_axi_bid, 1) //Write response channel ID
-   `IOB_WIRE(ddr_axi_bresp, 2) //Write response channel response
-   `IOB_WIRE(ddr_axi_bvalid, 1) //Write response channel valid
-   `IOB_WIRE(ddr_axi_bready, 1) //Write response channel ready
-   `IOB_WIRE(ddr_axi_arid, 1) //Address read channel ID
-   `IOB_WIRE(ddr_axi_araddr, AXI_ADDR_W) //Address read channel address
-   `IOB_WIRE(ddr_axi_arlen, 8) //Address read channel burst length
-   `IOB_WIRE(ddr_axi_arsize, 3) //Address read channel burst size. This signal indicates the size of each transfer in the burst
-   `IOB_WIRE(ddr_axi_arburst, 2) //Address read channel burst type
-   `IOB_WIRE(ddr_axi_arlock, 2) //Address read channel lock type
-   `IOB_WIRE(ddr_axi_arcache, 4) //Address read channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
-   `IOB_WIRE(ddr_axi_arprot, 3) //Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
-   `IOB_WIRE(ddr_axi_arqos, 4) //Address read channel quality of service
-   `IOB_WIRE(ddr_axi_arvalid, 1) //Address read channel valid
-   `IOB_WIRE(ddr_axi_arready, 1) //Address read channel ready
-   `IOB_WIRE(ddr_axi_rid, 1) //Read channel ID
-   `IOB_WIRE(ddr_axi_rdata, AXI_DATA_W) //Read channel data
-   `IOB_WIRE(ddr_axi_rresp, 2) //Read channel response
-   `IOB_WIRE(ddr_axi_rlast, 1) //Read channel last word
+   wire [1-1:0] ddr_axi_awid; //Address write channel ID
+   wire [AXI_ADDR_W-1:0] ddr_axi_awaddr; //Address write channel address
+   wire [8-1:0] ddr_axi_awlen; //Address write channel burst length
+   wire [3-1:0] ddr_axi_awsize; //Address write channel burst size. This signal indicates the size of each transfer in the burst
+   wire [2-1:0] ddr_axi_awburst; //Address write channel burst type
+   wire [2-1:0] ddr_axi_awlock; //Address write channel lock type
+   wire [4-1:0] ddr_axi_awcache; //Address write channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
+   wire [3-1:0] ddr_axi_awprot; //Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
+   wire [4-1:0] ddr_axi_awqos; //Address write channel quality of service
+   wire [1-1:0] ddr_axi_awvalid; //Address write channel valid
+   wire [1-1:0] ddr_axi_awready; //Address write channel ready
+   wire [1-1:0] ddr_axi_wid; //Write channel ID
+   wire [AXI_DATA_W-1:0] ddr_axi_wdata; //Write channel data
+   wire [(AXI_DATA_W/8)-1:0] ddr_axi_wstrb; //Write channel write strobe
+   wire [1-1:0] ddr_axi_wlast; //Write channel last word flag
+   wire [1-1:0] ddr_axi_bid; //Write response channel ID
+   wire [2-1:0] ddr_axi_bresp; //Write response channel response
+   wire [1-1:0] ddr_axi_bvalid; //Write response channel valid
+   wire [1-1:0] ddr_axi_bready; //Write response channel ready
+   wire [1-1:0] ddr_axi_arid; //Address read channel ID
+   wire [AXI_ADDR_W-1:0] ddr_axi_araddr; //Address read channel address
+   wire [8-1:0] ddr_axi_arlen; //Address read channel burst length
+   wire [3-1:0] ddr_axi_arsize; //Address read channel burst size. This signal indicates the size of each transfer in the burst
+   wire [2-1:0] ddr_axi_arburst; //Address read channel burst type
+   wire [2-1:0] ddr_axi_arlock; //Address read channel lock type
+   wire [4-1:0] ddr_axi_arcache; //Address read channel memory type. Transactions set with Normal Non-cacheable Modifiable and Bufferable (0011).
+   wire [3-1:0] ddr_axi_arprot; //Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
+   wire [4-1:0] ddr_axi_arqos; //Address read channel quality of service
+   wire [1-1:0] ddr_axi_arvalid; //Address read channel valid
+   wire [1-1:0] ddr_axi_arready; //Address read channel ready
+   wire [1-1:0] ddr_axi_rid; //Read channel ID
+   wire [AXI_DATA_W-1:0] ddr_axi_rdata; //Read channel data
+   wire [2-1:0] ddr_axi_rresp; //Read channel response
+   wire [1-1:0] ddr_axi_rlast; //Read channel last word
 
    // Iterators
    integer            i;

@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "iob_lib.vh"
+
 
 module iob_pulse_gen #(
     parameter START=0,
@@ -15,8 +15,8 @@ module iob_pulse_gen #(
    localparam WIDTH = $clog2(START+DURATION+2);
 
    //start detect
-   `IOB_WIRE(start_detected, 1)
-   `IOB_WIRE(start_detected_nxt, 1)
+   wire [1-1:0] start_detected;
+   wire [1-1:0] start_detected_nxt;
    assign start_detected_nxt = start_detected | start_i;
    
    iob_reg #
@@ -35,8 +35,8 @@ module iob_pulse_gen #(
    );
 
    //counter
-   `IOB_WIRE(cnt_en, 1)
-   `IOB_WIRE(cnt, WIDTH)   
+   wire [1-1:0] cnt_en;
+   wire [WIDTH-1:0] cnt;   
 
    //counter enable
    assign cnt_en = start_detected & (cnt <= (START+DURATION));

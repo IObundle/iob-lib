@@ -1,5 +1,5 @@
 `timescale 1 ns / 1 ps
-`include "iob_lib.vh"
+
 
 module iob_regfile_t2p
   #(
@@ -23,8 +23,8 @@ module iob_regfile_t2p
   );
 
   //write
-  `IOB_VAR(regfile_in, ((2**ADDR_W)*DATA_W))
-  `IOB_WIRE(regfile_synced, ((2**ADDR_W)*DATA_W))
+  reg [((2**ADDR_W)*DATA_W)-1:0] regfile_in;
+  wire [((2**ADDR_W)*DATA_W)-1:0] regfile_synced;
 
   //write
   genvar addr;

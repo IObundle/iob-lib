@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
-`include "iob_lib.vh"
+
+`include "iob_utils.vh"
 
 // test defines
 `define MAXADDR_W 10

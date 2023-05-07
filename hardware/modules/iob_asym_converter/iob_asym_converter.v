@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-`include "iob_lib.vh"
+`include "iob_utils.vh"
 
 module iob_asym_converter
   #(
@@ -16,31 +16,31 @@ module iob_asym_converter
     R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
   )
   (
-    `IOB_INPUT(clk_i, 1),
-    `IOB_INPUT(arst_i, 1),
-    `IOB_INPUT(cke_i, 1),
+    input [1-1:0] clk_i,
+    input [1-1:0] arst_i,
+    input [1-1:0] cke_i,
 
     //write port
-    `IOB_INPUT(w_en_i, 1),
-    `IOB_INPUT(w_addr_i, W_ADDR_W),
-    `IOB_INPUT(w_data_i, W_DATA_W),
+    input [1-1:0] w_en_i,
+    input [W_ADDR_W-1:0] w_addr_i,
+    input [W_DATA_W-1:0] w_data_i,
 
     //read port
-    `IOB_INPUT(r_en_i, 1),
-    `IOB_INPUT(r_addr_i, R_ADDR_W),
-    `IOB_OUTPUT(r_data_o, R_DATA_W),
+    input [1-1:0] r_en_i,
+    input [R_ADDR_W-1:0] r_addr_i,
+    output [R_DATA_W-1:0] r_data_o,
 
     //external memory write port
-    `IOB_OUTPUT(ext_mem_clk_o, 1),
-    `IOB_OUTPUT(ext_mem_arst_o, 1),
-    `IOB_OUTPUT(ext_mem_cke_o, 1),
-    `IOB_OUTPUT(ext_mem_w_en_o, R),
-    `IOB_OUTPUT(ext_mem_w_addr_o, MINADDR_W),
-    `IOB_OUTPUT(ext_mem_w_data_o, MAXDATA_W),
+    output [1-1:0] ext_mem_clk_o,
+    output [1-1:0] ext_mem_arst_o,
+    output [1-1:0] ext_mem_cke_o,
+    output [R-1:0] ext_mem_w_en_o,
+    output [MINADDR_W-1:0] ext_mem_w_addr_o,
+    output [MAXDATA_W-1:0] ext_mem_w_data_o,
     //external memory read port
-    `IOB_OUTPUT(ext_mem_r_en_o, R),
-    `IOB_OUTPUT(ext_mem_r_addr_o, MINADDR_W),
-    `IOB_INPUT(ext_mem_r_data_i, MAXDATA_W)
+    output [R-1:0] ext_mem_r_en_o,
+    output [MINADDR_W-1:0] ext_mem_r_addr_o,
+    input [MAXDATA_W-1:0] ext_mem_r_data_i
 
     );
 

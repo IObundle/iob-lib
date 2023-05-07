@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-`include "iob_lib.vh"
+
 
 // Check axis2axi for information on how this unit works
 
@@ -12,23 +12,23 @@ module axis2axi_out #(
    parameter BURST_W = 0
 )(
    // Configuration
-   `IOB_INPUT(config_out_addr_i,AXI_ADDR_W),
-   `IOB_INPUT(config_out_length_i,AXI_ADDR_W),
-   `IOB_INPUT(config_out_valid_i,1),
-   `IOB_OUTPUT(config_out_ready_o,1),
+   input [AXI_ADDR_W-1:0] config_out_addr_i,
+   input [AXI_ADDR_W-1:0] config_out_length_i,
+   input [1-1:0] config_out_valid_i,
+   output [1-1:0] config_out_ready_o,
 
    // Axi stream input
-   `IOB_OUTPUT(axis_out_data_o,AXI_DATA_W),
-   `IOB_OUTPUT(axis_out_valid_o,1),
-   `IOB_INPUT(axis_out_ready_i,1),
+   output [AXI_DATA_W-1:0] axis_out_data_o,
+   output [1-1:0] axis_out_valid_o,
+   input [1-1:0] axis_out_ready_i,
 
    // Axi master interface
    `include "iob_axi_m_read_port.vh"
 
-   `IOB_INPUT(clk_i,1),
-   `IOB_INPUT(cke_i,1),
-   `IOB_INPUT(rst_i,1),
-   `IOB_INPUT(arst_i,1)
+   input [1-1:0] clk_i,
+   input [1-1:0] cke_i,
+   input [1-1:0] rst_i,
+   input [1-1:0] arst_i
 );
 
 localparam BURST_SIZE = 2**BURST_W;
@@ -69,7 +69,7 @@ wire last_burst_possible = (current_length < BURST_SIZE);
 wire [BURST_W:0] burst_size;
 
 reg [BURST_W:0] non_boundary_burst_size;
-`IOB_COMB
+always @*
 begin
    non_boundary_burst_size = 0;
    
@@ -85,7 +85,7 @@ if(AXI_ADDR_W >= 13) begin // 4k boundary can only happen to LEN higher or equal
 wire [12:0] boundary_transfer_len = (13'h1000 - current_address[11:0]) >> 2;
 
 reg [BURST_W:0] boundary_burst_size;
-`IOB_COMB
+always @*
 begin
    boundary_burst_size = non_boundary_burst_size;
 
@@ -112,7 +112,7 @@ assign axi_araddr_o = araddr_int;
 assign axi_arlen_o = arlen_int;
 assign axi_arvalid_o = arvalid_int;
 
-`IOB_COMB
+always @*
 begin
    state_nxt = state;
    arvalid_int = 1'b0;
