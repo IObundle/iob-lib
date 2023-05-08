@@ -100,13 +100,13 @@ class mkregs:
 
         # compute wdata with only the needed bits
         if auto:
-            f.write(f"`IOB_WIRE({name}_wdata, {self.verilog_max(n_bits,1)})\n")
+            f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_wdata; \n")
             f.write(
                 f"assign {name}_wdata = iob_wdata_i[{self.boffset(addr,self.cpu_n_bytes)}+:{self.verilog_max(n_bits,1)}];\n"
             )
 
         # check if address in range
-        f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
+        f.write(f"wire {name}_addressed;\n")
         f.write(
             f"assign {name}_addressed = (waddr >= {addr}) && (waddr < ({addr}+(2**({addr_w}))));\n"
         )
@@ -133,7 +133,7 @@ class mkregs:
                     rst_val_str = "{" + str(n_bits) + "{1'd0}}"
             else:
                 rst_val_str = str(n_bits) + "'d" + str(rst_val)
-            f.write(f"`IOB_WIRE({name}_wen, 1)\n")
+            f.write(f"wire {name}_wen;\n")
             f.write(
                 f"assign {name}_wen = (iob_avalid_i) & ((|iob_wstrb_i) & {name}_addressed);\n"
             )
@@ -171,7 +171,7 @@ class mkregs:
         )
 
         if not auto:  # output read enable
-            f.write(f"`IOB_WIRE({name}_addressed, 1)\n")
+            f.write(f"wire {name}_addressed;\n")
             f.write(
                 f"assign {name}_addressed = (iob_addr_i >= {addr}) && (iob_addr_i < ({addr}+(2**({addr_w}))));\n"
             )
@@ -187,19 +187,19 @@ class mkregs:
             auto = row["autologic"]
             if row["type"] == "W":
                 if auto:
-                    f.write(f"\t`IOB_OUTPUT({name}_o, {self.verilog_max(n_bits,1)}),\n")
+                    f.write(f"\toutput [{self.verilog_max(n_bits,1)}-1:0] {name}_o,\n")
                 else:
-                    f.write(f"\t`IOB_OUTPUT({name}_wen_o, 1),\n")
+                    f.write(f"\toutput {name}_wen_o,\n")
             elif row["type"] == "R":
-                f.write(f"\t`IOB_INPUT({name}_i, {self.verilog_max(n_bits,1)}),\n")
+                f.write(f"\tinput [{self.verilog_max(n_bits,1)}-1:0] {name}_i,\n")
                 if not auto:
-                    f.write(f"\t`IOB_OUTPUT({name}_ren_o, 1),\n")
-                    f.write(f"\t`IOB_INPUT({name}_rvalid_i, 1),\n")
+                    f.write(f"\toutput {name}_ren_o,\n")
+                    f.write(f"\tinput {name}_rvalid_i,\n")
             if not auto:
-                f.write(f"\t`IOB_INPUT({name}_ready_i, 1),\n")
+                f.write(f"\tinput {name}_ready_i,\n")
 
-        f.write(f"\t`IOB_OUTPUT(iob_ready_nxt_o, 1),\n")
-        f.write(f"\t`IOB_OUTPUT(iob_rvalid_nxt_o, 1),\n")
+        f.write(f"\toutput iob_ready_nxt_o,\n")
+        f.write(f"\toutput iob_rvalid_nxt_o,\n")
 
     # generate wires to connect instance in top module
     def gen_inst_wire(self, table, f):
@@ -210,18 +210,18 @@ class mkregs:
 
             if row["type"] == "W":
                 if auto:
-                    f.write(f"`IOB_WIRE({name}, {self.verilog_max(n_bits,1)})\n")
+                    f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name};\n")
                 else:
-                    f.write(f"`IOB_WIRE({name}_wen, 1)\n")
+                    f.write(f"wire {name}_wen;\n")
             elif row["type"] == "R":
-                f.write(f"`IOB_WIRE({name}, {self.verilog_max(n_bits,1)})\n")
+                f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name};\n")
                 if not row["autologic"]:
-                    f.write(f"`IOB_WIRE({name}_rvalid, 1)\n")
-                    f.write(f"`IOB_WIRE({name}_ren, 1)\n")
+                    f.write(f"wire {name}_rvalid;\n")
+                    f.write(f"wire {name}_ren;\n")
             if not auto:
-                f.write(f"`IOB_WIRE({name}_ready, 1)\n")
-        f.write(f"`IOB_WIRE(iob_ready_nxt, 1)\n")
-        f.write(f"`IOB_WIRE(iob_rvalid_nxt, 1)\n")
+                f.write(f"wire {name}_ready;\n")
+        f.write(f"wire iob_ready_nxt;\n")
+        f.write(f"wire iob_rvalid_nxt;\n")
         f.write("\n")
 
     # generate portmap for swreg instance in top module
@@ -302,13 +302,13 @@ class mkregs:
         f_gen.write("\n//write address\n")
 
         # extract address byte offset
-        f_gen.write(f"`IOB_WIRE(byte_offset, ($clog2(DATA_W/8)+1))\n")
+        f_gen.write(f"wire [($clog2(DATA_W/8)+1)-1:0] byte_offset;\n")
         f_gen.write(
             f"iob_ctls #(.N(DATA_W/8), .MODE(0), .SYMBOL(0)) bo_inst (.data_i(iob_wstrb_i), .count_o(byte_offset));\n"
         )
 
         # compute write address
-        f_gen.write(f"`IOB_WIRE(waddr, ADDR_W)\n")
+        f_gen.write(f"wire [ADDR_W-1:0] waddr;\n")
         f_gen.write(f"assign waddr = `IOB_WORD_ADDR(iob_addr_i) + byte_offset;\n")
 
         # insert write register logic
@@ -327,14 +327,14 @@ class mkregs:
         f_gen.write("\n\n//RESPONSE SWITCH\n")
 
         # use variables to compute response
-        f_gen.write(f"\n`IOB_VAR(rdata_int, {8*self.cpu_n_bytes})\n")
-        f_gen.write(f"`IOB_VAR(rvalid_int, 1)\n")
-        f_gen.write(f"`IOB_VAR(wready_int, 1)\n")
-        f_gen.write(f"`IOB_VAR(rready_int, 1)\n\n")
+        f_gen.write(f"\n reg [{8*self.cpu_n_bytes}-1:0] rdata_int;\n")
+        f_gen.write(f"reg rvalid_int;\n")
+        f_gen.write(f"reg wready_int;\n")
+        f_gen.write(f"reg rready_int;\n\n")
 
         # ready output
         f_gen.write("//ready output\n")
-        f_gen.write("`IOB_VAR(ready_nxt, 1)\n")
+        f_gen.write("reg ready_nxt;\n")
         f_gen.write("iob_reg #( \n")
         f_gen.write("\t.DATA_W (1),\n")
         f_gen.write("\t.RST_VAL (1'd1),\n")
@@ -349,7 +349,7 @@ class mkregs:
 
         # rvalid output
         f_gen.write("//rvalid output\n")
-        f_gen.write("`IOB_VAR(rvalid_nxt, 1)\n")
+        f_gen.write("reg rvalid_nxt;\n")
         f_gen.write("iob_reg #( \n")
         f_gen.write("\t.DATA_W (1),\n")
         f_gen.write("\t.RST_VAL (1'd0),\n")
@@ -376,8 +376,8 @@ class mkregs:
         f_gen.write("\t.data_o (iob_rdata_o)\n")
         f_gen.write(");\n\n")
 
-        f_gen.write("`IOB_WIRE(pc, 1)\n")
-        f_gen.write("`IOB_VAR(pc_nxt, 1)\n")
+        f_gen.write("wire pc;\n")
+        f_gen.write("reg pc_nxt;\n")
         f_gen.write("iob_reg #(\n")
         f_gen.write("\t.DATA_W (1),\n")
         f_gen.write("\t.RST_VAL (1'd0),\n")
