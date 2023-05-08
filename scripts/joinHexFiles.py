@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # Joins two hex files, one starting at address 0 and one starting at address TOTALSIZE/2
 
 from sys import argv
