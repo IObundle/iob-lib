@@ -467,62 +467,63 @@ def write_git_revision_short_hash(dst_dir):
     file.write(text)
 
 
+# DEPRECATED
 # Setup a submodule in a given build directory
 # build_dir: path to build directory
 # submodule_dir: root directory of submodule to run setup function
 # module_parameters: optional argument. Allows passing an optional object with parameters to a hardware module (object is passed to the *_setup.py module).
 # function_2_call: optional argument. Name of the function to call for module setup. By default is the 'main' function.
-def submodule_setup(
-    build_dir, submodule_dir, module_parameters=None, function_2_call="main"
-):
-    # Check if submodule has *_setup.py file
-    for fname in os.listdir("."):
-        if fname.endswith("_setup.py"):
-            iob_submodule_setup(
-                build_dir,
-                submodule_dir,
-                module_parameters=module_parameters,
-                function_2_call=function_2_call,
-            )
-            return
-
-    # Did not find *_setup.py file, copy sources only
-    shutil.copytree(f"{submodule_dir}/hardware/src",
-                    f"{build_dir}/hardware/src")
-
+#def submodule_setup(
+#    build_dir, submodule_dir, module_parameters=None, function_2_call="main"
+#):
+#    # Check if submodule has *_setup.py file
+#    for fname in os.listdir("."):
+#        if fname.endswith("_setup.py"):
+#            iob_submodule_setup(
+#                build_dir,
+#                submodule_dir,
+#                module_parameters=module_parameters,
+#                function_2_call=function_2_call,
+#            )
+#            return
+#
+#    # Did not find *_setup.py file, copy sources only
+#    shutil.copytree(f"{submodule_dir}/hardware/src",
+#                    f"{build_dir}/hardware/src")
+#
 
 # Setup a submodule in a given build directory using its *_setup.py file
 # build_dir: destination build directory
 # submodule_dir: root directory of submodule to run setup function
 # module_parameters: optional argument. Allows passing an optional object with parameters to a hardware module.
 # function_2_call: optional argument. Name of the function to call for module setup. By default is the 'main' function. If the function accepts the 'module' argument, then it will be passed.
-def iob_submodule_setup(
-    build_dir, submodule_dir, module_parameters=None, function_2_call="main"
-):
-    # print(f"################# {function_2_call}") #DEBUG
-    # Import <corename>_setup.py
-    # Always set he 'not_top_module' to True, in order to signal that the module was imported
-    # Always set a build_dir and submodule_dir by default
-    module = import_setup(
-        submodule_dir,
-        not_top_module=True,
-        build_dir=build_dir,
-        setup_dir=submodule_dir,
-        module_parameters=module_parameters,
-    )
-    # Split string to check if function is inside a module
-    function_2_call = function_2_call.split(".")
-    # Check if function is inside other module(s)
-    module_with_function = module
-    for i in function_2_call[:-1]:
-        # print(f"######## {vars(module_with_function)}") #DEBUG
-        module_with_function = vars(module_with_function)[i]
-    function_2_call = vars(module_with_function)[function_2_call[-1]]
-    # Call setup function specified in function_2_call. Pass 'module' as argument if possible.
-    if "python_module" in inspect.signature(function_2_call).parameters.keys():
-        function_2_call(python_module=module)
-    else:
-        function_2_call()
+#def iob_submodule_setup(
+#    build_dir, submodule_dir, module_parameters=None, function_2_call="main"
+#):
+#    # print(f"################# {function_2_call}") #DEBUG
+#    # Import <corename>_setup.py
+#    # Always set he 'not_top_module' to True, in order to signal that the module was imported
+#    # Always set a build_dir and submodule_dir by default
+#    module = import_setup(
+#        submodule_dir,
+#        not_top_module=True,
+#        build_dir=build_dir,
+#        setup_dir=submodule_dir,
+#        module_parameters=module_parameters,
+#    )
+#    # Split string to check if function is inside a module
+#    function_2_call = function_2_call.split(".")
+#    # Check if function is inside other module(s)
+#    module_with_function = module
+#    for i in function_2_call[:-1]:
+#        # print(f"######## {vars(module_with_function)}") #DEBUG
+#        module_with_function = vars(module_with_function)[i]
+#    function_2_call = vars(module_with_function)[function_2_call[-1]]
+#    # Call setup function specified in function_2_call. Pass 'module' as argument if possible.
+#    if "python_module" in inspect.signature(function_2_call).parameters.keys():
+#        function_2_call(python_module=module)
+#    else:
+#        function_2_call()
 
 # Import python modules recursively into a dictionary
 # python_module: python module of *_setup.py of the core/system, should contain setup_dir
@@ -564,6 +565,7 @@ def import_submodules(python_module):
                 not_top_module=True,
                 build_dir=python_module.build_dir,
                 setup_dir=submodule_dirs[item],
+                modules_dictionary=modules_dictionary,
                 module_parameters=optional_parameters,
             )
             modules_dictionary[module.__name__] = module
@@ -574,11 +576,13 @@ def import_submodules(python_module):
     return modules_dictionary
 
 
-def submodule_setup(python_module);
+# Setup submodules in modules_dictionary
+def submodule_setup(python_module):
     modules_dictionary = python_module.modules_dictionary
 
-    #TODO: Run submodule setup by the order they appear in modules_dictionary
-    
+    # Setup submodules by the order they appear in modules_dictionary
+    for module in modules_dictionary:
+        module.main()
 
 
 

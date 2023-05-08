@@ -108,7 +108,6 @@ def setup(python_module, no_overlap=False):
     build_srcs.submodules_setup(python_module)
 
 
-
     #
     # Setup flows
     #
