@@ -44,6 +44,12 @@ python-format:
 python-format-check:
 	$(LIB_DIR)/scripts/black_format.py --check
 
+c-format:
+	$(LIB_DIR)/scripts/clang_format.py
+
+c-format-check:
+	$(LIB_DIR)/scripts/clang_format.py --check
+
 verilog-format:
 	# Run formatter on all verilog files of setup directory
 	verible-verilog-format --inplace `find . -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*/submodules/*" | tr '\n' ' '`
@@ -55,6 +61,8 @@ verilog-format-check:
 	#verible-verilog-lint `find . -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*/submodules/*" | tr '\n' ' '`
 	# Run linter on all verilog files of build directory (includes generated files)
 	#verible-verilog-lint `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
+
+format-check-all: python-format-check c-format-check verilog-format-check
 
 setup: debug
 
@@ -130,7 +138,7 @@ endif
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-debug: python-format-check verilog-format-check $(BUILD_DIR) $(SRC)
+debug: format-check-all $(BUILD_DIR) $(SRC)
 	@for i in $(SRC); do echo $$i; done
 
 
