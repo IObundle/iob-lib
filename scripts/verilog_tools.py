@@ -20,7 +20,7 @@ def replace_includes_in_code(code, files, ignore_files=[]):
     for line in code:
         if not found_module_start:
             # Check if line starts with Verilog module, ignoring spaces and tabs
-            if line.lstrip().startswith("module ") or re.match('^\s*\S+\s#?\(', line):
+            if line.lstrip().startswith("module ") or re.match("^\s*\S+\s#?\(", line):
                 found_module_start = True
             # Ignore lines before module start
             new_lines.append(line)
@@ -33,11 +33,7 @@ def replace_includes_in_code(code, files, ignore_files=[]):
 
         # Get filename from `include statement
         filename = (
-            line.split("`include")[1]
-            .split("//")[0]
-            .strip()
-            .strip('"')
-            .strip("'")
+            line.split("`include")[1].split("//")[0].strip().strip('"').strip("'")
         )
         # Don't include duplicates
         if filename in ignore_files:
@@ -53,8 +49,7 @@ def replace_includes_in_code(code, files, ignore_files=[]):
             continue
         # Include verilog header contents in the new_lines list
         with open(files[filename] + "/" + filename, "r") as f:
-            new_lines += replace_includes_in_code(
-                f.readlines(), files, ignore_files)
+            new_lines += replace_includes_in_code(f.readlines(), files, ignore_files)
     return new_lines
 
 
