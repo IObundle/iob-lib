@@ -36,7 +36,6 @@ def replace_includes_in_code(code, files, ignore_files=[], replace_all=False):
             new_lines.append(line)
             continue
 
-
         # Get filename from `include statement
         filename = (
             line.split("`include")[1].split("//")[0].strip().strip('"').strip("'")
@@ -55,7 +54,9 @@ def replace_includes_in_code(code, files, ignore_files=[], replace_all=False):
             continue
         # Include verilog header contents in the new_lines list
         with open(files[filename] + "/" + filename, "r") as f:
-            new_lines += replace_includes_in_code(f.readlines(), files, ignore_files, True)
+            new_lines += replace_includes_in_code(
+                f.readlines(), files, ignore_files, True
+            )
     return new_lines
 
 
