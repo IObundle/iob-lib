@@ -100,8 +100,8 @@ def find(pattern, path):
     return result
 
 
-def replaceFiles(pattern, path):
-    files = find(pattern, path)
+def replaceFiles(extension, path):
+    files = find("*" + extension, path)
 
     for inputFile in files:
         ei = inputFile.rfind(".")
