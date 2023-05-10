@@ -1,7 +1,6 @@
 //
 // Tasks for the IOb Native protocol
 //
-`include "iob_utils.vh"
 
 // Write data to IOb Native slave
 task iob_write;
