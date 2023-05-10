@@ -9,18 +9,17 @@ DEBUG = False
 # files: dictionary of files that can be included
 #        Dictionary format: {filename: path}
 # ignore_files: list of files that should not be included
+# replace_all: boolean to replace all includes, even if they are not inside a module
 
 
-def replace_includes_in_code(code, files, ignore_files=[]):
+def replace_includes_in_code(code, files, ignore_files=[], replace_all=False):
     new_lines = []
-    found_module_start = (
-        False  # Used to check if we are parsing inside a Verilog module
-    )
+    found_module_start = replace_all
     # Search for lines starting with `include inside the verilog file
     for line in code:
         if not found_module_start:
             # Check if line starts with Verilog module, ignoring spaces and tabs
-            if line.lstrip().startswith("module ") or re.match("^\s*\S+\s#?\(", line):
+            if line.lstrip().startswith("module "):
                 found_module_start = True
             # Ignore lines before module start
             new_lines.append(line)
@@ -28,6 +27,12 @@ def replace_includes_in_code(code, files, ignore_files=[]):
 
         # Ignore lines that don't start with `include, ignoring spaces and tabs
         if not line.lstrip().startswith("`include"):
+            new_lines.append(line)
+            continue
+
+        # Ignore lines after module end unless replace_all is True
+        if not replace_all and line.lstrip().startswith("endmodule"):
+            found_module_start = False
             new_lines.append(line)
             continue
 
@@ -49,7 +54,9 @@ def replace_includes_in_code(code, files, ignore_files=[]):
             continue
         # Include verilog header contents in the new_lines list
         with open(files[filename] + "/" + filename, "r") as f:
-            new_lines += replace_includes_in_code(f.readlines(), files, ignore_files)
+            new_lines += replace_includes_in_code(
+                f.readlines(), files, ignore_files, True
+            )
     return new_lines
 
 
@@ -80,7 +87,7 @@ def replace_includes(search_paths=[]):
         with open(verilog_files[filename] + "/" + filename, "r") as f:
             lines = f.readlines()
 
-        new_lines = replace_includes_in_code(lines, verilog_files, duplicates)
+        new_lines = replace_includes_in_code(lines, verilog_files, duplicates, False)
 
         # Write new_lines to the file
         with open(verilog_files[filename] + "/" + filename, "w") as f:
