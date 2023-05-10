@@ -33,7 +33,6 @@ module iob_iob2wishbone #(
     localparam RB_MASK = {1'b0, {READ_BYTES{1'b1}}};
 
     // IOb auxiliar wires
-    wire                valid_r;
     wire [ADDR_W-1:0]   address_r;
     wire [DATA_W-1:0]   wdata_r;
     wire                ready;
@@ -56,7 +55,6 @@ module iob_iob2wishbone #(
     assign wb_select = wb_we? iob_wstrb_i:(RB_MASK)<<(iob_address_i[1:0]);
     assign wb_we = |iob_wstrb_i;
 
-    iob_reg_re #(1,0) iob_reg_valid (clk_i, arst_i, ready, cke_i, 1'b1, iob_avalid_i, valid_r);
     iob_reg_re #(1,0) iob_reg_we (clk_i, arst_i, cke_i, 1'b0, iob_avalid_i, wb_we, wb_we_r);
     iob_reg_re #(ADDR_W,0) iob_reg_addr (clk_i, arst_i, cke_i, 1'b0, iob_avalid_i, iob_address_i, address_r);
     iob_reg_re #(DATA_W,0) iob_reg_iob_data (clk_i, arst_i, cke_i, 1'b0, iob_avalid_i, iob_wdata_i, wdata_r);
