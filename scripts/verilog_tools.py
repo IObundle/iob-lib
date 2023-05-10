@@ -89,7 +89,9 @@ def replace_includes(search_paths=[]):
             with open(filepath + "/" + filename, "r") as f:
                 lines = f.readlines()
 
-            new_lines, _files_included = replace_includes_in_code(lines, verilog_files, False)
+            new_lines, _files_included = replace_includes_in_code(
+                lines, verilog_files, False
+            )
             files_to_delete += _files_included
 
             # Write new_lines to the file
