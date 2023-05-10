@@ -3,7 +3,7 @@ import os
 import iob_colors
 import re
 
-DEBUG = True
+DEBUG = False
 
 # code: list of lines of code
 # files: dictionary of files that can be included
@@ -50,7 +50,6 @@ def replace_includes_in_code(code, files, replace_all=False):
                 )
             continue
 
-        print(f"{iob_colors.INFO}Including file '{filename}'{iob_colors.ENDC}")
         # Include verilog header contents in the new_lines list
         # Note: it will only include the contents of the first file found with this name.
         with open(files[filename][0] + "/" + filename, "r") as f:
