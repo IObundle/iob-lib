@@ -23,9 +23,9 @@ module iob_gray_counter
    assign bin_counter_nxt = bin_counter + 1'b1;
    
    generate 
-      if (W > 1) begin
+      if (W > 1) begin : g_width_gt1
          assign gray_counter_nxt = {bin_counter[W-1], bin_counter[W-2:0] ^ bin_counter[W-1:1]};
-      end else begin
+      end else begin : g_width_eq1
          assign gray_counter_nxt = bin_counter;
       end 
    endgenerate

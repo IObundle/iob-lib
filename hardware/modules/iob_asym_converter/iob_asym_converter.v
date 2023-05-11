@@ -50,7 +50,7 @@ module iob_asym_converter
 
   //Generate the RAM based on the parameters
   generate
-    if (W_DATA_W > R_DATA_W) begin
+    if (W_DATA_W > R_DATA_W) begin : g_write_wider
       //memory write port
       assign ext_mem_w_en_o = {R{w_en_i}};
       assign ext_mem_w_addr_o = w_addr_i;
@@ -77,7 +77,7 @@ module iob_asym_converter
       assign r_data = ext_mem_r_data_i >> (r_addr_lsbs_reg*R_DATA_W);
       assign r_data_o = r_data[R_DATA_W-1:0];
 
-    end else if (W_DATA_W < R_DATA_W) begin
+    end else if (W_DATA_W < R_DATA_W) begin : g_read_wider
       //memory write port
       assign ext_mem_w_en_o = {{(R-1){1'd0}},w_en_i} << w_addr_i[$clog2(R)-1:0];
       assign ext_mem_w_data_o = {{(R_DATA_W-W_DATA_W){1'd0}},w_data_i} << (w_addr_i[$clog2(R)-1:0]*W_DATA_W);
@@ -88,7 +88,8 @@ module iob_asym_converter
       assign ext_mem_r_addr_o = r_addr_i;
       assign r_data_o = ext_mem_r_data_i;
 
-    end else begin //W_DATA_W == R_DATA_W
+    end else begin : g_same_width
+       //W_DATA_W == R_DATA_W
       //memory write port
       assign ext_mem_w_en_o = w_en_i;
       assign ext_mem_w_addr_o = w_addr_i;
