@@ -8,7 +8,9 @@ pkgs.mkShell {
     verilator
     gtkwave
     python3
+    python3Packages.black
     python3Packages.parse
+    python3Packages.numpy
     (texlive.combine { inherit (texlive) scheme-medium multirow lipsum catchfile nowidow enumitem placeins xltabular ltablex titlesec makecell ; })
     (callPackage ./riscv-gnu-toolchain.nix { })
     verible
