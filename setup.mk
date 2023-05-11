@@ -54,7 +54,7 @@ verilog-format:
 	# Run formatter on all verilog files of setup directory
 	# verible-verilog-format --inplace `find  hardware -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*_tb.v" | tr '\n' ' '`
 	# Run formatter on all verilog files of build directory (includes generated files)
-	verible-verilog-format --inplace `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*_swreg_gen.v" -not -path "*test_*.vh" -not -path "*clkenrst*" -not -path "*clkrst*" | tr '\n' ' '`
+	verible-verilog-format --inplace `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*test_*.vh" -not -path "*clkenrst*" -not -path "*clkrst*" | tr '\n' ' '`
 
 verilog-lint:
 	# Run linter on all verilog files of setup directory
