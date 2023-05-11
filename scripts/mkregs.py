@@ -201,6 +201,21 @@ class mkregs:
         f.write(f"  output iob_ready_nxt_o,\n")
         f.write(f"  output iob_rvalid_nxt_o,\n")
 
+    # auxiliar read register case name
+    def aux_read_reg_case_name(self, row):
+        aux_read_reg_case_name = ""
+        if row["type"] == "R":
+            addr = row["addr"]
+            n_bits = row["n_bits"]
+            log2n_items = row["log2n_items"]
+            n_bytes = int(self.bceil(n_bits, 3) / 8)
+            if n_bytes == 3:
+                n_bytes = 4
+            addr_w = self.calc_addr_w(log2n_items, n_bytes)
+            addr_w_base = max(log(self.cpu_n_bytes, 2), addr_w)
+            aux_read_reg_case_name = f"iob_addr_i_{self.bfloor(addr, addr_w_base)}_{self.boffset(addr, self.cpu_n_bytes)}"
+        return aux_read_reg_case_name
+
     # generate wires to connect instance in top module
     def gen_inst_wire(self, table, f):
         for row in table:
@@ -330,6 +345,14 @@ class mkregs:
         f_gen.write(f"reg wready_int;\n")
         f_gen.write(f"reg rready_int;\n\n")
 
+        # auxiliar read register cases
+        for row in table:
+            if row["type"] == "R":
+                aux_read_reg = self.aux_read_reg_case_name(row)
+                if aux_read_reg:
+                    f_gen.write(f"reg {aux_read_reg};\n")
+        f_gen.write("\n")
+
         # ready output
         f_gen.write("//ready output\n")
         f_gen.write("reg ready_nxt;\n")
@@ -422,16 +445,20 @@ class mkregs:
             auto = row["autologic"]
 
             if row["type"] == "R":
+                aux_read_reg = self.aux_read_reg_case_name(row)
+
                 if self.bfloor(addr, addr_w_base) == self.bfloor(
                     addr_last, addr_w_base
                 ):
                     f_gen.write(
-                        f"  if(`IOB_WORD_ADDR(iob_addr_i) == {self.bfloor(addr, addr_w_base)}) "
+                        f"  {aux_read_reg} = (`IOB_WORD_ADDR(iob_addr_i) == {self.bfloor(addr, addr_w_base)});\n"
                     )
+                    f_gen.write(f"  if({aux_read_reg}) ")
                 else:
                     f_gen.write(
-                        f"  if((`IOB_WORD_ADDR(iob_addr_i) >= {self.bfloor(addr, addr_w_base)}) && (`IOB_WORD_ADDR(iob_addr_i) <= {self.bfloor(addr_last, addr_w_base)})) "
+                        f"  {aux_read_reg} = (`IOB_WORD_ADDR(iob_addr_i) >= {self.bfloor(addr, addr_w_base)};\n"
                     )
+                    f_gen.write(f"  if({aux_read_reg}) ")
                 f_gen.write(f"begin\n")
                 f_gen.write(
                     f"    rdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n"
