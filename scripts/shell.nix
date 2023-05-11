@@ -16,7 +16,6 @@ pkgs.mkShell {
     (callPackage ./riscv-gnu-toolchain.nix { })
     verible
     black
-    clang-tools
     llvmPackages_14.clangUseLLVM
   ];
 }
