@@ -114,15 +114,6 @@ def hw_setup(python_module):
             if os.path.isfile(f"{build_dir}/hardware/fpga/src/{file}"):
                 os.remove(f"{build_dir}/hardware/fpga/src/{file}")
 
-    # Copy LIB header files (all .vh files under LIB/hardware/src)
-    copy_files(
-        f"{LIB_DIR}/hardware/modules",
-        f"{build_dir}/hardware/src",
-        [],
-        "*.vh",
-        copy_all=True,
-    )
-
 
 # Setup simulation related files/modules
 # module: python module representing a *_setup.py file of the root directory of the core/system.
