@@ -134,6 +134,12 @@ format-check:
 	@./scripts/black_format.py --check
 	@./scripts/clang_format.py --check
 
+verilog-lint:
+	verible-verilog-lint --rules_config $(LIB_DIR)/scripts/verible-lint.rules  `find ./hardware -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
+
+verilog-format:
+	verible-verilog-format --inplace `find  ./hardware -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*_tb.v" | tr '\n' ' '`
+
 clean:
 	@rm -rf $(BUILD_VSRC_DIR)
 	@rm -rf spyglass_reports
@@ -142,8 +148,9 @@ clean:
 
 debug:
 
-.PHONY: all sim \ 
-	board_server_install \ 
+.PHONY: all sim \
+	board_server_install \
 	format-install-all format-install-python format-install-clang \
-	format format-check \ 
+	format format-check \
+	verilog-lint verilog-format \
 	clean debug
