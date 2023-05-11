@@ -215,8 +215,7 @@ def fpga_setup(python_module):
         )
 
     # Add functions to the fpga_srcs. These functions call setup modules for fpga setup (fpga_setup.py)
-    add_setup_functions(python_module, "fpga_setup",
-                        setup_module=python_module)
+    add_setup_functions(python_module, "fpga_setup", setup_module=python_module)
     # Setup any fpga submodules by calling the 'fpga_setup()' function from their *_setup.py module
     module_dependency_setup(
         fpga_srcs,
@@ -298,8 +297,7 @@ def add_setup_functions(python_module, module_type, **kwargs):
     if os.path.isfile(full_module_path):
         # Make sure dictionary exists
         if module_type not in python_module.submodules:
-            python_module.submodules[module_type] = {
-                "headers": [], "modules": []}
+            python_module.submodules[module_type] = {"headers": [], "modules": []}
         # Append executable module to 'modules' list of the submodules dictionary
         # The fuctions will be executed during setup
         python_module.submodules[module_type]["modules"].append(
@@ -316,8 +314,7 @@ def get_module_function(module_path, **kwargs):
     def module_function():
         if os.path.isfile(module_path):
             module_name = os.path.basename(module_path).split(".")[0]
-            spec = importlib.util.spec_from_file_location(
-                module_name, module_path)
+            spec = importlib.util.spec_from_file_location(module_name, module_path)
             module = importlib.util.module_from_spec(spec)
             sys.modules[module_name] = module
             # Define module objects given via kwargs
@@ -354,8 +351,7 @@ def sw_setup(python_module):
     if "emb" not in core_flows:
         mk_conf.append_flows_config_build_mk(core_flows, ["emb"], build_dir)
     if "pc-emul" not in core_flows:
-        mk_conf.append_flows_config_build_mk(
-            core_flows, ["pc-emul"], build_dir)
+        mk_conf.append_flows_config_build_mk(core_flows, ["pc-emul"], build_dir)
 
     # Copy software tree if it exists as this core may contain software sources to be used by others
     if os.path.isdir(f"{setup_dir}/software"):
@@ -382,13 +378,11 @@ def sw_setup(python_module):
     # Copy every .h file of the sw_headers list from LIB
     if sw_headers:
         copy_files(
-            LIB_DIR +
-            "/software", f"{build_dir}/software/src", sw_headers, "*.h"
+            LIB_DIR + "/software", f"{build_dir}/software/src", sw_headers, "*.h"
         )
     # Copy every .c file of the sw_srcs list from LIB
     if sw_srcs:
-        copy_files(LIB_DIR + "/software",
-                   f"{build_dir}/software/src", sw_srcs, "*.c")
+        copy_files(LIB_DIR + "/software", f"{build_dir}/software/src", sw_srcs, "*.c")
 
     if "emb" in core_flows or "pc-emul" in core_flows:
         # Copy LIB software Makefile
@@ -426,34 +420,37 @@ def doc_setup(python_module):
     # Copy LIB tex files if not present
     for file in os.listdir(f"{LIB_DIR}/document/tsrc"):
         copy_without_override(
-            f"{LIB_DIR}/document/tsrc/{file}", f"{build_dir}/document/tsrc/{file}")
+            f"{LIB_DIR}/document/tsrc/{file}", f"{build_dir}/document/tsrc/{file}"
+        )
 
     # Copy LIB figures
     for file in os.listdir(f"{LIB_DIR}/document/figures"):
         copy_without_override(
-            f"{LIB_DIR}/document/figures/{file}", f"{build_dir}/document/figures/{file}")
+            f"{LIB_DIR}/document/figures/{file}", f"{build_dir}/document/figures/{file}"
+        )
 
     # Copy document Makefile
-    shutil.copy2(f"{LIB_DIR}/document/Makefile",
-                 f"{build_dir}/document/Makefile")
+    shutil.copy2(f"{LIB_DIR}/document/Makefile", f"{build_dir}/document/Makefile")
 
     # General documentation
     write_git_revision_short_hash(f"{build_dir}/document/tsrc")
 
-    # Run doc_setup.py 
-    get_module_function(os.path.join(python_module.setup_dir,
-                        "document/doc_setup.py"), setup_module=python_module)()
-    
+    # Run doc_setup.py
+    get_module_function(
+        os.path.join(python_module.setup_dir, "document/doc_setup.py"),
+        setup_module=python_module,
+    )()
+
     # Future improvement: Add doc_setup.py to a doc_setup list, similar to the other processes (sim_setup, hw_setup, ...)
-    #add_setup_functions(python_module, "doc_setup", setup_module=python_module)
-    #module_dependency_setup(
+    # add_setup_functions(python_module, "doc_setup", setup_module=python_module)
+    # module_dependency_setup(
     #    doc_srcs,
     #    Vheaders,
     #    build_dir,
     #    submodule_dirs,
     #    function_2_call="setup.build_srcs.doc_setup",
     #    lib_dir=LIB_DIR,
-    #)
+    # )
 
 
 def write_git_revision_short_hash(dst_dir):
@@ -490,8 +487,7 @@ def submodule_setup(
             return
 
     # Did not find *_setup.py file, copy sources only
-    shutil.copytree(f"{submodule_dir}/hardware/src",
-                    f"{build_dir}/hardware/src")
+    shutil.copytree(f"{submodule_dir}/hardware/src", f"{build_dir}/hardware/src")
 
 
 # Setup a submodule in a given build directory using its *_setup.py file
@@ -638,8 +634,7 @@ def lib_module_setup(
     # If module_name.py is found, import the headers and srcs lists from it
     if extension == ".py":
         lib_module_name = os.path.basename(module_path).split(".")[0]
-        spec = importlib.util.spec_from_file_location(
-            lib_module_name, module_path)
+        spec = importlib.util.spec_from_file_location(lib_module_name, module_path)
         lib_module = importlib.util.module_from_spec(spec)
         sys.modules[lib_module_name] = lib_module
         if module_parameters:
@@ -648,14 +643,12 @@ def lib_module_setup(
         headers.extend(lib_module.headers)
         srcs.extend(lib_module.modules)
         if add_sim_srcs and (
-            hasattr(lib_module, "sim_headers") and hasattr(
-                lib_module, "sim_modules")
+            hasattr(lib_module, "sim_headers") and hasattr(lib_module, "sim_modules")
         ):
             headers.extend(lib_module.sim_headers)
             srcs.extend(lib_module.sim_modules)
         if add_fpga_srcs and (
-            hasattr(lib_module, "fpga_headers") and hasattr(
-                lib_module, "fpga_modules")
+            hasattr(lib_module, "fpga_headers") and hasattr(lib_module, "fpga_modules")
         ):
             headers.extend(lib_module.fpga_headers)
             srcs.extend(lib_module.fpga_modules)
@@ -717,10 +710,8 @@ def create_if_gen_headers(dest_dir, Vheaders):
                 vh_name["port_prefix"],
                 vh_name["wire_prefix"],
                 f_out,
-                bus_size=vh_name["bus_size"] if "bus_size" in vh_name.keys(
-                ) else 1,
-                bus_start=vh_name["bus_start"] if "bus_start" in vh_name.keys(
-                ) else 0,
+                bus_size=vh_name["bus_size"] if "bus_size" in vh_name.keys() else 1,
+                bus_start=vh_name["bus_start"] if "bus_start" in vh_name.keys() else 0,
             )
         else:
             sys.exit(
