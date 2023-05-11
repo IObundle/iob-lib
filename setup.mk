@@ -58,9 +58,9 @@ verilog-format:
 
 verilog-lint:
 	# Run linter on all verilog files of setup directory
-	verible-verilog-lint --rules_config $(LIB_DIR)/scripts/verible.rules  `find hardware -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*/submodules/*" | tr '\n' ' '`
+	verible-verilog-lint --rules_config $(LIB_DIR)/scripts/verible-lint.rules  `find hardware -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*/submodules/*" | tr '\n' ' '`
 	# Run linter on all verilog files of build directory (includes generated files)
-	verible-verilog-lint  --rules_config $(LIB_DIR)/scripts/verible.rules `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
+	verible-verilog-lint  --rules_config $(LIB_DIR)/scripts/verible-lint.rules `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
 
 format-check-all: $(BUILD_DIR) python-format-check c-format-check #verilog-lint
 
