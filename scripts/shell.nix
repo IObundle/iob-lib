@@ -1,6 +1,6 @@
 { pkgs ? import <nixpkgs> {}}:
 pkgs.mkShell {
-  name = "iob-soc-shell";
+  name = "iob-shell";
   buildInputs = with pkgs; [     
     bash
     gnumake
@@ -11,7 +11,8 @@ pkgs.mkShell {
     python3Packages.black
     python3Packages.parse
     python3Packages.numpy
-    (texlive.combine { inherit (texlive) scheme-medium multirow lipsum catchfile nowidow enumitem placeins xltabular ltablex titlesec makecell ; })
+    python3Packages.wavedrom
+    (texlive.combine { inherit (texlive) scheme-medium multirow lipsum catchfile nowidow enumitem placeins xltabular ltablex titlesec makecell datetime fmtcount ; })
     (callPackage ./riscv-gnu-toolchain.nix { })
     verible
     black

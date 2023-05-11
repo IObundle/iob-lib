@@ -75,26 +75,6 @@ $(BUILD_DIR):
 
 ifneq ($(wildcard document),)
 
-#include local fpga makefile segment
-ifneq ($(wildcard document/doc_setup.mk),)
-include document/doc_setup.mk
-endif
-
-#copy lib tex files if not present
-SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%, $(BUILD_TSRC_DIR)/%, $(wildcard $(LIB_DIR)/document/tsrc/*))
-$(BUILD_TSRC_DIR)/%: $(LIB_DIR)/document/tsrc/%
-	if [ ! -f $@ ]; then cp $< $@; fi
-
-#copy figures from LIB
-SRC+=$(patsubst $(LIB_DIR)/document/figures/%, $(BUILD_FIG_DIR)/%, $(wildcard $(LIB_DIR)/document/figures/*))
-$(BUILD_FIG_DIR)/%: $(LIB_DIR)/document/figures/%
-	cp $< $@
-
-#copy document Makefile
-SRC+=$(BUILD_DOC_DIR)/Makefile
-$(BUILD_DOC_DIR)/Makefile: $(LIB_DIR)/document/Makefile
-	cp $< $@
-
 ifeq ($(INTEL_FPGA),1)
 SRC+=$(BUILD_DIR)/doc/quartus.tex
 endif
