@@ -783,7 +783,7 @@ class mkregs:
                 """
     \\begin{table}[H]
       \centering
-      \\begin{tabularx}{\  extwidth}{|l|c|c|c|c|X|}
+      \\begin{tabularx}{\\textwidth}{|l|c|c|c|c|X|}
         
         \hline
         \\rowcolor{iob-green}
