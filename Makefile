@@ -150,7 +150,6 @@ debug:
 
 .PHONY: all setup sim \
 	board_server_install \
-	format-install-all format-install-python format-install-clang \
 	format format-check \
 	verilog-lint verilog-format \
 	clean debug
