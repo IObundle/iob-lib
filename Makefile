@@ -21,8 +21,6 @@ LINT_SYNC_FLAGS=$(SYNOPSYS_SYNC_FLAGS)
 
 PYTHON_EXEC:=/usr/bin/env python3 -B
 
-all: sim
-
 # Default module
 MODULE ?= iob_ram_2p
 MODULE_DIR ?= $(shell find hardware -name $(MODULE))
@@ -44,35 +42,18 @@ INCLUDE=-Ihardware/modules -Ihardware/src
 # asymmetric memory present
 IS_ASYM ?= 0
 
-#
-# Simulate with Icarus Verilog
-#
-VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
+#default target
+all: sim
 
+#setup test directory
 $(BUILD_VSRC_DIR):
 	@mkdir $@
 
 copy_srcs: $(BUILD_VSRC_DIR) 
 	$(PYTHON_EXEC) ./scripts/lib_sim_setup.py $(MODULE) $(BUILD_VSRC_DIR)
 
-lint-all:
-	./scripts/lint_all.sh
-
-lint-run: clean copy_srcs
-	$(PYTHON_EXEC) ./scripts/lib_lint_setup.py $(MODULE)
-	touch $(BUILD_VSRC_DIR)/$(MODULE).sdc
-	rm -rf $(BUILD_VSRC_DIR)/*_tb.v
-	cd $(BUILD_VSRC_DIR) && ls *.v >> $(MODULE)_files.list
-	@echo "Linting module $(MODULE)"
-ifeq ($(LINT_SERVER),)
-	cd $(BUILD_VSRC_DIR) && (echo exit | spyglass -licqueue -shell -project spyglass.prj -goals "lint/lint_rtl")
-else
-	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
-	rsync -avz --delete --exclude .git $(LINT_SYNC_FLAGS) . $(LINT_USER)@$(LINT_SERVER):$(REMOTE_BUILD_DIR)
-	ssh -t $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) 'make -C $(REMOTE_BUILD_DIR) lint-run MODULE=$(MODULE)'
-	mkdir -p spyglass_reports
-	scp $(LINT_SCP_FLAGS) $(LINT_USER)@$(LINT_SERVER):$(REMOTE_SRC_DIR)/spyglass/consolidated_reports/$(MODULE)_lint_lint_rtl/*.rpt spyglass_reports/.
-endif
+# iverilog simulation
+VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
 
 sim: copy_srcs
 	set -e;
@@ -96,9 +77,6 @@ else
 endif
 endif
 
-test:
-	./scripts/test.sh
-
 # Install board server and client
 board_server_install:
 	sudo cp scripts/board_client.py /usr/local/bin/ && \
@@ -118,13 +96,13 @@ board_server_uninstall:
 board_server_status:
 	systemctl status board_server
 
-format:
-	@./scripts/black_format.py
-	@./scripts/clang_format.py
+format: verilog-lint verilog-format python-format clang-format
 
-format-check:
-	@./scripts/black_format.py --check
-	@./scripts/clang_format.py --check
+python-format:
+	@./scripts/black_format.py
+
+clang-format:
+	@./scripts/clang_format.py
 
 IOB_LIB_PATH=$(LIB_DIR)/scripts
 export IOB_LIB_PATH
@@ -135,6 +113,33 @@ verilog-lint:
 verilog-format:
 	$(IOB_LIB_PATH)/verilog-format.sh `find  hardware -type f -name "*.v"| tr '\n' ' '`
 
+
+# Spyglass lint
+lint-all:
+	./scripts/lint_all.sh
+
+lint-run: clean copy_srcs
+	$(PYTHON_EXEC) ./scripts/lib_lint_setup.py $(MODULE)
+	touch $(BUILD_VSRC_DIR)/$(MODULE).sdc
+	rm -rf $(BUILD_VSRC_DIR)/*_tb.v
+	cd $(BUILD_VSRC_DIR) && ls *.v >> $(MODULE)_files.list
+	@echo "Linting module $(MODULE)"
+ifeq ($(LINT_SERVER),)
+	cd $(BUILD_VSRC_DIR) && (echo exit | spyglass -licqueue -shell -project spyglass.prj -goals "lint/lint_rtl")
+else
+	ssh $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) "if [ ! -d $(REMOTE_BUILD_DIR) ]; then mkdir -p $(REMOTE_BUILD_DIR); fi"
+	rsync -avz --delete --exclude .git $(LINT_SYNC_FLAGS) . $(LINT_USER)@$(LINT_SERVER):$(REMOTE_BUILD_DIR)
+	ssh -t $(LINT_SSH_FLAGS) $(LINT_USER)@$(LINT_SERVER) 'make -C $(REMOTE_BUILD_DIR) lint-run MODULE=$(MODULE)'
+	mkdir -p spyglass_reports
+	scp $(LINT_SCP_FLAGS) $(LINT_USER)@$(LINT_SERVER):$(REMOTE_SRC_DIR)/spyglass/consolidated_reports/$(MODULE)_lint_lint_rtl/*.rpt spyglass_reports/.
+endif
+
+# module test
+test: verilog-lint verilog-format
+	@./scripts/black_format.py --check
+	@./scripts/clang_format.py --check
+	./scripts/test.sh
+
 clean:
 	@rm -rf $(BUILD_VSRC_DIR)
 	@rm -rf spyglass_reports
@@ -143,7 +148,7 @@ clean:
 
 debug:
 
-.PHONY: all sim \
+.PHONY: all setup sim \
 	board_server_install \
 	format format-check \
 	verilog-lint verilog-format \
