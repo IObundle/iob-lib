@@ -135,6 +135,7 @@ format-check:
 	@./scripts/clang_format.py --check
 
 IOB_LIB_PATH=$(LIB_DIR)/scripts
+export IOB_LIB_PATH
 
 verilog-lint:
 	$(IOB_LIB_PATH)/verilog-lint.sh `find hardware -type f -name "*.v"  | tr '\n' ' '`

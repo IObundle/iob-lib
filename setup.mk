@@ -51,6 +51,7 @@ c-format-check:
 	$(LIB_DIR)/scripts/clang_format.py --check
 
 IOB_LIB_PATH=$(LIB_DIR)/scripts
+export IOB_LIB_PATH
 
 verilog-format:
 	# Run formatter on all verilog files of setup directory
