@@ -25,6 +25,7 @@ set_option incdir { . ../src }
 set_option active_methodology $SPYGLASS_HOME/GuideWare/latest/block/rtl_handoff
 set_option pragma { synopsys synthesis }
 set_option sdc2sgdc yes
+set_option enableSV yes
 
 
 ##Goal Setup Section
