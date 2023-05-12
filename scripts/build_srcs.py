@@ -420,7 +420,7 @@ def doc_setup(python_module):
 
     # For cores that have their own documentation
     if "doc" in core_flows:
-        shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")
+        shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document", dirs_exist_ok=True)
 
     # Copy LIB tex files if not present
     for file in os.listdir(f"{LIB_DIR}/document/tsrc"):
@@ -467,73 +467,22 @@ def write_git_revision_short_hash(dst_dir):
     file.write(text)
 
 
-# DEPRECATED
-# Setup a submodule in a given build directory
-# build_dir: path to build directory
-# submodule_dir: root directory of submodule to run setup function
-# module_parameters: optional argument. Allows passing an optional object with parameters to a hardware module (object is passed to the *_setup.py module).
-# function_2_call: optional argument. Name of the function to call for module setup. By default is the 'main' function.
-#def submodule_setup(
-#    build_dir, submodule_dir, module_parameters=None, function_2_call="main"
-#):
-#    # Check if submodule has *_setup.py file
-#    for fname in os.listdir("."):
-#        if fname.endswith("_setup.py"):
-#            iob_submodule_setup(
-#                build_dir,
-#                submodule_dir,
-#                module_parameters=module_parameters,
-#                function_2_call=function_2_call,
-#            )
-#            return
-#
-#    # Did not find *_setup.py file, copy sources only
-#    shutil.copytree(f"{submodule_dir}/hardware/src",
-#                    f"{build_dir}/hardware/src")
-#
-
-# Setup a submodule in a given build directory using its *_setup.py file
-# build_dir: destination build directory
-# submodule_dir: root directory of submodule to run setup function
-# module_parameters: optional argument. Allows passing an optional object with parameters to a hardware module.
-# function_2_call: optional argument. Name of the function to call for module setup. By default is the 'main' function. If the function accepts the 'module' argument, then it will be passed.
-#def iob_submodule_setup(
-#    build_dir, submodule_dir, module_parameters=None, function_2_call="main"
-#):
-#    # print(f"################# {function_2_call}") #DEBUG
-#    # Import <corename>_setup.py
-#    # Always set he 'not_top_module' to True, in order to signal that the module was imported
-#    # Always set a build_dir and submodule_dir by default
-#    module = import_setup(
-#        submodule_dir,
-#        not_top_module=True,
-#        build_dir=build_dir,
-#        setup_dir=submodule_dir,
-#        module_parameters=module_parameters,
-#    )
-#    # Split string to check if function is inside a module
-#    function_2_call = function_2_call.split(".")
-#    # Check if function is inside other module(s)
-#    module_with_function = module
-#    for i in function_2_call[:-1]:
-#        # print(f"######## {vars(module_with_function)}") #DEBUG
-#        module_with_function = vars(module_with_function)[i]
-#    function_2_call = vars(module_with_function)[function_2_call[-1]]
-#    # Call setup function specified in function_2_call. Pass 'module' as argument if possible.
-#    if "python_module" in inspect.signature(function_2_call).parameters.keys():
-#        function_2_call(python_module=module)
-#    else:
-#        function_2_call()
-
-# Import python modules recursively into a dictionary
+# Setup python submodules recursively (the deeper ones in the tree are setup first)
 # python_module: python module of *_setup.py of the core/system, should contain setup_dir
-# Returns a dictionary of imported modules
-def import_submodules(python_module):
-    submodule_dirs = python_module.submodules["dirs"]
+def setup_submodules(python_module):
     modules_dictionary = {}
+    submodule_dirs = []
+
+    if 'dirs' in python_module.submodules:
+        submodule_dirs = python_module.submodules["dirs"]
 
     for setup_type in python_module.submodules:
-        for item in setup_type['modules']:
+        # Skip non "*_setup" dictionaies
+        if not setup_type.endswith("_setup"):
+            continue
+
+        items_to_delete = []
+        for item in python_module.submodules[setup_type]['modules']:
             # If item is a tuple then it contains optional parameters
             if type(item) == tuple:
                 # Save optional_parameters in a variable
@@ -550,7 +499,7 @@ def import_submodules(python_module):
             # Only allow submodule sin hw_setup list. (The other processes will be handled by the setup function of the module).
             # Note: Maybe we should create a dedicated list to import submodules? This way it won't be as confusing as to why only the 'hw_setup' list is used for submodules.
             #       The outer for loop of this function, only exists to execute this asser and warn the user if he is not using hw_setup. Otherwise we could just use the 'hw_setup' list.
-            assert setup_type == "hw_setup", f"{iob_colors.FAIL}Only 'hw_setup' list can contain submodules. '{setup_type}' list contains '{item}' submodule.{iob_colors.ENDC}"
+            assert setup_type == "hw_setup", f"{iob_colors.FAIL}Only 'hw_setup' list can contain submodules. Please remove '{item}' from '{setup_type}' list.{iob_colors.ENDC}"
 
             # Only import if the item has a _setup.py file
             for fname in os.listdir(submodule_dirs[item]):
@@ -559,21 +508,28 @@ def import_submodules(python_module):
             else:
                 continue
 
-            # Import module and store it in dictionary
+            # Import module
             module = import_setup(
                 submodule_dirs[item],
                 not_top_module=True,
                 build_dir=python_module.build_dir,
                 setup_dir=submodule_dirs[item],
-                modules_dictionary=modules_dictionary,
                 module_parameters=optional_parameters,
             )
-            modules_dictionary[module.__name__] = module
 
-            # Import submodules from this imported module
-            modules_dictionary += import_submodules(module)
+            # Setup submodules from this imported module
+            setup_submodules(module)
 
-    return modules_dictionary
+            # Call main function to setup this module
+            module.main()
+
+            # Mark this module for removal
+            items_to_delete.append(item)
+
+        # Remove marked modules from list
+        for item in items_to_delete:
+            python_module.submodules[setup_type]['modules'].remove(item)
+
 
 
 # Setup submodules in modules_dictionary

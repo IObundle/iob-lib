@@ -98,14 +98,9 @@ def setup(python_module, no_overlap=False):
         python_module.submodules["hw_setup"]["headers"].append("iob_s_portmap")
 
 
-    # Create dictionary with all imported submodules or use the existing one
+    # Setup python submodules recursively (the deeper ones in the tree are setup first)
     if is_top_module(python_module):
-        python_module.modules_dictionary=import_submodules(python_module)
-
-    #
-    # Setup submodules
-    #
-    build_srcs.submodules_setup(python_module)
+        build_srcs.setup_submodules(python_module)
 
 
     #
