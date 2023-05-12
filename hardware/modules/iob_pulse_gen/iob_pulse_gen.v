@@ -42,7 +42,11 @@ module iob_pulse_gen #(
    assign cnt_en = start_detected & (cnt <= (START+DURATION));
 
     //counter
-    iob_counter #(WIDTH,{WIDTH{1'b0}})
+    iob_counter #
+      (
+       .DATA_W(WIDTH),
+       .RST_VAL({WIDTH{1'b0}})
+       )
     cnt0 (
         .clk_i(clk_i),
         .arst_i(arst_i),

@@ -52,15 +52,15 @@ c-format-check:
 
 verilog-format:
 	# Run formatter on all verilog files of setup directory
-	verible-verilog-format --inplace `find . -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*/submodules/*" | tr '\n' ' '`
+	verible-verilog-format --inplace `find  hardware -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*_tb.v" | tr '\n' ' '`
 	# Run formatter on all verilog files of build directory (includes generated files)
-	#verible-verilog-format --inplace `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
+	verible-verilog-format --inplace `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) -not "*_tb.v" -not "*_swreg_gen.v" | tr '\n' ' '`
 
 verilog-format-check:
 	# Run linter on all verilog files of setup directory
-	#verible-verilog-lint `find . -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*/submodules/*" | tr '\n' ' '`
+	verible-verilog-lint `find hardware -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*/submodules/*" | tr '\n' ' '`
 	# Run linter on all verilog files of build directory (includes generated files)
-	#verible-verilog-lint `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
+	verible-verilog-lint `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
 
 format-check-all: python-format-check c-format-check verilog-format-check
 

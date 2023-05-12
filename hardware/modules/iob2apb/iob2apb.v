@@ -26,7 +26,10 @@ module iob2apb
   //APB outputs
   reg [1-1:0] apb_sel_nxt;
   iob_reg
-    #(1,0)
+    #(
+      .DATA_W(1),
+      .RST_VAL(0)
+      )
   sel_reg
     (
     .clk_i(clk_i),
@@ -38,7 +41,10 @@ module iob2apb
 
   reg [1-1:0] apb_enable_nxt;
   iob_reg
-    #(1,0)
+    #(
+      .DATA_W(1),
+      .RST_VAL(0)
+      )
   enable_reg
     (
     .clk_i(clk_i),
@@ -50,7 +56,10 @@ module iob2apb
 
   reg [ADDR_W-1:0] apb_addr_nxt;
   iob_reg
-    #(ADDR_W,0)
+    #(
+      .DATA_W(ADDR_W),
+      .RST_VAL(0)
+      )
   addr_reg
     (
     .clk_i(clk_i),
@@ -62,7 +71,10 @@ module iob2apb
 
   reg [(DATA_W/8)-1:0] apb_wstrb_nxt;
   iob_reg
-    #(DATA_W/8,0)
+    #(
+      .DATA_W(DATA_W/8),
+      .RST_VAL(0)
+      )
   wstrb_reg
     (
     .clk_i(clk_i),
@@ -74,7 +86,10 @@ module iob2apb
 
   reg [1-1:0] apb_write_nxt;
   iob_reg
-    #(1,0)
+    #(
+      .DATA_W(1),
+      .RST_VAL(0)
+      )
   write_reg
     (
     .clk_i(clk_i),
@@ -86,7 +101,10 @@ module iob2apb
 
   reg [DATA_W-1:0] apb_wdata_nxt;
   iob_reg
-    #(DATA_W,0)
+    #(
+      .DATA_W(DATA_W),
+      .RST_VAL(0)
+      )
   wdata_reg
     (
     .clk_i(clk_i),
@@ -99,7 +117,10 @@ module iob2apb
   //IOb outputs
   reg [1-1:0] iob_ready_nxt;
   iob_reg
-    #(1,1)
+    #(
+      .DATA_W(1),
+      .RST_VAL(1)
+      )
   ready_reg
     (
     .clk_i(clk_i),
@@ -111,7 +132,10 @@ module iob2apb
 
   reg [1-1:0] iob_rvalid_nxt;
   iob_reg
-    #(1,0)
+    #(
+      .DATA_W(1),
+      .RST_VAL(0)
+      )
   rvalid_reg
     (
     .clk_i(clk_i),
@@ -123,7 +147,10 @@ module iob2apb
 
   reg [DATA_W-1:0] iob_rdata_nxt;
   iob_reg
-    #(DATA_W,0)
+    #(
+      .DATA_W(DATA_W),
+      .RST_VAL(0)
+      )
   rdata_reg
     (
     .clk_i(clk_i),
@@ -136,7 +163,10 @@ module iob2apb
   wire [1-1:0] pc;
   reg [1-1:0] pc_nxt;
   iob_reg
-    #(1,0)
+    #(
+      .DATA_W(1),
+      .RST_VAL(0)
+      )
   access_reg
     (
     .clk_i(clk_i),
@@ -146,7 +176,7 @@ module iob2apb
     .data_o(pc)
     );
   
-  always @* begin
+  always_comb begin
     
     pc_nxt = pc+1'b1;
     
@@ -176,7 +206,7 @@ module iob2apb
           iob_ready_nxt = 1'b0;
         end
       end
-      1: begin
+      default: begin
         apb_enable_nxt = 1'b1;
         if(!apb_ready_i) //wait until apb interface is ready
           pc_nxt = pc;
