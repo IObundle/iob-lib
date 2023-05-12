@@ -1,8 +1,8 @@
 `timescale 1ns / 1ps
 
 module iob_iob2wishbone #(
-    parameter ADDR_W = 32,
-    parameter DATA_W = 32,
+    parameter ADDR_W     = 32,
+    parameter DATA_W     = 32,
     parameter READ_BYTES = 4
 ) (
     input wire clk_i,

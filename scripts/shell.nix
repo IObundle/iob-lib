@@ -17,5 +17,6 @@ pkgs.mkShell {
     verible
     black
     llvmPackages_14.clangUseLLVM
+    inkscape
   ];
 }

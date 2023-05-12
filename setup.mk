@@ -50,17 +50,20 @@ c-format:
 c-format-check:
 	$(LIB_DIR)/scripts/clang_format.py --check
 
+IOB_LIB_PATH=$(LIB_DIR)/scripts
+export IOB_LIB_PATH
+
 verilog-format:
 	# Run formatter on all verilog files of setup directory
-	verible-verilog-format --inplace `find  hardware -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*_tb.v" | tr '\n' ' '`
+	$(IOB_LIB_PATH)/verilog-format.sh `find  hardware -type f -name "*.v"| tr '\n' ' '`
 	# Run formatter on all verilog files of build directory (includes generated files)
-	verible-verilog-format --inplace `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*test_*.vh" | tr '\n' ' '`
+	$(IOB_LIB_PATH)/verilog-format.sh `find $(BUILD_DIR) -type f -name "*.v"  | tr '\n' ' '`
 
 verilog-lint:
 	# Run linter on all verilog files of setup directory
-	verible-verilog-lint --rules_config $(LIB_DIR)/scripts/verible-lint.rules  `find hardware -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
+	$(IOB_LIB_PATH)/verilog-lint.sh `find hardware -type f -name "*.v"  | tr '\n' ' '`
 	# Run linter on all verilog files of build directory (includes generated files)
-	verible-verilog-lint  --rules_config $(LIB_DIR)/scripts/verible-lint.rules `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*version.vh" -not -path  "*test_*.vh"| tr '\n' ' '`
+	$(IOB_LIB_PATH)/verilog-lint.sh `find $(BUILD_DIR) -type f -name "*.v" | tr '\n' ' '`
 
 format-check-all: $(BUILD_DIR) python-format-check c-format-check verilog-lint verilog-format
 

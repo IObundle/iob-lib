@@ -11,7 +11,6 @@ RISC-V-based SoC, and associated projects.
 black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 - Python format workflow:
     - install [black](https://black.readthedocs.io/en/stable/)
-        - `make format-install-python`
     - run black manually:
         - `make format` or `./scripts/black_format.py`
     - (optional): [integrate with your preferred
@@ -28,7 +27,6 @@ black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://gith
 - Recommended C/C++ code style: [LLVM](https://llvm.org/docs/CodingStandards.html)
 - C/C++ format workflow:
     - install [clang-format](https://black.readthedocs.io/en/stable/)
-        - `make format-install-clang` (Debian and Ubuntu)
     - run clang-format manually:
         - `make format` or `./scripts/clang_format.py`
     - (optional) [integrate with your preferred
