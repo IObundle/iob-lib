@@ -61,7 +61,7 @@ module iob_ram_sp_tb;
             $display(
                 "ERROR: read error in data_out. \n \t i=%0d; data = %h when it should have been %0h",
                 i, i + seq_ini, data_out);
-            $fatal;
+            $fatal();
          end
       end
 
@@ -72,7 +72,7 @@ module iob_ram_sp_tb;
       $display("%c[1;34m", 27);
       $display("Test completed successfully.");
       $display("%c[0m", 27);
-      #(5 * clk_per) $finish;
+      #(5 * clk_per) $finish();
 
    end
 

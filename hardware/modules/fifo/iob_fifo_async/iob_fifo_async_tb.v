@@ -160,7 +160,7 @@ module iob_fifo_async_tb;
       end
 
       $display("INFO: TEST PASSED");
-      #100 $finish;
+      #100 $finish();
    end
 
    wire [        1-1:0] ext_mem_w_clk;

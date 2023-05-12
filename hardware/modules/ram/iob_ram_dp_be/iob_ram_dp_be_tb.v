@@ -71,7 +71,7 @@ module iob_ram_dp_be_tb;
          if (i + seq_ini != data_outA) begin
             $display("ERROR: write error in port A position %d, where data=%h but data_outA=%h", i,
                      i + seq_ini, data_outA);
-            $fatal;
+            $fatal();
          end
       end
 
@@ -102,7 +102,7 @@ module iob_ram_dp_be_tb;
          if (i + seq_ini != data_outB) begin
             $display("ERROR: write error in port B position %d, where data=%h but data_outB=%h", i,
                      i + seq_ini, data_outB);
-            $fatal;
+            $fatal();
          end
       end
 
@@ -119,7 +119,7 @@ module iob_ram_dp_be_tb;
                $display(
                    "ERROR: read error in port A position %d, where data and data_outA are '%h' but should not be the same",
                    i, data_outA);
-               $fatal;
+               $fatal();
             end
          end
       end
@@ -135,7 +135,7 @@ module iob_ram_dp_be_tb;
             $display(
                 "ERROR: read error in port B position %d, where data and data_outB are '%h' but should not be the same",
                 i, data_outB);
-            $fatal;
+            $fatal();
          end
       end
 
@@ -146,7 +146,7 @@ module iob_ram_dp_be_tb;
       $display("%c[1;34m", 27);
       $display("Test completed successfully.");
       $display("%c[0m", 27);
-      #(5 * clk_per) $finish;
+      #(5 * clk_per) $finish();
 
    end
 

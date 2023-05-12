@@ -101,7 +101,7 @@ module iob_asym_converter_tb;
 
       //wait 5 cycles and finish
       repeat (5) @(posedge clk) #1;
-      $finish;
+      $finish();
    end
 
    // instantiate the Unit Under Test (UUT)

@@ -46,7 +46,7 @@ module iob_rom_sp_tb;
          if (i + seq_ini != r_data) begin
             $display("ERROR: read error in position %d, where expected data=%h but r_data=%h", i,
                      i + seq_ini, r_data);
-            $fatal;
+            $fatal();
          end
       end
 
@@ -57,7 +57,7 @@ module iob_rom_sp_tb;
       $display("%c[1;34m", 27);
       $display("Test completed successfully.");
       $display("%c[0m", 27);
-      #(5 * clk_per) $finish;
+      #(5 * clk_per) $finish();
 
    end
 

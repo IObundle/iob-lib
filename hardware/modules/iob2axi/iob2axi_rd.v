@@ -44,19 +44,19 @@ module iob2axi_rd #(
 
    // Counter, error and ready register signals
    reg [`AXI_LEN_W-1:0] counter, counter_nxt;
-   reg                   error_nxt;
-   reg                   ready_nxt;
+   reg                                                    error_nxt;
+   reg                                                    ready_nxt;
 
-   reg                   m_axi_arvalid_int;
-   reg                   m_axi_rready_int;
+   reg                                                    m_axi_arvalid_int;
+   reg                                                    m_axi_rready_int;
 
    // Control register signals
-   reg  [    ADDR_W-1:0] addr_reg;
-   reg  [`AXI_LEN_W-1:0] length_reg;
+   reg                                   [    ADDR_W-1:0] addr_reg;
+   reg                                   [`AXI_LEN_W-1:0] length_reg;
 
    // Hold
-   reg                   m_valid_reg;
-   wire                  hold = m_valid_reg & ~m_ready_i;
+   reg                                                    m_valid_reg;
+   wire hold = m_valid_reg & ~m_ready_i;
    always @(posedge clk_i, posedge rst_i) begin
       if (rst_i) begin
          m_valid_reg <= 1'b0;
@@ -117,7 +117,7 @@ module iob2axi_rd #(
    end
 
    wire rst_valid_int = (state_nxt == ADDR_HS) ? 1'b1 : 1'b0;
-   reg  arvalid_int;
+   reg                                                        arvalid_int;
 
    always @(posedge clk_i, posedge rst_i) begin
       if (rst_i) begin
