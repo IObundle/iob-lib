@@ -22,11 +22,11 @@ module iob_regfile_dp #(
     output [DATA_W-1 : 0] b_rdata_o
 );
 
-   reg  [DATA_W-1:0] reg_file                                [(2**ADDR_W)-1:0];
+   reg [DATA_W-1:0] reg_file[(2**ADDR_W)-1:0];
 
    wire [ADDR_W-1:0] addr = a_wen_i ? a_addr_i : b_addr_i;
    wire [DATA_W-1:0] wdata = a_wen_i ? a_wdata_i : b_wdata_i;
-   wire              wen = a_wen_i ? a_wen_i : b_wen_i;
+   wire wen = a_wen_i ? a_wen_i : b_wen_i;
 
    //read
    assign a_rdata_o = reg_file[a_addr_i];

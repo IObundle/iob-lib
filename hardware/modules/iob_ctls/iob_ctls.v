@@ -45,7 +45,7 @@ module iob_ctls #(
       count = 0;
 
       for (pos = 0; pos < N; pos = pos + 1)
-      if ((data_int2[pos] == 1'd0) && (count == pos)) count = pos + 1;
+         if ((data_int2[pos] == 1'd0) && (count == pos)) count = pos + 1;
    end
 
    assign count_o = count;

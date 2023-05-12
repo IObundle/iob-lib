@@ -163,7 +163,7 @@ module axis2axi_tb;
 
       repeat (10) @(posedge clk) #1;
 
-      $finish;
+      $finish();
    end
 
    task AxiStreamInRun(input [31:0] address, startValue, runLength);
@@ -191,7 +191,7 @@ module axis2axi_tb;
             if (axis_in_data != i) begin
                $display("Error on run from %h to %h, index: %d", address, address + runLength * 4,
                         i);
-               $fatal;
+               $fatal();
             end
 
             @(posedge clk) #1;
@@ -235,7 +235,7 @@ module axis2axi_tb;
             if (delayed_axis_out_valid) begin
                if (axis_out_data != readIndex) begin
                   //$write("Error on run from %h to %h,index: %d",address,address + runLength * 4,readIndex);
-                  //$fatal;
+                  //$fatal();
                end
                readIndex = readIndex + 1;
 `ifdef AXIS_2_AXI_MANUAL_TB

@@ -57,19 +57,19 @@ module axis2axi_out #(
 
    // Instantiation wires
    wire [AXI_ADDR_W-1:0] current_address, current_length;
-   wire [      1:0] state;
+   wire [1:0] state;
 
    // Logical wires and combinatorial regs
-   wire             doing_global_transfer = (state != 2'h0);
-   wire             doing_local_transfer = (state == 2'h3);
-   wire [     15:0] boundary_transfer_len = (16'h1000 - current_address[11:0]) >> 2;
-   wire             normal_burst_possible = (current_length >= BURST_SIZE);
-   wire             last_burst_possible = (current_length < BURST_SIZE);
+   wire doing_global_transfer = (state != 2'h0);
+   wire doing_local_transfer = (state == 2'h3);
+   wire [15:0] boundary_transfer_len = (16'h1000 - current_address[11:0]) >> 2;
+   wire normal_burst_possible = (current_length >= BURST_SIZE);
+   wire last_burst_possible = (current_length < BURST_SIZE);
 
    wire [BURST_W:0] burst_size;
 
-   reg  [BURST_W:0] non_boundary_burst_size;
-   always @* begin
+   reg [BURST_W:0] non_boundary_burst_size;
+   always_comb begin
       non_boundary_burst_size = 0;
 
       if (last_burst_possible) begin
@@ -81,10 +81,10 @@ module axis2axi_out #(
    generate
       if (AXI_ADDR_W >= 13) begin  // 4k boundary can only happen to LEN higher or equal to 13
 
-         wire [     12:0] boundary_transfer_len = (13'h1000 - current_address[11:0]) >> 2;
+         wire [12:0] boundary_transfer_len = (13'h1000 - current_address[11:0]) >> 2;
 
-         reg  [BURST_W:0] boundary_burst_size;
-         always @* begin
+         reg [BURST_W:0] boundary_burst_size;
+         always_comb begin
             boundary_burst_size = non_boundary_burst_size;
 
             if (non_boundary_burst_size > boundary_transfer_len)
@@ -110,7 +110,7 @@ module axis2axi_out #(
    assign axi_arlen_o        = arlen_int;
    assign axi_arvalid_o      = arvalid_int;
 
-   always @* begin
+   always_comb begin
       state_nxt    = state;
       arvalid_int  = 1'b0;
       next_address = current_address;

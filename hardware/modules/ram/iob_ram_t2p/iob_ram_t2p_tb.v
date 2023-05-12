@@ -66,7 +66,7 @@ module iob_ram_t2p_tb;
          if (r_data != 0) begin
             $display("ERROR: with r_en = 0, at position %0d, r_data should be 0 but is %d", i,
                      r_data);
-            $finish;
+            $finish();
          end
       end
 
@@ -80,7 +80,7 @@ module iob_ram_t2p_tb;
          if (r_data != i + seq_ini) begin
             $display("ERROR: on position %0d, r_data is %d where it should be %0d", i, r_data,
                      i + seq_ini);
-            $finish;
+            $finish();
          end
       end
 
@@ -90,7 +90,7 @@ module iob_ram_t2p_tb;
       $display("%c[1;34m", 27);
       $display("Test completed successfully.");
       $display("%c[0m", 27);
-      $finish;
+      $finish();
    end
 
    // Instantiate the Unit Under Test (UUT)

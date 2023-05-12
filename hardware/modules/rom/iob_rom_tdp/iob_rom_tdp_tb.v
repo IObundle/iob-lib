@@ -60,13 +60,13 @@ module iob_rom_tdp_tb;
             $display(
                 "ERROR: Port A - read error in position %d, where expected data=%h but r_data=%h",
                 i, i + seq_ini, r_data_a);
-            $fatal;
+            $fatal();
          end
          if (seq_ini + 2 ** `ADDR_W - 1 - i != r_data_b) begin
             $display(
                 "ERROR: Port B - read error in position %d, where expected data=%h but r_data=%h",
                 2 ** `ADDR_W - 1 - i, seq_ini + 2 ** `ADDR_W - 1 - i, r_data_b);
-            $fatal;
+            $fatal();
          end
       end
 
@@ -78,7 +78,7 @@ module iob_rom_tdp_tb;
       $display("%c[1;34m", 27);
       $display("Test completed successfully.");
       $display("%c[0m", 27);
-      #(5 * clk_per) $finish;
+      #(5 * clk_per) $finish();
 
    end
 

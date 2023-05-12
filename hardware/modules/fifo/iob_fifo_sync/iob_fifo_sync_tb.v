@@ -165,7 +165,7 @@ module iob_fifo_sync_tb;
       end
       $display("INFO: read proc: data read matches test data as expected");
 
-      #(5 * clk_per) $finish;
+      #(5 * clk_per) $finish();
    end
 
    // Instantiate the Unit Under Test (UUT)

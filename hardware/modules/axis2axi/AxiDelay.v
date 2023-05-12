@@ -20,7 +20,7 @@ module AxiDelay #(
 
    generate
       if (MAX_DELAY == 0) begin
-         always @* begin
+         always_comb begin
             s_ready = m_ready;
             m_valid = s_valid;
          end
@@ -38,7 +38,7 @@ module AxiDelay #(
             end
          end
 
-         always @* begin
+         always_comb begin
             s_ready = 1'b0;
             m_valid = 1'b0;
 

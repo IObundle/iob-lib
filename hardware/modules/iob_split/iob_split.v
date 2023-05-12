@@ -28,15 +28,15 @@ module iob_split #(
 
    //route master request to selected slave
    integer i;
-   always @* begin
+   always_comb begin
       /*
      $display("pslave %d", P_SLAVES+1);
      $display("mreq %x", m_req_i);
      $display("s_sel %x", s_sel);
    */
       for (i = 0; i < N_SLAVES; i = i + 1)
-      if (i == s_sel) s_req_o[`REQ(i)] = m_req_i;
-      else s_req_o[`REQ(i)] = {(`REQ_W) {1'b0}};
+         if (i == s_sel) s_req_o[`REQ(i)] = m_req_i;
+         else s_req_o[`REQ(i)] = {(`REQ_W) {1'b0}};
    end
 
    //
@@ -52,7 +52,7 @@ module iob_split #(
 
    //route
    integer j;
-   always @* begin
+   always_comb begin
       m_resp_o = {`RESP_W{1'b0}};
       for (j = 0; j < N_SLAVES; j = j + 1) if (j == s_sel_reg) m_resp_o = s_resp_i[`RESP(j)];
    end

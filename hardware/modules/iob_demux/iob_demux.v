@@ -11,7 +11,7 @@ module iob_demux #(
 );
 
    //integer i;
-   //always @* begin
+   //always_comb begin
    //    for (i=0; i<N; i=i+1)
    //        if(i == sel_i) begin
    //            data_o[i*DATA_W += DATA_W] = data_i;

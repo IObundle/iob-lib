@@ -132,7 +132,7 @@ module iob2axi_tb;
 
       repeat (10) @(posedge clk) #1;
 
-      $finish;
+      $finish();
    end
 
    iob2axi #(
