@@ -52,7 +52,7 @@ set_goal_option addrules { InstanceNameRequired-ML InterfaceNameConflicts-ML FSM
 ## Ignore Rules
 set_goal_option ignorerules { NoParamMultConcat-ML NonBlockingCounters-ML ValueSizeOverFlow-ML W110a UnInitTopDuParam-ML STARC-1.1.1.8 STARC05-3.1.3.3v STARC-3.1.3.3 RegInName HardConst STARC-3.5.3.1 }
 
-set_parameter line_length_max 300
+set_parameter line_length_max 100
 set_parameter clock_string "/clk_/i or /clk/i"
 set_parameter check_task_ports -default
 set_parameter snake_length 15

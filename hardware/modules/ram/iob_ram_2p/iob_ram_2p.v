@@ -24,9 +24,9 @@ module iob_ram_2p
    localparam mem_init_file_int = HEXFILE;
 
    // Declare the RAM
-   reg [DATA_W-1:0]         mem [(2**ADDR_W)-1:0];
+   reg [DATA_W-1:0]     mem [2**ADDR_W];
 
-   reg [DATA_W-1:0]         r_data;
+   reg [DATA_W-1:0]     r_data;
    // Initialize the RAM
    initial
      if(mem_init_file_int != "none")

@@ -28,22 +28,25 @@ module iob_ctls
       
   // reverse if lading symbols or not
   wire [N-1:0]         data_int2;
-  generate if (MODE == 1)
-  iob_reverse #(N)
-  reverse0
-  (
-    .data_i(data_int1),
-    .data_o(data_int2)
-  );
-  else
-    assign data_int2 = data_int1;   
+  generate 
+     if (MODE == 1) begin: g_reverse
+        iob_reverse #(N)
+        reverse0
+          (
+           .data_i(data_int1),
+           .data_o(data_int2)
+           );
+     end else begin: g_noreverse
+        assign data_int2 = data_int1;
+        assign data_int2 = data_int1; 
+     end
   endgenerate
 
   //normalized to count trailing zeros
   reg [$clog2(N):0] count;
   integer           pos;
   
-  always @* begin
+  always_comb begin
     count = 0;
     
     for (pos=0; pos < N; pos=pos+1)

@@ -109,7 +109,7 @@ module iob_fifo_sync
   );
 
   reg [(ADDR_W+1)-1:0] level_incr;
-  always @* begin
+  always_comb begin
     level_incr = level_int + W_INCR;
     level_nxt = level_int;
     if(w_en_int && (!r_en_int))

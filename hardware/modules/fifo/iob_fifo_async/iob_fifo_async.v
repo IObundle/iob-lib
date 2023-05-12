@@ -76,17 +76,17 @@ module iob_fifo_async
   localparam [ADDR_W-1:0] R_INCR = (R_DATA_W > W_DATA_W) ? 1'b1 << ADDR_W_DIFF : 1'b1 ;
   
   generate
-    if (W_DATA_W > R_DATA_W) begin
+    if (W_DATA_W > R_DATA_W) begin : g_write_wider
         assign w_waddr_bin_n = w_waddr_bin<<ADDR_W_DIFF;
         assign w_raddr_bin_n = w_raddr_bin;
         assign r_raddr_bin_n = r_raddr_bin;
         assign r_waddr_bin_n = r_waddr_bin<<ADDR_W_DIFF;
-    end else if (R_DATA_W > W_DATA_W) begin
+    end else if (R_DATA_W > W_DATA_W) begin : g_read_wider
         assign w_waddr_bin_n = w_waddr_bin;
         assign w_raddr_bin_n = w_raddr_bin<<ADDR_W_DIFF;
         assign r_raddr_bin_n = r_raddr_bin<<ADDR_W_DIFF;
         assign r_waddr_bin_n = r_waddr_bin;
-    end else begin
+    end else begin  : g_write_equals_read
         assign w_raddr_bin_n = w_raddr_bin;
         assign w_waddr_bin_n = w_waddr_bin;
         assign r_waddr_bin_n = r_waddr_bin;

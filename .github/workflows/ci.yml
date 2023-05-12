@@ -33,4 +33,4 @@ jobs:
         with:
           submodules: 'recursive'
       - name: test memory modules
-        run: ./scripts/test.sh
+        run: nix-shell --run "./scripts/test.sh"
