@@ -25,26 +25,22 @@ on:
 
 jobs:
   python-black-check:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
-      - name: Install python dependencies
-        run: make format-install-python
       - name: Python black check
-        run: ./scripts/black_format.py --check
+        run: nix-shell --run "./scripts/black_format.py --check"
   clang-format-check:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
-      - name: Install llvm / clang
-        run: ./scripts/clang_install.py
       - name: Clang Format check
-        run: ./scripts/clang_format.py --check
+        run: nix-shell --run "./scripts/clang_format.py --check"
