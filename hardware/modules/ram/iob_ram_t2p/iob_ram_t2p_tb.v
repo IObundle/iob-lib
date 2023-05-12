@@ -6,32 +6,32 @@
 module iob_ram_t2p_tb;
 
    // Inputs
-   reg w_clk;
-   reg r_clk;
+   reg                w_clk;
+   reg                r_clk;
 
    // Write signals
-   reg w_en;
-   reg [`DATA_W-1:0] w_data;
-   reg [`ADDR_W-1:0] w_addr;
+   reg                w_en;
+   reg  [`DATA_W-1:0] w_data;
+   reg  [`ADDR_W-1:0] w_addr;
 
 
    // Read signals
-   reg               r_en;
-   reg [`ADDR_W-1:0] r_addr;
+   reg                r_en;
+   reg  [`ADDR_W-1:0] r_addr;
    wire [`DATA_W-1:0] r_data;
 
-   integer            i, seq_ini;
+   integer i, seq_ini;
 
-   parameter clk_per = 10; // clk period = 10 timeticks
+   parameter clk_per = 10;  // clk period = 10 timeticks
 
    initial begin
-      w_clk = 1;
-      r_clk = 1;
-      r_en = 0;
-      w_en = 0;
-      r_addr = 0;
-      w_addr = 0;
-      w_data = 0;
+      w_clk   = 1;
+      r_clk   = 1;
+      r_en    = 0;
+      w_en    = 0;
+      r_addr  = 0;
+      w_addr  = 0;
+      w_data  = 0;
 
       // Number from which to start the incremental sequence to write into the RAM
       seq_ini = 32;
@@ -47,8 +47,8 @@ module iob_ram_t2p_tb;
       w_en = 1;
 
       // Write all the locations of RAM
-      for(i = 0; i < 2**`ADDR_W; i = i + 1) begin
-         w_data = i+seq_ini;
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
+         w_data = i + seq_ini;
          w_addr = i;
          @(posedge w_clk) #1;
       end
@@ -60,11 +60,12 @@ module iob_ram_t2p_tb;
       r_en = 0;
       @(posedge r_clk) #1;
 
-      for(i = 0; i < 2**`ADDR_W; i = i + 1) begin
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
          r_addr = i;
          @(posedge r_clk) #1;
-         if(r_data != 0) begin
-            $display("ERROR: with r_en = 0, at position %0d, r_data should be 0 but is %d", i, r_data);
+         if (r_data != 0) begin
+            $display("ERROR: with r_en = 0, at position %0d, r_data should be 0 but is %d", i,
+                     r_data);
             $finish;
          end
       end
@@ -73,45 +74,43 @@ module iob_ram_t2p_tb;
       @(posedge r_clk) #1;
 
       // Read all the locations of RAM with r_en = 1
-      for(i = 0; i < 2**`ADDR_W; i = i + 1) begin
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
          r_addr = i;
          @(posedge r_clk) #1;
-         if(r_data != i+seq_ini) begin
-            $display("ERROR: on position %0d, r_data is %d where it should be %0d", i, r_data, i+seq_ini);
+         if (r_data != i + seq_ini) begin
+            $display("ERROR: on position %0d, r_data is %d where it should be %0d", i, r_data,
+                     i + seq_ini);
             $finish;
          end
       end
 
       r_en = 0;
 
-      #(5*clk_per);
-      $display("%c[1;34m",27);
+      #(5 * clk_per);
+      $display("%c[1;34m", 27);
       $display("Test completed successfully.");
-      $display("%c[0m",27);
+      $display("%c[0m", 27);
       $finish;
    end
 
    // Instantiate the Unit Under Test (UUT)
-   iob_ram_t2p
-     #(
+   iob_ram_t2p #(
        .DATA_W(`DATA_W),
        .ADDR_W(`ADDR_W)
-       )
-   uut
-     (
-      .w_clk_i  (w_clk),
-      .w_en_i   (w_en),
-      .w_addr_i (w_addr),
-      .w_data_i (w_data),
+   ) uut (
+      .w_clk_i (w_clk),
+      .w_en_i  (w_en),
+      .w_addr_i(w_addr),
+      .w_data_i(w_data),
 
-      .r_clk_i  (r_clk),
-      .r_en_i   (r_en),
-      .r_addr_i (r_addr),
-      .r_data_o (r_data)
-      );
+      .r_clk_i (r_clk),
+      .r_en_i  (r_en),
+      .r_addr_i(r_addr),
+      .r_data_o(r_data)
+   );
 
    // Clock
-   always #(clk_per/2) w_clk = ~w_clk;
-   always #(clk_per/2) r_clk = ~r_clk;
+   always #(clk_per / 2) w_clk = ~w_clk;
+   always #(clk_per / 2) r_clk = ~r_clk;
 
 endmodule

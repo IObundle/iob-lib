@@ -134,11 +134,13 @@ format-check:
 	@./scripts/black_format.py --check
 	@./scripts/clang_format.py --check
 
+IOB_LIB_PATH=$(LIB_DIR)/scripts
+
 verilog-lint:
-	verible-verilog-lint --rules_config $(LIB_DIR)/scripts/verible-lint.rules  `find ./hardware -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
+	$(IOB_LIB_PATH)/verilog-lint.sh `find hardware -type f -name "*.v"  | tr '\n' ' '`
 
 verilog-format:
-	verible-verilog-format --inplace `find  ./hardware -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*_tb.v" | tr '\n' ' '`
+	$(IOB_LIB_PATH)/verilog-format.sh `find  hardware -type f -name "*.v"| tr '\n' ' '`
 
 clean:
 	@rm -rf $(BUILD_VSRC_DIR)
