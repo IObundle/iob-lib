@@ -26,7 +26,6 @@ module iob_iob2wishbone #(
     output wire                wb_stb_o,
     output wire [DATA_W-1:0]   wb_data_o,
     input  wire                wb_ack_i,
-    input  wire                wb_error_i,
     input  wire [DATA_W-1:0]   wb_data_i
 );
     
@@ -35,6 +34,8 @@ module iob_iob2wishbone #(
     // IOb auxiliar wires
     wire [ADDR_W-1:0]   address_r;
     wire [DATA_W-1:0]   wdata_r;
+    wire                rvalid;
+    wire                rvalid_r;  
     wire                ready;
     wire                ready_r;
     // Wishbone auxiliar wire
@@ -60,12 +61,14 @@ module iob_iob2wishbone #(
     iob_reg_re #(DATA_W,0) iob_reg_iob_data (clk_i, arst_i, cke_i, 1'b0, iob_avalid_i, iob_wdata_i, wdata_r);
     iob_reg_re #(DATA_W/8,0) iob_reg_strb (clk_i, arst_i, cke_i, 1'b0, iob_avalid_i, wb_select, wb_select_r);
 
-    assign iob_rvalid_o = 1'b1; // This has to be verified and very probably fixed :)
-    assign iob_rdata_o = ready? wb_data_i:wb_data_r;
+    assign iob_rvalid_o = rvalid_r; // This has to be verified and very probably fixed :)
+    assign rvalid = (~iob_avalid_i)|(wb_ack_i);
+    assign iob_rdata_o = wb_data_r;
     assign iob_ready_o = ready_r;
-    assign ready = wb_ack_i|wb_error_i;
+    assign ready = (wb_ack_i)&(~wb_we);
+    iob_reg_re #(1,0) iob_reg_rvalid (clk_i, arst_i, cke_i, 1'b0, 1'b1, rvalid, rvalid_r);
     iob_reg_re #(1,0) iob_reg_ready (clk_i, arst_i, cke_i, 1'b0, 1'b1, ready, ready_r);
-    iob_reg_re #(DATA_W,0) iob_reg_wb_data (clk_i, arst_i, cke_i, 1'b0, ready, wb_data_i, wb_data_r);
+    iob_reg_re #(DATA_W,0) iob_reg_wb_data (clk_i, arst_i, cke_i, 1'b0, 1'b1, wb_data_i, wb_data_r);
     
 
 endmodule
