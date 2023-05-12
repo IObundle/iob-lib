@@ -96,9 +96,9 @@ module axis2axi_in #(
    generate
       if (AXI_ADDR_W >= 13) begin  // 4k boundary can only happen to LEN higher or equal to 13
 
-         wire [     12:0] boundary_transfer_len = (13'h1000 - current_address[11:0]) >> 2;
+         wire [12:0] boundary_transfer_len = (13'h1000 - current_address[11:0]) >> 2;
 
-         reg  [BURST_W:0] boundary_burst_size;
+         reg [BURST_W:0] boundary_burst_size;
          always @* begin
             boundary_burst_size = non_boundary_burst_size;
 

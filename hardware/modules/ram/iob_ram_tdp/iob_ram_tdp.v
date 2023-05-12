@@ -40,9 +40,9 @@ module iob_ram_tdp
       if (enA_i)
         if (weA_i)
 	        ram[addrA_i] <= dA_i;
-      `ifdef IOB_MEM_NO_READ_ON_WRITE
+`ifdef IOB_MEM_NO_READ_ON_WRITE
         else
-      `endif
+`endif
       dA_o <= ram[addrA_i];
     end
 
