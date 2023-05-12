@@ -229,7 +229,7 @@ module iob2axi #(
       end
    end
 
-   always @* begin
+   always_comb begin
       addr_int_next = minAddr + 1'b1;
 
       if (minAddr == addr4k) begin

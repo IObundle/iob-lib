@@ -1,4 +1,4 @@
-`define IOB_COMB always @*
+`define IOB_COMB always_comb
 
 //IO
 `define IOB_INPUT(NAME, WIDTH) input [WIDTH-1:0] NAME
