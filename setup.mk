@@ -54,15 +54,15 @@ verilog-format:
 	# Run formatter on all verilog files of setup directory
 	verible-verilog-format --inplace `find  hardware -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*_tb.v" | tr '\n' ' '`
 	# Run formatter on all verilog files of build directory (includes generated files)
-	verible-verilog-format --inplace `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) -not "*_tb.v" -not "*_swreg_gen.v" | tr '\n' ' '`
+	verible-verilog-format --inplace `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*test_*.vh" | tr '\n' ' '`
 
-verilog-format-check:
+verilog-lint:
 	# Run linter on all verilog files of setup directory
-	verible-verilog-lint `find hardware -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*/submodules/*" | tr '\n' ' '`
+	verible-verilog-lint --rules_config $(LIB_DIR)/scripts/verible-lint.rules  `find hardware -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
 	# Run linter on all verilog files of build directory (includes generated files)
-	verible-verilog-lint `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) | tr '\n' ' '`
+	verible-verilog-lint  --rules_config $(LIB_DIR)/scripts/verible-lint.rules `find $(BUILD_DIR) -type f \( -name "*.v" -o -name "*.vh" \) -not -path "*version.vh" -not -path  "*test_*.vh"| tr '\n' ' '`
 
-format-check-all: python-format-check c-format-check verilog-format-check
+format-check-all: $(BUILD_DIR) python-format-check c-format-check verilog-lint verilog-format
 
 setup: debug
 
@@ -74,26 +74,6 @@ $(BUILD_DIR):
 #
 
 ifneq ($(wildcard document),)
-
-#include local fpga makefile segment
-ifneq ($(wildcard document/doc_setup.mk),)
-include document/doc_setup.mk
-endif
-
-#copy lib tex files if not present
-SRC+=$(patsubst $(LIB_DIR)/document/tsrc/%, $(BUILD_TSRC_DIR)/%, $(wildcard $(LIB_DIR)/document/tsrc/*))
-$(BUILD_TSRC_DIR)/%: $(LIB_DIR)/document/tsrc/%
-	if [ ! -f $@ ]; then cp $< $@; fi
-
-#copy figures from LIB
-SRC+=$(patsubst $(LIB_DIR)/document/figures/%, $(BUILD_FIG_DIR)/%, $(wildcard $(LIB_DIR)/document/figures/*))
-$(BUILD_FIG_DIR)/%: $(LIB_DIR)/document/figures/%
-	cp $< $@
-
-#copy document Makefile
-SRC+=$(BUILD_DOC_DIR)/Makefile
-$(BUILD_DOC_DIR)/Makefile: $(LIB_DIR)/document/Makefile
-	cp $< $@
 
 ifeq ($(INTEL_FPGA),1)
 SRC+=$(BUILD_DIR)/doc/quartus.tex

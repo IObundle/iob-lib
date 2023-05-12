@@ -50,6 +50,8 @@ def replace_includes_in_code(code, files, replace_all=False):
                 )
             continue
 
+        if DEBUG:
+            print(f"{iob_colors.INFO}Including file '{filename}'{iob_colors.ENDC}")
         # Include verilog header contents in the new_lines list
         # Note: it will only include the contents of the first file found with this name.
         with open(files[filename][0] + "/" + filename, "r") as f:

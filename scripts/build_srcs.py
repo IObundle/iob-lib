@@ -1,4 +1,6 @@
-import os, sys, re
+import os
+import sys
+import re
 import subprocess
 from pathlib import Path
 import shutil
@@ -113,15 +115,6 @@ def hw_setup(python_module):
                 os.remove(f"{build_dir}/hardware/simulation/src/{file}")
             if os.path.isfile(f"{build_dir}/hardware/fpga/src/{file}"):
                 os.remove(f"{build_dir}/hardware/fpga/src/{file}")
-
-    # Copy LIB header files (all .vh files under LIB/hardware/src)
-    copy_files(
-        f"{LIB_DIR}/hardware/modules",
-        f"{build_dir}/hardware/src",
-        [],
-        "*.vh",
-        copy_all=True,
-    )
 
 
 # Setup simulation related files/modules
@@ -424,8 +417,40 @@ def doc_setup(python_module):
     if "doc" in core_flows:
         shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")
 
+    # Copy LIB tex files if not present
+    for file in os.listdir(f"{LIB_DIR}/document/tsrc"):
+        copy_without_override(
+            f"{LIB_DIR}/document/tsrc/{file}", f"{build_dir}/document/tsrc/{file}"
+        )
+
+    # Copy LIB figures
+    for file in os.listdir(f"{LIB_DIR}/document/figures"):
+        copy_without_override(
+            f"{LIB_DIR}/document/figures/{file}", f"{build_dir}/document/figures/{file}"
+        )
+
+    # Copy document Makefile
+    shutil.copy2(f"{LIB_DIR}/document/Makefile", f"{build_dir}/document/Makefile")
+
     # General documentation
     write_git_revision_short_hash(f"{build_dir}/document/tsrc")
+
+    # Run doc_setup.py
+    get_module_function(
+        os.path.join(python_module.setup_dir, "document/doc_setup.py"),
+        setup_module=python_module,
+    )()
+
+    # Future improvement: Add doc_setup.py to a doc_setup list, similar to the other processes (sim_setup, hw_setup, ...)
+    # add_setup_functions(python_module, "doc_setup", setup_module=python_module)
+    # module_dependency_setup(
+    #    doc_srcs,
+    #    Vheaders,
+    #    build_dir,
+    #    submodule_dirs,
+    #    function_2_call="setup.build_srcs.doc_setup",
+    #    lib_dir=LIB_DIR,
+    # )
 
 
 def write_git_revision_short_hash(dst_dir):
