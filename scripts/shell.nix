@@ -18,5 +18,6 @@ pkgs.mkShell {
     black
     llvmPackages_14.clangUseLLVM
     inkscape
+    libreoffice
   ];
 }

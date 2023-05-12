@@ -71,7 +71,7 @@ module decN #(
     output reg [        N_OUTPUTS-1:0] dec_o
 );
 
-   always @* begin
+   always_comb begin
       dec_o        = 0;
       dec_o[dec_i] = 1'b1;
    end
@@ -92,7 +92,7 @@ module muxN #(
     output reg [INPUT_W-1:0] data_o  // output port
 );
 
-   always @* begin
+   always_comb begin
       data_o = data_i[sel_i];
    end
 endmodule

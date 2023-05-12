@@ -69,7 +69,7 @@ module axis2axi_out #(
    wire [BURST_W:0] burst_size;
 
    reg [BURST_W:0] non_boundary_burst_size;
-   always @* begin
+   always_comb begin
       non_boundary_burst_size = 0;
 
       if (last_burst_possible) begin
@@ -84,7 +84,7 @@ module axis2axi_out #(
          wire [12:0] boundary_transfer_len = (13'h1000 - current_address[11:0]) >> 2;
 
          reg [BURST_W:0] boundary_burst_size;
-         always @* begin
+         always_comb begin
             boundary_burst_size = non_boundary_burst_size;
 
             if (non_boundary_burst_size > boundary_transfer_len)
@@ -110,7 +110,7 @@ module axis2axi_out #(
    assign axi_arlen_o        = arlen_int;
    assign axi_arvalid_o      = arvalid_int;
 
-   always @* begin
+   always_comb begin
       state_nxt    = state;
       arvalid_int  = 1'b0;
       next_address = current_address;

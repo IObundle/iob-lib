@@ -13,12 +13,12 @@ module iob_prio_enc #(
    integer pos;
    generate
       if (PRIO == "LOWEST") begin
-         always @* begin
+         always_comb begin
             encoded_o = {($clog2(WIDTH) + 1) {1'd0}};  //In case input is 0
             for (pos = WIDTH - 1; pos != -1; pos = pos - 1) if (unencoded_i[pos]) encoded_o = pos;
          end
       end else begin  //PRIO == "HIGHEST"
-         always @* begin
+         always_comb begin
             encoded_o = WIDTH;  //In case input is 0
             for (pos = 0; pos != WIDTH; pos = pos + 1) if (unencoded_i[pos]) encoded_o = pos;
          end
