@@ -56,39 +56,51 @@ module iob_iob2wishbone #(
   assign wb_select = wb_we ? iob_wstrb_i : (RB_MASK) << (iob_addr_i[1:0]);
   assign wb_we = |iob_wstrb_i;
 
-  iob_reg_re #(1, 0) iob_reg_we (
-      .clk_i(clk_i),
+  iob_reg_re #(
+      .DATA_W (1),
+      .RST_VAL(0)
+  ) iob_reg_we (
+      .clk_i (clk_i),
       .arst_i(arst_i),
-      .cke_i(cke_i),
-      .rst_i(1'b0),
-      .en_i(iob_avalid_i),
+      .cke_i (cke_i),
+      .rst_i (1'b0),
+      .en_i  (iob_avalid_i),
       .data_i(wb_we),
       .data_o(wb_we_r)
   );
-  iob_reg_re #(ADDR_W, 0) iob_reg_addr (
-      .clk_i(clk_i),
+  iob_reg_re #(
+      .DATA_W (ADDR_W),
+      .RST_VAL(0)
+  ) iob_reg_addr (
+      .clk_i (clk_i),
       .arst_i(arst_i),
-      .cke_i(cke_i),
-      .rst_i(1'b0),
-      .en_i(iob_avalid_i),
+      .cke_i (cke_i),
+      .rst_i (1'b0),
+      .en_i  (iob_avalid_i),
       .data_i(iob_addr_i),
       .data_o(address_r)
   );
-  iob_reg_re #(DATA_W, 0) iob_reg_iob_data (
-      .clk_i(clk_i),
+  iob_reg_re #(
+      .DATA_W (DATA_W),
+      .RST_VAL(0)
+  ) iob_reg_iob_data (
+      .clk_i (clk_i),
       .arst_i(arst_i),
-      .cke_i(cke_i),
-      .rst_i(1'b0),
-      .en_i(iob_avalid_i),
+      .cke_i (cke_i),
+      .rst_i (1'b0),
+      .en_i  (iob_avalid_i),
       .data_i(iob_wdata_i),
       .data_o(wdata_r)
   );
-  iob_reg_re #(DATA_W / 8, 0) iob_reg_strb (
-      .clk_i(clk_i),
+  iob_reg_re #(
+      .DATA_W (DATA_W / 8),
+      .RST_VAL(0)
+  ) iob_reg_strb (
+      .clk_i (clk_i),
       .arst_i(arst_i),
-      .cke_i(cke_i),
-      .rst_i(1'b0),
-      .en_i(iob_avalid_i),
+      .cke_i (cke_i),
+      .rst_i (1'b0),
+      .en_i  (iob_avalid_i),
       .data_i(wb_select),
       .data_o(wb_select_r)
   );
@@ -98,30 +110,39 @@ module iob_iob2wishbone #(
   assign iob_rdata_o = wb_data_r;
   assign iob_ready_o = ready_r;
   assign ready = (wb_ack_i) & (~wb_we);
-  iob_reg_re #(1, 0) iob_reg_rvalid (
-      .clk_i(clk_i),
+  iob_reg_re #(
+      .DATA_W (1),
+      .RST_VAL(0)
+  ) iob_reg_rvalid (
+      .clk_i (clk_i),
       .arst_i(arst_i),
-      .cke_i(cke_i),
-      .rst_i(1'b0),
-      .en_i(1'b1),
+      .cke_i (cke_i),
+      .rst_i (1'b0),
+      .en_i  (1'b1),
       .data_i(rvalid),
       .data_o(rvalid_r)
   );
-  iob_reg_re #(1, 0) iob_reg_ready (
-      .clk_i(clk_i),
+  iob_reg_re #(
+      .DATA_W (1),
+      .RST_VAL(0)
+  ) iob_reg_ready (
+      .clk_i (clk_i),
       .arst_i(arst_i),
-      .cke_i(cke_i),
-      .rst_i(1'b0),
-      .en_i(1'b1),
+      .cke_i (cke_i),
+      .rst_i (1'b0),
+      .en_i  (1'b1),
       .data_i(ready),
       .data_o(ready_r)
   );
-  iob_reg_re #(DATA_W, 0) iob_reg_wb_data (
-      .clk_i(clk_i),
+  iob_reg_re #(
+      .DATA_W (DATA_W),
+      .RST_VAL(0)
+  ) iob_reg_wb_data (
+      .clk_i (clk_i),
       .arst_i(arst_i),
-      .cke_i(cke_i),
-      .rst_i(1'b0),
-      .en_i(1'b1),
+      .cke_i (cke_i),
+      .rst_i (1'b0),
+      .en_i  (1'b1),
       .data_i(wb_data_i),
       .data_o(wb_data_r)
   );

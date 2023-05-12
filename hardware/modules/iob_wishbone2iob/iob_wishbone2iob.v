@@ -46,12 +46,15 @@ module iob_wishbone2iob #(
 
   assign avalid = wb_stb_i & wb_cyc_i;
   assign wstrb = wb_we_i ? wb_select_i : 4'h0;
-  iob_reg_re #(1, 0) iob_reg_avalid (
-      .clk_i(clk_i),
+  iob_reg_re #(
+      .DATA_W (1),
+      .RST_VAL(0)
+  ) iob_reg_avalid (
+      .clk_i (clk_i),
       .arst_i(arst_i),
-      .cke_i(cke_i),
-      .rst_i(1'b0),
-      .en_i(1'b1),
+      .cke_i (cke_i),
+      .rst_i (1'b0),
+      .en_i  (1'b1),
       .data_i(iob_avalid_o),
       .data_o(avalid_r)
   );
