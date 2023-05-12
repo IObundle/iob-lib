@@ -17,5 +17,4 @@
 --port_declarations_right_align_packed_dimensions=true
 --port_declarations_right_align_unpacked_dimensions=true
 --struct_union_members_alignment=align
---try_wrap_long_lines=true
 --indentation_spaces=3
