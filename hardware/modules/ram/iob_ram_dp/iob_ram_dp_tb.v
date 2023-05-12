@@ -73,7 +73,7 @@ module iob_ram_dp_tb;
          if (i + seq_ini != q_a) begin
             $display("ERROR: write error in port A position %d, where data=%h but q_a=%h", i,
                      i + seq_ini, q_a);
-            $fatal;
+            $fatal();
          end
       end
 
@@ -103,7 +103,7 @@ module iob_ram_dp_tb;
          if (i + seq_ini != q_b) begin
             $display("ERROR: write error in port B position %d, where data=%h but q_b=%h", i,
                      i + seq_ini, q_b);
-            $fatal;
+            $fatal();
          end
       end
 
@@ -115,7 +115,7 @@ module iob_ram_dp_tb;
       $display("%c[1;34m", 27);
       $display("Test completed successfully.");
       $display("%c[0m", 27);
-      #(5 * clk_per) $finish;
+      #(5 * clk_per) $finish();
 
    end
 

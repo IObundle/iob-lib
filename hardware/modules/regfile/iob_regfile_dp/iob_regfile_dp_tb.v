@@ -61,7 +61,7 @@ module iob_regfile_dp_tb;
          @(posedge clk) #1;
          if (rdataA != i + seq_ini) begin
             $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataA);
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -76,7 +76,7 @@ module iob_regfile_dp_tb;
          @(posedge clk) #1;
          if (rdataA != i + seq_ini) begin
             $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataA);
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -93,7 +93,7 @@ module iob_regfile_dp_tb;
          @(posedge clk) #1;
          if (rdataA != 0) begin
             $display("ERROR: rdata is not null");
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -111,7 +111,7 @@ module iob_regfile_dp_tb;
          @(posedge clk) #1;
          if (rdataB != i + seq_ini) begin
             $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataB);
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -126,7 +126,7 @@ module iob_regfile_dp_tb;
          @(posedge clk) #1;
          if (rdataB != i + seq_ini) begin
             $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataB);
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -143,7 +143,7 @@ module iob_regfile_dp_tb;
          @(posedge clk) #1;
          if (rdataB != 0) begin
             $display("ERROR: rdata is not null");
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -152,7 +152,7 @@ module iob_regfile_dp_tb;
       $display("%c[1;34m", 27);
       $display("Test completed successfully.");
       $display("%c[0m", 27);
-      #(5 * clk_per) $finish;
+      #(5 * clk_per) $finish();
    end
 
    // Instantiate the Unit Under Test (UUT)

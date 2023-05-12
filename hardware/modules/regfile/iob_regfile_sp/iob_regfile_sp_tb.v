@@ -52,7 +52,7 @@ module iob_regfile_sp_tb;
          @(posedge clk) #1;
          if (r_data != i + seq_ini) begin
             $display("ERROR: read error in r_data.\n \t data=%0d; r_data=%0d", i + seq_ini, r_data);
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -67,7 +67,7 @@ module iob_regfile_sp_tb;
          @(posedge clk) #1;
          if (r_data != i + seq_ini) begin
             $display("ERROR: read error in r_data.\n \t data=%0d; r_data=%0d", i + seq_ini, r_data);
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -84,7 +84,7 @@ module iob_regfile_sp_tb;
          @(posedge clk) #1;
          if (r_data != 0) begin
             $display("ERROR: r_data is not null");
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -93,7 +93,7 @@ module iob_regfile_sp_tb;
       $display("%c[1;34m", 27);
       $display("Test completed successfully.");
       $display("%c[0m", 27);
-      #(5 * clk_per) $finish;
+      #(5 * clk_per) $finish();
    end
 
    // Instantiate the Unit Under Test (UUT)
