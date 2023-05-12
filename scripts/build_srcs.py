@@ -16,12 +16,6 @@ import mk_configuration as mk_conf
 LIB_DIR = "submodules/LIB"
 
 
-# Copy a file if destination does not exist
-def copy_without_override(src, dst):
-    if not os.path.isfile(dst):
-        shutil.copy2(src, dst)
-
-
 # This function sets up the flows for this core
 def flows_setup(python_module):
     core_flows = python_module.flows
@@ -43,7 +37,7 @@ def flows_setup(python_module):
         syn_setup(python_module)
 
     # Setup software
-    if 'sw' in core_flows:
+    if 'emb' in core_flows:
         sw_setup(python_module)
 
     # Setup documentation
@@ -152,7 +146,6 @@ def sim_setup(python_module):
         f"{setup_dir}/{sim_dir}",
         f"{build_dir}/{sim_dir}",
         dirs_exist_ok=True,
-        copy_function=copy_without_override,
         ignore=shutil.ignore_patterns("*_setup*"),
     )
 
@@ -180,7 +173,6 @@ def sim_setup(python_module):
             f"{LIB_DIR}/{sim_dir}",
             f"{build_dir}/{sim_dir}",
             dirs_exist_ok=True,
-            copy_function=copy_without_override,
             ignore=shutil.ignore_patterns("*.pdf"),
         )
 
@@ -213,7 +205,6 @@ def fpga_setup(python_module):
             f"{setup_dir}/{fpga_dir}",
             f"{build_dir}/{fpga_dir}",
             dirs_exist_ok=True,
-            copy_function=copy_without_override,
             ignore=shutil.ignore_patterns("*_setup*"),
         )
 
@@ -242,7 +233,6 @@ def fpga_setup(python_module):
             f"{LIB_DIR}/{fpga_dir}",
             f"{build_dir}/{fpga_dir}",
             dirs_exist_ok=True,
-            copy_function=copy_without_override,
             ignore=shutil.ignore_patterns("*.pdf"),
         )
 
@@ -364,7 +354,6 @@ def sw_setup(python_module):
             f"{setup_dir}/software",
             f"{build_dir}/software",
             dirs_exist_ok=True,
-            copy_function=copy_without_override,
             ignore=shutil.ignore_patterns("*_setup*"),
         )
 
@@ -374,7 +363,7 @@ def sw_setup(python_module):
     func_and_include_setup(
         sw_srcs,
         sw_headers,
-        function_2_call="sw",
+        flow="sw",
         lib_dir=LIB_DIR,
     )
 
@@ -424,12 +413,12 @@ def doc_setup(python_module):
 
     # Copy LIB tex files if not present
     for file in os.listdir(f"{LIB_DIR}/document/tsrc"):
-        copy_without_override(
+        shutil.copy2(
             f"{LIB_DIR}/document/tsrc/{file}", f"{build_dir}/document/tsrc/{file}")
 
     # Copy LIB figures
     for file in os.listdir(f"{LIB_DIR}/document/figures"):
-        copy_without_override(
+        shutil.copy2(
             f"{LIB_DIR}/document/figures/{file}", f"{build_dir}/document/figures/{file}")
 
     # Copy document Makefile
