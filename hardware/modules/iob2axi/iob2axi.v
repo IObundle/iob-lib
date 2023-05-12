@@ -57,17 +57,17 @@ module iob2axi #(
    //
    // Input FIFO
    //
-   wire                       in_fifo_full;
-   wire                       in_fifo_wr = s_valid_i & |s_wstrb_i & ~in_fifo_full;
+   wire in_fifo_full;
+   wire in_fifo_wr = s_valid_i & |s_wstrb_i & ~in_fifo_full;
    wire [DATA_W+DATA_W/8-1:0] in_fifo_wdata = {s_wdata_i, s_wstrb_i};
 
-   wire                       in_fifo_empty;
-   wire                       in_fifo_rd = wr_valid;
+   wire in_fifo_empty;
+   wire in_fifo_rd = wr_valid;
    wire [DATA_W+DATA_W/8-1:0] in_fifo_rdata;
 
-   wire [       `AXI_LEN_W:0] in_fifo_level;
+   wire [`AXI_LEN_W:0] in_fifo_level;
 
-   reg                        in_fifo_empty_reg;
+   reg in_fifo_empty_reg;
    always @(posedge clk_i, posedge rst_i) begin
       if (rst_i) begin
          in_fifo_empty_reg <= 1'b1;
@@ -121,18 +121,18 @@ module iob2axi #(
    //
    // Output FIFO
    //
-   wire                out_fifo_full;
-   wire                out_fifo_wr = rd_valid & |rd_wstrb & ~out_fifo_full;
-   wire [  DATA_W-1:0] out_fifo_wdata = rd_wdata;
+   wire out_fifo_full;
+   wire out_fifo_wr = rd_valid & |rd_wstrb & ~out_fifo_full;
+   wire [DATA_W-1:0] out_fifo_wdata = rd_wdata;
 
-   wire                out_fifo_empty;
-   wire                out_fifo_rd = s_valid_i & ~|s_wstrb_i & ~out_fifo_empty;
-   wire [  DATA_W-1:0] out_fifo_rdata;
+   wire out_fifo_empty;
+   wire out_fifo_rd = s_valid_i & ~|s_wstrb_i & ~out_fifo_empty;
+   wire [DATA_W-1:0] out_fifo_rdata;
 
    wire [`AXI_LEN_W:0] out_fifo_level;
    wire [`AXI_LEN_W:0] out_fifo_capacity = {1'b1, `AXI_LEN_W'd0} - out_fifo_level;
 
-   reg                 out_fifo_empty_reg;
+   reg out_fifo_empty_reg;
    always @(posedge clk_i, posedge rst_i) begin
       if (rst_i) begin
          out_fifo_empty_reg <= 1'b1;
@@ -185,10 +185,10 @@ module iob2axi #(
    //
    // Compute next run
    //
-   wire [  `AXI_LEN_W:0] length_int = direction ? in_fifo_level : out_fifo_capacity;
+   wire [`AXI_LEN_W:0] length_int = direction ? in_fifo_level : out_fifo_capacity;
 
-   reg  [`AXI_LEN_W-1:0] count;
-   wire                  count_en = ~&count & |length_int;
+   reg [`AXI_LEN_W-1:0] count;
+   wire count_en = ~&count & |length_int;
 
    assign run_int   = ready_int & |length_int & (length_int[`AXI_LEN_W] | &count);
    assign run_wr    = direction ? run_int : 1'b0;
@@ -211,13 +211,13 @@ module iob2axi #(
    //
    localparam WADDR_W = ADDR_W - $clog2(DATA_W / 8);  // Word address width
 
-   reg  [`AXI_LEN_W-1:0] length_burst;
+   reg [`AXI_LEN_W-1:0] length_burst;
 
-   reg  [    ADDR_W-1:0] addr_int;
-   reg  [   WADDR_W-1:0] addr_int_next;
-   wire [   WADDR_W-1:0] addr4k = {addr_int[ADDR_W-1:12], {(12 - (ADDR_W - WADDR_W)) {1'b1}}};
-   wire [   WADDR_W-1:0] addrRem = addr_int[ADDR_W-1-:WADDR_W] + length_int - 1'b1;
-   wire [   WADDR_W-1:0] minAddr = `IOB_MIN(addr4k, addrRem);
+   reg [ADDR_W-1:0] addr_int;
+   reg [WADDR_W-1:0] addr_int_next;
+   wire [WADDR_W-1:0] addr4k = {addr_int[ADDR_W-1:12], {(12 - (ADDR_W - WADDR_W)) {1'b1}}};
+   wire [WADDR_W-1:0] addrRem = addr_int[ADDR_W-1-:WADDR_W] + length_int - 1'b1;
+   wire [WADDR_W-1:0] minAddr = `IOB_MIN(addr4k, addrRem);
 
    always @(posedge clk_i, posedge rst_i) begin
       if (rst_i) begin
