@@ -677,6 +677,8 @@ def copy_files(src_dir, dest_dir, sources=[], pattern="*", copy_all=False):
                     print(
                         f"{iob_colors.WARNING}{src_file} is not a file.{iob_colors.ENDC}"
                     )
+                else:
+                    print(f"{iob_colors.ERROR}UNknown.{iob_colors.ENDC}")
     else:
         print(
             f"{iob_colors.WARNING}'copy_files' function did nothing.{iob_colors.ENDC}"
