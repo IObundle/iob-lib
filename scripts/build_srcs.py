@@ -45,7 +45,8 @@ def build_dir_setup(python_module):
     sw_setup(python_module)
 
     # Setup DOC directories :
-    doc_setup(python_module)
+    if "doc" in core_flows:
+        doc_setup(python_module)
     # Setup DELIVERY directories :
     # (WIP)
     # Copy generic MAKEFILE
