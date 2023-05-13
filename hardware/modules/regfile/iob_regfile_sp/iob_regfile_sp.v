@@ -23,8 +23,10 @@ module iob_regfile_sp #(
    generate
       for (addr = 0; addr < (2 ** ADDR_W); addr = addr + 1) begin : register_file
          always @(posedge clk_i)
-            if (rst_i) reg_file[addr] <= {DATA_W{1'b0}};
-            else if (we_i && (addr_i == addr)) reg_file[addr] <= w_data_i;
+            if (rst_i) 
+              reg_file[addr] <= {DATA_W{1'b0}};
+            else if (we_i && (addr_i == addr)) 
+              reg_file[addr] <= w_data_i;
       end
    endgenerate
 

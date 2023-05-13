@@ -30,12 +30,12 @@ module iob_regfile_2p #(
     output [R_DATA_W-1:0] rdata_o
 );
 
-   reg [MINDATA_W-1:0] regfile[(2**MAXADDR_W)-1:0];
+   reg [MINDATA_W-1:0] regfile[0:(2**MAXADDR_W)-1];
 
    genvar addr;
    //Generate the memory based on the parameters
    generate
-      if (W_DATA_W >= R_DATA_W) begin
+      if (W_DATA_W >= R_DATA_W) begin : g_wdata_ge_rdata
          localparam R_LOG2 = $clog2(R);
          //Write
          for (addr = 0; addr < (2 ** MAXADDR_W); addr = addr + 1) begin : rf_addr
@@ -49,7 +49,7 @@ module iob_regfile_2p #(
 
          //Read
          assign rdata_o = regfile[raddr_i];
-      end else begin  //W_DATA_W < R_DATA_W
+      end else begin : g_wdata_l_rsda //W_DATA_W < R_DATA_W
          //Write
          for (addr = 0; addr < (2 ** MAXADDR_W); addr = addr + 1) begin : rf_addr
             wire addr_wen;
