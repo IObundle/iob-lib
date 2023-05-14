@@ -1,11 +1,6 @@
 `timescale 1 ns / 1 ps
 `include "iob_utils.vh"
 
-`define IOB_REGFILE_RADDR(req_i) (req_i[WADDR_W+WSTRB_W+WDATA_W+:RADDR_W])
-`define IOB_REGFILE_WADDR(req_i) (req_i[WSTRB_W+WDATA_W+:WADDR_W])
-`define IOB_REGFILE_WSTRB(req_i) (req_i[WDATA_W+:WSTRB_W])
-`define IOB_REGFILE_WDATA(req_i) (req_i[WDATA_W-1:0])
-
 module iob_regfile_2p 
   #(
     parameter N = 0, //number of registers
@@ -24,55 +19,46 @@ module iob_regfile_2p
  input                                       cke_i,
  input                                       wen_i,
  input [RADDR_W+WADDR_W+WSTRB_W+WDATA_W-1:0] req_i,
- output [RDATA_W-1:0]                        resp_i
+ output [RDATA_W-1:0]                        resp_o
  );
 
-   //register file
-   reg [W-1 : 0]                             regfile [N-1:0];
-   //register file write enable
-   reg [N-1:0]                               wen;
+   //register file and register file write enable
+   wire [(N*W)-1 : 0]                        regfile;
+   wire [N-1:0]                               wen;
 
-
-
-   
    //reconstruct write address from waddr_i and wstrb_i
-   wire                                      wstrb [WSTRB_W-1:0] = req_i[WDATA_W+:WSTRB_W];
+   wire [WSTRB_W-1:0]                        wstrb  = req_i[WDATA_W+:WSTRB_W];
+   wire [WADDR_W-1:0]                        waddr = req_i[WSTRB_W+WDATA_W+:WADDR_W];
    wire [WADDR_W-1:0]                        waddr_int;
    wire [$clog2(DATA_W/8):0]                 waddr_incr;
+
    iob_ctls #(
        .N     (DATA_W / 8),
        .MODE  (0),
        .SYMBOL(0)
    ) iob_ctls_txinst (
-      .data_i (wstrb_i),
+      .data_i (wstrb),
       .count_o(waddr_incr)
    );
-   assign waddr_int = waddr_i + waddr_incr;
-
-   //reconstruct write data 
-   wire [WSTRB_W-1:0]                        wdata = req_i[WDATA_W-1:0];
-   reg [WSTRB_W-1:0]                         wdata;
-   integer                                   k;
-   always_comb begin
-      wdata_int = {WSTRB_W{1'b0}};
-      for (k = 0; k < (DATA_W / 8); k = k + 1)
-        if (k == waddr_incr) wdata_int = wdata[8*k +: W];
-   end
-
+   assign waddr_int = waddr + waddr_incr;
 
    //write register file
+   localparam WDATA_INT_W = WSTRB_W*W;
+   wire [WDATA_W-1:0] wdata_int = req_i[WDATA_W-1:0];
    genvar                                    i;
    genvar                                    j;
+
+   localparam IEND = N/WSTRB_W + (N%WSTRB_W ? 1 : 0);
    generate
-      for (i = 0; i < N; i = i + WSTRB_W) begin : g_i
-         for (j = 0; j < WSTRB_W; j = j + 1) begin : g_j
+      for (i = 0; i < IEND; i = i + 1) begin : g_rows
+         for (j = 0; j < WSTRB_W; j = j + 1) begin : g_columns
 
             if ( (i*WSTRB_W+j) < N ) begin: g_if
-               assign wen[i*WSTRB_W+j] = wen_i & (waddR_int == (i*WSTRB_W+j));
+               assign wen[i*WSTRB_W+j] = wen_i & (waddr_int == (i*WSTRB_W+j));
                iob_reg_e 
                  #(
-                   .DATA_W (DATA_W),
-                   .RST_VAL({DATA_W{1'b0}}),
+                   .DATA_W (W),
+                   .RST_VAL({W{1'b0}}),
                    .CLKEDGE("posedge")
                    ) 
                iob_reg_inst 
@@ -80,9 +66,9 @@ module iob_regfile_2p
                   .clk_i (clk_i),
                   .arst_i(arst_i),
                   .cke_i (cke_i),
-                  .en_i  (wen[i*WSTRB_W+j]),
-                  .data_i(wdata_int),
-                  .data_o(regfile[i*WSTRB_W+j])
+                  .en_i  (wen[(i*WSTRB_W)+j]),
+                  .data_i(wdata_int[(i*8)+(j*W) +: W]),
+                  .data_o(regfile[(i*WDATA_INT_W)+(j*W) +: W])
                   );
             end
          end
@@ -90,6 +76,10 @@ module iob_regfile_2p
    endgenerate
 
    //read register file
-   assign rdata_o = regfile[raddr_i +: RDATA_W];
+   generate 
+      if (RADDR_W > 0) begin : g_read
+         assign resp_o = regfile[req_i[WSTRB_W+WDATA_W+WADDR_W+:RADDR_W]+: RDATA_W];
+      end 
+   endgenerate
 
 endmodule
