@@ -1,46 +1,46 @@
 `timescale 1 ns / 1 ps
 
-module iob_regfile_2p_readpar #(
-    parameter WADDR_W     = 3,
-    parameter WDATA_W     = 21,
-    parameter RDATA_W     = 21,
-    parameter R           = WDATA_W / RDATA_W,
-    parameter WADDR_W_INT = (WADDR_W > 0) ? WADDR_W : 1
-) (
-    input clk_i,
-    input arst_i,
-    input cke_i,
+module iob_regfile_2p_readpar 
+  #(
+    parameter DATA_W     = 0,
+    parameter ADDR_W     = 0
+    ) 
+(
+ input                               clk_i,
+ input                               arst_i,
+ input                               cke_i,
 
-    // Write Port
-    input [          R-1:0] wstrb_i,
-    input [WADDR_W_INT-1:0] waddr_i,
-    input [    WDATA_W-1:0] wdata_i,
-
-    // Read Port
-    output [((2**WADDR_W)*WDATA_W)-1 : 0] rdata_o
+ // Write Port
+ input [ADDR_W-1:0]                  addr_i,
+ input                               wen_i,
+ input [DATA_W-1:0]                  data_i,
+         
+ // Read Port
+ output [((2**ADDR_W)*DATA_W)-1 : 0] data_o
 );
 
-   wire [(R*(2**WADDR_W))-1:0] wstrb;
+   reg [((2**ADDR_W)*DATA_W)-1 : 0]  regfile;
+   wire [((2**ADDR_W)*DATA_W)-1 : 0] data_nxt = data_i << addr_i;
+   wire [(2**ADDR_W)-1:0]            en;
 
-   genvar col, row;
+  genvar i;
    generate
-      for (col = 0; col < (2 ** WADDR_W); col = col + 1) begin : rf
-         for (row = 0; row < R; row = row + 1) begin : rf_row
-            assign wstrb[(col*R)+row] = (waddr_i == col) & wstrb_i[row];
-            iob_reg_e #(
-                .DATA_W (RDATA_W),
-                .RST_VAL({{(RDATA_W - 1) {1'd0}}, 1'd1}),
-                .CLKEDGE("posedge")
-            ) iob_reg_rf_row_slice (
-               .clk_i (clk_i),
-               .arst_i(arst_i),
-               .cke_i (cke_i),
-               .en_i  (wstrb[(col*R)+row]),
-               .data_i(wdata_i[row*RDATA_W+:RDATA_W]),
-               .data_o(rdata_o[(col*WDATA_W)+(row*RDATA_W)+:RDATA_W])
-            );
-         end
+      for (i = 0; i < (2**ADDR_W); i = i + 1) begin : g_regfile_en
+         iob_reg_e #(
+                     .DATA_W (DATA_W),
+                     .RST_VAL({DATA_W{1'b0}}),
+                     .CLKEDGE("posedge")
+                     ) iob_reg_inst (
+                                     .clk_i (clk_i),
+                                     .arst_i(arst_i),
+                                     .cke_i (cke_i),
+                                     .en_i  (wen_i),
+                                     .data_i(data_nxt[i*DATA_W+:DATA_W]),
+                                     .data_o(data_o[i*DATA_W+:DATA_W])
+                                     );
       end
    endgenerate
 
+   assign data_o = regfile;
+   
 endmodule

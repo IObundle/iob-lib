@@ -53,17 +53,17 @@ c-format-check:
 IOB_LIB_PATH=$(LIB_DIR)/scripts
 export IOB_LIB_PATH
 
+verilog-lint:
+	# Run linter on all verilog files of setup directory
+	$(IOB_LIB_PATH)/verilog-lint.sh `find hardware -type f -name "*.v"  -name "*.vh" | tr '\n' ' '`
+	# Run linter on all verilog files of build directory (includes generated files)
+	$(IOB_LIB_PATH)/verilog-lint.sh `find $(BUILD_DIR) -type f -name "*.v" -name "*.vh" | tr '\n' ' '`
+
 verilog-format:
 	# Run formatter on all verilog files of setup directory
 	$(IOB_LIB_PATH)/verilog-format.sh `find  hardware -type f -name "*.v"| tr '\n' ' '`
 	# Run formatter on all verilog files of build directory (includes generated files)
 	$(IOB_LIB_PATH)/verilog-format.sh `find $(BUILD_DIR) -type f -name "*.v"  | tr '\n' ' '`
-
-verilog-lint:
-	# Run linter on all verilog files of setup directory
-	$(IOB_LIB_PATH)/verilog-lint.sh `find hardware -type f -name "*.v"  | tr '\n' ' '`
-	# Run linter on all verilog files of build directory (includes generated files)
-	$(IOB_LIB_PATH)/verilog-lint.sh `find $(BUILD_DIR) -type f -name "*.v" | tr '\n' ' '`
 
 format-check-all: $(BUILD_DIR) python-format-check c-format-check verilog-lint verilog-format
 
