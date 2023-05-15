@@ -916,7 +916,7 @@ def suffix(direction):
 # Write port with given direction, bus width, name and description to file
 def write_port(direction, width, name, description, fout):
     fout.write(direction + width + name + "," + "\n")
-    #fout.write(direction + width + name + ", //" + description + "\n")
+    # fout.write(direction + width + name + ", //" + description + "\n")
 
 
 def m_port(prefix, fout, bus_size=1):
