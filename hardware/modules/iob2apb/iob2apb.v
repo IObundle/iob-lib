@@ -144,7 +144,7 @@ module iob2apb #(
       .data_o(pc)
    );
 
-   always_comb begin
+   always @* begin
 
       pc_nxt         = pc + 1'b1;
 

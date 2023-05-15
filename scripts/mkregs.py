@@ -95,7 +95,7 @@ class mkregs:
         auto = row["autologic"]
 
         f.write(
-            f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n"
+            f"\n\n//NAME: {name};\n//TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n"
         )
 
         # compute wdata with only the needed bits
@@ -411,7 +411,7 @@ class mkregs:
         f_gen.write("  .data_o (pc)\n")
         f_gen.write(");\n\n")
 
-        f_gen.write("always_comb begin\n")
+        f_gen.write("always @* begin\n")
 
         f_gen.write(f"  rdata_int = {8*self.cpu_n_bytes}'d0;\n")
         f_gen.write(f"  rready_int = 1'b1;\n")
@@ -484,9 +484,9 @@ class mkregs:
                 if not auto:
                     # get wready
                     f_gen.write(
-                        f"  if((waddr >= {addr}) && (waddr < {addr + 2**addr_w}))\n"
+                        f"  if((waddr >= {addr}) && (waddr < {addr + 2**addr_w})) begin\n"
                     )
-                    f_gen.write(f"    wready_int = {name}_ready_i;\n\n")
+                    f_gen.write(f"    wready_int = {name}_ready_i;\n  end\n")
 
         f_gen.write("  ready_nxt = (|iob_wstrb_i)? wready_int: rready_int;\n")
         f_gen.write("  rvalid_nxt = iob_rvalid_o;\n")
@@ -494,17 +494,19 @@ class mkregs:
         f_gen.write("  case(pc)\n")
         f_gen.write("    0: begin\n")
         f_gen.write("      rvalid_nxt = 1'b0;\n")
-        f_gen.write("      if(!iob_avalid_i)\n")
+        f_gen.write("      if(!iob_avalid_i) begin\n")
         f_gen.write("        pc_nxt=pc;\n")
+        f_gen.write("      end\n")
         f_gen.write("    end\n")
         f_gen.write("    default: begin\n")
         f_gen.write("      rvalid_nxt =  (|iob_wstrb_i)? 1'b0: rvalid_int;\n")
-        f_gen.write("      if((|iob_wstrb_i)? !iob_ready_o: !rvalid_int)\n")
+        f_gen.write("      if((|iob_wstrb_i)? !iob_ready_o: !rvalid_int) begin\n")
         f_gen.write("        pc_nxt = pc;\n")
+        f_gen.write("      end\n")
         f_gen.write("    end\n")
         f_gen.write("  endcase\n")
 
-        f_gen.write("end //always_comb\n\n")
+        f_gen.write("end //always @*\n\n")
 
         # ready_nxt output
         f_gen.write("//ready_nxt output\n")

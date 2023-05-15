@@ -40,7 +40,7 @@ module iob_merge #(
 
    //select master
    integer k;
-   always_comb begin
+   always @* begin
       sel = {Nb{1'b0}};
       for (k = 0; k < N_MASTERS; k = k + 1)
          if (~sel_en) sel = sel_reg;
@@ -51,7 +51,7 @@ module iob_merge #(
    //route master request to slave
    //  
    integer i;
-   always_comb begin
+   always @* begin
       s_req_o = {`REQ_W{1'b0}};
       for (i = 0; i < N_MASTERS; i = i + 1) if (i == sel) s_req_o = m_req_i[`REQ(i)];
    end
@@ -68,7 +68,7 @@ module iob_merge #(
 
    //route
    integer j;
-   always_comb begin
+   always @* begin
       for (j = 0; j < N_MASTERS; j = j + 1)
          if (j == sel_reg) m_resp_o[`RESP(j)] = s_resp_i;
          else m_resp_o[`RESP(j)] = {`RESP_W{1'b0}};
