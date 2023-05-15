@@ -678,7 +678,9 @@ def copy_files(src_dir, dest_dir, sources=[], pattern="*", copy_all=False):
                         f"{iob_colors.WARNING}{src_file} is not a file.{iob_colors.ENDC}"
                     )
                 else:
-                    print(f"{iob_colors.INFO}Not copying file. File in build directory is newer than the one in the source directory.{iob_colors.ENDC}")
+                    print(
+                        f"{iob_colors.INFO}Not copying file. File in build directory is newer than the one in the source directory.{iob_colors.ENDC}"
+                    )
     else:
         print(
             f"{iob_colors.WARNING}'copy_files' function did nothing.{iob_colors.ENDC}"
