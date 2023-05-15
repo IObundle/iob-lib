@@ -4,20 +4,20 @@
 `define ADDR_W 4
 
 module iob_ram_sp_tb;
-   
+
    // Inputs
-   reg clk;
-   reg en; // enable access to ram
-   reg we; // write enable
+   reg               clk;
+   reg               en;  // enable access to ram
+   reg               we;  // write enable
    reg [`ADDR_W-1:0] addr;
    reg [`DATA_W-1:0] data_in;
-   
+
    // Ouptuts
    reg [`DATA_W-1:0] data_out;
 
-   integer           i, seq_ini;
+   integer i, seq_ini;
 
-   parameter clk_per = 10; // clk period = 10 timeticks
+   parameter clk_per = 10;  // clk period = 10 timeticks
 
    initial begin
       // optional VCD
@@ -25,12 +25,12 @@ module iob_ram_sp_tb;
       $dumpfile("uut.vcd");
       $dumpvars();
 `endif
-      
+
       // Initialize Inputs
-      clk = 1;
-      en = 0;
-      we = 0;
-      addr = 0;
+      clk     = 1;
+      en      = 0;
+      we      = 0;
+      addr    = 0;
 
       // Number from which to start the incremental sequence to write into the RAM
       seq_ini = 32;
@@ -43,9 +43,9 @@ module iob_ram_sp_tb;
       @(posedge clk) #1;
       we = 1;
 
-      for(i = 0; i < 2**`ADDR_W; i = i + 1) begin
-         addr = i;
-         data_in = i+seq_ini;
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
+         addr    = i;
+         data_in = i + seq_ini;
          @(posedge clk) #1;
       end
 
@@ -54,12 +54,14 @@ module iob_ram_sp_tb;
 
       // Read from all RAM words
       @(posedge clk) #1;
-      for(i = 0; i < 2**`ADDR_W; i = i + 1) begin
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
          addr = i;
          @(posedge clk) #1;
-         if(i+seq_ini != data_out) begin
-            $display("ERROR: read error in data_out. \n \t i=%0d; data = %h when it should have been %0h", i, i+seq_ini, data_out);
-            $fatal;
+         if (i + seq_ini != data_out) begin
+            $display(
+                "ERROR: read error in data_out. \n \t i=%0d; data = %h when it should have been %0h",
+                i, i + seq_ini, data_out);
+            $fatal();
          end
       end
 
@@ -67,30 +69,27 @@ module iob_ram_sp_tb;
       en = 0;
 
       #clk_per;
-      $display("%c[1;34m",27);
+      $display("%c[1;34m", 27);
       $display("Test completed successfully.");
-      $display("%c[0m",27);
-      #(5*clk_per) $finish;
+      $display("%c[0m", 27);
+      #(5 * clk_per) $finish();
 
    end
 
    // Instantiate the Unit Under Test (UUT)
-   iob_ram_sp
-     #(
-       .DATA_W(`DATA_W), 
+   iob_ram_sp #(
+       .DATA_W(`DATA_W),
        .ADDR_W(`ADDR_W)
-       ) 
-   uut 
-     (
-      .clk_i  (clk), 
-      .en_i   (en),
-      .we_i   (we),
-      .addr_i (addr),
-      .d_i    (data_in),
-      .d_o    (data_out)
-      );
-   
+   ) uut (
+      .clk_i (clk),
+      .en_i  (en),
+      .we_i  (we),
+      .addr_i(addr),
+      .d_i   (data_in),
+      .d_o   (data_out)
+   );
+
    // system clock
-   always #(clk_per/2) clk = ~clk; 
+   always #(clk_per / 2) clk = ~clk;
 
 endmodule

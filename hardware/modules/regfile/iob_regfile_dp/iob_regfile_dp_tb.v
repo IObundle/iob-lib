@@ -6,22 +6,22 @@
 module iob_regfile_dp_tb;
 
    // Inputs
-   reg clk;
-   reg rst;
-   reg [`DATA_W-1:0] wdataA;
-   reg [`DATA_W-1:0] wdataB;
-   reg [`ADDR_W-1:0] addrA;
-   reg [`ADDR_W-1:0] addrB;
-   reg               enA;
-   reg               enB;
+   reg                 clk;
+   reg                 rst;
+   reg [  `DATA_W-1:0] wdataA;
+   reg [  `DATA_W-1:0] wdataB;
+   reg [  `ADDR_W-1:0] addrA;
+   reg [  `ADDR_W-1:0] addrB;
+   reg                 enA;
+   reg                 enB;
 
    // Ouptuts
-   reg [`DATA_W-1 :0] rdataA;
-   reg [`DATA_W-1 :0] rdataB;
+   reg [`DATA_W-1 : 0] rdataA;
+   reg [`DATA_W-1 : 0] rdataB;
 
-   integer            i, seq_ini;
+   integer i, seq_ini;
 
-   parameter clk_per = 10; // clk period = 10 timeticks
+   parameter clk_per = 10;  // clk period = 10 timeticks
 
    initial begin
       // optional VCD
@@ -31,22 +31,22 @@ module iob_regfile_dp_tb;
 `endif
 
       // Initialize Inputs
-      clk = 1;
-      rst = 0;
+      clk     = 1;
+      rst     = 0;
 
-      wdataA = 0;
-      addrA = 0;
-      enA = 0;
+      wdataA  = 0;
+      addrA   = 0;
+      enA     = 0;
 
-      wdataB = 0;
-      addrB = 0;
-      enB = 0;
+      wdataB  = 0;
+      addrB   = 0;
+      enB     = 0;
 
       // Number from which to start the incremental sequence to write into the Register File
       seq_ini = 32;
 
       #clk_per;
-      @(posedge clk) #1; 
+      @(posedge clk) #1;
       rst = 1;
       @(posedge clk) #1;
       rst = 0;
@@ -55,28 +55,28 @@ module iob_regfile_dp_tb;
       enA = 1;
 
       // Write and real all the locations
-      for(i=0; i < 2**`ADDR_W; i = i + 1) begin
-         addrA = i;
-         wdataA = i+seq_ini;
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
+         addrA  = i;
+         wdataA = i + seq_ini;
          @(posedge clk) #1;
-         if(rdataA != i+seq_ini) begin
-            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i+seq_ini, rdataA);
-            $finish;
+         if (rdataA != i + seq_ini) begin
+            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataA);
+            $finish();
          end
          @(posedge clk) #1;
       end
 
       @(posedge clk) #1;
-      enA = 0;
+      enA   = 0;
       addrA = 0;
 
       // Read all the locations and check if still stored
-      for(i=0; i < 2**`ADDR_W; i = i + 1) begin
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
          addrA = i;
          @(posedge clk) #1;
-         if(rdataA != i+seq_ini) begin
-            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i+seq_ini, rdataA);
-            $finish;
+         if (rdataA != i + seq_ini) begin
+            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataA);
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -88,12 +88,12 @@ module iob_regfile_dp_tb;
       rst = 0;
 
       // Read all the locations and check if reset worked
-      for(i=0; i < 2**`ADDR_W; i = i + 1) begin
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
          addrA = i;
          @(posedge clk) #1;
-         if(rdataA != 0) begin
+         if (rdataA != 0) begin
             $display("ERROR: rdata is not null");
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -105,28 +105,28 @@ module iob_regfile_dp_tb;
       enB = 1;
 
       // Write and real all the locations
-      for(i=0; i < 2**`ADDR_W; i = i + 1) begin
-         addrB = i;
-         wdataB = i+seq_ini;
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
+         addrB  = i;
+         wdataB = i + seq_ini;
          @(posedge clk) #1;
-         if(rdataB != i+seq_ini) begin
-            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i+seq_ini, rdataB);
-            $finish;
+         if (rdataB != i + seq_ini) begin
+            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataB);
+            $finish();
          end
          @(posedge clk) #1;
       end
 
       @(posedge clk) #1;
-      enB = 0;
+      enB   = 0;
       addrB = 0;
 
       // Read all the locations and check if still stored
-      for(i=0; i < 2**`ADDR_W; i = i + 1) begin
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
          addrB = i;
          @(posedge clk) #1;
-         if(rdataB != i+seq_ini) begin
-            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i+seq_ini, rdataB);
-            $finish;
+         if (rdataB != i + seq_ini) begin
+            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataB);
+            $finish();
          end
          @(posedge clk) #1;
       end
@@ -138,46 +138,45 @@ module iob_regfile_dp_tb;
       rst = 0;
 
       // Read all the locations and check if reset worked
-      for(i=0; i < 2**`ADDR_W; i = i + 1) begin
+      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
          addrB = i;
          @(posedge clk) #1;
-         if(rdataB != 0) begin
+         if (rdataB != 0) begin
             $display("ERROR: rdata is not null");
-            $finish;
+            $finish();
          end
          @(posedge clk) #1;
       end
 
       #clk_per;
-      $display("%c[1;34m",27);
+      $display("%c[1;34m", 27);
       $display("Test completed successfully.");
-      $display("%c[0m",27);
-      #(5*clk_per) $finish;
+      $display("%c[0m", 27);
+      #(5 * clk_per) $finish();
    end
 
    // Instantiate the Unit Under Test (UUT)
-   iob_regfile_dp
-   #(
-      .ADDR_W(`ADDR_W),
-      .DATA_W(`DATA_W)
+   iob_regfile_dp #(
+       .ADDR_W(`ADDR_W),
+       .DATA_W(`DATA_W)
    ) uut (
-      .clk_i    (clk),
-      .arst_i   (1'd0),
-      .cke_i    (1'd1),
-      .rst_i    (rst),
+      .clk_i (clk),
+      .arst_i(1'd0),
+      .cke_i (1'd1),
+      .rst_i (rst),
 
-      .a_wdata_i (wdataA),
-      .a_addr_i  (addrA),
-      .a_wen_i   (enA),
-      .a_rdata_o (rdataA),
+      .a_wdata_i(wdataA),
+      .a_addr_i (addrA),
+      .a_wen_i  (enA),
+      .a_rdata_o(rdataA),
 
-      .b_wdata_i (wdataB),
-      .b_addr_i  (addrB),
-      .b_wen_i   (enB),
-      .b_rdata_o (rdataB)
+      .b_wdata_i(wdataB),
+      .b_addr_i (addrB),
+      .b_wen_i  (enB),
+      .b_rdata_o(rdataB)
    );
 
    // system clock
-   always #(clk_per/2) clk = ~clk;
+   always #(clk_per / 2) clk = ~clk;
 
 endmodule

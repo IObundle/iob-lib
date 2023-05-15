@@ -1,5 +1,5 @@
    //General Interface Signals (do not remove indentation)
    //START_IO_TABLE gen
-   `IOB_INPUT(clk_i,          1), //V2TEX_IO System clock.
-   `IOB_INPUT(cke_i,          1),  //V2TEX_IO System clock enable.
-   `IOB_INPUT(arst_i,         1)  //V2TEX_IO System reset, asynchronous and active high.
+   input [1-1:0] clk_i, //V2TEX_IO System clock.
+   input [1-1:0] cke_i,  //V2TEX_IO System clock enable.
+   input [1-1:0] arst_i  //V2TEX_IO System reset, asynchronous and active high.

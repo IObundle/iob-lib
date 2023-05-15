@@ -83,10 +83,22 @@ def get_port_type(port_type):
 def delete_last_comma(file_obj):
     # Place cursor at the end of the file
     file_obj.read()
-    # Search for start of line (previous \n) or start of file
-    # (It is better than just searching for the comma, because there may be verilog comments in this line with commas that we dont want to remove)
-    while file_obj.read(1) != "\n" and file_obj.tell() > 1:
-        file_obj.seek(file_obj.tell() - 2)
+
+    while True:
+        # Search for start of line (previous \n) or start of file
+        # (It is better than just searching for the comma, because there may be verilog comments in this line with commas that we dont want to remove)
+        while file_obj.read(1) != "\n" and file_obj.tell() > 1:
+            file_obj.seek(file_obj.tell() - 2)
+        # Return if we are at the start of the file (didnt find any comma)
+        if file_obj.tell() < 2:
+            return
+        # Ignore lines starting with Verilog macro
+        if file_obj.read(1) != "`":
+            file_obj.seek(file_obj.tell() - 1)
+            break
+        # Move cursor 3 chars back (skip "`", "\n" and previous char)
+        file_obj.seek(file_obj.tell() - 3)
+
     # Search for next comma
     while file_obj.read(1) != ",":
         pass

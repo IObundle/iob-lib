@@ -22,109 +22,104 @@ AXIS Out:
 Very important: if the transfer goes over the maximum size, given by AXI_ADDR_W, the transfer will wrap around and will start reading/writing to the lower addresses. 
 */
 
-module axis2axi
-   #( 
-      parameter AXI_ADDR_W = 0,
-      parameter AXI_DATA_W = 32, // We currently only support 4 byte transfers
-      parameter AXI_LEN_W = 8,
-      parameter AXI_ID_W = 1,
-      parameter BURST_W = 0,
-      parameter BUFFER_W = BURST_W + 1
-)(
-   // Configuration (AXIS In)
-   `IOB_INPUT(config_in_addr_i,AXI_ADDR_W),
-   `IOB_INPUT(config_in_valid_i,1),
-   `IOB_OUTPUT(config_in_ready_o,1),
+module axis2axi #(
+    parameter AXI_ADDR_W = 0,
+    parameter AXI_DATA_W = 32,          // We currently only support 4 byte transfers
+    parameter AXI_LEN_W  = 8,
+    parameter AXI_ID_W   = 1,
+    parameter BURST_W    = 0,
+    parameter BUFFER_W   = BURST_W + 1
+) (
+    // Configuration (AXIS In)
+    input  [AXI_ADDR_W-1:0] config_in_addr_i,
+    input  [         1-1:0] config_in_valid_i,
+    output [         1-1:0] config_in_ready_o,
 
-   // AXIS In
-   `IOB_INPUT(axis_in_data_i,AXI_DATA_W),
-   `IOB_INPUT(axis_in_valid_i,1),
-   `IOB_OUTPUT(axis_in_ready_o,1),
+    // AXIS In
+    input  [AXI_DATA_W-1:0] axis_in_data_i,
+    input  [         1-1:0] axis_in_valid_i,
+    output [         1-1:0] axis_in_ready_o,
 
-   // Configuration (AXIS Out)
-   `IOB_INPUT(config_out_addr_i,AXI_ADDR_W),
-   `IOB_INPUT(config_out_length_i,AXI_ADDR_W),
-   `IOB_INPUT(config_out_valid_i,1),
-   `IOB_OUTPUT(config_out_ready_o,1),
+    // Configuration (AXIS Out)
+    input  [AXI_ADDR_W-1:0] config_out_addr_i,
+    input  [AXI_ADDR_W-1:0] config_out_length_i,
+    input  [         1-1:0] config_out_valid_i,
+    output [         1-1:0] config_out_ready_o,
 
-   // AXIS Out
-   `IOB_OUTPUT(axis_out_data_o,AXI_DATA_W),
-   `IOB_OUTPUT(axis_out_valid_o,1),
-   `IOB_INPUT(axis_out_ready_i,1),
+    // AXIS Out
+    output [AXI_DATA_W-1:0] axis_out_data_o,
+    output [         1-1:0] axis_out_valid_o,
+    input  [         1-1:0] axis_out_ready_i,
 
-   // AXI master interface
-   `include "iob_axi_m_port.vh"
+    // AXI master interface
+    `include "iob_axi_m_port.vh"
 
-   // External memory interfaces
-   `IOB_OUTPUT(ext_mem_w_en_o, 1),
-   `IOB_OUTPUT(ext_mem_w_data_o, AXI_DATA_W),
-   `IOB_OUTPUT(ext_mem_w_addr_o, BUFFER_W),
-   `IOB_OUTPUT(ext_mem_r_en_o, 1),
-   `IOB_OUTPUT(ext_mem_r_addr_o, BUFFER_W),
-   `IOB_INPUT(ext_mem_r_data_i, AXI_DATA_W),
+    // External memory interfaces
+    output [         1-1:0] ext_mem_w_en_o,
+    output [AXI_DATA_W-1:0] ext_mem_w_data_o,
+    output [  BUFFER_W-1:0] ext_mem_w_addr_o,
+    output [         1-1:0] ext_mem_r_en_o,
+    output [  BUFFER_W-1:0] ext_mem_r_addr_o,
+    input  [AXI_DATA_W-1:0] ext_mem_r_data_i,
 
-   `IOB_INPUT(clk_i,1),
-   `IOB_INPUT(cke_i,1),
-   `IOB_INPUT(rst_i,1),
-   `IOB_INPUT(arst_i,1)
+    input [1-1:0] clk_i,
+    input [1-1:0] cke_i,
+    input [1-1:0] rst_i,
+    input [1-1:0] arst_i
 );
 
-axis2axi_in #(
-   .AXI_ADDR_W(AXI_ADDR_W),
-   .AXI_DATA_W(AXI_DATA_W),
-   .AXI_LEN_W(AXI_LEN_W),
-   .AXI_ID_W(AXI_ID_W),
-   .BURST_W(BURST_W)
-   )
-   axis2axi_in_inst
-   (
-   .config_in_addr_i(config_in_addr_i),
-   .config_in_valid_i(config_in_valid_i),
-   .config_in_ready_o(config_in_ready_o),
-   
-   .ext_mem_w_en_o(ext_mem_w_en_o),
-   .ext_mem_w_data_o(ext_mem_w_data_o),
-   .ext_mem_w_addr_o(ext_mem_w_addr_o),
-   .ext_mem_r_en_o(ext_mem_r_en_o),
-   .ext_mem_r_addr_o(ext_mem_r_addr_o),
-   .ext_mem_r_data_i(ext_mem_r_data_i),
+   axis2axi_in #(
+       .AXI_ADDR_W(AXI_ADDR_W),
+       .AXI_DATA_W(AXI_DATA_W),
+       .AXI_LEN_W (AXI_LEN_W),
+       .AXI_ID_W  (AXI_ID_W),
+       .BURST_W   (BURST_W)
+   ) axis2axi_in_inst (
+      .config_in_addr_i (config_in_addr_i),
+      .config_in_valid_i(config_in_valid_i),
+      .config_in_ready_o(config_in_ready_o),
 
-   .axis_in_data_i(axis_in_data_i),
-   .axis_in_valid_i(axis_in_valid_i),
-   .axis_in_ready_o(axis_in_ready_o),
+      .ext_mem_w_en_o  (ext_mem_w_en_o),
+      .ext_mem_w_data_o(ext_mem_w_data_o),
+      .ext_mem_w_addr_o(ext_mem_w_addr_o),
+      .ext_mem_r_en_o  (ext_mem_r_en_o),
+      .ext_mem_r_addr_o(ext_mem_r_addr_o),
+      .ext_mem_r_data_i(ext_mem_r_data_i),
 
-   `include "iob_axi_m_m_write_portmap.vh"
-   
-   .clk_i(clk_i),
-   .cke_i(cke_i),
-   .rst_i(rst_i),
-   .arst_i(arst_i)
+      .axis_in_data_i (axis_in_data_i),
+      .axis_in_valid_i(axis_in_valid_i),
+      .axis_in_ready_o(axis_in_ready_o),
+
+      `include "iob_axi_m_m_write_portmap.vh"
+
+      .clk_i (clk_i),
+      .cke_i (cke_i),
+      .rst_i (rst_i),
+      .arst_i(arst_i)
    );
 
-axis2axi_out #(
-   .AXI_ADDR_W(AXI_ADDR_W),
-   .AXI_DATA_W(AXI_DATA_W),
-   .AXI_LEN_W(AXI_LEN_W),
-   .AXI_ID_W(AXI_ID_W),
-   .BURST_W(BURST_W)
-   )
-   axis2axi_out_inst
-   (
-   .config_out_addr_i(config_out_addr_i),
-   .config_out_length_i(config_out_length_i),
-   .config_out_valid_i(config_out_valid_i),
-   .config_out_ready_o(config_out_ready_o),
+   axis2axi_out #(
+       .AXI_ADDR_W(AXI_ADDR_W),
+       .AXI_DATA_W(AXI_DATA_W),
+       .AXI_LEN_W (AXI_LEN_W),
+       .AXI_ID_W  (AXI_ID_W),
+       .BURST_W   (BURST_W)
+   ) axis2axi_out_inst (
+      .config_out_addr_i  (config_out_addr_i),
+      .config_out_length_i(config_out_length_i),
+      .config_out_valid_i (config_out_valid_i),
+      .config_out_ready_o (config_out_ready_o),
 
-   .axis_out_data_o(axis_out_data_o),
-   .axis_out_valid_o(axis_out_valid_o),
-   .axis_out_ready_i(axis_out_ready_i),
+      .axis_out_data_o (axis_out_data_o),
+      .axis_out_valid_o(axis_out_valid_o),
+      .axis_out_ready_i(axis_out_ready_i),
 
-   `include "iob_axi_m_m_read_portmap.vh"
-   
-   .clk_i(clk_i),
-   .cke_i(cke_i),
-   .rst_i(rst_i),
-   .arst_i(arst_i)
+      `include "iob_axi_m_m_read_portmap.vh"
+
+      .clk_i (clk_i),
+      .cke_i (cke_i),
+      .rst_i (rst_i),
+      .arst_i(arst_i)
    );
 
 endmodule
