@@ -11,7 +11,7 @@ module iob_mux #(
 );
 
    integer i;
-   always_comb begin
+   always @* begin
       data_o = {DATA_W{1'b0}};
       for (i = 0; i < N; i = i + 1) begin : gen_mux
          if (i == sel_i) data_o = data_i[i*DATA_W+:DATA_W];
