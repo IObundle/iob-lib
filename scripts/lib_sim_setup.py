@@ -2,6 +2,7 @@ from build_srcs import (
     lib_module_setup,
     create_if_gen_headers,
     copy_files,
+    func_and_include_setup,
 )
 import sys
 
@@ -13,6 +14,7 @@ def lib_sim_setup(module_name, dest_srcs_dir):
     lib_module_setup(
         Vheaders, hardware_srcs, module_name, lib_dir=lib_dir, add_sim_srcs=True
     )
+    func_and_include_setup(hardware_srcs, Vheaders, flow="sim", lib_dir=lib_dir)
 
     # Copy Hw
     if Vheaders:
