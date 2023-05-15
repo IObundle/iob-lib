@@ -24,12 +24,12 @@ module iob_regfile_2p
 
    //register file and register file write enable
    wire [(N*W)-1 : 0]                        regfile;
-   wire [N-1:0]                               wen;
+   wire [N-1:0]                              wen;
 
    //reconstruct write address from waddr_i and wstrb_i
    wire [WSTRB_W-1:0]                        wstrb  = req_i[WDATA_W+:WSTRB_W];
    wire [WADDR_W-1:0]                        waddr = req_i[WSTRB_W+WDATA_W+:WADDR_W];
-   wire [WADDR_W-1:0]                        waddr_int;
+   wire [WADDR_W:0]                          waddr_int;
    wire [$clog2(DATA_W/8):0]                 waddr_incr;
 
    iob_ctls #(
@@ -54,7 +54,7 @@ module iob_regfile_2p
          for (j = 0; j < WSTRB_W; j = j + 1) begin : g_columns
 
             if ( (i+j) < N ) begin: g_if
-               assign wen[i+j] = wen_i & (waddr_int == (i+j)) & wstrb[j];
+               assign wen[i+j] = wen_i & (waddr_int  == (i+j)) & wstrb[j];
                iob_reg_e 
                  #(
                    .DATA_W (W),

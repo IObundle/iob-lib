@@ -14,8 +14,7 @@ module iob_counter #(
     output [DATA_W-1:0] data_o
 );
 
-   wire [DATA_W-1:0] data;
-   assign data = data_o + 1'b1;
+   wire [DATA_W-1:0] data  = data_o + 1'b1;
 
    iob_reg_re #(
        .DATA_W (DATA_W),
@@ -25,10 +24,8 @@ module iob_counter #(
       .clk_i (clk_i),
       .arst_i(arst_i),
       .cke_i (cke_i),
-
       .rst_i(rst_i),
       .en_i (en_i),
-
       .data_i(data),
       .data_o(data_o)
    );
