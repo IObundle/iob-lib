@@ -4,4 +4,4 @@ headers = [
     "apb_m_port",
     "iob_m_tb_wire",
 ]
-modules = ["iob2apb.v", "iob_reg"]
+modules = ["iob2apb.v", "iob_reg.v"]

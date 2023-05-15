@@ -1,2 +1,2 @@
 headers = []
-modules = ["iob_edge_detect.v", "iob_reg"]
+modules = ["iob_edge_detect.v", "iob_reg.v"]

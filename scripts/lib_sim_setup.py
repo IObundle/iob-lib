@@ -2,7 +2,6 @@ from build_srcs import (
     lib_module_setup,
     create_if_gen_headers,
     copy_files,
-    module_dependency_setup,
 )
 import sys
 
@@ -10,14 +9,10 @@ import sys
 def lib_sim_setup(module_name, dest_srcs_dir):
     hardware_srcs = []
     Vheaders = []
-    sim_srcs = []
     lib_dir = "."
     lib_module_setup(
         Vheaders, hardware_srcs, module_name, lib_dir=lib_dir, add_sim_srcs=True
     )
-    module_dependency_setup(
-        hardware_srcs, Vheaders, "src", [], lib_dir=lib_dir, function_2_call="sim_setup"
-    )  # function_2_call is purely used to add_sim_srcs (the function does not actually get called)
 
     # Copy Hw
     if Vheaders:

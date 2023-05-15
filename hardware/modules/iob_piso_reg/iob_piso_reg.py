@@ -1,2 +1,2 @@
 headers = []
-modules = ["iob_piso_reg.v", "iob_reg"]
+modules = ["iob_piso_reg.v", "iob_reg.v"]

@@ -2,7 +2,7 @@ headers = []
 modules = [
     "iob_fifo_sync.v",
     "iob_reg_r",
-    "iob_reg",
+    "iob_reg.v",
     "iob_counter",
     "iob_asym_converter",
 ]
