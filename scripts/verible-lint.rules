@@ -5,3 +5,4 @@
 -generate-label-prefix
 -explicit-task-lifetime
 -unpacked-dimensions-range-ordering
+-always-comb

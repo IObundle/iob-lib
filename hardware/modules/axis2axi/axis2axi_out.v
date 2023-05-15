@@ -110,7 +110,7 @@ module axis2axi_out #(
    assign axi_arlen_o        = arlen_int;
    assign axi_arvalid_o      = arvalid_int;
 
-   always_comb begin
+   always @* begin
       state_nxt    = state;
       arvalid_int  = 1'b0;
       next_address = current_address;

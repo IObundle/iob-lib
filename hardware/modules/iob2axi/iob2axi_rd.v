@@ -143,7 +143,7 @@ module iob2axi_rd #(
    end
 
    // State machine
-   always_comb begin
+   always @* begin
       state_nxt         = state;
 
       error_nxt         = error_o;
