@@ -39,7 +39,7 @@ class mkregs:
             return a if a > b else b
         except ValueError:
             # a or b is a string
-            return f"((({a}) > ({b})) ? ({a}) : ({b}))"
+            return f"(({a} > {b}) ? {a} : {b})"
 
     def get_reg_table(self, regs, no_overlap):
         # Create reg table
@@ -167,7 +167,7 @@ class mkregs:
         auto = row["autologic"]
 
         f.write(
-            f"\n\n//NAME: {name}; TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n"
+            f"\n\n//NAME: {name};\n//TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n"
         )
 
         if not auto:  # output read enable
