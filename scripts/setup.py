@@ -49,8 +49,12 @@ def setup(python_module, no_overlap=False):
     if is_top_module(python_module):
         os.makedirs(build_dir, exist_ok=True)  # Create build directory
         mk_conf.config_build_mk(python_module, build_dir)
-        os.makedirs(f"{build_dir}/hardware/src", exist_ok=True)  # Create HARDWARE directories
-        shutil.copyfile(f"{build_srcs.LIB_DIR}/build.mk", f"{build_dir}/Makefile")  # Copy generic MAKEFILE
+        os.makedirs(
+            f"{build_dir}/hardware/src", exist_ok=True
+        )  # Create HARDWARE directories
+        shutil.copyfile(
+            f"{build_srcs.LIB_DIR}/build.mk", f"{build_dir}/Makefile"
+        )  # Copy generic MAKEFILE
         # Setup DELIVERY directories: TODO
 
     #
@@ -97,17 +101,14 @@ def setup(python_module, no_overlap=False):
         # Auto-add iob_s_portmap.vh
         python_module.submodules["hw_setup"]["headers"].append("iob_s_portmap")
 
-
     # Setup python submodules recursively (the deeper ones in the tree are setup first)
     if is_top_module(python_module):
         build_srcs.setup_submodules(python_module)
-
 
     #
     # Setup flows
     #
     build_srcs.flows_setup(python_module)
-
 
     #
     # Generate hw
@@ -148,7 +149,9 @@ def setup(python_module, no_overlap=False):
     # Generate TeX
     #
     # Only generate TeX of this core if it is the top module
-    if os.path.isdir(python_module.build_dir + "/document/tsrc") and is_top_module(python_module):
+    if os.path.isdir(python_module.build_dir + "/document/tsrc") and is_top_module(
+        python_module
+    ):
         mk_conf.generate_confs_tex(confs, python_module.build_dir + "/document/tsrc")
         ios_lib.generate_ios_tex(ios, python_module.build_dir + "/document/tsrc")
         if regs:

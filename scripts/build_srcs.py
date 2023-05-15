@@ -21,11 +21,11 @@ def flows_setup(python_module):
     core_flows = python_module.flows
 
     # Setup simulation
-    if 'sim' in core_flows:
+    if "sim" in core_flows:
         sim_setup(python_module)
 
     # Setup fpga
-    if 'fpga' in core_flows:
+    if "fpga" in core_flows:
         fpga_setup(python_module)
 
     # Setup harware
@@ -37,11 +37,11 @@ def flows_setup(python_module):
         syn_setup(python_module)
 
     # Setup software
-    if 'emb' in core_flows:
+    if "emb" in core_flows:
         sw_setup(python_module)
 
     # Setup documentation
-    if 'doc' in core_flows:
+    if "doc" in core_flows:
         doc_setup(python_module)
 
 
@@ -91,9 +91,7 @@ def hw_setup(python_module):
     )
 
     # Setup any hw submodules by calling the 'main()' function from their *_setup.py module
-    func_and_include_setup(
-        hardware_srcs, Vheaders, flow="hw", lib_dir=LIB_DIR
-    )
+    func_and_include_setup(hardware_srcs, Vheaders, flow="hw", lib_dir=LIB_DIR)
 
     # Create if_gen interfaces and copy every .vh file from LIB in the Vheaders list.
     if Vheaders:
@@ -394,17 +392,21 @@ def doc_setup(python_module):
 
     # For cores that have their own documentation
     if "doc" in core_flows:
-        shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document", dirs_exist_ok=True)
+        shutil.copytree(
+            f"{setup_dir}/document", f"{build_dir}/document", dirs_exist_ok=True
+        )
 
     # Copy LIB tex files if not present
     for file in os.listdir(f"{LIB_DIR}/document/tsrc"):
         shutil.copy2(
-            f"{LIB_DIR}/document/tsrc/{file}", f"{build_dir}/document/tsrc/{file}")
+            f"{LIB_DIR}/document/tsrc/{file}", f"{build_dir}/document/tsrc/{file}"
+        )
 
     # Copy LIB figures
     for file in os.listdir(f"{LIB_DIR}/document/figures"):
         shutil.copy2(
-            f"{LIB_DIR}/document/figures/{file}", f"{build_dir}/document/figures/{file}")
+            f"{LIB_DIR}/document/figures/{file}", f"{build_dir}/document/figures/{file}"
+        )
 
     # Copy document Makefile
     shutil.copy2(f"{LIB_DIR}/document/Makefile", f"{build_dir}/document/Makefile")
@@ -413,11 +415,13 @@ def doc_setup(python_module):
     write_git_revision_short_hash(f"{build_dir}/document/tsrc")
 
     # Run doc_setup.py
-    get_module_function(os.path.join(python_module.setup_dir,
-                        "document/doc_setup.py"), setup_module=python_module)()
+    get_module_function(
+        os.path.join(python_module.setup_dir, "document/doc_setup.py"),
+        setup_module=python_module,
+    )()
 
     # TODO: Future improvement: Add doc_setup.py to a doc_setup list, similar to the other processes (sim_setup, hw_setup, ...)
-    #add_setup_functions(python_module, "doc_setup", setup_module=python_module)
+    # add_setup_functions(python_module, "doc_setup", setup_module=python_module)
     # func_and_include_setup(
     #    doc_srcs,
     #    Vheaders,
@@ -446,7 +450,7 @@ def setup_submodules(python_module):
     modules_dictionary = {}
     submodule_dirs = []
 
-    if 'dirs' in python_module.submodules:
+    if "dirs" in python_module.submodules:
         submodule_dirs = python_module.submodules["dirs"]
 
     for setup_type in python_module.submodules:
@@ -455,7 +459,7 @@ def setup_submodules(python_module):
             continue
 
         items_to_delete = []
-        for item in python_module.submodules[setup_type]['modules']:
+        for item in python_module.submodules[setup_type]["modules"]:
             # If item is a tuple then it contains optional parameters
             if type(item) == tuple:
                 # Save optional_parameters in a variable
@@ -472,7 +476,9 @@ def setup_submodules(python_module):
             # Only allow submodule sin hw_setup list. (The other processes will be handled by the setup function of the module).
             # Note: Maybe we should create a dedicated list to import submodules? This way it won't be as confusing as to why only the 'hw_setup' list is used for submodules.
             #       The outer for loop of this function, only exists to execute this asser and warn the user if he is not using hw_setup. Otherwise we could just use the 'hw_setup' list.
-            assert setup_type == "hw_setup", f"{iob_colors.FAIL}Only 'hw_setup' list can contain submodules. Please remove '{item}' from '{setup_type}' list.{iob_colors.ENDC}"
+            assert (
+                setup_type == "hw_setup"
+            ), f"{iob_colors.FAIL}Only 'hw_setup' list can contain submodules. Please remove '{item}' from '{setup_type}' list.{iob_colors.ENDC}"
 
             # Only import if the item has a _setup.py file
             for fname in os.listdir(submodule_dirs[item]):
@@ -501,7 +507,7 @@ def setup_submodules(python_module):
 
         # Remove marked modules from list
         for item in items_to_delete:
-            python_module.submodules[setup_type]['modules'].remove(item)
+            python_module.submodules[setup_type]["modules"].remove(item)
 
 
 # Setup submodules in modules_dictionary
@@ -513,7 +519,6 @@ def submodule_setup(python_module):
         module.main()
 
 
-
 # srcs: list that may contain 4 types of entries:
 #       - function: This entry defines a function to call.
 #       - python include**: This entry defines a python module that contains a list of other hardware modules/headers.
@@ -523,11 +528,10 @@ def submodule_setup(python_module):
 # Entries with `**` can be a tuple, where the first item is the module, the second item is a dictionary with module parameters.
 #
 # flow: optional argument. Name of the flow, either: fpga, sim, sw, or hw
-def func_and_include_setup(
-    srcs, headers, flow="hw", lib_dir=LIB_DIR
-):
-    source_file_extension=".v"
-    if flow == "sw": source_file_extension=".c"
+def func_and_include_setup(srcs, headers, flow="hw", lib_dir=LIB_DIR):
+    source_file_extension = ".v"
+    if flow == "sw":
+        source_file_extension = ".c"
 
     # Process entries of the types: `function` and `python include`
     while True:
@@ -554,8 +558,8 @@ def func_and_include_setup(
                     srcs,
                     src,
                     lib_dir,
-                    add_sim_srcs=True if flow=="sim" else False,
-                    add_fpga_srcs=True if flow=="fpga" else False,
+                    add_sim_srcs=True if flow == "sim" else False,
+                    add_fpga_srcs=True if flow == "fpga" else False,
                     module_parameters=optional_parameters,
                     module_extension=source_file_extension,
                 )
