@@ -50,11 +50,11 @@ module iob_regfile_2p
 
    localparam IEND = N/WSTRB_W + (N%WSTRB_W ? 1 : 0);
    generate
-      for (i = 0; i < IEND; i = i + 1) begin : g_rows
+      for (i = 0; i < N; i = i + WSTRB_W) begin : g_rows
          for (j = 0; j < WSTRB_W; j = j + 1) begin : g_columns
 
-            if ( (i*WSTRB_W+j) < N ) begin: g_if
-               assign wen[i*WSTRB_W+j] = wen_i & (waddr_int == (i*WSTRB_W+j));
+            if ( (i+j) < N ) begin: g_if
+               assign wen[i+j] = wen_i & (waddr_int == (i+j)) & wstrb[j];
                iob_reg_e 
                  #(
                    .DATA_W (W),
@@ -66,9 +66,9 @@ module iob_regfile_2p
                   .clk_i (clk_i),
                   .arst_i(arst_i),
                   .cke_i (cke_i),
-                  .en_i  (wen[(i*WSTRB_W)+j]),
-                  .data_i(wdata_int[(i*8)+(j*W) +: W]),
-                  .data_o(regfile[(i*WDATA_INT_W)+(j*W) +: W])
+                  .en_i  (wen[i+j]),
+                  .data_i(wdata_int[(j*8) +: W]),
+                  .data_o(regfile[((i/WSTRB_W)*WDATA_INT_W)+(j*W) +: W])
                   );
             end
          end
