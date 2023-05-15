@@ -29,8 +29,10 @@ module iob_regfile_t2p #(
    generate
       for (addr = 0; addr < (2 ** ADDR_W); addr = addr + 1) begin : register_file
          always @(posedge w_clk_i, posedge w_arst_i) begin
-            if (w_arst_i) regfile_in[addr*DATA_W+:DATA_W] <= {DATA_W{1'd0}};
-            else if (w_cke_i && (w_addr_i == addr)) regfile_in[addr*DATA_W+:DATA_W] <= w_data_i;
+            if (w_arst_i) 
+              regfile_in[addr*DATA_W+:DATA_W] <= {DATA_W{1'd0}};
+            else if (w_cke_i && (w_addr_i == addr)) 
+              regfile_in[addr*DATA_W+:DATA_W] <= w_data_i;
          end
       end
    endgenerate

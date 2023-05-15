@@ -38,10 +38,13 @@ module iob_regfile_dp #(
       for (pos = 0; pos < (2 ** ADDR_W); pos = pos + 1) begin : register_file
          wire [ADDR_W-1:0] wire_pos = pos;
          always @(posedge clk_i, posedge arst_i)
-            if (arst_i) reg_file[pos] <= {DATA_W{1'b0}};
+            if (arst_i) 
+              reg_file[pos] <= {DATA_W{1'b0}};
             else if (cke_i) begin
-               if (rst_i) reg_file[pos] <= {DATA_W{1'b0}};
-               else if (wen && (addr == wire_pos)) reg_file[pos] <= wdata;
+               if (rst_i) 
+                 reg_file[pos] <= {DATA_W{1'b0}};
+               else if (wen && (addr == wire_pos)) 
+                 reg_file[pos] <= wdata;
             end
       end
    endgenerate
