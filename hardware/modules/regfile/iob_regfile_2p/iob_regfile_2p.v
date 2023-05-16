@@ -9,6 +9,7 @@ module iob_regfile_2p #(
    parameter RDATA_W = 0,           //width of read data
    parameter RADDR_W = 0,           //width of read address
    //cpu interface
+   //the address on the cpu side must be a byte address
    parameter DATA_W  = 0,           //width of data
    parameter WSTRB_W = WDATA_W / 8  //width of write strobe
 ) (
@@ -75,8 +76,6 @@ module iob_regfile_2p #(
    //read register file
    generate
       if (RADDR_W > 0) begin : g_read
-         //cpu interface
-         //the address on the cpu side must be a byte address
          wire [RADDR_W-1:0] raddr = req_i[(WSTRB_W+WDATA_W)+WADDR_W+:RADDR_W];
          assign resp_o = regfile[RDATA_W*raddr+:RDATA_W];
       end else begin : g_read
