@@ -51,7 +51,7 @@ module iob_regfile_2p
    localparam IEND = N/WSTRB_W + (N%WSTRB_W ? 1 : 0);
    generate
       for (i = 0; i < N; i = i + WSTRB_W) begin : g_rows
-         for (j = 0; j < WSTRB_W; j = j + 1) begin : g_columns
+         for (j = 0; j < (i==(N-1)? WSTRB_W: ((N%WSTRB_W)+1); j = j + 1) begin : g_columns
 
             if ( (i+j) < N ) begin: g_if
                assign wen[i+j] = wen_i & (waddr_int  == (i+j)) & wstrb[j];
@@ -78,8 +78,10 @@ module iob_regfile_2p
    //read register file
    generate 
       if (RADDR_W > 0) begin : g_read
-         assign resp_o = regfile[req_i[WSTRB_W+WDATA_W+WADDR_W+:RADDR_W]+: RDATA_W];
-      end 
+         assign resp_o = regfile[ req_i[WSTRB_W+WDATA_W+WADDR_W+:RADDR_W] +: RDATA_W];
+      end else begin : g_read
+         assign resp_o = regfile;
+      end
    endgenerate
 
 endmodule
