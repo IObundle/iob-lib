@@ -41,12 +41,10 @@ module iob_regfile_2p #(
    assign waddr_int = waddr + waddr_incr;
 
    //write register file
-   localparam WDATA_INT_W = WSTRB_W * W;
    wire [WDATA_W-1:0] wdata_int = req_i[WDATA_W-1:0];
    genvar i;
    genvar j;
 
-   localparam IEND = (N / WSTRB_W) + (((N % WSTRB_W) != 0) ? 1 : 0);
    generate
       for (i = 0; i < N; i = i + WSTRB_W) begin : g_rows
          for (
@@ -65,7 +63,7 @@ module iob_regfile_2p #(
                   .cke_i (cke_i),
                   .en_i  (wen[i+j]),
                   .data_i(wdata_int[(j*8)+:W]),
-                  .data_o(regfile[((i/WSTRB_W)*WDATA_INT_W)+(j*W)+:W])
+                  .data_o(regfile[(i+j)*W+:W])
                );
             end
          end
@@ -75,7 +73,7 @@ module iob_regfile_2p #(
    //read register file
    generate
       if (RADDR_W > 0) begin : g_read
-         assign resp_o = regfile[req_i[WSTRB_W+WDATA_W+WADDR_W+:RADDR_W]+:RDATA_W];
+         assign resp_o = regfile[req_i[(WSTRB_W+WDATA_W)+WADDR_W+:RADDR_W]+:RDATA_W];
       end else begin : g_read
          assign resp_o = regfile;
       end
