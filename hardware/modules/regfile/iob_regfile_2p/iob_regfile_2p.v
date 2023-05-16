@@ -21,14 +21,16 @@ module iob_regfile_2p #(
 );
 
    //register file and register file write enable
-   wire [       (N*W)-1 : 0] regfile;
-   wire [             N-1:0] wen;
+   wire [(N*W)-1 : 0] regfile;
+   wire [      N-1:0] wen;
 
    //reconstruct write address from waddr_i and wstrb_i
-   wire [       WSTRB_W-1:0] wstrb = req_i[WDATA_W+:WSTRB_W];
-   wire [       WADDR_W-1:0] waddr = req_i[WSTRB_W+WDATA_W+:WADDR_W];
-   wire [         WADDR_W:0] waddr_int;
-   wire [$clog2(DATA_W/8):0] waddr_incr;
+   wire [WSTRB_W-1:0] wstrb = req_i[WDATA_W+:WSTRB_W];
+   wire [WADDR_W-1:0] waddr = req_i[WSTRB_W+WDATA_W+:WADDR_W];
+   localparam WADDR_INT_W = (WADDR_W > ($clog2(DATA_W / 8) + 1)) ? WADDR_W
+                                 : ($clog2(DATA_W / 8) + 1);
+   wire [($clog2(DATA_W/8)+1)-1:0] waddr_incr;
+   wire [         WADDR_INT_W-1:0] waddr_int = waddr + waddr_incr;
 
    iob_ctls #(
       .N     (DATA_W / 8),
@@ -38,21 +40,18 @@ module iob_regfile_2p #(
       .data_i (wstrb),
       .count_o(waddr_incr)
    );
-   assign waddr_int = waddr + waddr_incr;
 
    //write register file
    wire [WDATA_W-1:0] wdata_int = req_i[WDATA_W-1:0];
    genvar i;
    genvar j;
 
-   localparam LAST_I = (N/WSTRB_W)*WSTRB_W;
-   localparam REM_I  = N - LAST_I;
-   
+   localparam LAST_I = (N / WSTRB_W) * WSTRB_W;
+   localparam REM_I = (N - LAST_I) + 1;
+
    generate
       for (i = 0; i < N; i = i + WSTRB_W) begin : g_rows
-         for (
-            j = 0; j < (i == LAST_I ? WSTRB_W : REM_I); j = j + 1
-         ) begin : g_columns
+         for (j = 0; j < ((i == LAST_I) ? REM_I : WSTRB_W); j = j + 1) begin : g_columns
 
             if ((i + j) < N) begin : g_if
                assign wen[i+j] = wen_i & (waddr_int == (i + j)) & wstrb[j];
@@ -76,7 +75,10 @@ module iob_regfile_2p #(
    //read register file
    generate
       if (RADDR_W > 0) begin : g_read
-         assign resp_o = regfile[req_i[(WSTRB_W+WDATA_W)+WADDR_W+:RADDR_W]+:RDATA_W];
+         //cpu interface
+         //the address on the cpu side must be a byte address
+         wire [RADDR_W-1:0] raddr = req_i[(WSTRB_W+WDATA_W)+WADDR_W+:RADDR_W];
+         assign resp_o = regfile[RDATA_W*raddr+:RDATA_W];
       end else begin : g_read
          assign resp_o = regfile;
       end
