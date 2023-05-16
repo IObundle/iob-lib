@@ -45,10 +45,13 @@ module iob_regfile_2p #(
    genvar i;
    genvar j;
 
+   localparam LAST_I = (N/WSTRB_W)*WSTRB_W;
+   localparam REM_I  = N - LAST_I;
+   
    generate
       for (i = 0; i < N; i = i + WSTRB_W) begin : g_rows
          for (
-            j = 0; j < ((i == (N - 1)) ? WSTRB_W : ((N % WSTRB_W) + 1)); j = j + 1
+            j = 0; j < (i == LAST_I ? WSTRB_W : REM_I); j = j + 1
          ) begin : g_columns
 
             if ((i + j) < N) begin : g_if
