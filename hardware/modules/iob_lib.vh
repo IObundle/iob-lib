@@ -20,15 +20,9 @@
 `define IOB_VARARRAY_2D(NAME, LEN, WIDTH) reg [WIDTH-1:0] NAME [LEN-1:0];
 `define IOB_VARARRAY_2D_SIGNED(NAME, LEN, WIDTH) reg signed [WIDTH-1:0] NAME [LEN-1:0];
 
-
 //declare and init var
 `define IOB_VAR_INIT(NAME, WIDTH, VAL) reg [WIDTH-1:0] NAME = VAL;
 
-
-//RESET SYNCHRONIZER
-`define IOB_RESET_SYNC(
-    CLK, RST_IN,
-    RST_OUT) always @(posedge CLK, posedge RST_IN) if(RST_IN) RST_OUT = 1; else RST_OUT = #1 RST_IN;
 
 
 
