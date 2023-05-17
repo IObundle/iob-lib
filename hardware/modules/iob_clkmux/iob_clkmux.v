@@ -24,7 +24,9 @@ module iob_clkmux (
       .O (clk_o)
    );
 `else
-   assign clk_o = clk_sel_i ? clk1_i : clk0_i;
+   reg     clk_v;
+   always @* clk_v = #1 clk_sel_i ? clk1_i : clk0_i;
+   assign clk_o = clk_v;
 `endif
 
 endmodule

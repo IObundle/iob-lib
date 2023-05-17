@@ -1,6 +1,9 @@
 `timescale 1ns / 1ps
 
-module iob_clkbuf (
+module iob_clkbuf #(
+                    parameter DELAY = 0
+                    )
+(
     input  clk_i,
     input  n_i,
     output clk_o
@@ -14,7 +17,9 @@ module iob_clkbuf (
       .O(clk_o)
    );
 `else
-   assign clk_o = clk_int;
+   reg clk_v;
+   always @* clk_v = #DELAY clk_int;
+   assign clk_o = clk_v;
 `endif
 
 endmodule
