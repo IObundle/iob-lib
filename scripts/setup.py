@@ -18,8 +18,9 @@ def getf(obj, name, field):
     return int(obj[next(i for i in range(len(obj)) if obj[i]["name"] == name)][field])
 
 
-# no_overlap: Optional argument. Selects if read/write addresses should not overlap
-def setup(python_module, no_overlap=False):
+# no_overlap: Optional argument. Selects if read/write register addresses should not overlap
+# disable_file_copy: Optional argument. Selects if files should be copied from setup directory to build directory. Enable this setting to run other specialized copy sequences.
+def setup(python_module, no_overlap=False, disable_file_copy=False):
     confs = python_module.confs
     ios = python_module.ios
     regs = python_module.regs
@@ -108,7 +109,7 @@ def setup(python_module, no_overlap=False):
     #
     # Setup flows
     #
-    build_srcs.flows_setup(python_module)
+    build_srcs.flows_setup(python_module, disable_file_copy=disable_file_copy)
 
     #
     # Generate hw

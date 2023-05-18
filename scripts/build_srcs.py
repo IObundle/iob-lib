@@ -14,10 +14,13 @@ import inspect
 import mk_configuration as mk_conf
 
 LIB_DIR = "submodules/LIB"
+# Global variable to disable automatic file copy from setup dir to build dir. May be useful for specialized copy sequences.
+global_disable_file_copy = False
 
 
 # This function sets up the flows for this core
-def flows_setup(python_module):
+def flows_setup(python_module, disable_file_copy=False):
+    global_disable_file_copy = disable_file_copy
     core_flows = python_module.flows
 
     # Setup simulation
@@ -33,6 +36,7 @@ def flows_setup(python_module):
 
     if "lint" in core_flows:
         lint_setup(python_module)
+
     if "syn" in core_flows:
         syn_setup(python_module)
 
@@ -40,8 +44,9 @@ def flows_setup(python_module):
     if "emb" in core_flows:
         sw_setup(python_module)
 
-    # Setup documentation
-    if "doc" in core_flows:
+    # Setup documentation if it is not top module
+    if "doc" in core_flows and \
+       not ("not_top_module" in vars(python_module) and python_module.not_top_module):
         doc_setup(python_module)
 
 
@@ -75,20 +80,21 @@ def hw_setup(python_module):
     version_file(core_name, core_version, core_previous_version, build_dir)
 
     # Copy Setup hw files (all .v and .sdc files under LIB/hardware/src)
-    copy_files(
-        f"{setup_dir}/hardware/src",
-        f"{build_dir}/hardware/src",
-        [],
-        "*.v*",
-        copy_all=True,
-    )
-    copy_files(
-        f"{setup_dir}/hardware/src",
-        f"{build_dir}/hardware/src",
-        [],
-        "*.sdc*",
-        copy_all=True,
-    )
+    if not global_disable_file_copy:
+        copy_files(
+            f"{setup_dir}/hardware/src",
+            f"{build_dir}/hardware/src",
+            [],
+            "*.v*",
+            copy_all=True,
+        )
+        copy_files(
+            f"{setup_dir}/hardware/src",
+            f"{build_dir}/hardware/src",
+            [],
+            "*.sdc*",
+            copy_all=True,
+        )
 
     # Setup any hw submodules by calling the 'main()' function from their *_setup.py module
     func_and_include_setup(hardware_srcs, Vheaders, flow="hw", lib_dir=LIB_DIR)
@@ -131,12 +137,13 @@ def sim_setup(python_module):
     sim_dir = "hardware/simulation"
 
     # Copy simulation sources
-    shutil.copytree(
-        f"{setup_dir}/{sim_dir}",
-        f"{build_dir}/{sim_dir}",
-        dirs_exist_ok=True,
-        ignore=shutil.ignore_patterns("*_setup*"),
-    )
+    if not global_disable_file_copy:
+        shutil.copytree(
+            f"{setup_dir}/{sim_dir}",
+            f"{build_dir}/{sim_dir}",
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("*_setup*"),
+        )
 
     # Add functions to the sim_srcs. These functions call setup modules for simulation setup (sim_setup.py)
     add_setup_functions(python_module, "sim_setup", setup_module=python_module)
@@ -189,7 +196,7 @@ def fpga_setup(python_module):
     # append this core hw flows to config_build
     mk_conf.append_flows_config_build_mk(core_flows, ["fpga"], build_dir)
 
-    if "fpga" in core_flows:
+    if not global_disable_file_copy:
         shutil.copytree(
             f"{setup_dir}/{fpga_dir}",
             f"{build_dir}/{fpga_dir}",
@@ -241,9 +248,10 @@ def lint_setup(python_module):
             for line in lines:
                 sources.write(re.sub(r"IOB_CORE_NAME", core_name, line))
 
-    copy_files(
-        f"{setup_dir}/{lint_dir}", f"{build_dir}/{lint_dir}", [], "*", copy_all=True
-    )
+    if not global_disable_file_copy:
+        copy_files(
+            f"{setup_dir}/{lint_dir}", f"{build_dir}/{lint_dir}", [], "*", copy_all=True
+        )
 
 
 # synthesis
@@ -252,7 +260,9 @@ def syn_setup(python_module):
     setup_dir = python_module.setup_dir
     syn_dir = "hardware/syn"
 
-    shutil.copytree(f"{setup_dir}/{syn_dir}", f"{build_dir}/{syn_dir}")
+    if not global_disable_file_copy:
+        shutil.copytree(f"{setup_dir}/{syn_dir}", f"{build_dir}/{syn_dir}")
+
     for file in Path(f"{LIB_DIR}/{syn_dir}").rglob("*"):
         src_file = file.as_posix()
         dest_file = re.sub(LIB_DIR, build_dir, src_file)
@@ -334,7 +344,8 @@ def sw_setup(python_module):
         mk_conf.append_flows_config_build_mk(core_flows, ["pc-emul"], build_dir)
 
     # Copy software tree if it exists as this core may contain software sources to be used by others
-    if os.path.isdir(f"{setup_dir}/software"):
+    if os.path.isdir(f"{setup_dir}/software")\
+       and not global_disable_file_copy:
         shutil.copytree(
             f"{setup_dir}/software",
             f"{build_dir}/software",
@@ -391,7 +402,7 @@ def doc_setup(python_module):
     setup_dir = python_module.setup_dir
 
     # For cores that have their own documentation
-    if "doc" in core_flows:
+    if not global_disable_file_copy:
         shutil.copytree(
             f"{setup_dir}/document", f"{build_dir}/document", dirs_exist_ok=True
         )
