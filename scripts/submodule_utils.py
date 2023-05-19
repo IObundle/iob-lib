@@ -393,7 +393,7 @@ class if_gen_hack_list:
     def write(self, port_string):
         # Parse written string
         port = re.search(
-            "^\s*((?:input)|(?:output))\s+\[([^:]+)-1:0\]\s+([^,]+), \/\/(.*)$",
+            "^\s*((?:input)|(?:output))\s+\[([^:]+)-1:0\]\s+([^,]+),(?: \/\/(.*))?$",
             port_string,
         )
         # Append port to port dictionary

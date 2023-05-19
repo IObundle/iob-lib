@@ -58,7 +58,7 @@ module apb2iob #(
       .data_o(pc)
    );
 
-   always_comb begin
+   always @* begin
 
       pc_nxt        = pc + 1'b1;
       apb_ready_nxt = apb_write_i ? iob_ready_nxt_i : iob_rvalid_nxt_i;
@@ -72,7 +72,8 @@ module apb2iob #(
          end
 
          default: begin
-            if (apb_enable_i && !apb_ready_o) pc_nxt = pc;
+            if (apb_enable_i && !apb_ready_o) //wait periph ready
+               pc_nxt = pc;
          end
       endcase
    end

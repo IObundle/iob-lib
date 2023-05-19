@@ -610,7 +610,7 @@ amba = [
         "width": AHB_SIZE_W,
         "name": "ahb_size",
         "default": "2",
-        "description": "Burst size. This signal indicates the size of each transfer in the burst.",
+        "description": "Burst size. Indicates the size of each transfer in the burst.",
     },
     {
         "ahb": 1,
@@ -654,7 +654,7 @@ amba = [
         "width": AHB_TRANS_W,
         "name": "ahb_trans",
         "default": "0",
-        "description": "Transfer type. This signal indicates the type of the transfer.",
+        "description": "Transfer type. Indicates the type of the transfer.",
     },
     {
         "ahb": 1,
@@ -676,7 +676,7 @@ amba = [
         "width": "1",
         "name": "ahb_enable",
         "default": "0",
-        "description": "Enable. This signal indicates the number of clock cycles of the transfer.",
+        "description": "Enable. Indicates the number of clock cycles of the transfer.",
     },
     {
         "ahb": 1,
@@ -687,7 +687,7 @@ amba = [
         "width": "1",
         "name": "ahb_write",
         "default": "0",
-        "description": "Write. This signal indicates the direction of the operation.",
+        "description": "Write. Indicates the direction of the operation.",
     },
     {
         "ahb": 1,
@@ -731,7 +731,7 @@ amba = [
         "width": "1",
         "name": "ahb_ready",
         "default": "0",
-        "description": "Ready. This signal indicates the end of a transfer.",
+        "description": "Ready. Indicates the end of a transfer.",
     },
     {
         "ahb": 1,
@@ -742,7 +742,7 @@ amba = [
         "width": "1",
         "name": "ahb_ready",
         "default": "0",
-        "description": "Ready input. This signal indicates the end of the last transfer.",
+        "description": "Ready input. Indicates the end of the last transfer.",
     },
     {
         "ahb": 1,
@@ -775,7 +775,7 @@ amba = [
         "width": "1",
         "name": "ahb_slverr",
         "default": "0",
-        "description": "Slave error. This signal indicates if the transfer has falied.",
+        "description": "Slave error. Indicates if the transfer has falied.",
     },
 ]
 
@@ -915,7 +915,8 @@ def suffix(direction):
 
 # Write port with given direction, bus width, name and description to file
 def write_port(direction, width, name, description, fout):
-    fout.write(direction + width + name + ", //" + description + "\n")
+    fout.write(direction + width + name + "," + "\n")
+    # fout.write(direction + width + name + ", //" + description + "\n")
 
 
 def m_port(prefix, fout, bus_size=1):

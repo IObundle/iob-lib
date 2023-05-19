@@ -138,7 +138,8 @@ def generate_ios_header(ios, top_module, out_dir):
             # Interface is not standard, read ports
             for port in table["ports"]:
                 f_io.write(
-                    f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if ios_table_prefix else ''}{port['name']}, //{port['descr']}\n"
+                    f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if ios_table_prefix else ''}{port['name']},\n"
+                    # f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if ios_table_prefix else ''}{port['name']}, //{port['descr']}\n"
                 )
         if "if_defined" in table.keys():
             f_io.write("`endif\n")
