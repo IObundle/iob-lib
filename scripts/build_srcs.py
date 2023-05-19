@@ -46,8 +46,9 @@ def flows_setup(python_module, disable_file_copy=False):
         sw_setup(python_module)
 
     # Setup documentation if it is not top module
-    if "doc" in core_flows and \
-       not ("not_top_module" in vars(python_module) and python_module.not_top_module):
+    if "doc" in core_flows and not (
+        "not_top_module" in vars(python_module) and python_module.not_top_module
+    ):
         doc_setup(python_module)
 
 
@@ -345,8 +346,7 @@ def sw_setup(python_module):
         mk_conf.append_flows_config_build_mk(core_flows, ["pc-emul"], build_dir)
 
     # Copy software tree if it exists as this core may contain software sources to be used by others
-    if os.path.isdir(f"{setup_dir}/software")\
-       and not global_disable_file_copy:
+    if os.path.isdir(f"{setup_dir}/software") and not global_disable_file_copy:
         shutil.copytree(
             f"{setup_dir}/software",
             f"{build_dir}/software",
