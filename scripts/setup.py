@@ -127,7 +127,7 @@ def setup(python_module, no_overlap=False, disable_file_copy=False):
     ios_lib.generate_ios_header(ios, top, build_dir + "/hardware/src")
 
     # Replace Verilog includes by Verilog header file contents
-    if is_top_module(python_module):
+    if is_top_module(python_module) and not disable_file_copy:
         verilog_tools.replace_includes([build_dir + "/hardware"])
 
     #

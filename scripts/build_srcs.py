@@ -20,6 +20,7 @@ global_disable_file_copy = False
 
 # This function sets up the flows for this core
 def flows_setup(python_module, disable_file_copy=False):
+    global global_disable_file_copy
     global_disable_file_copy = disable_file_copy
     core_flows = python_module.flows
 
@@ -408,12 +409,14 @@ def doc_setup(python_module):
         )
 
     # Copy LIB tex files if not present
+    os.makedirs(f"{build_dir}/document/tsrc", exist_ok=True)
     for file in os.listdir(f"{LIB_DIR}/document/tsrc"):
         shutil.copy2(
             f"{LIB_DIR}/document/tsrc/{file}", f"{build_dir}/document/tsrc/{file}"
         )
 
     # Copy LIB figures
+    os.makedirs(f"{build_dir}/document/figures", exist_ok=True)
     for file in os.listdir(f"{LIB_DIR}/document/figures"):
         shutil.copy2(
             f"{LIB_DIR}/document/figures/{file}", f"{build_dir}/document/figures/{file}"
