@@ -54,16 +54,19 @@ IOB_LIB_PATH=$(LIB_DIR)/scripts
 export IOB_LIB_PATH
 
 verilog-lint:
+ifneq ($(TESTER),1)
 	# Run linter on all verilog files of setup directory
 	$(IOB_LIB_PATH)/verilog-lint.sh `find hardware -type f -name "*.v?" -o -name "*.v" | tr '\n' ' '`
 	# Run linter on all verilog files of build directory (includes generated files)
 	$(IOB_LIB_PATH)/verilog-lint.sh `find $(BUILD_DIR) -type f -not -path "*version.vh" -not -path "*test_*.vh" -name "*.v?" -o -name "*.v"  | tr '\n' ' '`
-
+endif
 verilog-format:
+ifneq ($(TESTER),1)
 	# Run formatter on all verilog files of setup directory
 	$(IOB_LIB_PATH)/verilog-format.sh `find  hardware -type f -name "*.v?" -o -name "*.v" | tr '\n' ' '`
 	# Run formatter on all verilog files of build directory (includes generated files)
 	$(IOB_LIB_PATH)/verilog-format.sh `find $(BUILD_DIR) -type f -not -path "*test_*.vh" -name "*.v?" -o -name "*.v" | tr '\n' ' '`
+endif
 
 format-check-all: $(BUILD_DIR) python-format-check c-format-check verilog-lint verilog-format
 
