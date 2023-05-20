@@ -727,14 +727,6 @@ def version_file(core_name, core_version, core_previous_version, build_dir):
         with open(tex_file, "w") as tex_f:
             tex_f.write(core_previous_version)
 
-    vh_file = f"{verilog_dir}/{core_name}_version.vh"
-    vh_version_string = "0"
-    for c in core_version:
-        if c.isdigit():
-            vh_version_string += c
-    with open(vh_file, "w") as vh_f:
-        vh_f.write(f"`define VERSION {vh_version_string}")
-
 
 # Given a version string (like "V0.12"), return a 4 digit string representing the version (like "0012")
 def version_str_to_digits(version_str):
