@@ -25,10 +25,12 @@ module iob_iobuf (
       .IO(io)
    );
 `else
-   assign io    = t_i ? 1'bz : i;
-   assign o_int = io;
+   reg  o_var;
+   assign io = t_i ? 1'bz : i;
+   always @* o_var = #1 io;
+   assign o_int = o_var;
 `endif
 
-   assign o = n_i ^ o_int;
+   assign o = (n_i ^ o_int);
 
 endmodule
