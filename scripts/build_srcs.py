@@ -77,9 +77,8 @@ def hw_setup(python_module):
     )  # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
     submodule_dirs = python_module.submodules["dirs"]
 
-    # create module's *_version.vh Verilog Header
-    # TODO: Deprecated file?
-    version_file(core_name, core_version, core_previous_version, build_dir)
+    # create module's version TeX file. Also create *_version.vh Verilog Header if we do not have regs.
+    version_file(core_name, core_version, core_previous_version, build_dir, create_version_header=False if python_module.regs else True)
 
     # Copy Setup hw files (all .v and .sdc files under LIB/hardware/src)
     if not global_disable_file_copy:
@@ -715,7 +714,8 @@ def create_if_gen_headers(dest_dir, Vheaders):
     Vheaders = non_if_gen_interfaces
 
 
-def version_file(core_name, core_version, core_previous_version, build_dir):
+# Create TeX and optionally Verilog header files with the version of the system
+def version_file(core_name, core_version, core_previous_version, build_dir, create_version_header=True):
     tex_dir = f"{build_dir}/document/tsrc"
     verilog_dir = f"{build_dir}/hardware/src"
 
@@ -727,6 +727,16 @@ def version_file(core_name, core_version, core_previous_version, build_dir):
         with open(tex_file, "w") as tex_f:
             tex_f.write(core_previous_version)
 
+    if not create_version_header:
+        return
+
+    vh_file = f"{verilog_dir}/{core_name}_version.vh"
+    vh_version_string = "0"
+    for c in core_version:
+        if c.isdigit():
+            vh_version_string += c
+    with open(vh_file, "w") as vh_f:
+        vh_f.write(f"`define VERSION {vh_version_string}")
 
 # Given a version string (like "V0.12"), return a 4 digit string representing the version (like "0012")
 def version_str_to_digits(version_str):
