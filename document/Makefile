@@ -65,6 +65,7 @@ ugtop.tex:
 	if [ -f td.tex ]; then echo "\def\TD{Y}" >> $@; fi
 	if ls *_swreg_tab.tex > /dev/null 2>&1; then echo "\def\SWREG{Y}" >> $@; fi
 	if [ $(ASICSYNTH) == 1 ]; then echo "\def\ASICSYNTH{Y}" >> $@; fi
+	if [ $(FPGACOMP) == 1 ]; then echo "\def\FPGACOMP{Y}" >> $@; fi
 	make doctop DOC=ug
 
 #include implementation results if available
@@ -78,7 +79,6 @@ AMD_FPGA:=1
 endif
 
 RESULTS = $(INTEL_FPGA)$(AMD_FPGA)$(UMC130_ASIC)
-ASICSYNTH?=$(UMC130_ASIC)
 
 rntop.tex:
 	make doctop DOC=rn
