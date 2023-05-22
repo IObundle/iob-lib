@@ -471,8 +471,12 @@ def setup_submodules(python_module):
         if not setup_type.endswith("_setup"):
             continue
 
-        items_to_delete = []
-        for item in python_module.submodules[setup_type]["modules"]:
+        # Iterate through every module in list
+        idx=0
+        while idx < len(python_module.submodules[setup_type]["modules"]):
+            item = python_module.submodules[setup_type]["modules"][idx]
+            idx += 1
+
             # If item is a tuple then it contains optional parameters
             if type(item) == tuple:
                 # Save optional_parameters in a variable
@@ -515,12 +519,9 @@ def setup_submodules(python_module):
             # Call main function to setup this module
             module.main()
 
-            # Mark this module for removal
-            items_to_delete.append(item)
-
-        # Remove marked modules from list
-        for item in items_to_delete:
-            python_module.submodules[setup_type]["modules"].remove(item)
+            # Remove this module
+            idx -= 1
+            del python_module.submodules[setup_type]["modules"][idx]
 
 
 # Setup submodules in modules_dictionary
