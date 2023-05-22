@@ -20,7 +20,8 @@ def getf(obj, name, field):
 
 # no_overlap: Optional argument. Selects if read/write register addresses should not overlap
 # disable_file_copy: Optional argument. Selects if files should be copied from setup directory to build directory. Enable this setting to run other specialized copy sequences.
-def setup(python_module, no_overlap=False, disable_file_copy=False):
+# disable_file_gen: Optional argument. Selects if files should be auto-generated.
+def setup(python_module, no_overlap=False, disable_file_copy=False, disable_file_gen=False):
     confs = python_module.confs
     ios = python_module.ios
     regs = python_module.regs
@@ -111,53 +112,54 @@ def setup(python_module, no_overlap=False, disable_file_copy=False):
     #
     build_srcs.flows_setup(python_module, disable_file_copy=disable_file_copy)
 
-    #
-    # Generate hw
-    #
-    if regs:
-        mkregs_obj.write_hwheader(reg_table, build_dir + "/hardware/src", top)
-        mkregs_obj.write_lparam_header(
-            reg_table, build_dir + "/hardware/simulation/src", top
-        )
-        mkregs_obj.write_hwcode(reg_table, build_dir + "/hardware/src", top)
-    mk_conf.params_vh(confs, top, build_dir + "/hardware/src")
+    # Only auto-generate files if `disable_file_gen` is False
+    if not disable_file_gen:
+        #
+        # Generate hw
+        #
+        if regs:
+            mkregs_obj.write_hwheader(reg_table, build_dir + "/hardware/src", top)
+            mkregs_obj.write_lparam_header(
+                reg_table, build_dir + "/hardware/simulation/src", top
+            )
+            mkregs_obj.write_hwcode(reg_table, build_dir + "/hardware/src", top)
 
-    mk_conf.conf_vh(confs, top, build_dir + "/hardware/src")
+        mk_conf.params_vh(confs, top, build_dir + "/hardware/src")
 
-    ios_lib.generate_ios_header(ios, top, build_dir + "/hardware/src")
+        mk_conf.conf_vh(confs, top, build_dir + "/hardware/src")
+
+        ios_lib.generate_ios_header(ios, top, build_dir + "/hardware/src")
+
+        #
+        # Generate sw
+        #
+        if "emb" in python_module.flows:
+            if regs:
+                mkregs_obj.write_swheader(
+                    reg_table, python_module.build_dir + "/software/src", top
+                )
+                mkregs_obj.write_swcode(
+                    reg_table, python_module.build_dir + "/software/src", top
+                )
+                mkregs_obj.write_swheader(
+                    reg_table, python_module.build_dir + "/software/src", top
+                )
+            mk_conf.conf_h(confs, top, python_module.build_dir + "/software/src")
+
+        #
+        # Generate TeX
+        #
+        #if "doc" in python_module.flows:
+        if False: #TODO: Temporiarily disabled
+            mk_conf.generate_confs_tex(confs, python_module.build_dir + "/document/tsrc")
+            ios_lib.generate_ios_tex(ios, python_module.build_dir + "/document/tsrc")
+            if regs:
+                mkregs_obj.generate_regs_tex(regs, reg_table, build_dir + "/document/tsrc")
+            blocks_lib.generate_blocks_tex(blocks, build_dir + "/document/tsrc")
 
     # Replace Verilog includes by Verilog header file contents
     if is_top_module(python_module) and not disable_file_copy:
         verilog_tools.replace_includes([build_dir + "/hardware"])
-
-    #
-    # Generate sw
-    #
-    if os.path.isdir(python_module.build_dir + "/software"):
-        if regs:
-            mkregs_obj.write_swheader(
-                reg_table, python_module.build_dir + "/software/src", top
-            )
-            mkregs_obj.write_swcode(
-                reg_table, python_module.build_dir + "/software/src", top
-            )
-            mkregs_obj.write_swheader(
-                reg_table, python_module.build_dir + "/software/src", top
-            )
-        mk_conf.conf_h(confs, top, python_module.build_dir + "/software/src")
-
-    #
-    # Generate TeX
-    #
-    # Only generate TeX of this core if it is the top module
-    if os.path.isdir(python_module.build_dir + "/document/tsrc") and is_top_module(
-        python_module
-    ):
-        mk_conf.generate_confs_tex(confs, python_module.build_dir + "/document/tsrc")
-        ios_lib.generate_ios_tex(ios, python_module.build_dir + "/document/tsrc")
-        if regs:
-            mkregs_obj.generate_regs_tex(regs, reg_table, build_dir + "/document/tsrc")
-        blocks_lib.generate_blocks_tex(blocks, build_dir + "/document/tsrc")
 
 
 # Check if the given python_module is the top module (return true) or is a submodule (return false)
