@@ -461,10 +461,9 @@ def write_git_revision_short_hash(dst_dir):
 # python_module: python module of *_setup.py of the core/system, should contain setup_dir
 def setup_submodules(python_module):
     modules_dictionary = {}
-    submodule_dirs = []
 
-    if "dirs" in python_module.submodules:
-        submodule_dirs = python_module.submodules["dirs"]
+    set_default_submodule_dirs(python_module)
+    submodule_dirs = python_module.submodules["dirs"]
 
     for setup_type in python_module.submodules:
         # Skip non "*_setup" dictionaies
