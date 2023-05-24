@@ -115,7 +115,7 @@ def setup(python_module, no_overlap=False):
 
     # Replace Verilog includes by Verilog header file contents
     if create_build_dir:
-        verilog_tools.replace_includes([build_dir + "/hardware"])
+        verilog_tools.replace_includes(build_dir)
 
     #
     # Generate sw
