@@ -78,7 +78,7 @@ def replace_includes(search_paths=[]):
     for path in search_paths:
         for root, dirs, files in os.walk(path):
             for file in files:
-                if file.endswith(".v") or file.endswith(".sv") or file.endswith(".vh"):
+                if file.endswith(".v") or file.endswith(".sv") or file.endswith(".vh") or file.endswith(".vs"):
                     if file not in verilog_files:
                         verilog_files[file] = []
                     verilog_files[file].append(root)

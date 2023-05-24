@@ -267,17 +267,17 @@ class mkregs:
         #
 
         os.makedirs(out_dir, exist_ok=True)
-        f_inst = open(f"{out_dir}/{top}_swreg_inst.vh", "w")
+        f_inst = open(f"{out_dir}/{top}_swreg_inst.vs", "w")
 
         # connection wires
         self.gen_inst_wire(table, f_inst)
 
         f_inst.write(f"{top}_swreg_gen #(\n")
-        f_inst.write(f'  `include "{top}_inst_params.vh"\n')
+        f_inst.write(f'  `include "{top}_inst_params.vs"\n')
         f_inst.write("\n) swreg_0 (\n")
         self.gen_portmap(table, f_inst)
-        f_inst.write('  `include "iob_s_portmap.vh"\n')
-        f_inst.write('  `include "iob_clkenrst_portmap.vh"')
+        f_inst.write('  `include "iob_s_portmap.vs"\n')
+        f_inst.write('  `include "iob_clkenrst_portmap.vs"')
         f_inst.write("\n);\n")
 
         #
@@ -301,14 +301,14 @@ class mkregs:
 
         # parameters
         f_gen.write("#(\n")
-        f_gen.write(f'`include "{top}_params.vh"\n')
+        f_gen.write(f'`include "{top}_params.vs"\n')
         f_gen.write(")\n")
         f_gen.write("(\n")
 
         # ports
         self.gen_port(table, f_gen)
-        f_gen.write('  `include "iob_s_port.vh"\n')
-        f_gen.write('  `include "iob_clkenrst_port.vh"\n')
+        f_gen.write('  `include "iob_s_port.vs"\n')
+        f_gen.write('  `include "iob_clkenrst_port.vs"\n')
         f_gen.write(");\n\n")
 
         # write address
@@ -520,10 +520,10 @@ class mkregs:
         f_gen.close()
         f_inst.close()
 
-    # Generate *_swreg_lparam.vh file. Macros from this file contain the default values of the registers. These should not be used inside the instance of the core/system.
+    # Generate *_swreg_lparam.vs file. Macros from this file contain the default values of the registers. These should not be used inside the instance of the core/system.
     def write_lparam_header(self, table, out_dir, top):
         os.makedirs(out_dir, exist_ok=True)
-        f_def = open(f"{out_dir}/{top}_swreg_lparam.vh", "w")
+        f_def = open(f"{out_dir}/{top}_swreg_lparam.vs", "w")
         f_def.write("//used address space width\n")
         addr_w_prefix = f"{top}_swreg".upper()
         f_def.write(f"localparam {addr_w_prefix}_ADDR_W = {self.core_addr_w};\n\n")

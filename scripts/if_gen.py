@@ -1269,12 +1269,12 @@ def create_signal_table(interface_name):
 
 
 #
-# Write to .vh file
+# Write to .vs file
 #
 
 
 # port_prefix: Prefix for ports in a portmap file.
-# wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vh` file; Prefix for ports in a `*port.vh` file (these ports also create wires);
+# wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file; Prefix for ports in a `*port.vs` file (these ports also create wires);
 def write_vh_contents(
     interface_name, port_prefix, wire_prefix, file_object, bus_size=1, bus_start=0
 ):
@@ -1320,14 +1320,14 @@ def main():
     # make AXI bus
     create_signal_table(interface_name)
 
-    # open output .vh file
-    fout = open(file_prefix + interface_name + ".vh", "w")
+    # open output .vs file
+    fout = open(file_prefix + interface_name + ".vs", "w")
 
     # write pragma for doc production
     if interface_name.find("port") + 1 and not interface_name.find("portmap") + 1:
         fout.write("  //START_IO_TABLE " + port_prefix + interface_name + "\n")
 
-    # call function func to generate .vh file
+    # call function func to generate .vs file
     write_vh_contents(interface_name, port_prefix, wire_prefix, fout)
 
     fout.close()

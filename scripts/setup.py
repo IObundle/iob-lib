@@ -91,9 +91,9 @@ def setup(python_module, no_overlap=False):
             python_module.submodules["hw_setup"] = {"headers": [], "modules": []}
         # Auto-add iob_ctls module
         python_module.submodules["hw_setup"]["modules"].append("iob_ctls")
-        # Auto-add iob_s_port.vh
+        # Auto-add iob_s_port.vs
         python_module.submodules["hw_setup"]["headers"].append("iob_s_port")
-        # Auto-add iob_s_portmap.vh
+        # Auto-add iob_s_portmap.vs
         python_module.submodules["hw_setup"]["headers"].append("iob_s_portmap")
 
     #
