@@ -1,1 +1,1 @@
-scripts/shell.nix
+scripts/default.nix

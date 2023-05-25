@@ -21,7 +21,7 @@ endif
 
 #make wavedrom figures
 %.pdf: %.svg
-	inkscape --export-filename $@ $<
+	rsvg-convert $< > $@
 
 %.svg: %.drom
 	wavedrompy -i $< -s $@
