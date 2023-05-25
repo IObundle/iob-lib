@@ -8,10 +8,14 @@ import re
 # Find include statements inside those files and replace them by the contents of the included file
 
 
-def replace_includes(build_dir=""):
+def replace_includes(setup_dir="", build_dir=""):
     VSnippetFiles = []
     VerilogFiles  = []
     SearchPaths = f"{build_dir}/hardware"
+    VSnippetDir = f"{setup_dir}/hardware/aux"
+
+    if not os.path.isdir(VSnippetDir):
+        os.mkdir(VSnippetDir)
 
     for root, dirs, files in os.walk(SearchPaths):
         for file in files:
@@ -21,6 +25,7 @@ def replace_includes(build_dir=""):
                 VerilogFiles.append(f"{root}/{file}")
     
     for VSnippetFile in VSnippetFiles:
+        head, tail = os.path.split(VSnippetFile)
         with open(VSnippetFile, "r") as snippet:
             code = snippet.read()
         for VerilogFile in VerilogFiles:
@@ -28,10 +33,10 @@ def replace_includes(build_dir=""):
                 lines = source.readlines()
             with open(VerilogFile, "w") as source:
                 for line in lines:
-                    head, tail = os.path.split(VSnippetFile)
                     text = re.sub(r'`include "{0}"'.format(tail), code, line)
                     e = source.write(text)
-        os.remove(VSnippetFile) #Maybe for debug it would be good to move them somewhere
+        os.remove(VSnippetFile) #Maybe for debug it would be good to move them somewhere. However, the directory where it is moved to should be ignored by verible.
+        #os.rename(VSnippetFile, f"{VSnippetDir}/{tail}")
         #print(f"{iob_colors.INFO}Deleted file: {VSnippetFile}{iob_colors.ENDC}")
 
     print(f"{iob_colors.INFO}Replaced Verilog Snippet includes with respective content and deleted the files.{iob_colors.ENDC}")
