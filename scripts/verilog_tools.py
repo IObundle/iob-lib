@@ -10,7 +10,7 @@ import re
 
 def replace_includes(setup_dir="", build_dir=""):
     VSnippetFiles = []
-    VerilogFiles  = []
+    VerilogFiles = []
     SearchPaths = f"{build_dir}/hardware"
     VSnippetDir = f"{setup_dir}/hardware/aux"
 
@@ -23,7 +23,7 @@ def replace_includes(setup_dir="", build_dir=""):
                 VSnippetFiles.append(f"{root}/{file}")
             elif file.endswith(".v") or file.endswith(".sv") or file.endswith(".vh"):
                 VerilogFiles.append(f"{root}/{file}")
-    
+
     for VSnippetFile in VSnippetFiles:
         head, tail = os.path.split(VSnippetFile)
         with open(VSnippetFile, "r") as snippet:
@@ -35,8 +35,11 @@ def replace_includes(setup_dir="", build_dir=""):
                 for line in lines:
                     text = re.sub(r'`include "{0}"'.format(tail), code, line)
                     e = source.write(text)
-        os.remove(VSnippetFile) #Maybe for debug it would be good to move them somewhere. However, the directory where it is moved to should be ignored by verible.
-        #os.rename(VSnippetFile, f"{VSnippetDir}/{tail}")
-        #print(f"{iob_colors.INFO}Deleted file: {VSnippetFile}{iob_colors.ENDC}")
+        os.remove(VSnippetFile)
+        # Maybe for debug it would be good to move them somewhere. However, the directory where it is moved to should be ignored by verible.
+        # os.rename(VSnippetFile, f"{VSnippetDir}/{tail}")
+        # print(f"{iob_colors.INFO}Deleted file: {VSnippetFile}{iob_colors.ENDC}")
 
-    print(f"{iob_colors.INFO}Replaced Verilog Snippet includes with respective content and deleted the files.{iob_colors.ENDC}")
+    print(
+        f"{iob_colors.INFO}Replaced Verilog Snippet includes with respective content and deleted the files.{iob_colors.ENDC}"
+    )

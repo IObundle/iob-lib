@@ -696,7 +696,9 @@ def copy_files(src_dir, dest_dir, sources=[], pattern="*", copy_all=False):
 def create_if_gen_headers(dest_dir, VIncludes):
     non_if_gen_interfaces = []
     for vh_name in VIncludes:
-        if type(vh_name) == str and (vh_name.endswith(".vs") or vh_name.endswith(".vh")):
+        if type(vh_name) == str and (
+            vh_name.endswith(".vs") or vh_name.endswith(".vh")
+        ):
             # Save this entry as a .vs file.
             non_if_gen_interfaces.append(vh_name)
             continue  # Skip if_gen for this entry
