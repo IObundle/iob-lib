@@ -33,8 +33,8 @@ module iob2axi #(
     //
     // AXI-4 Full Master I/F
     //
-    `include "m_axi_m_port.vh"
-    `include "iob_clkrst_if.vh"
+    `include "m_axi_m_port.vs"
+    `include "iob_clkrst_if.vs"
 );
 
    wire run_int;
@@ -259,7 +259,7 @@ module iob2axi #(
       .error_o (error_rd),
 
       // AXI-4 full read master I/F
-      `include "m_m_axi_read_portmap.vh"
+      `include "m_m_axi_read_portmap.vs"
       // Native Master Write I/F
       .m_valid_o(rd_valid),
       .m_addr_o (rd_addr),
@@ -286,7 +286,7 @@ module iob2axi #(
       .error_o (error_wr),
 
       // AXI-4 full write master I/F
-      `include "m_m_axi_write_portmap.vh"
+      `include "m_m_axi_write_portmap.vs"
 
       // Native Master Read I/F
       .m_valid_o(wr_valid),

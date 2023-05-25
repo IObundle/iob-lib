@@ -23,7 +23,7 @@ module axis2axi_out #(
     input  [         1-1:0] axis_out_ready_i,
 
     // Axi master interface
-    `include "iob_axi_m_read_port.vh"
+    `include "iob_axi_m_read_port.vs"
 
     input [1-1:0] clk_i,
     input [1-1:0] cke_i,
