@@ -66,19 +66,26 @@ reserved_signals = {
 }
 
 
-# Import the <corename>_setup.py from the given core directory
-def import_setup(module_dir, **kwargs):
-    # Find <corename>_setup.py file
-    for x in os.listdir(module_dir):
-        if x.endswith("_setup.py"):
-            filename = x
-            break
-    if "filename" not in vars():
-        raise FileNotFoundError(f"Could not find a *_setup.py file in {module_dir}")
+# Import the <corename>_setup.py from the given core directory/file
+def import_setup(module_location, **kwargs):
+    # Check if module_location is a directory
+    if os.path.isdir(module_location):
+        # Find <corename>_setup.py file
+        for x in os.listdir(module_location):
+            if x.endswith("_setup.py"):
+                filename = x
+                module_location = module_location + "/" + x
+                break
+        if "filename" not in vars():
+            raise FileNotFoundError(f"Could not find a *_setup.py file in {module_location}")
+    else:
+        if not os.path.isfile(module_location):
+            raise FileNotFoundError(f"Could not find {module_location}")
+        filename = module_location.split("/")[-1]
     # Import <corename>_setup.py
     module_name = filename.split(".")[0]
     spec = importlib.util.spec_from_file_location(
-        module_name, module_dir + "/" + filename
+        module_name, module_location
     )
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = module

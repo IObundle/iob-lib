@@ -170,21 +170,6 @@ def is_top_module(python_module):
     else:
         return True
 
-
-# Print build directory of the core/system in the current directory (extracted from *_setup.py)
-def get_build_dir():
-    module = import_setup(".")
-    print(module.build_dir)
-
-
-# Return white-space separated list of submodules directories of the core/system in the current directory (extracted from *_setup.py)
-def get_core_submodules_dirs():
-    module = import_setup(".")
-    set_default_submodule_dirs(module)
-    for key, value in module.submodules["dirs"].items():
-        print(f"{key}_DIR={value}", end=" ")
-
-
 # Insert header in source files
 def insert_header():
     # invoked from the command line as:

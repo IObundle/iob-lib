@@ -14,18 +14,21 @@ help:
 
 
 
-SETUP_PYTHON_FILENAME=$(wildcard *_setup.py)
+TOP_MODULE_NAME ?=$(basename $(wildcard *.py))
+PROJECT_ROOT ?=.
+
+LIB_DIR=submodules/LIB
 
 # python scripts directory
-PYTHON_DIR=submodules/LIB/scripts
+PYTHON_DIR=$(LIB_DIR)/scripts
 
 PYTHON_EXEC:=/usr/bin/env python3 -B
 
-#submodule directories
-$(foreach entry, $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_core_submodules_dirs), $(eval $(entry)))
+#submodule directories DEPRECATED
+#$(foreach entry, $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_core_submodules_dirs), $(eval $(entry)))
 
 # establish build dir paths
-BUILD_DIR := $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_build_dir)
+BUILD_DIR := $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/bootstrap.py $(TOP_MODULE_NAME) -f get_build_dir -s $(PROJECT_ROOT))
 
 BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
 
@@ -73,7 +76,7 @@ format-check-all: $(BUILD_DIR) python-format-check c-format-check verilog-lint v
 setup: debug
 
 $(BUILD_DIR):
-	$(PYTHON_EXEC) ./$(SETUP_PYTHON_FILENAME) $(SETUP_ARGS)
+	$(PYTHON_EXEC) ./$(PYTHON_DIR)/bootstrap.py $(TOP_MODULE_NAME) $(SETUP_ARGS) -s $(PROJECT_ROOT)
 
 #
 #DOCUMENT
