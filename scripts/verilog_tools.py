@@ -21,7 +21,12 @@ def replace_includes(setup_dir="", build_dir=""):
         for file in files:
             if file.endswith(".vs"):
                 VSnippetFiles.append(f"{root}/{file}")
-            elif file.endswith(".v") or file.endswith(".sv") or file.endswith(".vh") or file.endswith(".vs"):
+            elif (
+                file.endswith(".v")
+                or file.endswith(".sv")
+                or file.endswith(".vh")
+                or file.endswith(".vs")
+            ):
                 VerilogFiles.append(f"{root}/{file}")
 
     for VSnippetFile in VSnippetFiles:
