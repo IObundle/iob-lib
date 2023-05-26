@@ -6,11 +6,11 @@
    iob2apb0
      (
       // APB master interface
-`include "<core name prefix>apb_portmap.vh"
+`include "<core name prefix>apb_portmap.vs"
 
       // IOb slave interface
-`include "<core name prefix>portmap.vh"
+`include "<core name prefix>portmap.vs"
 
       // Global signals
-`include "iob_clkenrst_portmap.vh"
+`include "iob_clkenrst_portmap.vs"
       );

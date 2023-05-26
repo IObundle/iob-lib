@@ -11,15 +11,15 @@ module iob2axil #(
     //
     // AXI4 Lite master interface
     //
-    `include "iob_axil_m_port.vh"
+    `include "iob_axil_m_port.vs"
 
     //
     // IOb slave interface
     //
-    `include "iob_s_port.vh"
+    `include "iob_s_port.vs"
 
     // Global signals
-    `include "iob_clkrst_port.vh"
+    `include "iob_clkrst_port.vs"
 );
 
    //

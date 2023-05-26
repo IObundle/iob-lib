@@ -7,11 +7,11 @@
    axil2iob0
      (
       // AXI4 Lite slave interface
-`include "<core name prefix>axil_portmap.vh"
+`include "<core name prefix>axil_portmap.vs"
 
       // IOb master interface
-`include "<core name prefix>portmap.vh"
+`include "<core name prefix>portmap.vs"
 
       // Global signals
-`include "iob_clkrst_portmap.vh"
+`include "iob_clkrst_portmap.vs"
       );

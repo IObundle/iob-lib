@@ -23,7 +23,7 @@ module iob2axi_rd #(
     //
     // AXI-4 Full Master Read I/F
     //
-    `include "m_axi_read_m_port.vh"
+    `include "m_axi_read_m_port.vs"
 
     //
     // Native Master Write I/F

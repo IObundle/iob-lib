@@ -11,7 +11,7 @@ module apb2iob #(
     parameter DATA_W     = APB_DATA_W   // IOb data bus width in bits
 ) (
     // APB slave interface
-    `include "iob_apb_s_port.vh"
+    `include "iob_apb_s_port.vs"
 
     // IOb master interface
     output [         1-1:0] iob_avalid_o,      //Request valid.
@@ -23,7 +23,7 @@ module apb2iob #(
     input  [         1-1:0] iob_ready_nxt_i,   //Interface ready.
 
     // Global signals
-    `include "iob_clkenrst_port.vh"
+    `include "iob_clkenrst_port.vs"
 );
 
 
