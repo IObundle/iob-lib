@@ -7,9 +7,9 @@ module iob_merge #(
     parameter ADDR_W = 0,
     parameter N      = 0
 ) (
-    `include "iob_split_i_iob_port.vh"
-    `include "iob_split_o_iob_port.vh"
-    `include "iob_clkenrst.vh"
+    `include "iob_split_i_iob_port.vs"
+    `include "iob_split_o_iob_port.vs"
+    `include "iob_clkenrst.vs"
 );
 
    localparam NBITS = $clog2(N) + ($clog2(N) == 0);

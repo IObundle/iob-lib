@@ -12,13 +12,13 @@ module iob2apb #(
     parameter DATA_W     = APB_DATA_W   // IOb data bus width in bits
 ) (
     // IOb slave interface
-    `include "iob_s_port.vh"
+    `include "iob_s_port.vs"
 
     // APB master interface
-    `include "iob_apb_m_port.vh"
+    `include "iob_apb_m_port.vs"
 
     // Global signals
-    `include "iob_clkenrst_port.vh"
+    `include "iob_clkenrst_port.vs"
 );
 
    //APB outputs

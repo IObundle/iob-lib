@@ -91,9 +91,9 @@ def setup(python_module, no_overlap=False):
             python_module.submodules["hw_setup"] = {"headers": [], "modules": []}
         # Auto-add iob_ctls module
         python_module.submodules["hw_setup"]["modules"].append("iob_ctls")
-        # Auto-add iob_s_port.vh
+        # Auto-add iob_s_port.vs
         python_module.submodules["hw_setup"]["headers"].append("iob_s_port")
-        # Auto-add iob_s_portmap.vh
+        # Auto-add iob_s_portmap.vs
         python_module.submodules["hw_setup"]["headers"].append("iob_s_portmap")
 
     #
@@ -115,7 +115,7 @@ def setup(python_module, no_overlap=False):
 
     # Replace Verilog includes by Verilog header file contents
     if create_build_dir:
-        verilog_tools.replace_includes([build_dir + "/hardware"])
+        verilog_tools.replace_includes(python_module.setup_dir, build_dir)
 
     #
     # Generate sw
