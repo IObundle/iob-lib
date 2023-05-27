@@ -5,12 +5,10 @@ module iob_regfile_dp_tb;
 
    localparam DATA_W = 32;
 
+              
+   localparam MODE = "RW";   
    localparam N = 8;
    localparam W = 8;
-              
-   localparam MODE = "RW";
-
-
    localparam NBYTES = (W<=8) ? N : (W<=16) ? 2*N : 4*N;
    localparam ADDR_W = $clog2(NBYTES);
 
@@ -39,7 +37,9 @@ module iob_regfile_dp_tb;
    
    // clock
    `IOB_CLOCK(clk, 10)
-  
+
+   integer             i;
+   
    initial begin
       // optional VCD
 `ifdef VCD
@@ -55,15 +55,27 @@ module iob_regfile_dp_tb;
 
       // pulse reset
       `IOB_PULSE(arst, 11, 12, 13)
-      
-      iob_write(0, 1, W);
-      iob_read(0, rdata, W);
+
+      for (i=0; i<N; i=i+1) begin
+         iob_write(i, ~i, W);
+      end
+
+      for (i=0; i<N; i=i+1) begin
+         iob_read(i, rdata, W);
+         if (rdata[(i%(DATA_W/8))*8+:W] !== ~i[W-1:0]) begin
+            $display("rdata = %h", rdata);
+            $display("ERROR: rdata = %h, expected %h", rdata[(i%(DATA_W/8))*8+:W], ~i[W-1:0]);
+            $display("%h", uut.regfile);
+            //$fatal(1);
+         end
+      end
+
 
       #100 $finish();
       
    end
 
-   wire [(1+ADDR_W+1+DATA_W)-1:0] cpu_req_i = {iob_avalid_i, iob_addr_i, |iob_wstrb_i, iob_wdata_i};
+   wire [1+ADDR_W+DATA_W:0] cpu_req_i = {iob_avalid_i, iob_addr_i, |iob_wstrb_i, iob_wdata_i};
    wire [(2+DATA_W)-1:0]               cpu_resp_o;
    
    wire [($clog2(N)+1+W)-1:0]          logic_req_i = {logic_addr_i, logic_we_i, logic_wdata_i};
@@ -90,6 +102,42 @@ module iob_regfile_dp_tb;
                            .logic_resp_o(logic_resp_o)
                            );
 
-   `include "iob_tasks.vh"
+   // Write data to IOb Native slave
+   task iob_write;
+      input [ADDR_W-1:0] addr;
+      input [DATA_W-1:0] data;
+      input [$clog2(DATA_W):0] width;
+      
+      begin
+         @(posedge clk) #1 iob_avalid_i = 1;  //sync and assign
+         iob_addr_i  = addr;
+         iob_wdata_i = `IOB_GET_WDATA(addr, data);
+         iob_wstrb_i = `IOB_GET_WSTRB(addr, width);
+         
+         while (!iob_ready_o) #1;
+         
+         @(posedge clk) iob_avalid_i = 0;
+         iob_wstrb_i = 0;
+      end
+   endtask
+
+   // Read data from IOb Native slave
+   task iob_read;
+      input [ADDR_W-1:0] addr;
+      output [DATA_W-1:0] data;
+      input [$clog2(DATA_W):0] width;
+      
+      begin
+         @(posedge clk) #1 iob_avalid_i = 1;
+         iob_addr_i = addr;
+         
+         while (!iob_ready_o) #1;
+         @(posedge clk) #1 iob_avalid_i = 0;
+         
+         while (!iob_rvalid_o) #1;
+         data = #1 `IOB_GET_RDATA(addr, iob_rdata_o, width);
+  end
+endtask
+
 
 endmodule

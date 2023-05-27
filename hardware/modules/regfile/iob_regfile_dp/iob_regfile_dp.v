@@ -31,6 +31,7 @@ module iob_regfile_dp
 
    //cpu interface
    wire                                  iob_avalid = cpu_req_i[1+ADDR_W+DATA_W];
+   wire [ADDR_W-1:0]                     iob_addr = cpu_req_i[ADDR_W+DATA_W+(ADDR_W == 0)-:ADDR_W];
    wire [DATA_W-1:0]                     iob_wdata = cpu_req_i[DATA_W-1:0];
    wire                                  iob_wen = cpu_req_i[DATA_W];
    wire                                  iob_ready = 1'b1;
@@ -44,11 +45,13 @@ module iob_regfile_dp
    wire logic_addr = logic_req_i[W+1:$clog2(N)];
    
    //THE REGISTER FILE
-   wire [W-1:0] regfile[0:N-1];
-   reg [W-1:0]  regfile_wdata [0:N-1];
-   reg [N-1:0]  regfile_wen;
+   wire [N*W-1:0] regfile;
+   reg [N*W-1:0]  regfile_wdata;
+   reg [N-1:0]    regfile_wen;
 
-   genvar           i;
+
+   integer j;  
+   genvar  i;
 
    generate 
       for (i=0; i < N; i=i+1) begin: g_regfile
@@ -61,8 +64,8 @@ module iob_regfile_dp
                                      .arst_i(arst_i),
                                      .cke_i (cke_i),
                                      .en_i  (regfile_wen[i]),
-                                     .data_i(regfile_wdata[i]),
-                                     .data_o(regfile[i])
+                                     .data_i(regfile_wdata[i*W+:W]),
+                                     .data_o(regfile[i*W+:W])
                                      );
       end
    endgenerate
@@ -72,101 +75,97 @@ module iob_regfile_dp
       //extract CPU address if it exists
       if (ADDR_W > 0) begin: g_iob_addr
          //address exists: extract it 
-         wire [ADDR_W-1:0] iob_addr = cpu_req_i[ADDR_W+DATA_W-:ADDR_W];
-
 
          //generate write interface
          if (MODE != "R") begin: g_cpu_write_if
             if (W <= 8) begin: g_cpu_write_8
-               for (i = 0; i < N; i=i+1) begin : g_cpu_write_word_loop
-                  always @* begin
-                     regfile_wdata[i] = {W{1'b0}};
-                     regfile_wen[i] = 1'b0;
-                     if (iob_addr == i) begin
-                        regfile_wdata[i] = cpu_req_i[(8*(i%(DATA_W/8)))+:W];
-                        regfile_wen[i] = cpu_req_i[DATA_W+(i%(DATA_W/8))];
+               always @* begin
+                  regfile_wdata = regfile;
+                  regfile_wen = {N{1'b0}};
+                  for (j = 0; j < N; j=j+1) begin : g_cpu_write_word_loop
+                     if ((iob_addr-ADDR_OFFSET) == j) begin
+                        regfile_wdata[j*W+:W] = cpu_req_i[(8*(j%(DATA_W/8)))+:W];
+                        regfile_wen[j] = cpu_req_i[DATA_W];
                      end
                   end
                end
-            end else if (W <= 16) begin: g_cpu_write_16
-               for (i = 0; i < N; i=i+2) begin : g_cpu_write_word_loop
-                  always @* begin
-                     regfile_wdata[i] = {W{1'b0}};
-                     regfile_wen[i] = {W{1'b0}};
-                     if (iob_addr == i) begin
-                        regfile_wdata[i] = cpu_req_i[(16*(i%(DATA_W/8)))+:W];
-                     end
-                     regfile_wen[i/2] = cpu_req_i[DATA_W+(i%(DATA_W/8))+:2];
-                  end
-               end
-            end else if (W <= 32) begin: g_cpu_write_32
-               for (i = 0; i < N; i=i+4) begin : g_cpu_write_word_loop
-                  always @* begin
-                     regfile_wdata[i] = {W{1'b0}};
-                     regfile_wen[i] = {W{1'b0}};
-                     if (iob_addr == i) begin
-                        regfile_wdata[i] = cpu_req_i[(32*(i%(DATA_W/8)))+:W];
-                        regfile_wen[i/4] = cpu_req_i[DATA_W+(i%(DATA_W/8))+:4];
+            end else if (W <= 16) begin: g_cpu_write_16 // block: g_cpu_write_8
+               always @* begin
+                  regfile_wdata = regfile;
+                  regfile_wen = {N{1'b0}};
+                  for (j = 0; j < N; j=j+1) begin : g_cpu_write_word_loop
+                     if ((iob_addr-ADDR_OFFSET) == j) begin
+                        regfile_wdata[j*W+:W] = cpu_req_i[(16*(j%(DATA_W/16)))+:W];
+                        regfile_wen[j] = cpu_req_i[DATA_W];
                      end
                   end
                end
-            end else if (W <= 64) begin: g_cpu_write_64
-               for (i = 0; i < N; i=i+8) begin : g_cpu_write_word_loop
-                  always @* begin
-                     regfile_wdata[i] = {W{1'b0}};
-                     regfile_wen[i] = {W{1'b0}};
-                     if (iob_addr == i) begin
-                        regfile_wen[i/8] = cpu_req_i[DATA_W+(i%(DATA_W/8))+:8];
-                        regfile_wdata[i] = cpu_req_i[(64*(i%(DATA_W/8)))+:W];
+            end else if (W <= 32) begin: g_cpu_write_32 // block: g_cpu_write_16
+               always @* begin
+                  regfile_wdata = regfile;
+                  regfile_wen = {N{1'b0}};
+                  for (j = 0; j < N; j=j+1) begin : g_cpu_write_word_loop
+                     if ((iob_addr-ADDR_OFFSET) == j) begin
+                        regfile_wdata[j*W+:W] = cpu_req_i[(32*(j%(DATA_W/32)))+:W];
+                        regfile_wen[j] = cpu_req_i[DATA_W];
                      end
                   end
                end
-            end
-         end
+            end else begin: g_cpu_write_64 // block: g_cpu_write_32
+               always @* begin
+                  regfile_wdata = regfile;
+                  regfile_wen = {N{1'b0}};
+                  for (j = 0; j < N; j=j+1) begin : g_cpu_write_word_loop
+                     if ((iob_addr-ADDR_OFFSET) == j) begin
+                        regfile_wdata[j*W+:W] = cpu_req_i[(64*(j%(DATA_W/64)))+:W];
+                        regfile_wen[j] = cpu_req_i[DATA_W];
+                     end
+                  end
+               end
+            end // block: g_cpu_write_64
+         end // block: g_cpu_write_if
+      
          
 
          //generate read interface
          if (MODE != "W") begin : g_cpu_read_if
             //read interface exists: assemble data to read
             if (W <= 8) begin: g_cpu_read_8
-               for (i = 0; i < N; i=i+1) begin : g_cpu_read_word_loop
-                  always @* begin
-                     iob_rdata[8*(i%(DATA_W/8))+:W] = {W{1'b0}};
-                     if (iob_addr == i) begin
-                        iob_rdata[8*(i%(DATA_W/8))+:W] = regfile[i];
+               always @* begin
+                  for (j = 0; j < N; j=j+1) begin
+                     if (iob_addr == j) begin
+                        iob_rdata[((8*j)%(DATA_W/8)+ADDR_OFFSET)%(DATA_W/8)+:8] = regfile[j*W+:W];
                      end
                   end
                end
             end else if (W <= 16) begin: g_cpu_read_16
-               for (i = 0; i < N; i=i+2) begin : g_cpu_read_word_loop
-                  always @* begin
-                     iob_rdata[16*(i%(DATA_W/8))+:W] = {W{1'b0}};
-                     if (iob_addr == i) begin
-                        iob_rdata[16*(i%(DATA_W/8))+:W] = regfile[i];
+               always @* begin
+                  for (j = 0; j < N; j=j+2) begin
+                     if (iob_addr == j) begin
+                        iob_rdata[((16*j)%(DATA_W/8)+ADDR_OFFSET)%(DATA_W/8)+:16] = regfile[j*W+:W];
                      end
                   end
                end
-            end else if (W <= 32) begin: g_cpu_read_32 // block: g_cpu_read_16
-               for (i = 0; i < N; i=i+4) begin : g_cpu_read_word_loop
-                  always @* begin
-                     iob_rdata[32*(i%(DATA_W/8))+:W] = {W{1'b0}};
-                     if (iob_addr == i) begin
-                        iob_rdata[32*(i%(DATA_W/8))+:W] = regfile[i];
+            end else if (W <= 32) begin: g_cpu_read_32
+               always @* begin
+                  for (j = 0; j < N; j=j+4) begin
+                     if (iob_addr == j) begin
+                        iob_rdata[(32*j)%(DATA_W/8)+:32] = regfile[j*W+:W];
                      end
                   end
                end
-            end else if (W <= 64) begin: g_cpu_read_64 // block: g_cpu_read_32
-               for (i = 0; i < N; i=i+8) begin : g_cpu_read_word_loop
-                  always @* begin
-                     iob_rdata[64*(i%(DATA_W/8))+:W] = {W{1'b0}};
-                     if (iob_addr == i) begin
-                        iob_rdata[64*(i%(DATA_W/8))+:W] = regfile[i];
+            end else if (W <= 64) begin: g_cpu_read_64
+               always @* begin
+                  for (j = 0; j < N; j=j+8) begin
+                     if (iob_addr == j) begin
+                        iob_rdata[(64*j)%(DATA_W/8)+:64] = regfile[j*W+:W];
                      end
                   end
                end
             end
 
             //rvalid register
+            wire iob_rvalid_nxt = iob_avalid & ~iob_wen;
             iob_reg #(
                       .DATA_W (1),
                       .RST_VAL({W{1'b0}}),
@@ -175,7 +174,7 @@ module iob_regfile_dp
                                          .clk_i (clk_i),
                                          .arst_i(arst_i),
                                          .cke_i (cke_i),
-                                         .data_i(iob_avalid),
+                                         .data_i(iob_rvalid_nxt),
                                          .data_o(iob_rvalid)
                                          );
 
