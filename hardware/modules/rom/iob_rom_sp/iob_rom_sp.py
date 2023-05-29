@@ -2,17 +2,10 @@
 from iob_module import iob_module
 
 class iob_rom_sp(iob_module):
-    def __init__(self, **kwargs):
-        super().__init__(
-                name='iob_rom_sp',
-                version='V0.10',
-                **kwargs
-                )
+    name='iob_rom_sp'
+    version='V0.10'
 
-    # This module accepts the following non-standard parameters:
-    # out_dir: Output directory for placement of source files during setup
-    def setup(self, out_dir="hardware/src", **kwargs):
-        super().setup(**kwargs)
+    @classmethod
+    def _run_setup(cls):
 
-        self.headers = []
-        self.modules = ["iob_rom_sp.v"]
+        iob_rom_sp.setup()        

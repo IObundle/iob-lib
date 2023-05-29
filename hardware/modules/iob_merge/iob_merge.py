@@ -1,17 +1,13 @@
 from iob_module import iob_module
 
 class iob_merge(iob_module):
-    def __init__(self, **kwargs):
-        super().__init__(
-                name='iob_merge',
-                version='V0.10',
-                **kwargs
-                )
+    name='iob_merge'
+    version='V0.10'
 
-    # This module accepts the following non-standard parameters:
-    # out_dir: Output directory for placement of source files during setup
-    def setup(self, out_dir="hardware/src", **kwargs):
-        super().setup(**kwargs)
+    @classmethod
+    def _run_setup(cls):
 
-        self.headers = []
-        self.modules = ["iob_merge.v", "iob_reg_e.v", "iob_mux.v", "iob_demux.v"]
+        iob_merge.setup()        
+        iob_reg_e.setup()        
+        iob_mux.setup()        
+        iob_demux.setup()        

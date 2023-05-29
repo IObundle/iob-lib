@@ -1,17 +1,12 @@
 from iob_module import iob_module
 
 class iob_s2f_sync(iob_module):
-    def __init__(self, **kwargs):
-        super().__init__(
-                name='iob_s2f_sync',
-                version='V0.10',
-                **kwargs
-                )
+    name='iob_s2f_sync'
+    version='V0.10'
 
-    # This module accepts the following non-standard parameters:
-    # out_dir: Output directory for placement of source files during setup
-    def setup(self, out_dir="hardware/src", **kwargs):
-        super().setup(**kwargs)
+    @classmethod
+    def _run_setup(cls):
 
-        self.headers = []
-        self.modules = ["iob_s2f_sync.v", "iob_counter", "iob_reg_re"]
+        iob_s2f_sync.setup()        
+        iob_counter.setup()        
+        iob_reg_re.setup()        

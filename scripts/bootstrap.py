@@ -59,13 +59,14 @@ exec("import " + top_module_name)
 
 # Print build directory attribute of the top module
 def get_build_dir():
-    top_module = vars(sys.modules[top_module_name])[top_module_name](is_top_module=True, disable_setup=True)
+    top_module = vars(sys.modules[top_module_name])[top_module_name]
+    top_module.set_dynamic_attributes()
     print(top_module.build_dir)
 
 
 # Instantiate top module to start setup process
 def instantiate_top_module():
-    vars(sys.modules[top_module_name])[top_module_name](is_top_module=True)
+    vars(sys.modules[top_module_name])[top_module_name].setup()
 
 
 # Call either the default function or the one given by the user

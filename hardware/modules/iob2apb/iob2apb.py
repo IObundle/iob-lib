@@ -1,22 +1,16 @@
 from iob_module import iob_module
 
 class iob2apb(iob_module):
-    def __init__(self, **kwargs):
-        super().__init__(
-                name='iob2apb',
-                version='V0.10',
-                **kwargs
-                )
+    name='iob2apb'
+    version='V0.10'
 
-    # This module accepts the following non-standard parameters:
-    # out_dir: Output directory for placement of source files during setup
-    def setup(self, out_dir="hardware/src", **kwargs):
-        super().setup(**kwargs)
+    @classmethod
+    def _run_setup(cls):
 
-        self.headers = [
-                "iob_s_port",
-                "iob_s_s_portmap",
-                "apb_m_port",
-                "iob_m_tb_wire",
-            ]
-        self.modules = ["iob2apb.v", "iob_reg.v"]
+        iob_s_port.setup()                
+        iob_s_s_portmap.setup()        
+        apb_m_port.setup()        
+        iob_m_tb_wire.setup()        
+
+        iob2apb.setup()        
+        iob_reg.setup()        

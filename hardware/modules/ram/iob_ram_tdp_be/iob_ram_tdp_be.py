@@ -1,17 +1,11 @@
 from iob_module import iob_module
 
 class iob_ram_tdp_be(iob_module):
-    def __init__(self, **kwargs):
-        super().__init__(
-                name='iob_ram_tdp_be',
-                version='V0.10',
-                **kwargs
-                )
+    name='iob_ram_tdp_be'
+    version='V0.10'
 
-    # This module accepts the following non-standard parameters:
-    # out_dir: Output directory for placement of source files during setup
-    def setup(self, out_dir="hardware/src", **kwargs):
-        super().setup(**kwargs)
+    @classmethod
+    def _run_setup(cls):
 
-        self.headers = []
-        self.modules = ["iob_ram_tdp_be.v", "iob_ram_tdp"]
+        iob_ram_tdp_be.setup()        
+        iob_ram_tdp.setup()        

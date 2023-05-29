@@ -1,24 +1,17 @@
 from iob_module import iob_module
 
 class iob2axil(iob_module):
-    def __init__(self, **kwargs):
-        super().__init__(
-                name='iob2axil',
-                version='V0.10',
-                **kwargs
-                )
+    name='iob2axil'
+    version='V0.10'
 
-    # This module accepts the following non-standard parameters:
-    # out_dir: Output directory for placement of source files during setup
-    def setup(self, out_dir="hardware/src", **kwargs):
-        super().setup(**kwargs)
+    @classmethod
+    def _run_setup(cls):
 
-        self.headers = [
-            "iob_s_port",
-            "iob_s_s_portmap",
-            "axil_m_port",
-            "axil_m_portmap",
-            "iob_m_tb_wire",
-            "axil_wire",
-        ]
-        self.modules = ["iob2axil.v"]
+        iob_s_port.setup()                
+        iob_s_s_portmap.setup()        
+        axil_m_port.setup()        
+        axil_m_portmap.setup()        
+        iob_m_tb_wire.setup()        
+        axil_wire.setup()        
+            
+        iob2axil.setup()        
