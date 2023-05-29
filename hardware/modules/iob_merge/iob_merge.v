@@ -25,26 +25,32 @@ module iob_merge #(
    localparam Nb = $clog2(N_MASTERS) + ($clog2(N_MASTERS) == 0);
 
 
-   //                               
-   //priority encoder: most significant bus has priority   
+   //
+   //priority encoder: most significant bus has priority
    //
    reg [Nb-1:0] sel, sel_reg;
 
    //select enable
    reg sel_en;
+   wire s_valid;
+   wire s_ready;
+   assign s_valid = s_req_o[`AVALID(0)];
+   assign s_ready = s_resp_i[`READY(0)];
    always @(posedge clk_i, posedge arst_i)
       if (arst_i) sel_en <= 1'b1;
-      else if (s_req_o[`AVALID(0)]) sel_en <= 1'b0;
-      else if (s_resp_i[`READY(0)]) sel_en <= ~s_req_o[`AVALID(0)];
+      else if (s_valid) sel_en <= 1'b0;
+      else if (s_ready) sel_en <= ~s_valid;
 
 
    //select master
    integer k;
+   wire m_valid;
+   assign m_valid = m_req_i[`AVALID(k)];
    always @* begin
       sel = {Nb{1'b0}};
       for (k = 0; k < N_MASTERS; k = k + 1)
          if (~sel_en) sel = sel_reg;
-         else if (m_req_i[`AVALID(k)]) sel = k[Nb-1:0];
+         else if (m_valid) sel = k[Nb-1:0];
    end
 
    //
