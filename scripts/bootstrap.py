@@ -66,7 +66,7 @@ def get_build_dir():
 
 # Instantiate top module to start setup process
 def instantiate_top_module():
-    vars(sys.modules[top_module_name])[top_module_name].setup()
+    vars(sys.modules[top_module_name])[top_module_name].setup(is_top_module=True)
 
 
 # Call either the default function or the one given by the user

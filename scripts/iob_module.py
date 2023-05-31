@@ -1,4 +1,5 @@
 import iob_colors
+from iob_verilog_instance import iob_verilog_instance
 
 # Generic class to describe a base iob-module
 class iob_module:
@@ -15,16 +16,19 @@ class iob_module:
 
     _setup_purpose=[] # List of setup purposes for this module. Also used to check if module has already been setup.
 
+    is_top_module=False # Select if this module is the top module
+
 
     # Public setup method for this module.
     @classmethod
-    def setup(cls, purpose="hardware"):
+    def setup(cls, purpose="hardware", is_top_module=False):
         # Don't setup if module has already been setup for this purpose or for the "hardware" purpose.
         if purpose in cls._setup_purpose or
             "hardware" in cls._setup_purpose:
             return
-
         cls._setup_purpose.append(purpose)
+
+        cls.is_top_module=is_top_module
         
         cls.set_dynamic_attributes()
         cls._run_setup()
@@ -38,8 +42,8 @@ class iob_module:
         if not name:
             name=f"{cls.name}_0"
 
-        # TODO: Return a new iob_verilog_instance object with these attributes and pointing to the class
-        return NotImplemented
+        # Return a new iob_verilog_instance object with these attributes that describe the Verilog instance and module.
+        return iob_verilog_instance(name, description, cls)
 
 
     # Public method to set dynamic attributes

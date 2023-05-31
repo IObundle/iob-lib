@@ -13,6 +13,8 @@ import shutil
 
 import datetime
 
+from iob_ctls import iob_ctls
+
 
 def getf(obj, name, field):
     return int(obj[next(i for i in range(len(obj)) if obj[i]["name"] == name)][field])
@@ -42,13 +44,10 @@ def setup(python_module, no_overlap=False, disable_file_copy=False, disable_file
         }
     )
 
-    # Fill `dirs` dictionary with default values
-    set_default_submodule_dirs(python_module)
-
     #
     # Build directory
     #
-    if is_top_module(python_module):
+    if python_module.is_top_module:
         os.makedirs(build_dir, exist_ok=True)  # Create build directory
         mk_conf.config_build_mk(python_module, build_dir)
         os.makedirs(
@@ -93,19 +92,12 @@ def setup(python_module, no_overlap=False, disable_file_copy=False, disable_file
         # Get register table
         reg_table = mkregs_obj.get_reg_table(regs, no_overlap)
 
-        # Make sure 'hw_setup' dictionary exists
-        if "hw_setup" not in python_module.submodules:
-            python_module.submodules["hw_setup"] = {"headers": [], "modules": []}
         # Auto-add iob_ctls module
-        python_module.submodules["hw_setup"]["modules"].append("iob_ctls")
+        iob_ctls.setup()
         # Auto-add iob_s_port.vh
-        python_module.submodules["hw_setup"]["headers"].append("iob_s_port")
+        iob_submodule_utils.generate("iob_s_port")
         # Auto-add iob_s_portmap.vh
-        python_module.submodules["hw_setup"]["headers"].append("iob_s_portmap")
-
-    # Setup python submodules recursively (the deeper ones in the tree are setup first)
-    if is_top_module(python_module):
-        build_srcs.setup_submodules(python_module)
+        iob_submodule_utils.generate("iob_s_portmap")
 
     #
     # Setup flows
@@ -158,17 +150,9 @@ def setup(python_module, no_overlap=False, disable_file_copy=False, disable_file
             blocks_lib.generate_blocks_tex(blocks, build_dir + "/document/tsrc")
 
     # Replace Verilog includes by Verilog header file contents
-    if is_top_module(python_module) and not disable_file_copy:
+    if python_module.is_top_module and not disable_file_copy:
         verilog_tools.replace_includes([build_dir + "/hardware"])
 
-
-# Check if the given python_module is the top module (return true) or is a submodule (return false)
-# The check is based on the presence of the 'not_top_module' variable, set by the build_srcs.py script
-def is_top_module(python_module):
-    if "not_top_module" in vars(python_module) and python_module.not_top_module:
-        return False
-    else:
-        return True
 
 # Insert header in source files
 def insert_header():

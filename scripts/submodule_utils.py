@@ -128,19 +128,6 @@ def set_default_submodule_dirs(python_module):
         python_module.submodules["dirs"]["LIB"] = "submodules/LIB"
 
 
-# Get peripherals list from 'peripherals' table in blocks list
-# blocks: blocks dictionary, contains definition of peripheral instances
-# function returns peripherals list
-def get_peripherals_list(blocks):
-    # Get peripherals list from 'peripherals' table in blocks list
-    for table in blocks:
-        if table["name"] == "peripherals":
-            peripherals_list = table["blocks"]
-            break
-    else:  # No peripherals found
-        peripherals_list = []
-    return peripherals_list
-
 
 # Get peripheral related macros
 # confs: confs dictionary to be filled with peripheral macros
@@ -191,19 +178,18 @@ def check_module_in_modules_list(module_type, modules_list):
 #    {'name': 'instance_name', 'descr':'instance description', 'ports': [
 #        {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
 #    ]}
-def get_peripheral_ios(peripherals_list, submodules):
+def get_peripheral_ios(peripherals_list):
     port_list = {}
     # Get port list for each type of peripheral used
     for instance in peripherals_list:
+        module = instance.module
         # Make sure we have a hw_module for this peripheral type
         # assert check_module_in_modules_list(instance['type'],submodules["hw_setup"]["modules"]), f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
         # Only insert ports of this peripheral type if we have not done so before
-        if instance["type"] not in port_list:
-            # Import <corename>_setup.py module
-            module = import_setup(submodules["dirs"][instance["type"]])
+        if module.name not in port_list:
             # Extract only PIO signals from the peripheral (no reserved/known signals)
-            port_list[instance["type"]] = get_pio_signals(
-                get_module_io(module.ios, module.confs, instance["name"])
+            port_list[module.name] = get_pio_signals(
+                get_module_io(module.ios, module.confs, instance.name)
             )
 
     ios_list = []
@@ -211,9 +197,9 @@ def get_peripheral_ios(peripherals_list, submodules):
     for instance in peripherals_list:
         ios_list.append(
             {
-                "name": instance["name"],
-                "descr": f"{instance['name']} interface signals",
-                "ports": port_list[instance["type"]],
+                "name": instance.name,
+                "descr": f"{instance.name} interface signals",
+                "ports": port_list[module.name],
                 "ios_table_prefix": True,
             }
         )
@@ -228,27 +214,23 @@ def iob_soc_peripheral_setup(python_module):
 
     if peripherals_list:
         # Get port list, parameter list and top module name for each type of peripheral used
-        _, params_list, _ = get_peripherals_ports_params_top(
-            peripherals_list, python_module.submodules["dirs"]
-        )
+        _, params_list, _ = get_peripherals_ports_params_top(peripherals_list)
         # Insert peripheral instance parameters in system parameters
         # This causes the system to have a parameter for each parameter of each peripheral instance
         for instance in peripherals_list:
-            for parameter in params_list[instance["type"]]:
+            for parameter in params_list[instance.module.name]:
                 parameter_to_append = parameter.copy()
                 # Override parameter value if user specified a 'parameters' dictionary with an override value for this parameter.
-                if "params" in instance and parameter["name"] in instance["params"]:
-                    parameter_to_append["val"] = instance["params"][parameter["name"]]
+                if parameter['name'] in instance.parameters:
+                    parameter_to_append['val'] = instance.parameters[parameter['name']]
                 # Add instance name prefix to the name of the parameter. This makes this parameter unique to this instance
                 parameter_to_append[
                     "name"
-                ] = f"{instance['name']}_{parameter_to_append['name']}"
+                ] = f"{instance.name}_{parameter_to_append['name']}"
                 python_module.confs.append(parameter_to_append)
-    # Get peripheral related macros
-    if peripherals_list:
-        get_peripheral_macros(python_module.confs, peripherals_list)
 
-    return peripherals_list
+        # Get peripheral related macros
+        get_peripheral_macros(python_module.confs, peripherals_list)
 
 
 # Given a string and a list of possible suffixes, check if string given has a suffix from the list
@@ -581,21 +563,19 @@ def get_pio_signals(signal_list):
 # The value of port_list is a list of ports for the given type of peripheral
 # The value of params_list is a list of parameters for the given type of peripheral
 # The value of top_list is the top name of the given type of peripheral
-def get_peripherals_ports_params_top(peripherals_list, submodule_dirs):
+def get_peripherals_ports_params_top(peripherals_list):
     port_list = {}
     params_list = {}
     top_list = {}
     for instance in peripherals_list:
-        if instance["type"] not in port_list:
-            # Import <corename>_setup.py module
-            module = import_setup(submodule_dirs[instance["type"]])
-
+        module = instance.module
+        if module.name not in port_list:
             # Append module IO, parameters, and top name
-            port_list[instance["type"]] = get_module_io(module.ios)
-            params_list[instance["type"]] = list(
+            port_list[module.name] = get_module_io(module.ios)
+            params_list[module.name] = list(
                 i for i in module.confs if i["type"] in ["P", "F"]
             )
-            top_list[instance["type"]] = module.name
+            top_list[module.name] = module.name
     return port_list, params_list, top_list
 
 
@@ -627,12 +607,12 @@ def get_periphs_id_as_macros(peripherals_list):
     for idx, instance in enumerate(peripherals_list):
         macro_list.append(
             {
-                "name": instance["name"],
+                "name": instance.name,
                 "type": "M",
                 "val": str(idx),
                 "min": "0",
                 "max": "NA",
-                "descr": f"ID of {instance['name']} peripheral",
+                "descr": f"ID of {instance.name} peripheral",
             }
         )
     return macro_list
