@@ -26,11 +26,14 @@ class iob_module:
         if purpose in cls._setup_purpose or
             "hardware" in cls._setup_purpose:
             return
+
+        # Only set dynamic attributes if this is the first time we run setup
+        if not cls._setup_purpose:
+            cls.is_top_module=is_top_module
+            cls.set_dynamic_attributes()
+
         cls._setup_purpose.append(purpose)
 
-        cls.is_top_module=is_top_module
-        
-        cls.set_dynamic_attributes()
         cls._run_setup()
 
 
@@ -50,13 +53,37 @@ class iob_module:
     # This method is automatically called by setup()
     @classmethod
     def set_dynamic_attributes(cls):
-        if not cls.build_dir:
-            cls.build_dir=f"../{cls.name}_{cls.version}"
+        # Set the build directory in the `iob_module` superclass, so everyone has access to it
+        if cls.is_top_module:
+            # Auto-fill build directory if its not set
+            if not cls.build_dir:
+                iob_module.build_dir=f"../{cls.name}_{cls.version}"
+            else
+                iob_module.build_dir=cls.build_dir
 
-    # Default setup function does nothing
+        # Copy build directory from the `iob_module` superclass
+        cls.build_dir=iob_module.build_dir
+
+        # TODO: It would be nice if we could auto-fill the setup directory with the location of the file, but I'm not sure how.
+        # cls.setup_dir=os.path.dirname(__file__) # This would not work, because `__file__` points to the iob_module.py file and not the ones from subclasses.
+
+    # Default setup function just parses the latest purpose and returns the destination directory
     @classmethod
     def _run_setup():
-        pass
+        # Get purpose of this setup
+        purpose = cls._setup_purpose[-1]
+        if purpose == 'hardware':
+            out_dir = 'hardware/src/'
+        elif purpose == 'simulation':
+            out_dir = 'hardware/simulation/src/'
+        elif purpose == 'fpga':
+            out_dir = 'hardware/fpga/src/'
+        elif purpose == 'software':
+            out_dir = 'software/src/'
+        else:
+            raise Exception(f'{iob_colors.ERROR}Unknown purpose: {purpose}{iob_colors.ENDC}')
+
+        return out_dir
 
     # Append confs to the current list, overriding existing ones
     @classmethod
