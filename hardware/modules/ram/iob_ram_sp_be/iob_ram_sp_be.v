@@ -4,16 +4,16 @@
 `timescale 1 ns / 1 ps
 
 module iob_ram_sp_be #(
-    parameter HEXFILE = "none",
-    parameter ADDR_W  = 10,      // Addr Width in bits : 2*ADDR_W = RAM Depth
-    parameter DATA_W  = 32       // Data Width in bits
+   parameter HEXFILE = "none",
+   parameter ADDR_W  = 10,      // Addr Width in bits : 2*ADDR_W = RAM Depth
+   parameter DATA_W  = 32       // Data Width in bits
 ) (
-    input                 clk_i,
-    input                 en_i,
-    input  [DATA_W/8-1:0] we_i,
-    input  [  ADDR_W-1:0] addr_i,
-    input  [  DATA_W-1:0] d_i,
-    output [  DATA_W-1:0] d_o
+   input                 clk_i,
+   input                 en_i,
+   input  [DATA_W/8-1:0] we_i,
+   input  [  ADDR_W-1:0] addr_i,
+   input  [  DATA_W-1:0] d_i,
+   output [  DATA_W-1:0] d_o
 );
 
    localparam COL_W = 8;
@@ -30,9 +30,9 @@ module iob_ram_sp_be #(
              {HEXFILE, "_", file_suffix[8*(i+1)-1-:8], ".hex"} : "none";
 
          iob_ram_sp #(
-             .HEXFILE(mem_init_file_int),
-             .ADDR_W (ADDR_W),
-             .DATA_W (COL_W)
+            .HEXFILE(mem_init_file_int),
+            .ADDR_W (ADDR_W),
+            .DATA_W (COL_W)
          ) ram (
             .clk_i(clk_i),
 

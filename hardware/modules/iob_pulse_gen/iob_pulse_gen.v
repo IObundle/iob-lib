@@ -2,14 +2,14 @@
 
 
 module iob_pulse_gen #(
-    parameter START    = 0,
-    parameter DURATION = 0
+   parameter START    = 0,
+   parameter DURATION = 0
 ) (
-    input  clk_i,
-    input  arst_i,
-    input  cke_i,
-    input  start_i,
-    output pulse_o
+   input  clk_i,
+   input  arst_i,
+   input  cke_i,
+   input  start_i,
+   output pulse_o
 );
 
    localparam WIDTH = $clog2(START + DURATION + 2);
@@ -20,9 +20,9 @@ module iob_pulse_gen #(
    assign start_detected_nxt = start_detected | start_i;
 
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(0),
-       .CLKEDGE("posedge")
+      .DATA_W (1),
+      .RST_VAL(0),
+      .CLKEDGE("posedge")
    ) start_detected_inst (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -40,8 +40,8 @@ module iob_pulse_gen #(
 
    //counter
    iob_counter #(
-       .DATA_W (WIDTH),
-       .RST_VAL({WIDTH{1'b0}})
+      .DATA_W (WIDTH),
+      .RST_VAL({WIDTH{1'b0}})
    ) cnt0 (
       .clk_i (clk_i),
       .arst_i(arst_i),

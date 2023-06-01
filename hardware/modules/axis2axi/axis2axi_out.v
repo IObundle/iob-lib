@@ -5,30 +5,30 @@
 // Check axis2axi for information on how this unit works
 
 module axis2axi_out #(
-    parameter AXI_ADDR_W = 0,
-    parameter AXI_DATA_W = 32,  // We currently only support 4 byte transfers
-    parameter AXI_LEN_W  = 8,
-    parameter AXI_ID_W   = 1,
-    parameter BURST_W    = 0
+   parameter AXI_ADDR_W = 0,
+   parameter AXI_DATA_W = 32,  // We currently only support 4 byte transfers
+   parameter AXI_LEN_W  = 8,
+   parameter AXI_ID_W   = 1,
+   parameter BURST_W    = 0
 ) (
-    // Configuration
-    input  [AXI_ADDR_W-1:0] config_out_addr_i,
-    input  [AXI_ADDR_W-1:0] config_out_length_i,
-    input  [         1-1:0] config_out_valid_i,
-    output [         1-1:0] config_out_ready_o,
+   // Configuration
+   input  [AXI_ADDR_W-1:0] config_out_addr_i,
+   input  [AXI_ADDR_W-1:0] config_out_length_i,
+   input  [         1-1:0] config_out_valid_i,
+   output [         1-1:0] config_out_ready_o,
 
-    // Axi stream input
-    output [AXI_DATA_W-1:0] axis_out_data_o,
-    output [         1-1:0] axis_out_valid_o,
-    input  [         1-1:0] axis_out_ready_i,
+   // Axi stream input
+   output [AXI_DATA_W-1:0] axis_out_data_o,
+   output [         1-1:0] axis_out_valid_o,
+   input  [         1-1:0] axis_out_ready_i,
 
-    // Axi master interface
-    `include "iob_axi_m_read_port.vh"
+   // Axi master interface
+   `include "iob_axi_m_read_port.vh"
 
-    input [1-1:0] clk_i,
-    input [1-1:0] cke_i,
-    input [1-1:0] rst_i,
-    input [1-1:0] arst_i
+   input [1-1:0] clk_i,
+   input [1-1:0] cke_i,
+   input [1-1:0] rst_i,
+   input [1-1:0] arst_i
 );
 
    localparam BURST_SIZE = 2 ** BURST_W;

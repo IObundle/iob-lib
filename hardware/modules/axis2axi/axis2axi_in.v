@@ -5,37 +5,37 @@
 // Check axis2axi.v for information on how this unit works
 
 module axis2axi_in #(
-    parameter AXI_ADDR_W = 0,
-    parameter AXI_DATA_W = 32,  // We currently only support 4 byte transfers
-    parameter AXI_LEN_W  = 8,
-    parameter AXI_ID_W   = 1,
-    parameter BURST_W    = 0
+   parameter AXI_ADDR_W = 0,
+   parameter AXI_DATA_W = 32,  // We currently only support 4 byte transfers
+   parameter AXI_LEN_W  = 8,
+   parameter AXI_ID_W   = 1,
+   parameter BURST_W    = 0
 ) (
-    // Configuration
-    input  [AXI_ADDR_W-1:0] config_in_addr_i,
-    input  [         1-1:0] config_in_valid_i,
-    output [         1-1:0] config_in_ready_o,
+   // Configuration
+   input  [AXI_ADDR_W-1:0] config_in_addr_i,
+   input  [         1-1:0] config_in_valid_i,
+   output [         1-1:0] config_in_ready_o,
 
-    // Axi stream input
-    input  [AXI_DATA_W-1:0] axis_in_data_i,
-    input  [         1-1:0] axis_in_valid_i,
-    output [         1-1:0] axis_in_ready_o,
+   // Axi stream input
+   input  [AXI_DATA_W-1:0] axis_in_data_i,
+   input  [         1-1:0] axis_in_valid_i,
+   output [         1-1:0] axis_in_ready_o,
 
-    // Axi master interface
-    `include "iob_axi_m_write_port.vh"
+   // Axi master interface
+   `include "iob_axi_m_write_port.vh"
 
-    // External memory interfaces
-    output [         1-1:0] ext_mem_w_en_o,
-    output [AXI_DATA_W-1:0] ext_mem_w_data_o,
-    output [  BUFFER_W-1:0] ext_mem_w_addr_o,
-    output [         1-1:0] ext_mem_r_en_o,
-    output [  BUFFER_W-1:0] ext_mem_r_addr_o,
-    input  [AXI_DATA_W-1:0] ext_mem_r_data_i,
+   // External memory interfaces
+   output [         1-1:0] ext_mem_w_en_o,
+   output [AXI_DATA_W-1:0] ext_mem_w_data_o,
+   output [  BUFFER_W-1:0] ext_mem_w_addr_o,
+   output [         1-1:0] ext_mem_r_en_o,
+   output [  BUFFER_W-1:0] ext_mem_r_addr_o,
+   input  [AXI_DATA_W-1:0] ext_mem_r_data_i,
 
-    input [1-1:0] clk_i,
-    input [1-1:0] cke_i,
-    input [1-1:0] rst_i,
-    input [1-1:0] arst_i
+   input [1-1:0] clk_i,
+   input [1-1:0] cke_i,
+   input [1-1:0] rst_i,
+   input [1-1:0] arst_i
 );
 
    localparam BURST_SIZE = 2 ** BURST_W;
@@ -194,9 +194,9 @@ module axis2axi_in #(
    );
 
    iob_fifo_sync #(
-       .W_DATA_W(AXI_DATA_W),
-       .R_DATA_W(AXI_DATA_W),
-       .ADDR_W  (BUFFER_W)
+      .W_DATA_W(AXI_DATA_W),
+      .R_DATA_W(AXI_DATA_W),
+      .ADDR_W  (BUFFER_W)
    ) fifo (
       //write port
       .ext_mem_w_en_o  (ext_mem_w_en_o),

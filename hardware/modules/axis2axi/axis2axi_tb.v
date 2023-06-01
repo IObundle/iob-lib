@@ -291,8 +291,8 @@ module axis2axi_tb;
    wire [BURST_W:0] ext_mem_w_addr, ext_mem_r_addr;
 
    iob_ram_t2p #(
-       .DATA_W(32),
-       .ADDR_W(BURST_W + 1)
+      .DATA_W(32),
+      .ADDR_W(BURST_W + 1)
    ) memory (
       .w_clk_i (clk),
       .w_en_i  (ext_mem_w_en),
@@ -308,7 +308,7 @@ module axis2axi_tb;
    // Insert delays between AXI like handshake interfaces
    wire m_rvalid, m_rready, s_rvalid, s_rready;
    AxiDelayRead #(
-       .MAX_DELAY(DELAY_AXI_READ)
+      .MAX_DELAY(DELAY_AXI_READ)
    ) delayRead (
       // Connect directly to the same named axi read wires in the master interface
       .m_rvalid(m_rvalid),
@@ -324,7 +324,7 @@ module axis2axi_tb;
 
    wire m_wvalid, m_wready, s_wvalid, s_wready;
    AxiDelayWrite #(
-       .MAX_DELAY(DELAY_AXI_WRITE)
+      .MAX_DELAY(DELAY_AXI_WRITE)
    ) delayWrite (
       // Connect directly to the same named axi write wires in the master interface
       .m_wvalid(m_wvalid),
@@ -340,7 +340,7 @@ module axis2axi_tb;
 
    wire delayed_axis_in_valid, delayed_axis_in_ready;
    AxiDelay #(
-       .MAX_DELAY(DELAY_AXIS_IN)
+      .MAX_DELAY(DELAY_AXIS_IN)
    ) delayIn (
       // Master interface. Connect to a slave interface
       .m_valid(delayed_axis_in_valid),
@@ -355,7 +355,7 @@ module axis2axi_tb;
    );
 
    AxiDelay #(
-       .MAX_DELAY(DELAY_AXIS_OUT)
+      .MAX_DELAY(DELAY_AXIS_OUT)
    ) delayOut (
       // Master interface. Connect to a slave interface
       .m_valid(delayed_axis_out_valid),
@@ -370,11 +370,11 @@ module axis2axi_tb;
    );
 
    axis2axi #(
-       .AXI_ADDR_W(AXI_ADDR_W),
-       .AXI_DATA_W(AXI_DATA_W),
-       .AXI_LEN_W (AXI_LEN_W),
-       .AXI_ID_W  (AXI_ID_W),
-       .BURST_W   (BURST_W)
+      .AXI_ADDR_W(AXI_ADDR_W),
+      .AXI_DATA_W(AXI_DATA_W),
+      .AXI_LEN_W (AXI_LEN_W),
+      .AXI_ID_W  (AXI_ID_W),
+      .BURST_W   (BURST_W)
    ) uut (
       // Memory interface
       .ext_mem_w_en_o  (ext_mem_w_en),
@@ -455,9 +455,9 @@ module axis2axi_tb;
    );
 
    axi_ram #(
-       .ID_WIDTH  (1),
-       .DATA_WIDTH(AXI_DATA_W),
-       .ADDR_WIDTH(AXI_ADDR_W)
+      .ID_WIDTH  (1),
+      .DATA_WIDTH(AXI_DATA_W),
+      .ADDR_WIDTH(AXI_ADDR_W)
    ) axi_ram0 (
       .clk_i(clk),
       .rst_i(rst),

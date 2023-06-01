@@ -157,8 +157,8 @@ module iob_regfile_dp_tb;
 
    // Instantiate the Unit Under Test (UUT)
    iob_regfile_dp #(
-       .ADDR_W(`ADDR_W),
-       .DATA_W(`DATA_W)
+      .ADDR_W(`ADDR_W),
+      .DATA_W(`DATA_W)
    ) uut (
       .clk_i (clk),
       .arst_i(1'd0),

@@ -89,8 +89,8 @@ module iob_ram_2p_tb;
 
    // Instantiate the Unit Under Test (UUT)
    iob_ram_2p #(
-       .DATA_W(`DATA_W),
-       .ADDR_W(`ADDR_W)
+      .DATA_W(`DATA_W),
+      .ADDR_W(`ADDR_W)
    ) uut (
       .clk_i(clk),
 

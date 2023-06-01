@@ -8,11 +8,11 @@
 `timescale 1ns / 1ps
 
 module iob_iobuf (
-    input  i,    // from core
-    input  t_i,  // from core: tristate control
-    input  n_i,  // from core: inversion control
-    output o,    // to core
-    inout  io    // to device IO
+   input  i,    // from core
+   input  t_i,  // from core: tristate control
+   input  n_i,  // from core: inversion control
+   output o,    // to core
+   inout  io    // to device IO
 );
 
    wire o_int;
@@ -25,7 +25,7 @@ module iob_iobuf (
       .IO(io)
    );
 `else
-   reg  o_var;
+   reg o_var;
    assign io = t_i ? 1'bz : i;
    always @* o_var = #1 io;
    assign o_int = o_var;

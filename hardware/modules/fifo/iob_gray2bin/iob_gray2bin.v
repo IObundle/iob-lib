@@ -2,10 +2,10 @@
 
 // Convert gray encoding to binary
 module iob_gray2bin #(
-    parameter DATA_W = 4
+   parameter DATA_W = 4
 ) (
-    input  [DATA_W-1:0] gr_i,
-    output [DATA_W-1:0] bin_o
+   input  [DATA_W-1:0] gr_i,
+   output [DATA_W-1:0] bin_o
 );
 
    genvar pos;

@@ -1,16 +1,16 @@
 `timescale 1ns / 1ps
 
 module iob_ram_sp #(
-    parameter HEXFILE = "none",
-    parameter DATA_W  = 8,
-    parameter ADDR_W  = 14
+   parameter HEXFILE = "none",
+   parameter DATA_W  = 8,
+   parameter ADDR_W  = 14
 ) (
-    input                     clk_i,
-    input                     en_i,
-    input                     we_i,
-    input      [(ADDR_W-1):0] addr_i,
-    output reg [(DATA_W-1):0] d_o,
-    input      [(DATA_W-1):0] d_i
+   input                     clk_i,
+   input                     en_i,
+   input                     we_i,
+   input      [(ADDR_W-1):0] addr_i,
+   output reg [(DATA_W-1):0] d_o,
+   input      [(DATA_W-1):0] d_i
 );
 
    //this allows ISE 14.7 to work; do not remove

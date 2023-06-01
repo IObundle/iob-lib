@@ -1,17 +1,17 @@
 `timescale 1ns / 1ps
 
 module iob_diff #(
-    parameter DATA_W  = 32,
-    parameter RST_VAL = 0
+   parameter DATA_W  = 32,
+   parameter RST_VAL = 0
 ) (
-    input clk_i,
-    input arst_i,
-    input cke_i,
+   input clk_i,
+   input arst_i,
+   input cke_i,
 
-    input rst_i,
+   input rst_i,
 
-    input  [DATA_W-1:0] data_i,
-    output [DATA_W-1:0] data_o
+   input  [DATA_W-1:0] data_i,
+   output [DATA_W-1:0] data_o
 );
 
    wire [DATA_W-1:0] data_i_reg;

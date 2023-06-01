@@ -8,20 +8,20 @@
 `timescale 1ns / 1ps
 
 module iob_ctls #(
-    parameter N      = 21,
-    parameter MODE   = 0,   //trailing (0), leading (1)
-    parameter SYMBOL = 0    //search zeros (0), search ones (1)
+   parameter N      = 21,
+   parameter MODE   = 0,   //trailing (0), leading (1)
+   parameter SYMBOL = 0    //search zeros (0), search ones (1)
 ) (
-    input  [      N-1:0] data_i,
-    output [$clog2(N):0] count_o
+   input  [      N-1:0] data_i,
+   output [$clog2(N):0] count_o
 );
 
    //invert if searching zeros or not
    wire [N-1:0] data_int1;
    generate
-      if (SYMBOL == 0) begin: g_zeros
+      if (SYMBOL == 0) begin : g_zeros
          assign data_int1 = data_i;
-      end else begin: g_ones
+      end else begin : g_ones
          assign data_int1 = ~data_i;
       end
    endgenerate
@@ -48,7 +48,7 @@ module iob_ctls #(
       count = 0;
 
       for (pos = 0; pos < N; pos = pos + 1)
-         if ((data_int2[pos] == 1'd0) && (count == pos)) //count trailing zeros
+         if ((data_int2[pos] == 1'd0) && (count == pos))  //count trailing zeros
             count = pos + 1;
    end
 

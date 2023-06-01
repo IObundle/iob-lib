@@ -6,26 +6,26 @@
 //
 
 module iob2apb #(
-    parameter APB_ADDR_W = 32,          // APB address bus width in bits
-    parameter APB_DATA_W = 32,          // APB data bus width in bits
-    parameter ADDR_W     = APB_ADDR_W,  // IOb address bus width in bits
-    parameter DATA_W     = APB_DATA_W   // IOb data bus width in bits
+   parameter APB_ADDR_W = 32,          // APB address bus width in bits
+   parameter APB_DATA_W = 32,          // APB data bus width in bits
+   parameter ADDR_W     = APB_ADDR_W,  // IOb address bus width in bits
+   parameter DATA_W     = APB_DATA_W   // IOb data bus width in bits
 ) (
-    // IOb slave interface
-    `include "iob_s_port.vh"
+   // IOb slave interface
+   `include "iob_s_port.vh"
 
-    // APB master interface
-    `include "iob_apb_m_port.vh"
+   // APB master interface
+   `include "iob_apb_m_port.vh"
 
-    // Global signals
-    `include "iob_clkenrst_port.vh"
+   // Global signals
+   `include "iob_clkenrst_port.vh"
 );
 
    //APB outputs
    reg [1-1:0] apb_sel_nxt;
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(0)
+      .DATA_W (1),
+      .RST_VAL(0)
    ) sel_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -36,8 +36,8 @@ module iob2apb #(
 
    reg [1-1:0] apb_enable_nxt;
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(0)
+      .DATA_W (1),
+      .RST_VAL(0)
    ) enable_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -48,8 +48,8 @@ module iob2apb #(
 
    reg [ADDR_W-1:0] apb_addr_nxt;
    iob_reg #(
-       .DATA_W (ADDR_W),
-       .RST_VAL(0)
+      .DATA_W (ADDR_W),
+      .RST_VAL(0)
    ) addr_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -60,8 +60,8 @@ module iob2apb #(
 
    reg [(DATA_W/8)-1:0] apb_wstrb_nxt;
    iob_reg #(
-       .DATA_W (DATA_W / 8),
-       .RST_VAL(0)
+      .DATA_W (DATA_W / 8),
+      .RST_VAL(0)
    ) wstrb_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -72,8 +72,8 @@ module iob2apb #(
 
    reg [1-1:0] apb_write_nxt;
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(0)
+      .DATA_W (1),
+      .RST_VAL(0)
    ) write_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -84,8 +84,8 @@ module iob2apb #(
 
    reg [DATA_W-1:0] apb_wdata_nxt;
    iob_reg #(
-       .DATA_W (DATA_W),
-       .RST_VAL(0)
+      .DATA_W (DATA_W),
+      .RST_VAL(0)
    ) wdata_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -97,8 +97,8 @@ module iob2apb #(
    //IOb outputs
    reg [1-1:0] iob_ready_nxt;
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(1)
+      .DATA_W (1),
+      .RST_VAL(1)
    ) ready_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -109,8 +109,8 @@ module iob2apb #(
 
    reg [1-1:0] iob_rvalid_nxt;
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(0)
+      .DATA_W (1),
+      .RST_VAL(0)
    ) rvalid_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -121,8 +121,8 @@ module iob2apb #(
 
    reg [DATA_W-1:0] iob_rdata_nxt;
    iob_reg #(
-       .DATA_W (DATA_W),
-       .RST_VAL(0)
+      .DATA_W (DATA_W),
+      .RST_VAL(0)
    ) rdata_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -134,8 +134,8 @@ module iob2apb #(
    wire [1-1:0] pc;
    reg  [1-1:0] pc_nxt;
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(0)
+      .DATA_W (1),
+      .RST_VAL(0)
    ) access_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),

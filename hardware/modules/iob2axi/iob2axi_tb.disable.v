@@ -136,8 +136,8 @@ module iob2axi_tb;
    end
 
    iob2axi #(
-       .ADDR_W(ADDR_W),
-       .DATA_W(DATA_W)
+      .ADDR_W(ADDR_W),
+      .DATA_W(DATA_W)
    ) uut (
       .clk_i(clk),
       .rst_i(rst),
@@ -168,9 +168,9 @@ module iob2axi_tb;
    );
 
    axi_ram #(
-       .ID_WIDTH  (`AXI_ID_W),
-       .DATA_WIDTH(AXI_DATA_W),
-       .ADDR_WIDTH(AXI_ADDR_W)
+      .ID_WIDTH  (`AXI_ID_W),
+      .DATA_WIDTH(AXI_DATA_W),
+      .ADDR_WIDTH(AXI_ADDR_W)
    ) axi_ram0 (
       .clk(clk),
       .rst(rst),

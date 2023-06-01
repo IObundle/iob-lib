@@ -2,37 +2,37 @@
 
 
 module iob2axi_rd #(
-    parameter ADDR_W     = 0,
-    parameter DATA_W     = 0,
-    // AXI-4 Full I/F parameters
-    parameter AXI_ADDR_W = ADDR_W,
-    parameter AXI_DATA_W = DATA_W
+   parameter ADDR_W     = 0,
+   parameter DATA_W     = 0,
+   // AXI-4 Full I/F parameters
+   parameter AXI_ADDR_W = ADDR_W,
+   parameter AXI_DATA_W = DATA_W
 ) (
-    input clk_i,
-    input rst_i,
+   input clk_i,
+   input rst_i,
 
-    //
-    // Control I/F
-    //
-    input                       run_i,
-    input      [    ADDR_W-1:0] addr_i,
-    input      [`AXI_LEN_W-1:0] length_i,
-    output reg                  ready_o,
-    output reg                  error_o,
+   //
+   // Control I/F
+   //
+   input                       run_i,
+   input      [    ADDR_W-1:0] addr_i,
+   input      [`AXI_LEN_W-1:0] length_i,
+   output reg                  ready_o,
+   output reg                  error_o,
 
-    //
-    // AXI-4 Full Master Read I/F
-    //
-    `include "m_axi_read_m_port.vh"
+   //
+   // AXI-4 Full Master Read I/F
+   //
+   `include "m_axi_read_m_port.vh"
 
-    //
-    // Native Master Write I/F
-    //
-    output reg                m_valid_o,
-    output     [  ADDR_W-1:0] m_addr_o,
-    output     [  DATA_W-1:0] m_wdata_o,
-    output     [DATA_W/8-1:0] m_wstrb_o,
-    input                     m_ready_i
+   //
+   // Native Master Write I/F
+   //
+   output reg                m_valid_o,
+   output     [  ADDR_W-1:0] m_addr_o,
+   output     [  DATA_W-1:0] m_wdata_o,
+   output     [DATA_W/8-1:0] m_wstrb_o,
+   input                     m_ready_i
 );
 
    localparam axi_arsize = $clog2(DATA_W / 8);

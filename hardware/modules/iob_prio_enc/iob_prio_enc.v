@@ -2,12 +2,12 @@
 
 
 module iob_prio_enc #(
-    parameter WIDTH = 21,
-    // Priority: "LOWEST", "HIGHEST"
-    parameter PRIO  = "LOWEST"  //"LOWEST" -> smaller index
+   parameter WIDTH = 21,
+   // Priority: "LOWEST", "HIGHEST"
+   parameter PRIO  = "LOWEST"  //"LOWEST" -> smaller index
 ) (
-    input      [            WIDTH-1:0] unencoded_i,
-    output reg [($clog2(WIDTH)+1)-1:0] encoded_o
+   input      [            WIDTH-1:0] unencoded_i,
+   output reg [($clog2(WIDTH)+1)-1:0] encoded_o
 );
 
    integer pos;

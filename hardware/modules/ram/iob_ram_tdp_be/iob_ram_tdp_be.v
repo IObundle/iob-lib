@@ -4,25 +4,25 @@
 `timescale 1 ns / 1 ps
 
 module iob_ram_tdp_be #(
-    parameter HEXFILE = "none",
-    parameter ADDR_W  = 10,      // Addr Width in bits : 2*ADDR_W = RAM Depth
-    parameter DATA_W  = 32       // Data Width in bits
+   parameter HEXFILE = "none",
+   parameter ADDR_W  = 10,      // Addr Width in bits : 2*ADDR_W = RAM Depth
+   parameter DATA_W  = 32       // Data Width in bits
 ) (
-    // Port A
-    input                 clkA_i,
-    input                 enA_i,
-    input  [DATA_W/8-1:0] weA_i,
-    input  [  ADDR_W-1:0] addrA_i,
-    input  [  DATA_W-1:0] dA_i,
-    output [  DATA_W-1:0] dA_o,
+   // Port A
+   input                 clkA_i,
+   input                 enA_i,
+   input  [DATA_W/8-1:0] weA_i,
+   input  [  ADDR_W-1:0] addrA_i,
+   input  [  DATA_W-1:0] dA_i,
+   output [  DATA_W-1:0] dA_o,
 
-    // Port B
-    input                 clkB_i,
-    input                 enB_i,
-    input  [DATA_W/8-1:0] weB_i,
-    input  [  ADDR_W-1:0] addrB_i,
-    input  [  DATA_W-1:0] dB_i,
-    output [DATA_W-1 : 0] dB_o
+   // Port B
+   input                 clkB_i,
+   input                 enB_i,
+   input  [DATA_W/8-1:0] weB_i,
+   input  [  ADDR_W-1:0] addrB_i,
+   input  [  DATA_W-1:0] dB_i,
+   output [DATA_W-1 : 0] dB_o
 );
 
    localparam COL_W = 8;
@@ -38,9 +38,9 @@ module iob_ram_tdp_be #(
              {HEXFILE, "_", file_suffix[8*(i+1)-1-:8], ".hex"} : "none";
 
          iob_ram_tdp #(
-             .HEXFILE(mem_init_file_int),
-             .ADDR_W (ADDR_W),
-             .DATA_W (COL_W)
+            .HEXFILE(mem_init_file_int),
+            .ADDR_W (ADDR_W),
+            .DATA_W (COL_W)
          ) ram (
             .clkA_i (clkA_i),
             .enA_i  (enA_i),

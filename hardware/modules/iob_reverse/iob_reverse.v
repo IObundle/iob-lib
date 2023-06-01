@@ -1,10 +1,10 @@
 `timescale 1ns / 1ps
 
 module iob_reverse #(
-    parameter DATA_W = 21
+   parameter DATA_W = 21
 ) (
-    input  [DATA_W-1:0] data_i,
-    output [DATA_W-1:0] data_o
+   input  [DATA_W-1:0] data_i,
+   output [DATA_W-1:0] data_o
 );
 
    genvar pos;

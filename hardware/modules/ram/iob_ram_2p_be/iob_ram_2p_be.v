@@ -3,21 +3,21 @@
 `timescale 1ns / 1ps
 
 module iob_ram_2p_be #(
-    parameter HEXFILE = "none",
-    parameter DATA_W  = 0,
-    parameter ADDR_W  = 0
+   parameter HEXFILE = "none",
+   parameter DATA_W  = 0,
+   parameter ADDR_W  = 0
 ) (
-    input clk_i,
+   input clk_i,
 
-    //write port
-    input [DATA_W/8-1:0] w_en_i,
-    input [  ADDR_W-1:0] w_addr_i,
-    input [  DATA_W-1:0] w_data_i,
+   //write port
+   input [DATA_W/8-1:0] w_en_i,
+   input [  ADDR_W-1:0] w_addr_i,
+   input [  DATA_W-1:0] w_data_i,
 
-    //read port
-    input                   r_en_i,
-    input      [ADDR_W-1:0] r_addr_i,
-    output reg [DATA_W-1:0] r_data_o
+   //read port
+   input                   r_en_i,
+   input      [ADDR_W-1:0] r_addr_i,
+   output reg [DATA_W-1:0] r_data_o
 );
 
    localparam COL_W = 8;
@@ -33,9 +33,9 @@ module iob_ram_2p_be #(
              {HEXFILE, "_", file_suffix[8*(i+1)-1-:8], ".hex"} : "none";
 
          iob_ram_2p #(
-             .HEXFILE(mem_init_file_int),
-             .ADDR_W (ADDR_W),
-             .DATA_W (COL_W)
+            .HEXFILE(mem_init_file_int),
+            .ADDR_W (ADDR_W),
+            .DATA_W (COL_W)
          ) ram (
             .clk_i(clk_i),
 

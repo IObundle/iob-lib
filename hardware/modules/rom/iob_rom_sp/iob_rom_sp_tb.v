@@ -63,8 +63,8 @@ module iob_rom_sp_tb;
 
    // Instantiate the Unit Under Test (UUT)
    iob_rom_sp #(
-       .DATA_W(`DATA_W),
-       .ADDR_W(`ADDR_W)
+      .DATA_W(`DATA_W),
+      .ADDR_W(`ADDR_W)
    ) uut (
       .clk_i   (clk),
       .r_en_i  (r_en),

@@ -1,10 +1,10 @@
 `timescale 1ns / 1ps
 
 module iob_f2s_1bit_sync (
-    input  clk_i,
-    input  cke_i,
-    input  value_i,
-    output value_o
+   input  clk_i,
+   input  cke_i,
+   input  value_i,
+   output value_o
 );
 
    wire [1:0] sync;
