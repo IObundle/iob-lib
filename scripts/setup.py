@@ -160,6 +160,31 @@ def get_build_dir():
     print(module.build_dir)
 
 
+def get_core_name():
+    module = import_setup(".")
+    print(module.name)
+
+def get_version_str():
+    module = import_setup(".")
+    print(module.version)
+
+
+def version_from_str(version_str):
+    major, minor = version_str.replace("V", "").split(".")
+    version_str = f"{int(major):02d}{int(minor):02d}"
+    return version_str
+
+
+def get_version():
+    module = import_setup(".")
+    print(version_from_str(module.version))
+
+
+def get_previous_version():
+    module = import_setup(".")
+    print(version_from_str(module.previous_version))
+
+
 # Return white-space separated list of submodules directories of the core/system in the current directory (extracted from *_setup.py)
 def get_core_submodules_dirs():
     module = import_setup(".")

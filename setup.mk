@@ -103,16 +103,6 @@ $(BUILD_DIR)/doc/vivado.tex:
 
 endif
 
-
-#
-# DELIVERY 
-#
-
-ifneq ($(wildcard config_delivery.mk),)
-include config_delivery.mk
-endif
-
-
 clean:
 	@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
 	@rm -rf $(BUILD_DIR)
