@@ -20,6 +20,15 @@ class iob_merge(iob_module):
             os.path.join(cls.setup_dir, "iob_merge.v"),
             os.path.join(cls.build_dir, out_dir, "iob_merge.v"),
         )
+
+        # Ensure sources of other purposes are deleted (except software)
+        # Check that latest purpose is hardware
+        if cls._setup_purpose[-1]=='hardware' and len(cls._setup_purpose)>1:
+            # Purposes that have been setup previously
+            for purpose in [x for x in cls._setup_purpose[:-1] if x!="software"]:
+                # Delete sources for this purpose
+                os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "iob_merge.v"))
+
         # Setup dependencies
         iob_reg_e.setup()
         iob_mux.setup()
