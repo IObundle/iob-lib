@@ -18,32 +18,36 @@ from AxiDelay import AxiDelay
 from axi_ram import axi_ram
 from iob_ram_t2p import iob_ram_t2p
 
+
 class axis2axi(iob_module):
-    name='axis2axi'
-    version='V0.10'
-    setup_dir=os.path.dirname(__file__)
+    name = "axis2axi"
+    version = "V0.10"
+    setup_dir = os.path.dirname(__file__)
 
     @classmethod
     def _run_setup(cls):
         out_dir = super()._run_setup()
         # Copy source to build directory
-        shutil.copyfile(os.path.join(cls.setup_dir, 'axis2axi.v'), os.path.join(cls.build_dir, out_dir, 'axis2axi.v'))
+        shutil.copyfile(
+            os.path.join(cls.setup_dir, "axis2axi.v"),
+            os.path.join(cls.build_dir, out_dir, "axis2axi.v"),
+        )
         # Setup dependencies
 
-        axi_m_port.setup()                
-        axi_m_write_port.setup()        
-        axi_m_read_port.setup()        
-        axi_m_m_write_portmap.setup()        
-        axi_m_m_read_portmap.setup()        
-                
-        axis2axi_in.setup()                
-        axis2axi_out.setup()                
-        iob_fifo_sync.setup()                
-        iob_counter.setup()        
-        iob_reg_r.setup()        
-        iob_reg_re.setup()        
-        iob_asym_converter.setup()        
-                
-        AxiDelay.setup(purpose="simulation")        
-        axi_ram.setup(purpose="simulation")        
-        iob_ram_t2p.setup(purpose="simulation")        
+        axi_m_port.setup()
+        axi_m_write_port.setup()
+        axi_m_read_port.setup()
+        axi_m_m_write_portmap.setup()
+        axi_m_m_read_portmap.setup()
+
+        axis2axi_in.setup()
+        axis2axi_out.setup()
+        iob_fifo_sync.setup()
+        iob_counter.setup()
+        iob_reg_r.setup()
+        iob_reg_re.setup()
+        iob_asym_converter.setup()
+
+        AxiDelay.setup(purpose="simulation")
+        axi_ram.setup(purpose="simulation")
+        iob_ram_t2p.setup(purpose="simulation")

@@ -77,16 +77,16 @@ def import_setup(module_location, **kwargs):
                 module_location = module_location + "/" + x
                 break
         if "filename" not in vars():
-            raise FileNotFoundError(f"Could not find a *_setup.py file in {module_location}")
+            raise FileNotFoundError(
+                f"Could not find a *_setup.py file in {module_location}"
+            )
     else:
         if not os.path.isfile(module_location):
             raise FileNotFoundError(f"Could not find {module_location}")
         filename = module_location.split("/")[-1]
     # Import <corename>_setup.py
     module_name = filename.split(".")[0]
-    spec = importlib.util.spec_from_file_location(
-        module_name, module_location
-    )
+    spec = importlib.util.spec_from_file_location(module_name, module_location)
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = module
     # Define objects given in the module
@@ -126,7 +126,6 @@ def set_default_submodule_dirs(python_module):
     # Make sure 'LIB' path exists
     if "LIB" not in python_module.submodules["dirs"]:
         python_module.submodules["dirs"]["LIB"] = "submodules/LIB"
-
 
 
 # Get peripheral related macros
@@ -221,8 +220,8 @@ def iob_soc_peripheral_setup(python_module):
             for parameter in params_list[instance.module.name]:
                 parameter_to_append = parameter.copy()
                 # Override parameter value if user specified a 'parameters' dictionary with an override value for this parameter.
-                if parameter['name'] in instance.parameters:
-                    parameter_to_append['val'] = instance.parameters[parameter['name']]
+                if parameter["name"] in instance.parameters:
+                    parameter_to_append["val"] = instance.parameters[parameter["name"]]
                 # Add instance name prefix to the name of the parameter. This makes this parameter unique to this instance
                 parameter_to_append[
                     "name"

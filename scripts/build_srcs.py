@@ -61,7 +61,13 @@ def hw_setup(python_module):
     setup_dir = python_module.setup_dir
 
     # create module's version TeX file. Also create *_version.vh Verilog Header if we do not have regs.
-    version_file(core_name, core_version, core_previous_version, build_dir, create_version_header=False if python_module.regs else True)
+    version_file(
+        core_name,
+        core_version,
+        core_previous_version,
+        build_dir,
+        create_version_header=False if python_module.regs else True,
+    )
 
     # Copy Setup hw files (all .v and .sdc files under LIB/hardware/src)
     if not global_disable_file_copy:
@@ -201,6 +207,7 @@ def run_setup_functions(python_module, module_type, **kwargs):
         # Get and run function of this file
         get_module_function(full_module_path, **kwargs)()
 
+
 # Get an executable function to run a given python module
 #    module_path: python module path
 #    **kwargs: set of objects that will be accessible from inside the module when it is executed
@@ -304,6 +311,7 @@ def doc_setup(python_module):
     # Run doc_setup.py
     run_setup_functions(python_module, "doc_setup", setup_module=python_module)
 
+
 def write_git_revision_short_hash(dst_dir):
     file_name = "shortHash.tex"
     text = (
@@ -332,7 +340,7 @@ def setup_submodules(python_module):
             continue
 
         # Iterate through every module in list
-        idx=0
+        idx = 0
         while idx < len(python_module.submodules[setup_type]["modules"]):
             item = python_module.submodules[setup_type]["modules"][idx]
             idx += 1
@@ -525,7 +533,13 @@ def create_if_gen_headers(dest_dir, Vheaders):
 
 
 # Create TeX and optionally Verilog header files with the version of the system
-def version_file(core_name, core_version, core_previous_version, build_dir, create_version_header=True):
+def version_file(
+    core_name,
+    core_version,
+    core_previous_version,
+    build_dir,
+    create_version_header=True,
+):
     tex_dir = f"{build_dir}/document/tsrc"
     verilog_dir = f"{build_dir}/hardware/src"
 
@@ -547,6 +561,7 @@ def version_file(core_name, core_version, core_previous_version, build_dir, crea
             vh_version_string += c
     with open(vh_file, "w") as vh_f:
         vh_f.write(f"`define VERSION {vh_version_string}")
+
 
 # Given a version string (like "V0.12"), return a 4 digit string representing the version (like "0012")
 def version_str_to_digits(version_str):

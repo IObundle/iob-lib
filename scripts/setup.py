@@ -24,7 +24,9 @@ def getf(obj, name, field):
 # no_overlap: Optional argument. Selects if read/write register addresses should not overlap
 # disable_file_copy: Optional argument. Selects if files should be copied from setup directory to build directory. Enable this setting to run other specialized copy sequences.
 # disable_file_gen: Optional argument. Selects if files should be auto-generated.
-def setup(python_module, no_overlap=False, disable_file_copy=False, disable_file_gen=False):
+def setup(
+    python_module, no_overlap=False, disable_file_copy=False, disable_file_gen=False
+):
     confs = python_module.confs
     ios = python_module.ios
     regs = python_module.regs
@@ -142,12 +144,16 @@ def setup(python_module, no_overlap=False, disable_file_copy=False, disable_file
         #
         # Generate TeX
         #
-        #if "doc" in python_module.flows:
-        if False: #TODO: Temporiarily disabled
-            mk_conf.generate_confs_tex(confs, python_module.build_dir + "/document/tsrc")
+        # if "doc" in python_module.flows:
+        if False:  # TODO: Temporiarily disabled
+            mk_conf.generate_confs_tex(
+                confs, python_module.build_dir + "/document/tsrc"
+            )
             ios_lib.generate_ios_tex(ios, python_module.build_dir + "/document/tsrc")
             if regs:
-                mkregs_obj.generate_regs_tex(regs, reg_table, build_dir + "/document/tsrc")
+                mkregs_obj.generate_regs_tex(
+                    regs, reg_table, build_dir + "/document/tsrc"
+                )
             blocks_lib.generate_blocks_tex(blocks, build_dir + "/document/tsrc")
 
     # Replace Verilog includes by Verilog header file contents
