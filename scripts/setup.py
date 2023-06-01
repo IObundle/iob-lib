@@ -9,6 +9,7 @@ import blocks as blocks_lib
 from submodule_utils import import_setup, set_default_submodule_dirs
 import build_srcs
 import verilog_tools
+from string import Template
 
 import datetime
 
@@ -203,7 +204,7 @@ def insert_header():
     # <comment> is the comment character to be used
     # <file1> <file2> <file3> ... are the files to be processed
 
-    x = datetime.datetime.now()
+    YEAR = datetime.datetime.today().year
 
     module = import_setup(".")
 
@@ -220,7 +221,10 @@ def insert_header():
         content = f.read()
         f.seek(0, 0)
         for line in header:
-            f.write(sys.argv[3] + "  " + f"{line}")
+            substitute_line = Template(line).substitute(
+                YEAR=YEAR, NAME=NAME, VERSION=VERSION
+            )
+            f.write(sys.argv[3] + "  " + f"{substitute_line}")
         f.write("\n\n\n" + content)
 
 
