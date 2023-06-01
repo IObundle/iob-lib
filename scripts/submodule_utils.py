@@ -442,6 +442,10 @@ def get_table_ports(table):
 def get_module_io(ios, confs=None, corename=None):
     module_signals = []
     for table in ios:
+        # If table has 'doc_only' attribute set to True, skip it
+        if "doc_only" in table.keys() and table["doc_only"]:
+            continue
+
         table_signals = get_table_ports(table)
         # Add signal attributes
         for signal in table_signals:
