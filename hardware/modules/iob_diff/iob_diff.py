@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_diff import iob_diff
 from iob_reg_r import iob_reg_r
 
 class iob_diff(iob_module):
@@ -17,5 +16,4 @@ class iob_diff(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_diff.v'), os.path.join(cls.build_dir, out_dir, 'iob_diff.v'))
         # Setup dependencies
 
-        iob_diff.setup()        
         iob_reg_r.setup()        

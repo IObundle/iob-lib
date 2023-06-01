@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_pulse_gen import iob_pulse_gen
 from iob_reg import iob_reg
 from iob_counter import iob_counter
 
@@ -18,6 +17,5 @@ class iob_pulse_gen(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_pulse_gen.v'), os.path.join(cls.build_dir, out_dir, 'iob_pulse_gen.v'))
         # Setup dependencies
 
-        iob_pulse_gen.setup()        
         iob_reg.setup()        
         iob_counter.setup()        

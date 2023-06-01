@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_wishbone2iob import iob_wishbone2iob
 from iob_reg_re import iob_reg_re
 
 class iob_wishbone2iob(iob_module):
@@ -17,5 +16,4 @@ class iob_wishbone2iob(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_wishbone2iob.v'), os.path.join(cls.build_dir, out_dir, 'iob_wishbone2iob.v'))
         # Setup dependencies
 
-        iob_wishbone2iob.setup()        
         iob_reg_re.setup()        

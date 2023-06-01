@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_split import iob_split
 
 class iob_split(iob_module):
     name='iob_split'
@@ -16,4 +15,3 @@ class iob_split(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_split.v'), os.path.join(cls.build_dir, out_dir, 'iob_split.v'))
         # Setup dependencies
 
-        iob_split.setup()        

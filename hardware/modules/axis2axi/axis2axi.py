@@ -7,7 +7,6 @@ from axi_m_write_port import axi_m_write_port
 from axi_m_read_port import axi_m_read_port
 from axi_m_m_write_portmap import axi_m_m_write_portmap
 from axi_m_m_read_portmap import axi_m_m_read_portmap
-from axis2axi import axis2axi
 from axis2axi_in import axis2axi_in
 from axis2axi_out import axis2axi_out
 from iob_fifo_sync import iob_fifo_sync
@@ -37,7 +36,6 @@ class axis2axi(iob_module):
         axi_m_m_write_portmap.setup()        
         axi_m_m_read_portmap.setup()        
                 
-        axis2axi.setup()                
         axis2axi_in.setup()                
         axis2axi_out.setup()                
         iob_fifo_sync.setup()                

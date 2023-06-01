@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_reg_e import iob_reg_e
 from iob_reg import iob_reg
 
 class iob_reg_e(iob_module):
@@ -17,5 +16,4 @@ class iob_reg_e(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_reg_e.v'), os.path.join(cls.build_dir, out_dir, 'iob_reg_e.v'))
         # Setup dependencies
 
-        iob_reg_e.setup()        
         iob_reg.setup()        

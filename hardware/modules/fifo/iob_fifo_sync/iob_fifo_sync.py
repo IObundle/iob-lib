@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_fifo_sync import iob_fifo_sync
 from iob_reg_r import iob_reg_r
 from iob_reg import iob_reg
 from iob_counter import iob_counter
@@ -21,7 +20,6 @@ class iob_fifo_sync(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_fifo_sync.v'), os.path.join(cls.build_dir, out_dir, 'iob_fifo_sync.v'))
         # Setup dependencies
 
-        iob_fifo_sync.setup()                
         iob_reg_r.setup()            
         iob_reg.setup()        
         iob_counter.setup()            

@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_sipo_reg import iob_sipo_reg
 from iob_counter import iob_counter
 from iob_reg import iob_reg
 
@@ -18,6 +17,5 @@ class iob_sipo_reg(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_sipo_reg.v'), os.path.join(cls.build_dir, out_dir, 'iob_sipo_reg.v'))
         # Setup dependencies
 
-        iob_sipo_reg.setup()        
         iob_counter.setup()        
         iob_reg.setup()        

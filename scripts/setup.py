@@ -14,6 +14,7 @@ import shutil
 import datetime
 
 from iob_ctls import iob_ctls
+from iob_module import iob_module
 
 
 def getf(obj, name, field):
@@ -95,9 +96,9 @@ def setup(python_module, no_overlap=False, disable_file_copy=False, disable_file
         # Auto-add iob_ctls module
         iob_ctls.setup()
         # Auto-add iob_s_port.vh
-        iob_submodule_utils.generate("iob_s_port")
+        iob_module.generate("iob_s_port")
         # Auto-add iob_s_portmap.vh
-        iob_submodule_utils.generate("iob_s_portmap")
+        iob_module.generate("iob_s_portmap")
 
     #
     # Setup flows

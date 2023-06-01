@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_ram_dp_be import iob_ram_dp_be
 from iob_ram_dp import iob_ram_dp
 
 class iob_ram_dp_be(iob_module):
@@ -17,5 +16,4 @@ class iob_ram_dp_be(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_ram_dp_be.v'), os.path.join(cls.build_dir, out_dir, 'iob_ram_dp_be.v'))
         # Setup dependencies
 
-        iob_ram_dp_be.setup()        
         iob_ram_dp.setup()        

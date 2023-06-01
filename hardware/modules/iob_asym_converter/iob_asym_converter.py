@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_asym_converter import iob_asym_converter
 from iob_reg import iob_reg
 from iob_ram_2p import iob_ram_2p
 
@@ -18,7 +17,6 @@ class iob_asym_converter(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_asym_converter.v'), os.path.join(cls.build_dir, out_dir, 'iob_asym_converter.v'))
         # Setup dependencies
 
-        iob_asym_converter.setup()        
         iob_reg.setup()        
 
         iob_ram_2p.setup(purpose="simulation")        

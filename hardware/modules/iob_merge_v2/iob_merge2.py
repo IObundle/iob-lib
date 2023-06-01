@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_merge2 import iob_merge2
 from iob_reg import iob_reg
 from iob_mux import iob_mux
 from iob_demux import iob_demux
@@ -19,7 +18,6 @@ class iob_merge2(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_merge2.v'), os.path.join(cls.build_dir, out_dir, 'iob_merge2.v'))
         # Setup dependencies
 
-        iob_merge2.setup()
         iob_reg.setup()
         iob_mux.setup()
         iob_demux.setup()

@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_acc import iob_acc
 from iob_reg_re import iob_reg_re
 
 class iob_acc(iob_module):
@@ -17,5 +16,4 @@ class iob_acc(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_acc.v'), os.path.join(cls.build_dir, out_dir, 'iob_acc.v'))
         # Setup dependencies
 
-        iob_acc.setup()        
         iob_reg_re.setup()        

@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_s2f_sync import iob_s2f_sync
 from iob_counter import iob_counter
 from iob_reg_re import iob_reg_re
 
@@ -18,6 +17,5 @@ class iob_s2f_sync(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_s2f_sync.v'), os.path.join(cls.build_dir, out_dir, 'iob_s2f_sync.v'))
         # Setup dependencies
 
-        iob_s2f_sync.setup()        
         iob_counter.setup()        
         iob_reg_re.setup()        

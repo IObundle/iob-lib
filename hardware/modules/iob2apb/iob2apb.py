@@ -6,7 +6,6 @@ from iob_s_port import iob_s_port
 from iob_s_s_portmap import iob_s_s_portmap
 from apb_m_port import apb_m_port
 from iob_m_tb_wire import iob_m_tb_wire
-from iob2apb import iob2apb
 from iob_reg import iob_reg
 
 class iob2apb(iob_module):
@@ -26,5 +25,4 @@ class iob2apb(iob_module):
         apb_m_port.setup()        
         iob_m_tb_wire.setup()        
 
-        iob2apb.setup()        
         iob_reg.setup()        

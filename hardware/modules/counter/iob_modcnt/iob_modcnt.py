@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_modcnt import iob_modcnt
 from iob_counter import iob_counter
 
 class iob_modcnt(iob_module):

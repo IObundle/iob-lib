@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_regfile_2p import iob_regfile_2p
 
 class iob_regfile_2p(iob_module):
     name='iob_regfile_2p'
@@ -16,4 +15,3 @@ class iob_regfile_2p(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_regfile_2p.v'), os.path.join(cls.build_dir, out_dir, 'iob_regfile_2p.v'))
         # Setup dependencies
 
-        iob_regfile_2p.setup()        

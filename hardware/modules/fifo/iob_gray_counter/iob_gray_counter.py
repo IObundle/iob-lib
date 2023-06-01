@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_gray_counter import iob_gray_counter
 from iob_reg_re import iob_reg_re
 
 class iob_gray_counter(iob_module):

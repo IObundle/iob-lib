@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_fifo_async import iob_fifo_async
 from iob_gray2bin import iob_gray2bin
 from iob_sync import iob_sync
 from iob_asym_converter import iob_asym_converter
@@ -20,7 +19,6 @@ class iob_fifo_async(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_fifo_async.v'), os.path.join(cls.build_dir, out_dir, 'iob_fifo_async.v'))
         # Setup dependencies
 
-        iob_fifo_async.setup()                
         iob_gray_counter.setup()            
         iob_gray2bin.setup()        
         iob_sync.setup()        

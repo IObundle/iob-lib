@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_ram_2p_tiled import iob_ram_2p_tiled
 from iob_ram_2p import iob_ram_2p
 
 class iob_ram_2p_tiled(iob_module):
@@ -17,5 +16,4 @@ class iob_ram_2p_tiled(iob_module):
         shutil.copyfile(os.path.join(cls.setup_dir, 'iob_ram_2p_tiled.v'), os.path.join(cls.build_dir, out_dir, 'iob_ram_2p_tiled.v'))
         # Setup dependencies
 
-        iob_ram_2p_tiled.setup()        
         iob_ram_2p.setup()        

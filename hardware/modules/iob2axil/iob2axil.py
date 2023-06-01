@@ -8,7 +8,6 @@ from axil_m_port import axil_m_port
 from axil_m_portmap import axil_m_portmap
 from iob_m_tb_wire import iob_m_tb_wire
 from axil_wire import axil_wire
-from iob2axil import iob2axil
 
 class iob2axil(iob_module):
     name='iob2axil'
@@ -29,4 +28,3 @@ class iob2axil(iob_module):
         iob_m_tb_wire.setup()        
         axil_wire.setup()        
             
-        iob2axil.setup()        
