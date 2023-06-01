@@ -1,28 +1,45 @@
 `timescale 1ns / 1ps
-
-`define DATA_W 32
-`define ADDR_W 4
+`include "iob_utils.vh"
 
 module iob_regfile_dp_tb;
 
-   // Inputs
-   reg                 clk;
-   reg                 rst;
-   reg [  `DATA_W-1:0] wdataA;
-   reg [  `DATA_W-1:0] wdataB;
-   reg [  `ADDR_W-1:0] addrA;
-   reg [  `ADDR_W-1:0] addrB;
-   reg                 enA;
-   reg                 enB;
+   localparam DATA_W = 32;
 
-   // Ouptuts
-   reg [`DATA_W-1 : 0] rdataA;
-   reg [`DATA_W-1 : 0] rdataB;
+              
+   localparam MODE = "RW";   
+   localparam N = 8;
+   localparam W = 8;
+   localparam NBYTES = (W<=8) ? N : (W<=16) ? 2*N : 4*N;
+   localparam ADDR_W = $clog2(NBYTES);
 
-   integer i, seq_ini;
+   
+   reg                 arst;
+   reg                 cke;
 
-   parameter clk_per = 10;  // clk period = 10 timeticks
 
+   //cpu interface   
+   reg                 iob_avalid_i;
+   reg [ADDR_W-1:0]    iob_addr_i;
+   reg [DATA_W-1:0]    iob_wdata_i;
+   reg [DATA_W/8-1:0]  iob_wstrb_i;
+   wire [DATA_W-1:0]   iob_rdata_o;
+   wire                iob_ready_o;
+   wire                iob_rvalid_o;
+
+   //logic block interface
+   reg [$clog2(N)-1:0] logic_addr_i;
+   reg [W-1:0]         logic_wdata_i;
+   reg                 logic_we_i;
+   wire [W-1:0]        logic_rdata_o;
+   wire                logic_ready_o;
+
+   reg [DATA_W-1:0]    rdata;
+   
+   // clock
+   `IOB_CLOCK(clk, 10)
+
+   integer             i;
+   
    initial begin
       // optional VCD
 `ifdef VCD
@@ -30,153 +47,97 @@ module iob_regfile_dp_tb;
       $dumpvars();
 `endif
 
-      // Initialize Inputs
-      clk     = 1;
-      rst     = 0;
+      cke = 1;
+      iob_avalid_i = 0;
+      iob_wstrb_i = 0;
+      
+      logic_we_i = 0;
 
-      wdataA  = 0;
-      addrA   = 0;
-      enA     = 0;
+      // pulse reset
+      `IOB_PULSE(arst, 11, 12, 13)
 
-      wdataB  = 0;
-      addrB   = 0;
-      enB     = 0;
-
-      // Number from which to start the incremental sequence to write into the Register File
-      seq_ini = 32;
-
-      #clk_per;
-      @(posedge clk) #1;
-      rst = 1;
-      @(posedge clk) #1;
-      rst = 0;
-
-      @(posedge clk) #1;
-      enA = 1;
-
-      // Write and real all the locations
-      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
-         addrA  = i;
-         wdataA = i + seq_ini;
-         @(posedge clk) #1;
-         if (rdataA != i + seq_ini) begin
-            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataA);
-            $finish();
-         end
-         @(posedge clk) #1;
+      for (i=0; i<N; i=i+1) begin
+         iob_write(i, ~i, W);
       end
 
-      @(posedge clk) #1;
-      enA   = 0;
-      addrA = 0;
-
-      // Read all the locations and check if still stored
-      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
-         addrA = i;
-         @(posedge clk) #1;
-         if (rdataA != i + seq_ini) begin
-            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataA);
-            $finish();
+      for (i=0; i<N; i=i+1) begin
+         iob_read(i, rdata, W);
+         if (rdata[(i%(DATA_W/8))*8+:W] !== ~i[W-1:0]) begin
+            $display("rdata = %h", rdata);
+            $display("ERROR: rdata = %h, expected %h", rdata[(i%(DATA_W/8))*8+:W], ~i[W-1:0]);
+            $display("%h", uut.regfile);
+            //$fatal(1);
          end
-         @(posedge clk) #1;
       end
 
-      // Resets the entire memory
-      @(posedge clk) #1;
-      rst = 1;
-      @(posedge clk) #1;
-      rst = 0;
 
-      // Read all the locations and check if reset worked
-      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
-         addrA = i;
-         @(posedge clk) #1;
-         if (rdataA != 0) begin
-            $display("ERROR: rdata is not null");
-            $finish();
-         end
-         @(posedge clk) #1;
-      end
-
-      // Number from which to start the incremental sequence to write into the Register File
-      seq_ini = 64;
-
-      @(posedge clk) #1;
-      enB = 1;
-
-      // Write and real all the locations
-      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
-         addrB  = i;
-         wdataB = i + seq_ini;
-         @(posedge clk) #1;
-         if (rdataB != i + seq_ini) begin
-            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataB);
-            $finish();
-         end
-         @(posedge clk) #1;
-      end
-
-      @(posedge clk) #1;
-      enB   = 0;
-      addrB = 0;
-
-      // Read all the locations and check if still stored
-      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
-         addrB = i;
-         @(posedge clk) #1;
-         if (rdataB != i + seq_ini) begin
-            $display("ERROR: read error in rdata.\n \t data=%0d; rdata=%0d", i + seq_ini, rdataB);
-            $finish();
-         end
-         @(posedge clk) #1;
-      end
-
-      // Resets the entire memory
-      @(posedge clk) #1;
-      rst = 1;
-      @(posedge clk) #1;
-      rst = 0;
-
-      // Read all the locations and check if reset worked
-      for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
-         addrB = i;
-         @(posedge clk) #1;
-         if (rdataB != 0) begin
-            $display("ERROR: rdata is not null");
-            $finish();
-         end
-         @(posedge clk) #1;
-      end
-
-      #clk_per;
-      $display("%c[1;34m", 27);
-      $display("Test completed successfully.");
-      $display("%c[0m", 27);
-      #(5 * clk_per) $finish();
+      #100 $finish();
+      
    end
 
-   // Instantiate the Unit Under Test (UUT)
+   wire [1+ADDR_W+DATA_W:0] cpu_req_i = {iob_avalid_i, iob_addr_i, |iob_wstrb_i, iob_wdata_i};
+   wire [(2+DATA_W)-1:0]               cpu_resp_o;
+   
+   wire [($clog2(N)+1+W)-1:0]          logic_req_i = {logic_addr_i, logic_we_i, logic_wdata_i};
+   wire [(2+W)-1:0]                    logic_resp_o;
+   
+   assign iob_ready_o = cpu_resp_o[1+DATA_W];
+   assign iob_rvalid_o = cpu_resp_o[DATA_W];
+   assign iob_rdata_o = cpu_resp_o[DATA_W-1:0];
+    
    iob_regfile_dp #(
-       .ADDR_W(`ADDR_W),
-       .DATA_W(`DATA_W)
-   ) uut (
-      .clk_i (clk),
-      .arst_i(1'd0),
-      .cke_i (1'd1),
-      .rst_i (rst),
+                    .N(N),
+                    .W(W),
+                    .MODE(MODE),
+                    .DATA_W(DATA_W),
+                    .ADDR_W(ADDR_W),
+                    .ADDR_OFFSET(0)
+                    ) uut (
+                           .clk_i(clk),
+                           .arst_i(arst),
+                           .cke_i(cke),
+                           .cpu_req_i(cpu_req_i),
+                           .cpu_resp_o(cpu_resp_o),
+                           .logic_req_i(logic_req_i),
+                           .logic_resp_o(logic_resp_o)
+                           );
 
-      .a_wdata_i(wdataA),
-      .a_addr_i (addrA),
-      .a_wen_i  (enA),
-      .a_rdata_o(rdataA),
+   // Write data to IOb Native slave
+   task iob_write;
+      input [ADDR_W-1:0] addr;
+      input [DATA_W-1:0] data;
+      input [$clog2(DATA_W):0] width;
+      
+      begin
+         @(posedge clk) #1 iob_avalid_i = 1;  //sync and assign
+         iob_addr_i  = addr;
+         iob_wdata_i = `IOB_GET_WDATA(addr, data);
+         iob_wstrb_i = `IOB_GET_WSTRB(addr, width);
+         
+         while (!iob_ready_o) #1;
+         
+         @(posedge clk) iob_avalid_i = 0;
+         iob_wstrb_i = 0;
+      end
+   endtask
 
-      .b_wdata_i(wdataB),
-      .b_addr_i (addrB),
-      .b_wen_i  (enB),
-      .b_rdata_o(rdataB)
-   );
+   // Read data from IOb Native slave
+   task iob_read;
+      input [ADDR_W-1:0] addr;
+      output [DATA_W-1:0] data;
+      input [$clog2(DATA_W):0] width;
+      
+      begin
+         @(posedge clk) #1 iob_avalid_i = 1;
+         iob_addr_i = addr;
+         
+         while (!iob_ready_o) #1;
+         @(posedge clk) #1 iob_avalid_i = 0;
+         
+         while (!iob_rvalid_o) #1;
+         data = #1 `IOB_GET_RDATA(addr, iob_rdata_o, width);
+  end
+endtask
 
-   // system clock
-   always #(clk_per / 2) clk = ~clk;
 
 endmodule

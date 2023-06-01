@@ -107,12 +107,12 @@ def delete_last_comma(file_obj):
     file_obj.write(" ")
 
 
-# Generate io.vh file
+# Generate io.vs file
 # ios: list of tables, each of them containing a list of ports
 # Each table is a dictionary with fomat: {'name': '<table name>', 'descr':'<table description>', 'ports': [<list of ports>]}
 # Each port is a dictionary with fomat: {'name':"<port name>", 'type':"<port type>", 'n_bits':'<port width>', 'descr':"<port description>"},
 def generate_ios_header(ios, top_module, out_dir):
-    f_io = open(f"{out_dir}/{top_module}_io.vh", "w+")
+    f_io = open(f"{out_dir}/{top_module}_io.vs", "w+")
 
     for table in ios:
         # If table has 'doc_only' attribute set to True, skip it

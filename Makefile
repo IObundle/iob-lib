@@ -77,6 +77,12 @@ else
 endif
 endif
 
+sim-waves: uut.vcd
+	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &
+
+uut.vcd:
+	make sim VCD=1 MODULE=$(MODULE)
+
 # Install board server and client
 board_server_install:
 	sudo cp scripts/board_client.py /usr/local/bin/ && \

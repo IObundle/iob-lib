@@ -51,3 +51,13 @@ Run tests for all memory modules with the command:
 ```
 make -f test.mk test
 ```
+
+## How to use Nix
+Instead of manually installing the dependencies for each IObundle repository project, you can use [nix-shell](https://nixos.org/manual/nix/stable/command-ref/nix-shell.html). This allows you to run your project in a [Nix](https://nixos.org/) environment with all dependencies available except for Vivado and Quartus. The packages installed by the `nix-shell` are defined in [`scripts/default.nix`](https://github.com/IObundle/iob-lib/blob/python-setup/scripts/default.nix).
+
+To [install Nix](https://nixos.org/download.html#nix-install-linux) the recommended command is:
+- `sh <(curl -L https://nixos.org/nix/install) --daemon`
+
+Then, in the repository you can run `nix-shell` from the root directory to install the required packages.
+
+To delete all the unused old Nix packages you can run: `nix-collect-garbage -d`. It is recommended to run it inside the nix-shell environment currently used to prevent deleting packages commonly used and having to install them again.

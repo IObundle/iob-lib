@@ -3,7 +3,7 @@
         register configuration file (mkregs.toml)
 
    Usage: verilog2tex.py path/to/top_level.v [verilog_files] [mkregs.toml]
-        print("verilog_files: paths to .v and .vh files
+        print("verilog_files: paths to .v, .vs and .vh files
         print("mkregs_conf: path/to/mkregs.toml
 """
 from parse import parse, search
