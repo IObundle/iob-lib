@@ -209,7 +209,7 @@ def get_peripheral_ios(peripherals_list):
 # python_module: Module of the iob-soc system being setup
 def iob_soc_peripheral_setup(python_module):
     # Get peripherals list from 'peripherals' table in blocks list
-    peripherals_list = get_peripherals_list(python_module.blocks)
+    peripherals_list = python_module.peripherals
 
     if peripherals_list:
         # Get port list, parameter list and top module name for each type of peripheral used

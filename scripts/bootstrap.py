@@ -66,6 +66,7 @@ exec("import " + top_module_name)
 # Print build directory attribute of the top module
 def get_build_dir():
     top_module = vars(sys.modules[top_module_name])[top_module_name]
+    top_module.is_top_module = True
     top_module.set_dynamic_attributes()
     print(top_module.build_dir)
 

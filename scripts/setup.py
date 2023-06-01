@@ -30,7 +30,6 @@ def setup(
     confs = python_module.confs
     ios = python_module.ios
     regs = python_module.regs
-    blocks = python_module.blocks
 
     top = python_module.name
     build_dir = python_module.build_dir
@@ -46,20 +45,6 @@ def setup(
             "descr": "Product version. This 16-bit macro uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234.",
         }
     )
-
-    #
-    # Build directory
-    #
-    if python_module.is_top_module:
-        os.makedirs(build_dir, exist_ok=True)  # Create build directory
-        mk_conf.config_build_mk(python_module, build_dir)
-        os.makedirs(
-            f"{build_dir}/hardware/src", exist_ok=True
-        )  # Create HARDWARE directories
-        shutil.copyfile(
-            f"{build_srcs.LIB_DIR}/build.mk", f"{build_dir}/Makefile"
-        )  # Copy generic MAKEFILE
-        # Setup DELIVERY directories: TODO
 
     #
     # Build registers table
@@ -145,7 +130,9 @@ def setup(
         # Generate TeX
         #
         # if "doc" in python_module.flows:
-        if False:  # TODO: Temporiarily disabled
+        # TODO: Temporarily disabled
+        '''
+        if python_module.is_top_module:
             mk_conf.generate_confs_tex(
                 confs, python_module.build_dir + "/document/tsrc"
             )
@@ -155,6 +142,7 @@ def setup(
                     regs, reg_table, build_dir + "/document/tsrc"
                 )
             blocks_lib.generate_blocks_tex(blocks, build_dir + "/document/tsrc")
+        '''
 
     # Replace Verilog includes by Verilog header file contents
     if python_module.is_top_module and not disable_file_copy:

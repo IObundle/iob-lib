@@ -1,7 +1,10 @@
 import os
+import shutil
 
 import iob_colors
 import if_gen
+from mk_configuration import config_build_mk
+from build_srcs import LIB_DIR
 from iob_verilog_instance import iob_verilog_instance
 
 # Generic class to describe a base iob-module
@@ -12,14 +15,14 @@ class iob_module:
     flows = ""  # Flows supported by this module
     setup_dir = ""  # Setup directory for this module
     build_dir = ""  # Build directory for this module
-    confs = []  # List of configuration macros/parameters for this module
-    regs = []  # List of registers for this module
-    ios = []  # List of I/O for this module
-    block_groups = []  # List of block groups for this module. Used for documentation.
+    confs = None  # List of configuration macros/parameters for this module
+    regs = None  # List of registers for this module
+    ios = None  # List of I/O for this module
+    block_groups = None  # List of block groups for this module. Used for documentation.
 
     # List of setup purposes for this module. Also used to check if module has already been setup.
     _setup_purpose = (
-        []
+        None
     )
 
     is_top_module = False  # Select if this module is the top module
@@ -33,6 +36,12 @@ class iob_module:
     # is_top_module: Select if this is the top module. This should only be enabled on the top module class.
     @classmethod
     def setup(cls, purpose="hardware", is_top_module=False):
+        #print(f'DEBUG: Setup: {cls.name}, purpose: {purpose}') # DEBUG
+
+        # Initialize empty list for purpose
+        if cls._setup_purpose == None:
+            cls._setup_purpose=[]
+
         # Don't setup if module has already been setup for this purpose or for the "hardware" purpose.
         if purpose in cls._setup_purpose or "hardware" in cls._setup_purpose:
             return
@@ -42,6 +51,11 @@ class iob_module:
             cls.is_top_module = is_top_module
             cls.set_dynamic_attributes()
 
+        # Create build directory this is the top module class, and is the first time setup
+        if is_top_module and not cls._setup_purpose:
+            cls.__create_build_dir()
+
+        # Add current setup purpose to list
         cls._setup_purpose.append(purpose)
 
         cls._run_setup()
@@ -53,8 +67,8 @@ class iob_module:
     @classmethod
     def instance(cls, name="", description=""):
         assert (
-            _setup_purpose
-        ), f"{iob_colors.ERROR}Module {cls.name} has not been setup yet!{iob_colors.ENDC}"
+            cls._setup_purpose
+        ), f"{iob_colors.FAIL}Module {cls.name} has not been setup yet!{iob_colors.ENDC}"
 
         if not name:
             name = f"{cls.name}_0"
@@ -79,6 +93,12 @@ class iob_module:
 
         # TODO: It would be nice if we could auto-fill the setup directory with the location of the file, but I'm not sure how.
         # cls.setup_dir=os.path.dirname(__file__) # This would not work, because `__file__` points to the iob_module.py file and not the ones from subclasses.
+
+        # Initialize empty lists for attributes (We can't initialize in the attribute declaration because it would cause every subclass to reference the same list)
+        cls.confs = []
+        cls.regs = []
+        cls.ios = []
+        cls.block_groups = []
 
     # Default _run_setup function just parses the latest purpose and returns the destination directory
     @classmethod
@@ -119,12 +139,12 @@ class iob_module:
                 file_prefix = ""
             else:
                 file_prefix = "iob_"
-            f_out = open(f"{dest_dir}/{file_prefix}{vh_name}.vh", "w")
+            f_out = open(os.path.join(dest_dir, file_prefix+vh_name+".vh"), "w")
             if_gen.create_signal_table(vh_name)
             if_gen.write_vh_contents(vh_name, "", "", f_out)
         elif (type(vh_name) is dict) and (vh_name["interface"] in if_gen.interfaces):
             f_out = open(
-                f"{dest_dir}/{vh_name['file_prefix']}{vh_name['interface']}.vh", "w"
+                os.path.join(dest_dir, vh_name['file_prefix']+vh_name['interface']+".vh"), "w"
             )
             if_gen.create_signal_table(vh_name["interface"])
             if_gen.write_vh_contents(
@@ -144,16 +164,39 @@ class iob_module:
     @staticmethod
     def get_purpose_dir(purpose):
         if purpose == "hardware":
-            out_dir = "hardware/src/"
+            out_dir = "hardware/src"
         elif purpose == "simulation":
-            out_dir = "hardware/simulation/src/"
+            out_dir = "hardware/simulation/src"
         elif purpose == "fpga":
-            out_dir = "hardware/fpga/src/"
+            out_dir = "hardware/fpga/src"
         elif purpose == "software":
-            out_dir = "software/src/"
+            out_dir = "software/src"
         else:
             raise Exception(
-                f"{iob_colors.ERROR}Unknown purpose: {purpose}{iob_colors.ENDC}"
+                f"{iob_colors.FAIL}Unknown purpose: {purpose}{iob_colors.ENDC}"
             )
 
         return out_dir
+
+    # Create build directory. Must be called from the top module.
+    @classmethod
+    def __create_build_dir(cls):
+        assert cls.is_top_module, f"{iob_colors.FAIL}Module {cls.name} is not a top module!{iob_colors.ENDC}"
+        os.makedirs(cls.build_dir, exist_ok=True)
+        config_build_mk(cls)
+        # Create hardware directories
+        os.makedirs(
+            f"{cls.build_dir}/hardware/src", exist_ok=True
+        )
+        if 'sim' in cls.flows:
+            os.makedirs(
+                f"{cls.build_dir}/hardware/simulation/src", exist_ok=True
+            )
+        if 'fpga' in cls.flows:
+            os.makedirs(
+                f"{cls.build_dir}/hardware/fpga/src", exist_ok=True
+            )
+
+        shutil.copyfile(
+            f"{LIB_DIR}/build.mk", f"{cls.build_dir}/Makefile"
+        )  # Copy generic MAKEFILE
