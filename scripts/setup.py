@@ -164,6 +164,7 @@ def get_core_name():
     module = import_setup(".")
     print(module.name)
 
+
 def get_version_str():
     module = import_setup(".")
     print(module.version)
