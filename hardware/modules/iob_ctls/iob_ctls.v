@@ -46,10 +46,9 @@ module iob_ctls #(
 
    always @* begin
       count = 0;
-
       for (pos = 0; pos < N; pos = pos + 1)
          if ((data_int2[pos] == 1'd0) && (count == pos)) //count trailing zeros
-            count = pos + 1;
+            count = pos[$clog2(N):0] + 1'b1;
    end
 
    assign count_o = count;
