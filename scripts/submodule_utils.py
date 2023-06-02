@@ -400,7 +400,7 @@ def if_gen_interface(interface_name, port_prefix):
     # Create a virtual file object
     virtual_file_obj = if_gen_hack_list()
     # Tell if_gen to write ports in virtual file object
-    if_gen.write_vh_contents(interface_name, "", port_prefix, virtual_file_obj)
+    if_gen.write_vs_contents(interface_name, "", port_prefix, virtual_file_obj)
     # Extract port list from virtual file object
     return virtual_file_obj.port_list
 

@@ -146,7 +146,7 @@ def setup(
 
     # Replace Verilog includes by Verilog header file contents
     if python_module.is_top_module and not disable_file_copy:
-        verilog_tools.replace_includes([build_dir + "/hardware"])
+        verilog_tools.replace_includes(python_module.setup_dir, build_dir)
 
 
 # Insert header in source files

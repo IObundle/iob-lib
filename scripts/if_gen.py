@@ -1275,7 +1275,7 @@ def create_signal_table(interface_name):
 
 # port_prefix: Prefix for ports in a portmap file.
 # wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file; Prefix for ports in a `*port.vs` file (these ports also create wires);
-def write_vh_contents(
+def write_vs_contents(
     interface_name, port_prefix, wire_prefix, file_object, bus_size=1, bus_start=0
 ):
     func_name = (
@@ -1328,7 +1328,7 @@ def main():
         fout.write("  //START_IO_TABLE " + port_prefix + interface_name + "\n")
 
     # call function func to generate .vs file
-    write_vh_contents(interface_name, port_prefix, wire_prefix, fout)
+    write_vs_contents(interface_name, port_prefix, wire_prefix, fout)
 
     fout.close()
 

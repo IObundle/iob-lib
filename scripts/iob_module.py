@@ -125,7 +125,7 @@ class iob_module:
                 cls.confs.append(conf)
 
     # Generate a Verilog header with `if_gen.py`.
-    # vh_name: Either a string or a dictionary describing the interface to generate.
+    # vs_name: Either a string or a dictionary describing the interface to generate.
     #          Example string: "iob_wire"
     #          Example dictionary:
     #                {
@@ -138,33 +138,33 @@ class iob_module:
     #                }
     # purpose: Reason for generating the header. Used to select between the standard destination locations.
     @classmethod
-    def generate(cls, vh_name, purpose="hardware"):
+    def generate(cls, vs_name, purpose="hardware"):
         dest_dir = os.path.join(cls.build_dir, cls.get_purpose_dir(purpose))
 
-        if (type(vh_name) is str) and (vh_name in if_gen.interfaces):
-            if "iob_" in vh_name:
+        if (type(vs_name) is str) and (vs_name in if_gen.interfaces):
+            if "iob_" in vs_name:
                 file_prefix = ""
             else:
                 file_prefix = "iob_"
-            f_out = open(os.path.join(dest_dir, file_prefix+vh_name+".vh"), "w")
-            if_gen.create_signal_table(vh_name)
-            if_gen.write_vh_contents(vh_name, "", "", f_out)
-        elif (type(vh_name) is dict) and (vh_name["interface"] in if_gen.interfaces):
+            f_out = open(os.path.join(dest_dir, file_prefix+vs_name+".vs"), "w")
+            if_gen.create_signal_table(vs_name)
+            if_gen.write_vs_contents(vs_name, "", "", f_out)
+        elif (type(vs_name) is dict) and (vs_name["interface"] in if_gen.interfaces):
             f_out = open(
-                os.path.join(dest_dir, vh_name['file_prefix']+vh_name['interface']+".vh"), "w"
+                os.path.join(dest_dir, vs_name['file_prefix']+vs_name['interface']+".vs"), "w"
             )
-            if_gen.create_signal_table(vh_name["interface"])
-            if_gen.write_vh_contents(
-                vh_name["interface"],
-                vh_name["port_prefix"],
-                vh_name["wire_prefix"],
+            if_gen.create_signal_table(vs_name["interface"])
+            if_gen.write_vs_contents(
+                vs_name["interface"],
+                vs_name["port_prefix"],
+                vs_name["wire_prefix"],
                 f_out,
-                bus_size=vh_name["bus_size"] if "bus_size" in vh_name.keys() else 1,
-                bus_start=vh_name["bus_start"] if "bus_start" in vh_name.keys() else 0,
+                bus_size=vs_name["bus_size"] if "bus_size" in vs_name.keys() else 1,
+                bus_start=vs_name["bus_start"] if "bus_start" in vs_name.keys() else 0,
             )
         else:
             raise Exception(
-                f"{iob_colors.FAIL} Can't generate '{vh_name}'. Type not recognized.{iob_colors.ENDC}"
+                f"{iob_colors.FAIL} Can't generate '{vs_name}'. Type not recognized.{iob_colors.ENDC}"
             )
 
     # Get output directory based on the purpose given.
