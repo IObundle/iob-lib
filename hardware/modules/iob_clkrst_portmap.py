@@ -4,8 +4,8 @@ import shutil
 from iob_module import iob_module
 
 
-class iob_clkenrst_port(iob_module):
-    name = "iob_clkenrst_port"
+class iob_clkrst_portmap(iob_module):
+    name = "iob_clkrst_portmap"
     version = "V0.10"
     setup_dir = os.path.dirname(__file__)
 
@@ -14,8 +14,8 @@ class iob_clkenrst_port(iob_module):
         out_dir = super()._run_setup()
         # Copy source to build directory
         shutil.copyfile(
-            os.path.join(cls.setup_dir, "iob_clkenrst_port.vs"),
-            os.path.join(cls.build_dir, out_dir, "iob_clkenrst_port.vs"),
+            os.path.join(cls.setup_dir, "iob_clkrst_portmap.vs"),
+            os.path.join(cls.build_dir, out_dir, "iob_clkrst_portmap.vs"),
         )
 
         # Ensure sources of other purposes are deleted (except software)
@@ -24,5 +24,5 @@ class iob_clkenrst_port(iob_module):
             # Purposes that have been setup previously
             for purpose in [x for x in cls._setup_purpose[:-1] if x!="software"]:
                 # Delete sources for this purpose
-                os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "iob_clkenrst_port.vs"))
+                os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "iob_clkrst_portmap.vs"))
 

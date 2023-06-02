@@ -14,8 +14,8 @@ class iob_clkenrst_portmap(iob_module):
         out_dir = super()._run_setup()
         # Copy source to build directory
         shutil.copyfile(
-            os.path.join(cls.setup_dir, "iob_clkenrst_portmap.vh"),
-            os.path.join(cls.build_dir, out_dir, "iob_clkenrst_portmap.vh"),
+            os.path.join(cls.setup_dir, "iob_clkenrst_portmap.vs"),
+            os.path.join(cls.build_dir, out_dir, "iob_clkenrst_portmap.vs"),
         )
 
         # Ensure sources of other purposes are deleted (except software)
@@ -24,5 +24,5 @@ class iob_clkenrst_portmap(iob_module):
             # Purposes that have been setup previously
             for purpose in [x for x in cls._setup_purpose[:-1] if x!="software"]:
                 # Delete sources for this purpose
-                os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "iob_clkenrst_portmap.vh"))
+                os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "iob_clkenrst_portmap.vs"))
 
