@@ -3,23 +3,23 @@
 
 
 module iob2axil #(
-   parameter AXIL_ADDR_W = 21,           // AXI Lite address bus width in bits
-   parameter AXIL_DATA_W = 21,           // AXI Lite data bus width in bits
-   parameter ADDR_W      = AXIL_ADDR_W,  // IOb address bus width in bits
-   parameter DATA_W      = AXIL_DATA_W   // IOb data bus width in bits
+    parameter AXIL_ADDR_W = 21,           // AXI Lite address bus width in bits
+    parameter AXIL_DATA_W = 21,           // AXI Lite data bus width in bits
+    parameter ADDR_W      = AXIL_ADDR_W,  // IOb address bus width in bits
+    parameter DATA_W      = AXIL_DATA_W   // IOb data bus width in bits
 ) (
-   //
-   // AXI4 Lite master interface
-   //
-   `include "iob_axil_m_port.vh"
+    //
+    // AXI4 Lite master interface
+    //
+    `include "iob_axil_m_port.vs"
 
-   //
-   // IOb slave interface
-   //
-   `include "iob_s_port.vh"
+    //
+    // IOb slave interface
+    //
+    `include "iob_s_port.vs"
 
-   // Global signals
-   `include "iob_clkrst_port.vh"
+    // Global signals
+    `include "iob_clkrst_port.vs"
 );
 
    //

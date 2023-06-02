@@ -74,6 +74,8 @@ User Guide, \input{\NAME_version.tex}, Build \input{shortHash.tex}
 \fi
 
 \section{Usage}
+
+\subsection{Instantiation}
 \label{sec:inst}
 \input{inst}
 
@@ -81,11 +83,16 @@ User Guide, \input{\NAME_version.tex}, Build \input{shortHash.tex}
 \label{sec:tbbd}
 \input{sim}
 
-%ASIC synthesis
 \ifdefined\ASICSYNTH
-\subsection{Synthesis}
+\subsection{ASIC Synthesis}
 \label{sec:synth}
 \input{synth}
+\fi
+
+\ifdefined\FPGACOMP
+\subsection{FPGA compilation}
+\label{sec:fpga}
+\input{fpga}
 \fi
 
 \ifdefined\RESULTS

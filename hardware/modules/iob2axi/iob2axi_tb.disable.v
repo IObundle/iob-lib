@@ -40,7 +40,7 @@ module iob2axi_tb;
    wire                s_ready;
 
    // AXI-4 full master I/F
-   `include "ddr_axi_wire.vh"
+   `include "ddr_axi_wire.vs"
 
    // Iterators
    integer i, seq_ini;
@@ -154,7 +154,7 @@ module iob2axi_tb;
       //
       // AXI-4 full master I/F
       //
-      `include "m_ddr_axi_portmap.vh"
+      `include "m_ddr_axi_portmap.vs"
 
       //
       // Native slave I/F
