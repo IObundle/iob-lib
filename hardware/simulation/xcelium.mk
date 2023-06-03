@@ -6,7 +6,7 @@ SIM_SYNC_FLAGS=$(CADENCE_SYNC_FLAGS)
 
 COV_TEST?=test
 
-SFLAGS = -errormax 15 -status
+SFLAGS = -errormax 15 -status -licqueue
 EFLAGS = $(SFLAGS) -access +wc
 ifeq ($(COV),1)
 COV_SFLAGS= -LICQUEUE -covoverwrite -covtest $(COV_TEST)
