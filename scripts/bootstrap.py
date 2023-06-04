@@ -51,6 +51,7 @@ def bfs_search_files(search_path):
 
 
 # Add python modules search paths for every module
+print(f"Searching for modules under '{search_path}'...", file=sys.stderr)
 found_modules = []
 for filepath, files in bfs_search_files(search_path):
     for filename in files:
@@ -80,4 +81,5 @@ def instantiate_top_module():
 function_2_call = "instantiate_top_module"
 if "-f" in sys.argv:
     function_2_call = sys.argv[sys.argv.index("-f") + 1]
+print(f"Calling '{function_2_call}'...", file=sys.stderr)
 vars()[function_2_call]()
