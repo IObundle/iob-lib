@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 /*
- Description: returns the position of the first 1 in the input vector
+ Description: returns the position of the 1 in the input vector (one-hot)
 */
 
 module iob_encoder #(
