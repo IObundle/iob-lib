@@ -44,7 +44,8 @@ module iob_ctls #(
 
    //count trailing zeros
    iob_prio_enc #(
-      .W(W + 1)
+      .W(W + 1),
+      .MODE("LOW")
    ) prio_encoder0 (
       .unencoded_i({1'b1, data_int2}),
       .encoded_o  (count_o)
