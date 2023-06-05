@@ -69,10 +69,10 @@ class iob_module:
 
     # Public method to create a Verilog instance of this module
     # name: Name of the Verilog instance.
-    # description: Description of the Verilog instance.
+    # *args and **kwargs: Other arguments for the Verilog instance.
     # Returns an `iob_verilog_instance` object representing a new Verilog instance of the module calling this method.
     @classmethod
-    def instance(cls, name="", description=""):
+    def instance(cls, name="", *args, **kwargs):
         assert (
             cls._setup_purpose
         ), f"{iob_colors.FAIL}Module {cls.name} has not been setup yet!{iob_colors.ENDC}"
@@ -81,7 +81,7 @@ class iob_module:
             name = f"{cls.name}_0"
 
         # Return a new iob_verilog_instance object with these attributes that describe the Verilog instance and module.
-        return iob_verilog_instance(name, description, cls)
+        return iob_verilog_instance(name, *args, module=cls, **kwargs)
 
     # Public method to set dynamic attributes
     # This method is automatically called by the `setup` method

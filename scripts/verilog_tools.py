@@ -14,8 +14,7 @@ def replace_includes(setup_dir="", build_dir=""):
     SearchPaths = f"{build_dir}/hardware"
     VSnippetDir = f"{setup_dir}/hardware/aux"
 
-    if not os.path.isdir(VSnippetDir):
-        os.mkdir(VSnippetDir)
+    os.makedirs(VSnippetDir, exist_ok=True)
 
     for root, dirs, files in os.walk(SearchPaths):
         for file in files:
