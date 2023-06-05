@@ -2,44 +2,44 @@
 `include "iob_utils.vh"
 
 module iob_asym_converter #(
-    parameter W_DATA_W = 42,
-    R_DATA_W = 21,
-    ADDR_W = 3,  //higher ADDR_W lower DATA_W
-    //determine W_ADDR_W and R_ADDR_W
-    MAXDATA_W =
-    `IOB_MAX(W_DATA_W, R_DATA_W),
-    MINDATA_W =
-    `IOB_MIN(W_DATA_W, R_DATA_W),
-    R = MAXDATA_W / MINDATA_W,
-    MINADDR_W = ADDR_W - $clog2(R),  //lower ADDR_W (higher DATA_W)
-    W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
-    R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
+   parameter W_DATA_W = 42,
+   R_DATA_W = 21,
+   ADDR_W = 3,  //higher ADDR_W lower DATA_W
+   //determine W_ADDR_W and R_ADDR_W
+   MAXDATA_W =
+   `IOB_MAX(W_DATA_W, R_DATA_W),
+   MINDATA_W =
+   `IOB_MIN(W_DATA_W, R_DATA_W),
+   R = MAXDATA_W / MINDATA_W,
+   MINADDR_W = ADDR_W - $clog2(R),  //lower ADDR_W (higher DATA_W)
+   W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
+   R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
 ) (
-    input [1-1:0] clk_i,
-    input [1-1:0] arst_i,
-    input [1-1:0] cke_i,
+   input [1-1:0] clk_i,
+   input [1-1:0] arst_i,
+   input [1-1:0] cke_i,
 
-    //write port
-    input [       1-1:0] w_en_i,
-    input [W_ADDR_W-1:0] w_addr_i,
-    input [W_DATA_W-1:0] w_data_i,
+   //write port
+   input [       1-1:0] w_en_i,
+   input [W_ADDR_W-1:0] w_addr_i,
+   input [W_DATA_W-1:0] w_data_i,
 
-    //read port
-    input  [       1-1:0] r_en_i,
-    input  [R_ADDR_W-1:0] r_addr_i,
-    output [R_DATA_W-1:0] r_data_o,
+   //read port
+   input  [       1-1:0] r_en_i,
+   input  [R_ADDR_W-1:0] r_addr_i,
+   output [R_DATA_W-1:0] r_data_o,
 
-    //external memory write port
-    output [        1-1:0] ext_mem_clk_o,
-    output [        1-1:0] ext_mem_arst_o,
-    output [        1-1:0] ext_mem_cke_o,
-    output [        R-1:0] ext_mem_w_en_o,
-    output [MINADDR_W-1:0] ext_mem_w_addr_o,
-    output [MAXDATA_W-1:0] ext_mem_w_data_o,
-    //external memory read port
-    output [        R-1:0] ext_mem_r_en_o,
-    output [MINADDR_W-1:0] ext_mem_r_addr_o,
-    input  [MAXDATA_W-1:0] ext_mem_r_data_i
+   //external memory write port
+   output [        1-1:0] ext_mem_clk_o,
+   output [        1-1:0] ext_mem_arst_o,
+   output [        1-1:0] ext_mem_cke_o,
+   output [        R-1:0] ext_mem_w_en_o,
+   output [MINADDR_W-1:0] ext_mem_w_addr_o,
+   output [MAXDATA_W-1:0] ext_mem_w_data_o,
+   //external memory read port
+   output [        R-1:0] ext_mem_r_en_o,
+   output [MINADDR_W-1:0] ext_mem_r_addr_o,
+   input  [MAXDATA_W-1:0] ext_mem_r_data_i
 
 );
 
@@ -58,8 +58,9 @@ module iob_asym_converter #(
          //register to hold the LSBs of r_addr_i
          wire [$clog2(R)-1:0] r_addr_lsbs_reg;
          iob_reg #(
-             .DATA_W ($clog2(R)),
-             .RST_VAL({$clog2(R) {1'd0}})
+            .DATA_W ($clog2(R)),
+            .RST_VAL({$clog2(R) {1'd0}}),
+            .CLKEDGE("posedge")
          ) r_addr_reg_inst (
             .clk_i (clk_i),
             .arst_i(arst_i),

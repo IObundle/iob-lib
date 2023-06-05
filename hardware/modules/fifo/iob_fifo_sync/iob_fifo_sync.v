@@ -2,49 +2,49 @@
 
 
 module iob_fifo_sync #(
-    parameter W_DATA_W = 21,
-    R_DATA_W = 21,
-    ADDR_W = 21,  //higher ADDR_W lower DATA_W
-    //determine W_ADDR_W and R_ADDR_W
-    MAXDATA_W =
-    `IOB_MAX(W_DATA_W, R_DATA_W),
-    MINDATA_W =
-    `IOB_MIN(W_DATA_W, R_DATA_W),
-    R = MAXDATA_W / MINDATA_W,
-    MINADDR_W = ADDR_W - $clog2(R),  //lower ADDR_W (higher DATA_W)
-    W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
-    R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
+   parameter W_DATA_W = 21,
+   R_DATA_W = 21,
+   ADDR_W = 21,  //higher ADDR_W lower DATA_W
+   //determine W_ADDR_W and R_ADDR_W
+   MAXDATA_W =
+      `IOB_MAX(W_DATA_W, R_DATA_W),
+   MINDATA_W =
+      `IOB_MIN(W_DATA_W, R_DATA_W),
+   R = MAXDATA_W / MINDATA_W,
+   MINADDR_W = ADDR_W - $clog2(R),  //lower ADDR_W (higher DATA_W)
+   W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
+   R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
 ) (
-    input [1-1:0] clk_i,
-    input [1-1:0] arst_i,
-    input [1-1:0] cke_i,
+   input [1-1:0] clk_i,
+   input [1-1:0] arst_i,
+   input [1-1:0] cke_i,
 
-    input [1-1:0] rst_i,
+   input [1-1:0] rst_i,
 
-    //write port
-    input  [       1-1:0] w_en_i,
-    input  [W_DATA_W-1:0] w_data_i,
-    output [       1-1:0] w_full_o,
+   //write port
+   input  [       1-1:0] w_en_i,
+   input  [W_DATA_W-1:0] w_data_i,
+   output [       1-1:0] w_full_o,
 
-    //read port
-    input  [       1-1:0] r_en_i,
-    output [R_DATA_W-1:0] r_data_o,
-    output [       1-1:0] r_empty_o,
+   //read port
+   input  [       1-1:0] r_en_i,
+   output [R_DATA_W-1:0] r_data_o,
+   output [       1-1:0] r_empty_o,
 
-    //write port
-    output [        1-1:0] ext_mem_clk_o,
-    output [        1-1:0] ext_mem_arst_o,
-    output [        1-1:0] ext_mem_cke_o,
-    output [        R-1:0] ext_mem_w_en_o,
-    output [MINADDR_W-1:0] ext_mem_w_addr_o,
-    output [MAXDATA_W-1:0] ext_mem_w_data_o,
-    //read port
-    output [        R-1:0] ext_mem_r_en_o,
-    output [MINADDR_W-1:0] ext_mem_r_addr_o,
-    input  [MAXDATA_W-1:0] ext_mem_r_data_i,
+   //write port
+   output [        1-1:0] ext_mem_clk_o,
+   output [        1-1:0] ext_mem_arst_o,
+   output [        1-1:0] ext_mem_cke_o,
+   output [        R-1:0] ext_mem_w_en_o,
+   output [MINADDR_W-1:0] ext_mem_w_addr_o,
+   output [MAXDATA_W-1:0] ext_mem_w_data_o,
+   //read port
+   output [        R-1:0] ext_mem_r_en_o,
+   output [MINADDR_W-1:0] ext_mem_r_addr_o,
+   input  [MAXDATA_W-1:0] ext_mem_r_data_i,
 
-    //FIFO level
-    output [(ADDR_W+1)-1:0] level_o
+   //FIFO level
+   output [(ADDR_W+1)-1:0] level_o
 );
 
    localparam ADDR_W_DIFF = $clog2(R);
@@ -56,8 +56,8 @@ module iob_fifo_sync #(
    //write address
    wire [W_ADDR_W-1:0] w_addr;
    iob_counter #(
-       .DATA_W (W_ADDR_W),
-       .RST_VAL({W_ADDR_W{1'd0}})
+      .DATA_W (W_ADDR_W),
+      .RST_VAL({W_ADDR_W{1'd0}})
    ) w_addr_cnt0 (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -74,8 +74,8 @@ module iob_fifo_sync #(
    //read address
    wire [R_ADDR_W-1:0] r_addr;
    iob_counter #(
-       .DATA_W (R_ADDR_W),
-       .RST_VAL({R_ADDR_W{1'd0}})
+      .DATA_W (R_ADDR_W),
+      .RST_VAL({R_ADDR_W{1'd0}})
    ) r_addr_cnt0 (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -94,8 +94,9 @@ module iob_fifo_sync #(
    reg  [ADDR_W:0] level_nxt;
    wire [ADDR_W:0] level_int;
    iob_reg_r #(
-       .DATA_W (ADDR_W + 1),
-       .RST_VAL({(ADDR_W + 1) {1'd0}})
+      .DATA_W  (ADDR_W + 1),
+      .RST_VAL ({(ADDR_W + 1) {1'd0}}),
+      .CLKEDGE("posedge")
    ) level_reg0 (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -125,8 +126,9 @@ module iob_fifo_sync #(
    wire [1-1:0] r_empty_nxt;
    assign r_empty_nxt = level_nxt < R_INCR;
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(1'd1)
+      .DATA_W (1),
+      .RST_VAL(1'd1),
+      .CLKEDGE("posedge")
    ) r_empty_reg0 (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -140,8 +142,9 @@ module iob_fifo_sync #(
    wire [1-1:0] w_full_nxt;
    assign w_full_nxt = level_nxt > (FIFO_SIZE - W_INCR);
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(1'd0)
+      .DATA_W (1),
+      .RST_VAL(1'd0),
+      .CLKEDGE("posedge")
    ) w_full_reg0 (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -153,9 +156,9 @@ module iob_fifo_sync #(
 
    //FIFO memory
    iob_asym_converter #(
-       .W_DATA_W(W_DATA_W),
-       .R_DATA_W(R_DATA_W),
-       .ADDR_W  (ADDR_W)
+      .W_DATA_W(W_DATA_W),
+      .R_DATA_W(R_DATA_W),
+      .ADDR_W  (ADDR_W)
    ) iob_asym_converter0 (
       .clk_i (clk_i),
       .arst_i(arst_i),
