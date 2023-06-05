@@ -5,25 +5,25 @@ module iob_prio_enc #(
    // Priority: "LOW", "HIGH"
    parameter MODE = "LOW"  //"LOW" -> smaller index
 ) (
-   input      [            WIDTH-1:0] unencoded_i,
-   output reg [($clog2(WIDTH)+1)-1:0] encoded_o
+   input      [            W-1:0] unencoded_i,
+   output reg [$clog2(W)-1:0] encoded_o
 );
 
    integer pos;
    generate
-      if (PRIO == "LOW") begin : gen_low_prio
+      if (MODE == "LOW") begin : gen_low_prio
          always @* begin
-            encoded_o = {$clog2(WIDTH) {1'd0}};  //In case input is 0
-            for (pos = WIDTH - 1; pos != -1; pos = pos - 1) begin
+            encoded_o = {$clog2(W) {1'd0}};  //In case input is 0
+            for (pos = W - 1; pos != -1; pos = pos - 1) begin
                if (unencoded_i[pos]) begin
                   encoded_o = pos;
                end
             end
          end
-      end else begin : gen_highest_prio  //PRIO == "HIGH"
+      end else begin : gen_highest_prio  //MODE == "HIGH"
          always @* begin
-            encoded_o = {$clog2(WIDTH) {1'd0}};  //In case input is 0
-            for (pos = 0; pos != WIDTH; pos = pos + 1) begin
+            encoded_o = {$clog2(W) {1'd0}};  //In case input is 0
+            for (pos = 0; pos != W; pos = pos + 1) begin
                if (unencoded_i[pos]) begin
                   encoded_o = pos;
                end
