@@ -5,7 +5,7 @@ module iob_prio_enc #(
    // Priority: "LOW", "HIGH"
    parameter MODE = "LOW"  //"LOW" -> smaller index
 ) (
-   input      [            W-1:0] unencoded_i,
+   input      [        W-1:0] unencoded_i,
    output reg [$clog2(W)-1:0] encoded_o
 );
 
