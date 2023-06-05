@@ -8,27 +8,27 @@
 `timescale 1ns / 1ps
 
 module iob_ctls #(
-    parameter N      = 21,
-    parameter MODE   = 0,   //trailing (0), leading (1)
-    parameter SYMBOL = 0    //search zeros (0), search ones (1)
+   parameter N      = 21,
+   parameter MODE   = 0,   //trailing (0), leading (1)
+   parameter SYMBOL = 0    //search zeros (0), search ones (1)
 ) (
-    input  [      N-1:0] data_i,
-    output [$clog2(N):0] count_o
+   input  [      N-1:0] data_i,
+   output [$clog2(N):0] count_o
 );
 
    localparam W = N;
-   
+
    //invert if searching zeros or not
    wire [W-1:0] data_int1;
    generate
-      if (SYMBOL == 0) begin: g_zeros
+      if (SYMBOL == 0) begin : g_zeros
          assign data_int1 = data_i;
-      end else begin: g_ones
+      end else begin : g_ones
          assign data_int1 = ~data_i;
       end
    endgenerate
 
-   // reverse if lading symbols or not
+   // reverse if leading symbols or not
    wire [W-1:0] data_int2;
    generate
       if (MODE == 1) begin : g_reverse
@@ -43,11 +43,12 @@ module iob_ctls #(
    endgenerate
 
    //count trailing zeros
-   iob_prio_enc #(.W(W+1)) 
-   prio_encoder0 
-     (
+   iob_prio_enc #(
+      .W   (W + 1),
+      .MODE("LOW")
+   ) prio_encoder0 (
       .unencoded_i({1'b1, data_int2}),
-      .encoded_o(count_o)
-      );
+      .encoded_o  (count_o)
+   );
 
 endmodule

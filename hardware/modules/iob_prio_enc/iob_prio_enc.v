@@ -1,36 +1,35 @@
 `timescale 1ns / 1ps
 
-
 module iob_prio_enc #(
-    parameter W = 21
+   parameter W    = 21,
+   // Priority: "LOW", "HIGH"
+   parameter MODE = "LOW"  //"LOW" -> smaller index
 ) (
-   input [ W-1:0]         unencoded_i,
-   output [$clog2(W)-1:0] encoded_o
+   input      [        W-1:0] unencoded_i,
+   output reg [$clog2(W)-1:0] encoded_o
 );
 
-   wire [W-1:0]                        filter1;
-   wire [W-1:0]                        filter2;
-
-   assign filter1[0] = unencoded_i[0];
-   assign filter2[0] = unencoded_i[0];
-   
-   genvar                              i;
-   
+   integer pos;
    generate
-      for(i=1; i<W; i=i+1) begin: g_loop
-         assign filter1[i] = unencoded_i[i] | filter1[i-1];
-         assign filter2[i] = filter1[i] & ~filter1[i-1];
+      if (MODE == "LOW") begin : gen_low_prio
+         always @* begin
+            encoded_o = {$clog2(W) {1'd0}};  //In case input is 0
+            for (pos = W - 1; pos != -1; pos = pos - 1) begin
+               if (unencoded_i[pos]) begin
+                  encoded_o = pos[$clog2(W)-1:0];
+               end
+            end
+         end
+      end else begin : gen_highest_prio  //MODE == "HIGH"
+         always @* begin
+            encoded_o = {$clog2(W) {1'd0}};  //In case input is 0
+            for (pos = 0; pos != W; pos = pos + 1) begin
+               if (unencoded_i[pos]) begin
+                  encoded_o = pos[$clog2(W)-1:0];
+               end
+            end
+         end
       end
    endgenerate
-
-   iob_encoder 
-     #(
-       .W(W)
-       ) 
-   iob_encoder_inst 
-     (
-      .unencoded_i(filter2),
-      .encoded_o(encoded_o)
-      );
 
 endmodule
