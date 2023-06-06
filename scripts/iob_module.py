@@ -67,6 +67,10 @@ class iob_module:
 
         cls._run_setup()
 
+    # TODO: Deprecate this method. Instead use constructors to instantiate these classes.
+    # Note: The class attibutes will be read only! as they refer to properties of the "type" of verilog module.
+    #       However, the instance attributes can be changed. Each instance will essentially have the same attributes as the `iob_verilog_instance` class. That class will also be deprecated with this modification.
+    #
     # Public method to create a Verilog instance of this module
     # name: Name of the Verilog instance.
     # *args and **kwargs: Other arguments for the Verilog instance.

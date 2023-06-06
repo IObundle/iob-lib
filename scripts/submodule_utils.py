@@ -9,6 +9,7 @@ import math
 import importlib
 import if_gen
 import iob_colors
+import copy
 
 # List of reserved signals
 # These signals are known by the python scripts and are always auto-connected using the matching Verilog the string.
@@ -416,7 +417,7 @@ def get_table_ports(table):
         return if_gen_interface(if_name, prefix)
     else:
         # Interface is not standard, read ports
-        return table["ports"].copy()
+        return copy.deepcopy(table["ports"])
 
 
 # Given ios object for the module, extract the list of ports.
