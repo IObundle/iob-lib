@@ -26,20 +26,7 @@ class axis2axi(iob_module):
 
     @classmethod
     def _run_setup(cls):
-        out_dir = super()._run_setup()
-        # Copy source to build directory
-        shutil.copyfile(
-            os.path.join(cls.setup_dir, "axis2axi.v"),
-            os.path.join(cls.build_dir, out_dir, "axis2axi.v"),
-        )
-
-        # Ensure sources of other purposes are deleted (except software)
-        # Check that latest purpose is hardware
-        if cls._setup_purpose[-1]=='hardware' and len(cls._setup_purpose)>1:
-            # Purposes that have been setup previously
-            for purpose in [x for x in cls._setup_purpose[:-1] if x!="software"]:
-                # Delete sources for this purpose
-                os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "axis2axi.v"))
+        super()._run_setup()
 
         # Setup dependencies
 
@@ -60,3 +47,22 @@ class axis2axi(iob_module):
         AxiDelay.setup(purpose="simulation")
         axi_ram.setup(purpose="simulation")
         iob_ram_t2p.setup(purpose="simulation")
+
+    # Copy sources of this module to the build directory
+    @classmethod
+    def _copy_srcs(cls):
+        out_dir = cls.get_purpose_dir(cls._setup_purpose[-1])
+        # Copy source to build directory
+        shutil.copyfile(
+            os.path.join(cls.setup_dir, "axis2axi.v"),
+            os.path.join(cls.build_dir, out_dir, "axis2axi.v"),
+        )
+
+        # Ensure sources of other purposes are deleted (except software)
+        # Check that latest purpose is hardware
+        if cls._setup_purpose[-1]=='hardware' and len(cls._setup_purpose)>1:
+            # Purposes that have been setup previously
+            for purpose in [x for x in cls._setup_purpose[:-1] if x!="software"]:
+                # Delete sources for this purpose
+                os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "axis2axi.v"))
+

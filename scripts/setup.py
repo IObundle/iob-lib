@@ -90,7 +90,7 @@ def setup(
     #
     # Setup flows
     #
-    build_srcs.flows_setup(python_module, disable_file_copy=disable_file_copy)
+    build_srcs.flows_setup(python_module, disable_file_copy=True)
 
     # Only auto-generate files if `disable_file_gen` is False
     if not disable_file_gen:

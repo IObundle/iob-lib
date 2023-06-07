@@ -15,7 +15,18 @@ class apb2iob(iob_module):
 
     @classmethod
     def _run_setup(cls):
-        out_dir = super()._run_setup()
+        super()._run_setup()
+
+        # Setup dependencies
+        iob_wire.setup()
+        apb_s_port.setup()
+        iob_s_portmap.setup()
+        iob_reg.setup()
+
+    # Copy sources of this module to the build directory
+    @classmethod
+    def _copy_srcs(cls):
+        out_dir = cls.get_purpose_dir(cls._setup_purpose[-1])
         # Copy source to build directory
         shutil.copyfile(
             os.path.join(cls.setup_dir, "apb2iob.v"),
@@ -30,8 +41,3 @@ class apb2iob(iob_module):
                 # Delete sources for this purpose
                 os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "apb2iob.v"))
 
-        # Setup dependencies
-        iob_wire.setup()
-        apb_s_port.setup()
-        iob_s_portmap.setup()
-        iob_reg.setup()

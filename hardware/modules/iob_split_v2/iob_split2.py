@@ -14,7 +14,18 @@ class iob_split2(iob_module):
 
     @classmethod
     def _run_setup(cls):
-        out_dir = super()._run_setup()
+        super()._run_setup()
+
+        # Setup dependencies
+
+        iob_reg.setup()
+        iob_mux.setup()
+        iob_demux.setup()
+
+    # Copy sources of this module to the build directory
+    @classmethod
+    def _copy_srcs(cls):
+        out_dir = cls.get_purpose_dir(cls._setup_purpose[-1])
         # Copy source to build directory
         shutil.copyfile(
             os.path.join(cls.setup_dir, "iob_split2.v"),
@@ -29,8 +40,3 @@ class iob_split2(iob_module):
                 # Delete sources for this purpose
                 os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "iob_split2.v"))
 
-        # Setup dependencies
-
-        iob_reg.setup()
-        iob_mux.setup()
-        iob_demux.setup()

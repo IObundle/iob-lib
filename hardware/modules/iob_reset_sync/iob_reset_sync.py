@@ -11,7 +11,12 @@ class iob_reset_sync(iob_module):
 
     @classmethod
     def _run_setup(cls):
-        out_dir = super()._run_setup()
+        super()._run_setup()
+
+    # Copy sources of this module to the build directory
+    @classmethod
+    def _copy_srcs(cls):
+        out_dir = cls.get_purpose_dir(cls._setup_purpose[-1])
         # Copy source to build directory
         shutil.copyfile(
             os.path.join(cls.setup_dir, "iob_reset_sync.v"),

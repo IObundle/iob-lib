@@ -111,11 +111,10 @@ class iob_module:
         cls.ios = []
         cls.block_groups = []
 
-    # Default _run_setup function just parses the latest purpose and returns the destination directory
+    # Default _run_setup function copies sources from setup directory of every subclass of iob_module, down to `cls`.
     @classmethod
     def _run_setup(cls):
-        # Get output directory for the `purpose` of this setup
-        return cls.get_purpose_dir(cls._setup_purpose[-1])
+        cls._copy_srcs()
 
     # Append confs to the current confs class list, overriding existing ones
     @classmethod
@@ -199,3 +198,70 @@ class iob_module:
         shutil.copyfile(
             f"{LIB_DIR}/build.mk", f"{cls.build_dir}/Makefile"
         )  # Copy generic MAKEFILE
+
+    # Copy module sources to the build directory from every subclass in between `ìob_module` and `cls`, inclusive.
+    # The function will not copy sources from classes that have no setup_dir (empty string)
+    # cls: Lowest subclass
+    # (implicit: iob_module: highest subclass)
+    # exclude_file_list: list of strings, each string representing an ignore pattern for the source files.
+    #                    For example, using the ignore pattern '*.v' would prevent from copying every Verilog source file.
+    #                    Note, if want to ignore a file that is going to be renamed with the new core name, 
+    #                    we would still use the old core name in the ignore patterns.
+    #                    For example, if we dont want it to generate the 'new_name_firmware.c' based on the 'old_name_firmware.c', 
+    #                    then we should add 'old_name_firmware.c' to the ignore list.
+    @classmethod
+    def _copy_srcs(cls, exclude_file_list=[]):
+        previously_setup_dirs = []
+
+        # List of classes, starting from highest superclass (iob_module), down to lowest subclass (cls)
+        classes = cls.__mro__[cls.__mro__.index(__class__)::-1]
+
+        # Go through every subclass, starting for highest superclass to the lowest subclass
+        for module_class in classes:
+            # Skip classes without setup_dir
+            if not module_class.setup_dir:
+                continue
+
+            # Skip class if we already setup its directory (it may have inherited the same dir from the superclass)
+            if module_class.setup_dir in previously_setup_dirs:
+                continue
+
+            previously_setup_dirs.append(module_class.setup_dir)
+
+            # Copy sources
+            for directory in [
+                    "hardware/src",
+                    "hardware/simulation",
+                    "hardware/fpga",
+                    "software",
+                    #"document"
+                    ]:
+                # Skip this directory if it does not exist
+                if not os.path.isdir(os.path.join(module_class.setup_dir, directory)):
+                    continue
+
+                # Copy tree of this directory, renaming files, and overriding destination ones.
+                shutil.copytree(os.path.join(module_class.setup_dir, directory),
+                                os.path.join(cls.build_dir,directory),
+                                dirs_exist_ok=True,
+                                copy_function=cls.copy_with_rename(module_class.name,cls.name),
+                                ignore=shutil.ignore_patterns(*exclude_file_list))
+
+    # Creates a function that:
+    #   - Renames any '<old_core_name>' string inside the src file and in its filename, to the given '<new_core_name>' string argument.
+    @staticmethod
+    def copy_with_rename(old_core_name,new_core_name):
+        def copy_func(src, dst):
+            dst = os.path.join(
+                    os.path.dirname(dst),
+                    os.path.basename(dst.replace(old_core_name,new_core_name).replace(old_core_name.upper(),new_core_name.upper()))
+                    )
+            #print(f"### DEBUG: {src} {dst}")
+            with open(src, 'r') as file:
+                lines = file.readlines()
+            for idx in range(len(lines)): 
+                lines[idx]=lines[idx].replace(old_core_name,new_core_name).replace(old_core_name.upper(),new_core_name.upper())
+            with open(dst, 'w') as file:
+                file.writelines(lines)
+
+        return copy_func
