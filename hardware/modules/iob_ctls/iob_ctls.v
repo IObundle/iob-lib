@@ -16,8 +16,10 @@ module iob_ctls #(
    output [$clog2(N):0] count_o
 );
 
+   localparam W = N;
+
    //invert if searching zeros or not
-   wire [N-1:0] data_int1;
+   wire [W-1:0] data_int1;
    generate
       if (SYMBOL == 0) begin : g_zeros
          assign data_int1 = data_i;
@@ -26,11 +28,11 @@ module iob_ctls #(
       end
    endgenerate
 
-   // reverse if lading symbols or not
-   wire [N-1:0] data_int2;
+   // reverse if leading symbols or not
+   wire [W-1:0] data_int2;
    generate
       if (MODE == 1) begin : g_reverse
-         iob_reverse #(N) reverse0 (
+         iob_reverse #(W) reverse0 (
             .data_i(data_int1),
             .data_o(data_int2)
          );
@@ -40,18 +42,13 @@ module iob_ctls #(
       end
    endgenerate
 
-   //normalized to count trailing zeros
-   reg     [$clog2(N):0] count;
-   integer               pos;
-
-   always @* begin
-      count = 0;
-
-      for (pos = 0; pos < N; pos = pos + 1)
-         if ((data_int2[pos] == 1'd0) && (count == pos))  //count trailing zeros
-            count = pos + 1;
-   end
-
-   assign count_o = count;
+   //count trailing zeros
+   iob_prio_enc #(
+      .W   (W + 1),
+      .MODE("LOW")
+   ) prio_encoder0 (
+      .unencoded_i({1'b1, data_int2}),
+      .encoded_o  (count_o)
+   );
 
 endmodule

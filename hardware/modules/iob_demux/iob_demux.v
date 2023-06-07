@@ -10,17 +10,7 @@ module iob_demux #(
    output [                (N*DATA_W)-1:0] data_o
 );
 
-   //integer i;
-   //always @* begin
-   //    for (i=0; i<N; i=i+1)
-   //        if(i == sel_i) begin
-   //            data_o[i*DATA_W += DATA_W] = data_i;
-   //        end else begin
-   //            data_o[i*DATA_W += DATA_W] = {(DATA_W){1'b0}};
-   //        end
-   //end
-
-   //Alternative
+   //Select the data to output
    assign data_o = {{((N - 1) * DATA_W) {1'b0}}, data_i} << (sel_i * DATA_W);
 
 endmodule

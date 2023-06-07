@@ -1,0 +1,27 @@
+`timescale 1ns / 1ps
+module iob_ctls_tb;
+
+   localparam W=8;
+
+   reg [W-1:0] data_i = 1;
+   wire [$clog2(W):0] data_o;
+
+   integer i;
+
+   initial begin
+      $dumpfile("uut.vcd");
+      $dumpvars();
+
+      for(i=0; i<2**W; i=i+1) begin
+         #10 data_i = i;
+      end
+      #10 $finish();
+   end
+   
+   iob_ctls #(.W(W)) iob_ctls_inst (
+      .data_i(data_i),
+      .count_o(data_o)
+   );
+   
+endmodule
+

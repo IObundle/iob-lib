@@ -59,7 +59,8 @@ module iob_asym_converter #(
          wire [$clog2(R)-1:0] r_addr_lsbs_reg;
          iob_reg #(
             .DATA_W ($clog2(R)),
-            .RST_VAL({$clog2(R) {1'd0}})
+            .RST_VAL({$clog2(R) {1'd0}}),
+            .CLKEDGE("posedge")
          ) r_addr_reg_inst (
             .clk_i (clk_i),
             .arst_i(arst_i),

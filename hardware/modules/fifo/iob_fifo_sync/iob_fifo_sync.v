@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
 
-`include "iob_utils.vh"
 
 module iob_fifo_sync #(
    parameter W_DATA_W = 21,
@@ -8,9 +7,9 @@ module iob_fifo_sync #(
    ADDR_W = 21,  //higher ADDR_W lower DATA_W
    //determine W_ADDR_W and R_ADDR_W
    MAXDATA_W =
-   `IOB_MAX(W_DATA_W, R_DATA_W),
+      `IOB_MAX(W_DATA_W, R_DATA_W),
    MINDATA_W =
-   `IOB_MIN(W_DATA_W, R_DATA_W),
+      `IOB_MIN(W_DATA_W, R_DATA_W),
    R = MAXDATA_W / MINDATA_W,
    MINADDR_W = ADDR_W - $clog2(R),  //lower ADDR_W (higher DATA_W)
    W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
@@ -52,10 +51,10 @@ module iob_fifo_sync #(
    localparam [ADDR_W:0] FIFO_SIZE = {1'b1, {ADDR_W{1'b0}}};  //in bytes
 
    //effective write enable
-   wire w_en_int = (w_en_i & (~w_full_o));
+   wire                w_en_int = (w_en_i & (~w_full_o));
 
    //write address
-   wire                                    [W_ADDR_W-1:0] w_addr;
+   wire [W_ADDR_W-1:0] w_addr;
    iob_counter #(
       .DATA_W (W_ADDR_W),
       .RST_VAL({W_ADDR_W{1'd0}})
@@ -70,10 +69,10 @@ module iob_fifo_sync #(
    );
 
    //effective read enable
-   wire r_en_int = (r_en_i & (~r_empty_o));
+   wire                r_en_int = (r_en_i & (~r_empty_o));
 
    //read address
-   wire                                     [R_ADDR_W-1:0] r_addr;
+   wire [R_ADDR_W-1:0] r_addr;
    iob_counter #(
       .DATA_W (R_ADDR_W),
       .RST_VAL({R_ADDR_W{1'd0}})
@@ -95,8 +94,9 @@ module iob_fifo_sync #(
    reg  [ADDR_W:0] level_nxt;
    wire [ADDR_W:0] level_int;
    iob_reg_r #(
-      .DATA_W (ADDR_W + 1),
-      .RST_VAL({(ADDR_W + 1) {1'd0}})
+      .DATA_W  (ADDR_W + 1),
+      .RST_VAL ({(ADDR_W + 1) {1'd0}}),
+      .CLKEDGE("posedge")
    ) level_reg0 (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -127,7 +127,8 @@ module iob_fifo_sync #(
    assign r_empty_nxt = level_nxt < R_INCR;
    iob_reg #(
       .DATA_W (1),
-      .RST_VAL(1'd1)
+      .RST_VAL(1'd1),
+      .CLKEDGE("posedge")
    ) r_empty_reg0 (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -142,7 +143,8 @@ module iob_fifo_sync #(
    assign w_full_nxt = level_nxt > (FIFO_SIZE - W_INCR);
    iob_reg #(
       .DATA_W (1),
-      .RST_VAL(1'd0)
+      .RST_VAL(1'd0),
+      .CLKEDGE("posedge")
    ) w_full_reg0 (
       .clk_i (clk_i),
       .arst_i(arst_i),
