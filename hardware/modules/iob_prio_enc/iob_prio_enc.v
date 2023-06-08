@@ -23,7 +23,7 @@ module iob_prio_enc #(
       end else begin : gen_highest_prio  //MODE == "HIGH"
          always @* begin
             encoded_o = {$clog2(W) {1'd0}};  //In case input is 0
-            for (pos = 0; pos != W; pos = pos + 1) begin
+            for (pos = {W{1'd0}}; pos < W; pos = pos + 1) begin
                if (unencoded_i[pos]) begin
                   encoded_o = pos;
                end
