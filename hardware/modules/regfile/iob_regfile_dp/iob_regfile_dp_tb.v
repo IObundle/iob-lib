@@ -11,7 +11,7 @@ module iob_regfile_dp_tb;
    localparam W = 8;
    localparam NBYTES = (W<=8) ? N : (W<=16) ? 2*N : 4*N;
    localparam ADDR_W = $clog2(NBYTES);
-
+   localparam LADDR_W = $clog2(N);
    
    reg                 arst;
    reg                 cke;
@@ -23,15 +23,14 @@ module iob_regfile_dp_tb;
    reg [DATA_W-1:0]    iob_wdata_i;
    reg [DATA_W/8-1:0]  iob_wstrb_i;
    wire [DATA_W-1:0]   iob_rdata_o;
-   wire                iob_ready_o;
-   wire                iob_rvalid_o;
+   wire                iob_ack_o;
 
    //logic block interface
-   reg [$clog2(N)-1:0] logic_addr_i;
+   reg [LADDR_W-1:0]   logic_addr_i;
    reg [W-1:0]         logic_wdata_i;
    reg                 logic_we_i;
    wire [W-1:0]        logic_rdata_o;
-   wire                logic_ready_o;
+   wire                logic_ack_o;
 
    reg [DATA_W-1:0]    rdata;
    
@@ -47,6 +46,9 @@ module iob_regfile_dp_tb;
       $dumpvars();
 `endif
 
+      $display("Starting testbench");
+      $display("MODE = %s", MODE);
+      
       cke = 1;
       iob_avalid_i = 0;
       iob_wstrb_i = 0;
@@ -75,14 +77,13 @@ module iob_regfile_dp_tb;
       
    end
 
-   wire [1+ADDR_W+DATA_W:0] cpu_req_i = {iob_avalid_i, iob_addr_i, |iob_wstrb_i, iob_wdata_i};
-   wire [(2+DATA_W)-1:0]               cpu_resp_o;
+   wire [1+ADDR_W+DATA_W+(DATA_W/8)-1:0] cpu_req_i = {iob_avalid_i, iob_addr_i, iob_wstrb_i, iob_wdata_i};
+   wire [(1+DATA_W)-1:0]                 cpu_resp_o;
    
-   wire [($clog2(N)+1+W)-1:0]          logic_req_i = {logic_addr_i, logic_we_i, logic_wdata_i};
-   wire [(2+W)-1:0]                    logic_resp_o;
+   wire [(1+LADDR_W+1+W)-1:0]            logic_req_i = {logic_addr_i, logic_we_i, logic_wdata_i};
+   wire [(1+W)-1:0]                      logic_resp_o;
    
-   assign iob_ready_o = cpu_resp_o[1+DATA_W];
-   assign iob_rvalid_o = cpu_resp_o[DATA_W];
+   assign iob_ack_o = cpu_resp_o[DATA_W];
    assign iob_rdata_o = cpu_resp_o[DATA_W-1:0];
     
    iob_regfile_dp #(
@@ -96,10 +97,10 @@ module iob_regfile_dp_tb;
                            .clk_i(clk),
                            .arst_i(arst),
                            .cke_i(cke),
-                           .cpu_req_i(cpu_req_i),
-                           .cpu_resp_o(cpu_resp_o),
-                           .logic_req_i(logic_req_i),
-                           .logic_resp_o(logic_resp_o)
+                           .req_i(cpu_req_i),
+                           .rsp_o(cpu_resp_o),
+                           .lreq_i(logic_req_i),
+                           .lrsp_o(logic_resp_o)
                            );
 
    // Write data to IOb Native slave
@@ -112,10 +113,7 @@ module iob_regfile_dp_tb;
          @(posedge clk) #1 iob_avalid_i = 1;  //sync and assign
          iob_addr_i  = addr;
          iob_wdata_i = `IOB_GET_WDATA(addr, data);
-         iob_wstrb_i = `IOB_GET_WSTRB(addr, width);
-         
-         while (!iob_ready_o) #1;
-         
+         iob_wstrb_i = `IOB_GET_WSTRB(addr, width);         
          @(posedge clk) iob_avalid_i = 0;
          iob_wstrb_i = 0;
       end
@@ -129,12 +127,9 @@ module iob_regfile_dp_tb;
       
       begin
          @(posedge clk) #1 iob_avalid_i = 1;
-         iob_addr_i = addr;
-         
-         while (!iob_ready_o) #1;
+         iob_addr_i = addr;         
          @(posedge clk) #1 iob_avalid_i = 0;
-         
-         while (!iob_rvalid_o) #1;
+         while (!iob_ack_o) #1;
          data = #1 `IOB_GET_RDATA(addr, iob_rdata_o, width);
   end
 endtask
