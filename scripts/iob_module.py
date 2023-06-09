@@ -234,7 +234,6 @@ class iob_module:
                     "hardware/simulation",
                     "hardware/fpga",
                     "software",
-                    #"document"
                     ]:
                 # Skip this directory if it does not exist
                 if not os.path.isdir(os.path.join(module_class.setup_dir, directory)):
@@ -246,6 +245,14 @@ class iob_module:
                                 dirs_exist_ok=True,
                                 copy_function=cls.copy_with_rename(module_class.name,cls.name),
                                 ignore=shutil.ignore_patterns(*exclude_file_list))
+
+            # Copy document directory if cls is the top module and it has documentation
+            if cls.is_top_module and "doc" in cls.flows:
+                shutil.copytree(os.path.join(module_class.setup_dir, "document"),
+                                os.path.join(cls.build_dir,"document"),
+                                dirs_exist_ok=True,
+                                ignore=shutil.ignore_patterns(*exclude_file_list))
+
 
     # Creates a function that:
     #   - Renames any '<old_core_name>' string inside the src file and in its filename, to the given '<new_core_name>' string argument.

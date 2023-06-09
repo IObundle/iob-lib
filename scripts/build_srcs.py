@@ -14,14 +14,10 @@ import inspect
 import mk_configuration as mk_conf
 
 LIB_DIR = "submodules/LIB"
-# Global variable to disable automatic file copy from setup dir to build dir. May be useful for specialized copy sequences.
-global_disable_file_copy = False
 
 
 # This function sets up the flows for this core
-def flows_setup(python_module, disable_file_copy=False):
-    global global_disable_file_copy
-    global_disable_file_copy = disable_file_copy
+def flows_setup(python_module):
     core_flows = python_module.flows
 
     # Setup simulation
@@ -69,23 +65,6 @@ def hw_setup(python_module):
         create_version_header=False if python_module.regs else True,
     )
 
-    # Copy Setup hw files (all .v and .sdc files under LIB/hardware/src)
-    if not global_disable_file_copy:
-        copy_files(
-            f"{setup_dir}/hardware/src",
-            f"{build_dir}/hardware/src",
-            [],
-            "*.v*",
-            copy_all=True,
-        )
-        copy_files(
-            f"{setup_dir}/hardware/src",
-            f"{build_dir}/hardware/src",
-            [],
-            "*.sdc*",
-            copy_all=True,
-        )
-
 
 # Setup simulation related files/modules
 # module: python module representing a *_setup.py file of the root directory of the core/system.
@@ -95,15 +74,6 @@ def sim_setup(python_module):
     setup_dir = python_module.setup_dir
 
     sim_dir = "hardware/simulation"
-
-    # Copy simulation sources
-    if not global_disable_file_copy:
-        shutil.copytree(
-            f"{setup_dir}/{sim_dir}",
-            f"{build_dir}/{sim_dir}",
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("*_setup*"),
-        )
 
     # Run sim_setup.py
     run_setup_functions(python_module, "sim_setup", setup_module=python_module)
@@ -128,14 +98,6 @@ def fpga_setup(python_module):
 
     # append this core hw flows to config_build
     mk_conf.append_flows_config_build_mk(core_flows, ["fpga"], build_dir)
-
-    if not global_disable_file_copy:
-        shutil.copytree(
-            f"{setup_dir}/{fpga_dir}",
-            f"{build_dir}/{fpga_dir}",
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("*_setup*"),
-        )
 
     # Run fpga_setup.py
     run_setup_functions(python_module, "fpga_setup", setup_module=python_module)
@@ -166,20 +128,12 @@ def lint_setup(python_module):
             for line in lines:
                 sources.write(re.sub(r"IOB_CORE_NAME", core_name, line))
 
-    if not global_disable_file_copy:
-        copy_files(
-            f"{setup_dir}/{lint_dir}", f"{build_dir}/{lint_dir}", [], "*", copy_all=True
-        )
-
 
 # synthesis
 def syn_setup(python_module):
     build_dir = python_module.build_dir
     setup_dir = python_module.setup_dir
     syn_dir = "hardware/syn"
-
-    if not global_disable_file_copy:
-        shutil.copytree(f"{setup_dir}/{syn_dir}", f"{build_dir}/{syn_dir}")
 
     for file in Path(f"{LIB_DIR}/{syn_dir}").rglob("*"):
         src_file = file.as_posix()
@@ -241,15 +195,6 @@ def sw_setup(python_module):
     if "pc-emul" not in core_flows:
         mk_conf.append_flows_config_build_mk(core_flows, ["pc-emul"], build_dir)
 
-    # Copy software tree if it exists as this core may contain software sources to be used by others
-    if os.path.isdir(f"{setup_dir}/software") and not global_disable_file_copy:
-        shutil.copytree(
-            f"{setup_dir}/software",
-            f"{build_dir}/software",
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("*_setup*"),
-        )
-
     # Run sw_setup.py
     run_setup_functions(python_module, "sw_setup", setup_module=python_module)
 
@@ -281,12 +226,6 @@ def doc_setup(python_module):
     core_flows = python_module.flows
     build_dir = python_module.build_dir
     setup_dir = python_module.setup_dir
-
-    # For cores that have their own documentation
-    if not global_disable_file_copy:
-        shutil.copytree(
-            f"{setup_dir}/document", f"{build_dir}/document", dirs_exist_ok=True
-        )
 
     # Copy LIB tex files if not present
     os.makedirs(f"{build_dir}/document/tsrc", exist_ok=True)
