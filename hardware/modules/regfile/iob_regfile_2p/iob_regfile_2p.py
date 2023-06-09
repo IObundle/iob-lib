@@ -2,6 +2,7 @@ import os
 import shutil
 
 from iob_module import iob_module
+from iob_ctls import iob_ctls
 
 
 class iob_regfile_2p(iob_module):
@@ -14,6 +15,7 @@ class iob_regfile_2p(iob_module):
         super()._run_setup()
 
         # Setup dependencies
+        iob_ctls.setup()
 
     # Copy sources of this module to the build directory
     @classmethod

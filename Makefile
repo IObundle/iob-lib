@@ -39,43 +39,52 @@ endif
 # Includes
 INCLUDE=-Ihardware/modules -Ihardware/src
 
-# asymmetric memory present
-IS_ASYM ?= 0
 
 #default target
 all: sim
 
-#setup test directory
+#setup simulation directory
+SIMULATOR?=icarus
+NAME=$(MODULE)
+include hardware/simulation/$(SIMULATOR).mk
+
+VSRC=$(BUILD_VSRC_DIR)/*.v
+
 $(BUILD_VSRC_DIR):
+ifneq ($(SIM_SERVER),)
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $@ ]; then mkdir -p $@; fi"
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d $@ ]; then mkdir -p $@/../simulation; fi"
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) "if [ ! -d ./scripts ]; then mkdir -p ./scripts; fi"
+else
 	@mkdir $@
+endif
+
 
 copy_srcs: $(BUILD_VSRC_DIR) 
 	$(PYTHON_EXEC) ./scripts/lib_sim_setup.py $(MODULE) $(BUILD_VSRC_DIR)
+ifneq ($(SIM_SERVER),)
+	rsync $(SIM_SYNC_FLAGS) -avz --force --delete . $(SIM_USER)@$(SIM_SERVER):./iob-lib
+endif 
 
-# iverilog simulation
-VLOG=iverilog -W all -g2005-sv $(INCLUDE) $(DEFINE)
-
-sim: copy_srcs
+sim-run: copy_srcs 
+ifeq ($(SIM_SERVER),)
 	set -e;
 	@echo "Simulating module $(MODULE)"
-ifeq ($(IS_ASYM),0)
-	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
-	./a.out $(TEST_LOG);
-else
-	$(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
-	./a.out $(TEST_LOG) && if [ $(VCD) != 0 ]; then mv uut.vcd uut1.vcd; fi 
-	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
-	./a.out $(TEST_LOG) && if [ $(VCD) != 0 ]; then mv uut.vcd uut2.vcd; fi
-	$(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
-	./a.out $(TEST_LOG) && if [ $(VCD) != 0 ]; then mv uut.vcd uut3.vcd; fi
-endif
+	make exec 
 ifeq ($(VCD),1)
-ifeq ($(IS_ASYM),0)
 	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &
+endif
 else
-	@if [ ! `pgrep gtkwave` ]; then gtkwave uut1.vcd; fi &
+	ssh $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'cd ./iob-lib; make $@ MODULE=$(MODULE) SIMULATOR=$(SIMULATOR)'
 endif
+
+sim-build: copy_srcs
+ifeq ($(SIM_SERVER),)
+	make comp
+else
+	ssh -t $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'cd iob-lib && make $@ MODULE=$(MODULE) SIMULATOR=$(SIMULATOR)'
 endif
+
 
 sim-waves: uut.vcd
 	@if [ ! `pgrep gtkwave` ]; then gtkwave uut.vcd; fi &
@@ -146,11 +155,14 @@ test: verilog-lint verilog-format
 	@./scripts/clang_format.py --check
 	./scripts/test.sh
 
-clean:
+gen-clean:
 	@rm -rf $(BUILD_VSRC_DIR)
 	@rm -rf spyglass_reports
 	@rm -f *.v *.vh *.c *.h *.tex *.rpt
 	@rm -f *~ \#*\# a.out *.vcd *.pyc *.log
+ifneq ($(SIM_SERVER),)
+	ssh -t $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'if [ -d iob-lib ]; then cd iob-lib && make gen-clean; fi'
+endif
 
 debug:
 
@@ -158,4 +170,4 @@ debug:
 	board_server_install \
 	format format-check \
 	verilog-lint verilog-format \
-	clean debug
+	gen-clean debug

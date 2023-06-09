@@ -9,10 +9,23 @@ COV_TEST?=test
 SFLAGS = -errormax 15 -status -licqueue
 EFLAGS = $(SFLAGS) -access +wc
 ifeq ($(COV),1)
-COV_SFLAGS= -LICQUEUE -covoverwrite -covtest $(COV_TEST)
+COV_SFLAGS= -covoverwrite -covtest $(COV_TEST)
 COV_EFLAGS= -covdut $(NAME) -coverage A -covfile xcelium_cov_commands.ccf
 endif
-VFLAGS+=$(SFLAGS) -update -linedebug -sv -incdir . -incdir ../src  -incdir src
+
+VFLAGS=$(SFLAGS) -update -linedebug -sv -incdir .
+
+ifneq ($(wildcard ../src),)
+VFLAGS+=-incdir ../src
+endif
+
+ifneq ($(wildcard src),)
+VFLAGS+=-incdir src
+endif
+
+ifneq ($(wildcard hardware/src),)
+VFLAGS+=-incdir hardware/src
+endif
 
 ifeq ($(VCD),1)
 VFLAGS+=-define VCD
@@ -23,6 +36,7 @@ VFLAGS+=-define SYN
 endif
 
 comp: $(VHDR) $(VSRC) $(HEX)
+	echo $(VFLAGS)
 	xmvlog $(VFLAGS) $(VSRC) && xmelab $(EFLAGS) $(COV_EFLAGS) worklib.$(NAME)_tb:module
 
 exec: comp

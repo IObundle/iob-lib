@@ -8,15 +8,13 @@
 `timescale 1ns / 1ps
 
 module iob_ctls #(
-   parameter N      = 21,
+   parameter W      = 21,
    parameter MODE   = 0,   //trailing (0), leading (1)
    parameter SYMBOL = 0    //search zeros (0), search ones (1)
 ) (
-   input  [      N-1:0] data_i,
-   output [$clog2(N):0] count_o
+   input  [      W-1:0] data_i,
+   output [$clog2(W):0] count_o
 );
-
-   localparam W = N;
 
    //invert if searching zeros or not
    wire [W-1:0] data_int1;

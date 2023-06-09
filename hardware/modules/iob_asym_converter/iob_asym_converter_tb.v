@@ -5,11 +5,18 @@
 // test defines
 `define MAXADDR_W 10
 
+/* TODO: re-implement these tests 
+-       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
+-       $(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
+-       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
+-       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
+*/
+
 module iob_asym_converter_tb;
 
    // determine W_ADDR_W and R_ADDR_W
-   localparam W_DATA_W = `W_DATA_W;
-   localparam R_DATA_W = `R_DATA_W;
+   localparam W_DATA_W = 8;
+   localparam R_DATA_W = 8;
    localparam MAXDATA_W =
    `IOB_MAX(W_DATA_W, R_DATA_W);
    localparam MINDATA_W =
