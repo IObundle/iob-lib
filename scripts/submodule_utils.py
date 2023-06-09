@@ -382,7 +382,7 @@ class if_gen_hack_list:
     def write(self, port_string):
         # Parse written string
         port = re.search(
-            "^\s*((?:input)|(?:output))\s+\[([^:]+)-1:0\]\s+([^,]+),(?: \/\/(.*))?$",
+            "^\s*((?:input)|(?:output))\s+\[([^:]+)-1:0\]\s+([^,]+),.*$",
             port_string,
         )
         # Append port to port dictionary
@@ -391,7 +391,7 @@ class if_gen_hack_list:
                 "name": port.group(3),
                 "type": get_short_port_type(port.group(1)),
                 "n_bits": port.group(2),
-                "descr": port.group(4),
+                "descr": next(signal["description"] for signal in if_gen.iob+if_gen.axi_write+if_gen.axi_read+if_gen.amba if signal["name"] in port.group(3)),
             }
         )
 
