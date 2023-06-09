@@ -34,7 +34,7 @@ module iob_regfile_2p #(
    wire [         WADDR_INT_W-1:0] waddr_int = waddr + waddr_incr;
 
    iob_ctls #(
-      .N     (DATA_W / 8),
+      .W     (DATA_W / 8),
       .MODE  (0),
       .SYMBOL(0)
    ) iob_ctls_txinst (
