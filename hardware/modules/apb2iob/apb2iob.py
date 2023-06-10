@@ -2,7 +2,6 @@ import os
 import shutil
 
 from iob_module import iob_module
-from iob_wire import iob_wire
 from apb_s_port import apb_s_port
 from iob_s_portmap import iob_s_portmap
 from iob_reg import iob_reg
@@ -18,7 +17,7 @@ class apb2iob(iob_module):
         super()._run_setup()
 
         # Setup dependencies
-        iob_wire.setup()
+        iob_module.generate('iob_wire')
         apb_s_port.setup()
         iob_s_portmap.setup()
         iob_reg.setup()

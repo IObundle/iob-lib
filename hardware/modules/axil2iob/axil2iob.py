@@ -6,7 +6,6 @@ from axil_s_port import axil_s_port
 from axil_s_s_portmap import axil_s_s_portmap
 from iob_m_port import iob_m_port
 from iob_m_portmap import iob_m_portmap
-from iob_wire import iob_wire
 from iob_s_portmap import iob_s_portmap
 
 
@@ -25,7 +24,7 @@ class axil2iob(iob_module):
         axil_s_s_portmap.setup()
         iob_m_port.setup()
         iob_m_portmap.setup()
-        iob_wire.setup()
+        iob_module.generate('iob_wire')
         iob_s_portmap.setup()
 
     # Copy sources of this module to the build directory

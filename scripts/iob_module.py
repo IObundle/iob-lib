@@ -20,6 +20,8 @@ class iob_module:
     ios = None  # List of I/O for this module
     block_groups = None  # List of block groups for this module. Used for documentation.
 
+    submodule_setup_list = None  # List of submodules to setup
+
     # List of setup purposes for this module. Also used to check if module has already been setup.
     _setup_purpose = (
         None
@@ -102,19 +104,48 @@ class iob_module:
         # Copy build directory from the `iob_module` superclass
         cls.build_dir = iob_module.build_dir
 
-        # TODO: It would be nice if we could auto-fill the setup directory with the location of the file, but I'm not sure how.
-        # cls.setup_dir=os.path.dirname(__file__) # This would not work, because `__file__` points to the iob_module.py file and not the ones from subclasses.
-
         # Initialize empty lists for attributes (We can't initialize in the attribute declaration because it would cause every subclass to reference the same list)
         cls.confs = []
         cls.regs = []
         cls.ios = []
         cls.block_groups = []
+        cls.submodule_setup_list = []
+        cls._create_submodules_list()
+
+    # Default method to create list of submodules does nothing
+    @classmethod
+    def _create_submodules_list(cls):
+        pass
 
     # Default _run_setup function copies sources from setup directory of every subclass of iob_module, down to `cls`.
     @classmethod
     def _run_setup(cls):
+        cls.__setup_submodules()
+
         cls._copy_srcs()
+
+    # Run setup functions for the submodules list stored in the setup_submodules_list
+    @classmethod
+    def __setup_submodules(cls):
+        for submodule in cls.submodule_setup_list:
+            _submodule = submodule
+            setup_options = {}
+
+            # Split submodule from its setup options (if it is a tuple)
+            if type(submodule) == tuple:
+                _submodule = submodule[0]
+                setup_options = submodule[1]
+
+            if type(_submodule) == str or type(_submodule) == dict:
+                # String or dictionary: generate interface with if_gen
+                iob_module.generate(_submodule, **setup_options)
+            elif issubclass(_submodule,iob_module):
+                # Subclass of iob_module: setup the module
+                _submodule.setup(**setup_options)
+            else:
+                # Unknown type
+                raise Exception(f"{iob_colors.FAIL}Unknown type in submodule_setup_list of {cls.name}: {_submodule}{iob_colors.ENDC}")
+
 
     # Append confs to the current confs class list, overriding existing ones
     @classmethod
