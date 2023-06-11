@@ -19,8 +19,8 @@ class iob_tasks(iob_module):
         out_dir = cls.get_purpose_dir(cls._setup_purpose[-1])
         # Copy source to build directory
         shutil.copyfile(
-            os.path.join(cls.setup_dir, "iob_tasks.vh"),
-            os.path.join(cls.build_dir, out_dir, "iob_tasks.vh"),
+            os.path.join(cls.setup_dir, "iob_tasks.vs"),
+            os.path.join(cls.build_dir, out_dir, "iob_tasks.vs"),
         )
 
         # Ensure sources of other purposes are deleted (except software)

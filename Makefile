@@ -41,7 +41,7 @@ INCLUDE=-Ihardware/modules -Ihardware/src
 
 
 #default target
-all: sim
+all: sim-run
 
 #setup simulation directory
 SIMULATOR?=icarus
@@ -166,7 +166,7 @@ endif
 
 debug:
 
-.PHONY: all setup sim \
+.PHONY: all setup sim-build sim-run \
 	board_server_install \
 	format format-check \
 	verilog-lint verilog-format \
