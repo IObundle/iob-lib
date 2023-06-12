@@ -5,7 +5,10 @@ import os
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage: %s <top_module_name> [setup_args] [-s <search_path>]" % sys.argv[0])
+    print(
+        "Usage: %s <top_module_name> [setup_args] [-s <search_path>] [-f <func_name>]"
+        % sys.argv[0]
+    )
     print(
         "<top_module_name>: Name of top module class and file (they must have the same name)."
     )
@@ -63,6 +66,14 @@ for filepath, files in bfs_search_files(search_path):
 top_module_name = sys.argv[1].split(".")[0]
 exec("import " + top_module_name)
 
+
+# Set a custom LIB directory
+for arg in sys.argv:
+    if "LIB_DIR" in arg:
+        import build_srcs
+
+        build_srcs.LIB_DIR = arg.split("=")[1]
+        break
 
 # Print build directory attribute of the top module
 def get_build_dir():

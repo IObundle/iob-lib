@@ -2,6 +2,9 @@ import os
 import shutil
 
 from iob_module import iob_module
+from setup import setup
+
+from iob_utils import iob_utils
 from iob_reg import iob_reg
 from iob_ram_2p import iob_ram_2p
 
@@ -9,6 +12,7 @@ from iob_ram_2p import iob_ram_2p
 class iob_asym_converter(iob_module):
     name = "iob_asym_converter"
     version = "V0.10"
+    flows = "sim"
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
@@ -17,9 +21,22 @@ class iob_asym_converter(iob_module):
 
         # Setup dependencies
 
+        iob_utils.setup()
         iob_reg.setup()
 
         iob_ram_2p.setup(purpose="simulation")
+
+        if cls.is_top_module:
+            # Setup flows of this core using LIB setup function
+            setup(cls, disable_file_gen=True)
+
+            # Copy testbench if this is the top module
+            shutil.copyfile(
+                os.path.join(cls.setup_dir, "iob_asym_converter_tb.v"),
+                os.path.join(
+                    cls.build_dir, "hardware/simulation/src", "iob_asym_converter_tb.v"
+                ),
+            )
 
     # Copy sources of this module to the build directory
     @classmethod

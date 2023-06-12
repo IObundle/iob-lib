@@ -2,12 +2,15 @@ import os
 import shutil
 
 from iob_module import iob_module
+from setup import setup
+
 from iob_ram_sp import iob_ram_sp
 
 
 class iob_ram_sp_be(iob_module):
     name = "iob_ram_sp_be"
     version = "V0.10"
+    flows = "sim"
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
@@ -17,6 +20,18 @@ class iob_ram_sp_be(iob_module):
         # Setup dependencies
 
         iob_ram_sp.setup()
+
+        if cls.is_top_module:
+            # Setup flows of this core using LIB setup function
+            setup(cls, disable_file_gen=True)
+
+            # Copy testbench if this is the top module
+            shutil.copyfile(
+                os.path.join(cls.setup_dir, "iob_ram_sp_be_tb.v"),
+                os.path.join(
+                    cls.build_dir, "hardware/simulation/src", "iob_ram_sp_be_tb.v"
+                ),
+            )
 
     # Copy sources of this module to the build directory
     @classmethod

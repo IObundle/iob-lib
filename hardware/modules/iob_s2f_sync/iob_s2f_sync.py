@@ -2,6 +2,8 @@ import os
 import shutil
 
 from iob_module import iob_module
+from setup import setup
+
 from iob_counter import iob_counter
 from iob_reg_re import iob_reg_re
 
@@ -9,6 +11,7 @@ from iob_reg_re import iob_reg_re
 class iob_s2f_sync(iob_module):
     name = "iob_s2f_sync"
     version = "V0.10"
+    flows = "sim"
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
@@ -19,6 +22,10 @@ class iob_s2f_sync(iob_module):
 
         iob_counter.setup()
         iob_reg_re.setup()
+
+        if cls.is_top_module:
+            # Setup flows of this core using LIB setup function
+            setup(cls, disable_file_gen=True)
 
     # Copy sources of this module to the build directory
     @classmethod

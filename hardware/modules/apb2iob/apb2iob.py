@@ -2,6 +2,8 @@ import os
 import shutil
 
 from iob_module import iob_module
+from setup import setup
+
 from apb_s_port import apb_s_port
 from iob_s_portmap import iob_s_portmap
 from iob_reg import iob_reg
@@ -10,6 +12,7 @@ from iob_reg import iob_reg
 class apb2iob(iob_module):
     name = "apb2iob"
     version = "V0.10"
+    flows = "sim"
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
@@ -21,6 +24,10 @@ class apb2iob(iob_module):
         apb_s_port.setup()
         iob_s_portmap.setup()
         iob_reg.setup()
+
+        if cls.is_top_module:
+            # Setup flows of this core using LIB setup function
+            setup(cls, disable_file_gen=True)
 
     # Copy sources of this module to the build directory
     @classmethod

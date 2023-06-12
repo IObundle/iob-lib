@@ -1,5 +1,7 @@
 `timescale 1ns / 1ps
 
+`include "iob_utils.vh"
+
 /* TODO: re-implement these tests 
 -       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
 -       $(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\

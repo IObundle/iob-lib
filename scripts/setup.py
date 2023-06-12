@@ -13,7 +13,7 @@ import shutil
 
 import datetime
 
-from iob_ctls import iob_ctls
+# from iob_ctls import iob_ctls # The iob_ctls module imports this file and runs setup(), therefore, this file cannot import it (would cause an import loop).
 from iob_module import iob_module
 
 
@@ -30,6 +30,11 @@ def setup(python_module, no_overlap=False, disable_file_gen=False):
 
     top = python_module.name
     build_dir = python_module.build_dir
+
+    #
+    # Setup flows
+    #
+    build_srcs.flows_setup(python_module)
 
     # Auto-add 'VERSION' macro
     confs.append(
@@ -78,16 +83,11 @@ def setup(python_module, no_overlap=False, disable_file_gen=False):
         reg_table = mkregs_obj.get_reg_table(regs, no_overlap)
 
         # Auto-add iob_ctls module
-        iob_ctls.setup()
-        # Auto-add iob_s_port.vh
-        iob_module.generate("iob_s_port")
-        # Auto-add iob_s_portmap.vh
-        iob_module.generate("iob_s_portmap")
-
-    #
-    # Setup flows
-    #
-    build_srcs.flows_setup(python_module)
+        # iob_ctls.setup()
+        ## Auto-add iob_s_port.vh
+        # iob_module.generate("iob_s_port")
+        ## Auto-add iob_s_portmap.vh
+        # iob_module.generate("iob_s_portmap")
 
     # Only auto-generate files if `disable_file_gen` is False
     if not disable_file_gen:

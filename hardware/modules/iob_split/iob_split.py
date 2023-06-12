@@ -2,11 +2,13 @@ import os
 import shutil
 
 from iob_module import iob_module
+from setup import setup
 
 
 class iob_split(iob_module):
     name = "iob_split"
     version = "V0.10"
+    flows = "sim"
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
@@ -14,6 +16,10 @@ class iob_split(iob_module):
         super()._run_setup()
 
         # Setup dependencies
+
+        if cls.is_top_module:
+            # Setup flows of this core using LIB setup function
+            setup(cls, disable_file_gen=True)
 
     # Copy sources of this module to the build directory
     @classmethod

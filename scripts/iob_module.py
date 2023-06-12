@@ -4,7 +4,7 @@ import shutil
 import iob_colors
 import if_gen
 from mk_configuration import config_build_mk
-from build_srcs import LIB_DIR
+import build_srcs
 from iob_verilog_instance import iob_verilog_instance
 
 # Generic class to describe a base iob-module
@@ -227,7 +227,7 @@ class iob_module:
             os.makedirs(f"{cls.build_dir}/hardware/fpga/src", exist_ok=True)
 
         shutil.copyfile(
-            f"{LIB_DIR}/build.mk", f"{cls.build_dir}/Makefile"
+            f"{build_srcs.LIB_DIR}/build.mk", f"{cls.build_dir}/Makefile"
         )  # Copy generic MAKEFILE
 
     # Copy module sources to the build directory from every subclass in between `ìob_module` and `cls`, inclusive.

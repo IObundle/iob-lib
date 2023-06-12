@@ -2,6 +2,8 @@ import os
 import shutil
 
 from iob_module import iob_module
+from setup import setup
+
 from iob_reg_r import iob_reg_r
 from iob_reg import iob_reg
 from iob_counter import iob_counter
@@ -12,6 +14,7 @@ from iob_ram_2p import iob_ram_2p
 class iob_fifo_sync(iob_module):
     name = "iob_fifo_sync"
     version = "V0.10"
+    flows = "sim"
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
@@ -26,6 +29,10 @@ class iob_fifo_sync(iob_module):
         iob_asym_converter.setup()
 
         iob_ram_2p.setup(purpose="simulation")
+
+        if cls.is_top_module:
+            # Setup flows of this core using LIB setup function
+            setup(cls, disable_file_gen=True)
 
     # Copy sources of this module to the build directory
     @classmethod

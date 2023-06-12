@@ -5,25 +5,25 @@
 // APB slave port to IOb master interface
 
 module apb2iob #(
-    parameter APB_ADDR_W = 21,          // APB address bus width in bits
-    parameter APB_DATA_W = 21,          // APB data bus width in bits
-    parameter ADDR_W     = APB_ADDR_W,  // IOb address bus width in bits
-    parameter DATA_W     = APB_DATA_W   // IOb data bus width in bits
+   parameter APB_ADDR_W = 21,          // APB address bus width in bits
+   parameter APB_DATA_W = 21,          // APB data bus width in bits
+   parameter ADDR_W     = APB_ADDR_W,  // IOb address bus width in bits
+   parameter DATA_W     = APB_DATA_W   // IOb data bus width in bits
 ) (
-    // APB slave interface
-    `include "iob_apb_s_port.vs"
+   // APB slave interface
+   `include "iob_apb_s_port.vs"
 
-    // IOb master interface
-    output [         1-1:0] iob_avalid_o,      //Request valid.
-    output [    ADDR_W-1:0] iob_addr_o,        //Address.
-    output [    DATA_W-1:0] iob_wdata_o,       //Write data.
-    output [(DATA_W/8)-1:0] iob_wstrb_o,       //Write strobe.
-    input  [         1-1:0] iob_rvalid_nxt_i,  //Read data valid.
-    input  [    DATA_W-1:0] iob_rdata_i,       //Read data.
-    input  [         1-1:0] iob_ready_nxt_i,   //Interface ready.
+   // IOb master interface
+   output [         1-1:0] iob_avalid_o,      //Request valid.
+   output [    ADDR_W-1:0] iob_addr_o,        //Address.
+   output [    DATA_W-1:0] iob_wdata_o,       //Write data.
+   output [(DATA_W/8)-1:0] iob_wstrb_o,       //Write strobe.
+   input  [         1-1:0] iob_rvalid_nxt_i,  //Read data valid.
+   input  [    DATA_W-1:0] iob_rdata_i,       //Read data.
+   input  [         1-1:0] iob_ready_nxt_i,   //Interface ready.
 
-    // Global signals
-    `include "iob_clkenrst_port.vs"
+   // Global signals
+   `include "iob_clkenrst_port.vs"
 );
 
 
@@ -31,9 +31,9 @@ module apb2iob #(
    reg [1-1:0] apb_ready_nxt;
 
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(1'b0),
-       .CLKEDGE("posedge")
+      .DATA_W (1),
+      .RST_VAL(1'b0),
+      .CLKEDGE("posedge")
    ) apb_ready_reg_inst (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -47,9 +47,9 @@ module apb2iob #(
    wire [1-1:0] pc;
    reg  [1-1:0] pc_nxt;
    iob_reg #(
-       .DATA_W (1),
-       .RST_VAL(1'b0),
-       .CLKEDGE("posedge")
+      .DATA_W (1),
+      .RST_VAL(1'b0),
+      .CLKEDGE("posedge")
    ) pc_reg (
       .clk_i (clk_i),
       .arst_i(arst_i),
@@ -72,7 +72,7 @@ module apb2iob #(
          end
 
          default: begin
-            if (apb_enable_i && !apb_ready_o) //wait periph ready
+            if (apb_enable_i && !apb_ready_o)  //wait periph ready
                pc_nxt = pc;
          end
       endcase

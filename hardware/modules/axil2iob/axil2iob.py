@@ -2,6 +2,8 @@ import os
 import shutil
 
 from iob_module import iob_module
+from setup import setup
+
 from axil_s_port import axil_s_port
 from axil_s_s_portmap import axil_s_s_portmap
 from iob_m_port import iob_m_port
@@ -12,6 +14,7 @@ from iob_s_portmap import iob_s_portmap
 class axil2iob(iob_module):
     name = "axil2iob"
     version = "V0.10"
+    flows = "sim"
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
@@ -26,6 +29,10 @@ class axil2iob(iob_module):
         iob_m_portmap.setup()
         iob_module.generate("iob_wire")
         iob_s_portmap.setup()
+
+        if cls.is_top_module:
+            # Setup flows of this core using LIB setup function
+            setup(cls, disable_file_gen=True)
 
     # Copy sources of this module to the build directory
     @classmethod

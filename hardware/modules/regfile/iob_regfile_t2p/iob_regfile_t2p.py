@@ -2,12 +2,15 @@ import os
 import shutil
 
 from iob_module import iob_module
+from setup import setup
+
 from iob_sync import iob_sync
 
 
 class iob_regfile_t2p(iob_module):
     name = "iob_regfile_t2p"
     version = "V0.10"
+    flows = "sim"
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
@@ -17,6 +20,10 @@ class iob_regfile_t2p(iob_module):
         # Setup dependencies
 
         iob_sync.setup()
+
+        if cls.is_top_module:
+            # Setup flows of this core using LIB setup function
+            setup(cls, disable_file_gen=True)
 
     # Copy sources of this module to the build directory
     @classmethod
