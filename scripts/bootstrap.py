@@ -57,7 +57,7 @@ for filepath, files in bfs_search_files(search_path):
     for filename in files:
         if filename.endswith(".py") and filename not in found_modules:
             sys.path.append(filepath)
-
+            found_modules.append(filename)
 
 # Import top module
 top_module_name = sys.argv[1].split(".")[0]
