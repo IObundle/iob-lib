@@ -56,7 +56,10 @@ def generate_blocks_tex(block_groups, out_dir):
         tex_table = []
         for instance in block_group.blocks:
             tex_table.append(
-                [instance.name.replace("_", "\_"), instance.description.replace("_", "\_")]
+                [
+                    instance.name.replace("_", "\_"),
+                    instance.description.replace("_", "\_"),
+                ]
             )
 
         write_table(f"{out_dir}/{block_group.name}_module", tex_table)

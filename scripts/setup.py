@@ -23,9 +23,7 @@ def getf(obj, name, field):
 
 # no_overlap: Optional argument. Selects if read/write register addresses should not overlap
 # disable_file_gen: Optional argument. Selects if files should be auto-generated.
-def setup(
-    python_module, no_overlap=False, disable_file_gen=False
-):
+def setup(python_module, no_overlap=False, disable_file_gen=False):
     confs = python_module.confs
     ios = python_module.ios
     regs = python_module.regs
@@ -128,7 +126,7 @@ def setup(
         #
         # Generate TeX
         #
-        if python_module.is_top_module and 'doc' in python_module.flows:
+        if python_module.is_top_module and "doc" in python_module.flows:
             mk_conf.generate_confs_tex(
                 confs, python_module.build_dir + "/document/tsrc"
             )
@@ -137,7 +135,9 @@ def setup(
                 mkregs_obj.generate_regs_tex(
                     regs, reg_table, build_dir + "/document/tsrc"
                 )
-            blocks_lib.generate_blocks_tex(python_module.block_groups, build_dir + "/document/tsrc")
+            blocks_lib.generate_blocks_tex(
+                python_module.block_groups, build_dir + "/document/tsrc"
+            )
 
     # Replace Verilog includes by Verilog header file contents
     if python_module.is_top_module:

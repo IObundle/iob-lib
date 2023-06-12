@@ -33,9 +33,12 @@ class iob_merge(iob_module):
 
         # Ensure sources of other purposes are deleted (except software)
         # Check that latest purpose is hardware
-        if cls._setup_purpose[-1]=='hardware' and len(cls._setup_purpose)>1:
+        if cls._setup_purpose[-1] == "hardware" and len(cls._setup_purpose) > 1:
             # Purposes that have been setup previously
-            for purpose in [x for x in cls._setup_purpose[:-1] if x!="software"]:
+            for purpose in [x for x in cls._setup_purpose[:-1] if x != "software"]:
                 # Delete sources for this purpose
-                os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "iob_merge.v"))
-
+                os.remove(
+                    os.path.join(
+                        cls.build_dir, cls.PURPOSE_DIRS[purpose], "iob_merge.v"
+                    )
+                )

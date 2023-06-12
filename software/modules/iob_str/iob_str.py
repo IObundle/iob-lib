@@ -12,9 +12,8 @@ class iob_str(iob_module):
     @classmethod
     def _run_setup(cls):
         super()._run_setup()
-        
-        # Setup dependencies
 
+        # Setup dependencies
 
     # Copy sources of this module to the build directory
     @classmethod

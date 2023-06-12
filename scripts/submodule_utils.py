@@ -391,7 +391,14 @@ class if_gen_hack_list:
                 "name": port.group(3),
                 "type": get_short_port_type(port.group(1)),
                 "n_bits": port.group(2),
-                "descr": next(signal["description"] for signal in if_gen.iob+if_gen.axi_write+if_gen.axi_read+if_gen.amba if signal["name"] in port.group(3)),
+                "descr": next(
+                    signal["description"]
+                    for signal in if_gen.iob
+                    + if_gen.axi_write
+                    + if_gen.axi_read
+                    + if_gen.amba
+                    if signal["name"] in port.group(3)
+                ),
             }
         )
 

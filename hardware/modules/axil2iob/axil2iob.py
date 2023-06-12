@@ -24,7 +24,7 @@ class axil2iob(iob_module):
         axil_s_s_portmap.setup()
         iob_m_port.setup()
         iob_m_portmap.setup()
-        iob_module.generate('iob_wire')
+        iob_module.generate("iob_wire")
         iob_s_portmap.setup()
 
     # Copy sources of this module to the build directory
@@ -39,9 +39,10 @@ class axil2iob(iob_module):
 
         # Ensure sources of other purposes are deleted (except software)
         # Check that latest purpose is hardware
-        if cls._setup_purpose[-1]=='hardware' and len(cls._setup_purpose)>1:
+        if cls._setup_purpose[-1] == "hardware" and len(cls._setup_purpose) > 1:
             # Purposes that have been setup previously
-            for purpose in [x for x in cls._setup_purpose[:-1] if x!="software"]:
+            for purpose in [x for x in cls._setup_purpose[:-1] if x != "software"]:
                 # Delete sources for this purpose
-                os.remove(os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "axil2iob.v"))
-
+                os.remove(
+                    os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "axil2iob.v")
+                )
