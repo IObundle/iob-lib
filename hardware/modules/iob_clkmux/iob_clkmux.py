@@ -4,11 +4,9 @@ import shutil
 from iob_module import iob_module
 from setup import setup
 
-from iob_reg import iob_reg
 
-
-class apb2iob(iob_module):
-    name = "apb2iob"
+class iob_clkmux(iob_module):
+    name = "iob_clkmux"
     version = "V0.10"
     flows = "sim"
     setup_dir = os.path.dirname(__file__)
@@ -18,10 +16,6 @@ class apb2iob(iob_module):
         super()._run_setup()
 
         # Setup dependencies
-        iob_module.generate("iob_wire")
-        iob_module.generate("apb_s_port")
-        iob_module.generate("iob_s_portmap")
-        iob_reg.setup()
 
         if cls.is_top_module:
             # Setup flows of this core using LIB setup function
@@ -33,8 +27,8 @@ class apb2iob(iob_module):
         out_dir = cls.get_purpose_dir(cls._setup_purpose[-1])
         # Copy source to build directory
         shutil.copyfile(
-            os.path.join(cls.setup_dir, "apb2iob.v"),
-            os.path.join(cls.build_dir, out_dir, "apb2iob.v"),
+            os.path.join(cls.setup_dir, "iob_clkmux.v"),
+            os.path.join(cls.build_dir, out_dir, "iob_clkmux.v"),
         )
 
         # Ensure sources of other purposes are deleted (except software)
@@ -44,5 +38,5 @@ class apb2iob(iob_module):
             for purpose in [x for x in cls._setup_purpose[:-1] if x != "software"]:
                 # Delete sources for this purpose
                 os.remove(
-                    os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "apb2iob.v")
+                    os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "iob_clkmux.v")
                 )

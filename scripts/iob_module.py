@@ -302,6 +302,7 @@ class iob_module:
                 ),
             )
             # print(f"### DEBUG: {src} {dst}")
+            file_perms = os.stat(src).st_mode
             with open(src, "r") as file:
                 lines = file.readlines()
             for idx in range(len(lines)):
@@ -312,5 +313,7 @@ class iob_module:
                 )
             with open(dst, "w") as file:
                 file.writelines(lines)
+            # Set file permissions equal to source file
+            os.chmod(dst, file_perms)
 
         return copy_func
