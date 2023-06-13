@@ -22,15 +22,18 @@ module iob_regfile_2p #(
 );
 
    //register file and register file write enable
-   wire [(N*W)-1 : 0] regfile;
-   wire [      N-1:0] wen;
+   wire [(N*W)-1 : 0]                                          regfile;
+   wire [      N-1:0]                                          wen;
 
    //reconstruct write address from waddr_i and wstrb_i
    wire [WSTRB_W-1:0] wstrb = req_i[WDATA_W+:WSTRB_W];
    wire [WADDR_W-1:0] waddr = req_i[WSTRB_W+WDATA_W+:WADDR_W];
-   localparam WADDR_INT_W = (WADDR_W > ($clog2(DATA_W / 8) + 1)) ? WADDR_W
-                                 : ($clog2(DATA_W / 8) + 1);
-   wire [($clog2(DATA_W/8)+1)-1:0] waddr_incr;
+   localparam WADDR_INT_W = (WADDR_W > ($clog2(
+       DATA_W / 8
+   ) + 1)) ? WADDR_W : ($clog2(
+       DATA_W / 8
+   ) + 1);
+   wire [($clog2(DATA_W/8)+1)-1:0]                                 waddr_incr;
    wire [         WADDR_INT_W-1:0] waddr_int = waddr + waddr_incr;
 
    iob_ctls #(

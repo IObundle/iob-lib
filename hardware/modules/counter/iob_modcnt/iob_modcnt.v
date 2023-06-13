@@ -17,22 +17,22 @@ module iob_modcnt #(
    output [DATA_W-1:0] data_o
 );
 
-  wire              ld_count = (data_o == mod_i);
-  wire [DATA_W-1:0] ld_val = {DATA_W{1'b0}};
+   wire ld_count = (data_o == mod_i);
+   wire                               [DATA_W-1:0] ld_val = {DATA_W{1'b0}};
 
-  iob_counter_ld #(
+   iob_counter_ld #(
       .DATA_W (DATA_W),
       .RST_VAL(RST_VAL),
       .CLKEDGE(CLKEDGE)
-  ) cnt0 (
-      .clk_i (clk_i),
-      .arst_i (arst_i),
-      .cke_i (cke_i),
-      .rst_i (rst_i),
-      .en_i (en_i),
-      .ld_i (ld_count),
-      .ld_val_i (ld_val),
-      .data_o (data_o)
-  );
+   ) cnt0 (
+      .clk_i   (clk_i),
+      .arst_i  (arst_i),
+      .cke_i   (cke_i),
+      .rst_i   (rst_i),
+      .en_i    (en_i),
+      .ld_i    (ld_count),
+      .ld_val_i(ld_val),
+      .data_o  (data_o)
+   );
 
 endmodule

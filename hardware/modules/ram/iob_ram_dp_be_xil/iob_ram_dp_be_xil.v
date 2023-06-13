@@ -4,25 +4,25 @@
 `timescale 1 ns / 1 ps
 
 module iob_ram_dp_be_xil #(
-    parameter HEXFILE = "none",
-    parameter ADDR_W  = 10,      // Addr Width in bits : 2*ADDR_W = RAM Depth
-    parameter DATA_W  = 32       // Data Width in bits
+   parameter HEXFILE = "none",
+   parameter ADDR_W  = 10,      // Addr Width in bits : 2*ADDR_W = RAM Depth
+   parameter DATA_W  = 32       // Data Width in bits
 ) (
-    input clk_i,
+   input clk_i,
 
-    // Port A
-    input                 enA_i,
-    input  [DATA_W/8-1:0] weA_i,
-    input  [  ADDR_W-1:0] addrA_i,
-    input  [  DATA_W-1:0] dA_i,
-    output [  DATA_W-1:0] dA_o,
+   // Port A
+   input                 enA_i,
+   input  [DATA_W/8-1:0] weA_i,
+   input  [  ADDR_W-1:0] addrA_i,
+   input  [  DATA_W-1:0] dA_i,
+   output [  DATA_W-1:0] dA_o,
 
-    // Port B
-    input                 enB_i,
-    input  [DATA_W/8-1:0] weB_i,
-    input  [  ADDR_W-1:0] addrB_i,
-    input  [  DATA_W-1:0] dB_i,
-    output [DATA_W-1 : 0] dB_o
+   // Port B
+   input                 enB_i,
+   input  [DATA_W/8-1:0] weB_i,
+   input  [  ADDR_W-1:0] addrB_i,
+   input  [  DATA_W-1:0] dB_i,
+   output [DATA_W-1 : 0] dB_o
 );
 
    localparam COL_W = 8;

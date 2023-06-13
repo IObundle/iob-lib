@@ -1,21 +1,21 @@
 `timescale 1ns / 1ps
 
 module iob_acc_ld #(
-    parameter DATA_W  = 21,
-    parameter RST_VAL = {DATA_W{1'b0}}
+   parameter DATA_W  = 21,
+   parameter RST_VAL = {DATA_W{1'b0}}
 ) (
-    input clk_i,
-    input arst_i,
-    input cke_i,
+   input clk_i,
+   input arst_i,
+   input cke_i,
 
-    input rst_i,
-    input en_i,
+   input rst_i,
+   input en_i,
 
-    input              ld_i,
-    input [DATA_W-1:0] ld_val_i,
+   input              ld_i,
+   input [DATA_W-1:0] ld_val_i,
 
-    input  [DATA_W-1:0] incr_i,
-    output [DATA_W-1:0] data_o
+   input  [DATA_W-1:0] incr_i,
+   output [DATA_W-1:0] data_o
 );
 
    wire [DATA_W-1:0] data;

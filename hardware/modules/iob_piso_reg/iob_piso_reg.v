@@ -1,19 +1,19 @@
 `timescale 1ns / 1ps
 
 module iob_piso_reg #(
-    parameter DATA_W = 32
+   parameter DATA_W = 32
 ) (
 
-    input clk_i,
-    input arst_i,
-    input cke_i,
+   input clk_i,
+   input arst_i,
+   input cke_i,
 
-    // parallel input
-    input              ld_i,
-    input [DATA_W-1:0] p_i,
+   // parallel input
+   input              ld_i,
+   input [DATA_W-1:0] p_i,
 
-    // serial output
-    output s_o
+   // serial output
+   output s_o
 );
 
    wire [DATA_W-1:0] data_reg;
@@ -21,9 +21,9 @@ module iob_piso_reg #(
    assign data = ld_i ? p_i : data_reg << 1'b1;
 
    iob_reg #(
-       .DATA_W (DATA_W),
-       .RST_VAL(0),
-       .CLKEDGE("posedge")
+      .DATA_W (DATA_W),
+      .RST_VAL(0),
+      .CLKEDGE("posedge")
    ) reg0 (
       .clk_i (clk_i),
       .arst_i(arst_i),

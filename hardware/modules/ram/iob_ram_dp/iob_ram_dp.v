@@ -1,26 +1,26 @@
 `timescale 1ns / 1ps
 
 module iob_ram_dp #(
-    parameter HEXFILE              = "none",
-    parameter DATA_W               = 8,
-    parameter ADDR_W               = 6,
-    parameter MEM_NO_READ_ON_WRITE = 1
+   parameter HEXFILE              = "none",
+   parameter DATA_W               = 8,
+   parameter ADDR_W               = 6,
+   parameter MEM_NO_READ_ON_WRITE = 1
 ) (
-    input clk_i,
+   input clk_i,
 
-    // Port A
-    input      [DATA_W-1:0] dA_i,
-    input      [ADDR_W-1:0] addrA_i,
-    input                   enA_i,
-    input                   weA_i,
-    output reg [DATA_W-1:0] dA_o,
+   // Port A
+   input      [DATA_W-1:0] dA_i,
+   input      [ADDR_W-1:0] addrA_i,
+   input                   enA_i,
+   input                   weA_i,
+   output reg [DATA_W-1:0] dA_o,
 
-    // Port B
-    input      [DATA_W-1:0] dB_i,
-    input      [ADDR_W-1:0] addrB_i,
-    input                   enB_i,
-    input                   weB_i,
-    output reg [DATA_W-1:0] dB_o
+   // Port B
+   input      [DATA_W-1:0] dB_i,
+   input      [ADDR_W-1:0] addrB_i,
+   input                   enB_i,
+   input                   weB_i,
+   output reg [DATA_W-1:0] dB_o
 );
 
    //this allows ISE 14.7 to work; do not remove

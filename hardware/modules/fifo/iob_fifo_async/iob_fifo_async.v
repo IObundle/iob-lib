@@ -3,57 +3,57 @@
 
 
 module iob_fifo_async #(
-    parameter W_DATA_W = 21,
-    parameter R_DATA_W = 21,
-    parameter ADDR_W = 3,  //higher ADDR_W lower DATA_W
-    //determine W_ADDR_W and R_ADDR_W
-    parameter MAXDATA_W =
-    `IOB_MAX(W_DATA_W, R_DATA_W),
-    parameter MINDATA_W =
-    `IOB_MIN(W_DATA_W, R_DATA_W),
-    parameter R = MAXDATA_W / MINDATA_W,
-    parameter ADDR_W_DIFF = $clog2(R),
-    parameter MINADDR_W = ADDR_W - $clog2(R),  //lower ADDR_W (higher DATA_W)
-    parameter W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
-    parameter R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
+   parameter W_DATA_W = 21,
+   parameter R_DATA_W = 21,
+   parameter ADDR_W = 3,  //higher ADDR_W lower DATA_W
+   //determine W_ADDR_W and R_ADDR_W
+   parameter MAXDATA_W =
+   `IOB_MAX(W_DATA_W, R_DATA_W),
+   parameter MINDATA_W =
+   `IOB_MIN(W_DATA_W, R_DATA_W),
+   parameter R = MAXDATA_W / MINDATA_W,
+   parameter ADDR_W_DIFF = $clog2(R),
+   parameter MINADDR_W = ADDR_W - $clog2(R),  //lower ADDR_W (higher DATA_W)
+   parameter W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
+   parameter R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
 ) (
 
-    //memory write port
-    output [        1-1:0] ext_mem_w_clk_o,
-    output [        1-1:0] ext_mem_w_arst_o,
-    output [        1-1:0] ext_mem_w_cke_o,
-    output [        R-1:0] ext_mem_w_en_o,
-    output [MINADDR_W-1:0] ext_mem_w_addr_o,
-    output [MAXDATA_W-1:0] ext_mem_w_data_o,
-    //memory read port
-    output [        1-1:0] ext_mem_r_clk_o,
-    output [        1-1:0] ext_mem_r_arst_o,
-    output [        1-1:0] ext_mem_r_cke_o,
-    output [        R-1:0] ext_mem_r_en_o,
-    output [MINADDR_W-1:0] ext_mem_r_addr_o,
-    input  [MAXDATA_W-1:0] ext_mem_r_data_i,
+   //memory write port
+   output [        1-1:0] ext_mem_w_clk_o,
+   output [        1-1:0] ext_mem_w_arst_o,
+   output [        1-1:0] ext_mem_w_cke_o,
+   output [        R-1:0] ext_mem_w_en_o,
+   output [MINADDR_W-1:0] ext_mem_w_addr_o,
+   output [MAXDATA_W-1:0] ext_mem_w_data_o,
+   //memory read port
+   output [        1-1:0] ext_mem_r_clk_o,
+   output [        1-1:0] ext_mem_r_arst_o,
+   output [        1-1:0] ext_mem_r_cke_o,
+   output [        R-1:0] ext_mem_r_en_o,
+   output [MINADDR_W-1:0] ext_mem_r_addr_o,
+   input  [MAXDATA_W-1:0] ext_mem_r_data_i,
 
-    //read port
-    input                 r_clk_i,
-    input                 r_arst_i,
-    input                 r_cke_i,
-    input                 r_rst_i,
-    input                 r_en_i,
-    output [R_DATA_W-1:0] r_data_o,
-    output                r_empty_o,
-    output                r_full_o,
-    output [    ADDR_W:0] r_level_o,
+   //read port
+   input                 r_clk_i,
+   input                 r_arst_i,
+   input                 r_cke_i,
+   input                 r_rst_i,
+   input                 r_en_i,
+   output [R_DATA_W-1:0] r_data_o,
+   output                r_empty_o,
+   output                r_full_o,
+   output [    ADDR_W:0] r_level_o,
 
-    //write port
-    input                 w_clk_i,
-    input                 w_arst_i,
-    input                 w_cke_i,
-    input                 w_rst_i,
-    input                 w_en_i,
-    input  [W_DATA_W-1:0] w_data_i,
-    output                w_empty_o,
-    output                w_full_o,
-    output [    ADDR_W:0] w_level_o
+   //write port
+   input                 w_clk_i,
+   input                 w_arst_i,
+   input                 w_cke_i,
+   input                 w_rst_i,
+   input                 w_en_i,
+   input  [W_DATA_W-1:0] w_data_i,
+   output                w_empty_o,
+   output                w_full_o,
+   output [    ADDR_W:0] w_level_o
 
 );
 
@@ -99,8 +99,8 @@ module iob_fifo_async #(
    wire [W_ADDR_W:0] w_waddr_gray;
    wire [W_ADDR_W:0] r_waddr_gray;
    iob_sync #(
-       .DATA_W (W_ADDR_W + 1),
-       .RST_VAL({(W_ADDR_W + 1) {1'd0}})
+      .DATA_W (W_ADDR_W + 1),
+      .RST_VAL({(W_ADDR_W + 1) {1'd0}})
    ) w_waddr_gray_sync0 (
       .clk_i   (r_clk_i),
       .arst_i  (r_arst_i),
@@ -112,8 +112,8 @@ module iob_fifo_async #(
    wire [R_ADDR_W:0] r_raddr_gray;
    wire [R_ADDR_W:0] w_raddr_gray;
    iob_sync #(
-       .DATA_W (R_ADDR_W + 1),
-       .RST_VAL({(R_ADDR_W + 1) {1'd0}})
+      .DATA_W (R_ADDR_W + 1),
+      .RST_VAL({(R_ADDR_W + 1) {1'd0}})
    ) r_raddr_gray_sync0 (
       .clk_i   (w_clk_i),
       .arst_i  (w_arst_i),
@@ -144,7 +144,7 @@ module iob_fifo_async #(
    //read address gray code counter
    wire r_en_int = (r_en_i & (~r_empty_o));
    iob_gray_counter #(
-       .W(R_ADDR_W + 1)
+      .W(R_ADDR_W + 1)
    ) r_raddr_gray_counter (
       .clk_i (r_clk_i),
       .arst_i(r_arst_i),
@@ -157,7 +157,7 @@ module iob_fifo_async #(
    //write address gray code counter
    wire w_en_int = (w_en_i & (~w_full_o));
    iob_gray_counter #(
-       .W(W_ADDR_W + 1)
+      .W(W_ADDR_W + 1)
    ) w_waddr_gray_counter (
       .clk_i (w_clk_i),
       .arst_i(w_arst_i),
@@ -169,7 +169,7 @@ module iob_fifo_async #(
 
    //convert gray read address to binary
    iob_gray2bin #(
-       .DATA_W(R_ADDR_W + 1)
+      .DATA_W(R_ADDR_W + 1)
    ) gray2bin_r_raddr (
       .gr_i (r_raddr_gray),
       .bin_o(r_raddr_bin)
@@ -177,7 +177,7 @@ module iob_fifo_async #(
 
    //convert synced gray write address to binary
    iob_gray2bin #(
-       .DATA_W(W_ADDR_W + 1)
+      .DATA_W(W_ADDR_W + 1)
    ) gray2bin_r_raddr_sync (
       .gr_i (r_waddr_gray),
       .bin_o(r_waddr_bin)
@@ -185,7 +185,7 @@ module iob_fifo_async #(
 
    //convert gray write address to binary
    iob_gray2bin #(
-       .DATA_W(W_ADDR_W + 1)
+      .DATA_W(W_ADDR_W + 1)
    ) gray2bin_w_waddr (
       .gr_i (w_waddr_gray),
       .bin_o(w_waddr_bin)
@@ -193,7 +193,7 @@ module iob_fifo_async #(
 
    //convert synced gray read address to binary
    iob_gray2bin #(
-       .DATA_W(R_ADDR_W + 1)
+      .DATA_W(R_ADDR_W + 1)
    ) gray2bin_w_raddr_sync (
       .gr_i (w_raddr_gray),
       .bin_o(w_raddr_bin)
@@ -210,9 +210,9 @@ module iob_fifo_async #(
 
    // FIFO memory
    iob_asym_converter #(
-       .W_DATA_W(W_DATA_W),
-       .R_DATA_W(R_DATA_W),
-       .ADDR_W  (ADDR_W)
+      .W_DATA_W(W_DATA_W),
+      .R_DATA_W(R_DATA_W),
+      .ADDR_W  (ADDR_W)
    ) iob_asym_converter0 (
       .clk_i (r_clk_i),
       .arst_i(r_arst_i),

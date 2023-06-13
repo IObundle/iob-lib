@@ -9,24 +9,32 @@ import blocks as blocks_lib
 from submodule_utils import import_setup, set_default_submodule_dirs
 import build_srcs
 import verilog_tools
-from string import Template
+import shutil
 
 import datetime
+
+# from iob_ctls import iob_ctls # The iob_ctls module imports this file and runs setup(), therefore, this file cannot import it (would cause an import loop).
+from iob_module import iob_module
 
 
 def getf(obj, name, field):
     return int(obj[next(i for i in range(len(obj)) if obj[i]["name"] == name)][field])
 
 
-# no_overlap: Optional argument. Selects if read/write addresses should not overlap
-def setup(python_module, no_overlap=False):
+# no_overlap: Optional argument. Selects if read/write register addresses should not overlap
+# disable_file_gen: Optional argument. Selects if files should be auto-generated.
+def setup(python_module, no_overlap=False, disable_file_gen=False):
     confs = python_module.confs
     ios = python_module.ios
     regs = python_module.regs
-    blocks = python_module.blocks
 
     top = python_module.name
     build_dir = python_module.build_dir
+
+    #
+    # Setup flows
+    #
+    build_srcs.flows_setup(python_module)
 
     # Auto-add 'VERSION' macro
     confs.append(
@@ -39,19 +47,6 @@ def setup(python_module, no_overlap=False):
             "descr": "Product version. This 16-bit macro uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234.",
         }
     )
-
-    # Check if should create build directory for this core/system
-    create_build_dir = is_top_module(python_module)
-
-    set_default_submodule_dirs(python_module)
-
-    #
-    # Build directory
-    #
-    if create_build_dir:
-        os.makedirs(build_dir, exist_ok=True)
-        mk_conf.config_build_mk(python_module, build_dir)
-        build_srcs.build_dir_setup(python_module)
 
     #
     # Build registers table
@@ -87,112 +82,66 @@ def setup(python_module, no_overlap=False):
         # Get register table
         reg_table = mkregs_obj.get_reg_table(regs, no_overlap)
 
-        # Make sure 'hw_setup' dictionary exists
-        if "hw_setup" not in python_module.submodules:
-            python_module.submodules["hw_setup"] = {"headers": [], "modules": []}
         # Auto-add iob_ctls module
-        python_module.submodules["hw_setup"]["modules"].append("iob_ctls")
-        # Auto-add iob_s_port.vs
-        python_module.submodules["hw_setup"]["headers"].append("iob_s_port")
-        # Auto-add iob_s_portmap.vs
-        python_module.submodules["hw_setup"]["headers"].append("iob_s_portmap")
+        # iob_ctls.setup()
+        ## Auto-add iob_s_port.vh
+        # iob_module.generate("iob_s_port")
+        ## Auto-add iob_s_portmap.vh
+        # iob_module.generate("iob_s_portmap")
 
-    #
-    # Generate hw
-    #
-    # Build hardware
-    build_srcs.hw_setup(python_module)
-    if regs:
-        mkregs_obj.write_hwheader(reg_table, build_dir + "/hardware/src", top)
-        mkregs_obj.write_lparam_header(
-            reg_table, build_dir + "/hardware/simulation/src", top
-        )
-        mkregs_obj.write_hwcode(reg_table, build_dir + "/hardware/src", top)
-    mk_conf.params_vh(confs, top, build_dir + "/hardware/src")
+    # Only auto-generate files if `disable_file_gen` is False
+    if not disable_file_gen:
+        #
+        # Generate hw
+        #
+        if regs:
+            mkregs_obj.write_hwheader(reg_table, build_dir + "/hardware/src", top)
+            mkregs_obj.write_lparam_header(
+                reg_table, build_dir + "/hardware/simulation/src", top
+            )
+            mkregs_obj.write_hwcode(reg_table, build_dir + "/hardware/src", top)
 
-    mk_conf.conf_vh(confs, top, build_dir + "/hardware/src")
+        mk_conf.params_vh(confs, top, build_dir + "/hardware/src")
 
-    ios_lib.generate_ios_header(ios, top, build_dir + "/hardware/src")
+        mk_conf.conf_vh(confs, top, build_dir + "/hardware/src")
+
+        ios_lib.generate_ios_header(ios, top, build_dir + "/hardware/src")
+
+        #
+        # Generate sw
+        #
+        if "emb" in python_module.flows:
+            if regs:
+                mkregs_obj.write_swheader(
+                    reg_table, python_module.build_dir + "/software/src", top
+                )
+                mkregs_obj.write_swcode(
+                    reg_table, python_module.build_dir + "/software/src", top
+                )
+                mkregs_obj.write_swheader(
+                    reg_table, python_module.build_dir + "/software/src", top
+                )
+            mk_conf.conf_h(confs, top, python_module.build_dir + "/software/src")
+
+        #
+        # Generate TeX
+        #
+        if python_module.is_top_module and "doc" in python_module.flows:
+            mk_conf.generate_confs_tex(
+                confs, python_module.build_dir + "/document/tsrc"
+            )
+            ios_lib.generate_ios_tex(ios, python_module.build_dir + "/document/tsrc")
+            if regs:
+                mkregs_obj.generate_regs_tex(
+                    regs, reg_table, build_dir + "/document/tsrc"
+                )
+            blocks_lib.generate_blocks_tex(
+                python_module.block_groups, build_dir + "/document/tsrc"
+            )
 
     # Replace Verilog includes by Verilog header file contents
-    if create_build_dir:
+    if python_module.is_top_module:
         verilog_tools.replace_includes(python_module.setup_dir, build_dir)
-
-    #
-    # Generate sw
-    #
-    if os.path.isdir(python_module.build_dir + "/software"):
-        if regs:
-            mkregs_obj.write_swheader(
-                reg_table, python_module.build_dir + "/software/src", top
-            )
-            mkregs_obj.write_swcode(
-                reg_table, python_module.build_dir + "/software/src", top
-            )
-            mkregs_obj.write_swheader(
-                reg_table, python_module.build_dir + "/software/src", top
-            )
-        mk_conf.conf_h(confs, top, python_module.build_dir + "/software/src")
-
-    #
-    # Generate TeX
-    #
-    # Only generate TeX of this core if creating build directory for it
-    if os.path.isdir(python_module.build_dir + "/document/tsrc") and create_build_dir:
-        mk_conf.generate_confs_tex(confs, python_module.build_dir + "/document/tsrc")
-        ios_lib.generate_ios_tex(ios, python_module.build_dir + "/document/tsrc")
-        if regs:
-            mkregs_obj.generate_regs_tex(regs, reg_table, build_dir + "/document/tsrc")
-        blocks_lib.generate_blocks_tex(blocks, build_dir + "/document/tsrc")
-
-
-# Check if the given python_module is the top module (return true) or is a submodule (return false)
-# The check is based on the presence of the 'not_top_module' variable, set by the build_srcs.py script
-def is_top_module(python_module):
-    if "not_top_module" in vars(python_module) and python_module.not_top_module:
-        return False
-    else:
-        return True
-
-
-# Print build directory of the core/system in the current directory (extracted from *_setup.py)
-def get_build_dir():
-    module = import_setup(".")
-    print(module.build_dir)
-
-
-def get_core_name():
-    module = import_setup(".")
-    print(module.name)
-
-
-def get_version_str():
-    module = import_setup(".")
-    print(module.version)
-
-
-def version_from_str(version_str):
-    major, minor = version_str.replace("V", "").split(".")
-    version_str = f"{int(major):02d}{int(minor):02d}"
-    return version_str
-
-
-def get_version():
-    module = import_setup(".")
-    print(version_from_str(module.version))
-
-
-def get_previous_version():
-    module = import_setup(".")
-    print(version_from_str(module.previous_version))
-
-
-# Return white-space separated list of submodules directories of the core/system in the current directory (extracted from *_setup.py)
-def get_core_submodules_dirs():
-    module = import_setup(".")
-    set_default_submodule_dirs(module)
-    for key, value in module.submodules["dirs"].items():
-        print(f"{key}_DIR={value}", end=" ")
 
 
 # Insert header in source files
@@ -204,7 +153,7 @@ def insert_header():
     # <comment> is the comment character to be used
     # <file1> <file2> <file3> ... are the files to be processed
 
-    YEAR = datetime.datetime.today().year
+    x = datetime.datetime.now()
 
     module = import_setup(".")
 
@@ -221,10 +170,7 @@ def insert_header():
         content = f.read()
         f.seek(0, 0)
         for line in header:
-            substitute_line = Template(line).substitute(
-                YEAR=YEAR, NAME=NAME, VERSION=VERSION
-            )
-            f.write(sys.argv[3] + "  " + f"{substitute_line}")
+            f.write(sys.argv[3] + "  " + f"{line}")
         f.write("\n\n\n" + content)
 
 

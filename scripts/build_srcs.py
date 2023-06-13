@@ -16,41 +16,34 @@ import mk_configuration as mk_conf
 LIB_DIR = "submodules/LIB"
 
 
-# Copy a file if destination does not exist
-def copy_without_override(src, dst):
-    if not os.path.isfile(dst):
-        shutil.copy2(src, dst)
-
-
-# build_dir_setup should only be called by the main core. Therefore, executed only one time.
-def build_dir_setup(python_module):
-    build_dir = python_module.build_dir
-    setup_dir = python_module.setup_dir
+# This function sets up the flows for this core
+def flows_setup(python_module):
     core_flows = python_module.flows
-    # Setup HARDWARE directories :
-    os.makedirs(f"{build_dir}/hardware/src", exist_ok=True)
 
     # Setup simulation
-    sim_setup(python_module)
+    if "sim" in core_flows:
+        sim_setup(python_module)
 
     # Setup fpga
-    fpga_setup(python_module)
+    if "fpga" in core_flows:
+        fpga_setup(python_module)
+
+    # Setup harware
+    hw_setup(python_module)
 
     if "lint" in core_flows:
         lint_setup(python_module)
+
     if "syn" in core_flows:
         syn_setup(python_module)
 
     # Setup software
-    sw_setup(python_module)
+    if "emb" in core_flows:
+        sw_setup(python_module)
 
-    # Setup DOC directories :
-    if "doc" in core_flows:
+    # Setup documentation if it is top module
+    if "doc" in core_flows and python_module.is_top_module:
         doc_setup(python_module)
-    # Setup DELIVERY directories :
-    # (WIP)
-    # Copy generic MAKEFILE
-    shutil.copyfile(f"{LIB_DIR}/build.mk", f"{build_dir}/Makefile")
 
 
 def hw_setup(python_module):
@@ -63,60 +56,14 @@ def hw_setup(python_module):
     build_dir = python_module.build_dir
     setup_dir = python_module.setup_dir
 
-    # Make sure 'hw_setup' dictionary exists
-    if "hw_setup" not in python_module.submodules:
-        python_module.submodules["hw_setup"] = {"headers": [], "modules": []}
-
-    core_hw_setup = python_module.submodules["hw_setup"]
-    # This list may contain .vh and .vs files or strings or tuples describing interfaces to be generated with_if_gen.py
-    VIncludes = core_hw_setup["headers"]
-    # This list may contain .v files, LIB python_modules, or functions to be called.
-    hardware_srcs = core_hw_setup["modules"]
-
-    set_default_submodule_dirs(
-        python_module
-    )  # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
-    submodule_dirs = python_module.submodules["dirs"]
-
-    # create module's *_version.vh Verilog Header
-    version_file(core_name, core_version, core_previous_version, build_dir)
-
-    # Copy Setup hw files (all .v and .sdc files under LIB/hardware/src)
-    copy_files(
-        f"{setup_dir}/hardware/src",
-        f"{build_dir}/hardware/src",
-        [],
-        "*.v*",
-        copy_all=True,
+    # create module's version TeX file. Also create *_version.vh Verilog Header if we do not have regs.
+    version_file(
+        core_name,
+        core_version,
+        core_previous_version,
+        build_dir,
+        create_version_header=False if python_module.regs else True,
     )
-    copy_files(
-        f"{setup_dir}/hardware/src",
-        f"{build_dir}/hardware/src",
-        [],
-        "*.sdc*",
-        copy_all=True,
-    )
-
-    # Setup any hw submodules by calling the 'main()' function from their *_setup.py module
-    module_dependency_setup(
-        hardware_srcs, VIncludes, build_dir, submodule_dirs, lib_dir=LIB_DIR
-    )
-
-    # Create if_gen interfaces and copy every .vh and .vs file from LIB in the VIncludes list.
-    if VIncludes:
-        create_if_gen_headers(f"{build_dir}/hardware/src", VIncludes)
-        copy_files(LIB_DIR, f"{build_dir}/hardware/src", VIncludes, "*.vh")
-        copy_files(LIB_DIR, f"{build_dir}/hardware/src", VIncludes, "*.vs")
-
-    if hardware_srcs:
-        # Copy every .v file from LIB that is in the hw_srcs list
-        copy_files(LIB_DIR, f"{build_dir}/hardware/src", hardware_srcs, "*.v*")
-        # Remove duplicate files for fpga/src and simulation/src dir if they already exist in hardware/src
-        for file in hardware_srcs:
-            if os.path.isfile(f"{build_dir}/hardware/simulation/src/{file}"):
-                os.remove(f"{build_dir}/hardware/simulation/src/{file}")
-            if os.path.isfile(f"{build_dir}/hardware/fpga/src/{file}"):
-                os.remove(f"{build_dir}/hardware/fpga/src/{file}")
 
 
 # Setup simulation related files/modules
@@ -126,53 +73,10 @@ def sim_setup(python_module):
     build_dir = python_module.build_dir
     setup_dir = python_module.setup_dir
 
-    # Make sure 'sim_setup' dictionary exists
-    if "sim_setup" not in python_module.submodules:
-        python_module.submodules["sim_setup"] = {"headers": [], "modules": []}
-
-    sim_setup = python_module.submodules["sim_setup"]
-    VIncludes = sim_setup["headers"]
-    sim_srcs = sim_setup["modules"]
-
-    set_default_submodule_dirs(
-        python_module
-    )  # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
-    submodule_dirs = python_module.submodules["dirs"]
     sim_dir = "hardware/simulation"
 
-    # append this core hw flows to config_build
-    if "sim" not in core_flows:
-        mk_conf.append_flows_config_build_mk(core_flows, ["sim"], build_dir)
-
-    if "sim" in core_flows:
-        shutil.copytree(
-            f"{setup_dir}/{sim_dir}",
-            f"{build_dir}/{sim_dir}",
-            dirs_exist_ok=True,
-            copy_function=copy_without_override,
-            ignore=shutil.ignore_patterns("*_setup*"),
-        )
-
-    # Add functions to the sim_srcs. These functions call setup modules for simulation setup (sim_setup.py)
-    add_setup_functions(python_module, "sim_setup", setup_module=python_module)
-    # Setup any sim submodules by calling the 'sim_setup()' function from their *_setup.py module
-    module_dependency_setup(
-        sim_srcs,
-        VIncludes,
-        build_dir,
-        submodule_dirs,
-        function_2_call="setup.build_srcs.sim_setup",
-        lib_dir=LIB_DIR,
-    )
-
-    # Create if_gen interfaces and copy every .vh and .vs file from LIB in the VIncludes list.
-    if VIncludes:
-        create_if_gen_headers(f"{build_dir}/{sim_dir}/src", VIncludes)
-        copy_files(LIB_DIR, f"{build_dir}/{sim_dir}/src", VIncludes, "*.vh")
-        copy_files(LIB_DIR, f"{build_dir}/{sim_dir}/src", VIncludes, "*.vs")
-    # Copy every .v file from LIB that is in the sim_srcs list
-    if sim_srcs:
-        copy_files(LIB_DIR, f"{build_dir}/{sim_dir}/src", sim_srcs, "*.v*")
+    # Run sim_setup.py
+    run_setup_functions(python_module, "sim_setup", setup_module=python_module)
 
     # Copy LIB sim files
     if "sim" in core_flows:
@@ -180,7 +84,6 @@ def sim_setup(python_module):
             f"{LIB_DIR}/{sim_dir}",
             f"{build_dir}/{sim_dir}",
             dirs_exist_ok=True,
-            copy_function=copy_without_override,
             ignore=shutil.ignore_patterns("*.pdf"),
         )
 
@@ -191,52 +94,13 @@ def fpga_setup(python_module):
     build_dir = python_module.build_dir
     setup_dir = python_module.setup_dir
 
-    # Make sure 'fpga_setup' dictionary exists
-    if "fpga_setup" not in python_module.submodules:
-        python_module.submodules["fpga_setup"] = {"headers": [], "modules": []}
-
-    fpga_setup = python_module.submodules["fpga_setup"]
-    VIncludes = fpga_setup["headers"]
-    fpga_srcs = fpga_setup["modules"]
-
-    set_default_submodule_dirs(
-        python_module
-    )  # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
-    submodule_dirs = python_module.submodules["dirs"]
     fpga_dir = "hardware/fpga"
 
     # append this core hw flows to config_build
     mk_conf.append_flows_config_build_mk(core_flows, ["fpga"], build_dir)
 
-    if "fpga" in core_flows:
-        shutil.copytree(
-            f"{setup_dir}/{fpga_dir}",
-            f"{build_dir}/{fpga_dir}",
-            dirs_exist_ok=True,
-            copy_function=copy_without_override,
-            ignore=shutil.ignore_patterns("*_setup*"),
-        )
-
-    # Add functions to the fpga_srcs. These functions call setup modules for fpga setup (fpga_setup.py)
-    add_setup_functions(python_module, "fpga_setup", setup_module=python_module)
-    # Setup any fpga submodules by calling the 'fpga_setup()' function from their *_setup.py module
-    module_dependency_setup(
-        fpga_srcs,
-        VIncludes,
-        build_dir,
-        submodule_dirs,
-        function_2_call="setup.build_srcs.fpga_setup",
-        lib_dir=LIB_DIR,
-    )
-
-    # Create if_gen interfaces and copy every .vh and .vs file from LIB in the VIncludes list.
-    if VIncludes:
-        create_if_gen_headers(f"{build_dir}/{fpga_dir}/src", VIncludes)
-        copy_files(LIB_DIR, f"{build_dir}/{fpga_dir}/src", VIncludes, "*.vh")
-        copy_files(LIB_DIR, f"{build_dir}/{fpga_dir}/src", VIncludes, "*.vs")
-    # Copy every .v file from LIB that is in the fpga_srcs list
-    if fpga_srcs:
-        copy_files(LIB_DIR, f"{build_dir}/{fpga_dir}/src", fpga_srcs, "*.v*")
+    # Run fpga_setup.py
+    run_setup_functions(python_module, "fpga_setup", setup_module=python_module)
 
     # Copy LIB fpga files
     if "fpga" in core_flows:
@@ -244,7 +108,6 @@ def fpga_setup(python_module):
             f"{LIB_DIR}/{fpga_dir}",
             f"{build_dir}/{fpga_dir}",
             dirs_exist_ok=True,
-            copy_function=copy_without_override,
             ignore=shutil.ignore_patterns("*.pdf"),
         )
 
@@ -265,10 +128,6 @@ def lint_setup(python_module):
             for line in lines:
                 sources.write(re.sub(r"IOB_CORE_NAME", core_name, line))
 
-    copy_files(
-        f"{setup_dir}/{lint_dir}", f"{build_dir}/{lint_dir}", [], "*", copy_all=True
-    )
-
 
 # synthesis
 def syn_setup(python_module):
@@ -276,7 +135,6 @@ def syn_setup(python_module):
     setup_dir = python_module.setup_dir
     syn_dir = "hardware/syn"
 
-    shutil.copytree(f"{setup_dir}/{syn_dir}", f"{build_dir}/{syn_dir}")
     for file in Path(f"{LIB_DIR}/{syn_dir}").rglob("*"):
         src_file = file.as_posix()
         dest_file = re.sub(LIB_DIR, build_dir, src_file)
@@ -286,27 +144,22 @@ def syn_setup(python_module):
 
 
 # Check if any *_setup.py modules exist (like sim_setup.py, fpga_setup.py, ...).
-# If so, get a function to execute them and add them to the 'modules' list of the 'submodules' variable in the 'python_module'
+# If so, get a function to execute them and run them
 # This will allow these modules to be executed during setup
 #    python_module: python module of *_setup.py of the core/system, should contain setup_dir
 #    **kwargs: set of objects that will be accessible from inside the modules when they are executed
-def add_setup_functions(python_module, module_type, **kwargs):
+def run_setup_functions(python_module, module_type, **kwargs):
     # Check if any *_setup.py modules exist. If so, get a function to execute them and add them to the 'modules' list
     module_path = {
         "sim_setup": "hardware/simulation/sim_setup.py",
         "fpga_setup": "hardware/fpga/fpga_setup.py",
         "sw_setup": "software/sw_setup.py",
+        "doc_setup": "document/doc_setup.py",
     }[module_type]
     full_module_path = os.path.join(python_module.setup_dir, module_path)
     if os.path.isfile(full_module_path):
-        # Make sure dictionary exists
-        if module_type not in python_module.submodules:
-            python_module.submodules[module_type] = {"headers": [], "modules": []}
-        # Append executable module to 'modules' list of the submodules dictionary
-        # The fuctions will be executed during setup
-        python_module.submodules[module_type]["modules"].append(
-            get_module_function(full_module_path, **kwargs)
-        )
+        # Get and run function of this file
+        get_module_function(full_module_path, **kwargs)()
 
 
 # Get an executable function to run a given python module
@@ -336,57 +189,14 @@ def sw_setup(python_module):
     build_dir = python_module.build_dir
     setup_dir = python_module.setup_dir
 
-    # Make sure 'sw_setup' dictionary exists
-    if "sw_setup" not in python_module.submodules:
-        python_module.submodules["sw_setup"] = {"headers": [], "modules": []}
-
-    sw_setup = python_module.submodules["sw_setup"]
-    # This can only contain .h files
-    sw_headers = sw_setup["headers"]
-    # This list may contain .c files, LIB python_modules, or functions to be called.
-    sw_srcs = sw_setup["modules"]
-
-    set_default_submodule_dirs(
-        python_module
-    )  # Make sure that dictionary submodules dirs exists (set default directory for non existing ones)
-    submodule_dirs = python_module.submodules["dirs"]
-
     # append this core hw flows to config_build
     if "emb" not in core_flows:
         mk_conf.append_flows_config_build_mk(core_flows, ["emb"], build_dir)
     if "pc-emul" not in core_flows:
         mk_conf.append_flows_config_build_mk(core_flows, ["pc-emul"], build_dir)
 
-    # Copy software tree if it exists as this core may contain software sources to be used by others
-    if os.path.isdir(f"{setup_dir}/software"):
-        shutil.copytree(
-            f"{setup_dir}/software",
-            f"{build_dir}/software",
-            dirs_exist_ok=True,
-            copy_function=copy_without_override,
-            ignore=shutil.ignore_patterns("*_setup*"),
-        )
-
-    # Add functions to the sw_srcs. These functions call setup modules for software setup (sw_setup.py)
-    add_setup_functions(python_module, "sw_setup", setup_module=python_module)
-    # Setup any sw submodules by calling the 'sw_setup()' function from their *_setup.py module
-    module_dependency_setup(
-        sw_srcs,
-        sw_headers,
-        build_dir,
-        submodule_dirs,
-        function_2_call="setup.build_srcs.sw_setup",
-        lib_dir=LIB_DIR,
-    )
-
-    # Copy every .h file of the sw_headers list from LIB
-    if sw_headers:
-        copy_files(
-            LIB_DIR + "/software", f"{build_dir}/software/src", sw_headers, "*.h"
-        )
-    # Copy every .c file of the sw_srcs list from LIB
-    if sw_srcs:
-        copy_files(LIB_DIR + "/software", f"{build_dir}/software/src", sw_srcs, "*.c")
+    # Run sw_setup.py
+    run_setup_functions(python_module, "sw_setup", setup_module=python_module)
 
     if "emb" in core_flows or "pc-emul" in core_flows:
         # Copy LIB software Makefile
@@ -417,19 +227,17 @@ def doc_setup(python_module):
     build_dir = python_module.build_dir
     setup_dir = python_module.setup_dir
 
-    # For cores that have their own documentation
-    if "doc" in core_flows:
-        shutil.copytree(f"{setup_dir}/document", f"{build_dir}/document")
-
     # Copy LIB tex files if not present
+    os.makedirs(f"{build_dir}/document/tsrc", exist_ok=True)
     for file in os.listdir(f"{LIB_DIR}/document/tsrc"):
-        copy_without_override(
+        shutil.copy2(
             f"{LIB_DIR}/document/tsrc/{file}", f"{build_dir}/document/tsrc/{file}"
         )
 
     # Copy LIB figures
+    os.makedirs(f"{build_dir}/document/figures", exist_ok=True)
     for file in os.listdir(f"{LIB_DIR}/document/figures"):
-        copy_without_override(
+        shutil.copy2(
             f"{LIB_DIR}/document/figures/{file}", f"{build_dir}/document/figures/{file}"
         )
 
@@ -440,21 +248,7 @@ def doc_setup(python_module):
     write_git_revision_short_hash(f"{build_dir}/document/tsrc")
 
     # Run doc_setup.py
-    get_module_function(
-        os.path.join(python_module.setup_dir, "document/doc_setup.py"),
-        setup_module=python_module,
-    )()
-
-    # Future improvement: Add doc_setup.py to a doc_setup list, similar to the other processes (sim_setup, hw_setup, ...)
-    # add_setup_functions(python_module, "doc_setup", setup_module=python_module)
-    # module_dependency_setup(
-    #    doc_srcs,
-    #    VIncludes,
-    #    build_dir,
-    #    submodule_dirs,
-    #    function_2_call="setup.build_srcs.doc_setup",
-    #    lib_dir=LIB_DIR,
-    # )
+    run_setup_functions(python_module, "doc_setup", setup_module=python_module)
 
 
 def write_git_revision_short_hash(dst_dir):
@@ -471,131 +265,79 @@ def write_git_revision_short_hash(dst_dir):
     file.write(text)
 
 
-# Setup a submodule in a given build directory
-# build_dir: path to build directory
-# submodule_dir: root directory of submodule to run setup function
-# module_parameters: optional argument. Allows passing an optional object with parameters to a hardware module (object is passed to the *_setup.py module).
-# function_2_call: optional argument. Name of the function to call for module setup. By default is the 'main' function.
-def submodule_setup(
-    build_dir, submodule_dir, module_parameters=None, function_2_call="main"
-):
-    # Check if submodule has *_setup.py file
-    for fname in os.listdir("."):
-        if fname.endswith("_setup.py"):
-            iob_submodule_setup(
-                build_dir,
-                submodule_dir,
-                module_parameters=module_parameters,
-                function_2_call=function_2_call,
-            )
-            return
+# Setup python submodules recursively (the deeper ones in the tree are setup first)
+# python_module: python module of *_setup.py of the core/system, should contain setup_dir
+def setup_submodules(python_module):
+    modules_dictionary = {}
 
-    # Did not find *_setup.py file, copy sources only
-    shutil.copytree(f"{submodule_dir}/hardware/src", f"{build_dir}/hardware/src")
+    set_default_submodule_dirs(python_module)
+    submodule_dirs = python_module.submodules["dirs"]
 
+    for setup_type in python_module.submodules:
+        # Skip non "*_setup" dictionaies
+        if not setup_type.endswith("_setup"):
+            continue
 
-# Setup a submodule in a given build directory using its *_setup.py file
-# build_dir: destination build directory
-# submodule_dir: root directory of submodule to run setup function
-# module_parameters: optional argument. Allows passing an optional object with parameters to a hardware module.
-# function_2_call: optional argument. Name of the function to call for module setup. By default is the 'main' function. If the function accepts the 'module' argument, then it will be passed.
-def iob_submodule_setup(
-    build_dir, submodule_dir, module_parameters=None, function_2_call="main"
-):
-    # print(f"################# {function_2_call}") #DEBUG
-    # Import <corename>_setup.py
-    # Always set he 'not_top_module' to True, in order to signal that the module was imported
-    # Always set a build_dir and submodule_dir by default
-    module = import_setup(
-        submodule_dir,
-        not_top_module=True,
-        build_dir=build_dir,
-        setup_dir=submodule_dir,
-        module_parameters=module_parameters,
-    )
-    # Split string to check if function is inside a module
-    function_2_call = function_2_call.split(".")
-    # Check if function is inside other module(s)
-    module_with_function = module
-    for i in function_2_call[:-1]:
-        # print(f"######## {vars(module_with_function)}") #DEBUG
-        module_with_function = vars(module_with_function)[i]
-    function_2_call = vars(module_with_function)[function_2_call[-1]]
-    # Call setup function specified in function_2_call. Pass 'module' as argument if possible.
-    if "python_module" in inspect.signature(function_2_call).parameters.keys():
-        function_2_call(python_module=module)
-    else:
-        function_2_call()
+        # Iterate through every module in list
+        idx = 0
+        while idx < len(python_module.submodules[setup_type]["modules"]):
+            item = python_module.submodules[setup_type]["modules"][idx]
+            idx += 1
 
-
-# hardware_srcs: list that may contain 4 types of entries:
-#                   - function: This entry defines a function to call.
-#                   - submodule: This entry defines a submodule to include (may contain *_setup.py or just a set of sources). Can be a tuple, where the first item is the submodule, the second item is a dictionary with module parameters.
-#                   - python include: This entry defines a python module that contains a list of other hardware modules/headers.
-#                   - verilog source:  This entry defines either a C source (.c) or verilog source (.c) file to include.
-# function_2_call: optional argument. Name of the function to call for module setup. By default is the 'main' function.
-def module_dependency_setup(
-    srcs, headers, build_dir, submodule_dirs, function_2_call="main", lib_dir=LIB_DIR
-):
-    # Remove all non *.v, *.vs and *.vh entries from srcs
-    # Do this by setting up submodules and including modules
-    while True:
-        # Handle each entry, skipping .v, .vs and .vh entries
-        for idx, src in enumerate(srcs):
-            # print(f"############ {src} {function_2_call}") # DEBUG
-            # Entry is a tuple, therefore it contains optional parameters
-            if type(src) == tuple:
+            # If item is a tuple then it contains optional parameters
+            if type(item) == tuple:
                 # Save optional_parameters in a variable
-                optional_parameters = src[1]
-                # Convert src to a string
-                src = src[0]
+                optional_parameters = item[1]
+                # Convert item to a string
+                item = item[0]
             else:
                 optional_parameters = None
 
-            # Entry is a function
-            if callable(src):
-                src()
-                srcs.pop(idx)
-                break
-            # Entry is a 'submodule'
-            elif src in submodule_dirs:
-                submodule_setup(
-                    build_dir,
-                    submodule_dirs[src],
-                    function_2_call=function_2_call,
-                    module_parameters=optional_parameters,
-                )
-                srcs.pop(idx)
-                break
-            # Entry is a 'python include' (software)
-            elif "sw_setup" in function_2_call:
-                if not src.endswith(".c"):
-                    lib_module_setup(
-                        headers,
-                        srcs,
-                        src,
-                        lib_dir,
-                        module_parameters=optional_parameters,
-                        module_extension=".c",
-                    )
-                    srcs.pop(idx)
+            # Skip non 'submodule' items
+            if item not in submodule_dirs:
+                continue
+
+            # Only allow submodule sin hw_setup list. (The other processes will be handled by the setup function of the module).
+            # Note: Maybe we should create a dedicated list to import submodules? This way it won't be as confusing as to why only the 'hw_setup' list is used for submodules.
+            #       The outer for loop of this function, only exists to execute this asser and warn the user if he is not using hw_setup. Otherwise we could just use the 'hw_setup' list.
+            assert (
+                setup_type == "hw_setup"
+            ), f"{iob_colors.FAIL}Only 'hw_setup' list can contain submodules. Please remove '{item}' from '{setup_type}' list.{iob_colors.ENDC}"
+
+            # Only import if the item has a _setup.py file
+            for fname in os.listdir(submodule_dirs[item]):
+                if fname.endswith("_setup.py"):
                     break
-            # Entry is a 'python include' (hardware)
-            elif not src.endswith(".v"):
-                lib_module_setup(
-                    headers,
-                    srcs,
-                    src,
-                    lib_dir,
-                    add_sim_srcs=True if "sim_setup" in function_2_call else False,
-                    add_fpga_srcs=True if "fpga_setup" in function_2_call else False,
-                    module_parameters=optional_parameters,
-                )
-                srcs.pop(idx)
-                break
-        # Did not find any non .v or .c entry
-        else:
-            break
+            else:
+                continue
+
+            # Import module
+            module = import_setup(
+                submodule_dirs[item],
+                not_top_module=True,
+                build_dir=python_module.build_dir,
+                setup_dir=submodule_dirs[item],
+                module_parameters=optional_parameters,
+            )
+
+            # Setup submodules from this imported module
+            setup_submodules(module)
+
+            # Call main function to setup this module
+            module.main()
+
+            # Remove this module
+            idx -= 1
+            del python_module.submodules[setup_type]["modules"][idx]
+
+
+# Setup submodules in modules_dictionary
+def submodule_setup(python_module):
+    modules_dictionary = python_module.modules_dictionary
+
+    # Setup submodules by the order they appear in modules_dictionary
+    for module in modules_dictionary:
+        module.main()
 
 
 # Include headers and srcs from given python module (module_name)
@@ -691,15 +433,13 @@ def copy_files(src_dir, dest_dir, sources=[], pattern="*", copy_all=False):
     return files_copied
 
 
-# Create verilog snippets for the interfaces in VIncludes list, using if_gen.py
-# This function will remove all if_gen entries from the VIncludes list. It will leave the .vs files in that list.
-def create_if_gen_headers(dest_dir, VIncludes):
+# Create verilog headers for the interfaces in Vheaders list, using if_gen.py
+# This function will remove all if_gen entries from the Vheaders list. It will leave the .vh files in that list.
+def create_if_gen_headers(dest_dir, Vheaders):
     non_if_gen_interfaces = []
-    for vh_name in VIncludes:
-        if type(vh_name) == str and (
-            vh_name.endswith(".vs") or vh_name.endswith(".vh")
-        ):
-            # Save this entry as a .vs file.
+    for vh_name in Vheaders:
+        if type(vh_name) == str and vh_name.endswith(".vh"):
+            # Save this entry as a .vh file.
             non_if_gen_interfaces.append(vh_name)
             continue  # Skip if_gen for this entry
         elif (type(vh_name) is str) and (vh_name in if_gen.interfaces):
@@ -707,12 +447,12 @@ def create_if_gen_headers(dest_dir, VIncludes):
                 file_prefix = ""
             else:
                 file_prefix = "iob_"
-            f_out = open(f"{dest_dir}/{file_prefix}{vh_name}.vs", "w")
+            f_out = open(f"{dest_dir}/{file_prefix}{vh_name}.vh", "w")
             if_gen.create_signal_table(vh_name)
             if_gen.write_vh_contents(vh_name, "", "", f_out)
         elif (type(vh_name) is dict) and (vh_name["interface"] in if_gen.interfaces):
             f_out = open(
-                f"{dest_dir}/{vh_name['file_prefix']}{vh_name['interface']}.vs", "w"
+                f"{dest_dir}/{vh_name['file_prefix']}{vh_name['interface']}.vh", "w"
             )
             if_gen.create_signal_table(vh_name["interface"])
             if_gen.write_vh_contents(
@@ -727,11 +467,18 @@ def create_if_gen_headers(dest_dir, VIncludes):
             sys.exit(
                 f"{iob_colors.FAIL} {vh_name} is not an available header.{iob_colors.ENDC}"
             )
-    # Save the list of non if_gen interfaces (will only contain .vs files)
-    VIncludes = non_if_gen_interfaces
+    # Save the list of non if_gen interfaces (will only contain .vh files)
+    Vheaders = non_if_gen_interfaces
 
 
-def version_file(core_name, core_version, core_previous_version, build_dir):
+# Create TeX and optionally Verilog header files with the version of the system
+def version_file(
+    core_name,
+    core_version,
+    core_previous_version,
+    build_dir,
+    create_version_header=True,
+):
     tex_dir = f"{build_dir}/document/tsrc"
     verilog_dir = f"{build_dir}/hardware/src"
 
@@ -742,6 +489,9 @@ def version_file(core_name, core_version, core_previous_version, build_dir):
         tex_file = f"{tex_dir}/{core_name}_previous_version.tex"
         with open(tex_file, "w") as tex_f:
             tex_f.write(core_previous_version)
+
+    if not create_version_header:
+        return
 
     vh_file = f"{verilog_dir}/{core_name}_version.vh"
     vh_version_string = "0"

@@ -1,5 +1,7 @@
 `timescale 1ns / 1ps
 
+`include "iob_utils.vh"
+
 /* TODO: re-implement these tests 
 -       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
 -       $(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
@@ -184,8 +186,8 @@ module iob_fifo_async_tb;
    generate
       for (p = 0; p < R; p = p + 1) begin
          iob_ram_t2p #(
-             .DATA_W(MINDATA_W),
-             .ADDR_W(MINADDR_W)
+            .DATA_W(MINDATA_W),
+            .ADDR_W(MINADDR_W)
          ) iob_ram_t2p (
             .w_clk_i (ext_mem_w_clk),
             .w_en_i  (ext_mem_w_en[p]),
@@ -202,9 +204,9 @@ module iob_fifo_async_tb;
 
    // Instantiate the Unit Under Test (UUT)
    iob_fifo_async #(
-       .W_DATA_W(W_DATA_W),
-       .R_DATA_W(R_DATA_W),
-       .ADDR_W  (ADDR_W)
+      .W_DATA_W(W_DATA_W),
+      .R_DATA_W(R_DATA_W),
+      .ADDR_W  (ADDR_W)
    ) uut (
       //memory write port
       .ext_mem_w_clk_o (ext_mem_w_clk),

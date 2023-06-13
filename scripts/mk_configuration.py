@@ -81,11 +81,11 @@ def conf_h(macros, top_module, out_dir):
     file2create.close()
 
 
-def config_build_mk(python_module, build_dir):
-    file2create = open(f"{build_dir}/config_build.mk", "w")
+def config_build_mk(python_module):
+    file2create = open(f"{python_module.build_dir}/config_build.mk", "w")
     file2create.write(f"NAME={python_module.name}\n")
     file2create.write(f"VERSION={python_module.version}\n")
-    file2create.write(f"BUILD_DIR_NAME={build_dir.split('/')[-1]}\n")
+    file2create.write(f"BUILD_DIR_NAME={python_module.build_dir.split('/')[-1]}\n")
     file2create.write(f"FLOWS={python_module.flows}\n\n")
 
     file2create.close()

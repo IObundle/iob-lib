@@ -1,19 +1,19 @@
 `timescale 1 ns / 1 ps
 
 module iob_rom_tdp #(
-    parameter HEXFILE = "none",
-    parameter DATA_W  = 32,
-    parameter ADDR_W  = 11
+   parameter HEXFILE = "none",
+   parameter DATA_W  = 32,
+   parameter ADDR_W  = 11
 ) (
-    input                     clk_a_i,
-    input      [(ADDR_W-1):0] addr_a_i,
-    input                     r_en_a_i,
-    output reg [(DATA_W-1):0] r_data_a_o,
+   input                     clk_a_i,
+   input      [(ADDR_W-1):0] addr_a_i,
+   input                     r_en_a_i,
+   output reg [(DATA_W-1):0] r_data_a_o,
 
-    input                     clk_b_i,
-    input      [(ADDR_W-1):0] addr_b_i,
-    input                     r_en_b_i,
-    output reg [(DATA_W-1):0] r_data_b_o
+   input                     clk_b_i,
+   input      [(ADDR_W-1):0] addr_b_i,
+   input                     r_en_b_i,
+   output reg [(DATA_W-1):0] r_data_b_o
 );
 
    //this allows ISE 14.7 to work; do not remove

@@ -2,21 +2,21 @@
 
 
 module iob_split #(
-    parameter DATA_W   = 32,
-    parameter ADDR_W   = 32,
-    parameter N_SLAVES = 2,          //number of slaves
-    parameter P_SLAVES = `REQ_W - 2  //slave select word msb position
+   parameter DATA_W   = 32,
+   parameter ADDR_W   = 32,
+   parameter N_SLAVES = 2,          //number of slaves
+   parameter P_SLAVES = `REQ_W - 2  //slave select word msb position
 ) (
-    input clk_i,
-    input arst_i,
+   input clk_i,
+   input arst_i,
 
-    //masters interface
-    input      [ `REQ_W-1:0] m_req_i,
-    output reg [`RESP_W-1:0] m_resp_o,
+   //masters interface
+   input      [ `REQ_W-1:0] m_req_i,
+   output reg [`RESP_W-1:0] m_resp_o,
 
-    //slave interface
-    output reg [ N_SLAVES*`REQ_W-1:0] s_req_o,
-    input      [N_SLAVES*`RESP_W-1:0] s_resp_i
+   //slave interface
+   output reg [ N_SLAVES*`REQ_W-1:0] s_req_o,
+   input      [N_SLAVES*`RESP_W-1:0] s_resp_i
 );
 
    localparam Nb = $clog2(N_SLAVES) + ($clog2(N_SLAVES) == 0);

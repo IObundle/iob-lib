@@ -84,8 +84,8 @@ module iob_rom_tdp_tb;
 
    // Instantiate the Unit Under Test (UUT)
    iob_rom_tdp #(
-       .DATA_W(`DATA_W),
-       .ADDR_W(`ADDR_W)
+      .DATA_W(`DATA_W),
+      .ADDR_W(`ADDR_W)
    ) uut (
       .clk_a_i   (clk_a),
       .r_en_a_i  (r_en_a),

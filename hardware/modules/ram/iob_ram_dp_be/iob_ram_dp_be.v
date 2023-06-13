@@ -4,26 +4,26 @@
 `timescale 1 ns / 1 ps
 
 module iob_ram_dp_be #(
-    parameter HEXFILE              = "none",
-    parameter ADDR_W               = 10,      // Addr Width in bits : 2*ADDR_W = RAM Depth
-    parameter DATA_W               = 32,      // Data Width in bits
-    parameter MEM_NO_READ_ON_WRITE = 0        //no simultaneous read/write
+   parameter HEXFILE              = "none",
+   parameter ADDR_W               = 10,      // Addr Width in bits : 2*ADDR_W = RAM Depth
+   parameter DATA_W               = 32,      // Data Width in bits
+   parameter MEM_NO_READ_ON_WRITE = 0        //no simultaneous read/write
 ) (
-    input clk_i,
+   input clk_i,
 
-    // Port A
-    input                 enA_i,
-    input  [DATA_W/8-1:0] weA_i,
-    input  [  ADDR_W-1:0] addrA_i,
-    input  [  DATA_W-1:0] dA_i,
-    output [  DATA_W-1:0] dA_o,
+   // Port A
+   input                 enA_i,
+   input  [DATA_W/8-1:0] weA_i,
+   input  [  ADDR_W-1:0] addrA_i,
+   input  [  DATA_W-1:0] dA_i,
+   output [  DATA_W-1:0] dA_o,
 
-    // Port B
-    input                 enB_i,
-    input  [DATA_W/8-1:0] weB_i,
-    input  [  ADDR_W-1:0] addrB_i,
-    input  [  DATA_W-1:0] dB_i,
-    output [DATA_W-1 : 0] dB_o
+   // Port B
+   input                 enB_i,
+   input  [DATA_W/8-1:0] weB_i,
+   input  [  ADDR_W-1:0] addrB_i,
+   input  [  DATA_W-1:0] dB_i,
+   output [DATA_W-1 : 0] dB_o
 );
 
    localparam COL_W = DATA_W / 4;
@@ -37,10 +37,10 @@ module iob_ram_dp_be #(
          localparam mem_init_file_int = (HEXFILE != "none") ?
              {HEXFILE, "_", file_suffix[8*(index+1)-1-:8], ".hex"} : "none";
          iob_ram_dp #(
-             .HEXFILE             (mem_init_file_int),
-             .ADDR_W              (ADDR_W),
-             .DATA_W              (COL_W),
-             .MEM_NO_READ_ON_WRITE(MEM_NO_READ_ON_WRITE)
+            .HEXFILE             (mem_init_file_int),
+            .ADDR_W              (ADDR_W),
+            .DATA_W              (COL_W),
+            .MEM_NO_READ_ON_WRITE(MEM_NO_READ_ON_WRITE)
          ) ram (
             .clk_i(clk_i),
 

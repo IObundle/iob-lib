@@ -125,8 +125,8 @@ module iob_ram_tdp_tb;
 
    // Instantiate the Unit Under Test (UUT)
    iob_ram_tdp #(
-       .DATA_W(`DATA_W),
-       .ADDR_W(`ADDR_W)
+      .DATA_W(`DATA_W),
+      .ADDR_W(`ADDR_W)
    ) uut (
       .clkA_i (clkA),
       .dA_i   (data_a),

@@ -113,9 +113,9 @@ module iob_asym_converter_tb;
 
    // instantiate the Unit Under Test (UUT)
    iob_asym_converter #(
-       .W_DATA_W(W_DATA_W),
-       .R_DATA_W(R_DATA_W),
-       .ADDR_W  (MAXADDR_W)
+      .W_DATA_W(W_DATA_W),
+      .R_DATA_W(R_DATA_W),
+      .ADDR_W  (MAXADDR_W)
    ) uut (
       .clk_i (clk),
       .arst_i(1'd0),
@@ -142,8 +142,8 @@ module iob_asym_converter_tb;
    generate
       for (p = 0; p < R; p = p + 1) begin
          iob_ram_2p #(
-             .DATA_W(MINDATA_W),
-             .ADDR_W(MINADDR_W)
+            .DATA_W(MINDATA_W),
+            .ADDR_W(MINADDR_W)
          ) iob_ram_2p_inst (
             .clk_i   (ext_mem_clk),
             .w_en_i  (ext_mem_w_en[p]),

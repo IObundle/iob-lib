@@ -13,6 +13,6 @@ for i in $TB_DIRS; do MODULES+=" `basename $i`" ; done
 
 #run tests
 for i in $MODULES; do
-   make clean copy_srcs MODULE=$i
-   make sim-run MODULE=$i VCD=0
+   make clean setup TOP_MODULE_NAME=$i
+   make -C ../${i}_V* sim-run VCD=0
 done

@@ -1,9 +1,9 @@
 `timescale 1ns / 1ps
 
 module iob_reset_sync (
-    input  clk_i,
-    input  arst_i,
-    output arst_o
+   input  clk_i,
+   input  arst_i,
+   output arst_o
 );
 
    reg [1:0] sync;

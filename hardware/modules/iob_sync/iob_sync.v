@@ -1,14 +1,14 @@
 `timescale 1ns / 1ps
 
 module iob_sync #(
-    parameter DATA_W  = 21,
-    parameter RST_VAL = {DATA_W{1'b0}},
-    parameter CLKEDGE = "posedge"
+   parameter DATA_W  = 21,
+   parameter RST_VAL = {DATA_W{1'b0}},
+   parameter CLKEDGE = "posedge"
 ) (
-    input                   clk_i,
-    input                   arst_i,
-    input      [DATA_W-1:0] signal_i,
-    output reg [DATA_W-1:0] signal_o
+   input                   clk_i,
+   input                   arst_i,
+   input      [DATA_W-1:0] signal_i,
+   output reg [DATA_W-1:0] signal_o
 );
 
    reg [DATA_W-1:0] synchronizer;

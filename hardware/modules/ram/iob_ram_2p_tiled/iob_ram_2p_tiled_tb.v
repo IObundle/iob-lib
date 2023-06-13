@@ -23,9 +23,9 @@ module iob_ram_2p_tiled_tb;
 
    // Instantiate the Unit Under Test (UUT)
    iob_ram_2p_tiled #(
-       .DATA_W     (`DATA_W),
-       .ADDR_W     (`ADDR_W),
-       .TILE_ADDR_W(`TILE_ADDR_W)
+      .DATA_W     (`DATA_W),
+      .ADDR_W     (`ADDR_W),
+      .TILE_ADDR_W(`TILE_ADDR_W)
    ) uut (
       .clk_i   (clk),
       .w_en_i  (w_en),

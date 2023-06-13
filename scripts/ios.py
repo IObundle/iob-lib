@@ -132,7 +132,7 @@ def generate_ios_header(ios, top_module, out_dir):
         if_prefix, if_name = find_suffix_from_list(table["name"], if_gen.interfaces)
         if if_name:
             if_gen.create_signal_table(if_name)
-            if_gen.write_vh_contents(
+            if_gen.write_vs_contents(
                 if_name,
                 "",
                 f"{if_name+'_' if ios_table_prefix else ''}{if_prefix}",
@@ -261,11 +261,11 @@ def get_verilog_mapping(map_obj):
 # port_name: name of the port we are mapping
 def get_peripheral_port_mapping(peripheral_instance, port_name):
     # If IO dictionary (with mapping) does not exist for this peripheral, use default wire name
-    if not "IO" in peripheral_instance:
-        return f"{peripheral_instance['name']}_{port_name}"
+    if "io" not in peripheral_instance.__dict__:
+        return f"{peripheral_instance.name}_{port_name}"
 
     assert (
-        port_name in peripheral_instance["IO"]
-    ), f"{iob_colors.FAIL}Port {port_name} of {peripheral_instance['name']} not mapped!{iob_colors.ENDC}"
+        port_name in peripheral_instance.io
+    ), f"{iob_colors.FAIL}Port {port_name} of {peripheral_instance.name} not mapped!{iob_colors.ENDC}"
     # IO mapping dictionary exists, get verilog string for that mapping
-    return get_verilog_mapping(peripheral_instance["IO"][port_name])
+    return get_verilog_mapping(peripheral_instance.io[port_name])

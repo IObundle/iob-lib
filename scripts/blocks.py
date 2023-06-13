@@ -7,8 +7,8 @@ from latex import write_table
 from submodule_utils import get_peripherals
 
 
-# Generate blocks.tex file with list TeX tables of blocks (Verilog modules)
-def generate_blocks_list_tex(blocks, out_dir):
+# Generate blocks.tex file with list TeX tables of blocks (Verilog modules instances)
+def generate_blocks_list_tex(block_groups, out_dir):
     blocks_file = open(f"{out_dir}/blocks.tex", "w")
 
     blocks_file.write(
@@ -17,7 +17,7 @@ def generate_blocks_list_tex(blocks, out_dir):
     Block Diagram, and contains a description of each of the sub-blocks.\n"
     )
 
-    for table in blocks:
+    for block_group in block_groups:
         blocks_file.write(
             """
 \\begin{table}[H]
@@ -29,15 +29,15 @@ def generate_blocks_list_tex(blocks, out_dir):
     {\\bf Name} & {\\bf Description}  \\\\ \hline \hline
 
     \input """
-            + table["name"]
+            + block_group.name
             + """_module_tab
  
   \end{tabularx}
   \caption{"""
-            + table["descr"]
+            + block_group.description
             + """}
   \label{"""
-            + table["name"]
+            + block_group.name
             + """_module_tab:is}
 \end{table}
 """
@@ -48,18 +48,21 @@ def generate_blocks_list_tex(blocks, out_dir):
 
 
 # Generate TeX tables of blocks
-def generate_blocks_tex(blocks, out_dir):
+def generate_blocks_tex(block_groups, out_dir):
     # Create blocks.tex file
-    generate_blocks_list_tex(blocks, out_dir)
+    generate_blocks_list_tex(block_groups, out_dir)
 
-    for table in blocks:
+    for block_group in block_groups:
         tex_table = []
-        for module in table["blocks"]:
+        for instance in block_group.blocks:
             tex_table.append(
-                [module["name"].replace("_", "\_"), module["descr"].replace("_", "\_")]
+                [
+                    instance.name.replace("_", "\_"),
+                    instance.description.replace("_", "\_"),
+                ]
             )
 
-        write_table(f"{out_dir}/{table['name']}_module", tex_table)
+        write_table(f"{out_dir}/{block_group.name}_module", tex_table)
 
 
 # Generate list of blocks, one for each peripheral instance
