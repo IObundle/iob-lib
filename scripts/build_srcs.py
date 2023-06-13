@@ -118,7 +118,7 @@ def lint_setup(python_module):
     setup_dir = python_module.setup_dir
     lint_dir = "hardware/lint"
 
-    os.mkdir(f"{build_dir}/{lint_dir}")
+    os.makedirs(f"{build_dir}/{lint_dir}", exist_ok=True)
     files = Path(f"{LIB_DIR}/{lint_dir}").glob("*")
     for file in files:
         file = os.path.basename(file)
