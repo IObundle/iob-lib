@@ -106,10 +106,10 @@ module iob_iob2wishbone #(
    );
 
    assign iob_rvalid_o = rvalid_r;  // This has to be verified and very probably fixed :)
-   assign rvalid       = (~iob_avalid_i) | (wb_ack_i);
+   assign rvalid       = (wb_ack_i) & (~wb_we);
    assign iob_rdata_o  = wb_data_r;
    assign iob_ready_o  = ready_r;
-   assign ready        = (wb_ack_i) & (~wb_we);
+   assign ready        = (~iob_avalid_i) | (wb_ack_i);
    iob_reg_re #(
       .DATA_W (1),
       .RST_VAL(0)
