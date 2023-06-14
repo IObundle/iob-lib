@@ -585,11 +585,13 @@ class mkregs:
     # uses unsigned int types from C stdint library
     @staticmethod
     def swreg_type(name, n_bytes):
-        type_dict = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t", 8:"uint64_t"}
+        type_dict = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t", 8: "uint64_t"}
         try:
             type_try = type_dict[n_bytes]
         except:
-            print(f"{iob_colors.FAIL}register {name} has invalid number of bytes {n_bytes}.{iob_colors.ENDC}")
+            print(
+                f"{iob_colors.FAIL}register {name} has invalid number of bytes {n_bytes}.{iob_colors.ENDC}"
+            )
             type_try = -1
         return type_try
 
@@ -708,15 +710,21 @@ class mkregs:
     @staticmethod
     def check_alignment(addr, addr_w):
         if addr % (2**addr_w) != 0:
-            sys.exit(f"{iob_colors.FAIL}address {addr} with span {2**addr_w} is not aligned{iob_colors.ENDC}")
+            sys.exit(
+                f"{iob_colors.FAIL}address {addr} with span {2**addr_w} is not aligned{iob_colors.ENDC}"
+            )
 
     # check if address overlaps with previous
     @staticmethod
     def check_overlap(addr, addr_type, read_addr, write_addr):
         if addr_type == "R" and addr < read_addr:
-            sys.exit(f"{iob_colors.FAIL}read address {addr} overlaps with previous addresses{iob_colors.ENDC}")
+            sys.exit(
+                f"{iob_colors.FAIL}read address {addr} overlaps with previous addresses{iob_colors.ENDC}"
+            )
         elif addr_type == "W" and addr < write_addr:
-            sys.exit(f"{iob_colors.FAIL}write address {addr} overlaps with previous addresses{iob_colors.ENDC}")
+            sys.exit(
+                f"{iob_colors.FAIL}write address {addr} overlaps with previous addresses{iob_colors.ENDC}"
+            )
 
     # compute address
     def compute_addr(self, table, no_overlap):
