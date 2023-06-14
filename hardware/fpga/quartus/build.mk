@@ -26,13 +26,6 @@ else
 FPGA_OBJ:=resynthesis/$(FPGA_TOP)_netlist.v
 endif
 
-# Set the Nios command shell to use
-ifeq ($(USE_QUARTUS_PRO),1)
-	FPGA_ENV=$(QUARTUSPROPATH)/nios2eds/nios2_command_shell.sh
-else
-	FPGA_ENV=$(QUARTUSPATH)/nios2eds/nios2_command_shell.sh
-endif
-
 # Set the Quartus command to porgram the FPGA
 FPGA_PROG=nios2_command_shell quartus_pgm -m jtag -c 1 -o "p;$(FPGA_TOP).sof"
 
