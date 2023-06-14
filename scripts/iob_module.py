@@ -269,6 +269,8 @@ class iob_module:
                 "hardware/src",
                 "hardware/simulation",
                 "hardware/fpga",
+                "hardware/syn",
+                "hardware/lint",
                 "software",
             ]:
                 # Skip this directory if it does not exist
