@@ -12,6 +12,7 @@ class iob_module:
     # Standard attributes common to all iob-modules
     name = "iob_module"  # Verilog module name (not instance name)
     version = "1.0"  # Module version
+    previous_version = None  # Module version
     flows = ""  # Flows supported by this module
     setup_dir = ""  # Setup directory for this module
     build_dir = ""  # Build directory for this module
@@ -101,6 +102,10 @@ class iob_module:
 
         # Copy build directory from the `iob_module` superclass
         cls.build_dir = iob_module.build_dir
+
+        # Copy current version to previous version if it is not set
+        if not cls.previous_version:
+            cls.previous_version = cls.version
 
         # Initialize empty lists for attributes (We can't initialize in the attribute declaration because it would cause every subclass to reference the same list)
         cls.confs = []
@@ -264,6 +269,8 @@ class iob_module:
                 "hardware/src",
                 "hardware/simulation",
                 "hardware/fpga",
+                "hardware/syn",
+                "hardware/lint",
                 "software",
             ]:
                 # Skip this directory if it does not exist
@@ -302,6 +309,7 @@ class iob_module:
                 ),
             )
             # print(f"### DEBUG: {src} {dst}")
+            file_perms = os.stat(src).st_mode
             with open(src, "r") as file:
                 lines = file.readlines()
             for idx in range(len(lines)):
@@ -312,5 +320,7 @@ class iob_module:
                 )
             with open(dst, "w") as file:
                 file.writelines(lines)
+            # Set file permissions equal to source file
+            os.chmod(dst, file_perms)
 
         return copy_func

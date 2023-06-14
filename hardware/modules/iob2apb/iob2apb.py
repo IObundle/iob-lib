@@ -4,10 +4,6 @@ import shutil
 from iob_module import iob_module
 from setup import setup
 
-from iob_s_port import iob_s_port
-from iob_s_s_portmap import iob_s_s_portmap
-from apb_m_port import apb_m_port
-from iob_m_tb_wire import iob_m_tb_wire
 from iob_reg import iob_reg
 
 
@@ -23,10 +19,10 @@ class iob2apb(iob_module):
 
         # Setup dependencies
 
-        iob_s_port.setup()
-        iob_s_s_portmap.setup()
-        apb_m_port.setup()
-        iob_m_tb_wire.setup()
+        iob_module.generate("iob_s_port")
+        iob_module.generate("iob_s_s_portmap")
+        iob_module.generate("apb_m_port")
+        iob_module.generate("iob_m_tb_wire")
 
         iob_reg.setup()
 

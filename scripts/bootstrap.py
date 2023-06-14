@@ -75,6 +75,24 @@ for arg in sys.argv:
         build_srcs.LIB_DIR = arg.split("=")[1]
         break
 
+# Given a version string, return a 4 digit representation of that version.
+def version_from_str(version_str):
+    major, minor = version_str.replace("V", "").split(".")
+    version_str = f"{int(major):02d}{int(minor):02d}"
+    return version_str
+
+
+# Print Makefile variable definitions, used for delivery
+def get_delivery_vars():
+    top_module = vars(sys.modules[top_module_name])[top_module_name]
+    top_module.is_top_module = True
+    top_module.set_dynamic_attributes()
+    print(f"NAME={top_module.name} ", end="")
+    print(f"VERSION={version_from_str(top_module.version)} ", end="")
+    print(f"PREVIOUS_VERSION={version_from_str(top_module.previous_version)} ", end="")
+    print(f"VERSION_STR={top_module.version} ")
+
+
 # Print build directory attribute of the top module
 def get_build_dir():
     top_module = vars(sys.modules[top_module_name])[top_module_name]

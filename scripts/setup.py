@@ -36,17 +36,21 @@ def setup(python_module, no_overlap=False, disable_file_gen=False):
     #
     build_srcs.flows_setup(python_module)
 
-    # Auto-add 'VERSION' macro
-    confs.append(
-        {
-            "name": "VERSION",
-            "type": "M",
-            "val": "16'h" + build_srcs.version_str_to_digits(python_module.version),
-            "min": "NA",
-            "max": "NA",
-            "descr": "Product version. This 16-bit macro uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234.",
-        }
-    )
+    # Auto-add 'VERSION' macro if it doesn't exist
+    for macro in confs:
+        if macro["name"] == "VERSION":
+            break
+    else:
+        confs.append(
+            {
+                "name": "VERSION",
+                "type": "M",
+                "val": "16'h" + build_srcs.version_str_to_digits(python_module.version),
+                "min": "NA",
+                "max": "NA",
+                "descr": "Product version. This 16-bit macro uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234.",
+            }
+        )
 
     #
     # Build registers table
@@ -61,19 +65,24 @@ def setup(python_module, no_overlap=False, disable_file_gen=False):
                 "regs": [],
             }
             regs.append(general_regs_table)
-        # Auto add 'VERSION' register in 'general' registers table
-        general_regs_table["regs"].append(
-            {
-                "name": "VERSION",
-                "type": "R",
-                "n_bits": 16,
-                "rst_val": build_srcs.version_str_to_digits(python_module.version),
-                "addr": -1,
-                "log2n_items": 0,
-                "autologic": True,
-                "descr": "Product version.  This 16-bit register uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234.",
-            }
-        )
+
+        # Auto add 'VERSION' register in 'general' registers table if it doesn't exist
+        for reg in general_regs_table["regs"]:
+            if reg["name"] == "VERSION":
+                break
+        else:
+            general_regs_table["regs"].append(
+                {
+                    "name": "VERSION",
+                    "type": "R",
+                    "n_bits": 16,
+                    "rst_val": build_srcs.version_str_to_digits(python_module.version),
+                    "addr": -1,
+                    "log2n_items": 0,
+                    "autologic": True,
+                    "descr": "Product version.  This 16-bit register uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234.",
+                }
+            )
 
         # Create an instance of the mkregs class inside the mkregs module
         # This instance is only used locally, not affecting status of mkregs imported in other functions/modules
