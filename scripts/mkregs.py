@@ -8,6 +8,7 @@ from math import ceil, log
 from latex import write_table
 from submodule_utils import eval_param_expression_from_config
 import re
+import iob_colors
 
 
 # Use a class for the entire module, as it may be imported multiple times, but must have instance variables (multiple cores/submodules have different registers)
@@ -584,11 +585,12 @@ class mkregs:
     # uses unsigned int types from C stdint library
     @staticmethod
     def swreg_type(name, n_bytes):
-        type_dict = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}
+        type_dict = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t", 8:"uint64_t"}
         try:
             type_try = type_dict[n_bytes]
         except:
-            print(f"Error: register {name} has invalid number of bytes {n_bytes}.")
+            print(f"{iob_colors.FAIL}register {name} has invalid number of bytes {n_bytes}.{iob_colors.ENDC}")
+            type_try = -1
         return type_try
 
     def write_swheader(self, table, out_dir, top):
@@ -706,15 +708,15 @@ class mkregs:
     @staticmethod
     def check_alignment(addr, addr_w):
         if addr % (2**addr_w) != 0:
-            sys.exit(f"Error: address {addr} with span {2**addr_w} is not aligned")
+            sys.exit(f"{iob_colors.FAIL}address {addr} with span {2**addr_w} is not aligned{iob_colors.ENDC}")
 
     # check if address overlaps with previous
     @staticmethod
     def check_overlap(addr, addr_type, read_addr, write_addr):
         if addr_type == "R" and addr < read_addr:
-            sys.exit(f"Error: read address {addr} overlaps with previous addresses")
+            sys.exit(f"{iob_colors.FAIL}read address {addr} overlaps with previous addresses{iob_colors.ENDC}")
         elif addr_type == "W" and addr < write_addr:
-            sys.exit(f"Error: write address {addr} overlaps with previous addresses")
+            sys.exit(f"{iob_colors.FAIL}write address {addr} overlaps with previous addresses{iob_colors.ENDC}")
 
     # compute address
     def compute_addr(self, table, no_overlap):
