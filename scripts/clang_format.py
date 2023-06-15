@@ -23,7 +23,17 @@ if __name__ == "__main__":
     # git ls-files: pipe only git tracked files into clang-format. Does not include
     # submodule files
     file_extentions = "*.c *.h *.cpp *.hpp"
-    format_cmd = f"git ls-files {file_extentions} | xargs clang-format {clang_flags}"
+    files = subprocess.run(
+        f"git ls-files {file_extentions}",
+        shell=True,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
 
-    subprocess.run(format_cmd, shell=True, check=True)
-    print(format_cmd)
+    if files.stdout:
+        format_cmd = (
+            f"git ls-files {file_extentions} | xargs clang-format {clang_flags}"
+        )
+        subprocess.run(format_cmd, shell=True, check=True)
+        print(format_cmd)
