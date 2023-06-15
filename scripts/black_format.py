@@ -35,9 +35,7 @@ if __name__ == "__main__":
         text=True,
     )
 
-    # format each file
-    for fname in files.stdout.split("\n"):
-        if fname.strip():
-            format_cmd = f"black {fname}"
-            subprocess.run(format_cmd, shell=True, check=True)
-            print(format_cmd)
+    if files.stdout:
+        format_cmd = f"git ls-files *.py | xargs black"
+        subprocess.run(format_cmd, shell=True, check=True)
+        print(format_cmd)

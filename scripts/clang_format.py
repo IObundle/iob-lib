@@ -31,9 +31,9 @@ if __name__ == "__main__":
         text=True,
     )
 
-    # format each file
-    for fname in files.stdout.split("\n"):
-        if fname.strip():
-            format_cmd = f"clang-format {clang_flags} {fname}"
-            subprocess.run(format_cmd, shell=True, check=True)
-            print(format_cmd)
+    if files.stdout:
+        format_cmd = (
+            f"git ls-files {file_extentions} | xargs clang-format {clang_flags}"
+        )
+        subprocess.run(format_cmd, shell=True, check=True)
+        print(format_cmd)
