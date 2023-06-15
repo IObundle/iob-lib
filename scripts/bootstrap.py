@@ -102,13 +102,14 @@ def insert_header():
     print(header)
     f.close()
 
-    for filename in sys.argv[h_arg_index + 3:]:
+    for filename in sys.argv[h_arg_index + 3 :]:
         f = open(filename, "r+")
         content = f.read()
         f.seek(0, 0)
         for line in header:
             f.write(sys.argv[h_arg_index + 2] + "  " + f"{line}")
         f.write("\n\n\n" + content)
+
 
 # Given a version string, return a 4 digit representation of that version.
 def version_from_str(version_str):
