@@ -26,7 +26,7 @@ reserved_signals = {
     "iob_rdata_o": ".iob_rdata_o(slaves_resp[`RDATA(`/*<InstanceName>*/)])",
     "iob_ready_o": ".iob_ready_o(slaves_resp[`READY(`/*<InstanceName>*/)])",
     "iob_rvalid_o": ".iob_rvalid_o(slaves_resp[`RVALID(`/*<InstanceName>*/)])",
-    "trap_o": ".trap_o(trap_o[0])",
+    "trap_o": ".trap_o(/*<InstanceName>*/_trap_o)",
     "axi_awid_o": ".axi_awid_o          (axi_awid_o             [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
     "axi_awaddr_o": ".axi_awaddr_o      (internal_axi_awaddr_o  [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
     "axi_awlen_o": ".axi_awlen_o        (axi_awlen_o            [/*<extmem_conn_num>*/*AXI_LEN_W      +:/*<bus_size>*/*AXI_LEN_W])",
