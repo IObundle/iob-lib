@@ -11,8 +11,6 @@ import build_srcs
 import verilog_tools
 import shutil
 
-import datetime
-
 # from iob_ctls import iob_ctls # The iob_ctls module imports this file and runs setup(), therefore, this file cannot import it (would cause an import loop).
 from iob_module import iob_module
 
@@ -151,36 +149,6 @@ def setup(python_module, no_overlap=False, disable_file_gen=False):
     # Replace Verilog includes by Verilog header file contents
     if python_module.is_top_module:
         verilog_tools.replace_includes(python_module.setup_dir, build_dir)
-
-
-# Insert header in source files
-def insert_header():
-    # invoked from the command line as:
-    # python3 insert_header.py <header_file> <comment> <file1> <file2> <file3> ...
-    # where
-    # <header_file> is the name of the header file to be inserted.
-    # <comment> is the comment character to be used
-    # <file1> <file2> <file3> ... are the files to be processed
-
-    x = datetime.datetime.now()
-
-    module = import_setup(".")
-
-    NAME, VERSION = module.name, module.version
-
-    # header is in the file whose name is given in the second argument
-    f = open(sys.argv[2], "r")
-    header = f.readlines()
-    print(header)
-    f.close()
-
-    for filename in sys.argv[4:]:
-        f = open(filename, "r+")
-        content = f.read()
-        f.seek(0, 0)
-        for line in header:
-            f.write(sys.argv[3] + "  " + f"{line}")
-        f.write("\n\n\n" + content)
 
 
 # If this script is called directly, run function given in first argument
