@@ -29,6 +29,8 @@ set_db hdl_error_on_latch true
 set_db lp_power_analysis_effort medium
 set_db lp_power_unit uW
 
+#set max loop limit to 64k
+set_db hdl_max_loop_limit 65536
 
 set_db super_thread_servers [string repeat "localhost " 4]
 # max 8 cpus for 1 license,  max 16 for 2 licenses
