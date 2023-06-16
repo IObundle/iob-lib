@@ -36,7 +36,6 @@ module iob_ctls #(
          );
       end else begin : g_noreverse
          assign data_int2 = data_int1;
-         assign data_int2 = data_int1;
       end
    endgenerate
 
