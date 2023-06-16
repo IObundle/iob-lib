@@ -21,18 +21,13 @@ def getf(obj, name, field):
 
 # no_overlap: Optional argument. Selects if read/write register addresses should not overlap
 # disable_file_gen: Optional argument. Selects if files should be auto-generated.
-def setup(python_module, no_overlap=False, disable_file_gen=False):
+def setup(python_module, no_overlap=False, disable_file_gen=False, replace_includes=True):
     confs = python_module.confs
     ios = python_module.ios
     regs = python_module.regs
 
     top = python_module.name
     build_dir = python_module.build_dir
-
-    #
-    # Setup flows
-    #
-    build_srcs.flows_setup(python_module)
 
     # Auto-add 'VERSION' macro if it doesn't exist
     for macro in confs:
@@ -118,17 +113,18 @@ def setup(python_module, no_overlap=False, disable_file_gen=False):
         # Generate sw
         #
         if "emb" in python_module.flows:
+            os.makedirs(build_dir + "/software/src", exist_ok=True)
             if regs:
                 mkregs_obj.write_swheader(
-                    reg_table, python_module.build_dir + "/software/src", top
+                    reg_table, build_dir + "/software/src", top
                 )
                 mkregs_obj.write_swcode(
-                    reg_table, python_module.build_dir + "/software/src", top
+                    reg_table, build_dir + "/software/src", top
                 )
                 mkregs_obj.write_swheader(
-                    reg_table, python_module.build_dir + "/software/src", top
+                    reg_table, build_dir + "/software/src", top
                 )
-            mk_conf.conf_h(confs, top, python_module.build_dir + "/software/src")
+            mk_conf.conf_h(confs, top, build_dir + "/software/src")
 
         #
         # Generate TeX
@@ -147,7 +143,7 @@ def setup(python_module, no_overlap=False, disable_file_gen=False):
             )
 
     # Replace Verilog includes by Verilog header file contents
-    if python_module.is_top_module:
+    if python_module.is_top_module and replace_includes:
         verilog_tools.replace_includes(python_module.setup_dir, build_dir)
 
 
