@@ -29,11 +29,6 @@ def setup(python_module, no_overlap=False, disable_file_gen=False, replace_inclu
     top = python_module.name
     build_dir = python_module.build_dir
 
-    #
-    # Setup flows
-    #
-    build_srcs.flows_setup(python_module)
-
     # Auto-add 'VERSION' macro if it doesn't exist
     for macro in confs:
         if macro["name"] == "VERSION":
@@ -118,17 +113,18 @@ def setup(python_module, no_overlap=False, disable_file_gen=False, replace_inclu
         # Generate sw
         #
         if "emb" in python_module.flows:
+            os.makedirs(build_dir + "/software/src", exist_ok=True)
             if regs:
                 mkregs_obj.write_swheader(
-                    reg_table, python_module.build_dir + "/software/src", top
+                    reg_table, build_dir + "/software/src", top
                 )
                 mkregs_obj.write_swcode(
-                    reg_table, python_module.build_dir + "/software/src", top
+                    reg_table, build_dir + "/software/src", top
                 )
                 mkregs_obj.write_swheader(
-                    reg_table, python_module.build_dir + "/software/src", top
+                    reg_table, build_dir + "/software/src", top
                 )
-            mk_conf.conf_h(confs, top, python_module.build_dir + "/software/src")
+            mk_conf.conf_h(confs, top, build_dir + "/software/src")
 
         #
         # Generate TeX

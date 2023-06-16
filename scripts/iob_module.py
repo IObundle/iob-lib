@@ -1,5 +1,7 @@
 import os
 import shutil
+import sys
+import importlib
 
 import iob_colors
 import if_gen
@@ -125,7 +127,39 @@ class iob_module:
     def _run_setup(cls):
         cls.__setup_submodules()
 
+        # Setup flows (copy LIB files)
+        build_srcs.flows_setup(cls)
+
         cls._copy_srcs()
+
+        cls._run_setup_files()
+
+    @classmethod
+    def _run_setup_files(cls):
+        flows_setup_files = {
+            "sim":  cls.setup_dir + "/hardware/simulation/sim_setup.py",
+            "fpga": cls.setup_dir + "/hardware/fpga/fpga_setup.py",
+            "emb":  cls.setup_dir + "/software/sw_setup.py",
+            "doc":  cls.setup_dir + "/document/doc_setup.py",
+        }
+        for flow, filepath in flows_setup_files.items():
+            # Skip if flow not in flows list
+            if flow not in cls.flows:
+                continue
+
+            # Skip if file does not exist
+            if not os.path.isfile(filepath):
+                continue
+
+            module_name = os.path.basename(filepath).split(".")[0]
+            spec = importlib.util.spec_from_file_location(module_name, filepath)
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name] = module
+            # Define setup_module object, corresponding to this class
+            vars(module)["setup_module"] = cls
+            # Execute setup file
+            spec.loader.exec_module(module)
+
 
     # Run setup functions for the submodules list stored in the setup_submodules_list
     @classmethod
@@ -264,15 +298,22 @@ class iob_module:
 
             previously_setup_dirs.append(module_class.setup_dir)
 
-            # Copy sources
-            for directory in [
+            # Files that should always be copied
+            dir_list = [
                 "hardware/src",
-                "hardware/simulation",
-                "hardware/fpga",
-                "hardware/syn",
-                "hardware/lint",
                 "software",
-            ]:
+            ]
+            # Files that should only be copied if it is top module
+            if cls.is_top_module:
+                dir_list += [
+                    "hardware/simulation",
+                    "hardware/fpga",
+                    "hardware/syn",
+                    "hardware/lint",
+                ]
+
+            # Copy sources
+            for directory in dir_list:
                 # Skip this directory if it does not exist
                 if not os.path.isdir(os.path.join(module_class.setup_dir, directory)):
                     continue
