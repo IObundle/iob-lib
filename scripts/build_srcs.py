@@ -47,21 +47,9 @@ def flows_setup(python_module):
 
 
 def hw_setup(python_module):
-    core_name = python_module.name
-    core_version = python_module.version
-    if "previous_version" in vars(python_module):
-        core_previous_version = python_module.previous_version
-    else:
-        core_previous_version = core_version
-    build_dir = python_module.build_dir
-    setup_dir = python_module.setup_dir
-
     # create module's version TeX file. Also create *_version.vh Verilog Header if we do not have regs.
     version_file(
-        core_name,
-        core_version,
-        core_previous_version,
-        build_dir,
+        python_module,
         create_version_header=False if python_module.regs else True,
     )
 
@@ -74,9 +62,6 @@ def sim_setup(python_module):
     setup_dir = python_module.setup_dir
 
     sim_dir = "hardware/simulation"
-
-    # Run sim_setup.py
-    run_setup_functions(python_module, "sim_setup", setup_module=python_module)
 
     # Copy LIB sim files
     if "sim" in core_flows:
@@ -98,9 +83,6 @@ def fpga_setup(python_module):
 
     # append this core hw flows to config_build
     mk_conf.append_flows_config_build_mk(core_flows, ["fpga"], build_dir)
-
-    # Run fpga_setup.py
-    run_setup_functions(python_module, "fpga_setup", setup_module=python_module)
 
     # Copy LIB fpga files
     if "fpga" in core_flows:
@@ -195,12 +177,10 @@ def sw_setup(python_module):
     if "pc-emul" not in core_flows:
         mk_conf.append_flows_config_build_mk(core_flows, ["pc-emul"], build_dir)
 
-    # Run sw_setup.py
-    run_setup_functions(python_module, "sw_setup", setup_module=python_module)
-
     if "emb" in core_flows or "pc-emul" in core_flows:
+        os.makedirs(build_dir + "/software/src", exist_ok=True)
         # Copy LIB software Makefile
-        shutil.copy(f"{LIB_DIR}/software/Makefile", f"{build_dir}/software")
+        shutil.copy(f"{LIB_DIR}/software/Makefile", f"{build_dir}/software/Makefile")
 
         # Create 'scripts/' directory
         python_setup(build_dir)
@@ -246,9 +226,6 @@ def doc_setup(python_module):
 
     # General documentation
     write_git_revision_short_hash(f"{build_dir}/document/tsrc")
-
-    # Run doc_setup.py
-    run_setup_functions(python_module, "doc_setup", setup_module=python_module)
 
 
 def write_git_revision_short_hash(dst_dir):
@@ -473,16 +450,19 @@ def create_if_gen_headers(dest_dir, Vheaders):
 
 # Create TeX and optionally Verilog header files with the version of the system
 def version_file(
-    core_name,
-    core_version,
-    core_previous_version,
-    build_dir,
+    python_module,
     create_version_header=True,
 ):
+    core_name = python_module.name
+    core_version = python_module.version
+    core_previous_version = python_module.previous_version
+    build_dir = python_module.build_dir
+
     tex_dir = f"{build_dir}/document/tsrc"
     verilog_dir = f"{build_dir}/hardware/src"
 
-    if os.path.isdir(tex_dir):
+    if python_module.is_top_module and 'doc' in python_module.flows:
+        os.makedirs(tex_dir, exist_ok=True)
         tex_file = f"{tex_dir}/{core_name}_version.tex"
         with open(tex_file, "w") as tex_f:
             tex_f.write(core_version)
