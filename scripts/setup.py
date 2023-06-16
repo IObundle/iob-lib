@@ -21,7 +21,7 @@ def getf(obj, name, field):
 
 # no_overlap: Optional argument. Selects if read/write register addresses should not overlap
 # disable_file_gen: Optional argument. Selects if files should be auto-generated.
-def setup(python_module, no_overlap=False, disable_file_gen=False):
+def setup(python_module, no_overlap=False, disable_file_gen=False, replace_includes=True):
     confs = python_module.confs
     ios = python_module.ios
     regs = python_module.regs
@@ -147,7 +147,7 @@ def setup(python_module, no_overlap=False, disable_file_gen=False):
             )
 
     # Replace Verilog includes by Verilog header file contents
-    if python_module.is_top_module:
+    if python_module.is_top_module and replace_includes:
         verilog_tools.replace_includes(python_module.setup_dir, build_dir)
 
 
