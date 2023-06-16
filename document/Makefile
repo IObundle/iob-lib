@@ -107,7 +107,7 @@ view: $(DOC).pdf
 	evince $< &
 
 clean:
-	@find . -maxdepth 1 -type f -not \( -name Makefile -o -name \*.mk -o -name $(NAME)\* \) -delete
+	@find . -maxdepth 1 -type f -not \( -name ug.pdf -o -name Makefile -o -name \*.mk -o -name $(NAME)\* \) -delete
 	@rm -rf $(PYTHON_DIR)/__pycache__ ../*.tex
 
 veryclean: clean
