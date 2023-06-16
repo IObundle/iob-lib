@@ -14,5 +14,11 @@ parameters have the following types:
     {\bf Macro} & {\bf Type} & {\bf Min} & {\bf Typical} & {\bf Max} & {\bf Description}
     \\ \hline \hline
     \input confs_tab
-    \caption{Configuration Macros}\label{tab:confs}
+    \caption{Configuration Macros.}\label{tab:confs}
 \end{xltabular}
+
+Note: The 16-bit auto-created Product Version macro uses nibbles to represent
+decimal num- bers using their binary values.  The two most significant nib- bles
+represent the integral part of the version, and the two least signifi- cant
+nibbles represent the decimal part.  For example V12.34 is rep- resented by
+0x1234.
