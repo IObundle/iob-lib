@@ -615,7 +615,7 @@ def get_periphs_id(peripherals_str):
 # Return list of dictionaries representing macros of each peripheral instance with their ID assigned
 def get_periphs_id_as_macros(peripherals_list):
     macro_list = []
-    for idx, instance in enumerate(peripherals_list):
+    for idx, instance in enumerate(peripherals_list, 1):
         macro_list.append(
             {
                 "name": instance.name,
@@ -636,7 +636,7 @@ def get_n_periphs(peripherals_list):
 
 # Return bus width required to address all peripherals
 def get_n_periphs_w(peripherals_list):
-    i = len(peripherals_list)
+    i = len(peripherals_list)+1
     if not i:
         return str(0)
     else:
