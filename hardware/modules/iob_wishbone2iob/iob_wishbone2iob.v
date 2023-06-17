@@ -60,7 +60,7 @@ module iob_wishbone2iob #(
    );
 
    assign wb_data_o = (iob_rdata_i) & (wb_data_mask);
-   assign wb_ack_o = (iob_rvalid_i) & (avalid_r);
+   assign wb_ack_o = (iob_ready_i) & (avalid_r);
 
    assign wb_data_mask = {
       {8{wb_select_i[3]}}, {8{wb_select_i[2]}}, {8{wb_select_i[1]}}, {8{wb_select_i[0]}}

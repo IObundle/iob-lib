@@ -3,6 +3,7 @@
 # It also instatiates the top module, assuming that it is a class with the same name as the file that contains it.
 import os
 import sys
+import datetime
 
 if len(sys.argv) < 2:
     print(
@@ -74,6 +75,59 @@ for arg in sys.argv:
 
         build_srcs.LIB_DIR = arg.split("=")[1]
         break
+
+
+# Insert header in source files
+def insert_header():
+    # invoked from the command line as:
+    # python3 bootstrap.py <top_module_name> -f insert_header -h <header_file> <comment> <file1> <file2> <file3> ...
+    # where
+    # <header_file> is the name of the header file to be inserted.
+    # <comment> is the comment character to be used
+    # <file1> <file2> <file3> ... are the files to be processed
+
+    x = datetime.datetime.now()
+
+    top_module = vars(sys.modules[top_module_name])[top_module_name]
+    top_module.is_top_module = True
+    top_module.set_dynamic_attributes()
+
+    NAME, VERSION = top_module.name, top_module.version
+
+    h_arg_index = sys.argv.index("-h")
+
+    # header is in the file whose name is given in the first argument after `-h`
+    f = open(sys.argv[h_arg_index + 1], "r")
+    header = f.readlines()
+    print(header)
+    f.close()
+
+    for filename in sys.argv[h_arg_index + 3 :]:
+        f = open(filename, "r+")
+        content = f.read()
+        f.seek(0, 0)
+        for line in header:
+            f.write(sys.argv[h_arg_index + 2] + "  " + f"{line}")
+        f.write("\n\n\n" + content)
+
+
+# Given a version string, return a 4 digit representation of that version.
+def version_from_str(version_str):
+    major, minor = version_str.replace("V", "").split(".")
+    version_str = f"{int(major):02d}{int(minor):02d}"
+    return version_str
+
+
+# Print Makefile variable definitions, used for delivery
+def get_delivery_vars():
+    top_module = vars(sys.modules[top_module_name])[top_module_name]
+    top_module.is_top_module = True
+    top_module.set_dynamic_attributes()
+    print(f"NAME={top_module.name} ", end="")
+    print(f"VERSION={version_from_str(top_module.version)} ", end="")
+    print(f"PREVIOUS_VERSION={version_from_str(top_module.previous_version)} ", end="")
+    print(f"VERSION_STR={top_module.version} ")
+
 
 # Print build directory attribute of the top module
 def get_build_dir():

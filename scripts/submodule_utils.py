@@ -26,44 +26,44 @@ reserved_signals = {
     "iob_rdata_o": ".iob_rdata_o(slaves_resp[`RDATA(`/*<InstanceName>*/)])",
     "iob_ready_o": ".iob_ready_o(slaves_resp[`READY(`/*<InstanceName>*/)])",
     "iob_rvalid_o": ".iob_rvalid_o(slaves_resp[`RVALID(`/*<InstanceName>*/)])",
-    "trap_o": ".trap_o(trap_o[0])",
-    "axi_awid_o": ".axi_awid_o          (axi_awid_o    [AXI_ID_W-1:0])",
-    "axi_awaddr_o": ".axi_awaddr_o      (axi_awaddr_o  [AXI_ADDR_W-1:0])",
-    "axi_awlen_o": ".axi_awlen_o        (axi_awlen_o   [AXI_LEN_W-1:0])",
-    "axi_awsize_o": ".axi_awsize_o      (axi_awsize_o  [3-1:0])",
-    "axi_awburst_o": ".axi_awburst_o    (axi_awburst_o [2-1:0])",
-    "axi_awlock_o": ".axi_awlock_o      (axi_awlock_o  [2-1:0])",
-    "axi_awcache_o": ".axi_awcache_o    (axi_awcache_o [4-1:0])",
-    "axi_awprot_o": ".axi_awprot_o      (axi_awprot_o  [3-1:0])",
-    "axi_awqos_o": ".axi_awqos_o        (axi_awqos_o   [4-1:0])",
-    "axi_awvalid_o": ".axi_awvalid_o    (axi_awvalid_o [1-1:0])",
-    "axi_awready_i": ".axi_awready_i    (axi_awready_i [1-1:0])",
-    "axi_wdata_o": ".axi_wdata_o        (axi_wdata_o   [AXI_DATA_W-1:0])",
-    "axi_wstrb_o": ".axi_wstrb_o        (axi_wstrb_o   [(AXI_DATA_W/8)-1:0])",
-    "axi_wlast_o": ".axi_wlast_o        (axi_wlast_o   [1-1:0])",
-    "axi_wvalid_o": ".axi_wvalid_o      (axi_wvalid_o  [1-1:0])",
-    "axi_wready_i": ".axi_wready_i      (axi_wready_i  [1-1:0])",
-    "axi_bid_i": ".axi_bid_i            (axi_bid_i     [AXI_ID_W-1:0])",
-    "axi_bresp_i": ".axi_bresp_i        (axi_bresp_i   [2-1:0])",
-    "axi_bvalid_i": ".axi_bvalid_i      (axi_bvalid_i  [1-1:0])",
-    "axi_bready_o": ".axi_bready_o      (axi_bready_o  [1-1:0])",
-    "axi_arid_o": ".axi_arid_o          (axi_arid_o    [AXI_ID_W-1:0])",
-    "axi_araddr_o": ".axi_araddr_o      (axi_araddr_o  [AXI_ADDR_W-1:0])",
-    "axi_arlen_o": ".axi_arlen_o        (axi_arlen_o   [AXI_LEN_W-1:0])",
-    "axi_arsize_o": ".axi_arsize_o      (axi_arsize_o  [3-1:0])",
-    "axi_arburst_o": ".axi_arburst_o    (axi_arburst_o [2-1:0])",
-    "axi_arlock_o": ".axi_arlock_o      (axi_arlock_o  [2-1:0])",
-    "axi_arcache_o": ".axi_arcache_o    (axi_arcache_o [4-1:0])",
-    "axi_arprot_o": ".axi_arprot_o      (axi_arprot_o  [3-1:0])",
-    "axi_arqos_o": ".axi_arqos_o        (axi_arqos_o   [4-1:0])",
-    "axi_arvalid_o": ".axi_arvalid_o    (axi_arvalid_o [1-1:0])",
-    "axi_arready_i": ".axi_arready_i    (axi_arready_i [1-1:0])",
-    "axi_rid_i": ".axi_rid_i            (axi_rid_i     [AXI_ID_W-1:0])",
-    "axi_rdata_i": ".axi_rdata_i        (axi_rdata_i   [AXI_DATA_W-1:0])",
-    "axi_rresp_i": ".axi_rresp_i        (axi_rresp_i   [2-1:0])",
-    "axi_rlast_i": ".axi_rlast_i        (axi_rlast_i   [1-1:0])",
-    "axi_rvalid_i": ".axi_rvalid_i      (axi_rvalid_i  [1-1:0])",
-    "axi_rready_o": ".axi_rready_o      (axi_rready_o  [1-1:0])",
+    "trap_o": ".trap_o(/*<InstanceName>*/_trap_o)",
+    "axi_awid_o": ".axi_awid_o          (axi_awid_o             [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
+    "axi_awaddr_o": ".axi_awaddr_o      (internal_axi_awaddr_o  [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
+    "axi_awlen_o": ".axi_awlen_o        (axi_awlen_o            [/*<extmem_conn_num>*/*AXI_LEN_W      +:/*<bus_size>*/*AXI_LEN_W])",
+    "axi_awsize_o": ".axi_awsize_o      (axi_awsize_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
+    "axi_awburst_o": ".axi_awburst_o    (axi_awburst_o          [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_awlock_o": ".axi_awlock_o      (axi_awlock_o           [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_awcache_o": ".axi_awcache_o    (axi_awcache_o          [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
+    "axi_awprot_o": ".axi_awprot_o      (axi_awprot_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
+    "axi_awqos_o": ".axi_awqos_o        (axi_awqos_o            [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
+    "axi_awvalid_o": ".axi_awvalid_o    (axi_awvalid_o          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_awready_i": ".axi_awready_i    (axi_awready_i          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_wdata_o": ".axi_wdata_o        (axi_wdata_o            [/*<extmem_conn_num>*/*AXI_DATA_W     +:/*<bus_size>*/*AXI_DATA_W])",
+    "axi_wstrb_o": ".axi_wstrb_o        (axi_wstrb_o            [/*<extmem_conn_num>*/*(AXI_DATA_W/8) +:/*<bus_size>*/*(AXI_DATA_W/8)])",
+    "axi_wlast_o": ".axi_wlast_o        (axi_wlast_o            [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_wvalid_o": ".axi_wvalid_o      (axi_wvalid_o           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_wready_i": ".axi_wready_i      (axi_wready_i           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_bid_i": ".axi_bid_i            (axi_bid_i              [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
+    "axi_bresp_i": ".axi_bresp_i        (axi_bresp_i            [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_bvalid_i": ".axi_bvalid_i      (axi_bvalid_i           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_bready_o": ".axi_bready_o      (axi_bready_o           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_arid_o": ".axi_arid_o          (axi_arid_o             [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
+    "axi_araddr_o": ".axi_araddr_o      (internal_axi_araddr_o  [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
+    "axi_arlen_o": ".axi_arlen_o        (axi_arlen_o            [/*<extmem_conn_num>*/*AXI_LEN_W      +:/*<bus_size>*/*AXI_LEN_W])",
+    "axi_arsize_o": ".axi_arsize_o      (axi_arsize_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
+    "axi_arburst_o": ".axi_arburst_o    (axi_arburst_o          [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_arlock_o": ".axi_arlock_o      (axi_arlock_o           [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_arcache_o": ".axi_arcache_o    (axi_arcache_o          [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
+    "axi_arprot_o": ".axi_arprot_o      (axi_arprot_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
+    "axi_arqos_o": ".axi_arqos_o        (axi_arqos_o            [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
+    "axi_arvalid_o": ".axi_arvalid_o    (axi_arvalid_o          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_arready_i": ".axi_arready_i    (axi_arready_i          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_rid_i": ".axi_rid_i            (axi_rid_i              [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
+    "axi_rdata_i": ".axi_rdata_i        (axi_rdata_i            [/*<extmem_conn_num>*/*AXI_DATA_W     +:/*<bus_size>*/*AXI_DATA_W])",
+    "axi_rresp_i": ".axi_rresp_i        (axi_rresp_i            [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_rlast_i": ".axi_rlast_i        (axi_rlast_i            [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_rvalid_i": ".axi_rvalid_i      (axi_rvalid_i           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_rready_o": ".axi_rready_o      (axi_rready_o           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
 }
 
 
@@ -403,12 +403,12 @@ class if_gen_hack_list:
         )
 
 
-def if_gen_interface(interface_name, port_prefix):
+def if_gen_interface(interface_name, port_prefix, bus_size=1):
     if_gen.create_signal_table(interface_name)
     # Create a virtual file object
     virtual_file_obj = if_gen_hack_list()
     # Tell if_gen to write ports in virtual file object
-    if_gen.write_vs_contents(interface_name, "", port_prefix, virtual_file_obj)
+    if_gen.write_vs_contents(interface_name, "", port_prefix, virtual_file_obj, bus_size=bus_size)
     # Extract port list from virtual file object
     return virtual_file_obj.port_list
 

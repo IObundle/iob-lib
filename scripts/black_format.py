@@ -27,6 +27,15 @@ if __name__ == "__main__":
 
     # git ls-files: pipe only git tracked files into black. Does not include
     # submodule files
-    format_cmd = f"git ls-files *.py | xargs black {black_flags}"
+    files = subprocess.run(
+        f"git ls-files *.py",
+        shell=True,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
 
-    subprocess.run(format_cmd, shell=True, check=True)
+    if files.stdout:
+        format_cmd = f"git ls-files *.py | xargs black"
+        subprocess.run(format_cmd, shell=True, check=True)
+        print(format_cmd)
