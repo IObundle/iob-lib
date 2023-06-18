@@ -169,6 +169,9 @@ DOC_DIR=document
 doc-build: $(BSP_H)
 	make -C $(DOC_DIR) build
 
+doc-view: $(BSP_H)
+	make -C $(DOC_DIR) view
+
 doc-debug: 
 	make -C $(DOC_DIR) debug
 
