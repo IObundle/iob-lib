@@ -47,11 +47,9 @@ def flows_setup(python_module):
 
 
 def hw_setup(python_module):
-    # create module's version TeX file. Also create *_version.vh Verilog Header if we do not have regs.
-    version_file(
-        python_module,
-        create_version_header=False if python_module.regs else True,
-    )
+    # Create module's version TeX file. Also create *_version.vh Verilog Header if we do not have regs.
+    if python_module.is_top_module:
+        version_file(python_module)
 
 
 # Setup simulation related files/modules
@@ -461,7 +459,7 @@ def version_file(
     tex_dir = f"{build_dir}/document/tsrc"
     verilog_dir = f"{build_dir}/hardware/src"
 
-    if python_module.is_top_module and 'doc' in python_module.flows:
+    if 'doc' in python_module.flows:
         os.makedirs(tex_dir, exist_ok=True)
         tex_file = f"{tex_dir}/{core_name}_version.tex"
         with open(tex_file, "w") as tex_f:
@@ -470,7 +468,8 @@ def version_file(
         with open(tex_file, "w") as tex_f:
             tex_f.write(core_previous_version)
 
-    if not create_version_header:
+    # Don't create version.vh if module has regs (because it already has the VERSION register)
+    if python_module.regs:
         return
 
     vh_file = f"{verilog_dir}/{core_name}_version.vh"

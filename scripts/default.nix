@@ -19,6 +19,7 @@ pkgs.mkShell {
     python3Packages.parse
     python3Packages.numpy
     python3Packages.wavedrom
+    python3Packages.pyserial
     (texlive.combine { inherit (texlive) scheme-medium multirow lipsum catchfile nowidow enumitem placeins xltabular ltablex titlesec makecell datetime fmtcount ; })
     (callPackage ./riscv-gnu-toolchain.nix { })
     verible
