@@ -11,7 +11,6 @@ import build_srcs
 import verilog_tools
 import shutil
 
-# from iob_ctls import iob_ctls # The iob_ctls module imports this file and runs setup(), therefore, this file cannot import it (would cause an import loop).
 from iob_module import iob_module
 
 
@@ -87,11 +86,14 @@ def setup(
         reg_table = mkregs_obj.get_reg_table(regs, no_overlap)
 
         # Auto-add iob_ctls module
-        # iob_ctls.setup()
+        if python_module.name != "iob_ctls":
+            from iob_ctls import iob_ctls
+
+            iob_ctls.setup()
         ## Auto-add iob_s_port.vh
-        # iob_module.generate("iob_s_port")
+        iob_module.generate("iob_s_port")
         ## Auto-add iob_s_portmap.vh
-        # iob_module.generate("iob_s_portmap")
+        iob_module.generate("iob_s_portmap")
 
     # Only auto-generate files if `disable_file_gen` is False
     if not disable_file_gen:
