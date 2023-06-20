@@ -118,8 +118,8 @@ endif
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-debug: $(BUILD_DIR) $(SRC) format-all
+setup: $(BUILD_DIR) $(SRC) format-all
 	@for i in $(SRC); do echo $$i; done
 
 
-.PHONY: setup clean debug c-format python-format verilog-format
+.PHONY: setup clean setup c-format python-format verilog-format
