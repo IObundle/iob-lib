@@ -631,11 +631,13 @@ def get_periphs_id_as_macros(peripherals_list):
 
 # Return amount of system peripherals
 def get_n_periphs(peripherals_list):
+    # +1 because the internal memory is not in the peripherals_list. int_mem is implicit peripheral. It is treated as a peripheral by the internal signals. (might change in the future)
     return str(len(peripherals_list)+1)
 
 
 # Return bus width required to address all peripherals
 def get_n_periphs_w(peripherals_list):
+    # +1 because the internal memory is not in the peripherals_list. int_mem is implicit peripheral. It is treated as a peripheral by the internal signals. (might change in the future)
     i = len(peripherals_list)+1
     if not i:
         return str(0)
