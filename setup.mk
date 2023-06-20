@@ -10,9 +10,6 @@ help:
 	@echo The following targets are available:
 	@echo "  setup:  Setup the build directory"
 	@echo "  clean:  Remove the build directory"
-	@echo "  debug:  Print all source files in the build directory"
-
-
 
 TOP_MODULE_NAME ?=$(basename $(wildcard *.py))
 PROJECT_ROOT ?=.
@@ -57,24 +54,27 @@ ifeq ($(TESTER),1)
 	DISABLE_FORMAT:=1
 endif
 
+# Verilog files in build directory
+VHFILES = $(shell find $(BUILD_DIR)/hardware -type f -name "*.vh" -not -path "*version.vh" -not -path "*test_*.vh")
+VFILES = $(shell find $(BUILD_DIR)/hardware -type f -name ".v")
+
+# Verilog files in setup directory
+VHFILES += $(shell find ./hardware -type f -name "*.vh")
+VFILES += $(shell find ./hardware -type f -name "*.v")
+
+# Run linter on all verilog files
 verilog-lint:
 ifneq ($(DISABLE_LINT),1)
-	# Run linter on all verilog files of setup directory
-	$(IOB_LIB_PATH)/verilog-lint.sh `find hardware -type f -name "*.v?" -o -name "*.v" | tr '\n' ' '`
-	# Run linter on all verilog files of build directory (includes generated files)
-	$(IOB_LIB_PATH)/verilog-lint.sh `find $(BUILD_DIR) -type f -not -path "*version.vh" -not -path "*test_*.vh" -name "*.v?" -o -name "*.v"  | tr '\n' ' '`
+	$(IOB_LIB_PATH)/verilog-lint.sh $(VHFILES) $(VFILES)
 endif
-verilog-format:
+
+# Run formatter on all verilog files
+verilog-format: verilog-lint
 ifneq ($(DISABLE_FORMAT),1)
-	# Run formatter on all verilog files of setup directory
-	$(IOB_LIB_PATH)/verilog-format.sh `find  hardware -type f -name "*.v?" -o -name "*.v" | tr '\n' ' '`
-	# Run formatter on all verilog files of build directory (includes generated files)
-	$(IOB_LIB_PATH)/verilog-format.sh `find $(BUILD_DIR) -type f -not -path "*test_*.vh" -name "*.v?" -o -name "*.v" | tr '\n' ' '`
+	$(IOB_LIB_PATH)/verilog-format.sh $(VHFILES) $(VFILES)
 endif
 
 format-all: $(BUILD_DIR) python-format c-format verilog-lint verilog-format
-
-setup: debug
 
 $(BUILD_DIR):
 	$(PYTHON_EXEC) ./$(PYTHON_DIR)/bootstrap.py $(TOP_MODULE_NAME) $(SETUP_ARGS) -s $(PROJECT_ROOT)
@@ -118,7 +118,7 @@ endif
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-debug: format-all $(BUILD_DIR) $(SRC)
+debug: $(BUILD_DIR) $(SRC) format-all
 	@for i in $(SRC); do echo $$i; done
 
 
