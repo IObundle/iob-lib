@@ -40,10 +40,6 @@ black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://gith
         format:
            @./$(LIB_DIR)/scripts/clang_format.py
         ```
-#### Github Actions
-- To check for format compliance in other repositories:
-    - copy `./github/workflows/format.yml` to new repository
-    - update path to format scripts accordingly
 
 ## Tests
 Currently tests are automated for the memory modules in the `test.mk` makefile.
