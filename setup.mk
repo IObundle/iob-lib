@@ -45,14 +45,8 @@ BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 python-format:
 	$(LIB_DIR)/scripts/black_format.py
 
-python-format-check:
-	$(LIB_DIR)/scripts/black_format.py --check
-
 c-format:
 	$(LIB_DIR)/scripts/clang_format.py
-
-c-format-check:
-	$(LIB_DIR)/scripts/clang_format.py --check
 
 IOB_LIB_PATH=$(LIB_DIR)/scripts
 export IOB_LIB_PATH
@@ -78,7 +72,7 @@ ifneq ($(DISABLE_FORMAT),1)
 	$(IOB_LIB_PATH)/verilog-format.sh `find $(BUILD_DIR) -type f -not -path "*test_*.vh" -name "*.v?" -o -name "*.v" | tr '\n' ' '`
 endif
 
-format-check-all: $(BUILD_DIR) python-format-check c-format-check verilog-lint verilog-format
+format-all: $(BUILD_DIR) python-format c-format verilog-lint verilog-format
 
 setup: debug
 
@@ -124,8 +118,8 @@ endif
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-debug: format-check-all $(BUILD_DIR) $(SRC)
+debug: format-all $(BUILD_DIR) $(SRC)
 	@for i in $(SRC); do echo $$i; done
 
 
-.PHONY: setup clean debug python-format-check verilog-format-check verilog-format
+.PHONY: setup clean debug c-format python-format verilog-format
