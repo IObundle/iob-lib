@@ -461,7 +461,7 @@ def version_file(
     tex_dir = f"{build_dir}/document/tsrc"
     verilog_dir = f"{build_dir}/hardware/src"
 
-    if python_module.is_top_module and 'doc' in python_module.flows:
+    if python_module.is_top_module and "doc" in python_module.flows:
         os.makedirs(tex_dir, exist_ok=True)
         tex_file = f"{tex_dir}/{core_name}_version.tex"
         with open(tex_file, "w") as tex_f:

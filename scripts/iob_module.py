@@ -137,10 +137,10 @@ class iob_module:
     @classmethod
     def _run_setup_files(cls):
         flows_setup_files = {
-            "sim":  cls.setup_dir + "/hardware/simulation/sim_setup.py",
+            "sim": cls.setup_dir + "/hardware/simulation/sim_setup.py",
             "fpga": cls.setup_dir + "/hardware/fpga/fpga_setup.py",
-            "emb":  cls.setup_dir + "/software/sw_setup.py",
-            "doc":  cls.setup_dir + "/document/doc_setup.py",
+            "emb": cls.setup_dir + "/software/sw_setup.py",
+            "doc": cls.setup_dir + "/document/doc_setup.py",
         }
         for flow, filepath in flows_setup_files.items():
             # Skip if flow not in flows list
@@ -159,7 +159,6 @@ class iob_module:
             vars(module)["setup_module"] = cls
             # Execute setup file
             spec.loader.exec_module(module)
-
 
     # Run setup functions for the submodules list stored in the setup_submodules_list
     @classmethod
