@@ -37,7 +37,6 @@ def build_find_cmd(path, file_extentions):
     is_git_repo = subprocess.run(
         "git rev-parse --is-inside-work-tree",
         shell=True,
-        check=True,
         capture_output=True,
         text=True,
         cwd=path,
