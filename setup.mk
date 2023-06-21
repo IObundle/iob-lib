@@ -58,10 +58,6 @@ endif
 VHFILES = $(shell find $(BUILD_DIR)/hardware -type f -name "*.vh" -not -path "*version.vh" -not -path "*test_*.vh")
 VFILES = $(shell find $(BUILD_DIR)/hardware -type f -name ".v")
 
-# Verilog files in setup directory
-VHFILES += $(shell find ./hardware -type f -name "*.vh")
-VFILES += $(shell find ./hardware -type f -name "*.v")
-
 # Run linter on all verilog files
 verilog-lint:
 ifneq ($(DISABLE_LINT),1)
