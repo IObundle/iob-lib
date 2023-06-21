@@ -29,7 +29,7 @@ done
 total_files_combined=$idx
 
 # Lint the temporary combined file and remove it if successful
-ERROR_STR=`verible-verilog-lint  --rules_config $IOB_LIB_PATH/verible-lint.rules $TMP_FILENAME && rm $TMP_FILENAME || true`
+ERROR_STR=`verible-verilog-lint --rules_config $IOB_LIB_PATH/verible-lint.rules $TMP_FILENAME 2>&1 && rm $TMP_FILENAME || true`
 #echo "'$ERROR_STR'" #DEBUG
 
 # Exit if there was no error
