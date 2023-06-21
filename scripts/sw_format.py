@@ -18,7 +18,7 @@ def submodule_exceptions(path):
     submodule_exceptions = ""
     for submodule in submodules.split("\n"):
         try:
-            submodule_dir = submodule.split(" ")[2]
+            submodule_dir = submodule.strip().split(" ")[1]
             submodule_exceptions = (
                 f"{submodule_exceptions} -not -path './{submodule_dir}/*'"
             )
@@ -61,9 +61,13 @@ def build_find_cmd(path, file_extentions):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="clang_format",
-        description="""Clang format script.
-        Format all C/C++ files (*.h, *.c, *.cpp, *.hpp) in repository.""",
+        prog="sw_format.py",
+        description="""Software format script.
+        Format all software files in directory or repository (except submodules).
+        Currently supports black (python) and clang (C/C++).""",
+    )
+    parser.add_argument(
+        "formater", choices=["black", "clang"], help="Formater program to run."
     )
     parser.add_argument(
         "path",
@@ -74,10 +78,23 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    clang_flags = "-i -style=file -fallback-style=none -Werror"
-    file_extentions = "*.c *.h *.cpp *.hpp"
+    match args.formater:
+        case "black":
+            cmd = "black"
+            flags = ""
+            file_extentions = "*.py"
+        case "clang":
+            cmd = "clang-format"
+            flags = "-i -style=file -fallback-style=none -Werror"
+            file_extentions = "*.c *.h *.cpp *.hpp"
+        case _:
+            cmd = ""
+            flags = ""
+            file_extentions = ""
 
     # find all files and format
-    format_cmd = f"{build_find_cmd(args.path, file_extentions)} | xargs -r clang-format {clang_flags}"
+    format_cmd = (
+        f"{build_find_cmd(args.path, file_extentions)} | xargs -r {cmd} {flags}"
+    )
     subprocess.run(format_cmd, shell=True, check=True)
     print(format_cmd)
