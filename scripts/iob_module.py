@@ -200,14 +200,25 @@ class iob_module:
     #          Example string: "iob_wire"
     #          Example dictionary:
     #                {
-    #                    "file_prefix": "iob_bus_0_2_",
-    #                    "interface": "axi_m_portmap",
-    #                    "wire_prefix": "",
-    #                    "port_prefix": "",
-    #                    "bus_start": 0,
-    #                    "bus_size": 2,
+    #                    "file_prefix": "iob_bus_0_2_", # Prefix to include in the generated file name
+    #                    "interface": "axi_m_portmap",  # Type of interface/wires to generate. Will also be part of the filename.
+    #                    "wire_prefix": "",             # Prefix to include in the generated wire names
+    #                    "port_prefix": "",             # Prefix to include in the generated port names
+    #                    "bus_start": 0,                # Optional. Starting index of the bus of wires that we are connecting.
+    #                    "bus_size": 2,                 # Optional. Size of the bus of wires that we are creating/connecting.
     #                }
-    # purpose: Reason for generating the header. Used to select between the standard destination locations.
+    # purpose: [Optional] Reason for generating the header. Used to select between the standard destination locations.
+    #
+    # Example function calls:
+    # To generate a simple `iob_s_port.vh` file, use: `iob_module.generate("iob_s_port")`
+    # To generate an iob_s_port file with a custom prefix in its ports, wires, and filename, use:
+    #     iob_module.generate(
+    #                {
+    #                    "file_prefix": "example_file_prefix_",
+    #                    "interface": "iob_s_port",
+    #                    "wire_prefix": "example_wire_prefix_",
+    #                    "port_prefix": "example_port_prefix_",
+    #                })
     @classmethod
     def generate(cls, vs_name, purpose="hardware"):
         dest_dir = os.path.join(cls.build_dir, cls.get_purpose_dir(purpose))
