@@ -110,6 +110,7 @@ endif
 clean:
 	-@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
 	@rm -rf $(BUILD_DIR)
+	@rm -f ~*
 ifneq ($(wildcard config_delivery.mk),)
 	make delivery-clean
 endif
