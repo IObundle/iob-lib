@@ -6,3 +6,4 @@
 -explicit-task-lifetime
 -unpacked-dimensions-range-ordering
 -always-comb
+-module-filename
