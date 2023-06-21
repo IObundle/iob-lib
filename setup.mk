@@ -56,7 +56,7 @@ endif
 
 # Verilog files in build directory
 VHFILES = $(shell find $(BUILD_DIR)/hardware -type f -name "*.vh" -not -path "*version.vh" -not -path "*test_*.vh")
-VFILES = $(shell find $(BUILD_DIR)/hardware -type f -name ".v")
+VFILES = $(shell find $(BUILD_DIR)/hardware -type f -name "*.v")
 
 # Run linter on all verilog files
 verilog-lint:
@@ -106,6 +106,7 @@ endif
 clean:
 	-@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
 	@rm -rf $(BUILD_DIR)
+	@rm -f ~*
 ifneq ($(wildcard config_delivery.mk),)
 	make delivery-clean
 endif
