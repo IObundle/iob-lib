@@ -24,7 +24,10 @@ module iob_s2f_sync #(
    assign data1 = ld_i ? ld_val_i : data_i;
    assign data2 = ld_i ? ld_val_i : sync;
 
-   iob_reg_r #(DATA_W, RST_VAL) reg0 (
+   iob_reg_r #(
+       .DATA_W(DATA_W), 
+       .RST_VAL(RST_VAL)
+   ) reg0 (
       .clk_i (clk_i),
       .arst_i(arst_i),
       .cke_i (cke_i),
@@ -35,7 +38,10 @@ module iob_s2f_sync #(
       .data_o(sync)
    );
 
-   iob_reg_r #(DATA_W, RST_VAL) reg1 (
+   iob_reg_r #(
+       .DATA_W(DATA_W), 
+       .RST_VAL(RST_VAL)
+   ) reg1 (
       .clk_i (clk_i),
       .arst_i(arst_i),
       .cke_i (cke_i),
