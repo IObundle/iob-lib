@@ -40,10 +40,12 @@ BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
 BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 
 python-format:
-	$(LIB_DIR)/scripts/black_format.py
+	$(LIB_DIR)/scripts/sw_format.py black . 
+	$(LIB_DIR)/scripts/sw_format.py black $(BUILD_DIR) 
 
 c-format:
-	$(LIB_DIR)/scripts/clang_format.py
+	$(LIB_DIR)/scripts/sw_format.py clang .
+	$(LIB_DIR)/scripts/sw_format.py clang $(BUILD_DIR)
 
 IOB_LIB_PATH=$(LIB_DIR)/scripts
 export IOB_LIB_PATH
