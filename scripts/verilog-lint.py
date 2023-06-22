@@ -1,29 +1,23 @@
-#!/usr/bin/env bash
-# run the command below for all files given as command line arguments
-set -e
-
-## 'verilator' linter
-LINTER_CMD="verilator --lint-only -Wall"
-LINTER_INCLUDE_FLAG="-I"
-
-## 'svlint' is a system verilog linter (Nix package available)
-#LINTER_CMD="svlint"
-#LINTER_INCLUDE_FLAG="-i"
-
-
-
+#!/usr/bin/env python3
 # Python3 script to parse directories to search and create lists of files for each combination of the directories
 # Example directory combinations:
 #  [ hardware/src, hardware/simulation/src ]                            -> The 'base' directory is 'hardware/simulation/src'
 #  [ hardware/src, hardware/fpga/src, hardware/fpga/vivado/BASYS3/ ]    -> The 'base' directory is 'hardware/fpga/vivado/BASYS3/'
 #  [ hardware/src, hardware/fpga/src, hardware/fpga/quartus/CYCLONEV/ ] -> The 'base' directory is 'hardware/fpga/quartus/CYCLONEV/'
 #  ...
-eval "`python3 - << EOF
 import os
-#import sys #DEBUG
+import sys
+import subprocess
 
-files_str = "$@"
-files_list = files_str.split()
+import iob_colors
+
+linters = [
+  {"command": "verilator --lint-only -Wall", "include_flag": "-I"},
+#  {"command": "svlint", "include_flag": "-i"}
+]
+
+# Get list of files to lint from argv
+files_list = sys.argv[1:]
 
 # Group files by their directories
 dir_file_list = {}
@@ -64,15 +58,17 @@ for directory in parent_dirs:
   del files_to_lint[directory]
   del directories_to_lint[directory]
 
-for directory, files in files_to_lint.items():
-  print(f'echo -e "\n\\033[36mLinting from base directory \'{directory}\'...\\033[0m"')
-  linter_cmd = f'$LINTER_CMD $LINTER_INCLUDE_FLAG{" $LINTER_INCLUDE_FLAG".join(directories_to_lint[directory])} {" ".join(files)}' 
-  print(f'echo {linter_cmd}')
-  print(linter_cmd)
+for linter in linters:
+  # Lint files for each directory combination
+  for directory, files in files_to_lint.items():
+    print(f'\n{iob_colors.INFO}Linting from base directory "{directory}"{iob_colors.ENDC}')
+    linter_cmd = f"{linter['command']} {linter['include_flag']}{(' '+linter['include_flag']).join(directories_to_lint[directory])} {' '.join(files)}"
+    print(linter_cmd)
+    result = subprocess.run(linter_cmd, shell=True)
+    exit(result.returncode)
 
 # DEBUG: Print child directories and files to lint
-#  print(directory, file=sys.stderr)
-#  print(files, file=sys.stderr)
-#  print("\n", file=sys.stderr)
-EOF
-`"
+#    print("Base dir: "+directory, file=sys.stderr)
+#    print("Parent dirs: "+directories_to_lint[directory], file=sys.stderr)
+#    print("Files from dirs:"+files, file=sys.stderr)
+#    print("\n", file=sys.stderr)
