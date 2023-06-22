@@ -2,96 +2,77 @@
 # run the command below for all files given as command line arguments
 set -e
 
-TMP_FILENAME=~linter_files_combined.tmp
+## 'verilator' linter
+LINTER_CMD="verilator --lint-only -Wall"
+LINTER_INCLUDE_FLAG="-I"
+
+## 'svlint' is a system verilog linter (Nix package available)
+#LINTER_CMD="svlint"
+#LINTER_INCLUDE_FLAG="-i"
 
 
 
-function lint_file () {
-  #echo "verible-verilog-lint --rules_config $IOB_LIB_PATH/verible-lint.rules $TMP_FILENAME" #DEBUG
+# Python3 script to parse directories to search and create lists of files for each combination of the directories
+# Example directory combinations:
+#  [ hardware/src, hardware/simulation/src ]                            -> The 'base' directory is 'hardware/simulation/src'
+#  [ hardware/src, hardware/fpga/src, hardware/fpga/vivado/BASYS3/ ]    -> The 'base' directory is 'hardware/fpga/vivado/BASYS3/'
+#  [ hardware/src, hardware/fpga/src, hardware/fpga/quartus/CYCLONEV/ ] -> The 'base' directory is 'hardware/fpga/quartus/CYCLONEV/'
+#  ...
+eval "`python3 - << EOF
+import os
+#import sys #DEBUG
 
-  # Lint the temporary combined file and remove it if successful
-  ERROR_STR=`verible-verilog-lint --rules_config $IOB_LIB_PATH/verible-lint.rules $TMP_FILENAME 2>&1 || true`
-  #echo "'$ERROR_STR'" #DEBUG
+files_str = "$@"
+files_list = files_str.split()
 
-  # Exit if there was no error and delete the temporary file
-  if [ "$ERROR_STR" = "" ]; then
-    rm $TMP_FILENAME
-    exit 0
-  fi
+# Group files by their directories
+dir_file_list = {}
+for file in files_list:
+    file_dir = os.path.dirname(file)
 
-  # Check if the first error is due to a syntax error (caused by hack for verible)
-  if [ $HACK_ENABLED ] && [[ "`echo $ERROR_STR | cut -d: -f4`" == *"syntax error"*  ]]; then
-    # The error was caused by the hack, therefore exit function instead of exiting the program
-    return 0
-  fi
+    if not file_dir in dir_file_list:
+      dir_file_list[file_dir] = []
 
-  # For each error line, find the correct original file
-  while IFS= read -r line; do
-    #echo "Processing line: $line" #DEBUG
-    LINE_NUM=`echo $line | cut -d: -f2`
-    ERROR_LINE=`echo $line | cut -d: -f3-`
-    #echo "$LINE_NUM $ERROR_LINE" #DEBUG
-    # Find which file contains the current line number
-    for idx in `seq 0 $(($total_files_combined-1))`;
-    do
-      #echo -e "\n\n$idx ${files_linenumber[$idx,0]} ${files_linenumber[$idx,1]}" #DEBUG
+    dir_file_list[file_dir].append(file)
 
-      # If hack is enabled, ignore lines that say syntax error due to EOF (these syntax errors are caused by the hack)
-      if [ $HACK_ENABLED ] && [[ "$ERROR_LINE" == *"syntax error (unexpected EOF)"* ]]; then continue; fi
-      
-      # If this is the last file
-      # or the line number of the next file is greater than the current line number
-      # then the current file has the error.
-      if [ $idx -eq $(($total_files_combined-1)) ] || [ "${files_linenumber[$(($idx+1)),1]}" -gt "$LINE_NUM" ]; then
-        #echo "Error is in file: ${files_linenumber[$(($idx)),0]}" #DEBUG
-        # Print error line with format: 'Error: <filename>:<linenumber>:<message>'
-        echo "Error: ${files_linenumber[$(($idx)),0]}:$(($LINE_NUM-${files_linenumber[$(($idx)),1]})):$ERROR_LINE"
-        break
-      fi
-    done
-  done <<< "$ERROR_STR"
+#print(dir_file_list, file=sys.stderr) #DEBUG
 
-  exit 1
-}
+files_to_lint = {}
+directories_to_lint = {}
+parent_dirs = []
+for child_dir in dir_file_list.keys():
+  #print(f"debug: {child_dir}", file=sys.stderr) #DEBUG
+  files_to_lint[child_dir] = []
+  directories_to_lint[child_dir] = []
 
+  # Find parents of this directory
+  for directory, file_list in dir_file_list.items():
+    dir_name = os.path.dirname(directory) if os.path.basename(directory) == "src" else directory
+    # If this directory is a parent (or equal) to the child_dir, add files to the list
+    if os.path.commonprefix([dir_name, child_dir])==dir_name and directory != child_dir+"/src":
+      files_to_lint[child_dir] += file_list
+      directories_to_lint[child_dir].append(directory)
+      #print(f"   {directory}", file=sys.stderr) #DEBUG
 
+      # Add this directory to the list of parent directories if it is not the child
+      if directory not in parent_dirs and directory != child_dir:
+        #print(f'PARENT: {directory}', file=sys.stderr)
+        parent_dirs.append(directory)
 
-# Start by deleting the temporary file if it exists
-rm -f $TMP_FILENAME
+# Remove parent directories from dictionary
+for directory in parent_dirs:
+  del files_to_lint[directory]
+  del directories_to_lint[directory]
 
-# Create array of tuples to store filenames and starting line numbers
-declare -A files_linenumber
+for directory, files in files_to_lint.items():
+  print(f'echo -e "\n\\033[36mLinting from base directory \'{directory}\'...\\033[0m"')
+  linter_cmd = f'$LINTER_CMD $LINTER_INCLUDE_FLAG{" $LINTER_INCLUDE_FLAG".join(directories_to_lint[directory])} {" ".join(files)}' 
+  print(f'echo {linter_cmd}')
+  print(linter_cmd)
 
-idx=0
-# Combine all files into one file, separating them with a comment, and creating an array for each file
-for file in $@;
-do
-  # Add comment to specify original file name
-  echo -e "\n////////////////////////////////////////////////////////////////////" >> $TMP_FILENAME
-  echo "// Original file $file" >> $TMP_FILENAME
-  echo -e ////////////////////////////////////////////////////////////////////"\n\n" >> $TMP_FILENAME
-  
-  # Store this filename and corresponding start line number into a dictionary
-  files_linenumber[$idx,0]="$file"
-  files_linenumber[$idx,1]=`wc -l $TMP_FILENAME | cut -d' ' -f1`
-  idx=$(($idx+1))
-
-  # Add file content
-  cat $file >> $TMP_FILENAME
-done
-total_files_combined=$idx
-
-# Hack to make verible lint macros. For some reason, verible analyses macros only when there are syntax erros.
-# Add a syntax error at the end of the file. 
-echo "syntax_error_for_verible_hack" >> $TMP_FILENAME
-HACK_ENABLED=1
-
-lint_file
-
-# If the function returned then there was syntax error (due to hack)
-# Remove last line from file (the one with syntax error)
-sed -i '$d' "$TMP_FILENAME"
-HACK_ENABLED=0
-# Run linter again in the file without the hack
-lint_file
-
+# DEBUG: Print child directories and files to lint
+#  print(directory, file=sys.stderr)
+#  print(files, file=sys.stderr)
+#  print("\n", file=sys.stderr)
+EOF
+`"
