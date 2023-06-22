@@ -63,7 +63,7 @@ VFILES = $(shell find $(BUILD_DIR)/hardware -type f -name "*.v")
 # Run linter on all verilog files
 verilog-lint:
 ifneq ($(DISABLE_LINT),1)
-	$(IOB_LIB_PATH)/verilog-lint.sh $(VHFILES) $(VFILES)
+	$(IOB_LIB_PATH)/verilog-lint.py $(VHFILES) $(VFILES)
 endif
 
 # Run formatter on all verilog files
