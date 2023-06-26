@@ -41,11 +41,15 @@ BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
 
 python-format:
 	$(LIB_DIR)/scripts/sw_format.py black . 
+ifneq ($(wildcard $(BUILD_DIR)),)
 	$(LIB_DIR)/scripts/sw_format.py black $(BUILD_DIR) 
+endif
 
 c-format:
 	$(LIB_DIR)/scripts/sw_format.py clang .
+ifneq ($(wildcard $(BUILD_DIR)),)
 	$(LIB_DIR)/scripts/sw_format.py clang $(BUILD_DIR)
+endif
 
 IOB_LIB_PATH=$(LIB_DIR)/scripts
 export IOB_LIB_PATH
