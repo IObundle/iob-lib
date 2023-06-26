@@ -102,7 +102,7 @@ module iob_regfile_sp_tb;
       .DATA_W(`DATA_W)
    ) uut (
       .clk_i   (clk),
-      .rst_i   (rst),
+      .arst_i  (rst),
       .we_i    (en),
       .addr_i  (addr),
       .w_data_i(w_data),
