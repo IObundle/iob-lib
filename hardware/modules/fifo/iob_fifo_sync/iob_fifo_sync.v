@@ -124,7 +124,7 @@ module iob_fifo_sync #(
    assign level_o = level_int;
 
    //FIFO empty
-   wire [1-1:0] r_empty_nxt;
+   wire r_empty_nxt;
    assign r_empty_nxt = level_nxt < R_INCR;
    iob_reg #(
       .DATA_W (1),
@@ -140,7 +140,7 @@ module iob_fifo_sync #(
    );
 
    //FIFO full
-   wire [1-1:0] w_full_nxt;
+   wire w_full_nxt;
    assign w_full_nxt = level_nxt > (FIFO_SIZE - W_INCR);
    iob_reg #(
       .DATA_W (1),

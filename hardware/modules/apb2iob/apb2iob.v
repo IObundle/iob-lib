@@ -28,7 +28,7 @@ module apb2iob #(
 
 
    // APB outputs
-   reg [1-1:0] apb_ready_nxt;
+   reg apb_ready_nxt;
 
    iob_reg #(
       .DATA_W (1),
@@ -44,8 +44,8 @@ module apb2iob #(
 
    assign apb_rdata_o = iob_rdata_i;
 
-   wire [1-1:0] pc;
-   reg  [1-1:0] pc_nxt;
+   wire pc;
+   reg  pc_nxt;
    iob_reg #(
       .DATA_W (1),
       .RST_VAL(1'b0),

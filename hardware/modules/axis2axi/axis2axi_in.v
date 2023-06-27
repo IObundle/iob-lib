@@ -32,10 +32,10 @@ module axis2axi_in #(
    output [  BUFFER_W-1:0] ext_mem_r_addr_o,
    input  [AXI_DATA_W-1:0] ext_mem_r_data_i,
 
-   input [1-1:0] clk_i,
-   input [1-1:0] cke_i,
-   input [1-1:0] rst_i,
-   input [1-1:0] arst_i
+   input clk_i,
+   input cke_i,
+   input rst_i,
+   input arst_i
 );
 
    localparam BURST_SIZE = 2 ** BURST_W;

@@ -15,8 +15,8 @@ module iob_pulse_gen #(
    localparam WIDTH = $clog2(START + DURATION + 2);
 
    //start detect
-   wire [1-1:0] start_detected;
-   wire [1-1:0] start_detected_nxt;
+   wire start_detected;
+   wire start_detected_nxt;
    assign start_detected_nxt = start_detected | start_i;
 
    iob_reg #(

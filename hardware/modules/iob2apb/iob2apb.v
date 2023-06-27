@@ -22,7 +22,7 @@ module iob2apb #(
 );
 
    //APB outputs
-   reg [1-1:0] apb_sel_nxt;
+   reg apb_sel_nxt;
    iob_reg #(
       .DATA_W (1),
       .RST_VAL(0)
@@ -34,7 +34,7 @@ module iob2apb #(
       .data_o(apb_sel_o)
    );
 
-   reg [1-1:0] apb_enable_nxt;
+   reg apb_enable_nxt;
    iob_reg #(
       .DATA_W (1),
       .RST_VAL(0)
@@ -70,7 +70,7 @@ module iob2apb #(
       .data_o(apb_wstrb_o)
    );
 
-   reg [1-1:0] apb_write_nxt;
+   reg apb_write_nxt;
    iob_reg #(
       .DATA_W (1),
       .RST_VAL(0)
@@ -95,7 +95,7 @@ module iob2apb #(
    );
 
    //IOb outputs
-   reg [1-1:0] iob_ready_nxt;
+   reg iob_ready_nxt;
    iob_reg #(
       .DATA_W (1),
       .RST_VAL(1)
@@ -107,7 +107,7 @@ module iob2apb #(
       .data_o(iob_ready_o)
    );
 
-   reg [1-1:0] iob_rvalid_nxt;
+   reg iob_rvalid_nxt;
    iob_reg #(
       .DATA_W (1),
       .RST_VAL(0)
@@ -131,8 +131,8 @@ module iob2apb #(
       .data_o(iob_rdata_o)
    );
 
-   wire [1-1:0] pc;
-   reg  [1-1:0] pc_nxt;
+   wire pc;
+   reg  pc_nxt;
    iob_reg #(
       .DATA_W (1),
       .RST_VAL(0)
