@@ -58,7 +58,7 @@ module axis2axi_tb;
    reg delayed_axis_out_ready;
 
    // AXI-4 full master I/F
-   wire [1-1:0] ddr_axi_awid;  //Address write channel ID
+   wire ddr_axi_awid;  //Address write channel ID
    wire [AXI_ADDR_W-1:0] ddr_axi_awaddr;  //Address write channel address
    wire [8-1:0] ddr_axi_awlen;  //Address write channel burst length
    wire [3-1:0] ddr_axi_awsize
@@ -70,17 +70,17 @@ module axis2axi_tb;
    wire [3-1:0] ddr_axi_awprot
        ;  //Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
    wire [4-1:0] ddr_axi_awqos;  //Address write channel quality of service
-   wire [1-1:0] ddr_axi_awvalid;  //Address write channel valid
-   wire [1-1:0] ddr_axi_awready;  //Address write channel ready
-   wire [1-1:0] ddr_axi_wid;  //Write channel ID
+   wire ddr_axi_awvalid;  //Address write channel valid
+   wire ddr_axi_awready;  //Address write channel ready
+   wire ddr_axi_wid;  //Write channel ID
    wire [AXI_DATA_W-1:0] ddr_axi_wdata;  //Write channel data
    wire [(AXI_DATA_W/8)-1:0] ddr_axi_wstrb;  //Write channel write strobe
-   wire [1-1:0] ddr_axi_wlast;  //Write channel last word flag
-   wire [1-1:0] ddr_axi_bid;  //Write response channel ID
+   wire ddr_axi_wlast;  //Write channel last word flag
+   wire ddr_axi_bid;  //Write response channel ID
    wire [2-1:0] ddr_axi_bresp;  //Write response channel response
-   wire [1-1:0] ddr_axi_bvalid;  //Write response channel valid
-   wire [1-1:0] ddr_axi_bready;  //Write response channel ready
-   wire [1-1:0] ddr_axi_arid;  //Address read channel ID
+   wire ddr_axi_bvalid;  //Write response channel valid
+   wire ddr_axi_bready;  //Write response channel ready
+   wire ddr_axi_arid;  //Address read channel ID
    wire [AXI_ADDR_W-1:0] ddr_axi_araddr;  //Address read channel address
    wire [8-1:0] ddr_axi_arlen;  //Address read channel burst length
    wire [3-1:0] ddr_axi_arsize
@@ -92,12 +92,12 @@ module axis2axi_tb;
    wire [3-1:0] ddr_axi_arprot
        ;  //Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).
    wire [4-1:0] ddr_axi_arqos;  //Address read channel quality of service
-   wire [1-1:0] ddr_axi_arvalid;  //Address read channel valid
-   wire [1-1:0] ddr_axi_arready;  //Address read channel ready
-   wire [1-1:0] ddr_axi_rid;  //Read channel ID
+   wire ddr_axi_arvalid;  //Address read channel valid
+   wire ddr_axi_arready;  //Address read channel ready
+   wire ddr_axi_rid;  //Read channel ID
    wire [AXI_DATA_W-1:0] ddr_axi_rdata;  //Read channel data
    wire [2-1:0] ddr_axi_rresp;  //Read channel response
-   wire [1-1:0] ddr_axi_rlast;  //Read channel last word
+   wire ddr_axi_rlast;  //Read channel last word
 
    // Iterators
    integer i;

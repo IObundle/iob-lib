@@ -15,9 +15,9 @@ module iob_asym_converter #(
    W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
    R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
 ) (
-   input [1-1:0] clk_i,
-   input [1-1:0] arst_i,
-   input [1-1:0] cke_i,
+   input clk_i,
+   input arst_i,
+   input cke_i,
 
    //write port
    input [       1-1:0] w_en_i,

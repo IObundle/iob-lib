@@ -16,26 +16,26 @@ module iob_fifo_sync #(
    W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
    R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
 ) (
-   input [1-1:0] clk_i,
-   input [1-1:0] arst_i,
-   input [1-1:0] cke_i,
+   input clk_i,
+   input arst_i,
+   input cke_i,
 
-   input [1-1:0] rst_i,
+   input rst_i,
 
    //write port
-   input  [       1-1:0] w_en_i,
+   input                 w_en_i,
    input  [W_DATA_W-1:0] w_data_i,
-   output [       1-1:0] w_full_o,
+   output                w_full_o,
 
    //read port
-   input  [       1-1:0] r_en_i,
+   input                 r_en_i,
    output [R_DATA_W-1:0] r_data_o,
-   output [       1-1:0] r_empty_o,
+   output                r_empty_o,
 
    //write port
-   output [        1-1:0] ext_mem_clk_o,
-   output [        1-1:0] ext_mem_arst_o,
-   output [        1-1:0] ext_mem_cke_o,
+   output                 ext_mem_clk_o,
+   output                 ext_mem_arst_o,
+   output                 ext_mem_cke_o,
    output [        R-1:0] ext_mem_w_en_o,
    output [MINADDR_W-1:0] ext_mem_w_addr_o,
    output [MAXDATA_W-1:0] ext_mem_w_data_o,
@@ -124,7 +124,7 @@ module iob_fifo_sync #(
    assign level_o = level_int;
 
    //FIFO empty
-   wire [1-1:0] r_empty_nxt;
+   wire r_empty_nxt;
    assign r_empty_nxt = level_nxt < R_INCR;
    iob_reg #(
       .DATA_W (1),
@@ -140,7 +140,7 @@ module iob_fifo_sync #(
    );
 
    //FIFO full
-   wire [1-1:0] w_full_nxt;
+   wire w_full_nxt;
    assign w_full_nxt = level_nxt > (FIFO_SIZE - W_INCR);
    iob_reg #(
       .DATA_W (1),

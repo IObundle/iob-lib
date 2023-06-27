@@ -25,10 +25,10 @@ module axis2axi_out #(
    // Axi master interface
    `include "iob_axi_m_read_port.vs"
 
-   input [1-1:0] clk_i,
-   input [1-1:0] cke_i,
-   input [1-1:0] rst_i,
-   input [1-1:0] arst_i
+   input clk_i,
+   input cke_i,
+   input rst_i,
+   input arst_i
 );
 
    localparam BURST_SIZE = 2 ** BURST_W;
