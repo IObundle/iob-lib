@@ -5,7 +5,7 @@ import subprocess
 
 
 def submodule_exceptions(path):
-    # get submodule paths and add as exceptions to find cmd
+    # get repository submodules
     submodules = subprocess.run(
         "git submodule",
         shell=True,
@@ -15,6 +15,7 @@ def submodule_exceptions(path):
         cwd=path,
     ).stdout
 
+    # parse submodule info to get submodule path
     submodule_exceptions = ""
     for submodule in submodules.split("\n"):
         try:
@@ -44,9 +45,9 @@ def build_find_cmd(path, file_extentions):
 
     find_flags = ""
     if is_git_repo == "true":
-        find_flags = submodule_exceptions(args.path)
+        find_flags = submodule_exceptions(path)
 
-    find_cmd = f"find {args.path} {find_flags} -type f \("
+    find_cmd = f"find {path} {find_flags} -type f \("
     first_extention = 1
     for extention in file_extentions.split(" "):
         if first_extention:
