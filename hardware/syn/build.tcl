@@ -161,22 +161,6 @@ report_gates > $OUTPUTS_DIR/${DESIGN}_gates.rpt
 report_clocks > $OUTPUTS_DIR/${DESIGN}_clk.rpt
 
 report_timing -max_paths 30 > $OUTPUTS_DIR/${DESIGN}_timing.rpt
-report_timing -from [get_clocks clk] -to [get_clocks mclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-report_timing -from [get_clocks clk] -to [get_clocks btxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-report_timing -from [get_clocks clk] -to [get_clocks brxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-
-report_timing -from [get_clocks mclk] -to [get_clocks clk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-report_timing -from [get_clocks mclk] -to [get_clocks btxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-report_timing -from [get_clocks mclk] -to [get_clocks brxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-
-report_timing -from [get_clocks btxclk] -to [get_clocks clk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-report_timing -from [get_clocks btxclk] -to [get_clocks mclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-report_timing -from [get_clocks btxclk] -to [get_clocks brxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-
-report_timing -from [get_clocks brxclk] -to [get_clocks clk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-report_timing -from [get_clocks brxclk] -to [get_clocks mclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-report_timing -from [get_clocks brxclk] -to [get_clocks btxclk] -max_paths 5 >> $OUTPUTS_DIR/${DESIGN}_timing.rpt
-
 
 report_power -by_hierarchy -format %.2f -levels 2  -unit uW  > $OUTPUTS_DIR/${DESIGN}_power.rpt
 
@@ -187,6 +171,10 @@ report_qor > $OUTPUTS_DIR/${DESIGN}_qor.rpt
 puts "============================"
 puts "Synthesis Finished ........."
 puts "============================"
+
+if {[file exists "post_syn.tcl"]} {
+  source post_syn.tcl
+}
 
 write_hdl -mapped -v2001 > $OUTPUTS_DIR/${DESIGN}_synth.v 
 
