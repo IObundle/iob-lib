@@ -24,7 +24,8 @@ module axil2iob #(
 
    // write address
    assign axil_awready_o = iob_ready_i;
-
+   assign axil_awprot_o  = 3'b000;
+   
    // write
    assign axil_wready_o  = iob_ready_i;
 
@@ -34,6 +35,7 @@ module axil2iob #(
 
    // read address
    assign axil_arready_o = iob_ready_i;
+   assign axil_arprot_o  = 3'b000;
 
    // read
    assign axil_rdata_o   = iob_rdata_i;

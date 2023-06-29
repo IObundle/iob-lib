@@ -239,7 +239,7 @@ axi_write = [
         "width": AXI_CACHE_W,
         "name": "axi_awcache",
         "default": "2",
-        "description": "Address write channel memory type. Transactions set with Normal, Non-cacheable, Modifiable, and Bufferable (0011).",
+        "description": "Address write channel memory type. Set to 0000 if master output; ignored if slave input.",
     },
     {
         "lite": 1,
@@ -249,7 +249,7 @@ axi_write = [
         "width": AXI_PROT_W,
         "name": "axi_awprot",
         "default": "2",
-        "description": "Address write channel protection type. Transactions set with Normal, Secure, and Data attributes (000).",
+        "description": "Address write channel protection type. Set to 000 if master output; ignored if slave input.",
     },
     {
         "lite": 0,
@@ -442,7 +442,7 @@ axi_read = [
         "width": AXI_CACHE_W,
         "name": "axi_arcache",
         "default": "2",
-        "description": "Address read channel memory type. Transactions set with Normal, Non-cacheable, Modifiable, and Bufferable (0011).",
+        "description": "Address read channel memory type. Set to 0000 if master output; ignored if slave input.",
     },
     {
         "lite": 1,
@@ -452,7 +452,7 @@ axi_read = [
         "width": AXI_PROT_W,
         "name": "axi_arprot",
         "default": "2",
-        "description": "Address read channel protection type. Transactions set with Normal, Secure, and Data attributes (000).",
+        "description": "Address read channel protection type. Set to 000 if master output; ignored if slave input.",
     },
     {
         "lite": 0,
@@ -599,7 +599,7 @@ amba = [
         "width": AHB_PROT_W,
         "name": "ahb_prot",
         "default": "1",
-        "description": "Protection type. Transactions set with Data, User access, Non-bufferrable, and Non-cacheable attributes (0001).",
+        "description": "Protection type. Set to 0000 if master output; ignored if slave input.",
     },
     {
         "ahb": 1,
