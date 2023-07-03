@@ -52,7 +52,7 @@ module iob_split #(
 
    //register the slave selection
    iob_reg_re #(
-      .DATA_W (1),
+      .DATA_W (Nb),
       .RST_VAL(0)
    ) iob_reg_s_sel (
       .clk_i (clk_i),
