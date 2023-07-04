@@ -15,4 +15,3 @@ set_db cap_table_file "$LIBDIR/arm_tech/r5p0/cadence_captable/9m_2xa1xd3xe2z_utr
 
 set_db lib_lef_consistency_check_enable true 
 set_db interconnect_mode ple
-

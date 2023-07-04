@@ -21,10 +21,13 @@ module iob_split #(
 
    localparam Nb = $clog2(N_SLAVES) + ($clog2(N_SLAVES) == 0);
 
-
    //slave select word
    wire [Nb-1:0] s_sel;
+   wire [Nb-1:0] s_sel_r;
+   wire m_avalid;
+
    assign s_sel = m_req_i[P_SLAVES-:Nb];
+   assign m_avalid = m_req_i[`AVALID(0)];
 
    //route master request to selected slave
    integer i;
@@ -43,18 +46,21 @@ module iob_split #(
    //route response from previously selected slave to master
    //
 
+   assign m_resp_o[`RDATA(0)] = s_resp_i[`RDATA(s_sel_r)];
+   assign m_resp_o[`RVALID(0)] = s_resp_i[`RVALID(s_sel_r)];
+   assign m_resp_o[`READY(0)] = s_resp_i[`READY(s_sel)];
+
    //register the slave selection
-   reg [Nb-1:0] s_sel_reg;
-   always @(posedge clk_i, posedge arst_i) begin
-      if (arst_i) s_sel_reg <= {Nb{1'b0}};
-      else s_sel_reg <= s_sel;
-   end
-
-   //route
-   integer j;
-   always @* begin
-      m_resp_o = {`RESP_W{1'b0}};
-      for (j = 0; j < N_SLAVES; j = j + 1) if (j == s_sel_reg) m_resp_o = s_resp_i[`RESP(j)];
-   end
-
+   iob_reg_re #(
+      .DATA_W (Nb),
+      .RST_VAL(0)
+   ) iob_reg_s_sel (
+      .clk_i (clk_i),
+      .arst_i(arst_i),
+      .cke_i (1'b1),
+      .rst_i (1'b0),
+      .en_i  (m_avalid),
+      .data_i(s_sel),
+      .data_o(s_sel_r)
+   );
 endmodule
