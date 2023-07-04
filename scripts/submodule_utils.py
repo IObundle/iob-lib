@@ -268,6 +268,8 @@ def get_submodule_directories(root_dir):
     module = import_setup(root_dir)
     return module.submodule_dirs
 
+def clog(val):
+    return math.ceil(math.log2(val))
 
 # given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string.
 # param_expression: string defining a math expression that may contain parameters
@@ -286,6 +288,8 @@ def eval_param_expression(param_expression, params_dict):
                     f"\\g<1>{param_value}\\g<2>",
                     param_expression,
                 )
+                # Evaluate $clog expressions
+                param_expression = param_expression.replace("$clog", "clog")
         # Try to calculate string as it should only contain numeric values
         try:
             return eval(param_expression)
