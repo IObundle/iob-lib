@@ -3,7 +3,7 @@
 // A generic axi like handshake delay for testbenches. 
 // For axi, the write and read cases are "different" in name usage.
 // Use the modules below for axi connections
-module AxiDelay #(
+module axidelay #(
    parameter MAX_DELAY = 3
 ) (
    // Master interface. Connect to a slave interface
@@ -54,7 +54,7 @@ endmodule
 
 // A simple interface change, make it easier to figure out the connections for the AXI Read case
 // An AXI read is controlled by the slave. The AXI slave is the master of the Read channel
-module AxiDelayRead #(
+module axidelayRead #(
    parameter MAX_DELAY = 3
 ) (
    // Connect directly to the same named axi read wires in the master interface
@@ -69,7 +69,7 @@ module AxiDelayRead #(
    input rst
 );
 
-   AxiDelay #(
+   axidelay #(
       .MAX_DELAY(MAX_DELAY)
    ) Read (
       .s_valid(s_rvalid),
@@ -86,7 +86,7 @@ endmodule
 
 // A simple interface change, make it easier to figure out the connections for the AXI Write case
 // An AXI write is controlled by the master. No change to the default handshake
-module AxiDelayWrite #(
+module axidelayWrite #(
    parameter MAX_DELAY = 3
 ) (
    // Connect directly to the same named axi write wires in the master interface
@@ -101,7 +101,7 @@ module AxiDelayWrite #(
    input rst
 );
 
-   AxiDelay #(
+   axidelay #(
       .MAX_DELAY(MAX_DELAY)
    ) Write (
       .s_valid(m_wvalid),

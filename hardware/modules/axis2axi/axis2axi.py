@@ -68,9 +68,9 @@ class axis2axi(iob_module):
             os.path.join(cls.build_dir, out_dir, "axis2axi_out.v"),
         )
         shutil.copyfile(
-            os.path.join(cls.setup_dir, "AxiDelay.v"),
+            os.path.join(cls.setup_dir, "axidelay.v"),
             # Should this always be copied to simulation?
-            os.path.join(cls.build_dir, out_dir, "AxiDelay.v"),
+            os.path.join(cls.build_dir, out_dir, "axidelay.v"),
         )
 
         # Ensure sources of other purposes are deleted (except software)
@@ -93,5 +93,5 @@ class axis2axi(iob_module):
                     )
                 )
                 os.remove(
-                    os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "AxiDelay.v")
+                    os.path.join(cls.build_dir, cls.PURPOSE_DIRS[purpose], "axidelay.v")
                 )

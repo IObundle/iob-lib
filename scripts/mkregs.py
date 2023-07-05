@@ -753,16 +753,15 @@ class mkregs:
                 write_addr = self.bceil(write_addr, addr_w)
                 addr_tmp = write_addr
             else:
-                 sys.exit(
+                sys.exit(
                     f"{iob_colors.FAIL}invalid address type {addr_type} for register named {row['name']}{iob_colors.ENDC}"
                 )
-                 
+
             if no_overlap:
                 addr_tmp = max(read_addr, write_addr)
 
             # save address temporarily in list
             tmp.append(addr_tmp)
-
 
             # update addresses
             addr_tmp += 2**addr_w

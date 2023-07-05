@@ -9,6 +9,7 @@ from mk_configuration import config_build_mk
 import build_srcs
 from iob_verilog_instance import iob_verilog_instance
 
+
 # Generic class to describe a base iob-module
 class iob_module:
     # Standard attributes common to all iob-modules
@@ -363,17 +364,20 @@ class iob_module:
                 ),
             )
             # print(f"### DEBUG: {src} {dst}")
-            file_perms = os.stat(src).st_mode
-            with open(src, "r") as file:
-                lines = file.readlines()
-            for idx in range(len(lines)):
-                lines[idx] = (
-                    lines[idx]
-                    .replace(old_core_name, new_core_name)
-                    .replace(old_core_name.upper(), new_core_name.upper())
-                )
-            with open(dst, "w") as file:
-                file.writelines(lines)
+            try:
+                file_perms = os.stat(src).st_mode
+                with open(src, "r") as file:
+                    lines = file.readlines()
+                for idx in range(len(lines)):
+                    lines[idx] = (
+                        lines[idx]
+                        .replace(old_core_name, new_core_name)
+                        .replace(old_core_name.upper(), new_core_name.upper())
+                    )
+                with open(dst, "w") as file:
+                    file.writelines(lines)
+            except:
+                shutil.copyfile(src, dst)
             # Set file permissions equal to source file
             os.chmod(dst, file_perms)
 

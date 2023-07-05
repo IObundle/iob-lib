@@ -3,6 +3,7 @@ import shutil
 
 from iob_module import iob_module
 from setup import setup
+from iob_reg_re import iob_reg_re
 
 
 class iob_regfile_sp(iob_module):
@@ -14,6 +15,8 @@ class iob_regfile_sp(iob_module):
     @classmethod
     def _run_setup(cls):
         super()._run_setup()
+        # Setup dependencies
+        iob_reg_re.setup()
 
         if cls.is_top_module:
             # Setup flows of this core using LIB setup function
