@@ -68,7 +68,7 @@ module iob_div_subshift
    always @* begin
       pc_nxt = pc+1'b1;
       dqr_nxt = dqr_reg;
-      divisor_nxt = divisor_i;
+      divisor_nxt = divisor_reg;
       done_o = 1'b1;
       
       case (pc)
