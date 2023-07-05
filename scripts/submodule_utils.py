@@ -268,7 +268,7 @@ def get_submodule_directories(root_dir):
     module = import_setup(root_dir)
     return module.submodule_dirs
 
-def clog(val):
+def clog2(val):
     return math.ceil(math.log2(val))
 
 # given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string.
@@ -279,23 +279,32 @@ def eval_param_expression(param_expression, params_dict):
         return param_expression
     else:
         original_expression = param_expression
+        # Split string to separate parameters/macros from the rest
+        split_expression = re.split('([^\w_])', param_expression)
         # Replace each parameter, following the reverse order of parameter list. The reversed order allows replacing parameters recursively (parameters may have values with parameters that came before).
         for param_name, param_value in reversed(params_dict.items()):
-            if param_name in param_expression:
-                # Replace parameter/macro by its max value (worst case scenario)
-                param_expression = re.sub(
-                    f"((?:^.*[^a-zA-Z_`])|^)`?{param_name}((?:[^a-zA-Z_].*$)|$)",
-                    f"\\g<1>{param_value}\\g<2>",
-                    param_expression,
-                )
-                # Evaluate $clog expressions
-                param_expression = param_expression.replace("$clog", "clog")
+            # Replace every instance of this parameter by its value
+            for idx, word in enumerate(split_expression):
+                if word == param_name:
+                    # Replace parameter/macro by its value
+                    split_expression[idx] = param_value
+                    # Remove '`' char if it was a macro
+                    if idx > 0 and split_expression[idx - 1] == '`':
+                        split_expression[idx - 1] = ""
+        # Join back the string
+        param_expression = "".join(split_expression)
+        # Evaluate $clog2 expressions
+        param_expression = param_expression.replace("$clog2", "clog2")
+        # Evaluate IOB_MAX and IOB_MIN expressions
+        param_expression = param_expression.replace("`IOB_MAX", "max")
+        param_expression = param_expression.replace("`IOB_MIN", "min")
+
         # Try to calculate string as it should only contain numeric values
         try:
             return eval(param_expression)
         except:
             sys.exit(
-                f"Error: string '{original_expression}' evaluated to '{param_expression}' is not well defined."
+                f"Error: string '{original_expression}' evaluated to '{param_expression}' is not a numeric expression."
             )
 
 

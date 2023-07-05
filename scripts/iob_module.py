@@ -204,6 +204,7 @@ class iob_module:
     #                    "interface": "axi_m_portmap",  # Type of interface/wires to generate. Will also be part of the filename.
     #                    "wire_prefix": "",             # Prefix to include in the generated wire names
     #                    "port_prefix": "",             # Prefix to include in the generated port names
+    #                    "param_prefix": "",            # Optional. Prefix to include in parameters of the width of the generated ports/wires.
     #                    "bus_start": 0,                # Optional. Starting index of the bus of wires that we are connecting.
     #                    "bus_size": 2,                 # Optional. Size of the bus of wires that we are creating/connecting.
     #                }
@@ -218,6 +219,7 @@ class iob_module:
     #                    "interface": "iob_s_port",
     #                    "wire_prefix": "example_wire_prefix_",
     #                    "port_prefix": "example_port_prefix_",
+    #                    "param_prefix": "example_parameter_prefix_",
     #                })
     @classmethod
     def generate(cls, vs_name, purpose="hardware"):
@@ -244,6 +246,7 @@ class iob_module:
                 vs_name["port_prefix"],
                 vs_name["wire_prefix"],
                 f_out,
+                param_prefix=vs_name["param_prefix"] if 'param_prefix' in vs_name.keys() else "",
                 bus_size=vs_name["bus_size"] if "bus_size" in vs_name.keys() else 1,
                 bus_start=vs_name["bus_start"] if "bus_start" in vs_name.keys() else 0,
             )
