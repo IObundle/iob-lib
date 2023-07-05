@@ -107,6 +107,7 @@ def append_flows_config_build_mk(flows_list, flows_filter, build_dir):
 
     append_str_config_build_mk(f"FLOWS+={flows2append}\n\n", build_dir)
 
+
 # Append a string to the config_build.mk
 def append_str_config_build_mk(str_2_append, build_dir):
     file = open(f"{build_dir}/config_build.mk", "a")

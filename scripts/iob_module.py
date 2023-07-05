@@ -9,6 +9,7 @@ from mk_configuration import config_build_mk
 import build_srcs
 from iob_verilog_instance import iob_verilog_instance
 
+
 # Generic class to describe a base iob-module
 class iob_module:
     # Standard attributes common to all iob-modules

@@ -7,7 +7,8 @@ module iob_regfile_sp_tb;
 
    // Inputs
    reg                 clk;
-   reg                 rst;
+   reg arst = 0;
+   reg rst;
    reg [  `DATA_W-1:0] w_data;
    reg [  `ADDR_W-1:0] addr;
    reg                 en;
@@ -102,11 +103,12 @@ module iob_regfile_sp_tb;
       .DATA_W(`DATA_W)
    ) uut (
       .clk_i   (clk),
-      .arst_i  (rst),
+      .arst_i  (arst),
+      .rst_i   (rst),
       .we_i    (en),
       .addr_i  (addr),
-      .w_data_i(w_data),
-      .r_data_o(r_data)
+      .d_i     (w_data),
+      .d_o     (r_data)
    );
 
    // system clock
