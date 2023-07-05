@@ -307,7 +307,7 @@ module axis2axi_tb;
 
    // Insert delays between AXI like handshake interfaces
    wire m_rvalid, m_rready, s_rvalid, s_rready;
-   AxiDelayRead #(
+   axidelayRead #(
       .MAX_DELAY(DELAY_AXI_READ)
    ) delayRead (
       // Connect directly to the same named axi read wires in the master interface
@@ -323,7 +323,7 @@ module axis2axi_tb;
    );
 
    wire m_wvalid, m_wready, s_wvalid, s_wready;
-   AxiDelayWrite #(
+   axidelayWrite #(
       .MAX_DELAY(DELAY_AXI_WRITE)
    ) delayWrite (
       // Connect directly to the same named axi write wires in the master interface
@@ -339,7 +339,7 @@ module axis2axi_tb;
    );
 
    wire delayed_axis_in_valid, delayed_axis_in_ready;
-   AxiDelay #(
+   axidelay #(
       .MAX_DELAY(DELAY_AXIS_IN)
    ) delayIn (
       // Master interface. Connect to a slave interface
@@ -354,7 +354,7 @@ module axis2axi_tb;
       .rst(rst)
    );
 
-   AxiDelay #(
+   axidelay #(
       .MAX_DELAY(DELAY_AXIS_OUT)
    ) delayOut (
       // Master interface. Connect to a slave interface
