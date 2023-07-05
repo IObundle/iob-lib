@@ -11,7 +11,7 @@ set_db library {sch240mc_cln07ff41001_base_svt_c11_ssgnp_cworstccworstt_max_0p76
 
 set_db lef_library {sch240mc_tech.lef sch240mc_cln07ff41001_base_svt_c11.lef}
 
-set_db cap_table_file "$LIBDIR/arm_tech/r5p2/lef/1p13m_1x1xa1ya5y2yy2z/sch240mc_tech.lef"
+#set_db cap_table_file "$LIBDIR/arm_tech/r5p2/lef/1p13m_1x1xa1ya5y2yy2z/sch240mc_tech.lef"
 
 set_db lib_lef_consistency_check_enable true 
 set_db interconnect_mode ple
