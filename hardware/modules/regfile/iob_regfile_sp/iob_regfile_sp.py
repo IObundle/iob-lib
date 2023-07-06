@@ -18,12 +18,8 @@ class iob_regfile_sp(iob_module):
         # Setup dependencies
         iob_reg_re.setup()
 
-        cls._setup_confs()
-
         super()._run_setup()
 
-        setup(cls, no_overlap=True)
-
-    @classmethod
-    def _setup_confs(cls):
-        super()._setup_confs([])
+        if cls.is_top_module:
+            # Setup flows of this core using LIB setup function
+            setup(cls, disable_file_gen=True)

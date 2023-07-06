@@ -9,31 +9,27 @@ from latex import write_table
 def params_vh(params, top_module, out_dir):
     file2create = open(f"{out_dir}/{top_module}_params.vs", "w")
     core_prefix = f"{top_module}_".upper()
-    empty_file = 1
     for parameter in params:
         if parameter["type"] in ["P", "F"]:
             p_name = parameter["name"].upper()
             file2create.write(f"\n  parameter {p_name} = `{core_prefix}{p_name},")
-            empty_file = 0
     file2create.close()
-    if not empty_file:
-        file2create = open(f"{out_dir}/{top_module}_params.vs", "rb+")
-        file2create.seek(-1, os.SEEK_END)
-        file2create.write(b"\n")
-        file2create.close()
+
+    file2create = open(f"{out_dir}/{top_module}_params.vs", "rb+")
+    file2create.seek(-1, os.SEEK_END)
+    file2create.write(b"\n")
+    file2create.close()
 
     file2create = open(f"{out_dir}/{top_module}_inst_params.vs", "w")
-    empty_file = 1
     for parameter in params:
         if parameter["type"] in ["P", "F"]:
             p_name = parameter["name"].upper()
             file2create.write(f"\n  .{p_name}({p_name}),")
-            empty_file = 0
-    if not empty_file:
-        file2create = open(f"{out_dir}/{top_module}_inst_params.vs", "rb+")
-        file2create.seek(-1, os.SEEK_END)
-        file2create.write(b"\n")
-        file2create.close()
+
+    file2create = open(f"{out_dir}/{top_module}_inst_params.vs", "rb+")
+    file2create.seek(-1, os.SEEK_END)
+    file2create.write(b"\n")
+    file2create.close()
 
 
 def conf_vh(macros, top_module, out_dir):
