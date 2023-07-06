@@ -1,124 +1,106 @@
 `timescale 1ns / 1ps
 
-module iob_div_subshift_frac
-  # (
-     parameter DATA_W = 32
-     )
-   (
-    input               clk_i,
-    input               arst_i,
-    input               cke_i,
-    input               start_i,
-    output              done_o,
+module iob_div_subshift_frac #(
+   parameter DATA_W = 32
+) (
+   `include "iob_clkenrst_port.vs"
 
-    input [DATA_W-1:0]  dividend_i,
-    input [DATA_W-1:0]  divisor_i,
-    output [DATA_W-1:0] quotient_o,
-    output [DATA_W-1:0] remainder_o
-    );
+   input  start_i,
+   output done_o,
 
-   wire [DATA_W-1:0]   divisor_reg;
+   input  [DATA_W-1:0] dividend_i,
+   input  [DATA_W-1:0] divisor_i,
+   output [DATA_W-1:0] quotient_o,
+   output [DATA_W-1:0] remainder_o
+);
+
+   wire [DATA_W-1:0] divisor_reg;
 
    iob_reg #(
       .DATA_W (DATA_W),
       .RST_VAL(1'b0)
    ) divisor_reg0 (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
 
       .data_i(divisor_i),
       .data_o(divisor_reg)
    );
-   
-   //output quotient
-   wire [DATA_W-1:0]  quotient_int;
-   reg                incr; //residue   
-   assign quotient_o =  quotient_int + incr;
 
-   iob_div_subshift
-     # (
-        .DATA_W(DATA_W)
-        )
-   div_subshift0
-     (
-      .clk_i(clk_i),
-      .arst_i(arst_i),
-      .cke_i(cke_i),
+   //output quotient
+   wire [DATA_W-1:0] quotient_int;
+   reg               incr;  //residue   
+   assign quotient_o = quotient_int + incr;
+
+   iob_div_subshift #(
+      .DATA_W(DATA_W)
+   ) div_subshift0 (
+      `include "iob_clkenrst_portmap.vs"
       .start_i(start_i),
-      .done_o(done_o),
-      
-      .dividend_i(dividend_i),
-      .divisor_i(divisor_i),
-      .quotient_o(quotient_int),
+      .done_o (done_o),
+
+      .dividend_i (dividend_i),
+      .divisor_i  (divisor_i),
+      .quotient_o (quotient_int),
       .remainder_o(remainder_o)
-      );
+   );
 
    //residue accum
-   reg [DATA_W:0]     res_acc_nxt;
-   wire [DATA_W:0]    res_acc;
-   reg res_acc_en;
-                
+   reg  [DATA_W:0] res_acc_nxt;
+   wire [DATA_W:0] res_acc;
+   reg             res_acc_en;
+
    iob_reg_e #(
-      .DATA_W (DATA_W+1),
+      .DATA_W (DATA_W + 1),
       .RST_VAL(1'b0)
    ) res_acc_reg0 (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
-      .en_i(res_acc_en),
+      `include "iob_clkenrst_portmap.vs"
+      .en_i  (res_acc_en),
 
       .data_i(res_acc_nxt),
       .data_o(res_acc)
    );
-   
+
    //pc register
-   reg [1:0] pc_nxt;
+   reg  [1:0] pc_nxt;
    wire [1:0] pc;
 
    iob_reg #(
       .DATA_W (2),
       .RST_VAL(1'b0)
    ) pc_reg0 (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
 
       .data_i(pc_nxt),
       .data_o(pc)
    );
-   
-   always @* begin
-      incr=1'b0;
-      res_acc_nxt = res_acc + remainder_o;
-      res_acc_en = 1'b0;
-      pc_nxt = pc+1'b1;
-      
-      case (pc)
-        0: begin //wait for div start
-           if(!start_i)
-             pc_nxt = pc;
-        end
 
-        1: begin //wait for div done
-           if(!done_o)
-             pc_nxt = pc;
-        end
-        
-        default: begin
-           res_acc_en = 1'b1;
-           if(res_acc_nxt >= divisor_i) begin
-              incr = 1'b1;
-              res_acc_nxt = res_acc + remainder_o - divisor_i;
-           end
-           if(!start_i)
-             pc_nxt = pc;
-           else
-             pc_nxt = 1'b1;
-        end
-      endcase // case (pc)
-      
+   always @* begin
+      incr        = 1'b0;
+      res_acc_nxt = res_acc + remainder_o;
+      res_acc_en  = 1'b0;
+      pc_nxt      = pc + 1'b1;
+
+      case (pc)
+         0: begin  //wait for div start
+            if (!start_i) pc_nxt = pc;
+         end
+
+         1: begin  //wait for div done
+            if (!done_o) pc_nxt = pc;
+         end
+
+         default: begin
+            res_acc_en = 1'b1;
+            if (res_acc_nxt >= divisor_i) begin
+               incr        = 1'b1;
+               res_acc_nxt = res_acc + remainder_o - divisor_i;
+            end
+            if (!start_i) pc_nxt = pc;
+            else pc_nxt = 1'b1;
+         end
+      endcase  // case (pc)
+
    end
 
-   
+
 endmodule

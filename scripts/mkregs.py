@@ -106,11 +106,18 @@ class mkregs:
                 f"assign {name}_wdata = iob_wdata_i[{self.boffset(addr,self.cpu_n_bytes)}+:{self.verilog_max(n_bits,1)}];\n"
             )
 
-        # check if address in range
+        # signal to indicate if the register is addressed
         f.write(f"wire {name}_addressed;\n")
-        f.write(
-            f"assign {name}_addressed = (waddr >= {addr}) && (waddr < ({addr}+(2**({addr_w}))));\n"
-        )
+
+        # test if addr and addr_w are int and substitute with their values
+        if isinstance(addr, int) and isinstance(addr_w, int):
+            f.write(
+                f"assign {name}_addressed = (waddr >= {addr}) && (waddr < {addr+2**addr_w});\n"
+            )
+        else:
+            f.write(
+                f"assign {name}_addressed = (waddr >= {addr}) && (waddr < ({addr}+(2**({addr_w}))));\n"
+            )
 
         if auto:  # generate register
             # fill remaining bits with 0s

@@ -10,6 +10,9 @@ module apb2iob #(
    parameter ADDR_W     = APB_ADDR_W,  // IOb address bus width in bits
    parameter DATA_W     = APB_DATA_W   // IOb data bus width in bits
 ) (
+   // Global signals
+   `include "iob_clkenrst_port.vs"
+
    // APB slave interface
    `include "iob_apb_s_port.vs"
 
@@ -20,10 +23,7 @@ module apb2iob #(
    output [(DATA_W/8)-1:0] iob_wstrb_o,       //Write strobe.
    input  [         1-1:0] iob_rvalid_nxt_i,  //Read data valid.
    input  [    DATA_W-1:0] iob_rdata_i,       //Read data.
-   input  [         1-1:0] iob_ready_nxt_i,   //Interface ready.
-
-   // Global signals
-   `include "iob_clkenrst_port.vs"
+   input  [         1-1:0] iob_ready_nxt_i   //Interface ready.
 );
 
 
@@ -35,9 +35,7 @@ module apb2iob #(
       .RST_VAL(1'b0),
       .CLKEDGE("posedge")
    ) apb_ready_reg_inst (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .data_i(apb_ready_nxt),
       .data_o(apb_ready_o)
    );
@@ -51,9 +49,7 @@ module apb2iob #(
       .RST_VAL(1'b0),
       .CLKEDGE("posedge")
    ) pc_reg (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .data_i(pc_nxt),
       .data_o(pc)
    );

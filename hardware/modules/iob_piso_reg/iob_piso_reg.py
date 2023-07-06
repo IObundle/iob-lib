@@ -5,6 +5,7 @@ from iob_module import iob_module
 from setup import setup
 
 from iob_reg import iob_reg
+from iob_clkenrst_portmap import iob_clkenrst_portmap
 
 
 class iob_piso_reg(iob_module):
@@ -20,6 +21,7 @@ class iob_piso_reg(iob_module):
         # Setup dependencies
 
         iob_reg.setup()
+        iob_clkenrst_portmap.setup()
 
         if cls.is_top_module:
             # Setup flows of this core using LIB setup function
