@@ -4,9 +4,7 @@ module iob_sipo_reg #(
    parameter DATA_W = 21
 ) (
 
-   input clk_i,
-   input arst_i,
-   input cke_i,
+   `include "iob_clkenrst_port.vs"
 
    //serial input
    input s_i,
@@ -23,9 +21,7 @@ module iob_sipo_reg #(
       .RST_VAL(0),
       .CLKEDGE("posedge")
    ) reg0 (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
 
       .data_i(data),
       .data_o(p_o)

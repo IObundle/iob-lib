@@ -5,6 +5,7 @@ from iob_module import iob_module
 from setup import setup
 
 from iob_reg import iob_reg
+from iob_clkenrst_portmap import iob_clkenrst_portmap
 
 
 class iob_div_subshift(iob_module):
@@ -16,6 +17,9 @@ class iob_div_subshift(iob_module):
     @classmethod
     def _run_setup(cls):
         super()._run_setup()
+
+        # Verilog snippet files
+        iob_clkenrst_portmap.setup()
 
         # Setup dependencies
         iob_reg.setup()

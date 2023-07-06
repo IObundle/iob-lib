@@ -5,9 +5,7 @@ module iob_counter_ld #(
    parameter RST_VAL = {DATA_W{1'b0}},
    parameter CLKEDGE = "posedge"
 ) (
-   input               clk_i,
-   input               arst_i,
-   input               cke_i,
+   `include "iob_clkenrst_port.vs"
    input               rst_i,
    input               en_i,
    input               ld_i,
@@ -22,9 +20,7 @@ module iob_counter_ld #(
       .RST_VAL(RST_VAL),
       .CLKEDGE(CLKEDGE)
    ) reg0 (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .rst_i (rst_i),
       .en_i  (en_i),
       .data_i(data),

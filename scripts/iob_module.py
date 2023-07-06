@@ -250,7 +250,9 @@ class iob_module:
                 vs_name["port_prefix"],
                 vs_name["wire_prefix"],
                 f_out,
-                param_prefix=vs_name["param_prefix"] if 'param_prefix' in vs_name.keys() else "",
+                param_prefix=vs_name["param_prefix"]
+                if "param_prefix" in vs_name.keys()
+                else "",
                 bus_size=vs_name["bus_size"] if "bus_size" in vs_name.keys() else 1,
                 bus_start=vs_name["bus_start"] if "bus_start" in vs_name.keys() else 0,
             )
