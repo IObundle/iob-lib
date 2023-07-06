@@ -46,13 +46,13 @@ module iob_regfile_sp_tb;
       @(posedge clk) #1;
       en = 1;
 
-      // Write and real all the locations
+      // Write and read all the locations
       for (i = 0; i < 2 ** `ADDR_W; i = i + 1) begin
          addr   = i;
          w_data = i + seq_ini;
          @(posedge clk) #1;
          if (r_data != i + seq_ini) begin
-            $display("ERROR: read error in r_data.\n \t data=%0d; r_data=%0d", i + seq_ini, r_data);
+            $display("Write ERROR: read error in r_data.\n \t data=%0d; r_data=%0d", i + seq_ini, r_data);
             $finish();
          end
          @(posedge clk) #1;
@@ -67,7 +67,7 @@ module iob_regfile_sp_tb;
          addr = i;
          @(posedge clk) #1;
          if (r_data != i + seq_ini) begin
-            $display("ERROR: read error in r_data.\n \t data=%0d; r_data=%0d", i + seq_ini, r_data);
+            $display("Read ERROR: read error in r_data.\n \t data=%0d; r_data=%0d", i + seq_ini, r_data);
             $finish();
          end
          @(posedge clk) #1;
@@ -103,6 +103,7 @@ module iob_regfile_sp_tb;
       .DATA_W(`DATA_W)
    ) uut (
       .clk_i   (clk),
+      .cke_i   (1'b1),
       .arst_i  (arst),
       .rst_i   (rst),
       .we_i    (en),

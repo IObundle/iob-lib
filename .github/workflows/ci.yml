@@ -33,4 +33,5 @@ jobs:
         with:
           submodules: 'recursive'
       - name: test memory modules
-        run: nix-shell --run "./scripts/test.sh"
+        # TODO running test2.sh script for updated modules
+        run: nix-shell --run "./scripts/test2.sh"

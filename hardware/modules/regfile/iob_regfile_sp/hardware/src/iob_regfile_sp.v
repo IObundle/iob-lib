@@ -22,6 +22,7 @@ module iob_regfile_sp #(
    genvar                        i;
    generate
       for (i = 0; i < 2**ADDR_W; i = i + 1) begin: g_regfile        
+         wire reg_en_i = we_i & (addr_i == i);
          iob_reg_re
                #(
                  .DATA_W(DATA_W)
@@ -31,7 +32,7 @@ module iob_regfile_sp #(
                 .cke_i(cke_i),
                 .arst_i(arst_i),
                 .rst_i(rst_i),
-                .en_i(we_i),
+                .en_i(reg_en_i),
                 .data_i(data_in[DATA_W*(i+1)-1:DATA_W*i]),
                 .data_o(data_out[DATA_W*(i+1)-1:DATA_W*i])
                 );
