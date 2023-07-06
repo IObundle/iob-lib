@@ -268,8 +268,10 @@ def get_submodule_directories(root_dir):
     module = import_setup(root_dir)
     return module.submodule_dirs
 
+
 def clog2(val):
     return math.ceil(math.log2(val))
+
 
 # given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string.
 # param_expression: string defining a math expression that may contain parameters
@@ -280,7 +282,7 @@ def eval_param_expression(param_expression, params_dict):
     else:
         original_expression = param_expression
         # Split string to separate parameters/macros from the rest
-        split_expression = re.split('([^\w_])', param_expression)
+        split_expression = re.split("([^\w_])", param_expression)
         # Replace each parameter, following the reverse order of parameter list. The reversed order allows replacing parameters recursively (parameters may have values with parameters that came before).
         for param_name, param_value in reversed(params_dict.items()):
             # Replace every instance of this parameter by its value
@@ -289,7 +291,7 @@ def eval_param_expression(param_expression, params_dict):
                     # Replace parameter/macro by its value
                     split_expression[idx] = param_value
                     # Remove '`' char if it was a macro
-                    if idx > 0 and split_expression[idx - 1] == '`':
+                    if idx > 0 and split_expression[idx - 1] == "`":
                         split_expression[idx - 1] = ""
         # Join back the string
         param_expression = "".join(split_expression)

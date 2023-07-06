@@ -3,6 +3,7 @@ import shutil
 
 from iob_module import iob_module
 from setup import setup
+from iob_clkrst_portmap import iob_clkrst_portmap
 
 
 class iob_split(iob_module):
@@ -16,6 +17,8 @@ class iob_split(iob_module):
         super()._run_setup()
 
         # Setup dependencies
+
+        iob_clkrst_portmap.setup()
 
         if cls.is_top_module:
             # Setup flows of this core using LIB setup function

@@ -4,10 +4,7 @@ module iob_wishbone2iob #(
    parameter ADDR_W = 32,
    parameter DATA_W = 32
 ) (
-   input wire clk_i,
-   input wire cke_i,
-   input wire arst_i,
-
+   `include "iob_clkenrst_port.vs"
    // Wishbone interface
    input  wire [  ADDR_W-1:0] wb_addr_i,
    input  wire [DATA_W/8-1:0] wb_select_i,
@@ -50,9 +47,7 @@ module iob_wishbone2iob #(
       .DATA_W (1),
       .RST_VAL(0)
    ) iob_reg_avalid (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .rst_i (1'b0),
       .en_i  (1'b1),
       .data_i(iob_avalid_o),

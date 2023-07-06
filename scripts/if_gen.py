@@ -911,7 +911,7 @@ def suffix(direction):
 
 # Add a given prefix (in upppercase) to every parameter/macro found in the string
 def add_param_prefix(string, param_prefix):
-    return re.sub(r"([a-zA-Z_][\w_]*)", param_prefix.upper()+r"\g<1>", string)
+    return re.sub(r"([a-zA-Z_][\w_]*)", param_prefix.upper() + r"\g<1>", string)
 
 
 #
@@ -1086,11 +1086,21 @@ def write_reg(name, param_prefix, bus_size, width, default, description, fout):
 
 # Write tb wire with given tb_signal, prefix, name, bus size, width and description to file
 def write_tb_wire(
-    tb_signal, prefix, name, param_prefix, bus_size, width, description, fout, default="0"
+    tb_signal,
+    prefix,
+    name,
+    param_prefix,
+    bus_size,
+    width,
+    description,
+    fout,
+    default="0",
 ):
     signal_name = prefix + name + suffix(tb_signal)
     if tb_signal == "reg":
-        write_reg(signal_name, param_prefix, bus_size, width, default, description, fout)
+        write_reg(
+            signal_name, param_prefix, bus_size, width, default, description, fout
+        )
     else:
         write_wire(signal_name, param_prefix, bus_size, width, description, fout)
 
@@ -1290,7 +1300,13 @@ def create_signal_table(interface_name):
 # wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file; Prefix for ports in a `*port.vs` file (these ports also create wires);
 # param_prefix: Prefix for parameters in signals width. Only used for ports or wires (unused for portmaps).
 def write_vs_contents(
-    interface_name, port_prefix, wire_prefix, file_object, param_prefix="", bus_size=1, bus_start=0
+    interface_name,
+    port_prefix,
+    wire_prefix,
+    file_object,
+    param_prefix="",
+    bus_size=1,
+    bus_start=0,
 ):
     func_name = (
         interface_name.replace("axil_", "")

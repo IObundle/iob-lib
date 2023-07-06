@@ -5,6 +5,8 @@ from iob_module import iob_module
 from setup import setup
 
 from iob_reg_re import iob_reg_re
+from iob_clkenrst_portmap import iob_clkenrst_portmap
+from iob_clkenrst_port import iob_clkenrst_port
 
 
 class iob_acc_ld(iob_module):
@@ -17,8 +19,11 @@ class iob_acc_ld(iob_module):
     def _run_setup(cls):
         super()._run_setup()
 
-        # Setup dependencies
+        # Verilog snippet files
+        iob_clkenrst_portmap.setup()
+        iob_clkenrst_port.setup()
 
+        # Setup dependencies
         iob_reg_re.setup()
 
         if cls.is_top_module:

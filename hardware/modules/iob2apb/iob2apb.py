@@ -5,6 +5,7 @@ from iob_module import iob_module
 from setup import setup
 
 from iob_reg import iob_reg
+from iob_clkenrst_portmap import iob_clkenrst_portmap
 
 
 class iob2apb(iob_module):
@@ -25,6 +26,7 @@ class iob2apb(iob_module):
         iob_module.generate("iob_m_tb_wire")
 
         iob_reg.setup()
+        iob_clkenrst_portmap.setup()
 
         if cls.is_top_module:
             # Setup flows of this core using LIB setup function

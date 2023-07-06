@@ -5,9 +5,7 @@ module iob_iob2wishbone #(
    parameter DATA_W     = 32,
    parameter READ_BYTES = 4
 ) (
-   input wire clk_i,
-   input wire cke_i,
-   input wire arst_i,
+   `include "iob_clkenrst_port.vs"
 
    // IOb interface
    input  wire                iob_avalid_i,
@@ -62,9 +60,7 @@ module iob_iob2wishbone #(
       .DATA_W (1),
       .RST_VAL(0)
    ) iob_reg_avalid (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .rst_i (1'b0),
       .en_i  (iob_avalid_i | wb_ack_i),
       .data_i(iob_avalid_i),
@@ -74,9 +70,7 @@ module iob_iob2wishbone #(
       .DATA_W (ADDR_W),
       .RST_VAL(0)
    ) iob_reg_addr (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .rst_i (1'b0),
       .en_i  (iob_avalid_i),
       .data_i(iob_addr_i),
@@ -86,9 +80,7 @@ module iob_iob2wishbone #(
       .DATA_W (DATA_W),
       .RST_VAL(0)
    ) iob_reg_iob_data (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .rst_i (1'b0),
       .en_i  (iob_avalid_i),
       .data_i(iob_wdata_i),
@@ -98,9 +90,7 @@ module iob_iob2wishbone #(
       .DATA_W (1),
       .RST_VAL(0)
    ) iob_reg_we (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .rst_i (1'b0),
       .en_i  (iob_avalid_i),
       .data_i(wb_we),
@@ -110,9 +100,7 @@ module iob_iob2wishbone #(
       .DATA_W (DATA_W / 8),
       .RST_VAL(0)
    ) iob_reg_strb (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .rst_i (1'b0),
       .en_i  (iob_avalid_i),
       .data_i(wb_select),
@@ -122,9 +110,7 @@ module iob_iob2wishbone #(
       .DATA_W (DATA_W),
       .RST_VAL(0)
    ) iob_reg_wb_data (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .rst_i (1'b0),
       .en_i  (1'b1),
       .data_i(wb_data_i),
@@ -134,9 +120,7 @@ module iob_iob2wishbone #(
       .DATA_W (1),
       .RST_VAL(0)
    ) iob_reg_wb_ack (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .rst_i (1'b0),
       .en_i  (1'b1),
       .data_i(wb_ack_i),
