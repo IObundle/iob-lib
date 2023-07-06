@@ -43,6 +43,7 @@ class iob_module:
     }
 
     # Public setup method for this module.
+    # This method should not be overriden by subclasses!
     # purpose: Reason for setting up the module. Used to select between the standard destination locations.
     # is_top_module: Select if this is the top module. This should only be enabled on the top module class.
     @classmethod
@@ -91,8 +92,9 @@ class iob_module:
         # Return a new iob_verilog_instance object with these attributes that describe the Verilog instance and module.
         return iob_verilog_instance(name, *args, module=cls, **kwargs)
 
-    # Public method to set dynamic attributes
-    # This method is automatically called by the `setup` method
+    # TODO: Rename this function to `init_attributes`
+    # Public method to set dynamic attributes.
+    # This method is automatically called by the `setup` method! It should only be called once for each class.
     @classmethod
     def set_dynamic_attributes(cls):
         # Set the build directory in the `iob_module` superclass, so everyone has access to it
@@ -123,6 +125,7 @@ class iob_module:
     def _create_submodules_list(cls):
         pass
 
+    # TODO: Rename this function to `_post_setup()`
     # Default _run_setup function copies sources from setup directory of every subclass of iob_module, down to `cls`.
     @classmethod
     def _run_setup(cls):

@@ -44,3 +44,24 @@ def replace_includes(setup_dir="", build_dir=""):
     print(
         f"{iob_colors.INFO}Replaced Verilog Snippet includes with respective content and deleted the files.{iob_colors.ENDC}"
     )
+
+
+# Insert given verilog code into module defined inside the given verilog source file
+# The code will be inserted just before the `endmodule` statement.
+def insert_verilog_in_module(verilog_code, verilog_file_path):
+    with open(verilog_file_path, "r") as system_source:
+        lines = system_source.readlines()
+    # Find `endmodule`
+    for idx, line in enumerate(lines):
+        if line.startswith("endmodule"):
+            endmodule_index = idx - 1
+            break
+    else:
+        raise Exception(f"{iob_colors.FAIL}verilog_tools.py: Could not find 'endmodule' declaration in '{verilog_file_path}'!{iob_colors.ENDC}")
+
+    # Insert Verilog code
+    lines.insert(endmodule_index, verilog_code)
+
+    # Write new system source file
+    with open(verilog_file_path, "w") as system_source:
+        system_source.writelines(lines)
