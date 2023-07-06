@@ -17,39 +17,19 @@ module iob_s2f_sync #(
    output [DATA_W-1:0] data_o
 );
 
-   wire [DATA_W-1:0] data1;
-   wire [DATA_W-1:0] data2;
-   wire [DATA_W-1:0] sync;
+   wire [DATA_W-1:0] ld_reg0 = ld_i ? ld_val_i : data_i;
+   
+   wire [DATA_W-1:0] data_rst0 = rst_i ? RST_VAL : ld_reg0;
 
-   assign data1 = ld_i ? ld_val_i : data_i;
-   assign data2 = ld_i ? ld_val_i : sync;
-
-   iob_reg_r #(
-       .DATA_W(DATA_W), 
-       .RST_VAL(RST_VAL)
-   ) reg0 (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
-
-      .rst_i(rst_i),
-
-      .data_i(data1),
-      .data_o(sync)
-   );
-
-   iob_reg_r #(
-       .DATA_W(DATA_W), 
-       .RST_VAL(RST_VAL)
-   ) reg1 (
-      .clk_i (clk_i),
-      .arst_i(arst_i),
-      .cke_i (cke_i),
-
-      .rst_i(rst_i),
-
-      .data_i(data2),
-      .data_o(data_o)
+   iob_sync #(
+       .DATA_W  (DATA_W),
+       .RST_VAL (RST_VAL),
+       .CLKEDGE ("posedge")
+   ) iob_sync_inst0 (
+       .clk_i   (clk_i),
+       .arst_i  (arst_i),
+       .signal_i(data_rst0),
+       .signal_o(data_o)
    );
 
 endmodule

@@ -4,8 +4,7 @@ import shutil
 from iob_module import iob_module
 from setup import setup
 
-from iob_counter import iob_counter
-from iob_reg_re import iob_reg_re
+from iob_sync import iob_sync
 
 
 class iob_s2f_sync(iob_module):
@@ -20,8 +19,7 @@ class iob_s2f_sync(iob_module):
 
         # Setup dependencies
 
-        iob_counter.setup()
-        iob_reg_re.setup()
+        iob_sync.setup()
 
         if cls.is_top_module:
             # Setup flows of this core using LIB setup function
