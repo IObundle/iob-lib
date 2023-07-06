@@ -7,6 +7,7 @@
 
 import sys
 import argparse
+import re
 
 table = []
 
@@ -908,6 +909,11 @@ def suffix(direction):
         quit()
 
 
+# Add a given prefix (in upppercase) to every parameter/macro found in the string
+def add_param_prefix(string, param_prefix):
+    return re.sub(r"([a-zA-Z_][\w_]*)", param_prefix.upper()+r"\g<1>", string)
+
+
 #
 # Port
 #
@@ -919,7 +925,7 @@ def write_port(direction, width, name, description, fout):
     # fout.write(direction + width + name + ", //" + description + "\n")
 
 
-def m_port(prefix, fout, bus_size=1):
+def m_port(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]["master"] == 1:
             port_direction = table[i]["signal"]
@@ -928,13 +934,14 @@ def m_port(prefix, fout, bus_size=1):
                 width = table[i]["width"]
             else:
                 width = "(" + str(bus_size) + "*" + table[i]["width"] + ")"
+            width = add_param_prefix(width, param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             # Write port
             write_port(port_direction, bus_width, name, description, fout)
 
 
-def s_port(prefix, fout, bus_size=1):
+def s_port(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]["slave"] == 1:
             port_direction = reverse(table[i]["signal"])
@@ -943,6 +950,7 @@ def s_port(prefix, fout, bus_size=1):
                 width = table[i]["width"]
             else:
                 width = "(" + str(bus_size) + "*" + table[i]["width"] + ")"
+            width = add_param_prefix(width, param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             # Write port
@@ -1057,7 +1065,8 @@ def s_s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
 
 
 # Write wire with given name, bus size, width and description to file
-def write_wire(name, bus_size, width, description, fout):
+def write_wire(name, param_prefix, bus_size, width, description, fout):
+    width = add_param_prefix(width, param_prefix)
     if bus_size == 1:
         bus_width = " [" + width + "-1:0] "
     else:
@@ -1066,7 +1075,8 @@ def write_wire(name, bus_size, width, description, fout):
 
 
 # Write reg with given name, bus size, width, initial value and description to file
-def write_reg(name, bus_size, width, default, description, fout):
+def write_reg(name, param_prefix, bus_size, width, default, description, fout):
+    width = add_param_prefix(width, param_prefix)
     if bus_size == 1:
         bus_width = " [" + width + "-1:0] "
     else:
@@ -1076,19 +1086,20 @@ def write_reg(name, bus_size, width, default, description, fout):
 
 # Write tb wire with given tb_signal, prefix, name, bus size, width and description to file
 def write_tb_wire(
-    tb_signal, prefix, name, bus_size, width, description, fout, default="0"
+    tb_signal, prefix, name, param_prefix, bus_size, width, description, fout, default="0"
 ):
     signal_name = prefix + name + suffix(tb_signal)
     if tb_signal == "reg":
-        write_reg(signal_name, bus_size, width, default, description, fout)
+        write_reg(signal_name, param_prefix, bus_size, width, default, description, fout)
     else:
-        write_wire(signal_name, bus_size, width, description, fout)
+        write_wire(signal_name, param_prefix, bus_size, width, description, fout)
 
 
-def wire(prefix, fout, bus_size=1):
+def wire(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
         write_wire(
             prefix + table[i]["name"],
+            param_prefix,
             bus_size,
             table[i]["width"],
             table[i]["description"],
@@ -1096,7 +1107,7 @@ def wire(prefix, fout, bus_size=1):
         )
 
 
-def m_tb_wire(prefix, fout, bus_size=1):
+def m_tb_wire(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]["slave"] == 1:
             tb_signal = tbsignal(table[i]["signal"])
@@ -1104,6 +1115,7 @@ def m_tb_wire(prefix, fout, bus_size=1):
                 tb_signal,
                 prefix,
                 table[i]["name"],
+                param_prefix,
                 bus_size,
                 table[i]["width"],
                 table[i]["description"],
@@ -1113,7 +1125,7 @@ def m_tb_wire(prefix, fout, bus_size=1):
     fout.write("\n")
 
 
-def s_tb_wire(prefix, fout, bus_size=1):
+def s_tb_wire(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]["master"] == 1:
             tb_signal = tbsignal(reverse(table[i]["signal"]))
@@ -1121,6 +1133,7 @@ def s_tb_wire(prefix, fout, bus_size=1):
                 tb_signal,
                 prefix,
                 table[i]["name"],
+                param_prefix,
                 bus_size,
                 table[i]["width"],
                 table[i]["description"],
@@ -1273,10 +1286,11 @@ def create_signal_table(interface_name):
 #
 
 
-# port_prefix: Prefix for ports in a portmap file.
+# port_prefix: Prefix for ports in a portmap file. Only used for portmaps.
 # wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file; Prefix for ports in a `*port.vs` file (these ports also create wires);
+# param_prefix: Prefix for parameters in signals width. Only used for ports or wires (unused for portmaps).
 def write_vs_contents(
-    interface_name, port_prefix, wire_prefix, file_object, bus_size=1, bus_start=0
+    interface_name, port_prefix, wire_prefix, file_object, param_prefix="", bus_size=1, bus_start=0
 ):
     func_name = (
         interface_name.replace("axil_", "")
@@ -1293,7 +1307,7 @@ def write_vs_contents(
             + "(port_prefix, wire_prefix, file_object, bus_start=bus_start, bus_size=bus_size)"
         )
     else:
-        eval(func_name + "(wire_prefix, file_object, bus_size=bus_size)")
+        eval(func_name + "(wire_prefix, param_prefix, file_object, bus_size=bus_size)")
 
 
 #
