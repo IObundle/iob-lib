@@ -15,6 +15,9 @@ TBS+=" hardware/modules/fifo/iob_fifo_async/iob_fifo_async_tb.v"
 TBS+=" hardware/modules/fifo/iob_fifo_sync/iob_fifo_sync_tb.v"
 TBS+=" hardware/modules/iob_prio_enc/iob_prio_enc_tb.v"
 TBS+=" hardware/modules/iob_ctls/iob_ctls_tb.v"
+TBS+=" hardware/modules/rom/iob_rom_sp/iob_rom_sp_tb.v"
+TBS+=" hardware/modules/rom/iob_rom_tdp/iob_rom_tdp_tb.v"
+TBS+=" hardware/modules/rom/iob_rom_dp/iob_rom_dp_tb.v"
 TBS+=" hardware/modules/regfile/iob_regfile_sp/iob_regfile_sp_tb.v"
 
 #extract respective directories
