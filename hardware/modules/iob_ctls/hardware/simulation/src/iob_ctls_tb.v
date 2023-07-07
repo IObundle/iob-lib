@@ -9,13 +9,19 @@ module iob_ctls_tb;
    integer               i;
 
    initial begin
+`ifdef VCD
       $dumpfile("uut.vcd");
       $dumpvars();
+`endif
 
       for (i = 0; i < 2 ** W; i = i + 1) begin
          #10 data_i = i;
       end
-      #10 $finish();
+      #10 
+      $display("%c[1;34m", 27);
+      $display("Test completed successfully.");
+      $display("%c[0m", 27);
+      $finish();
    end
 
    iob_ctls #(
