@@ -40,7 +40,7 @@ module iob_add2
       //intermediate adders
       if (N>3) begin: g_Ngt3
          for(i=1; i<(N-1); i=i+1) begin: adder
-            iob_add2 #(.W(W), .N(N)) 
+            iob_add2 #(.W(W)) 
             adder(
                   .in1_i(in_i[i*W +: W]),
                   .in2_i(sum[(i-1)*W +: W]),
@@ -52,7 +52,7 @@ module iob_add2
 
       //last adder
       if (N>2) begin: g_Ngt3
-      iob_add2 #(.W(W), .N(N)) 
+      iob_add2 #(.W(W)) 
       adder(
             .in1_i(in_i[(N-1)*W +: W]),
             .in2_i(sum[(N-2)*W +: W]),
