@@ -19,6 +19,17 @@ TBS+=" hardware/modules/rom/iob_rom_sp/iob_rom_sp_tb.v"
 TBS+=" hardware/modules/rom/iob_rom_tdp/iob_rom_tdp_tb.v"
 TBS+=" hardware/modules/rom/iob_rom_dp/iob_rom_dp_tb.v"
 TBS+=" hardware/modules/regfile/iob_regfile_sp/iob_regfile_sp_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_2p_tiled/iob_ram_2p_tiled_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_2p_be/iob_ram_2p_be_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_tdp/iob_ram_tdp_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_2p/iob_ram_2p_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_dp/iob_ram_dp_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_dp_be/iob_ram_dp_be_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_tdp_be/iob_ram_tdp_be_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_sp_be/iob_ram_sp_be_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_dp_be_xil/iob_ram_dp_be_xil_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_t2p/iob_ram_t2p_tb.v"
+TBS+=" hardware/modules/ram/iob_ram_sp/iob_ram_sp_tb.v"
 
 #extract respective directories
 for i in $TBS; do TB_DIRS+=" `dirname $i`" ; done
