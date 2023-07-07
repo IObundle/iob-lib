@@ -7,6 +7,8 @@
 -       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
 */
 
+`include "iob_utils.vh"
+
 module iob_fifo_sync_tb;
 
    localparam W_DATA_W = 8;
@@ -171,6 +173,9 @@ module iob_fifo_sync_tb;
       end
       $display("INFO: read proc: data read matches test data as expected");
 
+      $display("%c[1;34m", 27);
+      $display("INFO: TEST PASSED");
+      $display("%c[0m", 27);
       #(5 * clk_per) $finish();
    end
 

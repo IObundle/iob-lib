@@ -168,7 +168,9 @@ module iob_fifo_async_tb;
             );
       end
 
+      $display("%c[1;34m", 27);
       $display("INFO: TEST PASSED");
+      $display("%c[0m", 27);
       #100 $finish();
    end
 

@@ -103,6 +103,7 @@ module iob_fifo_async #(
       .RST_VAL({(W_ADDR_W + 1) {1'd0}})
    ) w_waddr_gray_sync0 (
       .clk_i   (r_clk_i),
+      .cke_i   (1'b1),
       .arst_i  (r_arst_i),
       .signal_i(w_waddr_gray),
       .signal_o(r_waddr_gray)
@@ -116,6 +117,7 @@ module iob_fifo_async #(
       .RST_VAL({(R_ADDR_W + 1) {1'd0}})
    ) r_raddr_gray_sync0 (
       .clk_i   (w_clk_i),
+      .cke_i   (1'b1),
       .arst_i  (w_arst_i),
       .signal_i(r_raddr_gray),
       .signal_o(w_raddr_gray)
