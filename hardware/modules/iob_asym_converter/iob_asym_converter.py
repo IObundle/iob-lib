@@ -7,6 +7,7 @@ from setup import setup
 from iob_utils import iob_utils
 from iob_reg import iob_reg
 from iob_ram_2p import iob_ram_2p
+from iob_clkenrst_portmap import iob_clkenrst_portmap
 
 
 class iob_asym_converter(iob_module):
@@ -23,6 +24,7 @@ class iob_asym_converter(iob_module):
 
         iob_utils.setup()
         iob_reg.setup()
+        iob_clkenrst_portmap.setup()
 
         iob_ram_2p.setup(purpose="simulation")
 

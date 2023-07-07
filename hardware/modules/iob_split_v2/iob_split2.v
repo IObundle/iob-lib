@@ -91,9 +91,7 @@ module iob_split #(
       .DATA_W (),
       .RST_VAL(0)
    ) sel_reg0 (
-      .clk_i (clk_i),
-      .arst_i(arst),
-      .cke_i (cke_i),
+      `include "iob_clkenrst_portmap.vs"
       .data_i(sel),
       .data_o(sel_reg)
    );
