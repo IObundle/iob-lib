@@ -3,7 +3,9 @@ import shutil
 
 from iob_module import iob_module
 from setup import setup
+
 from iob_reg_re import iob_reg_re
+from iob_clkenrst_portmap import iob_clkenrst_portmap
 
 
 class iob_regfile_sp(iob_module):
@@ -15,11 +17,14 @@ class iob_regfile_sp(iob_module):
 
     @classmethod
     def _run_setup(cls):
+
+        # Verilog snippet files
+        iob_clkenrst_portmap.setup()
+
         # Setup dependencies
         iob_reg_re.setup()
 
         super()._run_setup()
 
-        if cls.is_top_module:
-            # Setup flows of this core using LIB setup function
-            setup(cls, disable_file_gen=True)
+        # Setup flows of this core using LIB setup function
+        setup(cls, disable_file_gen=True)

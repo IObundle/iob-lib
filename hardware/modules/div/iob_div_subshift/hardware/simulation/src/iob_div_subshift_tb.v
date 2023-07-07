@@ -62,7 +62,11 @@ module iob_div_subshift_tb;
            $display ("%d / %d = %d with rem %d but got %d with rem %d", dividend[i], divisor[i], quotient[i], remainder[i], quotient_out, remainder_out);
       end
 
-      $finish;
+      #clk_period;
+      $display("%c[1;34m", 27);
+      $display("Test completed successfully.");
+      $display("%c[0m", 27);
+      #(5 * clk_period) $finish();
 
    end
 

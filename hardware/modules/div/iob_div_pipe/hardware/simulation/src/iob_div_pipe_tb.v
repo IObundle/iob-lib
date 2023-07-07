@@ -64,8 +64,11 @@ module iob_div_pipe_tb;
 
       #((TEST_SZ+DATA_W/OPERS_PER_STAGE)*clk_period);
 
-      $display("Test completed successfully");
-      $finish;
+      #clk_period;
+      $display("%c[1;34m", 27);
+      $display("Test completed successfully.");
+      $display("%c[0m", 27);
+      #(5 * clk_period) $finish();
    end
 
    always 
