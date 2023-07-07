@@ -8,8 +8,8 @@ TBS=`find hardware | grep _tb.v | grep -v include`
 #extract respective directories
 for i in $TBS; do TB_DIRS+=" `dirname $i`" ; done
 
-#extract respective modules
-for i in $TB_DIRS; do MODULES+=" `basename $i`" ; done
+#extract respective modules - go back from MODULE/hardware/simulation/src
+for i in $TB_DIRS; do MODULES+=" `basename $(builtin cd $i/../../..; pwd)`" ; done
 
 #run tests
 for i in $MODULES; do
