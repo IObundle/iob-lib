@@ -293,7 +293,7 @@ def eval_param_expression(param_expression, params_dict):
                     # Remove '`' char if it was a macro
                     if idx > 0 and split_expression[idx - 1] == "`":
                         split_expression[idx - 1] = ""
-                    #resplit the string in case the parameter value contains other parameters
+                    # resplit the string in case the parameter value contains other parameters
                     split_expression = re.split("([^\w_])", "".join(split_expression))
         # Join back the string
         param_expression = "".join(split_expression)
