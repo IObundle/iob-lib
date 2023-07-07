@@ -61,9 +61,12 @@ def setup(
             regs.append(general_regs_table)
 
         # Auto add 'VERSION' register in 'general' registers table if it doesn't exist
+        # If it does exist, give an error
         for reg in general_regs_table["regs"]:
             if reg["name"] == "VERSION":
-                break
+                raise Exception(
+                    "Register 'VERSION' is reserved. Please remove it."
+                )                
         else:
             general_regs_table["regs"].append(
                 {
