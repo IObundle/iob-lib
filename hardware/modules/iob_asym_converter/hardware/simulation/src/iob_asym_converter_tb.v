@@ -27,8 +27,10 @@ module iob_asym_converter_tb;
    localparam R_ADDR_W = R_DATA_W == MINDATA_W ? MAXADDR_W : MINADDR_W;
    localparam R = MAXDATA_W / MINDATA_W;
 
+   localparam clk_period = 10;
+
    // system clock
-   `IOB_CLOCK(clk, 10)
+   `IOB_CLOCK(clk, clk_period)
 
    // write port
    reg                  w_en = 0;
@@ -107,8 +109,11 @@ module iob_asym_converter_tb;
       end
 
       //wait 5 cycles and finish
-      repeat (5) @(posedge clk) #1;
-      $finish();
+      #clk_period;
+      $display("%c[1;34m", 27);
+      $display("Test completed successfully.");
+      $display("%c[0m", 27);
+      #(5 * clk_period) $finish();
    end
 
    // instantiate the Unit Under Test (UUT)

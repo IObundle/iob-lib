@@ -9,6 +9,8 @@ set -e
 TBS+=" hardware/modules/div/iob_div_pipe/iob_div_pipe_tb.v"
 TBS+=" hardware/modules/div/iob_div_subshift/iob_div_subshift_tb.v"
 TBS+=" hardware/modules/div/iob_div_subshift_frac/iob_div_subshift_frac_tb.v"
+TBS+=" hardware/modules/axis2axi/axis2axi_tb.v"
+TBS+=" hardware/modules/iob_asym_converter/iob_asym_converter_tb.v"
 TBS+=" hardware/modules/regfile/iob_regfile_sp/iob_regfile_sp_tb.v"
 
 #extract respective directories
