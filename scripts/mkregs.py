@@ -475,9 +475,15 @@ class mkregs:
                     )
                     f_gen.write(f"  if({aux_read_reg}) ")
                 f_gen.write(f"begin\n")
-                f_gen.write(
-                    f"    rdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n"
-                )
+                if (name == "VERSION") :
+                        rst_val = row["rst_val"]
+                        f_gen.write(
+                        f"    rdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = 16'h{rst_val}|{8*n_bytes}'d0;\n"
+                    )
+                else :
+                    f_gen.write(
+                        f"    rdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n"
+                    )
                 if not auto:
                     f_gen.write(f"    rready_int = {name}_ready_i;\n")
                     f_gen.write(f"    rvalid_int = {name}_rvalid_i;\n")
