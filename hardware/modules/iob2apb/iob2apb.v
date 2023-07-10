@@ -19,7 +19,6 @@ module iob2apb #(
 
    // APB master interface
    `include "iob_apb_m_port.vs"
-
 );
 
    //APB outputs
