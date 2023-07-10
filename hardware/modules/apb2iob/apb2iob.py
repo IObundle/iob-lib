@@ -21,6 +21,8 @@ class apb2iob(iob_module):
         iob_module.generate("iob_wire")
         iob_module.generate("apb_s_port")
         iob_module.generate("iob_s_portmap")
+        iob_module.generate("clk_n_rst_port")
+        iob_module.generate("clk_n_rst_portmap")
         iob_reg.setup()
 
         # Setup flows of this core using LIB setup function

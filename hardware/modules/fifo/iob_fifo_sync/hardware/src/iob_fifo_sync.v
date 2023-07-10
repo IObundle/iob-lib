@@ -16,7 +16,7 @@ module iob_fifo_sync #(
    W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
    R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
 ) (
-   `include "iob_clkenrst_port.vs"
+   `include "iob_clk_en_rst_port.vs"
 
    input rst_i,
 
@@ -58,7 +58,7 @@ module iob_fifo_sync #(
       .DATA_W (W_ADDR_W),
       .RST_VAL({W_ADDR_W{1'd0}})
    ) w_addr_cnt0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .rst_i (rst_i),
       .en_i  (w_en_int),
@@ -74,7 +74,7 @@ module iob_fifo_sync #(
       .DATA_W (R_ADDR_W),
       .RST_VAL({R_ADDR_W{1'd0}})
    ) r_addr_cnt0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .rst_i (rst_i),
       .en_i  (r_en_int),
@@ -93,7 +93,7 @@ module iob_fifo_sync #(
       .RST_VAL({(ADDR_W + 1) {1'd0}}),
       .CLKEDGE("posedge")
    ) level_reg0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .rst_i(rst_i),
 
@@ -123,7 +123,7 @@ module iob_fifo_sync #(
       .RST_VAL(1'd1),
       .CLKEDGE("posedge")
    ) r_empty_reg0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .data_i(r_empty_nxt),
       .data_o(r_empty_o)
@@ -137,7 +137,7 @@ module iob_fifo_sync #(
       .RST_VAL(1'd0),
       .CLKEDGE("posedge")
    ) w_full_reg0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .data_i(w_full_nxt),
       .data_o(w_full_o)
@@ -149,7 +149,7 @@ module iob_fifo_sync #(
       .R_DATA_W(R_DATA_W),
       .ADDR_W  (ADDR_W)
    ) iob_asym_converter0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .w_en_i  (w_en_int),
       .w_addr_i(w_addr),

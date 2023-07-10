@@ -3,7 +3,7 @@
 module iob_edge_detect #(
    parameter CLKEDGE = "posedge"
 ) (
-   `include "iob_clkenrst_port.vs"
+   `include "iob_clk_en_rst_port.vs"
    input  bit_i,
    output detected_o
 );
@@ -15,7 +15,7 @@ module iob_edge_detect #(
       .RST_VAL(1'b1),
       .CLKEDGE(CLKEDGE)
    ) reg0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .data_i({bit_i}),
       .data_o(bit_i_reg)
