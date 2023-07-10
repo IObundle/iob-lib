@@ -285,10 +285,10 @@ class mkregs:
         f_inst.write("\n) swreg_0 (\n")
         self.gen_portmap(table, f_inst)
         f_inst.write('  `include "iob_s_portmap.vs"\n')
-        f_inst.write('  .clk_i(clk_i),\n')
-        f_inst.write('  .cke_i(cke_i),\n')
-        f_inst.write('  .arst_i(arst_i)\n')
-        
+        f_inst.write("  .clk_i(clk_i),\n")
+        f_inst.write("  .cke_i(cke_i),\n")
+        f_inst.write("  .arst_i(arst_i)\n")
+
         f_inst.write("\n);\n")
 
         #
@@ -319,10 +319,10 @@ class mkregs:
         # ports
         self.gen_port(table, f_gen)
         f_gen.write('  `include "iob_s_port.vs"\n')
-        f_gen.write('  //General Interface Signals\n')
-        f_gen.write('  input clk_i,\n')
-        f_gen.write('  input cke_i,\n')
-        f_gen.write('  input arst_i\n')
+        f_gen.write("  //General Interface Signals\n")
+        f_gen.write("  input clk_i,\n")
+        f_gen.write("  input cke_i,\n")
+        f_gen.write("  input arst_i\n")
 
         f_gen.write(");\n\n")
 
