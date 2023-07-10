@@ -20,6 +20,7 @@ class iob_sync(iob_module):
 
         # Setup dependencies
 
+        iob_clkrst_port.setup()
         iob_reg.setup()
         iob_clkrst_port.setup()
 
