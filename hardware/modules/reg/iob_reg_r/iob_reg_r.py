@@ -5,8 +5,6 @@ from iob_module import iob_module
 from setup import setup
 
 from iob_reg import iob_reg
-from iob_clkenrst_portmap import iob_clkenrst_portmap
-from iob_clkenrst_port import iob_clkenrst_port
 
 
 class iob_reg_r(iob_module):
@@ -20,8 +18,8 @@ class iob_reg_r(iob_module):
         super()._run_setup()
 
         # Verilog snippet files
-        iob_clkenrst_portmap.setup()
-        iob_clkenrst_port.setup()
+        iob_module.generate("clk_en_rst_portmap")
+        iob_module.generate("clk_en_rst_port")
 
         # Setup dependencies
         iob_reg.setup()

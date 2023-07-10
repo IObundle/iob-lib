@@ -22,6 +22,10 @@ interfaces = [
     "iob_wire",
     "iob_m_tb_wire",
     "iob_s_tb_wire",
+    "clk_en_rst_port",
+    "clk_rst_port",
+    "clk_en_rst_portmap",
+    "clk_rst_portmap",
     "axi_m_port",
     "axi_s_port",
     "axi_m_write_port",
@@ -155,6 +159,33 @@ iob = [
         "name": "iob_ready",
         "default": "0",
         "description": "Interface ready.",
+    },
+]
+
+clk_en_rst = [
+    {
+        "enable": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "clk",
+        "default": "0",
+        "description": "clock signal",
+    },
+    {
+        "enable": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "cke",
+        "default": "0",
+        "description": "clock enable",
+    },
+    {
+        "enable": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "arst",
+        "default": "0",
+        "description": "asynchronous reset",
     },
 ]
 
@@ -795,6 +826,18 @@ def make_iob():
 
 
 #
+# Clk En Rst
+#
+
+
+def make_clk_en_rst():
+    bus = []
+    for i in range(len(clk_en_rst)):
+        bus.append(clk_en_rst[i])
+    return bus
+
+
+#
 # AXI4 Full
 #
 
@@ -925,6 +968,27 @@ def write_port(direction, width, name, description, fout):
     # fout.write(direction + width + name + ", //" + description + "\n")
 
 
+def en_rst_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        port_direction = table[i]["signal"]
+        name = prefix + table[i]["name"] + suffix(table[i]["signal"])
+        width = table[i]["width"]
+        bus_width = " [" + width + "-1:0] "
+        description = top_macro + table[i]["description"]
+        write_port(port_direction, bus_width, name, description, fout)
+
+
+def rst_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["enable"] == 0:
+            port_direction = table[i]["signal"]
+            name = prefix + table[i]["name"] + suffix(table[i]["signal"])
+            width = table[i]["width"]
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
 def m_port(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]["master"] == 1:
@@ -989,6 +1053,39 @@ def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             table[i]["description"],
             fout,
         )
+
+
+def en_rst_portmap(port_prefix, wire_prefix, fout, bus_start, bus_size):
+    for i in range(len(table)):
+        port = port_prefix + table[i]["name"] + suffix(table[i]["signal"])
+        connection_name = wire_prefix + table[i]["name"] + suffix(table[i]["signal"])
+        write_portmap(
+            port,
+            connection_name,
+            table[i]["width"],
+            bus_start,
+            bus_size,
+            table[i]["description"],
+            fout,
+        )
+
+
+def rst_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["enable"] == 0:
+            port = port_prefix + table[i]["name"] + suffix(table[i]["signal"])
+            connection_name = (
+                wire_prefix + table[i]["name"] + suffix(table[i]["signal"])
+            )
+            write_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                bus_start,
+                bus_size,
+                table[i]["description"],
+                fout,
+            )
 
 
 def m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
@@ -1178,6 +1275,9 @@ def parse_arguments():
                             iob_m_tb_wire: iob native master wires for testbench
                             iob_s_tb_wire: iob native slave wires for testbench
 
+                            clk_en_rst_port: clk, clk en, rst ports
+                            clk_rst_port: clk, rst ports
+
                             axi_m_port: axi full master port
                             axi_s_port: axi full slave port
                             axi_m_write_port: axi full master write port
@@ -1268,6 +1368,9 @@ def create_signal_table(interface_name):
     if interface_name.find("iob_") >= 0:
         table = make_iob()
 
+    if interface_name.find("clk_") >= 0:
+        table = make_clk_en_rst()
+
     if interface_name.find("axi_") >= 0:
         if interface_name.find("write_") >= 0:
             table = make_axi_write()
@@ -1310,6 +1413,7 @@ def write_vs_contents(
 ):
     func_name = (
         interface_name.replace("axil_", "")
+        .replace("clk_", "")
         .replace("axi_", "")
         .replace("write_", "")
         .replace("read_", "")

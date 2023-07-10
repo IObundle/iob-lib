@@ -28,6 +28,8 @@ class axil2iob(iob_module):
         iob_m_port.setup()
         iob_m_portmap.setup()
         iob_module.generate("iob_wire")
+        iob_module.generate("clk_rst_portmap")
+        iob_module.generate("clk_rst_port")
         iob_s_portmap.setup()
 
         # Setup flows of this core using LIB setup function

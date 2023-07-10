@@ -32,7 +32,7 @@ module axis2axi_in #(
    output [  BUFFER_W-1:0] ext_mem_r_addr_o,
    input  [AXI_DATA_W-1:0] ext_mem_r_data_i,
 
-   `include "iob_clkenrst_port.vs"
+   `include "iob_clk_en_rst_port.vs"
    input rst_i
 );
 
