@@ -19,6 +19,8 @@ class iob_sipo_reg(iob_module):
         super()._run_setup()
 
         # Setup dependencies
+        iob_module.generate("clk_en_rst_port")
+        iob_module.generate("clk_en_rst_portmap")
 
         iob_counter.setup()
         iob_reg.setup()

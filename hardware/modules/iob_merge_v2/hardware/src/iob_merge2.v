@@ -9,7 +9,7 @@ module iob_merge #(
 ) (
    `include "iob_split_i_iob_port.vs"
    `include "iob_split_o_iob_port.vs"
-   `include "iob_clkenrst_port.vs"
+   `include "iob_clk_en_rst_port.vs"
 );
 
    localparam NBITS = $clog2(N) + ($clog2(N) == 0);
@@ -92,7 +92,7 @@ module iob_merge #(
       .DATA_W (),
       .RST_VAL(0)
    ) sel_reg0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(sel),
       .data_o(sel_reg)
    );

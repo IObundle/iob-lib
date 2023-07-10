@@ -3,7 +3,7 @@
 module iob_gray_counter #(
    parameter W = 1
 ) (
-   `include "iob_clkenrst_port.vs"
+   `include "iob_clk_en_rst_port.vs"
 
    input rst_i,
    input en_i,
@@ -31,7 +31,7 @@ module iob_gray_counter #(
       .RST_VAL({{(W - 1) {1'd0}}, 1'd1}),
       .CLKEDGE("posedge")
    ) bin_counter_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .rst_i(rst_i),
       .en_i (en_i),
@@ -45,7 +45,7 @@ module iob_gray_counter #(
       .RST_VAL({W{1'd0}}),
       .CLKEDGE("posedge")
    ) gray_counter_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .rst_i(rst_i),
       .en_i (en_i),

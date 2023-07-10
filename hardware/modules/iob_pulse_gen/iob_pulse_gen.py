@@ -19,6 +19,8 @@ class iob_pulse_gen(iob_module):
         super()._run_setup()
 
         # Setup dependencies
+        iob_module.generate("clk_en_rst_portmap")
+        iob_module.generate("clk_en_rst_port")
 
         iob_reg.setup()
         iob_counter.setup()

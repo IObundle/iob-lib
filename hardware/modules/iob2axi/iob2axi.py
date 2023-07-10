@@ -30,6 +30,7 @@ class iob2axi(iob_module):
         m_axi_read_m_port.setup()
         m_m_axi_write_portmap.setup()
         m_m_axi_read_portmap.setup()
+        iob_module.generate("clk_rst_port")
 
         iob2axi_wr.setup()
         iob2axi_rd.setup()

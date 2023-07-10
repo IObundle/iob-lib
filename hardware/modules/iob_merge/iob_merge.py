@@ -24,5 +24,8 @@ class iob_merge(iob_module):
         iob_mux.setup()
         iob_demux.setup()
 
+        iob_module.generate("clk_en_rst_portmap")
+        iob_module.generate("clk_en_rst_port")
+
         # Setup flows of this core using LIB setup function
         setup(cls, disable_file_gen=True)

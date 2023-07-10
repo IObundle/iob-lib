@@ -6,7 +6,7 @@ module iob_modcnt #(
    parameter CLKEDGE = "posedge"
 ) (
 
-   `include "iob_clkenrst_port.vs"
+   `include "iob_clk_en_rst_port.vs"
 
    input rst_i,
    input en_i,
@@ -23,7 +23,7 @@ module iob_modcnt #(
       .RST_VAL(RST_VAL),
       .CLKEDGE(CLKEDGE)
    ) cnt0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .rst_i   (rst_i),
       .en_i    (en_i),
       .ld_i    (ld_count),

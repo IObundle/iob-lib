@@ -12,7 +12,7 @@ module iob2apb #(
    parameter DATA_W     = APB_DATA_W   // IOb data bus width in bits
 ) (
    // Global signals
-   `include "iob_clkenrst_port.vs"
+   `include "iob_clk_en_rst_port.vs"
 
    // IOb slave interface
    `include "iob_s_port.vs"
@@ -27,7 +27,7 @@ module iob2apb #(
       .DATA_W (1),
       .RST_VAL(0)
    ) sel_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(apb_sel_nxt),
       .data_o(apb_sel_o)
    );
@@ -37,7 +37,7 @@ module iob2apb #(
       .DATA_W (1),
       .RST_VAL(0)
    ) enable_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(apb_enable_nxt),
       .data_o(apb_enable_o)
    );
@@ -47,7 +47,7 @@ module iob2apb #(
       .DATA_W (ADDR_W),
       .RST_VAL(0)
    ) addr_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(apb_addr_nxt),
       .data_o(apb_addr_o)
    );
@@ -57,7 +57,7 @@ module iob2apb #(
       .DATA_W (DATA_W / 8),
       .RST_VAL(0)
    ) wstrb_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(apb_wstrb_nxt),
       .data_o(apb_wstrb_o)
    );
@@ -67,7 +67,7 @@ module iob2apb #(
       .DATA_W (1),
       .RST_VAL(0)
    ) write_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(apb_write_nxt),
       .data_o(apb_write_o)
    );
@@ -77,7 +77,7 @@ module iob2apb #(
       .DATA_W (DATA_W),
       .RST_VAL(0)
    ) wdata_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(apb_wdata_nxt),
       .data_o(apb_wdata_o)
    );
@@ -88,7 +88,7 @@ module iob2apb #(
       .DATA_W (1),
       .RST_VAL(1)
    ) ready_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(iob_ready_nxt),
       .data_o(iob_ready_o)
    );
@@ -98,7 +98,7 @@ module iob2apb #(
       .DATA_W (1),
       .RST_VAL(0)
    ) rvalid_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(iob_rvalid_nxt),
       .data_o(iob_rvalid_o)
    );
@@ -108,7 +108,7 @@ module iob2apb #(
       .DATA_W (DATA_W),
       .RST_VAL(0)
    ) rdata_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(iob_rdata_nxt),
       .data_o(iob_rdata_o)
    );
@@ -119,7 +119,7 @@ module iob2apb #(
       .DATA_W (1),
       .RST_VAL(0)
    ) access_reg (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(pc_nxt),
       .data_o(pc)
    );

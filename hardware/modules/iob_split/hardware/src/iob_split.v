@@ -7,7 +7,7 @@ module iob_split #(
    parameter N_SLAVES = 2,          //number of slaves
    parameter P_SLAVES = `REQ_W - 2  //slave select word msb position
 ) (
-   `include "iob_clkrst_port.vs"
+   `include "iob_clk_rst_port.vs"
 
    //masters interface
    input      [ `REQ_W-1:0] m_req_i,
@@ -54,7 +54,7 @@ module iob_split #(
       .DATA_W (Nb),
       .RST_VAL(0)
    ) iob_reg_s_sel (
-      `include "iob_clkrst_portmap.vs"
+      `include "iob_clk_rst_portmap.vs"
       .cke_i (1'b1),
       .rst_i (1'b0),
       .en_i  (m_avalid),

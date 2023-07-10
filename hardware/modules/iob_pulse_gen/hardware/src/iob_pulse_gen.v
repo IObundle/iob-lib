@@ -5,7 +5,7 @@ module iob_pulse_gen #(
    parameter START    = 0,
    parameter DURATION = 0
 ) (
-   `include "iob_clkenrst_port.vs"
+   `include "iob_clk_en_rst_port.vs"
    input  start_i,
    output pulse_o
 );
@@ -22,7 +22,7 @@ module iob_pulse_gen #(
       .RST_VAL(0),
       .CLKEDGE("posedge")
    ) start_detected_inst (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .data_i(start_detected_nxt),
       .data_o(start_detected)
    );
@@ -39,7 +39,7 @@ module iob_pulse_gen #(
       .DATA_W (WIDTH),
       .RST_VAL({WIDTH{1'b0}})
    ) cnt0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .rst_i (start_i),
       .en_i  (cnt_en),
       .data_o(cnt)

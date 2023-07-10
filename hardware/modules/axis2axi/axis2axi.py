@@ -30,6 +30,7 @@ class axis2axi(iob_module):
         iob_module.generate("axi_m_read_port")
         iob_module.generate("axi_m_m_write_portmap")
         iob_module.generate("axi_m_m_read_portmap")
+        iob_module.generate("clk_en_rst_port")
 
         iob_fifo_sync.setup()
         iob_counter.setup()
