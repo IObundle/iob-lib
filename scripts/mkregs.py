@@ -285,7 +285,10 @@ class mkregs:
         f_inst.write("\n) swreg_0 (\n")
         self.gen_portmap(table, f_inst)
         f_inst.write('  `include "iob_s_portmap.vs"\n')
-        f_inst.write('  `include "iob_clkenrst_portmap.vs"')
+        f_inst.write("  .clk_i(clk_i),\n")
+        f_inst.write("  .cke_i(cke_i),\n")
+        f_inst.write("  .arst_i(arst_i)\n")
+
         f_inst.write("\n);\n")
 
         #
@@ -316,7 +319,11 @@ class mkregs:
         # ports
         self.gen_port(table, f_gen)
         f_gen.write('  `include "iob_s_port.vs"\n')
-        f_gen.write('  `include "iob_clkenrst_port.vs"\n')
+        f_gen.write("  //General Interface Signals\n")
+        f_gen.write("  input clk_i,\n")
+        f_gen.write("  input cke_i,\n")
+        f_gen.write("  input arst_i\n")
+
         f_gen.write(");\n\n")
 
         # write address
@@ -468,9 +475,15 @@ class mkregs:
                     )
                     f_gen.write(f"  if({aux_read_reg}) ")
                 f_gen.write(f"begin\n")
-                f_gen.write(
-                    f"    rdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n"
-                )
+                if (name == "VERSION") :
+                        rst_val = row["rst_val"]
+                        f_gen.write(
+                        f"    rdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = 16'h{rst_val}|{8*n_bytes}'d0;\n"
+                    )
+                else :
+                    f_gen.write(
+                        f"    rdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n"
+                    )
                 if not auto:
                     f_gen.write(f"    rready_int = {name}_ready_i;\n")
                     f_gen.write(f"    rvalid_int = {name}_rvalid_i;\n")
