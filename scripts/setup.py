@@ -65,7 +65,7 @@ def setup(
         for reg in general_regs_table["regs"]:
             if reg["name"] == "VERSION":
                 raise Exception(
-                    "Register 'VERSION' is reserved. Please remove it."
+                    top + ": Register 'VERSION' is reserved. Please remove it."
                 )                
         else:
             general_regs_table["regs"].append(
