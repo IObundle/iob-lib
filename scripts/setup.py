@@ -91,8 +91,8 @@ def setup(
             iob_ctls.setup()
         ## Auto-add iob_s_port.vh
         iob_module.generate("iob_s_port")
-        ## Auto-add iob_s_portmap.vh
-        iob_module.generate("iob_s_portmap")
+        ## Auto-add iob_s_s_portmap.vh
+        iob_module.generate("iob_s_s_portmap")
 
     # Only auto-generate files if `disable_file_gen` is False
     if not disable_file_gen:
