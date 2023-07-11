@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-# Generates IOb Native, AXI4 Full and AXI4 Lite ports, port maps and signals
+# Generates IOb Native, Clock and Reset, External Memory, AXI4 Full and AXI4
+# Lite ports, port maps and signals
 #
 #   See "Usage" below
 #
@@ -26,6 +27,16 @@ interfaces = [
     "clk_rst_port",
     "clk_en_rst_portmap",
     "clk_rst_portmap",
+    "ext_rom_sp_port",
+    "ext_rom_dp_port",
+    "ext_rom_tdp_port",
+    "ext_rom_sp_portmap",
+    "ext_rom_dp_portmap",
+    "ext_rom_tdp_portmap",
+    "ext_ram_sp_port",
+    "ext_ram_sp_be_port",
+    "ext_ram_sp_portmap",
+    "ext_ram_sp_be_portmap",
     "axi_m_port",
     "axi_s_port",
     "axi_m_write_port",
@@ -186,6 +197,195 @@ clk_en_rst = [
         "name": "arst",
         "default": "0",
         "description": "asynchronous reset",
+    },
+]
+
+rom = [
+    {
+        "sp": 1,
+        "tdp": 0,
+        "dp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "clk",
+        "default": "0",
+        "description": "clock",
+    },
+    {
+        "sp": 1,
+        "tdp": 0,
+        "dp": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "r_en",
+        "default": "0",
+        "description": "read enable",
+    },
+    {
+        "sp": 1,
+        "tdp": 0,
+        "dp": 0,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addr",
+        "default": "0",
+        "description": "address",
+    },
+    {
+        "sp": 1,
+        "tdp": 0,
+        "dp": 0,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "r_data",
+        "default": "0",
+        "description": "read data",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "clk_a",
+        "default": "0",
+        "description": "clock port A",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "clk_b",
+        "default": "0",
+        "description": "clock port B",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "r_en_a",
+        "default": "0",
+        "description": "read enable port A",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addr_a",
+        "default": "0",
+        "description": "address port A",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "r_data_a",
+        "default": "0",
+        "description": "read data port A",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "r_en_b",
+        "default": "0",
+        "description": "read enable port B",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addr_b",
+        "default": "0",
+        "description": "address port B",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "r_data_b",
+        "default": "0",
+        "description": "read data port B",
+    },
+]
+
+ram_sp = [
+    {
+        "be": 1,
+        "sp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "clk",
+        "default": "0",
+        "description": "clock",
+    },
+    {
+        "be": 1,
+        "sp": 1,
+        "signal": "input",
+        "width": "DATA_W",
+        "name": "d",
+        "default": "0",
+        "description": "ram sp data input",
+    },
+    {
+        "be": 1,
+        "sp": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addr",
+        "default": "0",
+        "description": "ram sp address",
+    },
+    {
+        "be": 1,
+        "sp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "en",
+        "default": "0",
+        "description": "ram sp enable",
+    },
+    {
+        "be": 1,
+        "sp": 1,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "d",
+        "default": "0",
+        "description": "ram sp data output",
+    },
+    {
+        "be": 0,
+        "sp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "we",
+        "default": "0",
+        "description": "ram sp write enable",
+    },
+    {
+        "be": 1,
+        "sp": 0,
+        "signal": "input",
+        "width": "DATA_W/8",
+        "name": "we",
+        "default": "0",
+        "description": "ram sp write strobe",
     },
 ]
 
@@ -838,6 +1038,26 @@ def make_clk_en_rst():
 
 
 #
+# ROM
+#
+def make_rom():
+    bus = []
+    for i in range(len(rom)):
+        bus.append(rom[i])
+    return bus
+
+
+#
+# RAM SP
+#
+def make_ram_sp():
+    bus = []
+    for i in range(len(ram_sp)):
+        bus.append(ram_sp[i])
+    return bus
+
+
+#
 # AXI4 Full
 #
 
@@ -989,6 +1209,50 @@ def rst_port(prefix, param_prefix, fout, bus_size=1):
             write_port(port_direction, bus_width, name, description, fout)
 
 
+def sp_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["sp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = table[i]["width"]
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def sp_be_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = table[i]["width"]
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def dp_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["dp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = table[i]["width"]
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def tdp_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["tdp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = table[i]["width"]
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
 def m_port(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]["master"] == 1:
@@ -1077,6 +1341,40 @@ def rst_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             connection_name = (
                 wire_prefix + table[i]["name"] + suffix(table[i]["signal"])
             )
+            write_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                bus_start,
+                bus_size,
+                table[i]["description"],
+                fout,
+            )
+
+
+def sp_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["sp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                bus_start,
+                bus_size,
+                table[i]["description"],
+                fout,
+            )
+
+
+def sp_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
             write_portmap(
                 port,
                 connection_name,
@@ -1276,7 +1574,21 @@ def parse_arguments():
                             iob_s_tb_wire: iob native slave wires for testbench
 
                             clk_en_rst_port: clk, clk en, rst ports
+                            clk_en_rst_portmap: clk, clk en, rst portmap
                             clk_rst_port: clk, rst ports
+                            clk_rst_portmap: clk, rst portmap
+
+                            ext_rom_sp_port: external rom sp ports
+                            ext_rom_dp_port: external rom dp ports
+                            ext_rom_tdp_port: external rom tdp ports
+                            ext_rom_sp_portmap: external rom sp portmap
+                            ext_rom_dp_portmap: external rom dp portmap
+                            ext_rom_tdp_portmap: external rom tdp portmap
+
+                            ext_ram_sp_port: external ram sp ports
+                            ext_ram_sp_be_port: external ram sp be ports
+                            ext_ram_sp_portmap: external ram sp portmap
+                            ext_ram_sp_be_portmap: external ram sp be portmap
 
                             axi_m_port: axi full master port
                             axi_s_port: axi full slave port
@@ -1371,6 +1683,12 @@ def create_signal_table(interface_name):
     if interface_name.find("clk_") >= 0:
         table = make_clk_en_rst()
 
+    if interface_name.find("ext_rom_") >= 0:
+        table = make_rom()
+
+    if interface_name.find("ext_ram_sp_") >= 0:
+        table = make_ram_sp()
+
     if interface_name.find("axi_") >= 0:
         if interface_name.find("write_") >= 0:
             table = make_axi_write()
@@ -1414,6 +1732,8 @@ def write_vs_contents(
     func_name = (
         interface_name.replace("axil_", "")
         .replace("clk_", "")
+        .replace("ext_rom_", "")
+        .replace("ext_ram_", "")
         .replace("axi_", "")
         .replace("write_", "")
         .replace("read_", "")
