@@ -98,9 +98,9 @@ fix-vcd:
 	@echo "" >> $(VCD_FILE)
 
 test: test.log
+	test "$$(cat test.log)" = "Test passed!"
 
 test.log: very-clean clean-test-log $(TEST_LIST)
-	test "$$(cat test.log)" = "Test passed!"
 
 gen-clean:
 	@rm -f *.hex
