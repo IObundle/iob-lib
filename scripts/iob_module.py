@@ -19,6 +19,7 @@ class iob_module:
     flows = ""  # Flows supported by this module
     setup_dir = ""  # Setup directory for this module
     build_dir = ""  # Build directory for this module
+    _initialized_attributes = False  # Store if attributes have been initialized for this class
     confs = None  # List of configuration macros/parameters for this module
     regs = None  # List of registers for this module
     ios = None  # List of I/O for this module
@@ -57,10 +58,10 @@ class iob_module:
         if purpose in cls._setup_purpose or "hardware" in cls._setup_purpose:
             return
 
-        # Only set dynamic attributes if this is the first time we run setup
+        # Only init attributes if this is the first time we run setup
         if not cls._setup_purpose:
             cls.is_top_module = is_top_module
-            cls.set_dynamic_attributes()
+            cls.init_attributes()
 
         # Create build directory this is the top module class, and is the first time setup
         if is_top_module and not cls._setup_purpose:
@@ -91,11 +92,15 @@ class iob_module:
         # Return a new iob_verilog_instance object with these attributes that describe the Verilog instance and module.
         return iob_verilog_instance(name, *args, module=cls, **kwargs)
 
-    # TODO: Rename this function to `init_attributes`
-    # Public method to set dynamic attributes.
-    # This method is automatically called by the `setup` method! It should only be called once for each class.
+    # Public method to initialize attributes of the class
+    # This method is automatically called by the `setup` method.
     @classmethod
-    def set_dynamic_attributes(cls):
+    def init_attributes(cls):
+        # Only run this method if attributes have not yet been initialized
+        if cls._initialized_attributes:
+            return
+        cls._initialized_attributes = True
+
         # Set the build directory in the `iob_module` superclass, so everyone has access to it
         if cls.is_top_module:
             # Auto-fill build directory if its not set
