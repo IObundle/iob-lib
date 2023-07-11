@@ -3,7 +3,7 @@
 module iob_div_subshift_frac #(
    parameter DATA_W = 32
 ) (
-   `include "iob_clkenrst_port.vs"
+   `include "iob_clk_en_rst_port.vs"
 
    input  start_i,
    output done_o,
@@ -20,7 +20,7 @@ module iob_div_subshift_frac #(
       .DATA_W (DATA_W),
       .RST_VAL(1'b0)
    ) divisor_reg0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .data_i(divisor_i),
       .data_o(divisor_reg)
@@ -34,7 +34,7 @@ module iob_div_subshift_frac #(
    iob_div_subshift #(
       .DATA_W(DATA_W)
    ) div_subshift0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .start_i(start_i),
       .done_o (done_o),
 
@@ -53,7 +53,7 @@ module iob_div_subshift_frac #(
       .DATA_W (DATA_W + 1),
       .RST_VAL(1'b0)
    ) res_acc_reg0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
       .en_i  (res_acc_en),
 
       .data_i(res_acc_nxt),
@@ -68,7 +68,7 @@ module iob_div_subshift_frac #(
       .DATA_W (2),
       .RST_VAL(1'b0)
    ) pc_reg0 (
-      `include "iob_clkenrst_portmap.vs"
+      `include "iob_clk_en_rst_portmap.vs"
 
       .data_i(pc_nxt),
       .data_o(pc)

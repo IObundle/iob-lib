@@ -13,5 +13,5 @@
 `include "<core name prefix>portmap.vs"
 
       // Global signals
-`include "iob_clkrst_portmap.vs"
+`include "iob_clk_rst_portmap.vs"
       );

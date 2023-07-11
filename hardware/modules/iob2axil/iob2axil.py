@@ -31,5 +31,7 @@ class iob2axil(iob_module):
         iob_m_tb_wire.setup()
         axil_wire.setup()
 
+        iob_module.generate("clk_rst_port")
+
         # Setup flows of this core using LIB setup function
         setup(cls, disable_file_gen=True)

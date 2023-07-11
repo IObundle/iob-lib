@@ -7,7 +7,6 @@ from setup import setup
 from iob_reg import iob_reg
 from iob_reg_e import iob_reg_e
 from iob_div_subshift import iob_div_subshift
-from iob_clkenrst_portmap import iob_clkenrst_portmap
 
 
 class iob_div_subshift_frac(iob_module):
@@ -20,7 +19,8 @@ class iob_div_subshift_frac(iob_module):
     def _run_setup(cls):
 
         # Verilog snippet files
-        iob_clkenrst_portmap.setup()
+        iob_module.generate("clk_en_rst_portmap")
+        iob_module.generate("clk_en_rst_port")
 
         # Setup dependencies
         iob_reg.setup()
