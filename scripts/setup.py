@@ -64,7 +64,9 @@ def setup(
         # If it does exist, give an error
         for reg in general_regs_table["regs"]:
             if reg["name"] == "VERSION":
-                raise Exception(top + ": Register 'VERSION' is reserved. Please remove it.")
+                raise Exception(
+                    top + ": Register 'VERSION' is reserved. Please remove it."
+                )
         else:
             general_regs_table["regs"].append(
                 {

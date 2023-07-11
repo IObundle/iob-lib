@@ -37,6 +37,14 @@ interfaces = [
     "ext_ram_sp_be_port",
     "ext_ram_sp_portmap",
     "ext_ram_sp_be_portmap",
+    "ext_ram_2p_port",
+    "ext_ram_2p_portmap",
+    "ext_ram_2p_be_port",
+    "ext_ram_2p_be_portmap",
+    "ext_ram_2p_tiled_port",
+    "ext_ram_2p_tiled_portmap",
+    "ext_ram_t2p_port",
+    "ext_ram_t2p_portmap",
     "axi_m_port",
     "axi_s_port",
     "axi_m_write_port",
@@ -386,6 +394,130 @@ ram_sp = [
         "name": "we",
         "default": "0",
         "description": "ram sp write strobe",
+    },
+]
+
+ram_2p = [
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 1,
+        "t2p": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "clk",
+        "default": "0",
+        "description": "clock",
+    },
+    {
+        "2p": 0,
+        "be": 0,
+        "tiled": 0,
+        "t2p": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "w_clk",
+        "default": "0",
+        "description": "write clock",
+    },
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 1,
+        "t2p": 1,
+        "signal": "input",
+        "width": "DATA_W",
+        "name": "w_data",
+        "default": "0",
+        "description": "ram 2p write data",
+    },
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 0,
+        "t2p": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "w_addr",
+        "default": "0",
+        "description": "ram 2p write address",
+    },
+    {
+        "2p": 0,
+        "be": 0,
+        "tiled": 1,
+        "t2p": 0,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addr",
+        "default": "0",
+        "description": "ram 2p address",
+    },
+    {
+        "2p": 1,
+        "be": 0,
+        "tiled": 1,
+        "t2p": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "w_en",
+        "default": "0",
+        "description": "ram 2p write enable",
+    },
+    {
+        "2p": 0,
+        "be": 1,
+        "tiled": 0,
+        "t2p": 0,
+        "signal": "input",
+        "width": "DATA_W/8",
+        "name": "w_en",
+        "default": "0",
+        "description": "ram 2p write strobe",
+    },
+    {
+        "2p": 0,
+        "be": 0,
+        "tiled": 0,
+        "t2p": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "r_clk",
+        "default": "0",
+        "description": "read clock",
+    },
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 0,
+        "t2p": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "r_addr",
+        "default": "0",
+        "description": "ram 2p read address",
+    },
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 1,
+        "t2p": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "r_en",
+        "default": "0",
+        "description": "ram 2p read enable",
+    },
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 1,
+        "t2p": 1,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "r_data",
+        "default": "0",
+        "description": "ram 2p read data",
     },
 ]
 
@@ -1058,6 +1190,16 @@ def make_ram_sp():
 
 
 #
+# RAM 2P
+#
+def make_ram_2p():
+    bus = []
+    for i in range(len(ram_2p)):
+        bus.append(ram_2p[i])
+    return bus
+
+
+#
 # AXI4 Full
 #
 
@@ -1253,6 +1395,50 @@ def tdp_port(prefix, param_prefix, fout, bus_size=1):
             write_port(port_direction, bus_width, name, description, fout)
 
 
+def _2p_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["2p"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = table[i]["width"]
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def _2p_be_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = table[i]["width"]
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def _2p_tiled_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["tiled"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = table[i]["width"]
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def t2p_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["t2p"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = table[i]["width"]
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
 def m_port(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]["master"] == 1:
@@ -1372,6 +1558,74 @@ def sp_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
 def sp_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         if table[i]["be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                bus_start,
+                bus_size,
+                table[i]["description"],
+                fout,
+            )
+
+
+def _2p_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["2p"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                bus_start,
+                bus_size,
+                table[i]["description"],
+                fout,
+            )
+
+
+def _2p_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                bus_start,
+                bus_size,
+                table[i]["description"],
+                fout,
+            )
+
+
+def _2p_tiled_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["tiled"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                bus_start,
+                bus_size,
+                table[i]["description"],
+                fout,
+            )
+
+
+def t2p_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["t2p"] == 1:
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
@@ -1590,6 +1844,16 @@ def parse_arguments():
                             ext_ram_sp_portmap: external ram sp portmap
                             ext_ram_sp_be_portmap: external ram sp be portmap
 
+                            ext_ram_2p_port: external ram 2p ports
+                            ext_ram_2p_be_port: external ram 2p be ports
+                            ext_ram_2p_portmap: external ram 2p portmap
+                            ext_ram_2p_be_portmap: external ram 2p be portmap
+                            ext_ram_2p_tiled_port: external ram 2p ports
+                            ext_ram_t2p_port: external ram 2p be ports
+                            ext_ram_2p_tiled_portmap: external ram 2p portmap
+                            ext_ram_t2p_portmap: external ram 2p be portmap
+
+
                             axi_m_port: axi full master port
                             axi_s_port: axi full slave port
                             axi_m_write_port: axi full master write port
@@ -1689,6 +1953,12 @@ def create_signal_table(interface_name):
     if interface_name.find("ext_ram_sp_") >= 0:
         table = make_ram_sp()
 
+    if (
+        interface_name.find("ext_ram_2p_") >= 0
+        or interface_name.find("ext_ram_t2p_") >= 0
+    ):
+        table = make_ram_2p()
+
     if interface_name.find("axi_") >= 0:
         if interface_name.find("write_") >= 0:
             table = make_axi_write()
@@ -1741,6 +2011,12 @@ def write_vs_contents(
         .replace("apb_", "")
         .replace("ahb_", "")
     )
+
+    # add '_' prefix for func_names starting with digit
+    # (examples: 2p_port, 2p_be_portmap, 2p_tiled_port)
+    if func_name[0].isdigit():
+        func_name = f"_{func_name}"
+
     if interface_name.find("portmap") + 1:
         eval(
             func_name
