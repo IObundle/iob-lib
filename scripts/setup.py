@@ -19,7 +19,7 @@ def getf(obj, name, field):
 # no_overlap: Optional argument. Selects if read/write register addresses should not overlap
 # disable_file_gen: Optional argument. Selects if files should be auto-generated.
 def setup(
-    python_module, no_overlap=False, disable_file_gen=False, replace_includes=True
+    python_module, no_overlap=False, disable_file_gen=False
 ):
     confs = python_module.confs
     ios = python_module.ios
@@ -138,11 +138,6 @@ def setup(
             blocks_lib.generate_blocks_tex(
                 python_module.block_groups, build_dir + "/document/tsrc"
             )
-
-    # Replace Verilog includes by Verilog header file contents
-    if python_module.is_top_module and replace_includes:
-        verilog_tools.replace_includes(python_module.setup_dir, build_dir)
-
 
 # If this script is called directly, run function given in first argument
 if __name__ == "__main__":

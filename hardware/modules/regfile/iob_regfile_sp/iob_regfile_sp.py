@@ -15,7 +15,7 @@ class iob_regfile_sp(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _run_setup(cls):
+    def _post_setup(cls):
 
         # Verilog snippet files
         iob_module.generate("clk_en_rst_portmap")
@@ -24,7 +24,7 @@ class iob_regfile_sp(iob_module):
         # Setup dependencies
         iob_reg_re.setup()
 
-        super()._run_setup()
+        super()._post_setup()
 
         # Setup flows of this core using LIB setup function
         setup(cls, disable_file_gen=True)

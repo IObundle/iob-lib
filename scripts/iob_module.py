@@ -7,6 +7,7 @@ import iob_colors
 import if_gen
 from mk_configuration import config_build_mk
 import build_srcs
+import verilog_tools
 from iob_verilog_instance import iob_verilog_instance
 
 
@@ -70,7 +71,8 @@ class iob_module:
         # Add current setup purpose to list
         cls._setup_purpose.append(purpose)
 
-        cls._run_setup()
+        cls._specific_setup()
+        cls._post_setup()
 
     # TODO: Deprecate this method. Instead use constructors to instantiate these classes.
     # Note: The class attibutes will be read only! as they refer to properties of the "type" of verilog module.
@@ -129,10 +131,18 @@ class iob_module:
     def _create_submodules_list(cls):
         pass
 
-    # TODO: Rename this function to `_post_setup()`
-    # Default _run_setup function copies sources from setup directory of every subclass of iob_module, down to `cls`.
+    # Default _specific_setup does nothing.
+    # This function should be overriden by its subclasses to
+    # implement their specific setup functionality.
+    # If they create sources in the build dir, they should be aware of the
+    # latest setup purpose: `cls._setup_purpose[-1]`
     @classmethod
-    def _run_setup(cls):
+    def _specific_setup(cls):
+        pass
+
+    # Default _post_setup function copies sources from setup directory of every subclass of iob_module, down to `cls`.
+    @classmethod
+    def _post_setup(cls):
         cls.__setup_submodules()
 
         # Setup flows (copy LIB files)
@@ -141,6 +151,50 @@ class iob_module:
         cls._copy_srcs()
 
         cls._run_setup_files()
+
+        if cls.is_top_module:
+            # Replace Verilog snippet includes
+            cls._replace_snippet_includes()
+            # Clean duplicate sources in `hardware/src` and its subfolders (like `hardware/simulation/src`)
+            cls._remove_duplicate_sources()
+
+    @classmethod
+    def _remove_duplicate_sources(cls):
+        '''Remove sources in the build directory from subfolders that exist in `hardware/src`'''
+        # Go through all subfolders defined in PURPOSE_DIRS
+        for subfolder in cls.PURPOSE_DIRS.values():
+            # Skip hardware folder
+            if subfolder == "hardware/src":
+                continue
+
+            # Get common srcs between `hardware/src` and current subfolder
+            common_srcs = cls.find_common_deep(
+                    os.path.join(cls.build_dir, "hardware/src"),
+                    os.path.join(cls.build_dir, subfolder))
+            # Remove common sources
+            for src in common_srcs:
+                os.remove(os.path.join(cls.build_dir, subfolder, src))
+                #print(f'{iob_colors.INFO}Removed duplicate source: {os.path.join(subfolder, src)}{iob_colors.ENDC}')
+
+
+    @staticmethod
+    def find_common_deep(path1, path2):
+        '''Find common files (recursively) inside two given directories
+        Taken from: https://stackoverflow.com/a/51625515
+        :param str path1: Directory path 1
+        :param str path2: Directory path 2
+        '''
+        return set.intersection(
+                *(
+                    set(os.path.relpath(os.path.join(root, file), path)
+                        for root, _, files in os.walk(path) for file in files)
+                    for path in (path1, path2)
+                ))
+
+    @classmethod
+    def _replace_snippet_includes(cls):
+        verilog_tools.replace_includes(cls.setup_dir, cls.build_dir)
+
 
     @classmethod
     def _run_setup_files(cls):
@@ -347,13 +401,12 @@ class iob_module:
                 if not os.path.isdir(os.path.join(module_class.setup_dir, directory)):
                     continue
 
-                dst_directory = directory
-
                 # If we are handling the `hardware/src` directory,
                 # copy to the correct destination based on `_setup_purpose`.
                 if directory == "hardware/src":
-                    dst_directory = cls.PURPOSE_DIRS[cls._setup_purpose[-1]]
-                    cls.__remove_files_from_prev_setup(directory, module_class)
+                    dst_directory = cls.get_purpose_dir(cls._setup_purpose[-1])
+                else:
+                    dst_directory = directory
 
                 # Copy tree of this directory, renaming files, and overriding destination ones.
                 shutil.copytree(
@@ -372,23 +425,6 @@ class iob_module:
                     dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns(*exclude_file_list),
                 )
-
-    @classmethod
-    def __remove_files_from_prev_setup(cls, src_dir, module_class):
-        '''If we had previously set up this module for another purpose,
-        then delete files from that directory, based on the list of files in src_dir.
-        :param str src_dir: path to directory with sources (generally "hardware/src")
-        :param iob_module module_class: (super)class currently being setup.
-        '''
-        if len(cls._setup_purpose) > 1:
-            _rm_dir = os.path.join(cls.build_dir,
-                                   cls.PURPOSE_DIRS[cls._setup_purpose[-2]])
-
-            # Remove every file of _rm_dir that is listed in src dir
-            for file in os.listdir(os.path.join(module_class.setup_dir, src_dir)):
-                if os.path.isfile(os.path.join(module_class.setup_dir, src_dir, file)):
-                    os.remove(os.path.join(_rm_dir, file))
-
 
     # Creates a function that:
     #   - Renames any '<old_core_name>' string inside the src file and in its filename, to the given '<new_core_name>' string argument.

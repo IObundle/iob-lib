@@ -16,8 +16,8 @@ class iob_asym_converter(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _run_setup(cls):
-        super()._run_setup()
+    def _post_setup(cls):
+        super()._post_setup()
 
         # Setup dependencies
 

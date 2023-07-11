@@ -12,11 +12,11 @@ class iob_div_pipe(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _run_setup(cls):
+    def _post_setup(cls):
 
         # Setup dependencies
 
-        super()._run_setup()
+        super()._post_setup()
 
         # Setup flows of this core using LIB setup function
         setup(cls, disable_file_gen=True)
