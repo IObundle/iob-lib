@@ -4,10 +4,46 @@ import iob_colors
 import re
 
 
+# Find include statements inside a list of lines and replace them by the contents of the included file and return the new list of lines
+def replace_includes_in_lines(lines, VSnippetFiles):
+    for line in lines:
+        if re.search(r'`include ".*\.vs"', line):
+            # retrieve the name of the file to be included
+            tail = line.split('"')[1]
+            found_vs = False
+            for VSnippetFile in VSnippetFiles:
+                if tail in VSnippetFile:
+                    found_vs = True
+                    # open the file to be included
+                    with open(f"{VSnippetFile}", "r") as include:
+                        include_lines = include.readlines()
+                    # replace the include statement with the content of the file
+                    # if the file to be included is *_portmap.vs or *_port.vs and has a ");" in the next line, remove the last comma
+                    if re.search(r'`include ".*_portmap\.vs"', line) or re.search(
+                        r'`include ".*_port\.vs"', line
+                    ):
+                        if re.search(r"\s*\);\s*", lines[lines.index(line) + 1]):
+                            # find and remove the first comma in the last line of the include_lines ignoring white spaces
+                            include_lines[-1] = re.sub(
+                                r"\s*,\s*", "", include_lines[-1], count=1
+                            )
+                    # if the include_lines has an include statement, recursively replace the include statements
+                    for include_line in include_lines:
+                        if re.search(r'`include ".*\.vs"', include_line):
+                            include_lines = replace_includes_in_lines(
+                                include_lines, VSnippetFiles
+                            )
+                    # replace the include statement with the content of the file
+                    lines[lines.index(line)] = "".join(include_lines)
+            # if the file to be included is not found in the VSnippetFiles, raise an error
+            if not found_vs:
+                raise FileNotFoundError(
+                    f"{iob_colors.FAIL}File {tail} not found! {iob_colors.ENDC}"
+                )
+    return lines
+
+
 # Function to search recursively for every verilog file inside the search_path
-# Find include statements inside those files and replace them by the contents of the included file
-
-
 def replace_includes(setup_dir="", build_dir=""):
     VSnippetFiles = []
     VerilogFiles = []
@@ -27,36 +63,11 @@ def replace_includes(setup_dir="", build_dir=""):
     for VerilogFile in VerilogFiles:
         with open(VerilogFile, "r") as source:
             lines = source.readlines()
-        # for each line in the file, search for the include .vs file statement and replace the include statement with the content of the file
-        for line in lines:
-            if re.search(r'`include ".*\.vs"', line):
-                # retrieve the name of the file to be included
-                tail = line.split('"')[1]
-                # search for the file to be included in the VSnippetFiles
-                for VSnippetFile in VSnippetFiles:
-                    if tail in VSnippetFile:
-                        # open the file to be included
-                        with open(f"{VSnippetFile}", "r") as include:
-                            include_lines = include.readlines()
-                        # replace the include statement with the content of the file
-                        # if the file to be included is *_portmap.vs or *_port.vs and has a ");" in the next line, remove the last comma
-                        if re.search(r'`include ".*_portmap\.vs"', line) or re.search(
-                            r'`include ".*_port\.vs"', line
-                        ):
-                            if re.search(r"\s*\);\s*", lines[lines.index(line) + 1]):
-                                # find and remove the first comma in the last line of the include_lines ignoring white spaces
-                                include_lines[-1] = re.sub(
-                                    r"\s*,\s*", "", include_lines[-1], count=1
-                                )
-                        # replace the include statement with the content of the file
-                        lines[lines.index(line)] = "".join(include_lines)
+            # replace the include statements with the content of the file
+            new_lines = replace_includes_in_lines(lines, VSnippetFiles)
         # write the new file
         with open(VerilogFile, "w") as source:
-            source.writelines(lines)
-
-        # Maybe for debug it would be good to move them somewhere. However, the directory where it is moved to should be ignored by verible.
-        # os.rename(VSnippetFile, f"{VSnippetDir}/{tail}")
-        # print(f"{iob_colors.INFO}Deleted file: {VSnippetFile}{iob_colors.ENDC}")
+            source.writelines(new_lines)
 
     # Remove the VSnippetFiles
     for VSnippetFile in VSnippetFiles:
