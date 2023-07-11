@@ -20,8 +20,8 @@ class iob_regfile_2p(iob_module):
         # Setup dependencies
         iob_ctls.setup()
 
-        iob_modujle.generate("clk_en_rst_port")
-        iob_modujle.generate("clk_en_rst_portmap")
+        iob_module.generate("clk_en_rst_port")
+        iob_module.generate("clk_en_rst_portmap")
 
         # Setup flows of this core using LIB setup function
         setup(cls, disable_file_gen=True)

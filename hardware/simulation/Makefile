@@ -97,8 +97,10 @@ fix-vcd:
 	@tail -n 1 $(VCD_FILE) | wc -c | xargs -I {} truncate $(VCD_FILE) -s -{}
 	@echo "" >> $(VCD_FILE)
 
-test: very-clean clean-test-log $(TEST_LIST)
+test: test.log
 	test "$$(cat test.log)" = "Test passed!"
+
+test.log: very-clean clean-test-log $(TEST_LIST)
 
 gen-clean:
 	@rm -f *.hex
