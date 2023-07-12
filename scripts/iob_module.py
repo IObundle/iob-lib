@@ -348,7 +348,6 @@ class iob_module:
                 # copy to the correct destination based on `_setup_purpose`.
                 if directory == "hardware/src":
                     dst_directory = cls.PURPOSE_DIRS[cls._setup_purpose[-1]]
-                    cls.__remove_files_from_prev_setup(directory, module_class)
 
                 # Copy tree of this directory, renaming files, and overriding destination ones.
                 shutil.copytree(

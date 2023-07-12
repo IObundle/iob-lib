@@ -12,7 +12,7 @@ def replace_includes_in_lines(lines, VSnippetFiles):
             tail = line.split('"')[1]
             found_vs = False
             for VSnippetFile in VSnippetFiles:
-                if tail in VSnippetFile:
+                if tail == os.path.basename(VSnippetFile):
                     found_vs = True
                     # open the file to be included
                     with open(f"{VSnippetFile}", "r") as include:
