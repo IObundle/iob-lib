@@ -266,8 +266,8 @@ class mkregs:
             if not auto:
                 f.write(f"  .{name}_ready_i({name}_ready),\n")
 
-        f.write(f"  .iob_ready_nxt_o(iob_ready_nxt),\n")
-        f.write(f"  .iob_rvalid_nxt_o(iob_rvalid_nxt),\n")
+        f.write(f"  .iob_ready_nxt_o(iob_ready_nxt_o),\n")
+        f.write(f"  .iob_rvalid_nxt_o(iob_rvalid_nxt_o),\n")
 
     def write_hwcode(self, table, out_dir, top):
         #
