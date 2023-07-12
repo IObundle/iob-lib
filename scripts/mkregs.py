@@ -284,7 +284,7 @@ class mkregs:
         f_inst.write(f'  `include "{top}_inst_params.vs"\n')
         f_inst.write("\n) swreg_0 (\n")
         self.gen_portmap(table, f_inst)
-        f_inst.write('  `include "iob_s_portmap.vs"\n')
+        f_inst.write('  `include "iob_s_s_portmap.vs"\n')
         f_inst.write("  .clk_i(clk_i),\n")
         f_inst.write("  .cke_i(cke_i),\n")
         f_inst.write("  .arst_i(arst_i)\n")

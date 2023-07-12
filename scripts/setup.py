@@ -6,10 +6,8 @@ import mk_configuration as mk_conf
 import mkregs
 import ios as ios_lib
 import blocks as blocks_lib
-from submodule_utils import import_setup, set_default_submodule_dirs
 import build_srcs
 import verilog_tools
-import shutil
 
 from iob_module import iob_module
 
@@ -95,8 +93,8 @@ def setup(
             iob_ctls.setup()
         ## Auto-add iob_s_port.vh
         iob_module.generate("iob_s_port")
-        ## Auto-add iob_s_portmap.vh
-        iob_module.generate("iob_s_portmap")
+        ## Auto-add iob_s_s_portmap.vh
+        iob_module.generate("iob_s_s_portmap")
 
     # Only auto-generate files if `disable_file_gen` is False
     if not disable_file_gen:
