@@ -1560,7 +1560,7 @@ def sp_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["sp"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1571,7 +1571,7 @@ def sp_be_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["be"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1582,7 +1582,7 @@ def dp_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["dp"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1593,7 +1593,7 @@ def tdp_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["tdp"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1604,7 +1604,7 @@ def _2p_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["2p"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1615,7 +1615,7 @@ def _2p_be_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["be"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1626,7 +1626,7 @@ def _2p_tiled_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["tiled"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1637,7 +1637,7 @@ def t2p_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["t2p"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1648,7 +1648,7 @@ def dp_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["dp"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1659,7 +1659,7 @@ def dp_be_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["dp_be"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1670,7 +1670,7 @@ def dp_be_xil_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["dp_be_xil"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1681,7 +1681,7 @@ def tdp_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["tdp"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1692,7 +1692,7 @@ def tdp_be_port(prefix, param_prefix, fout, bus_size=1):
         if table[i]["tdp_be"] == 1:
             port_direction = reverse(table[i]["signal"])
             name = prefix + table[i]["name"] + suffix(port_direction)
-            width = table[i]["width"]
+            width = add_param_prefix(table[i]["width"], param_prefix)
             bus_width = " [" + width + "-1:0] "
             description = top_macro + table[i]["description"]
             write_port(port_direction, bus_width, name, description, fout)
@@ -1746,6 +1746,10 @@ def write_portmap(port, connection_name, width, bus_start, bus_size, description
     else:
         bus_select_size = str(bus_size) + "*" + width
     connection = connection_name + "[" + bus_start_index + "+:" + bus_select_size + "]"
+    fout.write("." + port + "(" + connection + "), //" + description + "\n")
+
+
+def write_plain_portmap(port, connection, width, description, fout):
     fout.write("." + port + "(" + connection + "), //" + description + "\n")
 
 
@@ -1803,12 +1807,10 @@ def sp_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -1820,12 +1822,10 @@ def sp_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -1837,12 +1837,10 @@ def _2p_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -1854,12 +1852,10 @@ def _2p_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -1871,12 +1867,10 @@ def _2p_tiled_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -1888,12 +1882,10 @@ def t2p_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -1905,12 +1897,10 @@ def dp_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -1922,12 +1912,10 @@ def dp_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -1939,12 +1927,10 @@ def dp_be_xil_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -1956,12 +1942,10 @@ def tdp_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -1973,12 +1957,10 @@ def tdp_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             port_direction = reverse(table[i]["signal"])
             port = port_prefix + table[i]["name"] + suffix(port_direction)
             connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
-            write_portmap(
+            write_plain_portmap(
                 port,
                 connection_name,
                 table[i]["width"],
-                bus_start,
-                bus_size,
                 table[i]["description"],
                 fout,
             )
@@ -2283,6 +2265,9 @@ def parse_arguments():
     )
     parser.add_argument("port_prefix", nargs="?", help="""Port prefix.""", default="")
     parser.add_argument("wire_prefix", nargs="?", help="""Wire prefix.""", default="")
+    parser.add_argument(
+        "param_prefix", nargs="?", help="""Parameter prefix.""", default=""
+    )
     parser.add_argument("--top", help="""Top Module interface.""", action="store_true")
 
     return parser.parse_args()
@@ -2401,6 +2386,7 @@ def main():
     file_prefix = args.file_prefix
     port_prefix = args.port_prefix
     wire_prefix = args.wire_prefix
+    param_prefix = args.param_prefix
 
     # top flag
     top = args.top
@@ -2418,7 +2404,9 @@ def main():
         fout.write("  //START_IO_TABLE " + port_prefix + interface_name + "\n")
 
     # call function func to generate .vs file
-    write_vs_contents(interface_name, port_prefix, wire_prefix, fout)
+    write_vs_contents(
+        interface_name, port_prefix, wire_prefix, fout, param_prefix=param_prefix
+    )
 
     fout.close()
 
