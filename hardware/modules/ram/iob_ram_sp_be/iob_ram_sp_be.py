@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from iob_module import iob_module
-from setup import setup
 
 from iob_ram_sp import iob_ram_sp
 
@@ -14,12 +12,7 @@ class iob_ram_sp_be(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _post_setup(cls):
-        super()._post_setup()
-
+    def _specific_setup(cls):
         # Setup dependencies
 
         iob_ram_sp.setup()
-
-        # Setup flows of this core using LIB setup function
-        setup(cls, disable_file_gen=True)

@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from iob_module import iob_module
-from setup import setup
 
 from iob_fifo_sync import iob_fifo_sync
 from iob_counter import iob_counter
@@ -20,9 +18,7 @@ class axis2axi(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _post_setup(cls):
-        super()._post_setup()
-
+    def _specific_setup(cls):
         # Setup dependencies
 
         iob_module.generate("axi_m_port")
@@ -40,6 +36,3 @@ class axis2axi(iob_module):
 
         axi_ram.setup(purpose="simulation")
         iob_ram_t2p.setup(purpose="simulation")
-
-        # Setup flows of this core using LIB setup function
-        setup(cls, disable_file_gen=True)

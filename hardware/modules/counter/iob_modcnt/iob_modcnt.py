@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from iob_module import iob_module
-from setup import setup
 
 from iob_counter import iob_counter
 
@@ -14,15 +12,10 @@ class iob_modcnt(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _post_setup(cls):
-        super()._post_setup()
-
+    def _specific_setup(cls):
         # Setup dependencies
         iob_module.generate("clk_en_rst_port")
         iob_module.generate("clk_en_rst_portmap")
 
         iob_modcnt.setup()
         iob_counter.setup()
-
-        # Setup flows of this core using LIB setup function
-        setup(cls, disable_file_gen=True)

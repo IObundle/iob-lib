@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from iob_module import iob_module
-from setup import setup
 
 from m_axi_m_port import m_axi_m_port
 from m_axi_write_m_port import m_axi_write_m_port
@@ -21,9 +19,7 @@ class iob2axi(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _post_setup(cls):
-        super()._post_setup()
-
+    def _specific_setup(cls):
         # Setup dependencies
         m_axi_m_port.setup()
         m_axi_write_m_port.setup()
@@ -35,6 +31,3 @@ class iob2axi(iob_module):
         iob2axi_wr.setup()
         iob2axi_rd.setup()
         iob_fifo_sync.setup()
-
-        # Setup flows of this core using LIB setup function
-        setup(cls, disable_file_gen=True)

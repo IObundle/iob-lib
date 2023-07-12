@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from iob_module import iob_module
-from setup import setup
 
 from iob_sync import iob_sync
 
@@ -14,14 +12,9 @@ class iob_s2f_sync(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _post_setup(cls):
-        super()._post_setup()
-
+    def _specific_setup(cls):
         # Setup dependencies
 
         iob_sync.setup()
         iob_module.generate("clk_rst_port")
         iob_module.generate("clk_rst_portmap")
-
-        # Setup flows of this core using LIB setup function
-        setup(cls, disable_file_gen=True)

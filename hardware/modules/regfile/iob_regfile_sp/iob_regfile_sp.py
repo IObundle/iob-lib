@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from iob_module import iob_module
-from setup import setup
 
 from iob_reg_re import iob_reg_re
 
@@ -15,8 +13,7 @@ class iob_regfile_sp(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _post_setup(cls):
-
+    def _specific_setup(cls):
         # Verilog snippet files
         iob_module.generate("clk_en_rst_portmap")
         iob_module.generate("clk_en_rst_port")
@@ -24,7 +21,3 @@ class iob_regfile_sp(iob_module):
         # Setup dependencies
         iob_reg_re.setup()
 
-        super()._post_setup()
-
-        # Setup flows of this core using LIB setup function
-        setup(cls, disable_file_gen=True)
