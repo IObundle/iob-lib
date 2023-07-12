@@ -6,8 +6,8 @@ SIM_SYNC_FLAGS=$(QUESTA_SYNC_FLAGS)
 
 SIM_PROC=vsim
 
-CFLAGS = -sv +incdir+. +incdir+../src  +incdir+src
-SFLAGS = -voptargs="+acc" -c 
+CFLAGS = -quiet -sv +incdir+. +incdir+../src  +incdir+src
+SFLAGS = -voptargs="+acc" -c
 ifeq ($(VCD),1)
 SFLAGS+=+define+VCD
 endif
