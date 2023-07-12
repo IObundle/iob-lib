@@ -17,15 +17,18 @@ class iob_fifo_sync(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
-        iob_module.generate("clk_en_rst_portmap")
-        iob_module.generate("clk_en_rst_port")
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            "clk_en_rst_portmap",
+            "clk_en_rst_port",
 
-        iob_reg_r.setup()
-        iob_reg.setup()
-        iob_counter.setup()
-        iob_asym_converter.setup()
-        iob_utils.setup()
+            iob_reg_r,
+            iob_reg,
+            iob_counter,
+            iob_asym_converter,
+            iob_utils,
 
-        iob_ram_2p.setup(purpose="simulation")
+            (iob_ram_2p, {"purpose": "simulation"}),
+        ])

@@ -10,8 +10,10 @@ class iob_split(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
-
-        iob_module.generate("clk_rst_portmap")
-        iob_module.generate("clk_rst_port")
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            "clk_rst_portmap",
+            "clk_rst_port",
+        ])

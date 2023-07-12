@@ -12,9 +12,11 @@ class iob_piso_reg(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
-
-        iob_reg.setup()
-        iob_module.generate("clk_en_rst_portmap")
-        iob_module.generate("clk_en_rst_port")
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            iob_reg,
+            "clk_en_rst_portmap",
+            "clk_en_rst_port",
+        ])

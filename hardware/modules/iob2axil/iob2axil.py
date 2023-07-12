@@ -17,14 +17,16 @@ class iob2axil(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            iob_s_port,
+            iob_s_s_portmap,
+            axil_m_port,
+            axil_m_portmap,
+            iob_m_tb_wire,
+            axil_wire,
 
-        iob_s_port.setup()
-        iob_s_s_portmap.setup()
-        axil_m_port.setup()
-        axil_m_portmap.setup()
-        iob_m_tb_wire.setup()
-        axil_wire.setup()
-
-        iob_module.generate("clk_rst_port")
+            "clk_rst_port",
+        ])

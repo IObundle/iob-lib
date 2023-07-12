@@ -14,11 +14,14 @@ class iob_merge(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
-        iob_reg_e.setup()
-        iob_mux.setup()
-        iob_demux.setup()
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            iob_reg_e,
+            iob_mux,
+            iob_demux,
 
-        iob_module.generate("clk_en_rst_portmap")
-        iob_module.generate("clk_en_rst_port")
+            "clk_en_rst_portmap",
+            "clk_en_rst_port",
+        ])

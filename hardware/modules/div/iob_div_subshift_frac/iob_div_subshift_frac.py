@@ -14,13 +14,15 @@ class iob_div_subshift_frac(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-        # Verilog snippet files
-        iob_module.generate("clk_en_rst_portmap")
-        iob_module.generate("clk_en_rst_port")
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            "clk_en_rst_portmap",
+            "clk_en_rst_port",
 
-        # Setup dependencies
-        iob_reg.setup()
-        iob_reg_e.setup()
-        iob_div_subshift.setup()
-
-        super()._specific_setup()
+            # Setup dependencies
+            iob_reg,
+            iob_reg_e,
+            iob_div_subshift,
+        ])

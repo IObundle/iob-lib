@@ -38,7 +38,7 @@ class iob_module:
 
     _initialized_attributes = False  # Store if attributes have been initialized for this class
 
-    submodule_setup_list = None  # List of submodules to setup
+    submodule_list = None  # List of submodules to setup
 
     # List of setup purposes for this module. Also used to check if module has already been setup.
     _setup_purpose = None
@@ -57,10 +57,25 @@ class iob_module:
     # Methods NOT to be overriden by subclasses
     ###############################################################
 
+    # DEPRECATED METHOD
     @classmethod
     def setup(cls, purpose="hardware", is_top_module=False):
-        ''' Public setup method for this module.
-            This method should not be overriden by subclasses!
+        ''' Deprecated method for setup.
+        Raises exception if called.
+        '''
+        raise Exception(f"{iob_colors.FAIL}The `setup()` method is deprecated. Use the `_create_submodules_list()` method to setup the `submodule_list`.{iob_colors.ENDC}")
+
+    @classmethod
+    def setup_as_top_module(cls):
+        ''' Initialize the setup process for the top module.
+        This method should only be called once, and only for the top module class.
+        It is typically called by the `bootstrap.py` script.
+        '''
+        cls.__setup(is_top_module=True)
+
+    @classmethod
+    def __setup(cls, purpose="hardware", is_top_module=False):
+        ''' Private setup method for this module.
             purpose: Reason for setting up the module. Used to select between the standard destination locations.
             is_top_module: Select if this is the top module. This should only be enabled on the top module class.
         '''
@@ -140,7 +155,7 @@ class iob_module:
         cls.regs = []
         cls.ios = []
         cls.block_groups = []
-        cls.submodule_setup_list = []
+        cls.submodule_list = []
 
         cls._init_attributes()
 
@@ -155,8 +170,8 @@ class iob_module:
     def __pre_specific_setup(cls):
         ''' Private method to setup and instantiate submodules before specific setup
         '''
-        # Setup submodules placed in `submodule_setup_list` list
-        cls.__setup_submodules()
+        # Setup submodules placed in `submodule_list` list
+        cls._setup_submodules(cls.submodule_list)
         # Create instances of submodules (previously setup)
         cls._create_instances()
         # Setup block groups (not called from init_attributes() because
@@ -175,10 +190,12 @@ class iob_module:
         pass
 
     @classmethod
-    def _create_submodules_list(cls):
-        ''' Default method to create list of submodules does nothing
+    def _create_submodules_list(cls, submodule_list=[]):
+        ''' Default method to create list of submodules just appends the list of submodules given, to the class list.
+        This method does not do any sanity checking on the list of submodules.
+        :param list submodule_list: List of submodules to append to the class `submodule_list` attribute.
         '''
-        pass
+        cls.submodule_list += submodule_list
 
     @classmethod
     def _create_instances(cls):
@@ -192,7 +209,7 @@ class iob_module:
             This function should be overriden by its subclasses to
             implement their specific setup functionality.
             If they create sources in the build dir, they should be aware of the
-            latest setup purpose, using: `cls._setup_purpose[-1]`
+            latest setup purpose, using: `cls.get_setup_purpose()`
         '''
         pass
 
@@ -289,11 +306,11 @@ class iob_module:
             if cls.name != "iob_ctls":
                 from iob_ctls import iob_ctls
 
-                iob_ctls.setup()
+                iob_ctls.__setup(purpose=cls.get_setup_purpose())
             ## Auto-add iob_s_port.vh
-            iob_module.generate("iob_s_port")
+            cls.__generate("iob_s_port", purpose=cls.get_setup_purpose())
             ## Auto-add iob_s_portmap.vh
-            iob_module.generate("iob_s_portmap")
+            cls.__generate("iob_s_portmap", purpose=cls.get_setup_purpose())
 
     @classmethod
     def _build_regs_table(cls, no_overlap=False):
@@ -442,10 +459,17 @@ class iob_module:
             spec.loader.exec_module(module)
 
     @classmethod
-    def __setup_submodules(cls):
-        ''' Run setup functions for the submodules list stored in the setup_submodules_list
+    def _setup_submodules(cls, submodule_list):
+        ''' Generate or run setup functions for the interfaces/submodules in the given submodules list.
+        :param list submodule_list: List of interfaces/submodules to generate/setup.
+        
+        Example submodule_list:
+            [
+            # Generate interfaces with if_gen. Check `__generate()` method for details.
+            "axi_m_portmap", # Generate an `axi_m_portmap` interface.
+            iob_picorv32,
         '''
-        for submodule in cls.submodule_setup_list:
+        for submodule in submodule_list:
             _submodule = submodule
             setup_options = {}
 
@@ -454,26 +478,44 @@ class iob_module:
                 _submodule = submodule[0]
                 setup_options = submodule[1]
 
+            # Add 'hardware' purpose by default
+            if "purpose" not in setup_options:
+                setup_options["purpose"] = "hardware"
+
             # Don't setup submodules that have a purpose different than
             # "hardware" when this class is not the top module
-            if (not cls.is_top_module and "purpose" in setup_options
+            if (not cls.is_top_module
                     and setup_options["purpose"] != "hardware"):
                 continue
 
+            # If the submodule purpose is hardware, change that purpose to match the purpose of the current class.
+            # (If we setup the current class for simulation, then we want the submodules for simulation aswell)
+            if setup_options["purpose"] == "hardware":
+                setup_options["purpose"] = cls.get_setup_purpose()
+
+            # Check if should generate with if_gen or setup a submodule.
             if type(_submodule) == str or type(_submodule) == dict:
                 # String or dictionary: generate interface with if_gen
-                iob_module.generate(_submodule, **setup_options)
+                cls.__generate(_submodule, **setup_options)
             elif issubclass(_submodule, iob_module):
                 # Subclass of iob_module: setup the module
-                _submodule.setup(**setup_options)
+                _submodule.__setup(**setup_options)
             else:
                 # Unknown type
                 raise Exception(
-                    f"{iob_colors.FAIL}Unknown type in submodule_setup_list of {cls.name}: {_submodule}{iob_colors.ENDC}"
+                    f"{iob_colors.FAIL}Unknown type in submodule_list of {cls.name}: {_submodule}{iob_colors.ENDC}"
                 )
 
+    # DEPRECATED METHOD
     @classmethod
     def generate(cls, vs_name, purpose="hardware"):
+        ''' Deprecated method for generate.
+        Raises exception if called.
+        '''
+        raise Exception(f"{iob_colors.FAIL}The `generate()` method is deprecated. Use the `_create_submodules_list()` method to setup the `submodule_list`.{iob_colors.ENDC}")
+
+    @classmethod
+    def __generate(cls, vs_name, purpose="hardware"):
         ''' Generate a Verilog header with `if_gen.py`.
             vs_name: Either a string or a dictionary describing the interface to generate.
                      Example string: "iob_wire"
@@ -534,6 +576,16 @@ class iob_module:
             raise Exception(
                 f"{iob_colors.FAIL} Can't generate '{vs_name}'. Type not recognized.{iob_colors.ENDC}"
             )
+
+    @classmethod
+    def get_setup_purpose(cls):
+        ''' Get the purpose of the latest setup.
+        :returns str setup_purpose: The latest setup purpose
+        '''
+        if len(cls._setup_purpose)<1:
+            raise Exception(f"{iob_colors.FAIL}Module has not been setup!{iob_colors.ENDC}")
+        # Return the latest purpose
+        return cls._setup_purpose[-1]
 
     @classmethod
     def get_purpose_dir(cls, purpose):
@@ -617,7 +669,7 @@ class iob_module:
                 # If we are handling the `hardware/src` directory,
                 # copy to the correct destination based on `_setup_purpose`.
                 if directory == "hardware/src":
-                    dst_directory = cls.get_purpose_dir(cls._setup_purpose[-1])
+                    dst_directory = cls.get_purpose_dir(cls.get_setup_purpose())
                 else:
                     dst_directory = directory
 

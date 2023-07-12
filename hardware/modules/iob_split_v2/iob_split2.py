@@ -14,11 +14,14 @@ class iob_split2(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
-        iob_module.generate("clk_en_rst_portmap")
-        iob_module.generate("clk_en_rst_port")
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            "clk_en_rst_portmap",
+            "clk_en_rst_port",
 
-        iob_reg.setup()
-        iob_mux.setup()
-        iob_demux.setup()
+            iob_reg,
+            iob_mux,
+            iob_demux,
+        ])

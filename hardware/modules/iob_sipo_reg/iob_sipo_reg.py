@@ -13,10 +13,13 @@ class iob_sipo_reg(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
-        iob_module.generate("clk_en_rst_port")
-        iob_module.generate("clk_en_rst_portmap")
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            "clk_en_rst_port",
+            "clk_en_rst_portmap",
 
-        iob_counter.setup()
-        iob_reg.setup()
+            iob_counter,
+            iob_reg,
+        ])

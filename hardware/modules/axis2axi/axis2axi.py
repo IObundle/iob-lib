@@ -18,21 +18,24 @@ class axis2axi(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
 
-        iob_module.generate("axi_m_port")
-        iob_module.generate("axi_m_write_port")
-        iob_module.generate("axi_m_read_port")
-        iob_module.generate("axi_m_m_write_portmap")
-        iob_module.generate("axi_m_m_read_portmap")
-        iob_module.generate("clk_en_rst_port")
+            "axi_m_port",
+            "axi_m_write_port",
+            "axi_m_read_port",
+            "axi_m_m_write_portmap",
+            "axi_m_m_read_portmap",
+            "clk_en_rst_port",
 
-        iob_fifo_sync.setup()
-        iob_counter.setup()
-        iob_reg_r.setup()
-        iob_reg_re.setup()
-        iob_asym_converter.setup()
+            iob_fifo_sync,
+            iob_counter,
+            iob_reg_r,
+            iob_reg_re,
+            iob_asym_converter,
 
-        axi_ram.setup(purpose="simulation")
-        iob_ram_t2p.setup(purpose="simulation")
+            (axi_ram, {"purpose": "simulation"}),
+            (iob_ram_t2p, {"purpose": "simulation"}),
+        ])

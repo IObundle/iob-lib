@@ -14,12 +14,14 @@ class iob_asym_converter(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            iob_utils,
+            iob_reg,
+            "clk_en_rst_portmap",
+            "clk_en_rst_port",
 
-        iob_utils.setup()
-        iob_reg.setup()
-        iob_module.generate("clk_en_rst_portmap")
-        iob_module.generate("clk_en_rst_port")
-
-        iob_ram_2p.setup(purpose="simulation")
+            (iob_ram_2p, {"purpose": "simulation"}),
+        ])

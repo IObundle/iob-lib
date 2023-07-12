@@ -17,13 +17,16 @@ class iob_fifo_async(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
 
-        iob_utils.setup()
-        iob_gray_counter.setup()
-        iob_gray2bin.setup()
-        iob_sync.setup()
-        iob_asym_converter.setup()
+            iob_utils,
+            iob_gray_counter,
+            iob_gray2bin,
+            iob_sync,
+            iob_asym_converter,
 
-        iob_ram_t2p.setup(purpose="simulation")
+            (iob_ram_t2p, {"purpose": "simulation"}),
+        ])

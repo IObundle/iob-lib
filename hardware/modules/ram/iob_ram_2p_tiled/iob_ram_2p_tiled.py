@@ -12,7 +12,9 @@ class iob_ram_2p_tiled(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Setup dependencies
-
-        iob_ram_2p.setup()
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            iob_ram_2p,
+        ])

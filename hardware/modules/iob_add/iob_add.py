@@ -12,8 +12,9 @@ class iob_add(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _specific_setup(cls):
-        # Verilog snippet files
-        iob_add2.setup()
-
-        # Setup dependencies
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            iob_add2,
+        ])

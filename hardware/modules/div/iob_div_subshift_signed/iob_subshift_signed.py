@@ -12,10 +12,11 @@ class iob_div_subshift_signed(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-        # Verilog snippet files
-        iob_module.generate("clk_en_rst_portmap")
+    def _create_submodules_list(cls):
+        ''' Create submodules list with dependencies of this module
+        '''
+        super()._create_submodules_list([
+            "clk_en_rst_portmap",
 
-        # Setup dependencies
-        iob_reg.setup()
-
-        super()._specific_setup()
+            iob_reg,
+        ])
