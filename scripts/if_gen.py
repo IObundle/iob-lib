@@ -146,6 +146,15 @@ iob = [
         "master": 1,
         "slave": 1,
         "signal": "input",
+        "width": "1",
+        "name": "iob_rvalid_nxt",
+        "default": "0",
+        "description": "Read data valid in next cycle.",
+    },
+    {
+        "master": 1,
+        "slave": 1,
+        "signal": "input",
         "width": "DATA_W",
         "name": "iob_rdata",
         "default": "0",
@@ -159,6 +168,15 @@ iob = [
         "name": "iob_ready",
         "default": "0",
         "description": "Interface ready.",
+    },
+    {
+        "master": 1,
+        "slave": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "iob_ready_nxt",
+        "default": "0",
+        "description": "Interface ready in next cycle.",
     },
 ]
 
@@ -1028,15 +1046,15 @@ def s_port(prefix, param_prefix, fout, bus_size=1):
 
 # Write portmap with given port, connection name, width, bus start, bus size and description to file
 def write_portmap(port, connection_name, width, bus_start, bus_size, description, fout):
-    if bus_start == 0:
-        bus_start_index = str(0)
-    else:
-        bus_start_index = str(bus_start) + "*" + width
-    if bus_size == 1:
-        bus_select_size = width
-    else:
+    if bus_size == 1 :
+        connection = connection_name
+    else :
         bus_select_size = str(bus_size) + "*" + width
-    connection = connection_name + "[" + bus_start_index + "+:" + bus_select_size + "]"
+        if bus_start == 0:
+            bus_start_index = str(0)
+        else:
+            bus_start_index = str(bus_start) + "*" + width
+        connection = connection_name + "[" + bus_start_index + "+:" + bus_select_size + "]"
     fout.write("." + port + "(" + connection + "), //" + description + "\n")
 
 

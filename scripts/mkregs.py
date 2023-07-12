@@ -206,9 +206,6 @@ class mkregs:
             if not auto:
                 f.write(f"  input {name}_ready_i,\n")
 
-        f.write(f"  output iob_ready_nxt_o,\n")
-        f.write(f"  output iob_rvalid_nxt_o,\n")
-
     # auxiliar read register case name
     def aux_read_reg_case_name(self, row):
         aux_read_reg_case_name = ""
@@ -265,9 +262,6 @@ class mkregs:
                     f.write(f"  .{name}_rvalid_i({name}_rvalid),\n")
             if not auto:
                 f.write(f"  .{name}_ready_i({name}_ready),\n")
-
-        f.write(f"  .iob_ready_nxt_o(iob_ready_nxt),\n")
-        f.write(f"  .iob_rvalid_nxt_o(iob_rvalid_nxt),\n")
 
     def write_hwcode(self, table, out_dir, top):
         #
