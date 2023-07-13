@@ -15,13 +15,13 @@ class iob_split2(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            "clk_en_rst_portmap",
-            "clk_en_rst_port",
-
-            iob_reg,
-            iob_mux,
-            iob_demux,
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                "clk_en_rst_portmap",
+                "clk_en_rst_port",
+                iob_reg,
+                iob_mux,
+                iob_demux,
+            ]
+        )

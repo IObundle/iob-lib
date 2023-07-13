@@ -13,10 +13,11 @@ class iob_piso_reg(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            iob_reg,
-            "clk_en_rst_portmap",
-            "clk_en_rst_port",
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                iob_reg,
+                "clk_en_rst_portmap",
+                "clk_en_rst_port",
+            ]
+        )

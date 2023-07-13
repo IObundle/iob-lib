@@ -18,17 +18,16 @@ class iob_fifo_sync(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            "clk_en_rst_portmap",
-            "clk_en_rst_port",
-
-            iob_reg_r,
-            iob_reg,
-            iob_counter,
-            iob_asym_converter,
-            iob_utils,
-
-            (iob_ram_2p, {"purpose": "simulation"}),
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                "clk_en_rst_portmap",
+                "clk_en_rst_port",
+                iob_reg_r,
+                iob_reg,
+                iob_counter,
+                iob_asym_converter,
+                iob_utils,
+                (iob_ram_2p, {"purpose": "simulation"}),
+            ]
+        )

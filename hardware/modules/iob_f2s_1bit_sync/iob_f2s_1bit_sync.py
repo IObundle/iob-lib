@@ -13,8 +13,9 @@ class iob_f2s_1bit_sync(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            iob_reg,
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                iob_reg,
+            ]
+        )

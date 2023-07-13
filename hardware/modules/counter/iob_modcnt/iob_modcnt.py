@@ -13,12 +13,12 @@ class iob_modcnt(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            "clk_en_rst_port",
-            "clk_en_rst_portmap",
-
-            iob_modcnt,
-            iob_counter,
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                "clk_en_rst_port",
+                "clk_en_rst_portmap",
+                iob_modcnt,
+                iob_counter,
+            ]
+        )

@@ -17,15 +17,16 @@ class axil2iob(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            axil_s_port,
-            axil_s_s_portmap,
-            iob_m_port,
-            iob_m_portmap,
-            "iob_wire",
-            "clk_rst_portmap",
-            "clk_rst_port",
-            iob_s_portmap,
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                axil_s_port,
+                axil_s_s_portmap,
+                iob_m_port,
+                iob_m_portmap,
+                "iob_wire",
+                "clk_rst_portmap",
+                "clk_rst_port",
+                iob_s_portmap,
+            ]
+        )

@@ -16,8 +16,7 @@ import mk_configuration as mk_conf
 
 
 class iob_module:
-    ''' Generic class to describe a base iob-module
-    '''
+    """Generic class to describe a base iob-module"""
 
     ###############################################################
     # IOb module attributes: common to all iob-modules (subclasses)
@@ -36,7 +35,9 @@ class iob_module:
     block_groups = None  # List of block groups for this module. Used for documentation.
     is_top_module = False  # Select if this module is the top module
 
-    _initialized_attributes = False  # Store if attributes have been initialized for this class
+    _initialized_attributes = (
+        False  # Store if attributes have been initialized for this class
+    )
 
     submodule_list = None  # List of submodules to setup
 
@@ -60,25 +61,27 @@ class iob_module:
     # DEPRECATED METHOD
     @classmethod
     def setup(cls, purpose="hardware", is_top_module=False):
-        ''' Deprecated method for setup.
+        """Deprecated method for setup.
         Raises exception if called.
-        '''
-        raise Exception(f"{iob_colors.FAIL}The `setup()` method is deprecated. Use the `_create_submodules_list()` method to setup the `submodule_list`.{iob_colors.ENDC}")
+        """
+        raise Exception(
+            f"{iob_colors.FAIL}The `setup()` method is deprecated. Use the `_create_submodules_list()` method to setup the `submodule_list`.{iob_colors.ENDC}"
+        )
 
     @classmethod
     def setup_as_top_module(cls):
-        ''' Initialize the setup process for the top module.
+        """Initialize the setup process for the top module.
         This method should only be called once, and only for the top module class.
         It is typically called by the `bootstrap.py` script.
-        '''
+        """
         cls.__setup(is_top_module=True)
 
     @classmethod
     def __setup(cls, purpose="hardware", is_top_module=False):
-        ''' Private setup method for this module.
-            purpose: Reason for setting up the module. Used to select between the standard destination locations.
-            is_top_module: Select if this is the top module. This should only be enabled on the top module class.
-        '''
+        """Private setup method for this module.
+        purpose: Reason for setting up the module. Used to select between the standard destination locations.
+        is_top_module: Select if this is the top module. This should only be enabled on the top module class.
+        """
         # print(f'DEBUG: Setup: {cls.name}, purpose: {purpose}') # DEBUG
 
         # Initialize empty list for purpose
@@ -127,9 +130,9 @@ class iob_module:
 
     @classmethod
     def init_attributes(cls):
-        ''' Public method to initialize attributes of the class
-            This method is automatically called by the `setup` method.
-        '''
+        """Public method to initialize attributes of the class
+        This method is automatically called by the `setup` method.
+        """
         # Only run this method if attributes have not yet been initialized
         if cls._initialized_attributes:
             return
@@ -168,8 +171,7 @@ class iob_module:
 
     @classmethod
     def __pre_specific_setup(cls):
-        ''' Private method to setup and instantiate submodules before specific setup
-        '''
+        """Private method to setup and instantiate submodules before specific setup"""
         # Setup submodules placed in `submodule_list` list
         cls._setup_submodules(cls.submodule_list)
         # Create instances of submodules (previously setup)
@@ -178,67 +180,64 @@ class iob_module:
         # this function has instances of modules that are only created by this function)
         cls._setup_block_groups()
 
-
     ###############################################################
     # Methods commonly overriden by subclasses
     ###############################################################
 
     @classmethod
     def _init_attributes(cls):
-        ''' Default method to init attributes does nothing
-        '''
+        """Default method to init attributes does nothing"""
         pass
 
     @classmethod
     def _create_submodules_list(cls, submodule_list=[]):
-        ''' Default method to create list of submodules just appends the list of submodules given, to the class list.
+        """Default method to create list of submodules just appends the list of submodules given, to the class list.
         This method does not do any sanity checking on the list of submodules.
         :param list submodule_list: List of submodules to append to the class `submodule_list` attribute.
-        '''
+        """
         cls.submodule_list += submodule_list
 
     @classmethod
     def _create_instances(cls):
-        ''' Default method to instantiate modules does nothing
-        '''
+        """Default method to instantiate modules does nothing"""
         pass
 
     @classmethod
     def _specific_setup(cls):
-        ''' Default _specific_setup does nothing.
-            This function should be overriden by its subclasses to
-            implement their specific setup functionality.
-            If they create sources in the build dir, they should be aware of the
-            latest setup purpose, using: `cls.get_setup_purpose()`
-        '''
+        """Default _specific_setup does nothing.
+        This function should be overriden by its subclasses to
+        implement their specific setup functionality.
+        If they create sources in the build dir, they should be aware of the
+        latest setup purpose, using: `cls.get_setup_purpose()`
+        """
         pass
 
     @classmethod
     def _setup_confs(cls, confs=[]):
-        ''' Append confs to the current confs class list, overriding existing ones
+        """Append confs to the current confs class list, overriding existing ones
         :param list confs: List of confs to append/override in class attribute
-        '''
+        """
         cls.update_dict_list(cls.confs, confs)
 
     @classmethod
     def _setup_ios(cls, ios=[]):
-        ''' Append ios to the current ios class list, overriding existing ones
+        """Append ios to the current ios class list, overriding existing ones
         :param list ios: List of ios to append/override in class attribute
-        '''
+        """
         cls.update_dict_list(cls.ios, ios)
 
     @classmethod
     def _setup_regs(cls, regs=[]):
-        ''' Append regs to the current regs class list, overriding existing ones
+        """Append regs to the current regs class list, overriding existing ones
         :param list regs: List of regs to append/override in class attribute
-        '''
+        """
         cls.update_dict_list(cls.regs, regs)
 
     @classmethod
     def _setup_block_groups(cls, block_groups=[]):
-        ''' Append block_groups to the current block_groups class list, overriding existing ones
+        """Append block_groups to the current block_groups class list, overriding existing ones
         :param list block_groups: List of block_groups to append/override in class attribute
-        '''
+        """
         cls.update_dict_list(cls.block_groups, block_groups)
 
     ###############################################################
@@ -247,8 +246,7 @@ class iob_module:
 
     @classmethod
     def _post_setup(cls):
-        ''' Launch post(-specific)-setup tasks
-        '''
+        """Launch post(-specific)-setup tasks"""
         # Setup flows (copy LIB files)
         build_srcs.flows_setup(cls)
 
@@ -272,8 +270,7 @@ class iob_module:
 
     @classmethod
     def _generate_files(cls):
-        ''' Generate hw, sw and doc files
-        '''
+        """Generate hw, sw and doc files"""
         mkregs_obj, reg_table = cls._build_regs_table()
         cls._generate_hw(mkregs_obj, reg_table)
         cls._generate_sw(mkregs_obj, reg_table)
@@ -281,8 +278,7 @@ class iob_module:
 
     @classmethod
     def _auto_add_settings(cls):
-        ''' Auto-add settings like macros and submodules to the module
-        '''
+        """Auto-add settings like macros and submodules to the module"""
         # Auto-add 'VERSION' macro if it doesn't exist.
         # But only if this module has at least one other configuration aswell
         # (to prevent lots of LIB modules with only the `VERSION` macron)
@@ -314,10 +310,10 @@ class iob_module:
 
     @classmethod
     def _build_regs_table(cls, no_overlap=False):
-        ''' Build registers table.
+        """Build registers table.
         :returns mkregs mkregs_obj: Instance of mkregs class
         :returns list reg_table: Register table generated by `get_reg_table` method of `mkregs_obj`
-        '''
+        """
         # Don't create regs table if module does not have regs
         if not cls.regs:
             return None, None
@@ -336,7 +332,9 @@ class iob_module:
         # If it does exist, give an error
         for reg in general_regs_table["regs"]:
             if reg["name"] == "VERSION":
-                raise Exception(top + ": Register 'VERSION' is reserved. Please remove it.")
+                raise Exception(
+                    top + ": Register 'VERSION' is reserved. Please remove it."
+                )
         else:
             general_regs_table["regs"].append(
                 {
@@ -362,14 +360,17 @@ class iob_module:
 
     @classmethod
     def _generate_hw(cls, mkregs_obj, reg_table):
-        ''' Generate common hardware files
-        '''
+        """Generate common hardware files"""
         if cls.regs:
-            mkregs_obj.write_hwheader(reg_table, cls.build_dir + "/hardware/src", cls.name)
+            mkregs_obj.write_hwheader(
+                reg_table, cls.build_dir + "/hardware/src", cls.name
+            )
             mkregs_obj.write_lparam_header(
                 reg_table, cls.build_dir + "/hardware/simulation/src", cls.name
             )
-            mkregs_obj.write_hwcode(reg_table, cls.build_dir + "/hardware/src", cls.name)
+            mkregs_obj.write_hwcode(
+                reg_table, cls.build_dir + "/hardware/src", cls.name
+            )
 
         if cls.confs:
             mk_conf.params_vh(cls.confs, cls.name, cls.build_dir + "/hardware/src")
@@ -377,28 +378,32 @@ class iob_module:
             mk_conf.conf_vh(cls.confs, cls.name, cls.build_dir + "/hardware/src")
 
         if cls.ios:
-            ios_lib.generate_ios_header(cls.ios, cls.name, cls.build_dir + "/hardware/src")
+            ios_lib.generate_ios_header(
+                cls.ios, cls.name, cls.build_dir + "/hardware/src"
+            )
 
     @classmethod
     def _generate_sw(cls, mkregs_obj, reg_table):
-        ''' Generate common software files
-        '''
+        """Generate common software files"""
         if "emb" in cls.flows:
             os.makedirs(cls.build_dir + "/software/src", exist_ok=True)
             if cls.regs:
-                mkregs_obj.write_swheader(reg_table, cls.build_dir + "/software/src", cls.name)
-                mkregs_obj.write_swcode(reg_table, cls.build_dir + "/software/src", cls.name)
-                mkregs_obj.write_swheader(reg_table, cls.build_dir + "/software/src", cls.name)
+                mkregs_obj.write_swheader(
+                    reg_table, cls.build_dir + "/software/src", cls.name
+                )
+                mkregs_obj.write_swcode(
+                    reg_table, cls.build_dir + "/software/src", cls.name
+                )
+                mkregs_obj.write_swheader(
+                    reg_table, cls.build_dir + "/software/src", cls.name
+                )
             mk_conf.conf_h(cls.confs, cls.name, cls.build_dir + "/software/src")
 
     @classmethod
     def _generate_doc(cls, mkregs_obj, reg_table):
-        ''' Generate common documentation files
-        '''
+        """Generate common documentation files"""
         if cls.is_top_module and "doc" in cls.flows:
-            mk_conf.generate_confs_tex(
-                cls.confs, cls.build_dir + "/document/tsrc"
-            )
+            mk_conf.generate_confs_tex(cls.confs, cls.build_dir + "/document/tsrc")
             ios_lib.generate_ios_tex(cls.ios, cls.build_dir + "/document/tsrc")
             if cls.regs:
                 mkregs_obj.generate_regs_tex(
@@ -410,7 +415,7 @@ class iob_module:
 
     @classmethod
     def _remove_duplicate_sources(cls):
-        ''' Remove sources in the build directory from subfolders that exist in `hardware/src`'''
+        """Remove sources in the build directory from subfolders that exist in `hardware/src`"""
         # Go through all subfolders defined in PURPOSE_DIRS
         for subfolder in cls.PURPOSE_DIRS.values():
             # Skip hardware folder
@@ -419,18 +424,17 @@ class iob_module:
 
             # Get common srcs between `hardware/src` and current subfolder
             common_srcs = cls.find_common_deep(
-                    os.path.join(cls.build_dir, "hardware/src"),
-                    os.path.join(cls.build_dir, subfolder))
+                os.path.join(cls.build_dir, "hardware/src"),
+                os.path.join(cls.build_dir, subfolder),
+            )
             # Remove common sources
             for src in common_srcs:
                 os.remove(os.path.join(cls.build_dir, subfolder, src))
-                #print(f'{iob_colors.INFO}Removed duplicate source: {os.path.join(subfolder, src)}{iob_colors.ENDC}')
-
+                # print(f'{iob_colors.INFO}Removed duplicate source: {os.path.join(subfolder, src)}{iob_colors.ENDC}')
 
     @classmethod
     def _replace_snippet_includes(cls):
         verilog_tools.replace_includes(cls.setup_dir, cls.build_dir)
-
 
     @classmethod
     def _run_setup_files(cls):
@@ -460,9 +464,9 @@ class iob_module:
 
     @classmethod
     def _setup_submodules(cls, submodule_list):
-        ''' Generate or run setup functions for the interfaces/submodules in the given submodules list.
+        """Generate or run setup functions for the interfaces/submodules in the given submodules list.
         :param list submodule_list: List of interfaces/submodules to generate/setup.
-        
+
         Example submodule_list:
             [
             # Generate interfaces with if_gen. Check out the `__generate()` method for details.
@@ -482,7 +486,7 @@ class iob_module:
             iob_picorv32,
             # Set up a submodule for the `simulation` purpose (using a tuple):
             (axi_ram, {"purpose": "simulation"}),
-        '''
+        """
         for submodule in submodule_list:
             _submodule = submodule
             setup_options = {}
@@ -498,8 +502,7 @@ class iob_module:
 
             # Don't setup submodules that have a purpose different than
             # "hardware" when this class is not the top module
-            if (not cls.is_top_module
-                    and setup_options["purpose"] != "hardware"):
+            if not cls.is_top_module and setup_options["purpose"] != "hardware":
                 continue
 
             # If the submodule purpose is hardware, change that purpose to match the purpose of the current class.
@@ -523,40 +526,42 @@ class iob_module:
     # DEPRECATED METHOD
     @classmethod
     def generate(cls, vs_name, purpose="hardware"):
-        ''' Deprecated method for generate.
+        """Deprecated method for generate.
         Raises exception if called.
-        '''
-        raise Exception(f"{iob_colors.FAIL}The `generate()` method is deprecated. Use the `_create_submodules_list()` method to setup the `submodule_list`.{iob_colors.ENDC}")
+        """
+        raise Exception(
+            f"{iob_colors.FAIL}The `generate()` method is deprecated. Use the `_create_submodules_list()` method to setup the `submodule_list`.{iob_colors.ENDC}"
+        )
 
     @classmethod
     def __generate(cls, vs_name, purpose="hardware"):
-        ''' Generate a Verilog header with `if_gen.py`.
-            vs_name: Either a string or a dictionary describing the interface to generate.
-                     Example string: "iob_wire"
-                     Example dictionary:
-                           {
-                               "file_prefix": "iob_bus_0_2_", # Prefix to include in the generated file name
-                               "interface": "axi_m_portmap",  # Type of interface/wires to generate. Will also be part of the filename.
-                               "wire_prefix": "",             # Prefix to include in the generated wire names
-                               "port_prefix": "",             # Prefix to include in the generated port names
-                               "param_prefix": "",            # Optional. Prefix to include in parameters of the width of the generated ports/wires.
-                               "bus_start": 0,                # Optional. Starting index of the bus of wires that we are connecting.
-                               "bus_size": 2,                 # Optional. Size of the bus of wires that we are creating/connecting.
-                           }
-            purpose: [Optional] Reason for generating the header. Used to select between the standard destination locations.
-            
-            Example function calls:
-            To generate a simple `iob_s_port.vh` file, use: `iob_module.generate("iob_s_port")`
-            To generate an iob_s_port file with a custom prefix in its ports, wires, and filename, use:
-                iob_module.generate(
-                           {
-                               "file_prefix": "example_file_prefix_",
-                               "interface": "iob_s_port",
-                               "wire_prefix": "example_wire_prefix_",
-                               "port_prefix": "example_port_prefix_",
-                               "param_prefix": "example_parameter_prefix_",
-                           })
-        '''
+        """Generate a Verilog header with `if_gen.py`.
+        vs_name: Either a string or a dictionary describing the interface to generate.
+                 Example string: "iob_wire"
+                 Example dictionary:
+                       {
+                           "file_prefix": "iob_bus_0_2_", # Prefix to include in the generated file name
+                           "interface": "axi_m_portmap",  # Type of interface/wires to generate. Will also be part of the filename.
+                           "wire_prefix": "",             # Prefix to include in the generated wire names
+                           "port_prefix": "",             # Prefix to include in the generated port names
+                           "param_prefix": "",            # Optional. Prefix to include in parameters of the width of the generated ports/wires.
+                           "bus_start": 0,                # Optional. Starting index of the bus of wires that we are connecting.
+                           "bus_size": 2,                 # Optional. Size of the bus of wires that we are creating/connecting.
+                       }
+        purpose: [Optional] Reason for generating the header. Used to select between the standard destination locations.
+
+        Example function calls:
+        To generate a simple `iob_s_port.vh` file, use: `iob_module.generate("iob_s_port")`
+        To generate an iob_s_port file with a custom prefix in its ports, wires, and filename, use:
+            iob_module.generate(
+                       {
+                           "file_prefix": "example_file_prefix_",
+                           "interface": "iob_s_port",
+                           "wire_prefix": "example_wire_prefix_",
+                           "port_prefix": "example_port_prefix_",
+                           "param_prefix": "example_parameter_prefix_",
+                       })
+        """
         dest_dir = os.path.join(cls.build_dir, cls.get_purpose_dir(purpose))
 
         if (type(vs_name) is str) and (vs_name in if_gen.interfaces):
@@ -593,18 +598,19 @@ class iob_module:
 
     @classmethod
     def get_setup_purpose(cls):
-        ''' Get the purpose of the latest setup.
+        """Get the purpose of the latest setup.
         :returns str setup_purpose: The latest setup purpose
-        '''
-        if len(cls._setup_purpose)<1:
-            raise Exception(f"{iob_colors.FAIL}Module has not been setup!{iob_colors.ENDC}")
+        """
+        if len(cls._setup_purpose) < 1:
+            raise Exception(
+                f"{iob_colors.FAIL}Module has not been setup!{iob_colors.ENDC}"
+            )
         # Return the latest purpose
         return cls._setup_purpose[-1]
 
     @classmethod
     def get_purpose_dir(cls, purpose):
-        ''' Get output directory based on the purpose given.
-        '''
+        """Get output directory based on the purpose given."""
         assert (
             purpose in cls.PURPOSE_DIRS
         ), f"{iob_colors.FAIL}Unknown purpose {purpose}{iob_colors.ENDC}"
@@ -612,8 +618,7 @@ class iob_module:
 
     @classmethod
     def __create_build_dir(cls):
-        ''' Create build directory. Must be called from the top module.
-        '''
+        """Create build directory. Must be called from the top module."""
         assert (
             cls.is_top_module
         ), f"{iob_colors.FAIL}Module {cls.name} is not a top module!{iob_colors.ENDC}"
@@ -632,7 +637,7 @@ class iob_module:
 
     @classmethod
     def _copy_srcs(cls, exclude_file_list=[]):
-        ''' Copy module sources to the build directory from every subclass in between `ìob_module` and `cls`, inclusive.
+        """Copy module sources to the build directory from every subclass in between `ìob_module` and `cls`, inclusive.
         The function will not copy sources from classes that have no setup_dir (empty string)
         cls: Lowest subclass
         (implicit: iob_module: highest subclass)
@@ -642,7 +647,7 @@ class iob_module:
                                        we would still use the old core name in the ignore patterns.
                                        For example, if we dont want it to generate the 'new_name_firmware.c' based on the 'old_name_firmware.c',
                                        then we should add 'old_name_firmware.c' to the ignore list.
-        '''
+        """
         previously_setup_dirs = []
 
         # List of classes, starting from highest superclass (iob_module), down to lowest subclass (cls)
@@ -711,11 +716,11 @@ class iob_module:
 
     @staticmethod
     def update_dict_list(dict_list, new_items):
-        ''' Update a list of dictionaries with new items given in a list
+        """Update a list of dictionaries with new items given in a list
 
         :param list dict_list: List of dictionaries, where each item is a dictionary that has a "name" key
         :param list new_items: List of dictionaries, where each item is a dictionary that has a "name" key and should be inserted into the dict_list
-        '''
+        """
         for item in new_items:
             for _item in dict_list:
                 if _item["name"] == item["name"]:
@@ -726,23 +731,28 @@ class iob_module:
 
     @staticmethod
     def find_common_deep(path1, path2):
-        ''' Find common files (recursively) inside two given directories
+        """Find common files (recursively) inside two given directories
         Taken from: https://stackoverflow.com/a/51625515
         :param str path1: Directory path 1
         :param str path2: Directory path 2
-        '''
+        """
         return set.intersection(
-                *(
-                    set(os.path.relpath(os.path.join(root, file), path)
-                        for root, _, files in os.walk(path) for file in files)
-                    for path in (path1, path2)
-                ))
+            *(
+                set(
+                    os.path.relpath(os.path.join(root, file), path)
+                    for root, _, files in os.walk(path)
+                    for file in files
+                )
+                for path in (path1, path2)
+            )
+        )
 
     @staticmethod
     def copy_with_rename(old_core_name, new_core_name):
-        ''' Creates a function that:
-            - Renames any '<old_core_name>' string inside the src file and in its filename, to the given '<new_core_name>' string argument.
-        '''
+        """Creates a function that:
+        - Renames any '<old_core_name>' string inside the src file and in its filename, to the given '<new_core_name>' string argument.
+        """
+
         def copy_func(src, dst):
             dst = os.path.join(
                 os.path.dirname(dst),

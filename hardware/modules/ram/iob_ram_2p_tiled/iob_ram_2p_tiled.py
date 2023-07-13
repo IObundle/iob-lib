@@ -13,8 +13,9 @@ class iob_ram_2p_tiled(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            iob_ram_2p,
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                iob_ram_2p,
+            ]
+        )

@@ -14,9 +14,10 @@ class iob_ctls(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            iob_reverse,
-            iob_prio_enc,
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                iob_reverse,
+                iob_prio_enc,
+            ]
+        )

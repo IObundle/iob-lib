@@ -15,13 +15,13 @@ class iob_asym_converter(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            iob_utils,
-            iob_reg,
-            "clk_en_rst_portmap",
-            "clk_en_rst_port",
-
-            (iob_ram_2p, {"purpose": "simulation"}),
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                iob_utils,
+                iob_reg,
+                "clk_en_rst_portmap",
+                "clk_en_rst_port",
+                (iob_ram_2p, {"purpose": "simulation"}),
+            ]
+        )

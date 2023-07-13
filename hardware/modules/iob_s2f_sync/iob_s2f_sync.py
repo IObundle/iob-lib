@@ -13,10 +13,11 @@ class iob_s2f_sync(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            iob_sync,
-            "clk_rst_port",
-            "clk_rst_portmap",
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                iob_sync,
+                "clk_rst_port",
+                "clk_rst_portmap",
+            ]
+        )

@@ -14,12 +14,12 @@ class iob_sipo_reg(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            "clk_en_rst_port",
-            "clk_en_rst_portmap",
-
-            iob_counter,
-            iob_reg,
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                "clk_en_rst_port",
+                "clk_en_rst_portmap",
+                iob_counter,
+                iob_reg,
+            ]
+        )

@@ -15,13 +15,13 @@ class iob_merge(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            iob_reg_e,
-            iob_mux,
-            iob_demux,
-
-            "clk_en_rst_portmap",
-            "clk_en_rst_port",
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                iob_reg_e,
+                iob_mux,
+                iob_demux,
+                "clk_en_rst_portmap",
+                "clk_en_rst_port",
+            ]
+        )

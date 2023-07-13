@@ -11,8 +11,9 @@ class iob_reg(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            "clk_en_rst_port",
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                "clk_en_rst_port",
+            ]
+        )

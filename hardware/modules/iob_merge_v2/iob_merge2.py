@@ -15,10 +15,11 @@ class iob_merge2(iob_module):
 
     @classmethod
     def _create_submodules_list(cls):
-        ''' Create submodules list with dependencies of this module
-        '''
-        super()._create_submodules_list([
-            iob_reg,
-            iob_mux,
-            iob_demux,
-        ])
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                iob_reg,
+                iob_mux,
+                iob_demux,
+            ]
+        )
