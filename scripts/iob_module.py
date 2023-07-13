@@ -310,7 +310,7 @@ class iob_module:
             ## Auto-add iob_s_port.vh
             cls.__generate("iob_s_port", purpose=cls.get_setup_purpose())
             ## Auto-add iob_s_portmap.vh
-            cls.__generate("iob_s_portmap", purpose=cls.get_setup_purpose())
+            cls.__generate("iob_s_s_portmap", purpose=cls.get_setup_purpose())
 
     @classmethod
     def _build_regs_table(cls, no_overlap=False):

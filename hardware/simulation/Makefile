@@ -79,6 +79,7 @@ ifeq ($(VCD),1)
 else
 	ssh -t $(SIM_SSH_FLAGS) $(SIM_USER)@$(SIM_SERVER) 'make -C $(REMOTE_SIM_DIR) $@ SIMULATOR=$(SIMULATOR) $(UFLAGS)'
 endif
+	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/*.log .
 ifeq ($(COV),1)
 	sleep 1 && sync && scp -r $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/cov_work .
 	sleep 1 && sync && scp $(SIM_SCP_FLAGS) $(SIM_USER)@$(SIM_SERVER):$(REMOTE_SIM_DIR)/coverage_report_summary.rpt .
@@ -97,10 +98,10 @@ fix-vcd:
 	@tail -n 1 $(VCD_FILE) | wc -c | xargs -I {} truncate $(VCD_FILE) -s -{}
 	@echo "" >> $(VCD_FILE)
 
-test: test.log
-	test "$$(cat test.log)" = "Test passed!"
-
 test.log: very-clean clean-test-log $(TEST_LIST)
+
+test: test.log
+	sync && sleep 1 && test "$$(cat test.log)" = "Test passed!"
 
 gen-clean:
 	@rm -f *.hex

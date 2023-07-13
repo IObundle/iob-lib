@@ -266,8 +266,8 @@ class mkregs:
             if not auto:
                 f.write(f"  .{name}_ready_i({name}_ready),\n")
 
-        f.write(f"  .iob_ready_nxt_o(iob_ready_nxt),\n")
-        f.write(f"  .iob_rvalid_nxt_o(iob_rvalid_nxt),\n")
+        f.write(f"  .iob_ready_nxt_o(iob_ready_nxt_o),\n")
+        f.write(f"  .iob_rvalid_nxt_o(iob_rvalid_nxt_o),\n")
 
     def write_hwcode(self, table, out_dir, top):
         #
@@ -284,7 +284,7 @@ class mkregs:
         f_inst.write(f'  `include "{top}_inst_params.vs"\n')
         f_inst.write("\n) swreg_0 (\n")
         self.gen_portmap(table, f_inst)
-        f_inst.write('  `include "iob_s_portmap.vs"\n')
+        f_inst.write('  `include "iob_s_s_portmap.vs"\n')
         f_inst.write("  .clk_i(clk_i),\n")
         f_inst.write("  .cke_i(cke_i),\n")
         f_inst.write("  .arst_i(arst_i)\n")
