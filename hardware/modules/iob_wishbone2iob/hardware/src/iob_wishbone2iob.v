@@ -30,6 +30,8 @@ module iob_wishbone2iob #(
    wire                avalid_r;
    wire [DATA_W/8-1:0] wstrb;
    wire [  DATA_W-1:0] rdata_r;
+   wire                wack;
+   wire                wack_r;
    // Wishbone auxiliar wire
    wire [  ADDR_W-1:0] wb_addr_r;
    wire [  DATA_W-1:0] wb_data_r;
@@ -43,6 +45,15 @@ module iob_wishbone2iob #(
 
    assign avalid        = wb_stb_i & wb_cyc_i;
    assign wstrb         = wb_we_i ? wb_select_i : 4'h0;
+
+   assign wb_data_o = (iob_rdata_i) & (wb_data_mask);
+   assign wb_ack_o = iob_rvalid_i | wack_r;
+   assign wack = iob_ready_i & iob_avalid_o & (| iob_wstrb_o);
+
+   assign wb_data_mask = {
+      {8{wb_select_i[3]}}, {8{wb_select_i[2]}}, {8{wb_select_i[1]}}, {8{wb_select_i[0]}}
+   };
+
    iob_reg_re #(
       .DATA_W (1),
       .RST_VAL(0)
@@ -53,12 +64,15 @@ module iob_wishbone2iob #(
       .data_i(iob_avalid_o),
       .data_o(avalid_r)
    );
-
-   assign wb_data_o = (iob_rdata_i) & (wb_data_mask);
-   assign wb_ack_o = (iob_ready_i) & (avalid_r);
-
-   assign wb_data_mask = {
-      {8{wb_select_i[3]}}, {8{wb_select_i[2]}}, {8{wb_select_i[1]}}, {8{wb_select_i[0]}}
-   };
+   iob_reg_re #(
+      .DATA_W (1),
+      .RST_VAL(0)
+   ) iob_reg_wack (
+      `include "iob_clk_en_rst_portmap.vs"
+      .rst_i (1'b0),
+      .en_i  (1'b1),
+      .data_i(wack),
+      .data_o(wack_r)
+   );
 
 endmodule

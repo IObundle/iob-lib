@@ -61,8 +61,8 @@ module iob_iob2wishbone #(
       .RST_VAL(0)
    ) iob_reg_avalid (
       `include "iob_clk_en_rst_portmap.vs"
-      .rst_i (1'b0),
-      .en_i  (iob_avalid_i | wb_ack_i),
+      .rst_i (wb_ack_i),
+      .en_i  (iob_avalid_i),
       .data_i(iob_avalid_i),
       .data_o(iob_avalid_r)
    );
