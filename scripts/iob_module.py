@@ -215,8 +215,7 @@ class iob_module:
     #                    "file_prefix": "iob_bus_0_2_", # Prefix to include in the generated file name
     #                    "interface": "axi_m_portmap",  # Type of interface/wires to generate. Will also be part of the filename.
     #                    "wire_prefix": "",             # Prefix to include in the generated wire names
-    #                    "port_prefix": "",             # Prefix to include in the generated port names
-    #                    "param_prefix": "",            # Optional. Prefix to include in parameters of the width of the generated ports/wires.
+    #                    "port_prefix": "",             # Prefix to include in the generated port names. User upper case prefix for parameter prefix.
     #                    "bus_start": 0,                # Optional. Starting index of the bus of wires that we are connecting.
     #                    "bus_size": 2,                 # Optional. Size of the bus of wires that we are creating/connecting.
     #                }
@@ -231,21 +230,14 @@ class iob_module:
     #                    "interface": "iob_s_port",
     #                    "wire_prefix": "example_wire_prefix_",
     #                    "port_prefix": "example_port_prefix_",
-    #                    "param_prefix": "example_parameter_prefix_",
     #                })
     @classmethod
     def generate(cls, vs_name, purpose="hardware"):
         dest_dir = os.path.join(cls.build_dir, cls.get_purpose_dir(purpose))
 
-        if (type(vs_name) is str) and (vs_name in if_gen.interfaces):
-            if "iob_" in vs_name:
-                file_prefix = ""
-            else:
-                file_prefix = "iob_"
-            f_out = open(os.path.join(dest_dir, file_prefix + vs_name + ".vs"), "w")
-            if_gen.create_signal_table(vs_name)
-            if_gen.write_vs_contents(vs_name, "", "", f_out)
-        elif (type(vs_name) is dict) and (vs_name["interface"] in if_gen.interfaces):
+        if_gen.default_interface_fields(vs_name)
+
+        if (type(vs_name) is dict) and (vs_name["interface"] in if_gen.interfaces):
             f_out = open(
                 os.path.join(
                     dest_dir, vs_name["file_prefix"] + vs_name["interface"] + ".vs"
@@ -258,9 +250,6 @@ class iob_module:
                 vs_name["port_prefix"],
                 vs_name["wire_prefix"],
                 f_out,
-                param_prefix=vs_name["param_prefix"]
-                if "param_prefix" in vs_name.keys()
-                else "",
                 bus_size=vs_name["bus_size"] if "bus_size" in vs_name.keys() else 1,
                 bus_start=vs_name["bus_start"] if "bus_start" in vs_name.keys() else 0,
             )

@@ -2133,6 +2133,22 @@ def s_tb_wire(prefix, param_prefix, fout, bus_size=1):
 #
 # Parse Arguments
 #
+def valid_interface_type(original_interface):
+    for interface in interfaces:
+        if original_interface.endswith(interface):
+            return interface
+    return None
+
+
+def parse_types(arg):
+    interface = valid_interface_type(arg)
+    if not interface:
+        msg = f"{arg} is not a valid type"
+        raise argparse.ArgumentTypeError(msg)
+    else:
+        return arg
+        
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="if_gen.py verilog interface generation.",
@@ -2141,124 +2157,124 @@ def parse_arguments():
 
     parser.add_argument(
         "type",
-        choices=interfaces,
+        type=lambda s: parse_types(s),
         help="""
                             type can defined as one of the following:
-                            iob_m_port: iob native master port
-                            iob_s_port: iob native slave port
-                            iob_portmap: iob native portmap
-                            iob_m_portmap: iob native master portmap
-                            iob_s_portmap: iob native slave portmap
-                            iob_m_m_portmap: iob native master to master portmap
-                            iob_s_s_portmap: iob native slave to slave portmap
-                            iob_wire: iob native wires for interconnection
-                            iob_m_tb_wire: iob native master wires for testbench
-                            iob_s_tb_wire: iob native slave wires for testbench
+                            [*]iob_m_port: iob native master port
+                            [*]iob_s_port: iob native slave port
+                            [*]iob_portmap: iob native portmap
+                            [*]iob_m_portmap: iob native master portmap
+                            [*]iob_s_portmap: iob native slave portmap
+                            [*]iob_m_m_portmap: iob native master to master portmap
+                            [*]iob_s_s_portmap: iob native slave to slave portmap
+                            [*]iob_wire: iob native wires for interconnection
+                            [*]iob_m_tb_wire: iob native master wires for testbench
+                            [*]iob_s_tb_wire: iob native slave wires for testbench
 
-                            clk_en_rst_port: clk, clk en, rst ports
-                            clk_en_rst_portmap: clk, clk en, rst portmap
-                            clk_rst_port: clk, rst ports
-                            clk_rst_portmap: clk, rst portmap
+                            [*]clk_en_rst_port: clk, clk en, rst ports
+                            [*]clk_en_rst_portmap: clk, clk en, rst portmap
+                            [*]clk_rst_port: clk, rst ports
+                            [*]clk_rst_portmap: clk, rst portmap
 
-                            rom_sp_port: external rom sp ports
-                            rom_dp_port: external rom dp ports
-                            rom_tdp_port: external rom tdp ports
-                            rom_sp_portmap: external rom sp portmap
-                            rom_dp_portmap: external rom dp portmap
-                            rom_tdp_portmap: external rom tdp portmap
+                            [*]rom_sp_port: external rom sp ports
+                            [*]rom_dp_port: external rom dp ports
+                            [*]rom_tdp_port: external rom tdp ports
+                            [*]rom_sp_portmap: external rom sp portmap
+                            [*]rom_dp_portmap: external rom dp portmap
+                            [*]rom_tdp_portmap: external rom tdp portmap
 
-                            ram_sp_port: external ram sp ports
-                            ram_sp_be_port: external ram sp be ports
-                            ram_sp_portmap: external ram sp portmap
-                            ram_sp_be_portmap: external ram sp be portmap
+                            [*]ram_sp_port: external ram sp ports
+                            [*]ram_sp_be_port: external ram sp be ports
+                            [*]ram_sp_portmap: external ram sp portmap
+                            [*]ram_sp_be_portmap: external ram sp be portmap
 
-                            ram_2p_port: external ram 2p ports
-                            ram_2p_be_port: external ram 2p be ports
-                            ram_2p_portmap: external ram 2p portmap
-                            ram_2p_be_portmap: external ram 2p be portmap
-                            ram_2p_tiled_port: external ram 2p ports
-                            ram_t2p_port: external ram 2p be ports
-                            ram_2p_tiled_portmap: external ram 2p portmap
-                            ram_t2p_portmap: external ram 2p be portmap
+                            [*]ram_2p_port: external ram 2p ports
+                            [*]ram_2p_be_port: external ram 2p be ports
+                            [*]ram_2p_portmap: external ram 2p portmap
+                            [*]ram_2p_be_portmap: external ram 2p be portmap
+                            [*]ram_2p_tiled_port: external ram 2p ports
+                            [*]ram_t2p_port: external ram 2p be ports
+                            [*]ram_2p_tiled_portmap: external ram 2p portmap
+                            [*]ram_t2p_portmap: external ram 2p be portmap
 
-                            ram_dp_port: external ram dp ports
-                            ram_dp_portmap: external ram dp portmap
-                            ram_dp_be_port: external ram dp_be ports
-                            ram_dp_be_portmap: external ram dp_be portmap
-                            ram_dp_be_xil_port: external ram dp_be_xil ports
-                            ram_dp_be_xil_portmap: external ram dp_be_xil portmap
-                            ram_tdp_port: external ram tdp ports
-                            ram_tdp_portmap: external ram tdp portmap
-                            ram_tdp_be_port: external ram tdp_be ports
-                            ram_tdp_be_portmap: external ram tdp_be portmap
+                            [*]ram_dp_port: external ram dp ports
+                            [*]ram_dp_portmap: external ram dp portmap
+                            [*]ram_dp_be_port: external ram dp_be ports
+                            [*]ram_dp_be_portmap: external ram dp_be portmap
+                            [*]ram_dp_be_xil_port: external ram dp_be_xil ports
+                            [*]ram_dp_be_xil_portmap: external ram dp_be_xil portmap
+                            [*]ram_tdp_port: external ram tdp ports
+                            [*]ram_tdp_portmap: external ram tdp portmap
+                            [*]ram_tdp_be_port: external ram tdp_be ports
+                            [*]ram_tdp_be_portmap: external ram tdp_be portmap
 
-                            axi_m_port: axi full master port
-                            axi_s_port: axi full slave port
-                            axi_m_write_port: axi full master write port
-                            axi_s_write_port: axi full slave write port
-                            axi_m_read_port: axi full master read port
-                            axi_s_read_port: axi full slave read port
-                            axi_portmap: axi full portmap
-                            axi_m_portmap: axi full master portmap
-                            axi_s_portmap: axi full slave portmap
-                            axi_m_m_portmap: axi full master to master portmap
-                            axi_s_s_portmap: axi full slave to slave portmap
-                            axi_m_write_portmap: axi full master write portmap
-                            axi_s_write_portmap: axi full slave write portmap
-                            axi_m_m_write_portmap: axi full master to master write portmap
-                            axi_s_s_write_portmap: axi full slave to slave write portmap
-                            axi_m_read_portmap: axi full master read portmap
-                            axi_s_read_portmap: axi full slave read portmap
-                            axi_m_m_read_portmap: axi full master to master read portmap
-                            axi_s_s_read_portmap: axi full slave to slave read portmap
-                            axi_wire: axi full wires for interconnection
-                            axi_m_tb_wire: axi full master wires for testbench
-                            axi_s_tb_wire: axi full slave wires for testbench
+                            [*]axi_m_port: axi full master port
+                            [*]axi_s_port: axi full slave port
+                            [*]axi_m_write_port: axi full master write port
+                            [*]axi_s_write_port: axi full slave write port
+                            [*]axi_m_read_port: axi full master read port
+                            [*]axi_s_read_port: axi full slave read port
+                            [*]axi_portmap: axi full portmap
+                            [*]axi_m_portmap: axi full master portmap
+                            [*]axi_s_portmap: axi full slave portmap
+                            [*]axi_m_m_portmap: axi full master to master portmap
+                            [*]axi_s_s_portmap: axi full slave to slave portmap
+                            [*]axi_m_write_portmap: axi full master write portmap
+                            [*]axi_s_write_portmap: axi full slave write portmap
+                            [*]axi_m_m_write_portmap: axi full master to master write portmap
+                            [*]axi_s_s_write_portmap: axi full slave to slave write portmap
+                            [*]axi_m_read_portmap: axi full master read portmap
+                            [*]axi_s_read_portmap: axi full slave read portmap
+                            [*]axi_m_m_read_portmap: axi full master to master read portmap
+                            [*]axi_s_s_read_portmap: axi full slave to slave read portmap
+                            [*]axi_wire: axi full wires for interconnection
+                            [*]axi_m_tb_wire: axi full master wires for testbench
+                            [*]axi_s_tb_wire: axi full slave wires for testbench
 
-                            axil_m_port: axi lite master port
-                            axil_s_port: axi lite slave port
-                            axil_m_write_port: axi lite master write port
-                            axil_s_write_port: axi lite slave write port
-                            axil_m_read_port: axi lite master read port
-                            axil_s_read_port: axi lite slave read port
-                            axil_portmap: axi lite portmap
-                            axil_m_portmap: axi lite master portmap
-                            axil_s_portmap: axi lite slave portmap
-                            axil_m_m_portmap: axi lite master to master portmap
-                            axil_s_s_portmap: axi lite slave to slave portmap
-                            axil_m_write_portmap: axi lite master write portmap
-                            axil_s_write_portmap: axi lite slave write portmap
-                            axil_m_m_write_portmap: axi lite master to master write portmap
-                            axil_s_s_write_portmap: axi lite slave to slave write portmap
-                            axil_m_read_portmap: axi lite master read portmap
-                            axil_s_read_portmap: axi lite slave read portmap
-                            axil_m_m_read_portmap: axi lite master to master read portmap
-                            axil_s_s_read_portmap: axi lite slave to slave read portmap
-                            axil_wire: axi lite wires for interconnection
-                            axil_m_tb_wire: axi lite master wires for testbench
-                            axil_s_tb_wire: axi lite slave wires for testbench
+                            [*]axil_m_port: axi lite master port
+                            [*]axil_s_port: axi lite slave port
+                            [*]axil_m_write_port: axi lite master write port
+                            [*]axil_s_write_port: axi lite slave write port
+                            [*]axil_m_read_port: axi lite master read port
+                            [*]axil_s_read_port: axi lite slave read port
+                            [*]axil_portmap: axi lite portmap
+                            [*]axil_m_portmap: axi lite master portmap
+                            [*]axil_s_portmap: axi lite slave portmap
+                            [*]axil_m_m_portmap: axi lite master to master portmap
+                            [*]axil_s_s_portmap: axi lite slave to slave portmap
+                            [*]axil_m_write_portmap: axi lite master write portmap
+                            [*]axil_s_write_portmap: axi lite slave write portmap
+                            [*]axil_m_m_write_portmap: axi lite master to master write portmap
+                            [*]axil_s_s_write_portmap: axi lite slave to slave write portmap
+                            [*]axil_m_read_portmap: axi lite master read portmap
+                            [*]axil_s_read_portmap: axi lite slave read portmap
+                            [*]axil_m_m_read_portmap: axi lite master to master read portmap
+                            [*]axil_s_s_read_portmap: axi lite slave to slave read portmap
+                            [*]axil_wire: axi lite wires for interconnection
+                            [*]axil_m_tb_wire: axi lite master wires for testbench
+                            [*]axil_s_tb_wire: axi lite slave wires for testbench
 
-                            ahb_m_port: ahb master port
-                            ahb_s_port: ahb slave port
-                            ahb_portmap: ahb portmap
-                            ahb_m_portmap: ahb master portmap
-                            ahb_s_portmap: ahb slave portmap
-                            ahb_m_m_portmap: ahb master to master portmap
-                            ahb_s_s_portmap: ahb slave to slave portmap
-                            ahb_wire: ahb wires for interconnection
-                            ahb_m_tb_wire: ahb master wires for testbench
-                            ahb_s_tb_wire: ahb slave wires for testbench
+                            [*]ahb_m_port: ahb master port
+                            [*]ahb_s_port: ahb slave port
+                            [*]ahb_portmap: ahb portmap
+                            [*]ahb_m_portmap: ahb master portmap
+                            [*]ahb_s_portmap: ahb slave portmap
+                            [*]ahb_m_m_portmap: ahb master to master portmap
+                            [*]ahb_s_s_portmap: ahb slave to slave portmap
+                            [*]ahb_wire: ahb wires for interconnection
+                            [*]ahb_m_tb_wire: ahb master wires for testbench
+                            [*]ahb_s_tb_wire: ahb slave wires for testbench
 
-                            apb_m_port: apb master port
-                            apb_s_port: apb slave port
-                            apb_portmap: apb portmap
-                            apb_m_portmap: apb master portmap
-                            apb_s_portmap: apb slave portmap
-                            apb_m_m_portmap: apb master to master portmap
-                            apb_s_s_portmap: apb slave to slave portmap
-                            apb_wire: apb wires for interconnection
-                            apb_m_tb_wire: apb master wires for testbench
-                            apb_s_tb_wire: apb slave wires for testbench
+                            [*]apb_m_port: apb master port
+                            [*]apb_s_port: apb slave port
+                            [*]apb_portmap: apb portmap
+                            [*]apb_m_portmap: apb master portmap
+                            [*]apb_s_portmap: apb slave portmap
+                            [*]apb_m_m_portmap: apb master to master portmap
+                            [*]apb_s_s_portmap: apb slave to slave portmap
+                            [*]apb_wire: apb wires for interconnection
+                            [*]apb_m_tb_wire: apb master wires for testbench
+                            [*]apb_s_tb_wire: apb slave wires for testbench
                         """,
     )
 
@@ -2267,9 +2283,6 @@ def parse_arguments():
     )
     parser.add_argument("port_prefix", nargs="?", help="""Port prefix.""", default="")
     parser.add_argument("wire_prefix", nargs="?", help="""Wire prefix.""", default="")
-    parser.add_argument(
-        "param_prefix", nargs="?", help="""Parameter prefix.""", default=""
-    )
     parser.add_argument("--top", help="""Top Module interface.""", action="store_true")
 
     return parser.parse_args()
@@ -2294,16 +2307,10 @@ def create_signal_table(interface_name):
     if interface_name.find("ram_sp_") >= 0:
         table = make_ram_sp()
 
-    if (
-        interface_name.find("ram_2p_") >= 0
-        or interface_name.find("ram_t2p_") >= 0
-    ):
+    if interface_name.find("ram_2p_") >= 0 or interface_name.find("ram_t2p_") >= 0:
         table = make_ram_2p()
 
-    if (
-        interface_name.find("ram_dp_") >= 0
-        or interface_name.find("ram_tdp_") >= 0
-    ):
+    if interface_name.find("ram_dp_") >= 0 or interface_name.find("ram_tdp_") >= 0:
         table = make_ram_dp()
 
     if interface_name.find("axi_") >= 0:
@@ -2329,20 +2336,51 @@ def create_signal_table(interface_name):
         table = make_apb()
 
 
+def default_interface_fields(if_dict):
+    # update interface dictionary fields if they are not set
+    # interface: remove prefix and keep matching supported interface name
+    # file_prefix: set to original interface prefix, if not set
+    # wire_prefix: set to original interface prefix, if not set
+    # port_prefix: set to original interface prefix, if not set
+    # Example:
+    #   input: if_dict = { "interface": "test_iob_m_port" }
+    #   output: if_dict = {
+    #             "interface": "iob_m_port",
+    #             "file_prefix": "test_",
+    #             "wire_prefix": "test_",
+    #             "port_prefix": "test_",
+    #          }
+
+    # get supported interface name
+    supported_interface = valid_interface_type(if_dict["interface"])
+    prefix = if_dict["interface"].split(supported_interface)[0]
+    
+    # set prefixes if they do not exist
+    if not "file_prefix" in if_dict:
+        if_dict["file_prefix"] = prefix
+    if not "port_prefix" in if_dict:
+        if_dict["port_prefix"] = prefix
+    if not "wire_prefix" in if_dict:
+        if_dict["wire_prefix"] = prefix
+
+    # set interface to supported_interface
+    if_dict["interface"] = supported_interface
+
+    return if_dict
+
+
 #
 # Write to .vs file
 #
 
 
-# port_prefix: Prefix for ports in a portmap file. Only used for portmaps.
+# port_prefix: Prefix for ports in a portmap file. Only used for portmaps. Use PORT_PREFIX (upper case) for parameters in signal width for ports or wire.
 # wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file; Prefix for ports in a `*port.vs` file (these ports also create wires);
-# param_prefix: Prefix for parameters in signals width. Only used for ports or wires (unused for portmaps).
 def write_vs_contents(
     interface_name,
     port_prefix,
     wire_prefix,
     file_object,
-    param_prefix="",
     bus_size=1,
     bus_start=0,
 ):
@@ -2359,6 +2397,8 @@ def write_vs_contents(
         .replace("ahb_", "")
     )
 
+    param_prefix = port_prefix.upper()
+
     # add '_' prefix for func_names starting with digit
     # (examples: 2p_port, 2p_be_portmap, 2p_tiled_port)
     if func_name[0].isdigit():
@@ -2369,8 +2409,10 @@ def write_vs_contents(
             func_name
             + "(port_prefix, wire_prefix, file_object, bus_start=bus_start, bus_size=bus_size)"
         )
-    else:
+    elif interface_name.find("wire") + 1:
         eval(func_name + "(wire_prefix, param_prefix, file_object, bus_size=bus_size)")
+    else:
+        eval(func_name + "(port_prefix, param_prefix, file_object, bus_size=bus_size)")
 
 
 #
@@ -2382,13 +2424,18 @@ def main():
     args = parse_arguments()
 
     # bus type
-    interface_name = args.type
-
+    if_dict = {
+        "interface": args.type,
+    }
     # port and wire prefix
-    file_prefix = args.file_prefix
-    port_prefix = args.port_prefix
-    wire_prefix = args.wire_prefix
-    param_prefix = args.param_prefix
+    if args.file_prefix:
+        if_dict["file_prefix"] = args.file_prefix
+    if args.port_prefix:
+        if_dict["port_prefix"] = args.port_prefix
+    if args.wire_prefix:
+        if_dict["wire_prefix"] = args.wire_prefix
+
+    if_dict = default_interface_fields(if_dict)
 
     # top flag
     top = args.top
@@ -2396,18 +2443,23 @@ def main():
         top_macro = "V2TEX_IO "
 
     # make AXI bus
-    create_signal_table(interface_name)
+    create_signal_table(if_dict["interface"])
 
     # open output .vs file
-    fout = open(file_prefix + interface_name + ".vs", "w")
+    fout = open(if_dict["file_prefix"] + if_dict["interface"] + ".vs", "w")
 
     # write pragma for doc production
-    if interface_name.find("port") + 1 and not interface_name.find("portmap") + 1:
-        fout.write("  //START_IO_TABLE " + port_prefix + interface_name + "\n")
+    if (
+        if_dict["interface"].find("port") + 1
+        and not if_dict["interface"].find("portmap") + 1
+    ):
+        fout.write(
+            "  //START_IO_TABLE " + if_dict["port_prefix"] + if_dict["interface"] + "\n"
+        )
 
     # call function func to generate .vs file
     write_vs_contents(
-        interface_name, port_prefix, wire_prefix, fout, param_prefix=param_prefix
+        if_dict["interface"], if_dict["port_prefix"], if_dict["wire_prefix"], fout
     )
 
     fout.close()
