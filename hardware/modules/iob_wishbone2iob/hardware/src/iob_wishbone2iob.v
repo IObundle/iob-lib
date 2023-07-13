@@ -68,7 +68,7 @@ module iob_wishbone2iob #(
       .DATA_W (1),
       .RST_VAL(0)
    ) iob_reg_wack (
-      `include "iob_clk_en_rst_portmap.vs"
+      `include "clk_en_rst_portmap.vs"
       .rst_i (1'b0),
       .en_i  (1'b1),
       .data_i(wack),
