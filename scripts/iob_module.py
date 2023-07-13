@@ -177,8 +177,11 @@ class iob_module:
 
             # Don't setup submodules that have a purpose different than
             # "hardware" when this class is not the top module
-            if (not cls.is_top_module and "purpose" in setup_options
-                    and setup_options["purpose"] != "hardware"):
+            if (
+                not cls.is_top_module
+                and "purpose" in setup_options
+                and setup_options["purpose"] != "hardware"
+            ):
                 continue
 
             if type(_submodule) == str or type(_submodule) == dict:
@@ -369,20 +372,20 @@ class iob_module:
 
     @classmethod
     def __remove_files_from_prev_setup(cls, src_dir, module_class):
-        '''If we had previously set up this module for another purpose,
+        """If we had previously set up this module for another purpose,
         then delete files from that directory, based on the list of files in src_dir.
         :param str src_dir: path to directory with sources (generally "hardware/src")
         :param iob_module module_class: (super)class currently being setup.
-        '''
+        """
         if len(cls._setup_purpose) > 1:
-            _rm_dir = os.path.join(cls.build_dir,
-                                   cls.PURPOSE_DIRS[cls._setup_purpose[-2]])
+            _rm_dir = os.path.join(
+                cls.build_dir, cls.PURPOSE_DIRS[cls._setup_purpose[-2]]
+            )
 
             # Remove every file of _rm_dir that is listed in src dir
             for file in os.listdir(os.path.join(module_class.setup_dir, src_dir)):
                 if os.path.isfile(os.path.join(module_class.setup_dir, src_dir, file)):
                     os.remove(os.path.join(_rm_dir, file))
-
 
     # Creates a function that:
     #   - Renames any '<old_core_name>' string inside the src file and in its filename, to the given '<new_core_name>' string argument.

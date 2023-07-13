@@ -27,34 +27,34 @@ interfaces = [
     "clk_rst_port",
     "clk_en_rst_portmap",
     "clk_rst_portmap",
-    "ext_rom_sp_port",
-    "ext_rom_dp_port",
-    "ext_rom_tdp_port",
-    "ext_rom_sp_portmap",
-    "ext_rom_dp_portmap",
-    "ext_rom_tdp_portmap",
-    "ext_ram_sp_port",
-    "ext_ram_sp_be_port",
-    "ext_ram_sp_portmap",
-    "ext_ram_sp_be_portmap",
-    "ext_ram_2p_port",
-    "ext_ram_2p_portmap",
-    "ext_ram_2p_be_port",
-    "ext_ram_2p_be_portmap",
-    "ext_ram_2p_tiled_port",
-    "ext_ram_2p_tiled_portmap",
-    "ext_ram_t2p_port",
-    "ext_ram_t2p_portmap",
-    "ext_ram_dp_port",
-    "ext_ram_dp_portmap",
-    "ext_ram_dp_be_port",
-    "ext_ram_dp_be_portmap",
-    "ext_ram_dp_be_xil_port",
-    "ext_ram_dp_be_xil_portmap",
-    "ext_ram_tdp_port",
-    "ext_ram_tdp_portmap",
-    "ext_ram_tdp_be_port",
-    "ext_ram_tdp_be_portmap",
+    "rom_sp_port",
+    "rom_dp_port",
+    "rom_tdp_port",
+    "rom_sp_portmap",
+    "rom_dp_portmap",
+    "rom_tdp_portmap",
+    "ram_sp_port",
+    "ram_sp_be_port",
+    "ram_sp_portmap",
+    "ram_sp_be_portmap",
+    "ram_2p_port",
+    "ram_2p_portmap",
+    "ram_2p_be_port",
+    "ram_2p_be_portmap",
+    "ram_2p_tiled_port",
+    "ram_2p_tiled_portmap",
+    "ram_t2p_port",
+    "ram_t2p_portmap",
+    "ram_dp_port",
+    "ram_dp_portmap",
+    "ram_dp_be_port",
+    "ram_dp_be_portmap",
+    "ram_dp_be_xil_port",
+    "ram_dp_be_xil_portmap",
+    "ram_tdp_port",
+    "ram_tdp_portmap",
+    "ram_tdp_be_port",
+    "ram_tdp_be_portmap",
     "axi_m_port",
     "axi_s_port",
     "axi_m_write_port",
@@ -1737,15 +1737,17 @@ def s_port(prefix, param_prefix, fout, bus_size=1):
 
 # Write portmap with given port, connection name, width, bus start, bus size and description to file
 def write_portmap(port, connection_name, width, bus_start, bus_size, description, fout):
-    if bus_size == 1 :
+    if bus_size == 1:
         connection = connection_name
-    else :
+    else:
         bus_select_size = str(bus_size) + "*" + width
         if bus_start == 0:
             bus_start_index = str(0)
         else:
             bus_start_index = str(bus_start) + "*" + width
-        connection = connection_name + "[" + bus_start_index + "+:" + bus_select_size + "]"
+        connection = (
+            connection_name + "[" + bus_start_index + "+:" + bus_select_size + "]"
+        )
     fout.write("." + port + "(" + connection + "), //" + description + "\n")
 
 
@@ -2158,37 +2160,37 @@ def parse_arguments():
                             clk_rst_port: clk, rst ports
                             clk_rst_portmap: clk, rst portmap
 
-                            ext_rom_sp_port: external rom sp ports
-                            ext_rom_dp_port: external rom dp ports
-                            ext_rom_tdp_port: external rom tdp ports
-                            ext_rom_sp_portmap: external rom sp portmap
-                            ext_rom_dp_portmap: external rom dp portmap
-                            ext_rom_tdp_portmap: external rom tdp portmap
+                            rom_sp_port: external rom sp ports
+                            rom_dp_port: external rom dp ports
+                            rom_tdp_port: external rom tdp ports
+                            rom_sp_portmap: external rom sp portmap
+                            rom_dp_portmap: external rom dp portmap
+                            rom_tdp_portmap: external rom tdp portmap
 
-                            ext_ram_sp_port: external ram sp ports
-                            ext_ram_sp_be_port: external ram sp be ports
-                            ext_ram_sp_portmap: external ram sp portmap
-                            ext_ram_sp_be_portmap: external ram sp be portmap
+                            ram_sp_port: external ram sp ports
+                            ram_sp_be_port: external ram sp be ports
+                            ram_sp_portmap: external ram sp portmap
+                            ram_sp_be_portmap: external ram sp be portmap
 
-                            ext_ram_2p_port: external ram 2p ports
-                            ext_ram_2p_be_port: external ram 2p be ports
-                            ext_ram_2p_portmap: external ram 2p portmap
-                            ext_ram_2p_be_portmap: external ram 2p be portmap
-                            ext_ram_2p_tiled_port: external ram 2p ports
-                            ext_ram_t2p_port: external ram 2p be ports
-                            ext_ram_2p_tiled_portmap: external ram 2p portmap
-                            ext_ram_t2p_portmap: external ram 2p be portmap
+                            ram_2p_port: external ram 2p ports
+                            ram_2p_be_port: external ram 2p be ports
+                            ram_2p_portmap: external ram 2p portmap
+                            ram_2p_be_portmap: external ram 2p be portmap
+                            ram_2p_tiled_port: external ram 2p ports
+                            ram_t2p_port: external ram 2p be ports
+                            ram_2p_tiled_portmap: external ram 2p portmap
+                            ram_t2p_portmap: external ram 2p be portmap
 
-                            ext_ram_dp_port: external ram dp ports
-                            ext_ram_dp_portmap: external ram dp portmap
-                            ext_ram_dp_be_port: external ram dp_be ports
-                            ext_ram_dp_be_portmap: external ram dp_be portmap
-                            ext_ram_dp_be_xil_port: external ram dp_be_xil ports
-                            ext_ram_dp_be_xil_portmap: external ram dp_be_xil portmap
-                            ext_ram_tdp_port: external ram tdp ports
-                            ext_ram_tdp_portmap: external ram tdp portmap
-                            ext_ram_tdp_be_port: external ram tdp_be ports
-                            ext_ram_tdp_be_portmap: external ram tdp_be portmap
+                            ram_dp_port: external ram dp ports
+                            ram_dp_portmap: external ram dp portmap
+                            ram_dp_be_port: external ram dp_be ports
+                            ram_dp_be_portmap: external ram dp_be portmap
+                            ram_dp_be_xil_port: external ram dp_be_xil ports
+                            ram_dp_be_xil_portmap: external ram dp_be_xil portmap
+                            ram_tdp_port: external ram tdp ports
+                            ram_tdp_portmap: external ram tdp portmap
+                            ram_tdp_be_port: external ram tdp_be ports
+                            ram_tdp_be_portmap: external ram tdp_be portmap
 
                             axi_m_port: axi full master port
                             axi_s_port: axi full slave port
@@ -2286,21 +2288,21 @@ def create_signal_table(interface_name):
     if interface_name.find("clk_") >= 0:
         table = make_clk_en_rst()
 
-    if interface_name.find("ext_rom_") >= 0:
+    if interface_name.find("rom_") >= 0:
         table = make_rom()
 
-    if interface_name.find("ext_ram_sp_") >= 0:
+    if interface_name.find("ram_sp_") >= 0:
         table = make_ram_sp()
 
     if (
-        interface_name.find("ext_ram_2p_") >= 0
-        or interface_name.find("ext_ram_t2p_") >= 0
+        interface_name.find("ram_2p_") >= 0
+        or interface_name.find("ram_t2p_") >= 0
     ):
         table = make_ram_2p()
 
     if (
-        interface_name.find("ext_ram_dp_") >= 0
-        or interface_name.find("ext_ram_tdp_") >= 0
+        interface_name.find("ram_dp_") >= 0
+        or interface_name.find("ram_tdp_") >= 0
     ):
         table = make_ram_dp()
 
@@ -2347,8 +2349,8 @@ def write_vs_contents(
     func_name = (
         interface_name.replace("axil_", "")
         .replace("clk_", "")
-        .replace("ext_rom_", "")
-        .replace("ext_ram_", "")
+        .replace("rom_", "")
+        .replace("ram_", "")
         .replace("axi_", "")
         .replace("write_", "")
         .replace("read_", "")
