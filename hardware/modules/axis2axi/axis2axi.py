@@ -22,12 +22,12 @@ class axis2axi(iob_module):
         """Create submodules list with dependencies of this module"""
         super()._create_submodules_list(
             [
-                "axi_m_port",
-                "axi_m_write_port",
-                "axi_m_read_port",
-                "axi_m_m_write_portmap",
-                "axi_m_m_read_portmap",
-                "clk_en_rst_port",
+                {"interface": "axi_m_port"},
+                {"interface": "axi_m_write_port"},
+                {"interface": "axi_m_read_port"},
+                {"interface": "axi_m_m_write_portmap"},
+                {"interface": "axi_m_m_read_portmap"},
+                {"interface": "clk_en_rst_port"},
                 iob_fifo_sync,
                 iob_counter,
                 iob_reg_r,

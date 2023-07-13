@@ -4,7 +4,7 @@ module iob_s2f_sync #(
    parameter DATA_W  = 21,
    parameter RST_VAL = {DATA_W{1'b0}}
 ) (
-   `include "iob_clk_rst_port.vs",
+   `include "clk_rst_port.vs",
 
    input rst_i,
 
@@ -24,7 +24,7 @@ module iob_s2f_sync #(
        .RST_VAL (RST_VAL),
        .CLKEDGE ("posedge")
    ) iob_sync_inst0 (
-       `include "iob_clk_rst_portmap.vs",
+       `include "clk_rst_portmap.vs",
        .signal_i(data_rst0),
        .signal_o(data_o)
    );

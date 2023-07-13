@@ -16,7 +16,7 @@ class iob_sync(iob_module):
         """Create submodules list with dependencies of this module"""
         super()._create_submodules_list(
             [
-                "clk_rst_port",
+                {"interface": "clk_rst_port"},
                 iob_reg,
             ]
         )

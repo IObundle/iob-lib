@@ -17,8 +17,8 @@ class iob_pulse_gen(iob_module):
         """Create submodules list with dependencies of this module"""
         super()._create_submodules_list(
             [
-                "clk_en_rst_portmap",
-                "clk_en_rst_port",
+                {"interface": "clk_en_rst_portmap"},
+                {"interface": "clk_en_rst_port"},
                 iob_reg,
                 iob_counter,
             ]

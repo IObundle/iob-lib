@@ -14,7 +14,7 @@ class iob_split(iob_module):
         """Create submodules list with dependencies of this module"""
         super()._create_submodules_list(
             [
-                "clk_rst_portmap",
-                "clk_rst_port",
+                {"interface": "clk_rst_portmap"},
+                {"interface": "clk_rst_port"},
             ]
         )

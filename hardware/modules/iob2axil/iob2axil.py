@@ -27,6 +27,6 @@ class iob2axil(iob_module):
                 axil_m_portmap,
                 iob_m_tb_wire,
                 axil_wire,
-                "clk_rst_port",
+                {"interface": "clk_rst_port"},
             ]
         )
