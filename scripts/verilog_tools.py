@@ -89,7 +89,9 @@ def insert_verilog_in_module(verilog_code, verilog_file_path):
             endmodule_index = idx - 1
             break
     else:
-        raise Exception(f"{iob_colors.FAIL}verilog_tools.py: Could not find 'endmodule' declaration in '{verilog_file_path}'!{iob_colors.ENDC}")
+        raise Exception(
+            f"{iob_colors.FAIL}verilog_tools.py: Could not find 'endmodule' declaration in '{verilog_file_path}'!{iob_colors.ENDC}"
+        )
 
     # Insert Verilog code
     lines.insert(endmodule_index, verilog_code)

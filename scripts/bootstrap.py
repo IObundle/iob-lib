@@ -90,7 +90,7 @@ def insert_header():
 
     top_module = vars(sys.modules[top_module_name])[top_module_name]
     top_module.is_top_module = True
-    top_module.set_dynamic_attributes()
+    top_module.init_attributes()
 
     NAME, VERSION = top_module.name, top_module.version
 
@@ -122,7 +122,7 @@ def version_from_str(version_str):
 def get_delivery_vars():
     top_module = vars(sys.modules[top_module_name])[top_module_name]
     top_module.is_top_module = True
-    top_module.set_dynamic_attributes()
+    top_module.init_attributes()
     print(f"NAME={top_module.name} ", end="")
     print(f"VERSION={version_from_str(top_module.version)} ", end="")
     print(f"PREVIOUS_VERSION={version_from_str(top_module.previous_version)} ", end="")
@@ -133,13 +133,13 @@ def get_delivery_vars():
 def get_build_dir():
     top_module = vars(sys.modules[top_module_name])[top_module_name]
     top_module.is_top_module = True
-    top_module.set_dynamic_attributes()
+    top_module.init_attributes()
     print(top_module.build_dir)
 
 
 # Instantiate top module to start setup process
 def instantiate_top_module():
-    vars(sys.modules[top_module_name])[top_module_name].setup(is_top_module=True)
+    vars(sys.modules[top_module_name])[top_module_name].setup_as_top_module()
 
 
 # Call either the default function or the one given by the user

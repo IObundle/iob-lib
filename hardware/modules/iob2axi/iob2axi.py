@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from iob_module import iob_module
-from setup import setup
 
 from m_axi_m_port import m_axi_m_port
 from m_axi_write_m_port import m_axi_write_m_port
@@ -21,20 +19,18 @@ class iob2axi(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _run_setup(cls):
-        super()._run_setup()
-
-        # Setup dependencies
-        m_axi_m_port.setup()
-        m_axi_write_m_port.setup()
-        m_axi_read_m_port.setup()
-        m_m_axi_write_portmap.setup()
-        m_m_axi_read_portmap.setup()
-        iob_module.generate("clk_rst_port")
-
-        iob2axi_wr.setup()
-        iob2axi_rd.setup()
-        iob_fifo_sync.setup()
-
-        # Setup flows of this core using LIB setup function
-        setup(cls, disable_file_gen=True)
+    def _create_submodules_list(cls):
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                m_axi_m_port,
+                m_axi_write_m_port,
+                m_axi_read_m_port,
+                m_m_axi_write_portmap,
+                m_m_axi_read_portmap,
+                "clk_rst_port",
+                iob2axi_wr,
+                iob2axi_rd,
+                iob_fifo_sync,
+            ]
+        )
