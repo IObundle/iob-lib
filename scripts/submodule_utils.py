@@ -411,6 +411,7 @@ class if_gen_hack_list:
                 "descr": next(
                     signal["description"]
                     for signal in if_gen.iob
+                    + if_gen.clk_en_rst
                     + if_gen.axi_write
                     + if_gen.axi_read
                     + if_gen.amba

@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from iob_module import iob_module
-from setup import setup
 
 from axil_s_port import axil_s_port
 from axil_s_s_portmap import axil_s_s_portmap
@@ -18,19 +16,17 @@ class axil2iob(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _run_setup(cls):
-        super()._run_setup()
-
-        # Setup dependencies
-
-        axil_s_port.setup()
-        axil_s_s_portmap.setup()
-        iob_m_port.setup()
-        iob_m_portmap.setup()
-        iob_module.generate("iob_wire")
-        iob_module.generate("clk_rst_portmap")
-        iob_module.generate("clk_rst_port")
-        iob_s_portmap.setup()
-
-        # Setup flows of this core using LIB setup function
-        setup(cls, disable_file_gen=True)
+    def _create_submodules_list(cls):
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                axil_s_port,
+                axil_s_s_portmap,
+                iob_m_port,
+                iob_m_portmap,
+                "iob_wire",
+                "clk_rst_portmap",
+                "clk_rst_port",
+                iob_s_portmap,
+            ]
+        )

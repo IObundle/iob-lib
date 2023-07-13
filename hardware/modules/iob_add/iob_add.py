@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from iob_module import iob_module
-from setup import setup
 
 from iob_add2 import iob_add2
 
@@ -14,13 +12,10 @@ class iob_add(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _run_setup(cls):
-        super()._run_setup()
-
-        # Verilog snippet files
-        iob_add2.setup()
-
-        # Setup dependencies
-
-        # Setup flows of this core using LIB setup function
-        setup(cls, disable_file_gen=True)
+    def _create_submodules_list(cls):
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                iob_add2,
+            ]
+        )

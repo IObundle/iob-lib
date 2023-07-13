@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from iob_module import iob_module
-from setup import setup
 
 from iob_ram_2p import iob_ram_2p
 
@@ -14,12 +12,10 @@ class iob_ram_2p_tiled(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _run_setup(cls):
-        super()._run_setup()
-
-        # Setup dependencies
-
-        iob_ram_2p.setup()
-
-        # Setup flows of this core using LIB setup function
-        setup(cls, disable_file_gen=True)
+    def _create_submodules_list(cls):
+        """Create submodules list with dependencies of this module"""
+        super()._create_submodules_list(
+            [
+                iob_ram_2p,
+            ]
+        )
