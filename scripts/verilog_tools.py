@@ -35,6 +35,7 @@ def replace_includes_in_lines(lines, VSnippetFiles):
                             )
                     # replace the include statement with the content of the file
                     lines[lines.index(line)] = "".join(include_lines)
+                    break
             # if the file to be included is not found in the VSnippetFiles, raise an error
             if not found_vs:
                 raise FileNotFoundError(
@@ -72,6 +73,7 @@ def replace_includes(setup_dir="", build_dir=""):
     # Remove the VSnippetFiles
     for VSnippetFile in VSnippetFiles:
         os.remove(VSnippetFile)
+    os.rmdir(VSnippetDir)
 
     print(
         f"{iob_colors.INFO}Replaced Verilog Snippet includes with respective content and deleted the files.{iob_colors.ENDC}"

@@ -12,7 +12,7 @@ import subprocess
 import iob_colors
 
 linters = [
-    {"command": "verilator --lint-only -Wall", "include_flag": "-I"},
+    {"command": "verilator --lint-only -Wall --timing", "include_flag": "-I"},
     #  {"command": "svlint", "include_flag": "-i"}
 ]
 
