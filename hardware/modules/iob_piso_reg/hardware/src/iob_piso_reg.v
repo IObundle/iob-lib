@@ -4,7 +4,7 @@ module iob_piso_reg #(
    parameter DATA_W = 32
 ) (
 
-   `include "iob_clk_en_rst_port.vs"
+   `include "clk_en_rst_port.vs"
 
    // parallel input
    input              ld_i,
@@ -23,7 +23,7 @@ module iob_piso_reg #(
       .RST_VAL(0),
       .CLKEDGE("posedge")
    ) reg0 (
-      `include "iob_clk_en_rst_portmap.vs"
+      `include "clk_en_rst_portmap.vs"
 
       .data_i(data),
       .data_o(data_reg)

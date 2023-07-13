@@ -2147,7 +2147,7 @@ def parse_types(arg):
         raise argparse.ArgumentTypeError(msg)
     else:
         return arg
-        
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -2354,7 +2354,7 @@ def default_interface_fields(if_dict):
     # get supported interface name
     supported_interface = valid_interface_type(if_dict["interface"])
     prefix = if_dict["interface"].split(supported_interface)[0]
-    
+
     # set prefixes if they do not exist
     if not "file_prefix" in if_dict:
         if_dict["file_prefix"] = prefix
