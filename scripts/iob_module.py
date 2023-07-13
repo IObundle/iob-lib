@@ -465,9 +465,23 @@ class iob_module:
         
         Example submodule_list:
             [
-            # Generate interfaces with if_gen. Check `__generate()` method for details.
-            "axi_m_portmap", # Generate an `axi_m_portmap` interface.
+            # Generate interfaces with if_gen. Check out the `__generate()` method for details.
+            # Generate an `axi_m_portmap` interface (using a string):
+            "axi_m_portmap",
+            # Generate an `axi_s_portmap` interface for the `simulation` purpose (using a tuple with a string):
+            ("axi_s_portmap", {"purpose": "simulation"}),
+            # Generate an `iob_s_port` interface with custom prefixes (using a dictionary):
+            {
+                "file_prefix": "example_file_prefix_",
+                "interface": "iob_s_port",
+                "wire_prefix": "example_wire_prefix_",
+                "port_prefix": "example_port_prefix_",
+                "param_prefix": "example_parameter_prefix_",
+            },
+            # Set up a submodule
             iob_picorv32,
+            # Set up a submodule for the `simulation` purpose (using a tuple):
+            (axi_ram, {"purpose": "simulation"}),
         '''
         for submodule in submodule_list:
             _submodule = submodule
