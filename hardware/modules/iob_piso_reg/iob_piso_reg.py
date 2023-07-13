@@ -17,7 +17,7 @@ class iob_piso_reg(iob_module):
         super()._create_submodules_list(
             [
                 iob_reg,
-                "clk_en_rst_portmap",
-                "clk_en_rst_port",
+                {"interface": "clk_en_rst_portmap"},
+                {"interface": "clk_en_rst_port"},
             ]
         )

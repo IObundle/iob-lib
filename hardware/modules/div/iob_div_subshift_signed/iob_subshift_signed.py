@@ -16,7 +16,7 @@ class iob_div_subshift_signed(iob_module):
         """Create submodules list with dependencies of this module"""
         super()._create_submodules_list(
             [
-                "clk_en_rst_portmap",
+                {"interface": "clk_en_rst_portmap"},
                 iob_reg,
             ]
         )

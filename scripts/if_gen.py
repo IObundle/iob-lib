@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-# Generates IOb Native, AXI4 Full and AXI4 Lite ports, port maps and signals
+# Generates IOb Native, Clock and Reset, External Memory, AXI4 Full and AXI4
+# Lite ports, port maps and signals
 #
 #   See "Usage" below
 #
@@ -26,6 +27,34 @@ interfaces = [
     "clk_rst_port",
     "clk_en_rst_portmap",
     "clk_rst_portmap",
+    "rom_sp_port",
+    "rom_dp_port",
+    "rom_tdp_port",
+    "rom_sp_portmap",
+    "rom_dp_portmap",
+    "rom_tdp_portmap",
+    "ram_sp_port",
+    "ram_sp_be_port",
+    "ram_sp_portmap",
+    "ram_sp_be_portmap",
+    "ram_2p_port",
+    "ram_2p_portmap",
+    "ram_2p_be_port",
+    "ram_2p_be_portmap",
+    "ram_2p_tiled_port",
+    "ram_2p_tiled_portmap",
+    "ram_t2p_port",
+    "ram_t2p_portmap",
+    "ram_dp_port",
+    "ram_dp_portmap",
+    "ram_dp_be_port",
+    "ram_dp_be_portmap",
+    "ram_dp_be_xil_port",
+    "ram_dp_be_xil_portmap",
+    "ram_tdp_port",
+    "ram_tdp_portmap",
+    "ram_tdp_be_port",
+    "ram_tdp_be_portmap",
     "axi_m_port",
     "axi_s_port",
     "axi_m_write_port",
@@ -186,6 +215,503 @@ clk_en_rst = [
         "name": "arst",
         "default": "0",
         "description": "asynchronous reset",
+    },
+]
+
+rom = [
+    {
+        "sp": 1,
+        "tdp": 0,
+        "dp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "clk",
+        "default": "0",
+        "description": "clock",
+    },
+    {
+        "sp": 1,
+        "tdp": 0,
+        "dp": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "r_en",
+        "default": "0",
+        "description": "read enable",
+    },
+    {
+        "sp": 1,
+        "tdp": 0,
+        "dp": 0,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addr",
+        "default": "0",
+        "description": "address",
+    },
+    {
+        "sp": 1,
+        "tdp": 0,
+        "dp": 0,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "r_data",
+        "default": "0",
+        "description": "read data",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "clk_a",
+        "default": "0",
+        "description": "clock port A",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "clk_b",
+        "default": "0",
+        "description": "clock port B",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "r_en_a",
+        "default": "0",
+        "description": "read enable port A",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addr_a",
+        "default": "0",
+        "description": "address port A",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "r_data_a",
+        "default": "0",
+        "description": "read data port A",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "r_en_b",
+        "default": "0",
+        "description": "read enable port B",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addr_b",
+        "default": "0",
+        "description": "address port B",
+    },
+    {
+        "sp": 0,
+        "tdp": 1,
+        "dp": 1,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "r_data_b",
+        "default": "0",
+        "description": "read data port B",
+    },
+]
+
+ram_sp = [
+    {
+        "be": 1,
+        "sp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "clk",
+        "default": "0",
+        "description": "clock",
+    },
+    {
+        "be": 1,
+        "sp": 1,
+        "signal": "input",
+        "width": "DATA_W",
+        "name": "d",
+        "default": "0",
+        "description": "ram sp data input",
+    },
+    {
+        "be": 1,
+        "sp": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addr",
+        "default": "0",
+        "description": "ram sp address",
+    },
+    {
+        "be": 1,
+        "sp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "en",
+        "default": "0",
+        "description": "ram sp enable",
+    },
+    {
+        "be": 1,
+        "sp": 1,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "d",
+        "default": "0",
+        "description": "ram sp data output",
+    },
+    {
+        "be": 0,
+        "sp": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "we",
+        "default": "0",
+        "description": "ram sp write enable",
+    },
+    {
+        "be": 1,
+        "sp": 0,
+        "signal": "input",
+        "width": "DATA_W/8",
+        "name": "we",
+        "default": "0",
+        "description": "ram sp write strobe",
+    },
+]
+
+ram_2p = [
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 1,
+        "t2p": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "clk",
+        "default": "0",
+        "description": "clock",
+    },
+    {
+        "2p": 0,
+        "be": 0,
+        "tiled": 0,
+        "t2p": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "w_clk",
+        "default": "0",
+        "description": "write clock",
+    },
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 1,
+        "t2p": 1,
+        "signal": "input",
+        "width": "DATA_W",
+        "name": "w_data",
+        "default": "0",
+        "description": "ram 2p write data",
+    },
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 0,
+        "t2p": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "w_addr",
+        "default": "0",
+        "description": "ram 2p write address",
+    },
+    {
+        "2p": 0,
+        "be": 0,
+        "tiled": 1,
+        "t2p": 0,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addr",
+        "default": "0",
+        "description": "ram 2p address",
+    },
+    {
+        "2p": 1,
+        "be": 0,
+        "tiled": 1,
+        "t2p": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "w_en",
+        "default": "0",
+        "description": "ram 2p write enable",
+    },
+    {
+        "2p": 0,
+        "be": 1,
+        "tiled": 0,
+        "t2p": 0,
+        "signal": "input",
+        "width": "DATA_W/8",
+        "name": "w_en",
+        "default": "0",
+        "description": "ram 2p write strobe",
+    },
+    {
+        "2p": 0,
+        "be": 0,
+        "tiled": 0,
+        "t2p": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "r_clk",
+        "default": "0",
+        "description": "read clock",
+    },
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 0,
+        "t2p": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "r_addr",
+        "default": "0",
+        "description": "ram 2p read address",
+    },
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 1,
+        "t2p": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "r_en",
+        "default": "0",
+        "description": "ram 2p read enable",
+    },
+    {
+        "2p": 1,
+        "be": 1,
+        "tiled": 1,
+        "t2p": 1,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "r_data",
+        "default": "0",
+        "description": "ram 2p read data",
+    },
+]
+
+
+ram_dp = [
+    {
+        "dp": 1,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 0,
+        "tdp_be": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "clk",
+        "default": "0",
+        "description": "clock",
+    },
+    {
+        "dp": 0,
+        "dp_be": 0,
+        "dp_be_xil": 0,
+        "tdp": 1,
+        "tdp_be": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "clkA",
+        "default": "0",
+        "description": "clock A",
+    },
+    {
+        "dp": 1,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 1,
+        "tdp_be": 1,
+        "signal": "input",
+        "width": "DATA_W",
+        "name": "dA",
+        "default": "0",
+        "description": "Data in A",
+    },
+    {
+        "dp": 1,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 1,
+        "tdp_be": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addrA",
+        "default": "0",
+        "description": "Address A",
+    },
+    {
+        "dp": 1,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 1,
+        "tdp_be": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "enA",
+        "default": "0",
+        "description": "Enable A",
+    },
+    {
+        "dp": 1,
+        "dp_be": 0,
+        "dp_be_xil": 0,
+        "tdp": 1,
+        "tdp_be": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "weA",
+        "default": "0",
+        "description": "Write enable A",
+    },
+    {
+        "dp": 0,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 0,
+        "tdp_be": 1,
+        "signal": "input",
+        "width": "DATA_W/8",
+        "name": "weA",
+        "default": "0",
+        "description": "Write strobe A",
+    },
+    {
+        "dp": 1,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 1,
+        "tdp_be": 1,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "dA",
+        "default": "0",
+        "description": "Data out A",
+    },
+    {
+        "dp": 0,
+        "dp_be": 0,
+        "dp_be_xil": 0,
+        "tdp": 1,
+        "tdp_be": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "clkB",
+        "default": "0",
+        "description": "clock B",
+    },
+    {
+        "dp": 1,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 1,
+        "tdp_be": 1,
+        "signal": "input",
+        "width": "DATA_W",
+        "name": "dB",
+        "default": "0",
+        "description": "Data in B",
+    },
+    {
+        "dp": 1,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 1,
+        "tdp_be": 1,
+        "signal": "input",
+        "width": "ADDR_W",
+        "name": "addrB",
+        "default": "0",
+        "description": "Address B",
+    },
+    {
+        "dp": 1,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 1,
+        "tdp_be": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "enB",
+        "default": "0",
+        "description": "Enable B",
+    },
+    {
+        "dp": 1,
+        "dp_be": 0,
+        "dp_be_xil": 0,
+        "tdp": 1,
+        "tdp_be": 0,
+        "signal": "input",
+        "width": "1",
+        "name": "weB",
+        "default": "0",
+        "description": "Write enable B",
+    },
+    {
+        "dp": 0,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 0,
+        "tdp_be": 1,
+        "signal": "input",
+        "width": "DATA_W/8",
+        "name": "weB",
+        "default": "0",
+        "description": "Write strobe B",
+    },
+    {
+        "dp": 1,
+        "dp_be": 1,
+        "dp_be_xil": 1,
+        "tdp": 1,
+        "tdp_be": 1,
+        "signal": "output",
+        "width": "DATA_W",
+        "name": "dB",
+        "default": "0",
+        "description": "Data out B",
     },
 ]
 
@@ -838,6 +1364,46 @@ def make_clk_en_rst():
 
 
 #
+# ROM
+#
+def make_rom():
+    bus = []
+    for i in range(len(rom)):
+        bus.append(rom[i])
+    return bus
+
+
+#
+# RAM SP
+#
+def make_ram_sp():
+    bus = []
+    for i in range(len(ram_sp)):
+        bus.append(ram_sp[i])
+    return bus
+
+
+#
+# RAM 2P
+#
+def make_ram_2p():
+    bus = []
+    for i in range(len(ram_2p)):
+        bus.append(ram_2p[i])
+    return bus
+
+
+#
+# RAM DP
+#
+def make_ram_dp():
+    bus = []
+    for i in range(len(ram_dp)):
+        bus.append(ram_dp[i])
+    return bus
+
+
+#
 # AXI4 Full
 #
 
@@ -989,6 +1555,149 @@ def rst_port(prefix, param_prefix, fout, bus_size=1):
             write_port(port_direction, bus_width, name, description, fout)
 
 
+def sp_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["sp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def sp_be_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def dp_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["dp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def tdp_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["tdp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def _2p_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["2p"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def _2p_be_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def _2p_tiled_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["tiled"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def t2p_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["t2p"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def dp_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["dp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def dp_be_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["dp_be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def dp_be_xil_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["dp_be_xil"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def tdp_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["tdp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
+def tdp_be_port(prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["tdp_be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            name = prefix + table[i]["name"] + suffix(port_direction)
+            width = add_param_prefix(table[i]["width"], param_prefix)
+            bus_width = " [" + width + "-1:0] "
+            description = top_macro + table[i]["description"]
+            write_port(port_direction, bus_width, name, description, fout)
+
+
 def m_port(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
         if table[i]["master"] == 1:
@@ -1042,6 +1751,10 @@ def write_portmap(port, connection_name, width, bus_start, bus_size, description
     fout.write("." + port + "(" + connection + "), //" + description + "\n")
 
 
+def write_plain_portmap(port, connection, width, description, fout):
+    fout.write("." + port + "(" + connection + "), //" + description + "\n")
+
+
 def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
         port = port_prefix + table[i]["name"]
@@ -1085,6 +1798,171 @@ def rst_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
                 table[i]["width"],
                 bus_start,
                 bus_size,
+                table[i]["description"],
+                fout,
+            )
+
+
+def sp_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["sp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                table[i]["description"],
+                fout,
+            )
+
+
+def sp_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                table[i]["description"],
+                fout,
+            )
+
+
+def _2p_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["2p"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                table[i]["description"],
+                fout,
+            )
+
+
+def _2p_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                table[i]["description"],
+                fout,
+            )
+
+
+def _2p_tiled_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["tiled"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                table[i]["description"],
+                fout,
+            )
+
+
+def t2p_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["t2p"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                table[i]["description"],
+                fout,
+            )
+
+
+def dp_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["dp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                table[i]["description"],
+                fout,
+            )
+
+
+def dp_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["dp_be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                table[i]["description"],
+                fout,
+            )
+
+
+def dp_be_xil_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["dp_be_xil"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                table[i]["description"],
+                fout,
+            )
+
+
+def tdp_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["tdp"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
+                table[i]["description"],
+                fout,
+            )
+
+
+def tdp_be_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+    for i in range(len(table)):
+        if table[i]["tdp_be"] == 1:
+            port_direction = reverse(table[i]["signal"])
+            port = port_prefix + table[i]["name"] + suffix(port_direction)
+            connection_name = wire_prefix + table[i]["name"] + suffix(port_direction)
+            write_plain_portmap(
+                port,
+                connection_name,
+                table[i]["width"],
                 table[i]["description"],
                 fout,
             )
@@ -1255,6 +2133,22 @@ def s_tb_wire(prefix, param_prefix, fout, bus_size=1):
 #
 # Parse Arguments
 #
+def valid_interface_type(original_interface):
+    for interface in interfaces:
+        if original_interface.endswith(interface):
+            return interface
+    return None
+
+
+def parse_types(arg):
+    interface = valid_interface_type(arg)
+    if not interface:
+        msg = f"{arg} is not a valid type"
+        raise argparse.ArgumentTypeError(msg)
+    else:
+        return arg
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="if_gen.py verilog interface generation.",
@@ -1263,90 +2157,124 @@ def parse_arguments():
 
     parser.add_argument(
         "type",
-        choices=interfaces,
+        type=lambda s: parse_types(s),
         help="""
                             type can defined as one of the following:
-                            iob_m_port: iob native master port
-                            iob_s_port: iob native slave port
-                            iob_portmap: iob native portmap
-                            iob_m_portmap: iob native master portmap
-                            iob_s_portmap: iob native slave portmap
-                            iob_m_m_portmap: iob native master to master portmap
-                            iob_s_s_portmap: iob native slave to slave portmap
-                            iob_wire: iob native wires for interconnection
-                            iob_m_tb_wire: iob native master wires for testbench
-                            iob_s_tb_wire: iob native slave wires for testbench
+                            [*]iob_m_port: iob native master port
+                            [*]iob_s_port: iob native slave port
+                            [*]iob_portmap: iob native portmap
+                            [*]iob_m_portmap: iob native master portmap
+                            [*]iob_s_portmap: iob native slave portmap
+                            [*]iob_m_m_portmap: iob native master to master portmap
+                            [*]iob_s_s_portmap: iob native slave to slave portmap
+                            [*]iob_wire: iob native wires for interconnection
+                            [*]iob_m_tb_wire: iob native master wires for testbench
+                            [*]iob_s_tb_wire: iob native slave wires for testbench
 
-                            clk_en_rst_port: clk, clk en, rst ports
-                            clk_rst_port: clk, rst ports
+                            [*]clk_en_rst_port: clk, clk en, rst ports
+                            [*]clk_en_rst_portmap: clk, clk en, rst portmap
+                            [*]clk_rst_port: clk, rst ports
+                            [*]clk_rst_portmap: clk, rst portmap
 
-                            axi_m_port: axi full master port
-                            axi_s_port: axi full slave port
-                            axi_m_write_port: axi full master write port
-                            axi_s_write_port: axi full slave write port
-                            axi_m_read_port: axi full master read port
-                            axi_s_read_port: axi full slave read port
-                            axi_portmap: axi full portmap
-                            axi_m_portmap: axi full master portmap
-                            axi_s_portmap: axi full slave portmap
-                            axi_m_m_portmap: axi full master to master portmap
-                            axi_s_s_portmap: axi full slave to slave portmap
-                            axi_m_write_portmap: axi full master write portmap
-                            axi_s_write_portmap: axi full slave write portmap
-                            axi_m_m_write_portmap: axi full master to master write portmap
-                            axi_s_s_write_portmap: axi full slave to slave write portmap
-                            axi_m_read_portmap: axi full master read portmap
-                            axi_s_read_portmap: axi full slave read portmap
-                            axi_m_m_read_portmap: axi full master to master read portmap
-                            axi_s_s_read_portmap: axi full slave to slave read portmap
-                            axi_wire: axi full wires for interconnection
-                            axi_m_tb_wire: axi full master wires for testbench
-                            axi_s_tb_wire: axi full slave wires for testbench
+                            [*]rom_sp_port: external rom sp ports
+                            [*]rom_dp_port: external rom dp ports
+                            [*]rom_tdp_port: external rom tdp ports
+                            [*]rom_sp_portmap: external rom sp portmap
+                            [*]rom_dp_portmap: external rom dp portmap
+                            [*]rom_tdp_portmap: external rom tdp portmap
 
-                            axil_m_port: axi lite master port
-                            axil_s_port: axi lite slave port
-                            axil_m_write_port: axi lite master write port
-                            axil_s_write_port: axi lite slave write port
-                            axil_m_read_port: axi lite master read port
-                            axil_s_read_port: axi lite slave read port
-                            axil_portmap: axi lite portmap
-                            axil_m_portmap: axi lite master portmap
-                            axil_s_portmap: axi lite slave portmap
-                            axil_m_m_portmap: axi lite master to master portmap
-                            axil_s_s_portmap: axi lite slave to slave portmap
-                            axil_m_write_portmap: axi lite master write portmap
-                            axil_s_write_portmap: axi lite slave write portmap
-                            axil_m_m_write_portmap: axi lite master to master write portmap
-                            axil_s_s_write_portmap: axi lite slave to slave write portmap
-                            axil_m_read_portmap: axi lite master read portmap
-                            axil_s_read_portmap: axi lite slave read portmap
-                            axil_m_m_read_portmap: axi lite master to master read portmap
-                            axil_s_s_read_portmap: axi lite slave to slave read portmap
-                            axil_wire: axi lite wires for interconnection
-                            axil_m_tb_wire: axi lite master wires for testbench
-                            axil_s_tb_wire: axi lite slave wires for testbench
+                            [*]ram_sp_port: external ram sp ports
+                            [*]ram_sp_be_port: external ram sp be ports
+                            [*]ram_sp_portmap: external ram sp portmap
+                            [*]ram_sp_be_portmap: external ram sp be portmap
 
-                            ahb_m_port: ahb master port
-                            ahb_s_port: ahb slave port
-                            ahb_portmap: ahb portmap
-                            ahb_m_portmap: ahb master portmap
-                            ahb_s_portmap: ahb slave portmap
-                            ahb_m_m_portmap: ahb master to master portmap
-                            ahb_s_s_portmap: ahb slave to slave portmap
-                            ahb_wire: ahb wires for interconnection
-                            ahb_m_tb_wire: ahb master wires for testbench
-                            ahb_s_tb_wire: ahb slave wires for testbench
+                            [*]ram_2p_port: external ram 2p ports
+                            [*]ram_2p_be_port: external ram 2p be ports
+                            [*]ram_2p_portmap: external ram 2p portmap
+                            [*]ram_2p_be_portmap: external ram 2p be portmap
+                            [*]ram_2p_tiled_port: external ram 2p ports
+                            [*]ram_t2p_port: external ram 2p be ports
+                            [*]ram_2p_tiled_portmap: external ram 2p portmap
+                            [*]ram_t2p_portmap: external ram 2p be portmap
 
-                            apb_m_port: apb master port
-                            apb_s_port: apb slave port
-                            apb_portmap: apb portmap
-                            apb_m_portmap: apb master portmap
-                            apb_s_portmap: apb slave portmap
-                            apb_m_m_portmap: apb master to master portmap
-                            apb_s_s_portmap: apb slave to slave portmap
-                            apb_wire: apb wires for interconnection
-                            apb_m_tb_wire: apb master wires for testbench
-                            apb_s_tb_wire: apb slave wires for testbench
+                            [*]ram_dp_port: external ram dp ports
+                            [*]ram_dp_portmap: external ram dp portmap
+                            [*]ram_dp_be_port: external ram dp_be ports
+                            [*]ram_dp_be_portmap: external ram dp_be portmap
+                            [*]ram_dp_be_xil_port: external ram dp_be_xil ports
+                            [*]ram_dp_be_xil_portmap: external ram dp_be_xil portmap
+                            [*]ram_tdp_port: external ram tdp ports
+                            [*]ram_tdp_portmap: external ram tdp portmap
+                            [*]ram_tdp_be_port: external ram tdp_be ports
+                            [*]ram_tdp_be_portmap: external ram tdp_be portmap
+
+                            [*]axi_m_port: axi full master port
+                            [*]axi_s_port: axi full slave port
+                            [*]axi_m_write_port: axi full master write port
+                            [*]axi_s_write_port: axi full slave write port
+                            [*]axi_m_read_port: axi full master read port
+                            [*]axi_s_read_port: axi full slave read port
+                            [*]axi_portmap: axi full portmap
+                            [*]axi_m_portmap: axi full master portmap
+                            [*]axi_s_portmap: axi full slave portmap
+                            [*]axi_m_m_portmap: axi full master to master portmap
+                            [*]axi_s_s_portmap: axi full slave to slave portmap
+                            [*]axi_m_write_portmap: axi full master write portmap
+                            [*]axi_s_write_portmap: axi full slave write portmap
+                            [*]axi_m_m_write_portmap: axi full master to master write portmap
+                            [*]axi_s_s_write_portmap: axi full slave to slave write portmap
+                            [*]axi_m_read_portmap: axi full master read portmap
+                            [*]axi_s_read_portmap: axi full slave read portmap
+                            [*]axi_m_m_read_portmap: axi full master to master read portmap
+                            [*]axi_s_s_read_portmap: axi full slave to slave read portmap
+                            [*]axi_wire: axi full wires for interconnection
+                            [*]axi_m_tb_wire: axi full master wires for testbench
+                            [*]axi_s_tb_wire: axi full slave wires for testbench
+
+                            [*]axil_m_port: axi lite master port
+                            [*]axil_s_port: axi lite slave port
+                            [*]axil_m_write_port: axi lite master write port
+                            [*]axil_s_write_port: axi lite slave write port
+                            [*]axil_m_read_port: axi lite master read port
+                            [*]axil_s_read_port: axi lite slave read port
+                            [*]axil_portmap: axi lite portmap
+                            [*]axil_m_portmap: axi lite master portmap
+                            [*]axil_s_portmap: axi lite slave portmap
+                            [*]axil_m_m_portmap: axi lite master to master portmap
+                            [*]axil_s_s_portmap: axi lite slave to slave portmap
+                            [*]axil_m_write_portmap: axi lite master write portmap
+                            [*]axil_s_write_portmap: axi lite slave write portmap
+                            [*]axil_m_m_write_portmap: axi lite master to master write portmap
+                            [*]axil_s_s_write_portmap: axi lite slave to slave write portmap
+                            [*]axil_m_read_portmap: axi lite master read portmap
+                            [*]axil_s_read_portmap: axi lite slave read portmap
+                            [*]axil_m_m_read_portmap: axi lite master to master read portmap
+                            [*]axil_s_s_read_portmap: axi lite slave to slave read portmap
+                            [*]axil_wire: axi lite wires for interconnection
+                            [*]axil_m_tb_wire: axi lite master wires for testbench
+                            [*]axil_s_tb_wire: axi lite slave wires for testbench
+
+                            [*]ahb_m_port: ahb master port
+                            [*]ahb_s_port: ahb slave port
+                            [*]ahb_portmap: ahb portmap
+                            [*]ahb_m_portmap: ahb master portmap
+                            [*]ahb_s_portmap: ahb slave portmap
+                            [*]ahb_m_m_portmap: ahb master to master portmap
+                            [*]ahb_s_s_portmap: ahb slave to slave portmap
+                            [*]ahb_wire: ahb wires for interconnection
+                            [*]ahb_m_tb_wire: ahb master wires for testbench
+                            [*]ahb_s_tb_wire: ahb slave wires for testbench
+
+                            [*]apb_m_port: apb master port
+                            [*]apb_s_port: apb slave port
+                            [*]apb_portmap: apb portmap
+                            [*]apb_m_portmap: apb master portmap
+                            [*]apb_s_portmap: apb slave portmap
+                            [*]apb_m_m_portmap: apb master to master portmap
+                            [*]apb_s_s_portmap: apb slave to slave portmap
+                            [*]apb_wire: apb wires for interconnection
+                            [*]apb_m_tb_wire: apb master wires for testbench
+                            [*]apb_s_tb_wire: apb slave wires for testbench
                         """,
     )
 
@@ -1373,6 +2301,18 @@ def create_signal_table(interface_name):
     if interface_name.find("clk_") >= 0:
         table = make_clk_en_rst()
 
+    if interface_name.find("rom_") >= 0:
+        table = make_rom()
+
+    if interface_name.find("ram_sp_") >= 0:
+        table = make_ram_sp()
+
+    if interface_name.find("ram_2p_") >= 0 or interface_name.find("ram_t2p_") >= 0:
+        table = make_ram_2p()
+
+    if interface_name.find("ram_dp_") >= 0 or interface_name.find("ram_tdp_") >= 0:
+        table = make_ram_dp()
+
     if interface_name.find("axi_") >= 0:
         if interface_name.find("write_") >= 0:
             table = make_axi_write()
@@ -1396,26 +2336,59 @@ def create_signal_table(interface_name):
         table = make_apb()
 
 
+def default_interface_fields(if_dict):
+    # update interface dictionary fields if they are not set
+    # interface: remove prefix and keep matching supported interface name
+    # file_prefix: set to original interface prefix, if not set
+    # wire_prefix: set to original interface prefix, if not set
+    # port_prefix: set to original interface prefix, if not set
+    # Example:
+    #   input: if_dict = { "interface": "test_iob_m_port" }
+    #   output: if_dict = {
+    #             "interface": "iob_m_port",
+    #             "file_prefix": "test_",
+    #             "wire_prefix": "test_",
+    #             "port_prefix": "test_",
+    #          }
+
+    # get supported interface name
+    supported_interface = valid_interface_type(if_dict["interface"])
+    prefix = if_dict["interface"].split(supported_interface)[0]
+
+    # set prefixes if they do not exist
+    if not "file_prefix" in if_dict:
+        if_dict["file_prefix"] = prefix
+    if not "port_prefix" in if_dict:
+        if_dict["port_prefix"] = prefix
+    if not "wire_prefix" in if_dict:
+        if_dict["wire_prefix"] = prefix
+
+    # set interface to supported_interface
+    if_dict["interface"] = supported_interface
+
+    return if_dict
+
+
 #
 # Write to .vs file
 #
 
 
-# port_prefix: Prefix for ports in a portmap file. Only used for portmaps.
+# port_prefix: Prefix for ports in a portmap file. Only used for portmaps. Use PORT_PREFIX (upper case) for parameters in signal width for ports or wire.
 # wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file; Prefix for ports in a `*port.vs` file (these ports also create wires);
-# param_prefix: Prefix for parameters in signals width. Only used for ports or wires (unused for portmaps).
 def write_vs_contents(
     interface_name,
     port_prefix,
     wire_prefix,
     file_object,
-    param_prefix="",
     bus_size=1,
     bus_start=0,
 ):
     func_name = (
         interface_name.replace("axil_", "")
         .replace("clk_", "")
+        .replace("rom_", "")
+        .replace("ram_", "")
         .replace("axi_", "")
         .replace("write_", "")
         .replace("read_", "")
@@ -1423,13 +2396,23 @@ def write_vs_contents(
         .replace("apb_", "")
         .replace("ahb_", "")
     )
+
+    param_prefix = port_prefix.upper()
+
+    # add '_' prefix for func_names starting with digit
+    # (examples: 2p_port, 2p_be_portmap, 2p_tiled_port)
+    if func_name[0].isdigit():
+        func_name = f"_{func_name}"
+
     if interface_name.find("portmap") + 1:
         eval(
             func_name
             + "(port_prefix, wire_prefix, file_object, bus_start=bus_start, bus_size=bus_size)"
         )
-    else:
+    elif interface_name.find("wire") + 1:
         eval(func_name + "(wire_prefix, param_prefix, file_object, bus_size=bus_size)")
+    else:
+        eval(func_name + "(port_prefix, param_prefix, file_object, bus_size=bus_size)")
 
 
 #
@@ -1441,12 +2424,18 @@ def main():
     args = parse_arguments()
 
     # bus type
-    interface_name = args.type
-
+    if_dict = {
+        "interface": args.type,
+    }
     # port and wire prefix
-    file_prefix = args.file_prefix
-    port_prefix = args.port_prefix
-    wire_prefix = args.wire_prefix
+    if args.file_prefix:
+        if_dict["file_prefix"] = args.file_prefix
+    if args.port_prefix:
+        if_dict["port_prefix"] = args.port_prefix
+    if args.wire_prefix:
+        if_dict["wire_prefix"] = args.wire_prefix
+
+    if_dict = default_interface_fields(if_dict)
 
     # top flag
     top = args.top
@@ -1454,17 +2443,24 @@ def main():
         top_macro = "V2TEX_IO "
 
     # make AXI bus
-    create_signal_table(interface_name)
+    create_signal_table(if_dict["interface"])
 
     # open output .vs file
-    fout = open(file_prefix + interface_name + ".vs", "w")
+    fout = open(if_dict["file_prefix"] + if_dict["interface"] + ".vs", "w")
 
     # write pragma for doc production
-    if interface_name.find("port") + 1 and not interface_name.find("portmap") + 1:
-        fout.write("  //START_IO_TABLE " + port_prefix + interface_name + "\n")
+    if (
+        if_dict["interface"].find("port") + 1
+        and not if_dict["interface"].find("portmap") + 1
+    ):
+        fout.write(
+            "  //START_IO_TABLE " + if_dict["port_prefix"] + if_dict["interface"] + "\n"
+        )
 
     # call function func to generate .vs file
-    write_vs_contents(interface_name, port_prefix, wire_prefix, fout)
+    write_vs_contents(
+        if_dict["interface"], if_dict["port_prefix"], if_dict["wire_prefix"], fout
+    )
 
     fout.close()
 

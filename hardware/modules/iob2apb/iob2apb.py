@@ -16,12 +16,12 @@ class iob2apb(iob_module):
         """Create submodules list with dependencies of this module"""
         super()._create_submodules_list(
             [
-                "iob_s_port",
-                "iob_s_s_portmap",
-                "apb_m_port",
-                "iob_m_tb_wire",
+                {"interface": "iob_s_port"},
+                {"interface": "iob_s_s_portmap"},
+                {"interface": "apb_m_port"},
+                {"interface": "iob_m_tb_wire"},
                 iob_reg,
-                "clk_en_rst_portmap",
-                "clk_en_rst_port",
+                {"interface": "clk_en_rst_portmap"},
+                {"interface": "clk_en_rst_port"},
             ]
         )

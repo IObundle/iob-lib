@@ -22,7 +22,7 @@ module axis2axi_in #(
    output [         1-1:0] axis_in_ready_o,
 
    // Axi master interface
-   `include "iob_axi_m_write_port.vs"
+   `include "axi_m_write_port.vs"
 
    // External memory interfaces
    output [         1-1:0] ext_mem_w_en_o,
@@ -32,7 +32,7 @@ module axis2axi_in #(
    output [  BUFFER_W-1:0] ext_mem_r_addr_o,
    input  [AXI_DATA_W-1:0] ext_mem_r_data_i,
 
-   `include "iob_clk_en_rst_port.vs"
+   `include "clk_en_rst_port.vs"
    input rst_i
 );
 
