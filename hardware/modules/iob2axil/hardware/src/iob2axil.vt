@@ -19,7 +19,7 @@ module iob2axil #(
    `include "iob_s_port.vs"
 
    // Global signals
-   `include "iob_clk_rst_port.vs"
+   `include "clk_rst_port.vs"
 );
 
    //
