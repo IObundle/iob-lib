@@ -627,8 +627,8 @@ class iob_module:
         )  # Copy generic MAKEFILE
 
     @classmethod
-    def _copy_srcs(cls, exclude_file_list=[]):
-        """Copy module sources to the build directory from every subclass in between `ìob_module` and `cls`, inclusive.
+    def _copy_srcs(cls, exclude_file_list=[], highest_superclass=None):
+        """Copy module sources to the build directory from every subclass in between `iob_module` and `cls`, inclusive.
         The function will not copy sources from classes that have no setup_dir (empty string)
         cls: Lowest subclass
         (implicit: iob_module: highest subclass)
@@ -638,11 +638,14 @@ class iob_module:
                                        we would still use the old core name in the ignore patterns.
                                        For example, if we dont want it to generate the 'new_name_firmware.c' based on the 'old_name_firmware.c',
                                        then we should add 'old_name_firmware.c' to the ignore list.
+        :param class highest_superclass: If specified, only copy sources from this subclass and up to specified class. By default, highest_superclass=iob_module.
         """
         previously_setup_dirs = []
+        # Select between specified highest_superclass or this one (iob_module)
+        highest_superclass = highest_superclass or __class__
 
         # List of classes, starting from highest superclass (iob_module), down to lowest subclass (cls)
-        classes = cls.__mro__[cls.__mro__.index(__class__) :: -1]
+        classes = cls.__mro__[cls.__mro__.index(highest_superclass) :: -1]
 
         # Go through every subclass, starting for highest superclass to the lowest subclass
         for module_class in classes:
