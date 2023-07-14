@@ -8,7 +8,7 @@ module iob_split #(
 ) (
    `include "iob_split_i_iob_port.vs"
    `include "iob_split_o_iob_port.vs"
-   `include "iob_clk_en_rst.vs"
+   `include "clk_en_rst.vs"
 );
 
    localparam NBITS = $clog2(N) + ($clog2(N) == 0);
