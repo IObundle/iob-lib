@@ -28,7 +28,7 @@ class iob2axi(iob_module):
                 m_axi_read_m_port,
                 m_m_axi_write_portmap,
                 m_m_axi_read_portmap,
-                "clk_rst_port",
+                {"interface": "clk_rst_port"},
                 iob2axi_wr,
                 iob2axi_rd,
                 iob_fifo_sync,

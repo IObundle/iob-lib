@@ -17,7 +17,7 @@ class iob_s2f_sync(iob_module):
         super()._create_submodules_list(
             [
                 iob_sync,
-                "clk_rst_port",
-                "clk_rst_portmap",
+                {"interface": "clk_rst_port"},
+                {"interface": "clk_rst_portmap"},
             ]
         )
