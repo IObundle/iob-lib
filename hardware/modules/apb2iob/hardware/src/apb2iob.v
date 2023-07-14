@@ -14,7 +14,7 @@ module apb2iob #(
    `include "clk_en_rst_port.vs"
 
    // APB slave interface
-   `include "iob_apb_s_port.vs"
+   `include "apb_s_port.vs"
 
    // IOb master interface
    output [         1-1:0] iob_avalid_o,      //Request valid.
