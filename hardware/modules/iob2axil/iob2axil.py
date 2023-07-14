@@ -2,13 +2,6 @@ import os
 
 from iob_module import iob_module
 
-from iob_s_port import iob_s_port
-from iob_s_s_portmap import iob_s_s_portmap
-from axil_m_port import axil_m_port
-from axil_m_portmap import axil_m_portmap
-from iob_m_tb_wire import iob_m_tb_wire
-from axil_wire import axil_wire
-
 
 class iob2axil(iob_module):
     name = "iob2axil"
@@ -21,12 +14,12 @@ class iob2axil(iob_module):
         """Create submodules list with dependencies of this module"""
         super()._create_submodules_list(
             [
-                iob_s_port,
-                iob_s_s_portmap,
-                axil_m_port,
-                axil_m_portmap,
-                iob_m_tb_wire,
-                axil_wire,
                 {"interface": "clk_rst_port"},
+                {"interface": "iob_s_port"},
+                {"interface": "iob_s_s_portmap"},
+                {"interface": "axil_m_port"},
+                {"interface": "axil_m_portmap"},
+                {"interface": "iob_m_tb_wire"},
+                {"interface": "axil_wire"},
             ]
         )
