@@ -470,17 +470,16 @@ class iob_module:
         Example submodule_list:
             [
             # Generate interfaces with if_gen. Check out the `__generate()` method for details.
-            # Generate an `axi_m_portmap` interface (using a string):
-            "axi_m_portmap",
-            # Generate an `axi_s_portmap` interface for the `simulation` purpose (using a tuple with a string):
-            ("axi_s_portmap", {"purpose": "simulation"}),
+            # Generate an `axi_m_portmap` interface (using a simple dictionary):
+            {"interface": "axi_m_portmap"},
+            # Generate an `axi_s_portmap` interface for the `simulation` purpose (using a tuple with a simple dictionary):
+            ({"interface": "axi_s_portmap"}, {"purpose": "simulation"}),
             # Generate an `iob_s_port` interface with custom prefixes (using a dictionary):
             {
                 "file_prefix": "example_file_prefix_",
                 "interface": "iob_s_port",
                 "wire_prefix": "example_wire_prefix_",
                 "port_prefix": "example_port_prefix_",
-                "param_prefix": "example_parameter_prefix_",
             },
             # Set up a submodule
             iob_picorv32,
@@ -511,8 +510,8 @@ class iob_module:
                 setup_options["purpose"] = cls.get_setup_purpose()
 
             # Check if should generate with if_gen or setup a submodule.
-            if type(_submodule) == str or type(_submodule) == dict:
-                # String or dictionary: generate interface with if_gen
+            if type(_submodule) == dict:
+                # Dictionary: generate interface with if_gen
                 cls.__generate(_submodule, **setup_options)
             elif issubclass(_submodule, iob_module):
                 # Subclass of iob_module: setup the module
@@ -536,15 +535,14 @@ class iob_module:
     @classmethod
     def __generate(cls, vs_name, purpose="hardware"):
         """Generate a Verilog header with `if_gen.py`.
-        vs_name: Either a string or a dictionary describing the interface to generate.
-                 Example string: "iob_wire"
-                 Example dictionary:
+        vs_name: A dictionary describing the interface to generate.
+                 Example simple dictionary: {"interface": "iob_wire"}
+                 Example full dictionary:
                        {
                            "file_prefix": "iob_bus_0_2_", # Prefix to include in the generated file name
                            "interface": "axi_m_portmap",  # Type of interface/wires to generate. Will also be part of the filename.
                            "wire_prefix": "",             # Prefix to include in the generated wire names
                            "port_prefix": "",             # Prefix to include in the generated port names
-                           "param_prefix": "",            # Optional. Prefix to include in parameters of the width of the generated ports/wires.
                            "bus_start": 0,                # Optional. Starting index of the bus of wires that we are connecting.
                            "bus_size": 2,                 # Optional. Size of the bus of wires that we are creating/connecting.
                        }
@@ -559,7 +557,6 @@ class iob_module:
                            "interface": "iob_s_port",
                            "wire_prefix": "example_wire_prefix_",
                            "port_prefix": "example_port_prefix_",
-                           "param_prefix": "example_parameter_prefix_",
                        })
         """
         dest_dir = os.path.join(cls.build_dir, cls.get_purpose_dir(purpose))
