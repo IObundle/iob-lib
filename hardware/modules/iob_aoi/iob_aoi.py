@@ -4,6 +4,7 @@ from iob_module import iob_module
 
 from iob_add import iob_add
 from iob_or import iob_or
+from iob_inv import iob_inv
 
 
 class iob_aoi(iob_module):
@@ -19,5 +20,6 @@ class iob_aoi(iob_module):
             [
                 iob_add,
                 iob_or,
+                iob_inv,
             ]
         )
