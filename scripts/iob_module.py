@@ -54,6 +54,29 @@ class iob_module:
         "fpga": "hardware/fpga/src",
     }
 
+    def __init__(
+        self,
+        name="",
+        description="default description",
+        parameters={},
+    ):
+        ''' Constructor to build verilog instances.
+        :param str name: Verilog instance name
+        :param str description: Verilog instance description
+        :param dict parameters: Verilog parameters
+        '''
+        assert (
+            self._setup_purpose
+        ), f"{iob_colors.FAIL}Module {self.name} has not been setup yet!{iob_colors.ENDC}"
+
+        if not name:
+            name = f"{self.name}_0"
+        self.instance_name = name  # Name of the Verilog instance
+        self.instance_description = description  # Description of the Verilog instance
+        self.instance_parameters = (
+            parameters  # Dictionary of Verilog parameters to pass to this instance
+        )
+
     ###############################################################
     # Methods NOT to be overriden by subclasses
     ###############################################################
@@ -108,22 +131,15 @@ class iob_module:
         cls._specific_setup()
         cls._post_setup()
 
-    # TODO: Deprecate this method. Instead use constructors to instantiate these classes.
-    # Note: The class attibutes will be read only! as they refer to properties of the "type" of verilog module.
-    #       However, the instance attributes can be changed. Each instance will essentially have the same attributes as the `iob_verilog_instance` class. That class will also be deprecated with this modification.
-    #
-    # Public method to create a Verilog instance of this module
-    # name: Name of the Verilog instance.
-    # *args and **kwargs: Other arguments for the Verilog instance.
-    # Returns an `iob_verilog_instance` object representing a new Verilog instance of the module calling this method.
+    # DEPRECATED METHOD
     @classmethod
     def instance(cls, name="", *args, **kwargs):
-        assert (
-            cls._setup_purpose
-        ), f"{iob_colors.FAIL}Module {cls.name} has not been setup yet!{iob_colors.ENDC}"
-
-        if not name:
-            name = f"{cls.name}_0"
+        """Deprecated method to create Verilog instances.
+        Raises exception if called.
+        """
+        raise Exception(
+            f"{iob_colors.FAIL}The `instance()` method is deprecated. Use the class constructor inherited from `iob_module` to create Verilog instances.{iob_colors.ENDC}"
+        )
 
         # Return a new iob_verilog_instance object with these attributes that describe the Verilog instance and module.
         return iob_verilog_instance(name, *args, module=cls, **kwargs)

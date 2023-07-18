@@ -262,10 +262,10 @@ def get_verilog_mapping(map_obj):
 def get_peripheral_port_mapping(peripheral_instance, port_name):
     # If IO dictionary (with mapping) does not exist for this peripheral, use default wire name
     if "io" not in peripheral_instance.__dict__:
-        return f"{peripheral_instance.name}_{port_name}"
+        return f"{peripheral_instance.instance_name}_{port_name}"
 
     assert (
         port_name in peripheral_instance.io
-    ), f"{iob_colors.FAIL}Port {port_name} of {peripheral_instance.name} not mapped!{iob_colors.ENDC}"
+    ), f"{iob_colors.FAIL}Port {port_name} of {peripheral_instance.instance_name} not mapped!{iob_colors.ENDC}"
     # IO mapping dictionary exists, get verilog string for that mapping
     return get_verilog_mapping(peripheral_instance.io[port_name])
