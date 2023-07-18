@@ -33,6 +33,7 @@ class iob_module:
     regs = None  # List of registers for this module
     ios = None  # List of I/O for this module
     block_groups = None  # List of block groups for this module. Used for documentation.
+    wire_list = None  # List of internal wires of the Verilog module. Used to interconnect module components.
     is_top_module = False  # Select if this module is the top module
 
     _initialized_attributes = (
@@ -71,11 +72,9 @@ class iob_module:
 
         if not name:
             name = f"{self.name}_0"
-        self.instance_name = name  # Name of the Verilog instance
-        self.instance_description = description  # Description of the Verilog instance
-        self.instance_parameters = (
-            parameters  # Dictionary of Verilog parameters to pass to this instance
-        )
+        self.instance_name = name
+        self.instance_description = description
+        self.instance_parameters = parameters
 
     ###############################################################
     # Methods NOT to be overriden by subclasses
@@ -175,6 +174,7 @@ class iob_module:
         cls.ios = []
         cls.block_groups = []
         cls.submodule_list = []
+        cls.wire_list = []
 
         cls._init_attributes()
 
