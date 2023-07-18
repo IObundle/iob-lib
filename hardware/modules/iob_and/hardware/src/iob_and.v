@@ -3,7 +3,7 @@
 
 module iob_and
   #(
-    parameter W = 21
+    parameter W = 21,
     parameter N = 21
 ) (
    input [N*W-1:0] in_i,
