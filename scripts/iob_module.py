@@ -72,9 +72,9 @@ class iob_module:
 
         if not name:
             name = f"{self.name}_0"
-        self.instance_name = name
-        self.instance_description = description
-        self.instance_parameters = parameters
+        self.name = name
+        self.description = description
+        self.parameters = parameters
 
     ###############################################################
     # Methods NOT to be overriden by subclasses

@@ -57,8 +57,8 @@ def generate_blocks_tex(block_groups, out_dir):
         for instance in block_group.blocks:
             tex_table.append(
                 [
-                    instance.instance_name.replace("_", "\\_"),
-                    instance.instance_description.replace("_", "\\_"),
+                    instance.name.replace("_", "\\_"),
+                    instance.description.replace("_", "\\_"),
                 ]
             )
 

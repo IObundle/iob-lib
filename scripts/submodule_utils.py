@@ -185,10 +185,10 @@ def get_peripheral_ios(peripherals_list):
         # Make sure we have a hw_module for this peripheral type
         # assert check_module_in_modules_list(instance['type'],submodules["hw_setup"]["modules"]), f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
         # Only insert ports of this peripheral type if we have not done so before
-        if instance.name not in port_list:
+        if instance.__class__.name not in port_list:
             # Extract only PIO signals from the peripheral (no reserved/known signals)
-            port_list[instance.name] = get_pio_signals(
-                get_module_io(instance.ios, instance.confs, instance.instance_name)
+            port_list[instance.__class__.name] = get_pio_signals(
+                get_module_io(instance.ios, instance.confs, instance.name)
             )
 
     ios_list = []
@@ -196,9 +196,9 @@ def get_peripheral_ios(peripherals_list):
     for instance in peripherals_list:
         ios_list.append(
             {
-                "name": instance.instance_name,
-                "descr": f"{instance.instance_name} interface signals",
-                "ports": port_list[instance.name],
+                "name": instance.name,
+                "descr": f"{instance.name} interface signals",
+                "ports": port_list[instance.__class__.name],
                 "ios_table_prefix": True,
             }
         )
@@ -217,15 +217,15 @@ def iob_soc_peripheral_setup(python_module):
         # Insert peripheral instance parameters in system parameters
         # This causes the system to have a parameter for each parameter of each peripheral instance
         for instance in peripherals_list:
-            for parameter in params_list[instance.name]:
+            for parameter in params_list[instance.__class__.name]:
                 parameter_to_append = parameter.copy()
                 # Override parameter value if user specified a 'parameters' dictionary with an override value for this parameter.
-                if parameter["name"] in instance.instance_parameters:
-                    parameter_to_append["val"] = instance.instance_parameters[parameter["name"]]
+                if parameter["name"] in instance.parameters:
+                    parameter_to_append["val"] = instance.parameters[parameter["name"]]
                 # Add instance name prefix to the name of the parameter. This makes this parameter unique to this instance
                 parameter_to_append[
                     "name"
-                ] = f"{instance.instance_name}_{parameter_to_append['name']}"
+                ] = f"{instance.name}_{parameter_to_append['name']}"
                 python_module.confs.append(parameter_to_append)
 
         # Get peripheral related macros
@@ -598,13 +598,13 @@ def get_peripherals_ports_params_top(peripherals_list):
     params_list = {}
     top_list = {}
     for instance in peripherals_list:
-        if instance.name not in port_list:
+        if instance.__class__.name not in port_list:
             # Append instance IO, parameters, and top name
-            port_list[instance.name] = get_module_io(instance.ios)
-            params_list[instance.name] = list(
+            port_list[instance.__class__.name] = get_module_io(instance.ios)
+            params_list[instance.__class__.name] = list(
                 i for i in instance.confs if i["type"] in ["P", "F"]
             )
-            top_list[instance.name] = instance.name
+            top_list[instance.__class__.name] = instance.__class__.name
     return port_list, params_list, top_list
 
 
@@ -636,12 +636,12 @@ def get_periphs_id_as_macros(peripherals_list):
     for idx, instance in enumerate(peripherals_list, 1):
         macro_list.append(
             {
-                "name": instance.instance_name,
+                "name": instance.name,
                 "type": "M",
                 "val": str(idx),
                 "min": "0",
                 "max": "NA",
-                "descr": f"ID of {instance.instance_name} peripheral",
+                "descr": f"ID of {instance.name} peripheral",
             }
         )
     return macro_list
