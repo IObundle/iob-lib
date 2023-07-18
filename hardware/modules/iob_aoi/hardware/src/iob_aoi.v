@@ -14,7 +14,7 @@ module iob_aoi
 	wire or_out;
 
 	iob_and #(
-		.W(1)
+		.W(1),
 		.N(2)
 	) iob_and_ab (
 		.in_i({a_i,b_i}),
@@ -22,7 +22,7 @@ module iob_aoi
 	);
 
 	iob_and #(
-		.W(1)
+		.W(1),
 		.N(2)
 	) iob_and_cd (
 		.in_i({c_i,d_i}),
@@ -30,7 +30,7 @@ module iob_aoi
 	);
 
 	iob_or #(
-		.W(1)
+		.W(1),
 		.N(2)
 	) iob_or_abcd (
 		.in_i({aab,cad}),
