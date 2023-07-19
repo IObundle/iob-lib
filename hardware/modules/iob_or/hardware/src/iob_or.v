@@ -10,15 +10,17 @@ module iob_or
    output [W-1:0]  out_o
 );
 
-   wire [(N-1)*W-1:0] and_vec;
+   wire [N*W-1:0] or_vec;
    
+   assign or_vec[0 +: W] = in_i[0 +: W];
+
    genvar i;
    generate
       for (i = 1; i < N; i = i + 1) begin : gen_mux
-         assign and_vec[i*W +: W] = in_i[i*W +: W] | and_vec[(i-1)*W +: W];
+         assign or_vec[i*W +: W] = in_i[i*W +: W] | or_vec[(i-1)*W +: W];
       end
    endgenerate
 
-   assign out_o = and_vec[(N-1)*W +: W];
+   assign out_o = or_vec[(N-1)*W +: W];
 
 endmodule
