@@ -10,8 +10,10 @@ module iob_and
    output [W-1:0]  out_o
 );
 
-   wire [(N-1)*W-1:0] and_vec;
+   wire [N*W-1:0] and_vec;
    
+   assign and_vec[0 +: W] = in_i[0 +: W];
+
    genvar i;
    generate
       for (i = 1; i < N; i = i + 1) begin : gen_mux

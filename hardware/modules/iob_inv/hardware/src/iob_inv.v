@@ -9,6 +9,8 @@ module iob_inv
    output [W-1:0]  out_o
 );
 
+   wire [W-1:0]  out_o;
+
    assign out_o = ~in_i;
 
 endmodule
