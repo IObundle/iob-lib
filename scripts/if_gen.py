@@ -2374,8 +2374,8 @@ def default_interface_fields(if_dict):
 #
 
 
-# port_prefix: Prefix for ports in a portmap file. Only used for portmaps. Use PORT_PREFIX (upper case) for parameters in signal width for ports or wire.
-# wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file; Prefix for ports in a `*port.vs` file (these ports also create wires);
+# port_prefix: Prefix for ports in a portmap file; Prefix for ports in a `*port.vs` file; Use PORT_PREFIX (upper case) for parameters in signal width for ports or wire.
+# wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file;
 def write_vs_contents(
     interface_name,
     port_prefix,

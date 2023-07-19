@@ -134,8 +134,8 @@ def generate_ios_header(ios, top_module, out_dir):
             if_gen.create_signal_table(if_name)
             if_gen.write_vs_contents(
                 if_name,
-                "",
                 f"{if_name+'_' if ios_table_prefix else ''}{if_prefix}",
+                "",
                 f_io,
             )
         else:

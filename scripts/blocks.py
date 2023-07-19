@@ -24,22 +24,22 @@ def generate_blocks_list_tex(block_groups, out_dir):
   \centering
   \\begin{tabularx}{\\textwidth}{|l|X|}
     
-    \hline
+    \\hline
     \\rowcolor{iob-green}
-    {\\bf Name} & {\\bf Description}  \\\\ \hline \hline
+    {\\bf Name} & {\\bf Description}  \\\\ \\hline \\hline
 
-    \input """
+    \\input """
             + block_group.name
             + """_module_tab
  
-  \end{tabularx}
-  \caption{"""
+  \\end{tabularx}
+  \\caption{"""
             + block_group.description
             + """}
-  \label{"""
+  \\label{"""
             + block_group.name
             + """_module_tab:is}
-\end{table}
+\\end{table}
 """
         )
 
@@ -57,8 +57,8 @@ def generate_blocks_tex(block_groups, out_dir):
         for instance in block_group.blocks:
             tex_table.append(
                 [
-                    instance.name.replace("_", "\_"),
-                    instance.description.replace("_", "\_"),
+                    instance.name.replace("_", "\\_"),
+                    instance.description.replace("_", "\\_"),
                 ]
             )
 
