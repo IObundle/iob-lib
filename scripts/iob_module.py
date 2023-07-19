@@ -8,7 +8,6 @@ import if_gen
 from mk_configuration import config_build_mk
 import build_srcs
 import verilog_tools
-from iob_verilog_instance import iob_verilog_instance
 import mkregs
 import blocks as blocks_lib
 import ios as ios_lib
@@ -140,8 +139,8 @@ class iob_module:
             f"{iob_colors.FAIL}The `instance()` method is deprecated. Use the class constructor inherited from `iob_module` to create Verilog instances.{iob_colors.ENDC}"
         )
 
-        # Return a new iob_verilog_instance object with these attributes that describe the Verilog instance and module.
-        return iob_verilog_instance(name, *args, module=cls, **kwargs)
+        # Return None, since iob_verilog_instance class/objects do not exist
+        return None
 
     @classmethod
     def init_attributes(cls):
