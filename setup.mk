@@ -5,6 +5,10 @@
 
 SHELL=bash
 
+#Verify if we are in a nix-shell
+ifeq ($(NIX_STORE),)
+$(error Please run this command from a nix-shell)
+endif
 
 help:
 	@echo The following targets are available:
