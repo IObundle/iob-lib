@@ -46,8 +46,8 @@ module iob_iob2wishbone #(
    assign wb_data_o   = iob_avalid_i ? iob_wdata_i : iob_wdata_r;
    assign wb_select_o = iob_avalid_i ? wb_select : wb_select_r;
    assign wb_we_o     = iob_avalid_i ? wb_we : wb_we_r;
-   assign wb_cyc_o    = wb_stb_o;
-   assign wb_stb_o    = iob_avalid_i ? iob_avalid_i : iob_avalid_r;
+   assign wb_cyc_o    = iob_avalid_i ? iob_avalid_i : iob_avalid_r;
+   assign wb_stb_o    = wb_cyc_o;
 
    assign wb_select   = wb_we ? iob_wstrb_i : (RB_MASK) << (iob_addr_i[1:0]);
    assign wb_we       = |iob_wstrb_i;

@@ -38,12 +38,12 @@ module iob_wishbone2iob #(
    wire [  DATA_W-1:0] wb_data_mask;
 
    // Logic
-   assign iob_avalid_o  = (avalid) & (~wb_ack_o);  // (avalid)^(wb_ack_o); should also work
+   assign iob_avalid_o  = avalid;
    assign iob_address_o = wb_addr_i;
    assign iob_wdata_o   = wb_data_i;
    assign iob_wstrb_o   = wstrb;
 
-   assign avalid        = wb_stb_i & wb_cyc_i;
+   assign avalid        = (wb_stb_i & wb_cyc_i) & (~avalid_r);
    assign wstrb         = wb_we_i ? wb_select_i : 4'h0;
 
    assign wb_data_o = (iob_rdata_i) & (wb_data_mask);
@@ -59,9 +59,9 @@ module iob_wishbone2iob #(
       .RST_VAL(0)
    ) iob_reg_avalid (
       `include "clk_en_rst_portmap.vs"
-      .rst_i (1'b0),
-      .en_i  (1'b1),
-      .data_i(iob_avalid_o),
+      .rst_i (~wb_stb_i & avalid_r),
+      .en_i  (avalid),
+      .data_i(avalid),
       .data_o(avalid_r)
    );
    iob_reg_re #(
