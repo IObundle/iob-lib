@@ -28,6 +28,7 @@ module iob_wishbone2iob #(
    // IOb auxiliar wires
    wire                avalid;
    wire                avalid_r;
+   wire                rst_avalid;
    wire [DATA_W/8-1:0] wstrb;
    wire [  DATA_W-1:0] rdata_r;
    wire                wack;
@@ -44,6 +45,7 @@ module iob_wishbone2iob #(
    assign iob_wstrb_o   = wstrb;
 
    assign avalid        = (wb_stb_i & wb_cyc_i) & (~avalid_r);
+   assign rst_avalid    = (~wb_stb_i) & avalid_r;
    assign wstrb         = wb_we_i ? wb_select_i : 4'h0;
 
    assign wb_data_o = (iob_rdata_i) & (wb_data_mask);
@@ -59,7 +61,7 @@ module iob_wishbone2iob #(
       .RST_VAL(0)
    ) iob_reg_avalid (
       `include "clk_en_rst_portmap.vs"
-      .rst_i (~wb_stb_i & avalid_r),
+      .rst_i (rst_avalid),
       .en_i  (avalid),
       .data_i(avalid),
       .data_o(avalid_r)
