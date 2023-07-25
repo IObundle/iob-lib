@@ -23,6 +23,7 @@ class iob_module:
 
     # Standard attributes common to all iob-modules
     name = "iob_module"  # Verilog module name (not instance name)
+    csr_if = "iob"
     version = "1.0"  # Module version
     previous_version = None  # Module version
     flows = ""  # Flows supported by this module
