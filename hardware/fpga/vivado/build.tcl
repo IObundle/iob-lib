@@ -1,11 +1,12 @@
 #extract cli args
 set NAME [lindex $argv 0]
-set BOARD [lindex $argv 1]
-set VSRC [lindex $argv 2]
-set VIP [lindex $argv 3]
-set IS_FPGA [lindex $argv 4]
-set USE_EXTMEM [lindex $argv 5]
-set N_INTERCONNECT_SLAVES [lindex $argv 6]
+set CSR_IF [lindex $argv 1]
+set BOARD [lindex $argv 2]
+set VSRC [lindex $argv 3]
+set VIP [lindex $argv 4]
+set IS_FPGA [lindex $argv 5]
+set USE_EXTMEM [lindex $argv 6]
+set N_INTERCONNECT_SLAVES [lindex $argv 7]
 
 #verilog sources
 foreach file [split $VSRC \ ] {
@@ -44,6 +45,9 @@ if { $IS_FPGA == "1" } {
     puts "Synthesizing for FPGA"
     read_xdc vivado/$BOARD/$NAME\_dev.sdc
     read_xdc ../src/$NAME.sdc
+    if {[file exists "../src/$NAME\_$CSR_IF.sdc"]} {
+        read_xdc ../src/$NAME\_$CSR_IF.sdc
+    }
     if {[file exists "vivado/$NAME\_tool.sdc"]} {
         read_xdc vivado/$NAME\_tool.sdc
     }

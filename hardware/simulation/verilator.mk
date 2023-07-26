@@ -2,7 +2,7 @@ VTOP?=$(NAME)
 
 VFLAGS+=--cc --exe -I. -I../src -Isrc --top-module $(VTOP)
 VFLAGS+=-Wno-lint --Wno-UNOPTFLAT
-VFLAGS+=--timing
+VFLAGS+=--no-timing
 # Include embedded headers
 VFLAGS+=-CFLAGS "-I../../../software/src -I../../../software"
 

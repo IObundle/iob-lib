@@ -22,8 +22,6 @@ PYTHON_DIR=$(LIB_DIR)/scripts
 
 PYTHON_EXEC:=/usr/bin/env python3 -B
 
-#submodule directories DEPRECATED
-#$(foreach entry, $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_core_submodules_dirs), $(eval $(entry)))
 
 # establish build dir paths
 BUILD_DIR := $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/bootstrap.py $(TOP_MODULE_NAME) $(SETUP_ARGS) -f get_build_dir -s $(PROJECT_ROOT))
