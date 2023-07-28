@@ -625,6 +625,9 @@ class mkregs:
         fswhdr.write(f"#define H_{core_prefix}SWREG_H\n\n")
         fswhdr.write("#include <stdint.h>\n\n")
 
+        fswhdr.write("//used address space width\n")
+        fswhdr.write(f"#define  {core_prefix}SWREG_ADDR_W {self.core_addr_w}\n\n")
+
         fswhdr.write("//Addresses\n")
         for row in table:
             name = row["name"]
