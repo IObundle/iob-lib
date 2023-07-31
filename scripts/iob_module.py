@@ -66,8 +66,9 @@ class iob_module:
         :param str description: Verilog instance description
         :param dict parameters: Verilog parameters
         '''
+        # Assert that we have previously setup this module (except for iob_module)
         assert (
-            self._setup_purpose
+            self.__class__.name == "iob_module" or self._setup_purpose
         ), f"{iob_colors.FAIL}Module {self.name} has not been setup yet!{iob_colors.ENDC}"
 
         if not name:
@@ -344,26 +345,29 @@ class iob_module:
             }
             cls.regs.append(general_regs_table)
 
-        # Auto add 'VERSION' register in 'general' registers table if it doesn't exist
-        # If it does exist, give an error
-        for reg in general_regs_table["regs"]:
-            if reg["name"] == "VERSION":
-                raise Exception(
-                    top + ": Register 'VERSION' is reserved. Please remove it."
+        # Add 'VERSION' register if this is the first time we are setting up this core
+        # (The register will already be present on subsequent setups)
+        if len(cls._setup_purpose) < 2:
+            # Auto add 'VERSION' register in 'general' registers table if it doesn't exist
+            # If it does exist, give an error
+            for reg in general_regs_table["regs"]:
+                if reg["name"] == "VERSION":
+                    raise Exception(
+                        cls.name + ": Register 'VERSION' is reserved. Please remove it."
+                    )
+            else:
+                general_regs_table["regs"].append(
+                    {
+                        "name": "VERSION",
+                        "type": "R",
+                        "n_bits": 16,
+                        "rst_val": build_srcs.version_str_to_digits(cls.version),
+                        "addr": -1,
+                        "log2n_items": 0,
+                        "autologic": True,
+                        "descr": "Product version.  This 16-bit register uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234.",
+                    }
                 )
-        else:
-            general_regs_table["regs"].append(
-                {
-                    "name": "VERSION",
-                    "type": "R",
-                    "n_bits": 16,
-                    "rst_val": build_srcs.version_str_to_digits(cls.version),
-                    "addr": -1,
-                    "log2n_items": 0,
-                    "autologic": True,
-                    "descr": "Product version.  This 16-bit register uses nibbles to represent decimal numbers using their binary values. The two most significant nibbles represent the integral part of the version, and the two least significant nibbles represent the decimal part. For example V12.34 is represented by 0x1234.",
-                }
-            )
 
         # Create an instance of the mkregs class inside the mkregs module
         # This instance is only used locally, not affecting status of mkregs imported in other functions/modules
