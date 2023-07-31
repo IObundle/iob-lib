@@ -1,7 +1,12 @@
+set TOP [lindex $argv 0]
+set CSR_IF [lindex $argv 1]
 
-set WS alint/IOB_CORE_NAME_ws
-set PRJ IOB_CORE_NAME_prj
-set TOP IOB_CORE_NAME
+puts "TOP: $TOP"
+puts "CSR_IF: $CSR_IF"
+
+set WS alint/$TOP\_ws
+set PRJ $TOP\_prj
+
 
 if {![ file exists $WS.alintws ]} {
    workspace.create $WS
@@ -20,11 +25,11 @@ puts "Reading files"
 #includes
 project.pref.vlogdirs -path ../src/
 
-workspace.file.add -destination $PRJ -f IOB_CORE_NAME_files.list
+workspace.file.add -destination $PRJ -f $TOP\_files.list
 
 # Open the sdc files for reading
 set sdcfile1 [open "../syn/umc130/$TOP\_dev.sdc" "r"]
-set sdcfile2 [open "../src/$TOP\_wrapper.sdc" "r"]
+set sdcfile2 [open "../src/$TOP.sdc" "r"]
 set sdcfile3 [open "../syn/$TOP\_tool.sdc" "r"]
 
 # Open the output file for writing
@@ -49,7 +54,7 @@ close $outfile
 
 workspace.file.add -destination $PRJ merged.sdc
 
-project.pref.toplevels -top $TOP
+project.pref.toplevels -top $TOP\_$CSR_IF
 
 project.pref.vlogstandard -format sv2005
 

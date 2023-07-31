@@ -3,9 +3,6 @@
 # This file is run as a makefile to setup a build directory for an IP core
 #
 
-SHELL=bash
-
-
 help:
 	@echo The following targets are available:
 	@echo "  setup:  Setup the build directory"
