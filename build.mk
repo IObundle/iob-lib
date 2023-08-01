@@ -3,9 +3,6 @@
 # This file is copied to the root of the build directory and becomes the top Makefile.
 #
 
-SHELL:=bash
-export
-
 include config_build.mk
 
 # default FPGA board
@@ -16,17 +13,17 @@ help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  fw-build          to build the firmware"
 	@echo "  fw-clean          to clean the firmware"
-	@echo "  pc-emul 				   to build the emulator for PC"
+	@echo "  pc-emul           to build the emulator for PC"
 	@echo "  pc-emul-clean     to clean the emulator for PC"
 	@echo "  pc-emul-run       to run the emulator for PC"
 	@echo "  lint-run          to run the linter"
 	@echo "  lint-clean        to clean the linter"
-	@echo "  lint-test	       to run the linter test"
+	@echo "  lint-test	   to run the linter test"
 	@echo "  sim-build         to build the RTL simulator"
 	@echo "  sim-clean         to clean the RTL simulator"
 	@echo "  sim-run           to run the RTL simulator"
 	@echo "  sim-test          to run the RTL simulator test"
-	@echo "  sim-waves	       to run the RTL simulator with waves"
+	@echo "  sim-waves	   to run the RTL simulator with waves"
 	@echo "  sim-debug         to print important simulation Makefile variables"
 	@echo "  cov-test          to run the RTL simulator test with coverage"
 	@echo "  fpga-build        to build the RTL simulator"
@@ -40,9 +37,9 @@ help:
 	@echo "  doc-clean         to clean the RTL simulator"
 	@echo "  doc-run           to run the RTL simulator"
 	@echo "  doc-test          to run the RTL simulator test"
-	@echo "  test 		         to run all tests"
-	@echo "  ptest 		         to run all production tests"
-	@echo "  dtest 		         to run all delivery tests"
+	@echo "  test 		   to run all tests"
+	@echo "  ptest 		   to run all production tests"
+	@echo "  dtest 		   to run all delivery tests"
 	@echo "  debug             to print important Makefile variables"
 	@echo "  clean             to clean all the build files"
 
@@ -140,7 +137,8 @@ fpga-run: fw-build
 fpga-test: fw-build
 	make -C $(FPGA_DIR) test
 
-fpga-debug: 
+fpga-debug:
+	echo "BOARD=$(BOARD)"
 	make -C $(FPGA_DIR) debug
 
 fpga-clean:

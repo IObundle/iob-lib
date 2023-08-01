@@ -1,5 +1,4 @@
 `timescale 1 ns / 1 ps
-`include "iob_utils.vh"
 
 module iob_regfile_2p #(
    parameter N       = 0,           //number of registers
