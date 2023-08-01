@@ -248,8 +248,6 @@ class mkregs:
                         f.write(f"wire {name}_ren;\n")
                 if not auto:
                     f.write(f"wire {name}_ready;\n")
-        f.write(f"wire iob_ready_nxt;\n")
-        f.write(f"wire iob_rvalid_nxt;\n")
         f.write("\n")
 
     # generate portmap for swreg instance in top module
