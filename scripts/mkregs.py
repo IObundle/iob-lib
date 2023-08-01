@@ -150,10 +150,10 @@ class mkregs:
             f.write(f"  .RST_VAL({rst_val_str}),\n")
             f.write('  .CLKEDGE("posedge")\n')
             f.write(f") {name}_datareg (\n")
-            f.write("  .clk_i (clk_i),\n")
+            f.write("  .clk_i  (clk_i),\n")
+            f.write("  .cke_i  (cke_i),\n")
             f.write("  .arst_i (arst_i),\n")
-            f.write("  .cke_i (cke_i),\n")
-            f.write(f"  .en_i ({name}_wen),\n")
+            f.write(f"  .en_i   ({name}_wen),\n")
             f.write(f"  .data_i ({name}_wdata),\n")
             f.write(f"  .data_o ({name}_o)\n")
             f.write(");\n")
@@ -193,18 +193,21 @@ class mkregs:
             name = row["name"]
             n_bits = row["n_bits"]
             auto = row["autologic"]
-            if row["type"] == "W":
-                if auto:
-                    f.write(f"  output [{self.verilog_max(n_bits,1)}-1:0] {name}_o,\n")
-                else:
-                    f.write(f"  output {name}_wen_o,\n")
-            elif row["type"] == "R":
-                f.write(f"  input [{self.verilog_max(n_bits,1)}-1:0] {name}_i,\n")
+
+            # VERSION is not a register, it is an internal constant
+            if name != "VERSION":
+                if row["type"] == "W":
+                    if auto:
+                        f.write(f"  output [{self.verilog_max(n_bits,1)}-1:0] {name}_o,\n")
+                    else:
+                        f.write(f"  output {name}_wen_o,\n")
+                elif row["type"] == "R":
+                    f.write(f"  input [{self.verilog_max(n_bits,1)}-1:0] {name}_i,\n")
+                    if not auto:
+                        f.write(f"  output {name}_ren_o,\n")
+                        f.write(f"  input {name}_rvalid_i,\n")
                 if not auto:
-                    f.write(f"  output {name}_ren_o,\n")
-                    f.write(f"  input {name}_rvalid_i,\n")
-            if not auto:
-                f.write(f"  input {name}_ready_i,\n")
+                    f.write(f"  input {name}_ready_i,\n")
 
         f.write(f"  output iob_ready_nxt_o,\n")
         f.write(f"  output iob_rvalid_nxt_o,\n")
@@ -231,18 +234,20 @@ class mkregs:
             n_bits = row["n_bits"]
             auto = row["autologic"]
 
-            if row["type"] == "W":
-                if auto:
+            # VERSION is not a register, it is an internal constant
+            if name != "VERSION":
+                if row["type"] == "W":
+                    if auto:
+                        f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name};\n")
+                    else:
+                        f.write(f"wire {name}_wen;\n")
+                elif row["type"] == "R":
                     f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name};\n")
-                else:
-                    f.write(f"wire {name}_wen;\n")
-            elif row["type"] == "R":
-                f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name};\n")
-                if not row["autologic"]:
-                    f.write(f"wire {name}_rvalid;\n")
-                    f.write(f"wire {name}_ren;\n")
-            if not auto:
-                f.write(f"wire {name}_ready;\n")
+                    if not row["autologic"]:
+                        f.write(f"wire {name}_rvalid;\n")
+                        f.write(f"wire {name}_ren;\n")
+                if not auto:
+                    f.write(f"wire {name}_ready;\n")
         f.write(f"wire iob_ready_nxt;\n")
         f.write(f"wire iob_rvalid_nxt;\n")
         f.write("\n")
@@ -253,18 +258,20 @@ class mkregs:
             name = row["name"]
             auto = row["autologic"]
 
-            if row["type"] == "W":
-                if auto:
-                    f.write(f"  .{name}_o({name}),\n")
+            # VERSION is not a register, it is an internal constant
+            if name != "VERSION":
+                if row["type"] == "W":
+                    if auto:
+                        f.write(f"  .{name}_o({name}),\n")
+                    else:
+                        f.write(f"  .{name}_wen_o({name}_wen),\n")
                 else:
-                    f.write(f"  .{name}_wen_o({name}_wen),\n")
-            else:
-                f.write(f"  .{name}_i({name}),\n")
+                    f.write(f"  .{name}_i({name}),\n")
+                    if not auto:
+                        f.write(f"  .{name}_ren_o({name}_ren),\n")
+                        f.write(f"  .{name}_rvalid_i({name}_rvalid),\n")
                 if not auto:
-                    f.write(f"  .{name}_ren_o({name}_ren),\n")
-                    f.write(f"  .{name}_rvalid_i({name}_rvalid),\n")
-            if not auto:
-                f.write(f"  .{name}_ready_i({name}_ready),\n")
+                    f.write(f"  .{name}_ready_i({name}_ready),\n")
 
         f.write(f"  .iob_ready_nxt_o(iob_ready_nxt_o),\n")
         f.write(f"  .iob_rvalid_nxt_o(iob_rvalid_nxt_o),\n")
@@ -376,9 +383,9 @@ class mkregs:
         f_gen.write("  .RST_VAL (1'd1),\n")
         f_gen.write('  .CLKEDGE ("posedge")\n')
         f_gen.write(") ready_reg_inst (\n")
-        f_gen.write("  .clk_i (clk_i),\n")
+        f_gen.write("  .clk_i  (clk_i),\n")
+        f_gen.write("  .cke_i  (cke_i),\n")
         f_gen.write("  .arst_i (arst_i),\n")
-        f_gen.write("  .cke_i (cke_i),\n")
         f_gen.write("  .data_i (ready_nxt),\n")
         f_gen.write("  .data_o (iob_ready_o)\n")
         f_gen.write(");\n\n")
@@ -391,9 +398,9 @@ class mkregs:
         f_gen.write("  .RST_VAL (1'd0),\n")
         f_gen.write('  .CLKEDGE ("posedge")\n')
         f_gen.write(") rvalid_reg_inst (\n")
-        f_gen.write("  .clk_i (clk_i),\n")
+        f_gen.write("  .clk_i  (clk_i),\n")
+        f_gen.write("  .cke_i  (cke_i),\n")
         f_gen.write("  .arst_i (arst_i),\n")
-        f_gen.write("  .cke_i (cke_i),\n")
         f_gen.write("  .data_i (rvalid_nxt),\n")
         f_gen.write("  .data_o (iob_rvalid_o)\n")
         f_gen.write(");\n\n")
@@ -405,9 +412,9 @@ class mkregs:
         f_gen.write(f"  .RST_VAL ({8*self.cpu_n_bytes}'d0),\n")
         f_gen.write('  .CLKEDGE ("posedge")\n')
         f_gen.write(") rdata_reg_inst (\n")
-        f_gen.write("  .clk_i (clk_i),\n")
+        f_gen.write("  .clk_i  (clk_i),\n")
+        f_gen.write("  .cke_i  (cke_i),\n")
         f_gen.write("  .arst_i (arst_i),\n")
-        f_gen.write("  .cke_i (cke_i),\n")
         f_gen.write("  .data_i (rdata_int),\n")
         f_gen.write("  .data_o (iob_rdata_o)\n")
         f_gen.write(");\n\n")
@@ -419,9 +426,9 @@ class mkregs:
         f_gen.write("  .RST_VAL (1'd0),\n")
         f_gen.write('  .CLKEDGE ("posedge")\n')
         f_gen.write(") pc_reg (\n")
-        f_gen.write("  .clk_i (clk_i),\n")
+        f_gen.write("  .clk_i  (clk_i),\n")
+        f_gen.write("  .cke_i  (cke_i),\n")
         f_gen.write("  .arst_i (arst_i),\n")
-        f_gen.write("  .cke_i (cke_i),\n")
         f_gen.write("  .data_i (pc_nxt),\n")
         f_gen.write("  .data_o (pc)\n")
         f_gen.write(");\n\n")

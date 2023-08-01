@@ -21,7 +21,7 @@
 
 //CLOCK GENERATOR
 `define IOB_CLOCK(CLK, PER) reg CLK=1; always #(PER/2) CLK = ~CLK;
-   
+
 //PULSE GENERATOR
 `define IOB_PULSE(VAR, PRE, DURATION, POST) VAR=0; #PRE VAR=1; #DURATION VAR=0; #POST;
 
@@ -120,6 +120,3 @@
 `define RDATA(I) `RDATA_(I, DATA_W)
 `define RVALID(I) `RVALID_(I, DATA_W)
 `define READY(I) `READY_(I, DATA_W)
-
-
-   

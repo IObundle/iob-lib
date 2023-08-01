@@ -147,8 +147,8 @@ module iob_fifo_async #(
       .W(R_ADDR_W + 1)
    ) r_raddr_gray_counter (
       .clk_i (r_clk_i),
-      .arst_i(r_arst_i),
       .cke_i (r_cke_i),
+      .arst_i(r_arst_i),
       .rst_i (r_rst_i),
       .en_i  (r_en_int),
       .data_o(r_raddr_gray)
@@ -160,8 +160,8 @@ module iob_fifo_async #(
       .W(W_ADDR_W + 1)
    ) w_waddr_gray_counter (
       .clk_i (w_clk_i),
-      .arst_i(w_arst_i),
       .cke_i (w_cke_i),
+      .arst_i(w_arst_i),
       .rst_i (w_rst_i),
       .en_i  (w_en_int),
       .data_o(w_waddr_gray)
@@ -215,8 +215,8 @@ module iob_fifo_async #(
       .ADDR_W  (ADDR_W)
    ) iob_asym_converter0 (
       .clk_i (r_clk_i),
-      .arst_i(r_arst_i),
       .cke_i (r_cke_i),
+      .arst_i(r_arst_i),
 
       .w_en_i  (w_en_int),
       .w_addr_i(w_addr),
