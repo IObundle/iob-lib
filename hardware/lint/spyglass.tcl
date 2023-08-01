@@ -19,7 +19,7 @@ if {[file exists spyglass.sgdc]} {
     file delete spyglass.sgdc
 }
 set fp [open spyglass.sgdc a]
-puts $fp "current_design IOB_CORE_NAME"
+puts $fp "current_design $TOP"
 puts $fp "sdcschema -type ../syn/umc130/$TOP\_dev.sdc ../src/$TOP.sdc ../src/$top.sdc ../syn/$TOP\_tool.sdc"
 
 read_file -type sgdc spyglass.sgdc
@@ -96,7 +96,6 @@ run_goal
 
 save_project
 close_project
-
 
 exit -force
 
