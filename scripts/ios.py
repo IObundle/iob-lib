@@ -21,10 +21,10 @@ import iob_colors
 # Any interfaces in this dictionary can by auto mapped by the python scripts
 known_map_interfaces = {
     "rs232": {
-        "rxd": "txd",
-        "txd": "rxd",
-        "cts": "rts",
-        "rts": "cts",
+        "rxd_i": "txd_o",
+        "txd_o": "rxd_i",
+        "cts_i": "rts_o",
+        "rts_o": "cts_i",
     },
 }
 
