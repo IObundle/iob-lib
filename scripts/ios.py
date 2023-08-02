@@ -17,16 +17,6 @@ import importlib.util
 import os
 import iob_colors
 
-# List of known interfaces for auto-map
-# Any interfaces in this dictionary can by auto mapped by the python scripts
-known_map_interfaces = {
-    "rs232": {
-        "rxd_i": "txd_o",
-        "txd_o": "rxd_i",
-        "cts_i": "rts_o",
-        "rts_o": "cts_i",
-    },
-}
 
 
 def reverse_port(port_type):
@@ -34,35 +24,6 @@ def reverse_port(port_type):
         return "O"
     else:
         return "I"
-
-
-# Given a known interface name, return its mapping
-# full_if_name: String with the name of an interface. It may contain a prefix.
-def get_interface_mapping(full_if_name):
-    # Note: the if_name may have a prefix, therefore we separate it before calling if_gen.
-    prefix, if_name = find_suffix_from_list(full_if_name, known_map_interfaces.keys())
-    if if_name:
-        return_dict = {}
-        # Add interface prefix to every signal
-        for signal_map in known_map_interfaces[if_name].items():
-            return_dict[prefix + signal_map[0]] = prefix + signal_map[1]
-        return return_dict
-    # Interface is was not in 'known_map_interfaces'.
-    # Check `if_gen.py` has knows this interfaces. Note: the if_name may have a prefix, therefore we separate it before calling if_gen.
-    prefix, if_name = find_suffix_from_list(full_if_name, if_gen.interfaces)
-    if if_name:
-        if_mapping = {}
-        port_list = if_gen_interface(if_name, prefix)
-        for port in port_list:
-            if_mapping[port["name"]] = (
-                port["name"][:-1] + reverse_port(port["type"]).lower()
-            )
-        return if_mapping
-
-    # Did not find known interface
-    assert (
-        False
-    ), f"{iob_colors.FAIL} Unknown mapping for ports of '{full_if_name}' interface.{iob_colors.ENDC}"
 
 
 # Return full port type string based on given types: "I", "O" and "IO"
