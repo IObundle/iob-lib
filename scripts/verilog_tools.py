@@ -101,3 +101,21 @@ def insert_verilog_in_module(verilog_code, verilog_file_path):
     # Write new system source file
     with open(verilog_file_path, "w") as system_source:
         system_source.writelines(lines)
+
+
+# Remove given verilog line of code from the given verilog source file
+def remove_verilog_line_from_source(verilog_code, verilog_file_path):
+    with open(verilog_file_path, "r") as system_source:
+        lines = system_source.readlines()
+    # Find Verilog line that contains given verilog_code
+    line_idx = 0
+    while line_idx < len(lines):
+        # Remove line if contains verilog_code
+        if verilog_code in lines[line_idx]:
+            lines.pop(line_idx)
+            break
+        line_idx += 1
+
+    # Write new system source file
+    with open(verilog_file_path, "w") as system_source:
+        system_source.writelines(lines)
