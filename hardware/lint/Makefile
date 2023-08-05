@@ -10,6 +10,8 @@ include ../../config_build.mk
 REMOTE_BUILD_DIR=$(USER)/$(BUILD_DIR_NAME)
 REMOTE_LINT_DIR=$(REMOTE_BUILD_DIR)/hardware/lint
 
+LINT_TOP=$(NAME)_$(CSR_IF)
+
 VHDR=$(wildcard ../src/*.vh)
 VSRC=$(wildcard ../src/*.v)
 

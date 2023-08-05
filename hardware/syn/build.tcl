@@ -97,6 +97,10 @@ if {[file exists $NODE/mems/genus.mems.tcl]} {
 echo "\n\n"
 echo "NODE=" $NODE
 echo "\n\n"
+echo "NAME=" $NAME
+echo "\n\n"
+echo "CSR_IF=" $CSR_IF
+echo "\n\n"
 echo "DESIGN=" $DESIGN
 echo "\n\n"
 echo "INCLUDE=" $INCLUDE
@@ -120,9 +124,10 @@ check_design -unresolved
 
 # add optimization constraints
 #----------------------------------------------------------------------
-read_sdc -stop_on_error ./$NODE/$DESIGN\_dev.sdc
-read_sdc -stop_on_error ../src/$DESIGN\_wrapper.sdc
-read_sdc -stop_on_error ./$DESIGN\_tool.sdc
+read_sdc -stop_on_error ./$NODE/$NAME\_dev.sdc
+read_sdc -stop_on_error ../src/$NAME.sdc
+read_sdc -stop_on_error ../src/$NAME\_$CSR_IF.sdc
+read_sdc -stop_on_error ./$NAME\_tool.sdc
 
 check_timing_intent 
 

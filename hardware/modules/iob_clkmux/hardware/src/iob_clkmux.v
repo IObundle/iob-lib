@@ -6,6 +6,7 @@
 
 ******************************************************************************/
 `timescale 1ns / 1ps
+`include "bsp.vh"
 
 module iob_clkmux (
    input  clk0_i,

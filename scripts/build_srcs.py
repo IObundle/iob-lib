@@ -57,62 +57,51 @@ def hw_setup(python_module):
 def sim_setup(python_module):
     core_flows = python_module.flows
     build_dir = python_module.build_dir
-    setup_dir = python_module.setup_dir
 
     sim_dir = "hardware/simulation"
 
     # Copy LIB sim files
-    if "sim" in core_flows:
-        shutil.copytree(
-            f"{LIB_DIR}/{sim_dir}",
-            f"{build_dir}/{sim_dir}",
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("*.pdf"),
-        )
+    shutil.copytree(
+        f"{LIB_DIR}/{sim_dir}",
+        f"{build_dir}/{sim_dir}",
+        dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns("*.pdf"),
+    )
 
 
 # Currently not used because it is not needed
 def fpga_setup(python_module):
     core_flows = python_module.flows
     build_dir = python_module.build_dir
-    setup_dir = python_module.setup_dir
-
     fpga_dir = "hardware/fpga"
 
     # append this core hw flows to config_build
     mk_conf.append_flows_config_build_mk(core_flows, ["fpga"], build_dir)
 
     # Copy LIB fpga files
-    if "fpga" in core_flows:
-        shutil.copytree(
-            f"{LIB_DIR}/{fpga_dir}",
-            f"{build_dir}/{fpga_dir}",
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("*.pdf"),
-        )
+    shutil.copytree(
+        f"{LIB_DIR}/{fpga_dir}",
+        f"{build_dir}/{fpga_dir}",
+        dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns("*.pdf"),
+    )
 
 
 def lint_setup(python_module):
     build_dir = python_module.build_dir
-    core_name = python_module.name
-    setup_dir = python_module.setup_dir
     lint_dir = "hardware/lint"
 
-    os.makedirs(f"{build_dir}/{lint_dir}", exist_ok=True)
-    files = Path(f"{LIB_DIR}/{lint_dir}").glob("*")
-    for file in files:
-        file = os.path.basename(file)
-        with open(f"{LIB_DIR}/{lint_dir}/{file}", "r") as sources:
-            lines = sources.readlines()
-        with open(f"{build_dir}/{lint_dir}/{file}", "w") as sources:
-            for line in lines:
-                sources.write(re.sub(r"IOB_CORE_NAME", core_name, line))
+    # Copy LIB lint files
+    shutil.copytree(
+        f"{LIB_DIR}/{lint_dir}",
+        f"{build_dir}/{lint_dir}",
+        dirs_exist_ok=True,
+    )
 
 
 # synthesis
 def syn_setup(python_module):
     build_dir = python_module.build_dir
-    setup_dir = python_module.setup_dir
     syn_dir = "hardware/syn"
 
     for file in Path(f"{LIB_DIR}/{syn_dir}").rglob("*"):

@@ -3,9 +3,6 @@
 # This file is run as a makefile to setup a build directory for an IP core
 #
 
-SHELL=bash
-
-
 help:
 	@echo The following targets are available:
 	@echo "  setup:  Setup the build directory"
@@ -22,8 +19,6 @@ PYTHON_DIR=$(LIB_DIR)/scripts
 
 PYTHON_EXEC:=/usr/bin/env python3 -B
 
-#submodule directories DEPRECATED
-#$(foreach entry, $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_core_submodules_dirs), $(eval $(entry)))
 
 # establish build dir paths
 build_dir_name:

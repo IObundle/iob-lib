@@ -1,30 +1,41 @@
-#!SPYGLASS_PROJECT_FILE
-#!VERSION 3.0
-#  -------------------------------------------------------------------
-#  This is a software generated project file. Manual edits to this file could be lost during the next save operation
-#  Copyright Synopsys Inc.
-#  Last Updated By: SpyGlass SpyGlass_vQ-2020.03-SP1
-#  Last Updated On Fri Oct  8 15:02:07 2021
-#
-#  -------------------------------------------------------------------
+#grab TOP from environment variable NAME in tcl
+set TOP $env(NAME)
+set CSR_IF $env(CSR_IF)
+
+puts "TOP: $TOP"
+puts "CSR_IF: $CSR_IF"
+
+set top $TOP\_$CSR_IF
+
+
+new_project spyglass -projectwdir .
 
 ##Data Import Section
 
-read_file -type sourcelist IOB_CORE_NAME_files.list
+read_file -type sourcelist $TOP\_files.list
+
+#delete file if it exsists
+if {[file exists spyglass.sgdc]} {
+    file delete spyglass.sgdc
+}
+set fp [open spyglass.sgdc a]
+puts $fp "current_design $TOP"
+puts $fp "sdcschema -type ../syn/umc130/$TOP\_dev.sdc ../src/$TOP.sdc ../src/$top.sdc ../syn/$TOP\_tool.sdc"
+
 read_file -type sgdc spyglass.sgdc
 
 ##Common Options Section
 
-set_option projectwdir .
+#set_option projectwdir .
 set_option language_mode mixed
-set_option designread_enable_synthesis no
-set_option designread_disable_flatten no
+#set_option designread_enable_synthesis no
+#set_option designread_disable_flatten no
 set_option enableV05 yes
-set_option top IOB_CORE_NAME
+set_option top $top
 set_option incdir { . ../src }
-set_option active_methodology $SPYGLASS_HOME/GuideWare/latest/block/rtl_handoff
+#set_option active_methodology $SPYGLASS_HOME/GuideWare/latest/block/rtl_handoff
 set_option pragma { synopsys synthesis }
-set_option sdc2sgdc yes
+#set_option sdc2sgdc yes
 set_option enableSV no
 
 
@@ -32,9 +43,10 @@ set_option enableSV no
 
 current_methodology $SPYGLASS_HOME/GuideWare/latest/block/rtl_handoff
 
+current_goal lint/lint_rtl -top $top
 
-current_goal lint/lint_rtl -top IOB_CORE_NAME
 read_file -type awl spyglass_waiver.awl
+
 set_goal_option default_waiver_file spyglass_waiver.awl
 
 set_goal_option addrules { ImproperRangeIndex-ML NonResetFSM-ML SameControlNDataNet-ML NoConstSourceInAlways-ML NonConstShift-ML FSMNonConstDefault-ML UndrivenInTerm-ML PartConnPort-ML HangingInstInput-ML UseLogic-ML PortType PortTypeMismatch-ML CheckModulesWithoutPorts-ML EnumStateDecl-ML TwoStateData-ML NoRealFunc-ML FlopFeedbackRace-ML MultiAssign-ML MixedResetEdges-ML SetBeforeRead-ML ConstWithoutValue-ML SigAssignX-ML SigAssignZ-ML NoOpen-ML NullOthers-ML NullPort-ML OneModule-ML NoInoutPort-ML PortConnToInout-ML NoWidthInBasedNum-ML NoSigCaseX-ML NoDisableInTask-ML NoDisableInFunc-ML BitRangeUsedParam-ML UnpackedStructUsed-ML CheckLocalParam-ML NonReusableParametricModule-ML ParamValueOverride-ML ParamOverrideMismatch-ML ParamWidthMismatch-ML DetectParamTruncate-ML UnInitParam-ML ChkSensExprPar-ML NoExprInPort-ML UseBusWidth-ML BitOrder-ML SigAsgnDelay-ML CondSigAsgnDelay-ML NoAssignX-ML RegInput-ML CAPA-ML ComplexExpr-ML AsgnToOneBit-ML UnloadedOutTerm-ML UndrivenOutPort-ML UnloadedInPort-ML UnloadedNet-ML ResetFlop-ML SignedUnsignedExpr-ML DuplicateCaseLabel-ML DisallowXInCaseZ-ML UndrivenNUnloaded-ML UndrivenNet-ML DisallowCaseZ-ML DisallowCaseX-ML DiffTimescaleUsed-ML SelfAssignment-ML UseParamWidthInOverriding-ML }
@@ -79,3 +91,11 @@ set_parameter regoutname /^(.*)_o/
 set_parameter nesting_level 5
 set_parameter num_max_bit_changes 3
 set_parameter OperatorCount 12
+
+run_goal
+
+save_project
+close_project
+
+exit -force
+

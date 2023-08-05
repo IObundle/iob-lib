@@ -23,6 +23,7 @@ class iob_module:
 
     # Standard attributes common to all iob-modules
     name = "iob_module"  # Verilog module name (not instance name)
+    csr_if = "iob"
     version = "1.0"  # Module version
     previous_version = None  # Module version
     flows = ""  # Flows supported by this module
@@ -60,15 +61,11 @@ class iob_module:
         description="default description",
         parameters={},
     ):
-        ''' Constructor to build verilog instances.
+        """Constructor to build verilog instances.
         :param str name: Verilog instance name
         :param str description: Verilog instance description
         :param dict parameters: Verilog parameters
-        '''
-        assert (
-            self._setup_purpose
-        ), f"{iob_colors.FAIL}Module {self.name} has not been setup yet!{iob_colors.ENDC}"
-
+        """
         if not name:
             name = f"{self.name}_0"
         self.name = name
@@ -321,7 +318,9 @@ class iob_module:
             ## Auto-add iob_s_port.vh
             cls.__generate({"interface": "iob_s_port"}, purpose=cls.get_setup_purpose())
             ## Auto-add iob_s_portmap.vh
-            cls.__generate({"interface": "iob_s_s_portmap"}, purpose=cls.get_setup_purpose())
+            cls.__generate(
+                {"interface": "iob_s_s_portmap"}, purpose=cls.get_setup_purpose()
+            )
 
     @classmethod
     def _build_regs_table(cls, no_overlap=False):
