@@ -26,26 +26,26 @@ PYTHON_EXEC:=/usr/bin/env python3 -B
 #$(foreach entry, $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/setup.py get_core_submodules_dirs), $(eval $(entry)))
 
 # establish build dir paths
-BUILD_DIR := $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/bootstrap.py $(TOP_MODULE_NAME) $(SETUP_ARGS) -f get_build_dir -s $(PROJECT_ROOT))
+build_dir_name:
+	$(eval BUILD_DIR := $(shell $(PYTHON_EXEC) $(PYTHON_DIR)/bootstrap.py $(TOP_MODULE_NAME) $(SETUP_ARGS) -f get_build_dir -s $(PROJECT_ROOT)))
+	$(eval BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src)
+	$(eval BUILD_SIM_DIR := $(BUILD_DIR)/hardware/simulation)
+	$(eval BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga)	
+	$(eval BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn)
+	$(eval BUILD_DOC_DIR = $(BUILD_DIR)/document)
+	$(eval BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures)
+	$(eval BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc)
+	@echo $(BUILD_DIR)
+	$(PYTHON_EXEC) ./$(PYTHON_DIR)/bootstrap.py $(TOP_MODULE_NAME) $(SETUP_ARGS) -s $(PROJECT_ROOT)
 
-BUILD_VSRC_DIR = $(BUILD_DIR)/hardware/src
 
-BUILD_SIM_DIR := $(BUILD_DIR)/hardware/simulation
-
-BUILD_FPGA_DIR = $(BUILD_DIR)/hardware/fpga
-BUILD_SYN_DIR = $(BUILD_DIR)/hardware/syn
-
-BUILD_DOC_DIR = $(BUILD_DIR)/document
-BUILD_FIG_DIR = $(BUILD_DOC_DIR)/figures
-BUILD_TSRC_DIR = $(BUILD_DOC_DIR)/tsrc
-
-python-format:
+python-format: build_dir_name
 	$(LIB_DIR)/scripts/sw_format.py black . 
 ifneq ($(wildcard $(BUILD_DIR)),)
 	$(LIB_DIR)/scripts/sw_format.py black $(BUILD_DIR) 
 endif
 
-c-format:
+c-format: build_dir_name
 	$(LIB_DIR)/scripts/sw_format.py clang .
 ifneq ($(wildcard $(BUILD_DIR)),)
 	$(LIB_DIR)/scripts/sw_format.py clang $(BUILD_DIR)
@@ -61,11 +61,12 @@ ifeq ($(TESTER),1)
 endif
 
 # Verilog files in build directory
-VHFILES = $(shell find $(BUILD_DIR)/hardware -type f -name "*.vh" -not -path "*version.vh" -not -path "*test_*.vh")
-VFILES = $(shell find $(BUILD_DIR)/hardware -type f -name "*.v")
+verilog_files: build_dir_name
+	$(eval VHFILES = $(shell find $(BUILD_DIR)/hardware -type f -name "*.vh" -not -path "*version.vh" -not -path "*test_*.vh"))
+	$(eval VFILES = $(shell find $(BUILD_DIR)/hardware -type f -name "*.v"))
 
 # Run linter on all verilog files
-verilog-lint:
+verilog-lint: verilog_files
 ifneq ($(DISABLE_LINT),1)
 	$(IOB_LIB_PATH)/verilog-lint.py $(VHFILES) $(VFILES)
 endif
@@ -76,10 +77,7 @@ ifneq ($(DISABLE_FORMAT),1)
 	$(IOB_LIB_PATH)/verilog-format.sh $(VHFILES) $(VFILES)
 endif
 
-format-all: $(BUILD_DIR) python-format c-format verilog-lint verilog-format
-
-$(BUILD_DIR):
-	$(PYTHON_EXEC) ./$(PYTHON_DIR)/bootstrap.py $(TOP_MODULE_NAME) $(SETUP_ARGS) -s $(PROJECT_ROOT)
+format-all: build_dir_name  python-format c-format verilog-lint verilog-format
 
 #
 #DOCUMENT
@@ -110,8 +108,8 @@ $(BUILD_DIR)/doc/vivado.tex:
 endif
 
 clean:
-	-@if [ -f $(BUILD_DIR)/Makefile ]; then make -C $(BUILD_DIR) clean; fi
-	@rm -rf $(BUILD_DIR)
+	-@if [ -f ../$(CORE)_V*/Makefile ]; then make -C ../$(CORE)_V* clean; fi
+	@rm -rf ../$(CORE)_V*
 	@rm -f ~*
 ifneq ($(wildcard config_delivery.mk),)
 	make delivery-clean
@@ -121,7 +119,7 @@ endif
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-setup: $(BUILD_DIR) $(SRC) format-all
+setup: build_dir_name $(BUILD_DIR) $(SRC) format-all
 	@for i in $(SRC); do echo $$i; done
 
 
