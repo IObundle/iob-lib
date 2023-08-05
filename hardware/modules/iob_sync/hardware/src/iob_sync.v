@@ -5,7 +5,7 @@ module iob_sync #(
    parameter RST_VAL = {DATA_W{1'b0}},
    parameter CLKEDGE = "posedge"
 ) (
-   `include "clk_rst_port.vs"
+   `include "clk_rst_s_port.vs"
    input      [DATA_W-1:0] signal_i,
    output reg [DATA_W-1:0] signal_o
 );

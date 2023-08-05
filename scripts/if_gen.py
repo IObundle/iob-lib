@@ -38,9 +38,9 @@ interfaces = [
     "clk_rst_s_portmap",
     "clk_rst_m_m_portmap",
     "clk_rst_s_m_portmap",
-    "clk_rst__wire",
-    "clk_rst__m_tb_wire",
-    "clk_rst__s_tb_wire",
+    "clk_rst_wire",
+    "clk_rst_m_tb_wire",
+    "clk_rst_s_tb_wire",
     "rom_sp_port",
     "rom_dp_port",
     "rom_tdp_port",
@@ -205,7 +205,7 @@ iob = [
     },
 ]
 
-clk_en_rst = [
+clk_rst = [
     {
         "master": 1,
         "slave": 1,
@@ -219,22 +219,25 @@ clk_en_rst = [
     {
         "master": 1,
         "slave": 1,
-        "enable": 1,
-        "signal": "input",
-        "width": "1",
-        "name": "cke",
-        "default": "0",
-        "description": "clock enable",
-    },
-    {
-        "master": 1,
-        "slave": 1,
         "enable": 0,
         "signal": "input",
         "width": "1",
         "name": "arst",
         "default": "0",
         "description": "asynchronous reset",
+    },
+]
+
+clk_en_rst = clk_rst + [
+    {
+        "master": 1,
+        "slave": 1,
+        "enable": 1,
+        "signal": "input",
+        "width": "1",
+        "name": "cke",
+        "default": "0",
+        "description": "clock enable",
     },
 ]
 
