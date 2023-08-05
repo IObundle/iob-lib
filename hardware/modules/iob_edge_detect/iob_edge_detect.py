@@ -17,7 +17,7 @@ class iob_edge_detect(iob_module):
         super()._create_submodules_list(
             [
                 iob_reg,
-                {"interface": "clk_en_rst_portmap"},
-                {"interface": "clk_en_rst_port"},
+                {"interface": "clk_en_rst_s_s_portmap"},
+                {"interface": "clk_en_rst_s_port"},
             ]
         )

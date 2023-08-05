@@ -15,7 +15,7 @@ module iob_asym_converter #(
    W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
    R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
 ) (
-   `include "clk_en_rst_port.vs"
+   `include "clk_en_rst_s_port.vs"
 
    //write port
    input [       1-1:0] w_en_i,
@@ -60,7 +60,7 @@ module iob_asym_converter #(
             .RST_VAL({$clog2(R) {1'd0}}),
             .CLKEDGE("posedge")
          ) r_addr_reg_inst (
-            `include "clk_en_rst_portmap.vs"
+            `include "clk_en_rst_s_s_portmap.vs"
 
             .data_i(r_addr_i[$clog2(R)-1:0]),
             .data_o(r_addr_lsbs_reg)

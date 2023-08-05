@@ -27,7 +27,7 @@ class axis2axi(iob_module):
                 {"interface": "axi_m_read_port"},
                 {"interface": "axi_m_m_write_portmap"},
                 {"interface": "axi_m_m_read_portmap"},
-                {"interface": "clk_en_rst_port"},
+                {"interface": "clk_en_rst_s_port"},
                 iob_fifo_sync,
                 iob_counter,
                 iob_reg_r,
