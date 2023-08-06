@@ -20,7 +20,7 @@ class iob2apb(iob_module):
                 {"interface": "iob_s_port"},
                 {"interface": "apb_m_port"},
                 {"interface": "clk_en_rst_s_s_portmap"},
-                #simulation
+                # simulation
                 ({"interface": "iob_s_s_portmap"}, {"purpose": "simulation"}),
                 ({"interface": "iob_m_tb_wire"}, {"purpose": "simulation"}),
                 iob_reg,

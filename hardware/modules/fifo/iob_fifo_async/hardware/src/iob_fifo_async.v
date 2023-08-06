@@ -20,15 +20,11 @@ module iob_fifo_async #(
 
    //memory write port
    output [        1-1:0] ext_mem_w_clk_o,
-   output [        1-1:0] ext_mem_w_arst_o,
-   output [        1-1:0] ext_mem_w_cke_o,
    output [        R-1:0] ext_mem_w_en_o,
    output [MINADDR_W-1:0] ext_mem_w_addr_o,
    output [MAXDATA_W-1:0] ext_mem_w_data_o,
    //memory read port
    output [        1-1:0] ext_mem_r_clk_o,
-   output [        1-1:0] ext_mem_r_arst_o,
-   output [        1-1:0] ext_mem_r_cke_o,
    output [        R-1:0] ext_mem_r_en_o,
    output [MINADDR_W-1:0] ext_mem_r_addr_o,
    input  [MAXDATA_W-1:0] ext_mem_r_data_i,
@@ -205,8 +201,6 @@ module iob_fifo_async #(
    assign r_addr           = r_raddr_bin[R_ADDR_W-1:0];
 
    assign ext_mem_w_clk_o  = w_clk_i;
-   assign ext_mem_w_arst_o = w_arst_i;
-   assign ext_mem_w_cke_o  = w_cke_i;
 
    // FIFO memory
    iob_asym_converter #(
@@ -227,8 +221,6 @@ module iob_fifo_async #(
       .r_data_o(r_data_o),
 
       .ext_mem_clk_o   (ext_mem_r_clk_o),
-      .ext_mem_arst_o  (ext_mem_r_arst_o),
-      .ext_mem_cke_o   (ext_mem_r_cke_o),
       .ext_mem_w_en_o  (ext_mem_w_en_o),
       .ext_mem_w_addr_o(ext_mem_w_addr_o),
       .ext_mem_w_data_o(ext_mem_w_data_o),

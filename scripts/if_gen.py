@@ -210,7 +210,7 @@ clk_rst = [
         "master": 1,
         "slave": 1,
         "enable": 0,
-        "signal": "input",
+        "signal": "output",
         "width": "1",
         "name": "clk",
         "default": "0",
@@ -220,7 +220,7 @@ clk_rst = [
         "master": 1,
         "slave": 1,
         "enable": 0,
-        "signal": "input",
+        "signal": "output",
         "width": "1",
         "name": "arst",
         "default": "0",
@@ -233,7 +233,7 @@ clk_en_rst = clk_rst + [
         "master": 1,
         "slave": 1,
         "enable": 1,
-        "signal": "input",
+        "signal": "output",
         "width": "1",
         "name": "cke",
         "default": "0",
@@ -1385,6 +1385,7 @@ def make_clk_en_rst():
         bus.append(clk_en_rst[i])
     return bus
 
+
 def make_clk_rst():
     bus = []
     for i in range(len(clk_rst)):
@@ -1561,6 +1562,7 @@ def add_param_prefix(string, param_prefix):
 def write_port(direction, width, name, description, fout):
     fout.write(direction + width + name + "," + "\n")
     # fout.write(direction + width + name + ", //" + description + "\n")
+
 
 def sp_port(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
@@ -1775,8 +1777,6 @@ def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             table[i]["description"],
             fout,
         )
-
-
 
 
 def sp_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):

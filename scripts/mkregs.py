@@ -198,7 +198,9 @@ class mkregs:
             if name != "VERSION":
                 if row["type"] == "W":
                     if auto:
-                        f.write(f"  output [{self.verilog_max(n_bits,1)}-1:0] {name}_o,\n")
+                        f.write(
+                            f"  output [{self.verilog_max(n_bits,1)}-1:0] {name}_o,\n"
+                        )
                     else:
                         f.write(f"  output {name}_wen_o,\n")
                 elif row["type"] == "R":

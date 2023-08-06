@@ -5,12 +5,12 @@
 // test defines
 `define MAXADDR_W 10
 
-/* TODO: re-implement these tests 
--       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
--       $(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
--       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
--       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)/*.v) &&\
-*/
+// TODO: re-implement these tests 
+//       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)\/\*.v) &&\
+//       $(VLOG) -DW_DATA_W=32 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)\/\*.v) &&\
+//       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=32 $(wildcard $(BUILD_VSRC_DIR)\/\*.v) &&\
+//       $(VLOG) -DW_DATA_W=8 -DR_DATA_W=8 $(wildcard $(BUILD_VSRC_DIR)\/\*.v) &&\
+
 
 module iob_asym_converter_tb;
 
@@ -27,10 +27,14 @@ module iob_asym_converter_tb;
    localparam R_ADDR_W = R_DATA_W == MINDATA_W ? MAXADDR_W : MINADDR_W;
    localparam R = MAXDATA_W / MINDATA_W;
 
-   localparam clk_period = 10;
+   localparam CLK_PER = 10;
+
+   //async reset
+   reg arst;
 
    // system clock
-   `IOB_CLOCK(clk, clk_period)
+   reg clk;
+   `IOB_CLOCK(clk, CLK_PER)
 
    // write port
    reg                  w_en = 0;
@@ -69,6 +73,9 @@ module iob_asym_converter_tb;
       $dumpvars();
 `endif
 
+      //reset core
+      `IOB_RESET(clk, arst, 23, 23, 23)
+      
       $display("W_DATA_W=%d", W_DATA_W);
       $display("W_ADDR_W=%d", W_ADDR_W);
       $display("R_DATA_W=%d", R_DATA_W);
@@ -109,11 +116,11 @@ module iob_asym_converter_tb;
       end
 
       //wait 5 cycles and finish
-      #clk_period;
+      #CLK_PER;
       $display("%c[1;34m", 27);
       $display("Test completed successfully.");
       $display("%c[0m", 27);
-      #(5 * clk_period) $finish();
+      #(5 * CLK_PER) $finish();
    end
 
    // instantiate the Unit Under Test (UUT)
@@ -123,7 +130,7 @@ module iob_asym_converter_tb;
       .ADDR_W  (MAXADDR_W)
    ) uut (
       .clk_i (clk),
-      .arst_i(1'd0),
+      .arst_i(arst),
       .cke_i (1'd1),
 
       .ext_mem_clk_o   (ext_mem_clk),

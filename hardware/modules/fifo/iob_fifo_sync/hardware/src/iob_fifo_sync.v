@@ -32,8 +32,6 @@ module iob_fifo_sync #(
 
    //write port
    output                 ext_mem_clk_o,
-   output                 ext_mem_arst_o,
-   output                 ext_mem_cke_o,
    output [        R-1:0] ext_mem_w_en_o,
    output [MINADDR_W-1:0] ext_mem_w_addr_o,
    output [MAXDATA_W-1:0] ext_mem_w_data_o,
@@ -160,8 +158,6 @@ module iob_fifo_sync #(
       .r_data_o(r_data_o),
 
       .ext_mem_clk_o   (ext_mem_clk_o),
-      .ext_mem_arst_o  (ext_mem_arst_o),
-      .ext_mem_cke_o   (ext_mem_cke_o),
       .ext_mem_w_en_o  (ext_mem_w_en_o),
       .ext_mem_w_addr_o(ext_mem_w_addr_o),
       .ext_mem_w_data_o(ext_mem_w_data_o),
