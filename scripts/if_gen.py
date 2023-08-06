@@ -37,7 +37,7 @@ interfaces = [
     "clk_rst_m_portmap",
     "clk_rst_s_portmap",
     "clk_rst_m_m_portmap",
-    "clk_rst_s_m_portmap",
+    "clk_rst_s_s_portmap",
     "clk_rst_wire",
     "clk_rst_m_tb_wire",
     "clk_rst_s_tb_wire",
