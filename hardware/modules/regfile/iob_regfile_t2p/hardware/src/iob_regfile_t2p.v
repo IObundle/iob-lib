@@ -7,15 +7,15 @@ module iob_regfile_t2p #(
 ) (
    // Write Port
    input              w_clk_i,
-   input              w_arst_i,
    input              w_cke_i,
+   input              w_arst_i,
    input [ADDR_W-1:0] w_addr_i,
    input [DATA_W-1:0] w_data_i,
 
    // Read Port
    input                   r_clk_i,
-   input                   r_arst_i,
    input                   r_cke_i,
+   input                   r_arst_i,
    input      [ADDR_W-1:0] r_addr_i,
    output reg [DATA_W-1:0] r_data_o
 );
