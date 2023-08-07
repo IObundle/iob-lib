@@ -228,7 +228,17 @@ clk_rst = [
     },
 ]
 
-clk_en_rst = clk_rst + [
+clk_en_rst = [
+    {
+        "master": 1,
+        "slave": 1,
+        "enable": 0,
+        "signal": "output",
+        "width": "1",
+        "name": "clk",
+        "default": "0",
+        "description": "clock signal",
+    },
     {
         "master": 1,
         "slave": 1,
@@ -238,6 +248,16 @@ clk_en_rst = clk_rst + [
         "name": "cke",
         "default": "0",
         "description": "clock enable",
+    },
+    {
+        "master": 1,
+        "slave": 1,
+        "enable": 0,
+        "signal": "output",
+        "width": "1",
+        "name": "arst",
+        "default": "0",
+        "description": "asynchronous reset",
     },
 ]
 
