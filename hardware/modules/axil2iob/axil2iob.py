@@ -25,8 +25,8 @@ class axil2iob(iob_module):
                 iob_m_port,
                 iob_m_portmap,
                 {"interface": "iob_wire"},
-                {"interface": "clk_rst_portmap"},
-                {"interface": "clk_rst_port"},
+                {"interface": "clk_rst_s_s_portmap"},
+                {"interface": "clk_rst_s_port"},
                 iob_s_portmap,
             ]
         )

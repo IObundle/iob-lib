@@ -47,9 +47,11 @@ module iob_fifo_async_tb;
       else r_arst = #1 arst;
 
    //write clock
+   reg w_clk;
    `IOB_CLOCK(w_clk, 10)
 
    //read clock
+   reg r_clk;
    `IOB_CLOCK(r_clk, 13)
 
    reg                 r_cke = 1;
@@ -212,15 +214,11 @@ module iob_fifo_async_tb;
    ) uut (
       //memory write port
       .ext_mem_w_clk_o (ext_mem_w_clk),
-      .ext_mem_w_arst_o(),
-      .ext_mem_w_cke_o (),
       .ext_mem_w_en_o  (ext_mem_w_en),
       .ext_mem_w_addr_o(ext_mem_w_addr),
       .ext_mem_w_data_o(ext_mem_w_data),
       //memory read port
       .ext_mem_r_clk_o (ext_mem_r_clk),
-      .ext_mem_r_arst_o(),
-      .ext_mem_r_cke_o (),
       .ext_mem_r_en_o  (ext_mem_r_en),
       .ext_mem_r_addr_o(ext_mem_r_addr),
       .ext_mem_r_data_i(ext_mem_r_data),

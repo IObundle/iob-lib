@@ -191,8 +191,6 @@ module iob_fifo_sync_tb;
       .rst_i (reset),
 
       .ext_mem_clk_o   (ext_mem_clk),
-      .ext_mem_arst_o  (),
-      .ext_mem_cke_o   (),
       .ext_mem_w_en_o  (ext_mem_w_en),
       .ext_mem_w_addr_o(ext_mem_w_addr),
       .ext_mem_w_data_o(ext_mem_w_data),

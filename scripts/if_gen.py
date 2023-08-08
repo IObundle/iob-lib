@@ -23,10 +23,24 @@ interfaces = [
     "iob_wire",
     "iob_m_tb_wire",
     "iob_s_tb_wire",
-    "clk_en_rst_port",
-    "clk_rst_port",
-    "clk_en_rst_portmap",
-    "clk_rst_portmap",
+    "clk_en_rst_m_port",
+    "clk_en_rst_s_port",
+    "clk_en_rst_m_portmap",
+    "clk_en_rst_s_portmap",
+    "clk_en_rst_m_m_portmap",
+    "clk_en_rst_s_s_portmap",
+    "clk_en_rst_wire",
+    "clk_en_rst_m_tb_wire",
+    "clk_en_rst_s_tb_wire",
+    "clk_rst_m_port",
+    "clk_rst_s_port",
+    "clk_rst_m_portmap",
+    "clk_rst_s_portmap",
+    "clk_rst_m_m_portmap",
+    "clk_rst_s_s_portmap",
+    "clk_rst_wire",
+    "clk_rst_m_tb_wire",
+    "clk_rst_s_tb_wire",
     "rom_sp_port",
     "rom_dp_port",
     "rom_tdp_port",
@@ -191,26 +205,55 @@ iob = [
     },
 ]
 
-clk_en_rst = [
+clk_rst = [
     {
+        "master": 1,
+        "slave": 1,
         "enable": 0,
-        "signal": "input",
+        "signal": "output",
         "width": "1",
         "name": "clk",
         "default": "0",
         "description": "clock signal",
     },
     {
+        "master": 1,
+        "slave": 1,
+        "enable": 0,
+        "signal": "output",
+        "width": "1",
+        "name": "arst",
+        "default": "0",
+        "description": "asynchronous reset",
+    },
+]
+
+clk_en_rst = [
+    {
+        "master": 1,
+        "slave": 1,
+        "enable": 0,
+        "signal": "output",
+        "width": "1",
+        "name": "clk",
+        "default": "0",
+        "description": "clock signal",
+    },
+    {
+        "master": 1,
+        "slave": 1,
         "enable": 1,
-        "signal": "input",
+        "signal": "output",
         "width": "1",
         "name": "cke",
         "default": "0",
         "description": "clock enable",
     },
     {
+        "master": 1,
+        "slave": 1,
         "enable": 0,
-        "signal": "input",
+        "signal": "output",
         "width": "1",
         "name": "arst",
         "default": "0",
@@ -1363,6 +1406,13 @@ def make_clk_en_rst():
     return bus
 
 
+def make_clk_rst():
+    bus = []
+    for i in range(len(clk_rst)):
+        bus.append(clk_rst[i])
+    return bus
+
+
 #
 # ROM
 #
@@ -1532,27 +1582,6 @@ def add_param_prefix(string, param_prefix):
 def write_port(direction, width, name, description, fout):
     fout.write(direction + width + name + "," + "\n")
     # fout.write(direction + width + name + ", //" + description + "\n")
-
-
-def en_rst_port(prefix, param_prefix, fout, bus_size=1):
-    for i in range(len(table)):
-        port_direction = table[i]["signal"]
-        name = prefix + table[i]["name"] + suffix(table[i]["signal"])
-        width = table[i]["width"]
-        bus_width = " [" + width + "-1:0] "
-        description = top_macro + table[i]["description"]
-        write_port(port_direction, bus_width, name, description, fout)
-
-
-def rst_port(prefix, param_prefix, fout, bus_size=1):
-    for i in range(len(table)):
-        if table[i]["enable"] == 0:
-            port_direction = table[i]["signal"]
-            name = prefix + table[i]["name"] + suffix(table[i]["signal"])
-            width = table[i]["width"]
-            bus_width = " [" + width + "-1:0] "
-            description = top_macro + table[i]["description"]
-            write_port(port_direction, bus_width, name, description, fout)
 
 
 def sp_port(prefix, param_prefix, fout, bus_size=1):
@@ -1768,39 +1797,6 @@ def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             table[i]["description"],
             fout,
         )
-
-
-def en_rst_portmap(port_prefix, wire_prefix, fout, bus_start, bus_size):
-    for i in range(len(table)):
-        port = port_prefix + table[i]["name"] + suffix(table[i]["signal"])
-        connection_name = wire_prefix + table[i]["name"] + suffix(table[i]["signal"])
-        write_portmap(
-            port,
-            connection_name,
-            table[i]["width"],
-            bus_start,
-            bus_size,
-            table[i]["description"],
-            fout,
-        )
-
-
-def rst_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
-    for i in range(len(table)):
-        if table[i]["enable"] == 0:
-            port = port_prefix + table[i]["name"] + suffix(table[i]["signal"])
-            connection_name = (
-                wire_prefix + table[i]["name"] + suffix(table[i]["signal"])
-            )
-            write_portmap(
-                port,
-                connection_name,
-                table[i]["width"],
-                bus_start,
-                bus_size,
-                table[i]["description"],
-                fout,
-            )
 
 
 def sp_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
@@ -2160,6 +2156,28 @@ def parse_arguments():
         type=lambda s: parse_types(s),
         help="""
                             type can defined as one of the following:
+                            [*]clk_en_rst_m_port: iob native master port
+                            [*]clk_en_rst_s_port: iob native slave port
+                            [*]clk_en_rst_s_s_portmap: iob native portmap
+                            [*]clk_en_rst_m_portmap: iob native master portmap
+                            [*]clk_en_rst_s_portmap: iob native slave portmap
+                            [*]clk_en_rst_m_m_portmap: iob native master to master portmap
+                            [*]clk_en_rst_s_s_portmap: iob native slave to slave portmap
+                            [*]clk_en_rst_wire: iob native wires for interconnection
+                            [*]clk_en_rst_m_tb_wire: iob native master wires for testbench
+                            [*]clk_en_rst_s_tb_wire: iob native slave wires for testbench
+
+                            [*]clk_rst_m_port: iob native master port
+                            [*]clk_rst_s_port: iob native slave port
+                            [*]clk_rst_portmap: iob native portmap
+                            [*]clk_rst_m_portmap: iob native master portmap
+                            [*]clk_rst_s_portmap: iob native slave portmap
+                            [*]clk_rst_m_m_portmap: iob native master to master portmap
+                            [*]clk_rst_s_s_portmap: iob native slave to slave portmap
+                            [*]clk_rst_wire: iob native wires for interconnection
+                            [*]clk_rst_m_tb_wire: iob native master wires for testbench
+                            [*]clk_rst_s_tb_wire: iob native slave wires for testbench
+
                             [*]iob_m_port: iob native master port
                             [*]iob_s_port: iob native slave port
                             [*]iob_portmap: iob native portmap
@@ -2171,10 +2189,6 @@ def parse_arguments():
                             [*]iob_m_tb_wire: iob native master wires for testbench
                             [*]iob_s_tb_wire: iob native slave wires for testbench
 
-                            [*]clk_en_rst_port: clk, clk en, rst ports
-                            [*]clk_en_rst_portmap: clk, clk en, rst portmap
-                            [*]clk_rst_port: clk, rst ports
-                            [*]clk_rst_portmap: clk, rst portmap
 
                             [*]rom_sp_port: external rom sp ports
                             [*]rom_dp_port: external rom dp ports
@@ -2298,8 +2312,11 @@ def create_signal_table(interface_name):
     if interface_name.find("iob_") >= 0:
         table = make_iob()
 
-    if interface_name.find("clk_") >= 0:
+    if interface_name.find("clk_en_rst_") >= 0:
         table = make_clk_en_rst()
+
+    if interface_name.find("clk_rst_") >= 0:
+        table = make_clk_rst()
 
     if interface_name.find("rom_") >= 0:
         table = make_rom()
@@ -2386,7 +2403,8 @@ def write_vs_contents(
 ):
     func_name = (
         interface_name.replace("axil_", "")
-        .replace("clk_", "")
+        .replace("clk_en_rst_", "")
+        .replace("clk_rst_", "")
         .replace("rom_", "")
         .replace("ram_", "")
         .replace("axi_", "")

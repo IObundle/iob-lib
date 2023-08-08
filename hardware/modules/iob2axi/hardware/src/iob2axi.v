@@ -34,7 +34,7 @@ module iob2axi #(
     // AXI-4 Full Master I/F
     //
     `include "m_axi_m_port.vs"
-    `include "clk_rst_port.vs"
+    `include "clk_rst_s_port.vs"
 );
 
    wire run_int;

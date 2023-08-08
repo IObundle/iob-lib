@@ -17,7 +17,7 @@ class iob_regfile_2p(iob_module):
         super()._create_submodules_list(
             [
                 iob_ctls,
-                {"interface": "clk_en_rst_port"},
-                {"interface": "clk_en_rst_portmap"},
+                {"interface": "clk_en_rst_s_port"},
+                {"interface": "clk_en_rst_s_s_portmap"},
             ]
         )

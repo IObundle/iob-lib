@@ -10,7 +10,7 @@ module iob_div_subshift_frac_tb;
    parameter TEST_SZ = 100;
 
    reg clk = 0;
-   reg rst = 0;
+   reg arst = 0;
    reg start = 0;
    wire done;
 
@@ -44,8 +44,8 @@ module iob_div_subshift_frac_tb;
       end
       
       //reset pulse
-      #100 rst = 1;
-      @(posedge clk) #1 rst = 0;
+      #100 arst = 1;
+      @(posedge clk) #1 arst = 0;
       
       //compute divisions
       for (i=0; i < TEST_SZ; i=i+1) begin
@@ -85,7 +85,7 @@ module iob_div_subshift_frac_tb;
    uut 
      (
       .clk_i(clk),
-      .arst_i(rst),
+      .arst_i(arst),
       .cke_i(1'b1),
       .start_i(start),
       .done_o(done),

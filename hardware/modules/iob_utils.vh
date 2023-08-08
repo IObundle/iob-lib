@@ -20,7 +20,7 @@
 //
 
 //CLOCK GENERATOR
-`define IOB_CLOCK(CLK, PER) reg CLK=1; always #(PER/2) CLK = ~CLK;
+`define IOB_CLOCK(CLK, PER) initial CLK=0; always #(PER/2) CLK = ~CLK;
 
 //PULSE GENERATOR
 `define IOB_PULSE(VAR, PRE, DURATION, POST) VAR=0; #PRE VAR=1; #DURATION VAR=0; #POST;

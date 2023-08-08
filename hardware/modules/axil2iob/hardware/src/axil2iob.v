@@ -9,7 +9,7 @@ module axil2iob #(
    parameter DATA_W      = AXIL_DATA_W   // IOb data bus width in bits
 ) (
    // Global signals
-   `include "clk_rst_port.vs"
+   `include "clk_rst_s_port.vs"
 
    // AXI4 Lite slave interface
    `include "iob_axil_s_port.vs"

@@ -5,7 +5,7 @@ module iob_iob2wishbone #(
    parameter DATA_W     = 32,
    parameter READ_BYTES = 4
 ) (
-   `include "clk_en_rst_port.vs"
+   `include "clk_en_rst_s_port.vs"
 
    // IOb interface
    input  wire                iob_avalid_i,
@@ -60,7 +60,7 @@ module iob_iob2wishbone #(
       .DATA_W (1),
       .RST_VAL(0)
    ) iob_reg_avalid (
-      `include "clk_en_rst_portmap.vs"
+      `include "clk_en_rst_s_s_portmap.vs"
       .rst_i (wb_ack_i),
       .en_i  (iob_avalid_i),
       .data_i(iob_avalid_i),
@@ -70,7 +70,7 @@ module iob_iob2wishbone #(
       .DATA_W (ADDR_W),
       .RST_VAL(0)
    ) iob_reg_addr (
-      `include "clk_en_rst_portmap.vs"
+      `include "clk_en_rst_s_s_portmap.vs"
       .rst_i (1'b0),
       .en_i  (iob_avalid_i),
       .data_i(iob_addr_i),
@@ -80,7 +80,7 @@ module iob_iob2wishbone #(
       .DATA_W (DATA_W),
       .RST_VAL(0)
    ) iob_reg_iob_data (
-      `include "clk_en_rst_portmap.vs"
+      `include "clk_en_rst_s_s_portmap.vs"
       .rst_i (1'b0),
       .en_i  (iob_avalid_i),
       .data_i(iob_wdata_i),
@@ -90,7 +90,7 @@ module iob_iob2wishbone #(
       .DATA_W (1),
       .RST_VAL(0)
    ) iob_reg_we (
-      `include "clk_en_rst_portmap.vs"
+      `include "clk_en_rst_s_s_portmap.vs"
       .rst_i (1'b0),
       .en_i  (iob_avalid_i),
       .data_i(wb_we),
@@ -100,7 +100,7 @@ module iob_iob2wishbone #(
       .DATA_W (DATA_W / 8),
       .RST_VAL(0)
    ) iob_reg_strb (
-      `include "clk_en_rst_portmap.vs"
+      `include "clk_en_rst_s_s_portmap.vs"
       .rst_i (1'b0),
       .en_i  (iob_avalid_i),
       .data_i(wb_select),
@@ -110,7 +110,7 @@ module iob_iob2wishbone #(
       .DATA_W (DATA_W),
       .RST_VAL(0)
    ) iob_reg_wb_data (
-      `include "clk_en_rst_portmap.vs"
+      `include "clk_en_rst_s_s_portmap.vs"
       .rst_i (1'b0),
       .en_i  (1'b1),
       .data_i(wb_data_i),
@@ -120,7 +120,7 @@ module iob_iob2wishbone #(
       .DATA_W (1),
       .RST_VAL(0)
    ) iob_reg_wb_ack (
-      `include "clk_en_rst_portmap.vs"
+      `include "clk_en_rst_s_s_portmap.vs"
       .rst_i (1'b0),
       .en_i  (1'b1),
       .data_i(wb_ack_i),

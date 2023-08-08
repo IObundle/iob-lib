@@ -7,8 +7,22 @@ LIB_DIR:=.
 DISABLE_LINT:=1
 DISABLE_FORMAT:=1
 # Default lib module to setup. Can be overriden by the user.
-TOP_MODULE_NAME ?=iob_ctls
+CORE ?=iob_ctls
 
 include setup.mk
+
+sim-build:
+	scripts/test.sh build $(CORE)
+
+sim-run:
+	VCD=$(VCD) scripts/test.sh $(CORE)
+
+sim-test:
+	scripts/test.sh test
+
+sim-clean:
+	scripts/test.sh clean
+
+
 
 
