@@ -2,7 +2,7 @@ import os
 
 from iob_module import iob_module
 
-from iob_counter import iob_counter
+from iob_counter_ld import iob_counter_ld
 
 
 class iob_modcnt(iob_module):
@@ -19,6 +19,6 @@ class iob_modcnt(iob_module):
                 {"interface": "clk_en_rst_port"},
                 {"interface": "clk_en_rst_portmap"},
                 iob_modcnt,
-                iob_counter,
+                iob_counter_ld,
             ]
         )
