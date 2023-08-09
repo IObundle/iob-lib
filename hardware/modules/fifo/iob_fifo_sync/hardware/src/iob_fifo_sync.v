@@ -8,9 +8,9 @@ module iob_fifo_sync #(
    ADDR_W = 21,  //higher ADDR_W lower DATA_W
    //determine W_ADDR_W and R_ADDR_W
    MAXDATA_W =
-   `IOB_MAX(W_DATA_W, R_DATA_W),
+      `IOB_MAX(W_DATA_W, R_DATA_W),
    MINDATA_W =
-   `IOB_MIN(W_DATA_W, R_DATA_W),
+      `IOB_MIN(W_DATA_W, R_DATA_W),
    R = MAXDATA_W / MINDATA_W,
    MINADDR_W = ADDR_W - $clog2(R),  //lower ADDR_W (higher DATA_W)
    W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
@@ -141,29 +141,7 @@ module iob_fifo_sync #(
       .data_o(w_full_o)
    );
 
-   //FIFO memory
-   iob_asym_converter #(
-      .W_DATA_W(W_DATA_W),
-      .R_DATA_W(R_DATA_W),
-      .ADDR_W  (ADDR_W)
-   ) iob_asym_converter0 (
-      `include "clk_en_rst_s_s_portmap.vs"
-
-      .w_en_i  (w_en_int),
-      .w_addr_i(w_addr),
-      .w_data_i(w_data_i),
-
-      .r_en_i  (r_en_int),
-      .r_addr_i(r_addr),
-      .r_data_o(r_data_o),
-
-      .ext_mem_clk_o   (ext_mem_clk_o),
-      .ext_mem_w_en_o  (ext_mem_w_en_o),
-      .ext_mem_w_addr_o(ext_mem_w_addr_o),
-      .ext_mem_w_data_o(ext_mem_w_data_o),
-      .ext_mem_r_en_o  (ext_mem_r_en_o),
-      .ext_mem_r_addr_o(ext_mem_r_addr_o),
-      .ext_mem_r_data_i(ext_mem_r_data_i)
-   );
+   assign ext_mem_clk_o = clk_i;
+   `include "iob_asym_converter.vs"
 
 endmodule
