@@ -3,7 +3,7 @@
 
 `timescale 1 ns / 1 ps
 
-module iob_ram_sp_be #(
+module iob_ram_sp_se #(
    parameter HEXFILE = "none",
    parameter ADDR_W  = 10,
    parameter DATA_W  = 32,
@@ -11,7 +11,7 @@ module iob_ram_sp_be #(
 ) (
    input                 clk_i,
    input                 en_i,
-   input  [DATA_W/SDATA_W-1:0] we_i,
+   input  [DATA_W/COL_W-1:0] we_i,
    input  [  ADDR_W-1:0] addr_i,
    input  [  DATA_W-1:0] d_i,
    output [  DATA_W-1:0] d_o

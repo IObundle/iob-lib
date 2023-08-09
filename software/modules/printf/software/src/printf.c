@@ -125,13 +125,11 @@ typedef struct {
   void *arg;
 } out_fct_wrap_type;
 
-
-
 // Function pointer for uart
 static void (*g_uart_putc_ptr)(char);
 
 // Initialize pointer function for uart
-void printf_init(void (*uart_putc_ptr)(char)){
+void printf_init(void (*uart_putc_ptr)(char)) {
   g_uart_putc_ptr = uart_putc_ptr;
 }
 
