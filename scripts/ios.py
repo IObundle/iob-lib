@@ -89,9 +89,12 @@ def generate_ios_header(ios, top_module, out_dir):
             f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
         # Check if this table is a standard interface (from if_gen.py)
         # Note: the table['name'] may have a prefix, therefore we separate it before calling if_gen.
-        if_prefix, if_name = find_suffix_from_list(table["name"], if_gen.interfaces)
+        if_prefix, if_name = find_suffix_from_list(table["name"], if_gen.interface_names)
         if if_name:
-            if_gen.create_signal_table(if_name)
+            print("##############################################")
+            print("Generating " + table["name"] + " interface")
+            if_gen.parse_type(table["name"])
+            if_gen.create_table()
             if_gen.write_vs_contents(
                 if_name,
                 f"{if_name+'_' if ios_table_prefix else ''}{if_prefix}",
@@ -157,12 +160,17 @@ def generate_ios_tex(ios, out_dir):
     # Create if.tex file
     generate_if_tex(ios, out_dir)
 
+    
+    
     for table in ios:
         tex_table = []
         # Check if this table is a standard interface (from if_gen.py)
-        if table["name"] in if_gen.interfaces:
+        if table["name"] in if_gen.interface_names:
             # Interface is standard, generate ports
-            if_gen.create_signal_table(table["name"])
+            print("##############################################")
+            print("Generating " + table["name"] + " interface")
+            if_gen.parse_type(table["name"])
+            if_gen.create_table()
             for port in if_gen.table:
                 port_direction = (
                     port["signal"]

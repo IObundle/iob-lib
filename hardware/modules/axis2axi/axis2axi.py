@@ -23,10 +23,10 @@ class axis2axi(iob_module):
         super()._create_submodules_list(
             [
                 {"interface": "axi_m_port"},
-                {"interface": "axi_m_write_port"},
-                {"interface": "axi_m_read_port"},
-                {"interface": "axi_m_m_write_portmap"},
-                {"interface": "axi_m_m_read_portmap"},
+                {"interface": "axi_write_m_port"},
+                {"interface": "axi_read_m_port"},
+                {"interface": "axi_write_m_m_portmap"},
+                {"interface": "aaxi_read_m_m_portmap"},
                 {"interface": "clk_en_rst_s_port"},
                 iob_fifo_sync,
                 iob_counter,

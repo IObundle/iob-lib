@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Python script to search and add python modules under the given directory to the search path.
-# It also instatiates the top module, assuming that it is a class with the same name as the file that contains it.
+# Python script to search and add python modules under the given search path directory.
+# It also instatiates the top module, provided the  class name matches the name of the file containing it.
 import os
 import sys
 import datetime

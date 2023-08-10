@@ -90,7 +90,7 @@ module axis2axi #(
       .axis_in_valid_i(axis_in_valid_i),
       .axis_in_ready_o(axis_in_ready_o),
 
-      `include "axi_m_m_write_portmap.vs"
+      `include "axi_write_m_m_portmap.vs"
 
       .clk_i (clk_i),
       .cke_i (cke_i),
@@ -114,7 +114,7 @@ module axis2axi #(
       .axis_out_valid_o(axis_out_valid_o),
       .axis_out_ready_i(axis_out_ready_i),
 
-      `include "axi_m_m_read_portmap.vs"
+      `include "aaxi_read_m_m_portmap.vs"
 
       .clk_i (clk_i),
       .cke_i (cke_i),

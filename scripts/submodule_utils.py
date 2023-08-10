@@ -421,7 +421,8 @@ class if_gen_hack_list:
 
 
 def if_gen_interface(interface_name, port_prefix, bus_size=1):
-    if_gen.create_signal_table(interface_name)
+    if_gen.parse_type(interface_name)
+    if_gen.create_table()
     # Create a virtual file object
     virtual_file_obj = if_gen_hack_list()
     # Tell if_gen to write ports in virtual file object
@@ -437,7 +438,7 @@ def if_gen_interface(interface_name, port_prefix, bus_size=1):
 def get_table_ports(table):
     # Check if this table is a standard interface (from if_gen.py)
     # Note: the table['name'] may have a prefix, therefore we separate it before calling if_gen.
-    prefix, if_name = find_suffix_from_list(table["name"], if_gen.interfaces)
+    prefix, if_name = find_suffix_from_list(table["name"], if_gen.interface_names)
     if if_name:
         # Interface is standard, generate ports
         return if_gen_interface(if_name, prefix)

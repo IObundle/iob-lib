@@ -551,6 +551,7 @@ class iob_module:
 
     @classmethod
     def __generate(cls, vs_name, purpose="hardware"):
+
         """Generate a Verilog header with `if_gen.py`.
         vs_name: A dictionary describing the interface to generate.
                  Example simple dictionary: {"interface": "iob_wire"}
@@ -578,16 +579,23 @@ class iob_module:
         """
         dest_dir = os.path.join(cls.build_dir, cls.get_purpose_dir(purpose))
 
-        if_gen.default_interface_fields(vs_name)
-
-        if (type(vs_name) is dict) and (vs_name["interface"] in if_gen.interfaces):
+        # set prefixes if they do not exist
+        if not "file_prefix" in vs_name:
+            vs_name["file_prefix"] = ""
+        if not "port_prefix" in vs_name:
+            vs_name["port_prefix"] = ""
+        if not "wire_prefix" in vs_name:
+            vs_name["wire_prefix"] = ""
+        
+        if (type(vs_name) is dict):
             f_out = open(
                 os.path.join(
                     dest_dir, vs_name["file_prefix"] + vs_name["interface"] + ".vs"
                 ),
                 "w",
             )
-            if_gen.create_signal_table(vs_name["interface"])
+            if_gen.parse_type(vs_name["interface"])
+            if_gen.create_table()
             if_gen.write_vs_contents(
                 vs_name["interface"],
                 vs_name["port_prefix"],
