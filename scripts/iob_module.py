@@ -594,9 +594,11 @@ class iob_module:
                 ),
                 "w",
             )
-            if_gen.parse_type(vs_name["interface"])
-            if_gen.create_table()
+            interface_name = if_gen.get_if_name(vs_name["interface"])
+            table = if_gen.create_table(interface_name)
+            print(interface_name, table)
             if_gen.write_vs_contents(
+                table,
                 vs_name["interface"],
                 vs_name["port_prefix"],
                 vs_name["wire_prefix"],

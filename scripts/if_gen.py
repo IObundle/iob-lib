@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # this script generates interfaces for Verilog modules and testbenches
-# to add a new interface, add the name to the list interface_name and an interface dictionary below
+# to add a new interface, add the name to the interface_names list, and an interface dictionary as below
 # run this script with the -h option for help
 
 import sys
@@ -1320,15 +1320,12 @@ apb = amba
 
 
 #interface name and table global variable
-interface_name = ""
 table = []
 
-def create_table():
+def create_table(interface_name):
 
-    global interface_name
     global table
 
-    print("Creating table for interface: " + interface_name)
     table = eval(interface_name)
     
     for i in table:
@@ -1615,64 +1612,43 @@ def s_tb_wire(prefix, param_prefix, fout, bus_size=1):
 # port_prefix: Prefix for ports in a portmap file; Prefix for ports in a `*port.vs` file; Use PORT_PREFIX (upper case) for parameters in signal width for ports or wire.
 # wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file;
 def write_vs_contents(
-    interface_name,
-    port_prefix,
-    wire_prefix,
-    file_object,
-    bus_size=1,
-    bus_start=0,
+        sig_table,
+        interface_type,
+        port_prefix,
+        wire_prefix,
+        file_object,
+        bus_size=1,
+        bus_start=0,
 ):
-    func_name = (
-        interface_name.replace("axil_", "")
-        .replace("clk_en_rst_", "")
-        .replace("clk_rst_", "")
-        .replace("rom_", "")
-        .replace("ram_", "")
-        .replace("axi_", "")
-        .replace("write_", "")
-        .replace("read_", "")
-        .replace("iob_", "")
-        .replace("apb_", "")
-        .replace("ahb_", "")
-    )
+    global table
+    table = sig_table
 
     param_prefix = port_prefix.upper()
 
-    # add '_' prefix for func_names starting with digit
-    # (examples: 2p_port, 2p_be_portmap, 2p_tiled_port)
-    if func_name[0].isdigit():
-        func_name = f"_{func_name}"
-
-    if interface_name.find("portmap") + 1:
+    if interface_type.find("portmap") + 1:
         eval(
-            func_name
+            interface_type
             + "(port_prefix, wire_prefix, file_object, bus_start=bus_start, bus_size=bus_size)"
         )
-    elif interface_name.find("wire") + 1:
-        eval(func_name + "(wire_prefix, param_prefix, file_object, bus_size=bus_size)")
+    elif interface_type.find("wire") + 1:
+        eval(interface_type + "(wire_prefix, param_prefix, file_object, bus_size=bus_size)")
     else:
-        eval(func_name + "(port_prefix, param_prefix, file_object, bus_size=bus_size)")
+        eval(interface_type + "(port_prefix, param_prefix, file_object, bus_size=bus_size)")
 
-def parse_type(arg):
-
-    print("parse_type: arg = ", arg)
-    
-    global interface_name
-
-    #loop over all interface names and find if arg starts with one of them; then assign interface_name to that interface
+def get_if_name(arg):
     for interface in interface_names:
         if arg.startswith(interface):
-            interface_name = interface
-            #interface_type is the string after the interface name
-            interface_type = arg[len(interface)+1:]
-            return interface_type
+            return interface
+    if interface == interface_names[-1]:
+        return None
 
-        #if arg does not start with any of the interface names, then it is not a valid interface. Issue error and exit
-        if interface == interface_names[-1]:
-            print("Error: Invalid interface name: " + arg)
-            exit()
-
-
+def get_if_type(arg):
+    for interface in interface_names:
+        if arg.startswith(interface):
+            return arg[len(interface):]
+    if interface == interface_names[-1]:
+        return None
+        
 #
 # Parse command line arguments
 #
@@ -1685,7 +1661,6 @@ def parse_arguments():
 
     parser.add_argument(
         "type",
-        type=lambda s: parse_type(s),
         help="""
         type can defined as one of the following: 
         base_m_port: iob native master port, 
@@ -1735,13 +1710,14 @@ def main():
 
     # parse command line arguments
     args = parse_arguments()
-    
+
     # create signal table
-    create_table()
+    interface_name = get_if_name(args.type)
+    create_table(interface_name)
 
     # write .vs file
-    fout = open(args.file_prefix + interface_name + '_' + args.type + ".vs", "w")
-    write_vs_contents(args.type, args.port_prefix, args.wire_prefix, fout)
+    fout = open(args.file_prefix + args.type + ".vs", "w")
+    write_vs_contents(table, interface_name, args.port_prefix, args.wire_prefix, fout)
 
     fout.close()
 

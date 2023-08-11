@@ -89,13 +89,15 @@ def generate_ios_header(ios, top_module, out_dir):
             f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
         # Check if this table is a standard interface (from if_gen.py)
         # Note: the table['name'] may have a prefix, therefore we separate it before calling if_gen.
+
         if_prefix, if_name = find_suffix_from_list(table["name"], if_gen.interface_names)
+        
         if if_name:
-            print("##############################################")
-            print("Generating " + table["name"] + " interface")
-            if_gen.parse_type(table["name"])
-            if_gen.create_table()
+            if_name = if_gen.get_if_name(table["name"])
+            if_table = if_gen.create_table(if_name)
+            print(if_name, if_table)
             if_gen.write_vs_contents(
+                if_table,
                 if_name,
                 f"{if_name+'_' if ios_table_prefix else ''}{if_prefix}",
                 "",
@@ -159,23 +161,19 @@ def generate_if_tex(ios, out_dir):
 def generate_ios_tex(ios, out_dir):
     # Create if.tex file
     generate_if_tex(ios, out_dir)
-
-    
-    
+ 
     for table in ios:
         tex_table = []
         # Check if this table is a standard interface (from if_gen.py)
-        if table["name"] in if_gen.interface_names:
+        if_name = if_gen.get_if_name(table["name"])
+        if if_name in if_gen.interface_names:
             # Interface is standard, generate ports
-            print("##############################################")
-            print("Generating " + table["name"] + " interface")
-            if_gen.parse_type(table["name"])
-            if_gen.create_table()
-            for port in if_gen.table:
+            if_table = if_gen.create_table(if_name)
+            for port in if_table:
                 port_direction = (
-                    port["signal"]
+                    port["type"]
                     if "m_" in port["name"]
-                    else if_gen.reverse(port["signal"])
+                    else if_gen.reverse(port["type"])
                 )  # Reverse port direction if it is a slave interface
                 tex_table.append(
                     [
