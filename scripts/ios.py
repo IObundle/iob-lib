@@ -72,8 +72,9 @@ def delete_last_comma(file_obj):
 # Each table is a dictionary with fomat: {'name': '<table name>', 'descr':'<table description>', 'ports': [<list of ports>]}
 # Each port is a dictionary with fomat: {'name':"<port name>", 'type':"<port type>", 'n_bits':'<port width>', 'descr':"<port description>"},
 def generate_ios_header(ios, top_module, out_dir):
-    f_io = open(f"{out_dir}/{top_module}_io.vs", "w+")
 
+    f_io = open(f"{out_dir}/{top_module}_io.vs", "w+")
+    
     for table in ios:
         # If table has 'doc_only' attribute set to True, skip it
         if "doc_only" in table.keys() and table["doc_only"]:
@@ -87,18 +88,17 @@ def generate_ios_header(ios, top_module, out_dir):
 
         if "if_defined" in table.keys():
             f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
-        # Check if this table is a standard interface (from if_gen.py)
-        # Note: the table['name'] may have a prefix, therefore we separate it before calling if_gen.
 
-        if_prefix, if_name = find_suffix_from_list(table["name"], if_gen.interface_names)
-        
+        interface = table["name"]
+        if_name = if_gen.get_if_name(interface)
+        if_type = if_gen.get_if_type(interface)
+            
         if if_name:
-            if_name = if_gen.get_if_name(table["name"])
+            
             if_table = if_gen.create_table(if_name)
-            print(if_name, if_table)
             if_gen.write_vs_contents(
                 if_table,
-                if_name,
+                if_type,
                 f"{if_name+'_' if ios_table_prefix else ''}{if_prefix}",
                 "",
                 f_io,
@@ -169,6 +169,7 @@ def generate_ios_tex(ios, out_dir):
         if if_name in if_gen.interface_names:
             # Interface is standard, generate ports
             if_table = if_gen.create_table(if_name)
+            
             for port in if_table:
                 port_direction = (
                     port["type"]

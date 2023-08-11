@@ -1620,6 +1620,7 @@ def write_vs_contents(
         bus_size=1,
         bus_start=0,
 ):
+
     global table
     table = sig_table
 
@@ -1645,7 +1646,7 @@ def get_if_name(arg):
 def get_if_type(arg):
     for interface in interface_names:
         if arg.startswith(interface):
-            return arg[len(interface):]
+            return arg[len(interface)+1:]
     if interface == interface_names[-1]:
         return None
         
@@ -1716,8 +1717,9 @@ def main():
     create_table(interface_name)
 
     # write .vs file
+    interface_type = get_if_type(args.type)
     fout = open(args.file_prefix + args.type + ".vs", "w")
-    write_vs_contents(table, interface_name, args.port_prefix, args.wire_prefix, fout)
+    write_vs_contents(table, interface_type, args.port_prefix, args.wire_prefix, fout)
 
     fout.close()
 

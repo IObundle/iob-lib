@@ -447,7 +447,6 @@ class iob_module:
             # Remove common sources
             for src in common_srcs:
                 os.remove(os.path.join(cls.build_dir, subfolder, src))
-                # print(f'{iob_colors.INFO}Removed duplicate source: {os.path.join(subfolder, src)}{iob_colors.ENDC}')
 
     @classmethod
     def _replace_snippet_includes(cls):
@@ -594,12 +593,12 @@ class iob_module:
                 ),
                 "w",
             )
-            interface_name = if_gen.get_if_name(vs_name["interface"])
-            table = if_gen.create_table(interface_name)
-            print(interface_name, table)
+            if_name, if_type = if_gen.get_if_name(vs_name["interface"]), if_gen.get_if_type(vs_name["interface"])
+            if_table = if_gen.create_table(if_name)
+            
             if_gen.write_vs_contents(
-                table,
-                vs_name["interface"],
+                if_table,
+                if_type,
                 vs_name["port_prefix"],
                 vs_name["wire_prefix"],
                 f_out,

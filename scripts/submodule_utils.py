@@ -421,13 +421,15 @@ class if_gen_hack_list:
 
 
 def if_gen_interface(interface_name, port_prefix, bus_size=1):
-    if_name = if_gen.get_if_name(interface_name)
+    if_name, if_type = if_gen.get_if_name(interface_name), if_gen.get_if_type(interface_name)
     table = if_gen.create_table(if_name)
+
     # Create a virtual file object
     virtual_file_obj = if_gen_hack_list()
     # Tell if_gen to write ports in virtual file object
+    
     if_gen.write_vs_contents(
-        table, interface_name, port_prefix, "", virtual_file_obj, bus_size=bus_size
+        table, interface_type, port_prefix, "", virtual_file_obj, bus_size=bus_size
     )
     # Extract port list from virtual file object
     return virtual_file_obj.port_list

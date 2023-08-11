@@ -71,9 +71,9 @@ def replace_includes(setup_dir="", build_dir=""):
             source.writelines(new_lines)
 
     # Remove the VSnippetFiles
-    for VSnippetFile in VSnippetFiles:
-        os.remove(VSnippetFile)
-    os.rmdir(VSnippetDir)
+    #for VSnippetFile in VSnippetFiles:
+     #   os.remove(VSnippetFile)
+    #os.rmdir(VSnippetDir)
 
     print(
         f"{iob_colors.INFO}Replaced Verilog Snippet includes with respective content and deleted the files.{iob_colors.ENDC}"
