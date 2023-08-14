@@ -458,7 +458,6 @@ class mkregs:
                             log2n_items, self.config, "max"
                         )
                     )
-                    - 1
                 )
                 * n_bytes
             )
@@ -478,7 +477,7 @@ class mkregs:
                     f_gen.write(f"  if({aux_read_reg}) ")
                 else:
                     f_gen.write(
-                        f"  {aux_read_reg} = (`IOB_WORD_ADDR(iob_addr_i) >= {self.bfloor(addr, addr_w_base)};\n"
+                        f"  {aux_read_reg} = (`IOB_WORD_ADDR(iob_addr_i) >= {self.bfloor(addr, addr_w_base)} && `IOB_WORD_ADDR(iob_addr_i) < {self.bfloor(addr_last, addr_w_base)});\n"
                     )
                     f_gen.write(f"  if({aux_read_reg}) ")
                 f_gen.write(f"begin\n")
@@ -714,7 +713,7 @@ class mkregs:
                 addr_shift = ""
                 if addr_w / n_bytes > 1:
                     addr_arg = ", int addr"
-                    addr_shift = f" + (addr << {int(log(n_bytes, 2))})"
+                    addr_shift = f" + (addr)"
                 fsw.write(
                     f"void {core_prefix}SET_{name}({sw_type} value{addr_arg}) {{\n"
                 )
@@ -728,7 +727,7 @@ class mkregs:
                 addr_shift = ""
                 if addr_w / n_bytes > 1:
                     addr_arg = "int addr"
-                    addr_shift = f" + (addr << {int(log(n_bytes, 2))})"
+                    addr_shift = f" + (addr)"
                 fsw.write(f"{sw_type} {core_prefix}GET_{name}({addr_arg}) {{\n")
                 fsw.write(
                     f"  return (*( (volatile {sw_type} *) ( (base) + ({core_prefix}{name}){addr_shift}) ));\n"
