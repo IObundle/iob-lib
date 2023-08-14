@@ -2,11 +2,11 @@ import os
 
 from iob_module import iob_module
 
-from iob_counter_ld import iob_counter_ld
+from iob_ram_sp import iob_ram_sp
 
 
-class iob_modcnt(iob_module):
-    name = "iob_modcnt"
+class iob_ram_sp_se(iob_module):
+    name = "iob_ram_sp_se"
     version = "V0.10"
     flows = "sim"
     setup_dir = os.path.dirname(__file__)
@@ -16,9 +16,6 @@ class iob_modcnt(iob_module):
         """Create submodules list with dependencies of this module"""
         super()._create_submodules_list(
             [
-                {"interface": "clk_en_rst_s_port"},
-                {"interface": "clk_en_rst_s_s_portmap"},
-                iob_modcnt,
-                iob_counter_ld,
+                iob_ram_sp,
             ]
         )
