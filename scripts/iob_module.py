@@ -76,16 +76,6 @@ class iob_module:
     # Methods NOT to be overriden by subclasses
     ###############################################################
 
-    # DEPRECATED METHOD
-    @classmethod
-    def setup(cls, purpose="hardware", is_top_module=False):
-        """Deprecated method for setup.
-        Raises exception if called.
-        """
-        raise Exception(
-            f"{iob_colors.FAIL}The `setup()` method is deprecated. Use the `_create_submodules_list()` method to setup the `submodule_list`.{iob_colors.ENDC}"
-        )
-
     @classmethod
     def setup_as_top_module(cls):
         """Initialize the setup process for the top module.
@@ -125,19 +115,6 @@ class iob_module:
         cls.__pre_specific_setup()
         cls._specific_setup()
         cls._post_setup()
-
-    # DEPRECATED METHOD
-    @classmethod
-    def instance(cls, name="", *args, **kwargs):
-        """Deprecated method to create Verilog instances.
-        Raises exception if called.
-        """
-        raise Exception(
-            f"{iob_colors.FAIL}The `instance()` method is deprecated. Use the class constructor inherited from `iob_module` to create Verilog instances.{iob_colors.ENDC}"
-        )
-
-        # Return None, since iob_verilog_instance class/objects do not exist
-        return None
 
     @classmethod
     def init_attributes(cls):
@@ -395,7 +372,7 @@ class iob_module:
             mk_conf.conf_vh(cls.confs, cls.name, cls.build_dir + "/hardware/src")
 
         if cls.ios:
-            ios_lib.generate_ios_header(
+            ios_lib.generate_ports(
                 cls.ios, cls.name, cls.build_dir + "/hardware/src"
             )
 
@@ -538,20 +515,10 @@ class iob_module:
                     f"{iob_colors.FAIL}Unknown type in submodule_list of {cls.name}: {_submodule}{iob_colors.ENDC}"
                 )
 
-    # DEPRECATED METHOD
-    @classmethod
-    def generate(cls, vs_name, purpose="hardware"):
-        """Deprecated method for generate.
-        Raises exception if called.
-        """
-        raise Exception(
-            f"{iob_colors.FAIL}The `generate()` method is deprecated. Use the `_create_submodules_list()` method to setup the `submodule_list`.{iob_colors.ENDC}"
-        )
-
     @classmethod
     def __generate(cls, vs_name, purpose="hardware"):
 
-        """Generate a Verilog header with `if_gen.py`.
+        """Generate a Verilog snippet with `if_gen.py`.
         vs_name: A dictionary describing the interface to generate.
                  Example simple dictionary: {"interface": "iob_wire"}
                  Example full dictionary:
@@ -563,7 +530,7 @@ class iob_module:
                            "bus_start": 0,                # Optional. Starting index of the bus of wires that we are connecting.
                            "bus_size": 2,                 # Optional. Size of the bus of wires that we are creating/connecting.
                        }
-        purpose: [Optional] Reason for generating the header. Used to select between the standard destination locations.
+        purpose: [Optional] Used to select between the standard destination locations.
 
         Example function calls:
         To generate a simple `iob_s_port.vh` file, use: `iob_module.generate("iob_s_port")`

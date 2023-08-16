@@ -10,7 +10,6 @@ from submodule_utils import (
     get_module_io,
     import_setup,
     get_pio_signals,
-    if_gen_interface,
     find_suffix_from_list,
 )
 import importlib.util
@@ -71,7 +70,7 @@ def delete_last_comma(file_obj):
 # ios: list of tables, each of them containing a list of ports
 # Each table is a dictionary with fomat: {'name': '<table name>', 'descr':'<table description>', 'ports': [<list of ports>]}
 # Each port is a dictionary with fomat: {'name':"<port name>", 'type':"<port type>", 'n_bits':'<port width>', 'descr':"<port description>"},
-def generate_ios_header(ios, top_module, out_dir):
+def generate_ports(ios, top_module, out_dir):
 
     f_io = open(f"{out_dir}/{top_module}_io.vs", "w+")
     
@@ -80,36 +79,31 @@ def generate_ios_header(ios, top_module, out_dir):
         if "doc_only" in table.keys() and table["doc_only"]:
             continue
 
-        # If table has 'ios_table_prefix' attribute set to True, append table name as a prefix to every port
-        if "ios_table_prefix" in table.keys():
-            ios_table_prefix = table["ios_table_prefix"]
-        else:
-            ios_table_prefix = False
-
+        # Open ifdef if conditional interface
         if "if_defined" in table.keys():
             f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
 
         interface = table["name"]
         if_name = if_gen.get_if_name(interface)
         if_type = if_gen.get_if_type(interface)
-            
+
         if if_name:
-            
             if_table = if_gen.create_table(if_name)
             if_gen.write_vs_contents(
-                if_table,
-                if_type,
-                f"{if_name+'_' if ios_table_prefix else ''}{if_prefix}",
-                "",
-                f_io,
+                sig_table = if_table,
+                interface_type = if_type,
+                port_prefix = table["port_prefix"] if "port_prefix" in table.keys() else "",
+                wire_prefix = table["wire_prefix"] if "wire_prefix" in table.keys() else "",
+                file_object=f_io,
             )
         else:
-            # Interface is not standard, read ports
+            # Interface is not standard, so we need to generate it
             for port in table["ports"]:
                 f_io.write(
-                    f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if ios_table_prefix else ''}{port['name']},\n"
-                    # f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if ios_table_prefix else ''}{port['name']}, //{port['descr']}\n"
+                    f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {port['name']},\n"
                 )
+
+        # Close ifdef if conditional interface
         if "if_defined" in table.keys():
             f_io.write("`endif\n")
 
