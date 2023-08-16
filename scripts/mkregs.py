@@ -713,7 +713,7 @@ class mkregs:
                 addr_shift = ""
                 if addr_w / n_bytes > 1:
                     addr_arg = ", int addr"
-                    addr_shift = f" + (addr)"
+                    addr_shift = f" + (addr << {int(log(n_bytes, 2))})"
                 fsw.write(
                     f"void {core_prefix}SET_{name}({sw_type} value{addr_arg}) {{\n"
                 )
@@ -727,7 +727,7 @@ class mkregs:
                 addr_shift = ""
                 if addr_w / n_bytes > 1:
                     addr_arg = "int addr"
-                    addr_shift = f" + (addr)"
+                    addr_shift = f" + (addr << {int(log(n_bytes, 2))})"
                 fsw.write(f"{sw_type} {core_prefix}GET_{name}({addr_arg}) {{\n")
                 fsw.write(
                     f"  return (*( (volatile {sw_type} *) ( (base) + ({core_prefix}{name}){addr_shift}) ));\n"
