@@ -9,8 +9,8 @@ from mk_configuration import config_build_mk
 import build_srcs
 import verilog_tools
 import mkregs
-import blocks as blocks_lib
-import ios as ios_lib
+import blocks
+import ios
 import mk_configuration as mk_conf
 
 
@@ -372,10 +372,13 @@ class iob_module:
             mk_conf.conf_vh(cls.confs, cls.name, cls.build_dir + "/hardware/src")
 
         if cls.ios:
-            ios_lib.generate_ports(
-                cls.ios, cls.name, cls.build_dir + "/hardware/src"
+            ios.write_ports (
+                ios.generate_ports(
+                    cls.ios, cls.name, cls.build_dir + "/hardware/src"
+                ), cls.name,
+                cls.build_dir + "/hardware/src",
             )
-
+            
     @classmethod
     def _generate_sw(cls, mkregs_obj, reg_table):
         """Generate common software files"""
@@ -398,12 +401,12 @@ class iob_module:
         """Generate common documentation files"""
         if cls.is_top_module and "doc" in cls.flows:
             mk_conf.generate_confs_tex(cls.confs, cls.build_dir + "/document/tsrc")
-            ios_lib.generate_ios_tex(cls.ios, cls.build_dir + "/document/tsrc")
+            ios.generate_ios_tex(cls.ios, cls.build_dir + "/document/tsrc")
             if cls.regs:
                 mkregs_obj.generate_regs_tex(
                     cls.regs, reg_table, cls.build_dir + "/document/tsrc"
                 )
-            blocks_lib.generate_blocks_tex(
+            blocks.generate_blocks_tex(
                 cls.block_groups, cls.build_dir + "/document/tsrc"
             )
 
@@ -564,11 +567,11 @@ class iob_module:
             if_table = if_gen.create_table(if_name)
             
             if_gen.write_vs_contents(
+                f_out,
                 if_table,
                 if_type,
                 vs_name["port_prefix"],
                 vs_name["wire_prefix"],
-                f_out,
                 bus_size=vs_name["bus_size"] if "bus_size" in vs_name.keys() else 1,
                 bus_start=vs_name["bus_start"] if "bus_start" in vs_name.keys() else 0,
             )

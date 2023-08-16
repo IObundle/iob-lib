@@ -23,9 +23,6 @@ def reverse_port(port_type):
     else:
         return "I"
 
-
-# Return full port type string based on given types: "I", "O" and "IO"
-# Maps "I", "O" and "IO" to "input", "output" and "inout", respectively.
 def get_port_type(port_type):
     if port_type == "I":
         return "input"
@@ -35,10 +32,6 @@ def get_port_type(port_type):
         return "inout"
 
 
-# Find and remove last comma from an IO signal line in a Verilog header file
-# It expects file to contain lines formated like:
-# input [signal_size-1:0] signal_name,  //Some comment, may contain commas
-# Note: file_obj given must have been opened in write+read mode (like "r+" or "w+")
 def delete_last_comma(file_obj):
     # Place cursor at the end of the file
     file_obj.read()
@@ -66,14 +59,35 @@ def delete_last_comma(file_obj):
     file_obj.write(" ")
 
 
-# Generate io.vs file
-# ios: list of tables, each of them containing a list of ports
-# Each table is a dictionary with fomat: {'name': '<table name>', 'descr':'<table description>', 'ports': [<list of ports>]}
-# Each port is a dictionary with fomat: {'name':"<port name>", 'type':"<port type>", 'n_bits':'<port width>', 'descr':"<port description>"},
-def generate_ports(ios, top_module, out_dir):
+def write_ports(if_table, top_module, out_dir):
 
     f_io = open(f"{out_dir}/{top_module}_io.vs", "w+")
     
+    for table in if_table:
+        # Open ifdef if conditional interface
+        if "if_defined" in table.keys():
+            f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
+
+        if_gen.write_vs_contents(
+            file_object=f_io,
+            sig_table = if_table,
+            interface_type = if_type,
+            port_prefix = table["port_prefix"] if "port_prefix" in table.keys() else "",
+            wire_prefix = table["wire_prefix"] if "wire_prefix" in table.keys() else "",
+        )
+
+        # Close ifdef if conditional interface
+        if "if_defined" in table.keys():
+            f_io.write("`endif\n")
+
+    # Find and remove last comma
+    delete_last_comma(f_io)
+
+    f_io.close()
+
+
+def generate_ports(ios):
+
     for table in ios:
         # If table has 'doc_only' attribute set to True, skip it
         if "doc_only" in table.keys() and table["doc_only"]:
@@ -87,31 +101,17 @@ def generate_ports(ios, top_module, out_dir):
         if_name = if_gen.get_if_name(interface)
         if_type = if_gen.get_if_type(interface)
 
+
         if if_name:
             if_table = if_gen.create_table(if_name)
-            if_gen.write_vs_contents(
-                sig_table = if_table,
-                interface_type = if_type,
-                port_prefix = table["port_prefix"] if "port_prefix" in table.keys() else "",
-                wire_prefix = table["wire_prefix"] if "wire_prefix" in table.keys() else "",
-                file_object=f_io,
-            )
         else:
-            # Interface is not standard, so we need to generate it
-            for port in table["ports"]:
-                f_io.write(
-                    f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {port['name']},\n"
-                )
+            if_table = table
 
         # Close ifdef if conditional interface
         if "if_defined" in table.keys():
             f_io.write("`endif\n")
 
-    # Find and remove last comma
-    delete_last_comma(f_io)
-
-    f_io.close()
-
+    return if_name
 
 # Generate if.tex file with list TeX tables of IOs
 def generate_if_tex(ios, out_dir):

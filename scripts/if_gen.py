@@ -44,8 +44,6 @@ interface_names = [
 
 iob = [
     {
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "iob_avalid",
@@ -53,8 +51,6 @@ iob = [
         "description": "Request valid.",
     },
     {
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "ADDR_W",
         "name": "iob_addr",
@@ -62,8 +58,6 @@ iob = [
         "description": "Address.",
     },
     {
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "DATA_W",
         "name": "iob_wdata",
@@ -71,8 +65,6 @@ iob = [
         "description": "Write data.",
     },
     {
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "(DATA_W/8)",
         "name": "iob_wstrb",
@@ -80,8 +72,6 @@ iob = [
         "description": "Write strobe.",
     },
     {
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "iob_rvalid",
@@ -89,8 +79,6 @@ iob = [
         "description": "Read data valid.",
     },
     {
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "DATA_W",
         "name": "iob_rdata",
@@ -98,8 +86,6 @@ iob = [
         "description": "Read data.",
     },
     {
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "iob_ready",
@@ -110,8 +96,6 @@ iob = [
 
 clk_rst = [
     {
-        "master": 1,
-        "slave": 1,
         "enable": 0,
         "type": "output",
         "width": "1",
@@ -120,8 +104,6 @@ clk_rst = [
         "description": "clock signal",
     },
     {
-        "master": 1,
-        "slave": 1,
         "enable": 0,
         "type": "output",
         "width": "1",
@@ -133,8 +115,6 @@ clk_rst = [
 
 clk_en_rst = [
     {
-        "master": 1,
-        "slave": 1,
         "enable": 0,
         "type": "output",
         "width": "1",
@@ -143,8 +123,6 @@ clk_en_rst = [
         "description": "clock signal",
     },
     {
-        "master": 1,
-        "slave": 1,
         "enable": 1,
         "type": "output",
         "width": "1",
@@ -153,8 +131,6 @@ clk_en_rst = [
         "description": "clock enable",
     },
     {
-        "master": 1,
-        "slave": 1,
         "enable": 0,
         "type": "output",
         "width": "1",
@@ -675,8 +651,6 @@ AXI_RESP_W = "2"
 axi_write = [
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "AXI_ID_W",
         "name": "axi_awid",
@@ -685,8 +659,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "AXI_ADDR_W",
         "name": "axi_awaddr",
@@ -695,8 +667,6 @@ axi_write = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "AXI_LEN_W",
         "name": "axi_awlen",
@@ -705,8 +675,6 @@ axi_write = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_SIZE_W,
         "name": "axi_awsize",
@@ -715,8 +683,6 @@ axi_write = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_BURST_W,
         "name": "axi_awburst",
@@ -725,8 +691,6 @@ axi_write = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_LOCK_W,
         "name": "axi_awlock",
@@ -735,8 +699,6 @@ axi_write = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_CACHE_W,
         "name": "axi_awcache",
@@ -745,8 +707,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_PROT_W,
         "name": "axi_awprot",
@@ -755,8 +715,6 @@ axi_write = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_QOS_W,
         "name": "axi_awqos",
@@ -765,8 +723,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "axi_awvalid",
@@ -775,8 +731,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "axi_awready",
@@ -785,8 +739,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "AXI_DATA_W",
         "name": "axi_wdata",
@@ -795,8 +747,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "(AXI_DATA_W/8)",
         "name": "axi_wstrb",
@@ -805,8 +755,6 @@ axi_write = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "axi_wlast",
@@ -815,8 +763,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "axi_wvalid",
@@ -825,8 +771,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "axi_wready",
@@ -835,8 +779,6 @@ axi_write = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "AXI_ID_W",
         "name": "axi_bid",
@@ -845,8 +787,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": AXI_RESP_W,
         "name": "axi_bresp",
@@ -855,8 +795,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "axi_bvalid",
@@ -865,8 +803,6 @@ axi_write = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "axi_bready",
@@ -878,8 +814,6 @@ axi_write = [
 axi_read = [
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "AXI_ID_W",
         "name": "axi_arid",
@@ -888,8 +822,6 @@ axi_read = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "AXI_ADDR_W",
         "name": "axi_araddr",
@@ -898,8 +830,6 @@ axi_read = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "AXI_LEN_W",
         "name": "axi_arlen",
@@ -908,8 +838,6 @@ axi_read = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_SIZE_W,
         "name": "axi_arsize",
@@ -918,8 +846,6 @@ axi_read = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_BURST_W,
         "name": "axi_arburst",
@@ -928,8 +854,6 @@ axi_read = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_LOCK_W,
         "name": "axi_arlock",
@@ -938,8 +862,6 @@ axi_read = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_CACHE_W,
         "name": "axi_arcache",
@@ -948,8 +870,6 @@ axi_read = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_PROT_W,
         "name": "axi_arprot",
@@ -958,8 +878,6 @@ axi_read = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AXI_QOS_W,
         "name": "axi_arqos",
@@ -968,8 +886,6 @@ axi_read = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "axi_arvalid",
@@ -978,8 +894,6 @@ axi_read = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "axi_arready",
@@ -988,8 +902,6 @@ axi_read = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "AXI_ID_W",
         "name": "axi_rid",
@@ -998,8 +910,6 @@ axi_read = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "AXI_DATA_W",
         "name": "axi_rdata",
@@ -1008,8 +918,6 @@ axi_read = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": AXI_RESP_W,
         "name": "axi_rresp",
@@ -1018,8 +926,6 @@ axi_read = [
     },
     {
         "lite": 0,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "axi_rlast",
@@ -1028,8 +934,6 @@ axi_read = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "axi_rvalid",
@@ -1038,8 +942,6 @@ axi_read = [
     },
     {
         "lite": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "axi_rready",
@@ -1096,8 +998,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "AHB_ADDR_W",
         "name": "ahb_addr",
@@ -1107,8 +1007,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AHB_BURST_W,
         "name": "ahb_burst",
@@ -1118,8 +1016,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "ahb_mastlock",
@@ -1129,8 +1025,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AHB_PROT_W,
         "name": "ahb_prot",
@@ -1140,8 +1034,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AHB_SIZE_W,
         "name": "ahb_size",
@@ -1151,8 +1043,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "ahb_nonsec",
@@ -1162,8 +1052,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "ahb_excl",
@@ -1173,8 +1061,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "AHB_MASTER_W",
         "name": "ahb_master",
@@ -1184,8 +1070,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": AHB_TRANS_W,
         "name": "ahb_trans",
@@ -1195,8 +1079,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "ahb_sel",
@@ -1206,8 +1088,6 @@ amba = [
     {
         "ahb": 0,
         "apb": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "ahb_enable",
@@ -1217,8 +1097,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "ahb_write",
@@ -1228,8 +1106,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "AHB_DATA_W",
         "name": "ahb_wdata",
@@ -1239,8 +1115,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 1,
-        "master": 1,
-        "slave": 1,
         "type": "output",
         "width": "(AHB_DATA_W/8)",
         "name": "ahb_wstrb",
@@ -1250,8 +1124,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 1,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "AHB_DATA_W",
         "name": "ahb_rdata",
@@ -1261,8 +1133,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 1,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "ahb_ready",
@@ -1272,8 +1142,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 0,
-        "slave": 1,
         "type": "output",
         "width": "1",
         "name": "ahb_ready",
@@ -1283,8 +1151,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "ahb_resp",
@@ -1294,8 +1160,6 @@ amba = [
     {
         "ahb": 1,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "ahb_exokay",
@@ -1305,8 +1169,6 @@ amba = [
     {
         "ahb": 0,
         "apb": 0,
-        "master": 1,
-        "slave": 1,
         "type": "input",
         "width": "1",
         "name": "ahb_slverr",
@@ -1343,6 +1205,7 @@ def create_table(interface_name):
                 table.remove(i)
 
     return table
+
 
 #
 # Handle signal direction 
@@ -1394,37 +1257,53 @@ def add_param_prefix(string, param_prefix):
 
 
 # Write port with given direction, bus width, and name to file
-def write_port(direction, width, name, fout):
+def write_port(
+        direction,
+        width,
+        name,
+        fout):
+
     fout.write(direction + width + name + "," + "\n")
+
+def nstd_port (prefix, param_prefix, fout, bus_size=1):
+    for i in range(len(table)):
+        port_direction = table[i]["type"]
+        name = prefix + table[i]["name"] + suffix(table[i]["type"])
+        if bus_size == 1:
+            width = table[i]["width"]
+        else:
+            width = "(" + str(bus_size) + "*" + table[i]["width"] + ")"
+        width = add_param_prefix(width, param_prefix)
+        bus_width = " [" + width + "-1:0] "
+        # Write port
+        write_port(port_direction, bus_width, name, fout)
 
 def m_port(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
-        if table[i]["master"] == 1:
-            port_direction = table[i]["type"]
-            name = prefix + table[i]["name"] + suffix(table[i]["type"])
-            if bus_size == 1:
-                width = table[i]["width"]
-            else:
-                width = "(" + str(bus_size) + "*" + table[i]["width"] + ")"
-            width = add_param_prefix(width, param_prefix)
-            bus_width = " [" + width + "-1:0] "
-            # Write port
-            write_port(port_direction, bus_width, name, fout)
+        port_direction = table[i]["type"]
+        name = prefix + table[i]["name"] + suffix(table[i]["type"])
+        if bus_size == 1:
+            width = table[i]["width"]
+        else:
+            width = "(" + str(bus_size) + "*" + table[i]["width"] + ")"
+        width = add_param_prefix(width, param_prefix)
+        bus_width = " [" + width + "-1:0] "
+        # Write port
+        write_port(port_direction, bus_width, name, fout)
 
 
 def s_port(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
-        if table[i]["slave"] == 1:
-            port_direction = reverse(table[i]["type"])
-            name = prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
-            if bus_size == 1:
-                width = table[i]["width"]
-            else:
-                width = "(" + str(bus_size) + "*" + table[i]["width"] + ")"
-            width = add_param_prefix(width, param_prefix)
-            bus_width = " [" + width + "-1:0] "
-            # Write port
-            write_port(port_direction, bus_width, name, fout)
+        port_direction = reverse(table[i]["type"])
+        name = prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
+        if bus_size == 1:
+            width = table[i]["width"]
+        else:
+            width = "(" + str(bus_size) + "*" + table[i]["width"] + ")"
+        width = add_param_prefix(width, param_prefix)
+        bus_width = " [" + width + "-1:0] "
+        # Write port
+        write_port(port_direction, bus_width, name, fout)
 
 
 #
@@ -1462,66 +1341,62 @@ def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
 
 def m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
-        if table[i]["master"] == 1:
-            port = port_prefix + table[i]["name"] + suffix(table[i]["type"])
-            connection_name = wire_prefix + table[i]["name"]
-            write_portmap(
-                port,
-                connection_name,
-                table[i]["width"],
-                bus_start,
-                bus_size,
-                fout,
-            )
+        port = port_prefix + table[i]["name"] + suffix(table[i]["type"])
+        connection_name = wire_prefix + table[i]["name"]
+        write_portmap(
+            port,
+            connection_name,
+            table[i]["width"],
+            bus_start,
+            bus_size,
+            fout,
+        )
 
 
 def s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
-        if table[i]["slave"] == 1:
-            port = port_prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
-            connection_name = wire_prefix + table[i]["name"]
-            write_portmap(
-                port,
-                connection_name,
-                table[i]["width"],
-                bus_start,
-                bus_size,
-                fout,
-            )
+        port = port_prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
+        connection_name = wire_prefix + table[i]["name"]
+        write_portmap(
+            port,
+            connection_name,
+            table[i]["width"],
+            bus_start,
+            bus_size,
+            fout,
+        )
 
 
 def m_m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
-        if table[i]["master"] == 1:
-            port = port_prefix + table[i]["name"] + suffix(table[i]["type"])
-            connection_name = (
-                wire_prefix + table[i]["name"] + suffix(table[i]["type"])
-            )
-            write_portmap(
-                port,
-                connection_name,
-                table[i]["width"],
-                bus_start,
-                bus_size,
-                fout,
-            )
+        port = port_prefix + table[i]["name"] + suffix(table[i]["type"])
+        connection_name = (
+            wire_prefix + table[i]["name"] + suffix(table[i]["type"])
+        )
+        write_portmap(
+            port,
+            connection_name,
+            table[i]["width"],
+            bus_start,
+            bus_size,
+            fout,
+        )
 
 
 def s_s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(table)):
-        if table[i]["slave"] == 1:
-            port = port_prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
-            connection_name = (
-                wire_prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
-            )
-            write_portmap(
-                port,
-                connection_name,
-                table[i]["width"],
-                bus_start,
-                bus_size,
-                fout,
-            )
+        port = port_prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
+        connection_name = (
+            wire_prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
+        )
+        write_portmap(
+            port,
+            connection_name,
+            table[i]["width"],
+            bus_start,
+            bus_size,
+            fout,
+        )
 
 #
 # Wire
@@ -1578,47 +1453,45 @@ def wire(prefix, param_prefix, fout, bus_size=1):
 
 def m_tb_wire(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
-        if table[i]["slave"] == 1:
-            tb_signal = tbsignal(table[i]["type"])
-            write_tb_wire(
-                tb_signal,
-                prefix,
-                table[i]["name"],
-                param_prefix,
-                bus_size,
-                table[i]["width"],
-                fout,
-                table[i]["default"],
-            )
+        tb_signal = tbsignal(table[i]["type"])
+        write_tb_wire(
+            tb_signal,
+            prefix,
+            table[i]["name"],
+            param_prefix,
+            bus_size,
+            table[i]["width"],
+            fout,
+            table[i]["default"],
+        )
     fout.write("\n")
 
 
 def s_tb_wire(prefix, param_prefix, fout, bus_size=1):
     for i in range(len(table)):
-        if table[i]["master"] == 1:
-            tb_signal = tbsignal(reverse(table[i]["type"]))
-            write_tb_wire(
-                tb_signal,
-                prefix,
-                table[i]["name"],
-                param_prefix,
-                bus_size,
-                table[i]["width"],
-                fout,
-                table[i]["default"],
-            )
+        tb_signal = tbsignal(reverse(table[i]["type"]))
+        write_tb_wire(
+            tb_signal,
+            prefix,
+            table[i]["name"],
+            param_prefix,
+            bus_size,
+            table[i]["width"],
+            fout,
+            table[i]["default"],
+        )
     fout.write("\n")
 
 # port_prefix: Prefix for ports in a portmap file; Prefix for ports in a `*port.vs` file; Use PORT_PREFIX (upper case) for parameters in signal width for ports or wire.
 # wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file;
 def write_vs_contents(
+        file_object,
         sig_table,
         interface_type,
-        port_prefix,
-        wire_prefix,
-        file_object,
-        bus_size=1,
-        bus_start=0,
+        port_prefix = "",
+        wire_prefix = "",
+        bus_size = 1,
+        bus_start = 0,
 ):
 
     global table
@@ -1626,7 +1499,9 @@ def write_vs_contents(
 
     param_prefix = port_prefix.upper()
 
-    if interface_type.find("portmap") + 1:
+    if interface_type.find("nostd") + 1:
+        eval(interface_type + "(port_prefix, param_prefix, file_object, bus_size=bus_size)")
+    elif interface_type.find("portmap") + 1:
         eval(
             interface_type
             + "(port_prefix, wire_prefix, file_object, bus_start=bus_start, bus_size=bus_size)"
@@ -1713,13 +1588,13 @@ def main():
     args = parse_arguments()
 
     # create signal table
-    interface_name = get_if_name(args.type)
-    create_table(interface_name)
+    if_name = get_if_name(args.type)
+    create_table(if_name)
 
     # write .vs file
-    interface_type = get_if_type(args.type)
+    if_type = get_if_type(args.type)
     fout = open(args.file_prefix + args.type + ".vs", "w")
-    write_vs_contents(table, interface_type, args.port_prefix, args.wire_prefix, fout)
+    write_vs_contents(fout, table, if_type, args.port_prefix, args.wire_prefix)
 
     fout.close()
 

@@ -10,6 +10,8 @@ import importlib
 import if_gen
 import iob_colors
 import copy
+import ios
+
 
 # List of reserved signals
 # These signals are known by the python scripts and are always auto-connected using the matching Verilog the string.
@@ -109,29 +111,22 @@ def get_short_port_type(port_type):
         return "IO"
 
 
-# Adds and fills 'dirs' dictionary inside 'submodules' dicionary of given core/system _setup.py python module
-#       To implement this, we can either: crate a global dictionary with all submodules; or we can do a BFS search for submodules every time we call this function, starting from the root current working directory.
 def set_default_submodule_dirs(python_module):
-    # Make sure 'dirs' dictionary exists
     if "dirs" not in python_module.submodules:
         python_module.submodules["dirs"] = {}
 
     if os.path.isdir(f"{python_module.setup_dir}/submodules"):
-        # Add default path for every submodule without a path
         for submodule in os.listdir(f"{python_module.setup_dir}/submodules"):
             if submodule not in python_module.submodules["dirs"]:
                 python_module.submodules["dirs"].update(
                     {submodule: f"{python_module.setup_dir}/submodules/{submodule}"}
                 )
 
-    # Make sure 'LIB' path exists
     if "LIB" not in python_module.submodules["dirs"]:
         python_module.submodules["dirs"]["LIB"] = "submodules/LIB"
 
 
 # Get peripheral related macros
-# confs: confs dictionary to be filled with peripheral macros
-# peripherals_list: list of peripherals
 def get_peripheral_macros(confs, peripherals_list):
     # Append macros with ID of each peripheral
     confs.extend(get_periphs_id_as_macros(peripherals_list))
@@ -199,7 +194,7 @@ def get_peripheral_ios(peripherals_list):
                 "name": instance.name,
                 "descr": f"{instance.name} interface signals",
                 "ports": port_list[instance.__class__.name],
-                "ios_table_prefix": True,
+                "port_prefix": instance.name,
             }
         )
     return ios_list
@@ -389,36 +384,6 @@ def get_peripherals(peripherals_str):
     return instances_amount, instances_parameters
 
 
-# A virtual file object with a port list. It has a write() method to extract information from if_gen.py signals.
-# Can be used to create virtual file objects with a write() method that parses the if_gen.py port string.
-class if_gen_hack_list:
-    def __init__(self):
-        self.port_list = []
-
-    def write(self, port_string):
-        # Parse written string
-        port = re.search(
-            "^\s*((?:input)|(?:output))\s+\[([^:]+)-1:0\]\s+([^,]+),.*$",
-            port_string,
-        )
-        # Append port to port dictionary
-        self.port_list.append(
-            {
-                "name": port.group(3),
-                "type": get_short_port_type(port.group(1)),
-                "n_bits": port.group(2),
-                "descr": next(
-                    signal["description"]
-                    for signal in if_gen.iob
-                    + if_gen.clk_en_rst
-                    + if_gen.axi_write
-                    + if_gen.axi_read
-                    + if_gen.amba
-                    if signal["name"] in port.group(3)
-                ),
-            }
-        )
-
 
 def if_gen_interface(interface_name, port_prefix, bus_size=1):
     if_name, if_type = if_gen.get_if_name(interface_name), if_gen.get_if_type(interface_name)
@@ -429,7 +394,10 @@ def if_gen_interface(interface_name, port_prefix, bus_size=1):
     # Tell if_gen to write ports in virtual file object
     
     if_gen.write_vs_contents(
-        table, interface_type, port_prefix, "", virtual_file_obj, bus_size=bus_size
+        file_object = virtual_file_obj,
+        sig_table=table,
+        interface_type=if_type,
+        bus_size = bus_size
     )
     # Extract port list from virtual file object
     return virtual_file_obj.port_list
@@ -475,8 +443,7 @@ def get_module_io(ios, confs=None, corename=None):
             signal["name_without_prefix"] = signal[
                 "name"
             ]  # Save the name without prefix in an attribute
-            # Add prefix to signal name if ios_table_prefix is set
-            if "ios_table_prefix" in table.keys() and table["ios_table_prefix"]:
+            if "port_prefix" in table.keys() and table["port_prefix"]:
                 signal["name"] = (
                     table["name"] + "_" + signal["name"]
                 )  # Add prefix to the signal name
