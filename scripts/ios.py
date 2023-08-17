@@ -5,13 +5,7 @@
 
 from latex import write_table
 import if_gen
-from submodule_utils import (
-    get_submodule_directories,
-    get_module_io,
-    import_setup,
-    get_pio_signals,
-    find_suffix_from_list,
-)
+import submodule_utils
 import importlib.util
 import os
 import iob_colors
@@ -22,15 +16,6 @@ def reverse_port(port_type):
         return "O"
     else:
         return "I"
-
-def get_port_type(port_type):
-    if port_type == "I":
-        return "input"
-    elif port_type == "O":
-        return "output"
-    else:
-        return "inout"
-
 
 def delete_last_comma(file_obj):
     # Place cursor at the end of the file
@@ -59,19 +44,19 @@ def delete_last_comma(file_obj):
     file_obj.write(" ")
 
 
-def write_ports(if_table, top_module, out_dir):
-
+def write_ports(ios, top_module, out_dir):
+    
     f_io = open(f"{out_dir}/{top_module}_io.vs", "w+")
     
-    for table in if_table:
+    for table in ios:
         # Open ifdef if conditional interface
         if "if_defined" in table.keys():
             f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
 
         if_gen.write_vs_contents(
             file_object=f_io,
-            sig_table = if_table,
-            interface_type = if_type,
+            sig_table = table["ports"],
+            interface_type = if_gen.get_if_type(table["name"]),
             port_prefix = table["port_prefix"] if "port_prefix" in table.keys() else "",
             wire_prefix = table["wire_prefix"] if "wire_prefix" in table.keys() else "",
         )
@@ -93,25 +78,12 @@ def generate_ports(ios):
         if "doc_only" in table.keys() and table["doc_only"]:
             continue
 
-        # Open ifdef if conditional interface
-        if "if_defined" in table.keys():
-            f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
-
-        interface = table["name"]
-        if_name = if_gen.get_if_name(interface)
-        if_type = if_gen.get_if_type(interface)
-
+        if_name = if_gen.get_if_name(table["name"])
 
         if if_name:
-            if_table = if_gen.create_table(if_name)
-        else:
-            if_table = table
+            table["ports"] = if_gen.create_table(if_name)
 
-        # Close ifdef if conditional interface
-        if "if_defined" in table.keys():
-            f_io.write("`endif\n")
-
-    return if_name
+    return ios
 
 # Generate if.tex file with list TeX tables of IOs
 def generate_if_tex(ios, out_dir):
@@ -176,8 +148,8 @@ def generate_ios_tex(ios, out_dir):
                             "_", "\_"
                         ),
                         port_direction.replace("`IOB_", "").replace("(", ""),
-                        port["width"].replace("_", "\_"),
-                        port["description"].replace("_", "\_"),
+                        port["n_bits"].replace("_", "\_"),
+                        port["descr"].replace("_", "\_"),
                     ]
                 )
         else:
@@ -186,7 +158,7 @@ def generate_ios_tex(ios, out_dir):
                 tex_table.append(
                     [
                         port["name"].replace("_", "\_"),
-                        get_port_type(port["type"]),
+                        port["type"],
                         port["n_bits"].replace("_", "\_"),
                         port["descr"].replace("_", "\_"),
                     ]

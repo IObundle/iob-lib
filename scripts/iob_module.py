@@ -372,12 +372,7 @@ class iob_module:
             mk_conf.conf_vh(cls.confs, cls.name, cls.build_dir + "/hardware/src")
 
         if cls.ios:
-            ios.write_ports (
-                ios.generate_ports(
-                    cls.ios, cls.name, cls.build_dir + "/hardware/src"
-                ), cls.name,
-                cls.build_dir + "/hardware/src",
-            )
+            ios.write_ports (ios.generate_ports(cls.ios), cls.name, cls.build_dir + "/hardware/src")
             
     @classmethod
     def _generate_sw(cls, mkregs_obj, reg_table):
