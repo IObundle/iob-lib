@@ -12,10 +12,10 @@ import iob_colors
 
 
 def reverse_port(port_type):
-    if port_type == "I":
-        return "O"
+    if port_type == "input":
+        return "output"
     else:
-        return "I"
+        return "input"
 
 def delete_last_comma(file_obj):
     # Place cursor at the end of the file

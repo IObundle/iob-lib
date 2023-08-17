@@ -100,17 +100,6 @@ def import_setup(module_location, **kwargs):
     return module
 
 
-# Return short port type string based on given types: "input", "output" and "inout"
-# Maps "I", "O" and "IO" to "input", "output" and "inout", respectively.
-def get_short_port_type(port_type):
-    if port_type == "input":
-        return "I"
-    elif port_type == "output":
-        return "O"
-    else:
-        return "IO"
-
-
 def set_default_submodule_dirs(python_module):
     if "dirs" not in python_module.submodules:
         python_module.submodules["dirs"] = {}
@@ -166,20 +155,9 @@ def check_module_in_modules_list(module_type, modules_list):
     return False
 
 
-# Generate list of dictionaries with interfaces for each peripheral instance
-# Each dictionary is follows the format of a dictionary table in the
-# 'ios' list of the <corename>_setup.py
-# Example dictionary of a peripheral instance with one port:
-#    {'name': 'instance_name', 'descr':'instance description', 'ports': [
-#        {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
-#    ]}
 def get_peripheral_ios(peripherals_list):
     port_list = {}
-    # Get port list for each type of peripheral used
     for instance in peripherals_list:
-        # Make sure we have a hw_module for this peripheral type
-        # assert check_module_in_modules_list(instance['type'],submodules["hw_setup"]["modules"]), f"{iob_colors.FAIL}peripheral {instance['type']} configured but no corresponding hardware module found!{iob_colors.ENDC}"
-        # Only insert ports of this peripheral type if we have not done so before
         if instance.__class__.name not in port_list:
             # Extract only PIO signals from the peripheral (no reserved/known signals)
             port_list[instance.__class__.name] = get_pio_signals(
@@ -187,7 +165,6 @@ def get_peripheral_ios(peripherals_list):
             )
 
     ios_list = []
-    # Append ports of each instance
     for instance in peripherals_list:
         ios_list.append(
             {
@@ -225,22 +202,6 @@ def iob_soc_peripheral_setup(python_module):
 
         # Get peripheral related macros
         get_peripheral_macros(python_module.confs, peripherals_list)
-
-
-# Given a string and a list of possible suffixes, check if string given has a suffix from the list
-# Returns a turple:
-#        -(prefix, suffix): 'prefix' is the full_string with the suffix removed. 'suffix' is the string from the list that is a suffix of the full_string.
-#        -(None, None): if no suffix is found
-def find_suffix_from_list(full_string, list_of_suffix_strings):
-    return next(
-        (
-            (full_string[: -len(i)], i)
-            for i in list_of_suffix_strings
-            if full_string.endswith(i)
-        ),
-        (None, None),
-    )
-
 
 # Get path to build directory of directory
 # Parameter: directory: path to core directory
@@ -384,48 +345,6 @@ def get_peripherals(peripherals_str):
     return instances_amount, instances_parameters
 
 
-
-def if_gen_interface(interface_name, port_prefix, bus_size=1):
-    if_name, if_type = if_gen.get_if_name(interface_name), if_gen.get_if_type(interface_name)
-    table = if_gen.create_table(if_name)
-
-    # Create a virtual file object
-    virtual_file_obj = if_gen_hack_list()
-    # Tell if_gen to write ports in virtual file object
-    
-    if_gen.write_vs_contents(
-        file_object = virtual_file_obj,
-        sig_table=table,
-        interface_type=if_type,
-        bus_size = bus_size
-    )
-    # Extract port list from virtual file object
-    return virtual_file_obj.port_list
-
-
-# Given a table from 'ios' dictionary, return its ports list
-# If table has a standard interface name (and empty port list) then it generates the port list with if_gen.py
-def get_table_ports(table):
-    # Check if this table is a standard interface (from if_gen.py)
-    # Note: the table['name'] may have a prefix, therefore we separate it before calling if_gen.
-    prefix, if_name = find_suffix_from_list(table["name"], if_gen.interface_names)
-    if if_name:
-        # Interface is standard, generate ports
-        return if_gen_interface(if_name, prefix)
-    else:
-        # Interface is not standard, read ports
-        return copy.deepcopy(table["ports"])
-
-
-# Given ios object for the module, extract the list of ports.
-# It essencially removes de tables of each interface in 'ios'.
-# Returns a list of dictionaries that describe each port. (The list contains ports from all tables in ios)
-# Also add certain table attributes to each signal of that table.
-# Example return list:
-# [ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"},
-#  {'name':"rst_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral reset input"} ]
-#
-# The `confs` and `corename` are optional parameters that should be provided togheter. If they are set, this function will add the `corename` as a prefix to any parameters in the port widths that are also present in the `confs` dictionary.
 def get_module_io(ios, confs=None, corename=None):
     module_signals = []
     for table in ios:
@@ -433,7 +352,7 @@ def get_module_io(ios, confs=None, corename=None):
         if "doc_only" in table.keys() and table["doc_only"]:
             continue
 
-        table_signals = get_table_ports(table)
+        table_signals = table["ports"]
         # Add signal attributes
         for signal in table_signals:
             # Add ifdef attribute to every signal if table also has it
