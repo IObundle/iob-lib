@@ -7,66 +7,65 @@ import os
 import re
 import math
 import importlib
+
 import if_gen
-import iob_colors
-import copy
-import ios
 
 
 # List of reserved signals
 # These signals are known by the python scripts and are always auto-connected using the matching Verilog the string.
 # These signals can not be portmapped! They will always have the fixed connection specified here.
+
 reserved_signals = {
-    "clk_i": ".clk_i(clk_i)",
-    "cke_i": ".cke_i(cke_i)",
-    "en_i": ".en_i(en_i)",
-    "arst_i": ".arst_i(arst_i)",
-    "iob_avalid_i": ".iob_avalid_i(slaves_req[`AVALID(`/*<InstanceName>*/)])",
-    "iob_addr_i": ".iob_addr_i(slaves_req[`ADDRESS(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])",
-    "iob_wdata_i": ".iob_wdata_i(slaves_req[`WDATA(`/*<InstanceName>*/)])",
-    "iob_wstrb_i": ".iob_wstrb_i(slaves_req[`WSTRB(`/*<InstanceName>*/)])",
-    "iob_rdata_o": ".iob_rdata_o(slaves_resp[`RDATA(`/*<InstanceName>*/)])",
-    "iob_ready_o": ".iob_ready_o(slaves_resp[`READY(`/*<InstanceName>*/)])",
-    "iob_rvalid_o": ".iob_rvalid_o(slaves_resp[`RVALID(`/*<InstanceName>*/)])",
-    "trap_o": ".trap_o(/*<InstanceName>*/_trap_o)",
-    "axi_awid_o": ".axi_awid_o          (axi_awid_o             [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
-    "axi_awaddr_o": ".axi_awaddr_o      (internal_axi_awaddr_o  [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
-    "axi_awlen_o": ".axi_awlen_o        (axi_awlen_o            [/*<extmem_conn_num>*/*AXI_LEN_W      +:/*<bus_size>*/*AXI_LEN_W])",
-    "axi_awsize_o": ".axi_awsize_o      (axi_awsize_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
-    "axi_awburst_o": ".axi_awburst_o    (axi_awburst_o          [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
-    "axi_awlock_o": ".axi_awlock_o      (axi_awlock_o           [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
-    "axi_awcache_o": ".axi_awcache_o    (axi_awcache_o          [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
-    "axi_awprot_o": ".axi_awprot_o      (axi_awprot_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
-    "axi_awqos_o": ".axi_awqos_o        (axi_awqos_o            [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
-    "axi_awvalid_o": ".axi_awvalid_o    (axi_awvalid_o          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_awready_i": ".axi_awready_i    (axi_awready_i          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_wdata_o": ".axi_wdata_o        (axi_wdata_o            [/*<extmem_conn_num>*/*AXI_DATA_W     +:/*<bus_size>*/*AXI_DATA_W])",
-    "axi_wstrb_o": ".axi_wstrb_o        (axi_wstrb_o            [/*<extmem_conn_num>*/*(AXI_DATA_W/8) +:/*<bus_size>*/*(AXI_DATA_W/8)])",
-    "axi_wlast_o": ".axi_wlast_o        (axi_wlast_o            [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_wvalid_o": ".axi_wvalid_o      (axi_wvalid_o           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_wready_i": ".axi_wready_i      (axi_wready_i           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_bid_i": ".axi_bid_i            (axi_bid_i              [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
-    "axi_bresp_i": ".axi_bresp_i        (axi_bresp_i            [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
-    "axi_bvalid_i": ".axi_bvalid_i      (axi_bvalid_i           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_bready_o": ".axi_bready_o      (axi_bready_o           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_arid_o": ".axi_arid_o          (axi_arid_o             [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
-    "axi_araddr_o": ".axi_araddr_o      (internal_axi_araddr_o  [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
-    "axi_arlen_o": ".axi_arlen_o        (axi_arlen_o            [/*<extmem_conn_num>*/*AXI_LEN_W      +:/*<bus_size>*/*AXI_LEN_W])",
-    "axi_arsize_o": ".axi_arsize_o      (axi_arsize_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
-    "axi_arburst_o": ".axi_arburst_o    (axi_arburst_o          [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
-    "axi_arlock_o": ".axi_arlock_o      (axi_arlock_o           [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
-    "axi_arcache_o": ".axi_arcache_o    (axi_arcache_o          [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
-    "axi_arprot_o": ".axi_arprot_o      (axi_arprot_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
-    "axi_arqos_o": ".axi_arqos_o        (axi_arqos_o            [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
-    "axi_arvalid_o": ".axi_arvalid_o    (axi_arvalid_o          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_arready_i": ".axi_arready_i    (axi_arready_i          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_rid_i": ".axi_rid_i            (axi_rid_i              [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
-    "axi_rdata_i": ".axi_rdata_i        (axi_rdata_i            [/*<extmem_conn_num>*/*AXI_DATA_W     +:/*<bus_size>*/*AXI_DATA_W])",
-    "axi_rresp_i": ".axi_rresp_i        (axi_rresp_i            [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
-    "axi_rlast_i": ".axi_rlast_i        (axi_rlast_i            [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_rvalid_i": ".axi_rvalid_i      (axi_rvalid_i           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
-    "axi_rready_o": ".axi_rready_o      (axi_rready_o           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "clk": ".clk_i(clk_i)",
+    "cke": ".cke_i(cke_i)",
+    "arst": ".arst_i(arst_i)",
+    "iob_avalid": ".iob_avalid_i(slaves_req[`AVALID(`/*<InstanceName>*/)])",
+    "iob_addr": ".iob_addr_i(slaves_req[`ADDRESS(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])",
+    "iob_wdata": ".iob_wdata_i(slaves_req[`WDATA(`/*<InstanceName>*/)])",
+    "iob_wstrb": ".iob_wstrb_i(slaves_req[`WSTRB(`/*<InstanceName>*/)])",
+    "iob_rdata": ".iob_rdata_o(slaves_resp[`RDATA(`/*<InstanceName>*/)])",
+    "iob_ready": ".iob_ready_o(slaves_resp[`READY(`/*<InstanceName>*/)])",
+    "iob_rvalid": ".iob_rvalid_o(slaves_resp[`RVALID(`/*<InstanceName>*/)])",
+    "trap": ".trap_o(/*<InstanceName>*/_trap_o)",
+    "axi_awid": ".axi_awid_o          (axi_awid_o             [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
+    "axi_awaddr": ".axi_awaddr_o      (internal_axi_awaddr_o  [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
+    "axi_awlen": ".axi_awlen_o        (axi_awlen_o            [/*<extmem_conn_num>*/*AXI_LEN_W      +:/*<bus_size>*/*AXI_LEN_W])",
+    "axi_awsize": ".axi_awsize_o      (axi_awsize_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
+    "axi_awburst": ".axi_awburst_o    (axi_awburst_o          [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_awlock": ".axi_awlock_o      (axi_awlock_o           [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_awcache": ".axi_awcache_o    (axi_awcache_o          [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
+    "axi_awprot": ".axi_awprot_o      (axi_awprot_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
+    "axi_awqos": ".axi_awqos_o        (axi_awqos_o            [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
+    "axi_awvalid": ".axi_awvalid_o    (axi_awvalid_o          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_awready": ".axi_awready_i    (axi_awready_i          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_wdata": ".axi_wdata_o        (axi_wdata_o            [/*<extmem_conn_num>*/*AXI_DATA_W     +:/*<bus_size>*/*AXI_DATA_W])",
+    "axi_wstrb": ".axi_wstrb_o        (axi_wstrb_o            [/*<extmem_conn_num>*/*(AXI_DATA_W/8) +:/*<bus_size>*/*(AXI_DATA_W/8)])",
+    "axi_wlast": ".axi_wlast_o        (axi_wlast_o            [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_wvalid": ".axi_wvalid_o      (axi_wvalid_o           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_wready": ".axi_wready_i      (axi_wready_i           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_bid": ".axi_bid_i            (axi_bid_i              [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
+    "axi_bresp": ".axi_bresp_i        (axi_bresp_i            [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_bvalid": ".axi_bvalid_i      (axi_bvalid_i           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_bready": ".axi_bready_o      (axi_bready_o           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_arid": ".axi_arid_o          (axi_arid_o             [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
+    "axi_araddr": ".axi_araddr_o      (internal_axi_araddr_o  [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
+    "axi_arlen": ".axi_arlen_o        (axi_arlen_o            [/*<extmem_conn_num>*/*AXI_LEN_W      +:/*<bus_size>*/*AXI_LEN_W])",
+    "axi_arsize": ".axi_arsize_o      (axi_arsize_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
+    "axi_arburst": ".axi_arburst_o    (axi_arburst_o          [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_arlock": ".axi_arlock_o      (axi_arlock_o           [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_arcache": ".axi_arcache_o    (axi_arcache_o          [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
+    "axi_arprot": ".axi_arprot_o      (axi_arprot_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
+    "axi_arqos": ".axi_arqos_o        (axi_arqos_o            [/*<extmem_conn_num>*/*4              +:/*<bus_size>*/*4])",
+    "axi_arvalid": ".axi_arvalid_o    (axi_arvalid_o          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_arready": ".axi_arready_i    (axi_arready_i          [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_rid": ".axi_rid_i            (axi_rid_i              [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
+    "axi_rdata": ".axi_rdata_i        (axi_rdata_i            [/*<extmem_conn_num>*/*AXI_DATA_W     +:/*<bus_size>*/*AXI_DATA_W])",
+    "axi_rresp": ".axi_rresp_i        (axi_rresp_i            [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
+    "axi_rlast": ".axi_rlast_i        (axi_rlast_i            [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_rvalid": ".axi_rvalid_i      (axi_rvalid_i           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
+    "axi_rready": ".axi_rready_o      (axi_rready_o           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
 }
+
 
 
 # Import the <corename>_setup.py from the given core directory/file
@@ -227,57 +226,6 @@ def get_submodule_directories(root_dir):
 def clog2(val):
     return math.ceil(math.log2(val))
 
-
-# given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string.
-# param_expression: string defining a math expression that may contain parameters
-# params_dict: dictionary of parameters, where the key is the parameter name and the value is its value
-def eval_param_expression(param_expression, params_dict):
-    if type(param_expression) == int:
-        return param_expression
-    else:
-        original_expression = param_expression
-        # Split string to separate parameters/macros from the rest
-        split_expression = re.split("([^\w_])", param_expression)
-        # Replace each parameter, following the reverse order of parameter list. The reversed order allows replacing parameters recursively (parameters may have values with parameters that came before).
-        for param_name, param_value in reversed(params_dict.items()):
-            # Replace every instance of this parameter by its value
-            for idx, word in enumerate(split_expression):
-                if word == param_name:
-                    # Replace parameter/macro by its value
-                    split_expression[idx] = param_value
-                    # Remove '`' char if it was a macro
-                    if idx > 0 and split_expression[idx - 1] == "`":
-                        split_expression[idx - 1] = ""
-                    # resplit the string in case the parameter value contains other parameters
-                    split_expression = re.split("([^\w_])", "".join(split_expression))
-        # Join back the string
-        param_expression = "".join(split_expression)
-        # Evaluate $clog2 expressions
-        param_expression = param_expression.replace("$clog2", "clog2")
-        # Evaluate IOB_MAX and IOB_MIN expressions
-        param_expression = param_expression.replace("`IOB_MAX", "max")
-        param_expression = param_expression.replace("`IOB_MIN", "min")
-
-        # Try to calculate string as it should only contain numeric values
-        try:
-            return eval(param_expression)
-        except:
-            sys.exit(
-                f"Error: string '{original_expression}' evaluated to '{param_expression}' is not a numeric expression."
-            )
-
-
-# given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string. The parameters are taken from the confs dictionary.
-# param_expression: string defining a math expression that may contain parameters
-# confs: list of dictionaries, each of which describes a parameter and has attributes: 'name', 'val' and 'max'.
-# param_attribute: name of the attribute in the paramater that contains the value to replace in string given. Attribute names are: 'val', 'min, or 'max'.
-def eval_param_expression_from_config(param_expression, confs, param_attribute):
-    # Create parameter dictionary with correct values to be replaced in string
-    params_dict = {}
-    for param in confs:
-        params_dict[param["name"]] = param[param_attribute]
-
-    return eval_param_expression(param_expression, params_dict)
 
 
 # Replaces a verilog parameter in a string with its value.

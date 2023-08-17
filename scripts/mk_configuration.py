@@ -162,3 +162,55 @@ def update_define(confs, define_name, should_set):
                     "descr": "Define",
                 }
             )
+
+
+# given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string.
+# param_expression: string defining a math expression that may contain parameters
+# params_dict: dictionary of parameters, where the key is the parameter name and the value is its value
+def eval_param_expression(param_expression, params_dict):
+    if type(param_expression) == int:
+        return param_expression
+    else:
+        original_expression = param_expression
+        # Split string to separate parameters/macros from the rest
+        split_expression = re.split("([^\w_])", param_expression)
+        # Replace each parameter, following the reverse order of parameter list. The reversed order allows replacing parameters recursively (parameters may have values with parameters that came before).
+        for param_name, param_value in reversed(params_dict.items()):
+            # Replace every instance of this parameter by its value
+            for idx, word in enumerate(split_expression):
+                if word == param_name:
+                    # Replace parameter/macro by its value
+                    split_expression[idx] = param_value
+                    # Remove '`' char if it was a macro
+                    if idx > 0 and split_expression[idx - 1] == "`":
+                        split_expression[idx - 1] = ""
+                    # resplit the string in case the parameter value contains other parameters
+                    split_expression = re.split("([^\w_])", "".join(split_expression))
+        # Join back the string
+        param_expression = "".join(split_expression)
+        # Evaluate $clog2 expressions
+        param_expression = param_expression.replace("$clog2", "clog2")
+        # Evaluate IOB_MAX and IOB_MIN expressions
+        param_expression = param_expression.replace("`IOB_MAX", "max")
+        param_expression = param_expression.replace("`IOB_MIN", "min")
+
+        # Try to calculate string as it should only contain numeric values
+        try:
+            return eval(param_expression)
+        except:
+            sys.exit(
+                f"Error: string '{original_expression}' evaluated to '{param_expression}' is not a numeric expression."
+            )
+
+
+# given a mathematical string with parameters, replace every parameter by its numeric value and tries to evaluate the string. The parameters are taken from the confs dictionary.
+# param_expression: string defining a math expression that may contain parameters
+# confs: list of dictionaries, each of which describes a parameter and has attributes: 'name', 'val' and 'max'.
+# param_attribute: name of the attribute in the paramater that contains the value to replace in string given. Attribute names are: 'val', 'min, or 'max'.
+def eval_param_expression_from_config(param_expression, confs, param_attribute):
+    # Create parameter dictionary with correct values to be replaced in string
+    params_dict = {}
+    for param in confs:
+        params_dict[param["name"]] = param[param_attribute]
+
+    return eval_param_expression(param_expression, params_dict)

@@ -1213,7 +1213,7 @@ def reverse(direction):
         print("ERROR: reverse_direction : invalid argument")
         quit()
 
-#reverse testbench signal direction
+#testbench signal direction
 def tbsignal(direction):
     if direction == "input":
         return "wire"
@@ -1223,7 +1223,7 @@ def tbsignal(direction):
         print("ERROR: tb_reciprocal : invalid argument")
         quit()
 
-#apply direction direction 
+#get suffix from direction 
 def suffix(direction):
     if direction == "input" or direction == "reg":
         return "_i"
@@ -1570,7 +1570,6 @@ def main():
     # parse command line arguments
     args = parse_arguments()
 
-    print(args)
     if_name = get_if_name(args.nametype)
     if_type = get_if_type(args.nametype)
     get_ports(if_name) #sets global port_list
