@@ -55,7 +55,7 @@ def write_ports(ios, top_module, out_dir):
 
         if_gen.write_vs_contents(
             file_object=f_io,
-            sig_table = table["ports"],
+            in_port_list = table["ports"],
             interface_type = if_gen.get_if_type(table["name"]),
             port_prefix = table["port_prefix"] if "port_prefix" in table.keys() else "",
             wire_prefix = table["wire_prefix"] if "wire_prefix" in table.keys() else "",
