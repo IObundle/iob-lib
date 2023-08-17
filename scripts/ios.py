@@ -81,7 +81,7 @@ def generate_ports(ios):
         if_name = if_gen.get_if_name(table["name"])
 
         if if_name:
-            table["ports"] = if_gen.create_table(if_name)
+            table["ports"] = if_gen.get_ports(if_name)
 
     return ios
 
@@ -134,7 +134,7 @@ def generate_ios_tex(ios, out_dir):
         if_name = if_gen.get_if_name(table["name"])
         if if_name in if_gen.interface_names:
             # Interface is standard, generate ports
-            if_table = if_gen.create_table(if_name)
+            if_table = if_gen.get_ports(if_name)
             
             for port in if_table:
                 port_direction = (

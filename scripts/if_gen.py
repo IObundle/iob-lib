@@ -37,10 +37,9 @@ interface_names = [
     "apb",
     "axis",
 ]
+    
 
-#
-# Interface dictionaries
-#
+#interfaces 
 
 iob = [
     {
@@ -989,7 +988,7 @@ AHB_PROT_W = "4"
 AHB_SIZE_W = "3"
 AHB_TRANS_W = "2"
 
-amba = [
+ahb = [
     {
         "ahb": 1,
         "apb": 1,
@@ -1172,34 +1171,32 @@ amba = [
     },
 ]
 
-ahb = amba
-apb = amba
+apb = ahb
 
+#port_list global variable
+port_list = []
 
-#interface name and table global variable
-table = []
+def get_ports(interface_name):
 
-def create_table(interface_name):
+    global port_list
 
-    global table
-
-    table = eval(interface_name)
+    port_list = eval(interface_name)
     
-    for i in table:
+    for i in port_list:
         if interface_name == "axil":
             if i["lite"] == 1:
-                table[-1]["name"] = table[-1]["name"].replace("axi_", "axil_")
-                table[-1]["n_bits"] = table[-1]["n_bits"].replace("AXI_", "AXIL_")
+                port_list[-1]["name"] = port_list[-1]["name"].replace("axi_", "axil_")
+                port_list[-1]["n_bits"] = port_list[-1]["n_bits"].replace("AXI_", "AXIL_")
             else:
-                table.remove(i)
+                port_list.remove(i)
         if interface_name == "apb":
             if i["apb"] == 1:
-                table[-1]["name"] = table[-1]["name"].replace("ahb_", "apb_")
-                table[-1]["n_bits"] = table[-1]["n_bits"].replace("AHB_", "APB_")
+                port_list[-1]["name"] = port_list[-1]["name"].replace("ahb_", "apb_")
+                port_list[-1]["n_bits"] = port_list[-1]["n_bits"].replace("AHB_", "APB_")
             else:
-                table.remove(i)
+                port_list.remove(i)
 
-    return table
+    return port_list
 
 
 #
@@ -1261,26 +1258,26 @@ def write_port(
     fout.write(direction + width + name + "," + "\n")
 
 def custom_port (prefix, param_prefix, fout, bus_size=1):
-    for i in range(len(table)):
-        port_direction = table[i]["type"]
-        name = prefix + table[i]["name"] + suffix(table[i]["type"])
+    for i in range(len(port_list)):
+        port_direction = port_list[i]["type"]
+        name = prefix + port_list[i]["name"] + suffix(port_list[i]["type"])
         if bus_size == 1:
-            width = table[i]["n_bits"]
+            width = port_list[i]["n_bits"]
         else:
-            width = "(" + str(bus_size) + "*" + table[i]["n_bits"] + ")"
+            width = "(" + str(bus_size) + "*" + port_list[i]["n_bits"] + ")"
         width = add_param_prefix(width, param_prefix)
         bus_width = " [" + width + "-1:0] "
         # Write port
         write_port(port_direction, bus_width, name, fout)
 
 def m_port(prefix, param_prefix, fout, bus_size=1):
-    for i in range(len(table)):
-        port_direction = table[i]["type"]
-        name = prefix + table[i]["name"] + suffix(table[i]["type"])
+    for i in range(len(port_list)):
+        port_direction = port_list[i]["type"]
+        name = prefix + port_list[i]["name"] + suffix(port_list[i]["type"])
         if bus_size == 1:
-            width = table[i]["n_bits"]
+            width = port_list[i]["n_bits"]
         else:
-            width = "(" + str(bus_size) + "*" + table[i]["n_bits"] + ")"
+            width = "(" + str(bus_size) + "*" + port_list[i]["n_bits"] + ")"
         width = add_param_prefix(width, param_prefix)
         bus_width = " [" + width + "-1:0] "
         # Write port
@@ -1288,13 +1285,13 @@ def m_port(prefix, param_prefix, fout, bus_size=1):
 
 
 def s_port(prefix, param_prefix, fout, bus_size=1):
-    for i in range(len(table)):
-        port_direction = reverse(table[i]["type"])
-        name = prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
+    for i in range(len(port_list)):
+        port_direction = reverse(port_list[i]["type"])
+        name = prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["type"]))
         if bus_size == 1:
-            width = table[i]["n_bits"]
+            width = port_list[i]["n_bits"]
         else:
-            width = "(" + str(bus_size) + "*" + table[i]["n_bits"] + ")"
+            width = "(" + str(bus_size) + "*" + port_list[i]["n_bits"] + ")"
         width = add_param_prefix(width, param_prefix)
         bus_width = " [" + width + "-1:0] "
         # Write port
@@ -1322,26 +1319,26 @@ def write_portmap(port, connection_name, width, bus_start, bus_size, fout):
     fout.write("." + port + "(" + connection + "), //" + "\n")
 
 def portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
-    for i in range(len(table)):
-        port = port_prefix + table[i]["name"]
-        connection_name = wire_prefix + table[i]["name"]
+    for i in range(len(port_list)):
+        port = port_prefix + port_list[i]["name"]
+        connection_name = wire_prefix + port_list[i]["name"]
         write_portmap(
             port,
             connection_name,
-            table[i]["n_bits"],
+            port_list[i]["n_bits"],
             bus_start,
             bus_size,
             fout,
         )
 
 def m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
-    for i in range(len(table)):
-        port = port_prefix + table[i]["name"] + suffix(table[i]["type"])
-        connection_name = wire_prefix + table[i]["name"]
+    for i in range(len(port_list)):
+        port = port_prefix + port_list[i]["name"] + suffix(port_list[i]["type"])
+        connection_name = wire_prefix + port_list[i]["name"]
         write_portmap(
             port,
             connection_name,
-            table[i]["n_bits"],
+            port_list[i]["n_bits"],
             bus_start,
             bus_size,
             fout,
@@ -1349,13 +1346,13 @@ def m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
 
 
 def s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
-    for i in range(len(table)):
-        port = port_prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
-        connection_name = wire_prefix + table[i]["name"]
+    for i in range(len(port_list)):
+        port = port_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["type"]))
+        connection_name = wire_prefix + port_list[i]["name"]
         write_portmap(
             port,
             connection_name,
-            table[i]["n_bits"],
+            port_list[i]["n_bits"],
             bus_start,
             bus_size,
             fout,
@@ -1363,15 +1360,15 @@ def s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
 
 
 def m_m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
-    for i in range(len(table)):
-        port = port_prefix + table[i]["name"] + suffix(table[i]["type"])
+    for i in range(len(port_list)):
+        port = port_prefix + port_list[i]["name"] + suffix(port_list[i]["type"])
         connection_name = (
-            wire_prefix + table[i]["name"] + suffix(table[i]["type"])
+            wire_prefix + port_list[i]["name"] + suffix(port_list[i]["type"])
         )
         write_portmap(
             port,
             connection_name,
-            table[i]["n_bits"],
+            port_list[i]["n_bits"],
             bus_start,
             bus_size,
             fout,
@@ -1379,15 +1376,15 @@ def m_m_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
 
 
 def s_s_portmap(port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
-    for i in range(len(table)):
-        port = port_prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
+    for i in range(len(port_list)):
+        port = port_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["type"]))
         connection_name = (
-            wire_prefix + table[i]["name"] + suffix(reverse(table[i]["type"]))
+            wire_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["type"]))
         )
         write_portmap(
             port,
             connection_name,
-            table[i]["n_bits"],
+            port_list[i]["n_bits"],
             bus_start,
             bus_size,
             fout,
@@ -1436,44 +1433,44 @@ def write_tb_wire(
 
 
 def wire(prefix, param_prefix, fout, bus_size=1):
-    for i in range(len(table)):
+    for i in range(len(port_list)):
         write_wire(
-            prefix + table[i]["name"],
+            prefix + port_list[i]["name"],
             param_prefix,
             bus_size,
-            table[i]["n_bits"],
+            port_list[i]["n_bits"],
             fout,
         )
 
 
 def m_tb_wire(prefix, param_prefix, fout, bus_size=1):
-    for i in range(len(table)):
-        tb_signal = tbsignal(table[i]["type"])
+    for i in range(len(port_list)):
+        tb_signal = tbsignal(port_list[i]["type"])
         write_tb_wire(
             tb_signal,
             prefix,
-            table[i]["name"],
+            port_list[i]["name"],
             param_prefix,
             bus_size,
-            table[i]["n_bits"],
+            port_list[i]["n_bits"],
             fout,
-            table[i]["default"],
+            port_list[i]["default"],
         )
     fout.write("\n")
 
 
 def s_tb_wire(prefix, param_prefix, fout, bus_size=1):
-    for i in range(len(table)):
-        tb_signal = tbsignal(reverse(table[i]["type"]))
+    for i in range(len(port_list)):
+        tb_signal = tbsignal(reverse(port_list[i]["type"]))
         write_tb_wire(
             tb_signal,
             prefix,
-            table[i]["name"],
+            port_list[i]["name"],
             param_prefix,
             bus_size,
-            table[i]["n_bits"],
+            port_list[i]["n_bits"],
             fout,
-            table[i]["default"],
+            port_list[i]["default"],
         )
     fout.write("\n")
 
@@ -1481,7 +1478,7 @@ def s_tb_wire(prefix, param_prefix, fout, bus_size=1):
 # wire_prefix: Prefix for wires in a portmap file; Prefix for wires in a `*wires.vs` file;
 def write_vs_contents(
         file_object,
-        sig_table,
+        in_port_list,
         interface_type,
         port_prefix = "",
         wire_prefix = "",
@@ -1489,8 +1486,8 @@ def write_vs_contents(
         bus_start = 0,
 ):
 
-    global table
-    table = sig_table
+    global port_list
+    port_list = in_port_list
 
     param_prefix = port_prefix.upper()
 
@@ -1523,31 +1520,22 @@ def get_if_type(arg):
 #
 # Parse command line arguments
 #
-        
+
+def validate_nametype(arg):
+    if get_if_name(arg) is None:
+        raise argparse.ArgumentTypeError("Invalid interface name")
+    return arg
+    
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="description: generates interface files for a given interface",
+        description="Generates Verilog snippet files for a given interface",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     parser.add_argument(
-        "type",
-        help="""
-        type can defined as one of the following: 
-        base_m_port: iob native master port, 
-        base_s_port: iob native slave port, 
-        base_s_s_portmap: iob native portmap, 
-        base_m_portmap: iob native master portmap, 
-        base_s_portmap: iob native slave portmap, 
-        base_m_m_portmap: iob native master to master portmap, 
-        base_s_s_portmap: iob native slave to slave portmap\
-        base_wire: iob native wires for interconnection, 
-        base_m_tb_wire: iob native master wires for testbench, 
-        base_s_tb_wire: iob native slave wires for testbench; 
-        
-        where base is one of the following: 
-  
-        """,
+        "nametype",
+        type = validate_nametype,
+        help=f"Interface name and type. Available names: {', '.join(interface_names)}",
     )
 
     parser.add_argument(
@@ -1582,14 +1570,14 @@ def main():
     # parse command line arguments
     args = parse_arguments()
 
-    # create signal table
-    if_name = get_if_name(args.type)
-    create_table(if_name)
+    print(args)
+    if_name = get_if_name(args.nametype)
+    if_type = get_if_type(args.nametype)
+    get_ports(if_name) #sets global port_list
 
     # write .vs file
-    if_type = get_if_type(args.type)
-    fout = open(args.file_prefix + args.type + ".vs", "w")
-    write_vs_contents(fout, table, if_type, args.port_prefix, args.wire_prefix)
+    fout = open(args.file_prefix + args.nametype + ".vs", "w")
+    write_vs_contents(fout, port_list, if_type, args.port_prefix, args.wire_prefix)
 
     fout.close()
 

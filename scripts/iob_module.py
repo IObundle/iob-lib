@@ -559,7 +559,7 @@ class iob_module:
                 "w",
             )
             if_name, if_type = if_gen.get_if_name(vs_name["interface"]), if_gen.get_if_type(vs_name["interface"])
-            if_table = if_gen.create_table(if_name)
+            if_table = if_gen.get_ports(if_name)
             
             if_gen.write_vs_contents(
                 f_out,
