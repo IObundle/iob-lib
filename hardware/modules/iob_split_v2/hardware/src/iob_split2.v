@@ -1,99 +1,65 @@
 `timescale 1ns / 1ps
 
+`include "iob_utils.vh"
 
-module iob_split #(
-   parameter DATA_W = 0,
-   parameter ADDR_W = 0,
-   parameter N      = 0
+module iob_split2 #(
+   parameter DATA_W   = 32,
+   parameter ADDR_W   = 32,
+   parameter N_SLAVES = 2          //number of slaves
 ) (
-   `include "iob_split_i_iob_port.vs"
-   `include "iob_split_o_iob_port.vs"
-   `include "clk_en_rst.vs"
+   `include "clk_rst_s_port.vs"
+
+   input      [Nb-1:0] s_sel_i,
+
+   //masters interface
+   input      [ `REQ_W-1:0] m_req_i,
+   output reg [`RESP_W-1:0] m_resp_o,
+
+   //slave interface
+   output reg [ N_SLAVES*`REQ_W-1:0] s_req_o,
+   input      [N_SLAVES*`RESP_W-1:0] s_resp_i
 );
 
-   localparam NBITS = $clog2(N) + ($clog2(N) == 0);
+   localparam Nb = $clog2(N_SLAVES) + ($clog2(N_SLAVES) == 0);
 
-   wire [NBITS-1:0] sel, sel_reg;
-   assign sel = addr_i[ADDR_W-2-:NBITS];
+   //slave select word
+   wire [Nb-1:0] s_sel;
+   wire [Nb-1:0] s_sel_r;
+   wire m_avalid;
 
-   //avalid demux
-   iob_demux #(
-      .DATA_W(1),
-      .N     (N)
-   ) iob_demux_avalid (
-      .sel_i (sel),
-      .data_i(avalid_i),
-      .data_o(avalid_o)
-   );
+   assign m_avalid = m_req_i[`AVALID(0)];
+   assign s_sel = s_sel_i;
 
-   //addr demux
-   iob_demux #(
-      .DATA_W(ADDR_W),
-      .N     (N)
-   ) iob_demux_addr (
-      .sel_i (sel),
-      .data_i(addr_i),
-      .data_o(addr_o)
-   );
+   //route master request to selected slave
+   integer i;
+   always @* begin
+      /*
+     $display("mreq %x", m_req_i);
+     $display("s_sel %x", s_sel);
+   */
+      for (i = 0; i < N_SLAVES; i = i + 1)
+         if (i == s_sel) s_req_o[`REQ(i)] = m_req_i;
+         else s_req_o[`REQ(i)] = {(`REQ_W) {1'b0}};
+   end
 
-   //wstrb demux
-   iob_demux #(
-      .DATA_W(DATA_W / 8),
-      .N     (N)
-   ) iob_demux_wstrb (
-      .sel_i (sel),
-      .data_i(wstrb_i),
-      .data_o(wstrb_o)
-   );
+   //
+   //route response from previously selected slave to master
+   //
 
-   //wdata demux
-   iob_demux #(
-      .DATA_W(DATA_W / 8),
-      .N     (N)
-   ) iob_demux_wdata (
-      .sel_i (sel),
-      .data_i(wdata_i),
-      .data_o(wdata_o)
-   );
+   assign m_resp_o[`RDATA(0)] = s_resp_i[`RDATA(s_sel_r)];
+   assign m_resp_o[`RVALID(0)] = s_resp_i[`RVALID(s_sel_r)];
+   assign m_resp_o[`READY(0)] = s_resp_i[`READY(s_sel)];
 
-   //ready mux
-   iob_mux #(
-      .DATA_W(DATA_W / 8),
-      .N     (N)
-   ) iob_demux_ready (
-      .sel_i (sel),
-      .data_i(ready_i),
-      .data_o(ready_o)
-   );
-
-   //rdata mux
-   iob_mux #(
-      .DATA_W(DATA_W / 8),
-      .N     (N)
-   ) iob_mux_rdata (
-      .sel_i (sel_reg),
-      .data_i(rdata_i),
-      .data_o(rdata_o)
-   );
-
-
-   //rvalid mux
-   iob_mux #(
-      .DATA_W(DATA_W / 8),
-      .N     (N)
-   ) iob_mux_rvalid (
-      .sel_i (sel_reg),
-      .data_i(rvalid_i),
-      .data_o(rvalid_o)
-   );
-
-   iob_reg #(
-      .DATA_W (),
+   //register the slave selection
+   iob_reg_re #(
+      .DATA_W (Nb),
       .RST_VAL(0)
-   ) sel_reg0 (
-      `include "clk_en_rst_s_s_portmap.vs"
-      .data_i(sel),
-      .data_o(sel_reg)
+   ) iob_reg_s_sel (
+      `include "clk_rst_s_s_portmap.vs"
+      .cke_i (1'b1),
+      .rst_i (1'b0),
+      .en_i  (m_avalid),
+      .data_i(s_sel),
+      .data_o(s_sel_r)
    );
-
 endmodule
