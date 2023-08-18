@@ -158,37 +158,29 @@ module axis2axi_in #(
    end
 
    iob_counter #(BURST_SIZE, 0) transfer_count_reg (
-      clk_i,
-      arst_i,
-      cke_i,
-      (state == WAIT_DATA),
-      (state == TRANSFER && transfer),
-      transfer_count
+      `include "clk_en_rst_s_s_portmap.vs"
+      .rst_i(state == WAIT_DATA),
+      .en_i(state == TRANSFER && transfer),
+      .data_o(transfer_count)
    );
    iob_reg_re #(BURST_W + 1, 0) axi_length_reg (
-      clk_i,
-      arst_i,
-      cke_i,
-      rst_i,
-      (state == WAIT_DATA && start_transfer),
-      transfer_len,
-      awlen_int
+      `include "clk_en_rst_s_s_portmap.vs"
+      .rst_i (rst_i),
+      .en_i(state == WAIT_DATA && start_transfer),
+      .data_i(transfer_len),
+      .data_o(awlen_int)
    );
    iob_reg_r #(AXI_ADDR_W, 0) address_reg (
-      clk_i,
-      arst_i,
-      cke_i,
-      rst_i,
-      next_address,
-      current_address
+      `include "clk_en_rst_s_s_portmap.vs"
+      .rst_i (rst_i),
+      .data_i(next_address),
+      .data_o(current_address)
    );
    iob_reg_r #(2, 0) state_reg (
-      clk_i,
-      arst_i,
-      cke_i,
-      rst_i,
-      state_nxt,
-      state
+      `include "clk_en_rst_s_s_portmap.vs"
+      .rst_i (rst_i),
+      .data_i(state_nxt),
+      .data_o(state)
    );
 
    iob_fifo_sync #(
