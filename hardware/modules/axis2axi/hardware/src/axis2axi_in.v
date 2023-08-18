@@ -9,7 +9,8 @@ module axis2axi_in #(
    parameter AXI_DATA_W = 32,  // We currently only support 4 byte transfers
    parameter AXI_LEN_W  = 8,
    parameter AXI_ID_W   = 1,
-   parameter BURST_W    = 0
+   parameter BURST_W    = 0,
+   parameter BUFFER_W   = BURST_W + 1
 ) (
    // Configuration
    input  [AXI_ADDR_W-1:0] config_in_addr_i,
@@ -37,7 +38,6 @@ module axis2axi_in #(
 );
 
    localparam BURST_SIZE = 2 ** BURST_W;
-   localparam BUFFER_W = BURST_W + 1;
    localparam BUFFER_SIZE = 2 ** BUFFER_W;
 
    localparam WAIT_DATA = 2'h0, START_TRANSFER = 2'h1, TRANSFER = 2'h2, WAIT_BRESP = 2'h3;
