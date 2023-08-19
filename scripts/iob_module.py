@@ -455,27 +455,8 @@ class iob_module:
 
     @classmethod
     def _setup_submodules(cls, submodule_list):
-        """Generate or run setup functions for the interfaces/submodules in the given submodules list.
-        :param list submodule_list: List of interfaces/submodules to generate/setup.
-
-        Example submodule_list:
-            [
-            # Generate interfaces with if_gen. Check out the `__generate()` method for details.
-            # Generate an `axi_m_portmap` interface (using a simple dictionary):
-            {"interface": "axi_m_portmap"},
-            # Generate an `axi_s_portmap` interface for the `simulation` purpose (using a tuple with a simple dictionary):
-            ({"interface": "axi_s_portmap"}, {"purpose": "simulation"}),
-            # Generate an `iob_s_port` interface with custom prefixes (using a dictionary):
-            {
-                "file_prefix": "example_file_prefix_",
-                "interface": "iob_s_port",
-                "wire_prefix": "example_wire_prefix_",
-                "port_prefix": "example_port_prefix_",
-            },
-            # Set up a submodule
-            iob_picorv32,
-            # Set up a submodule for the `simulation` purpose (using a tuple):
-            (axi_ram, {"purpose": "simulation"}),
+        """
+        Generate or run setup functions for the interfaces/submodules in the given submodules list.
         """
         for submodule in submodule_list:
             _submodule = submodule
@@ -515,31 +496,8 @@ class iob_module:
 
     @classmethod
     def __generate(cls, vs_name, purpose="hardware"):
-
-        """Generate a Verilog snippet with `if_gen.py`.
-        vs_name: A dictionary describing the interface to generate.
-                 Example simple dictionary: {"interface": "iob_wire"}
-                 Example full dictionary:
-                       {
-                           "file_prefix": "iob_bus_0_2_", # Prefix to include in the generated file name
-                           "interface": "axi_m_portmap",  # Type of interface/wires to generate. Will also be part of the filename.
-                           "wire_prefix": "",             # Prefix to include in the generated wire names
-                           "port_prefix": "",             # Prefix to include in the generated port names
-                           "bus_start": 0,                # Optional. Starting index of the bus of wires that we are connecting.
-                           "bus_size": 2,                 # Optional. Size of the bus of wires that we are creating/connecting.
-                       }
-        purpose: [Optional] Used to select between the standard destination locations.
-
-        Example function calls:
-        To generate a simple `iob_s_port.vh` file, use: `iob_module.generate("iob_s_port")`
-        To generate an iob_s_port file with a custom prefix in its ports, wires, and filename, use:
-            iob_module.generate(
-                       {
-                           "file_prefix": "example_file_prefix_",
-                           "interface": "iob_s_port",
-                           "wire_prefix": "example_wire_prefix_",
-                           "port_prefix": "example_port_prefix_",
-                       })
+        """
+        Generate a Verilog snippet with `if_gen.py`.
         """
         dest_dir = os.path.join(cls.build_dir, cls.get_purpose_dir(purpose))
 
@@ -558,13 +516,11 @@ class iob_module:
                 ),
                 "w",
             )
-            if_name, if_type = if_gen.get_if_name(vs_name["interface"]), if_gen.get_if_type(vs_name["interface"])
-            if_table = if_gen.get_ports(if_name)
             
             if_gen.write_vs_contents(
                 f_out,
-                if_table,
-                if_type,
+                vs_name["interface"],
+                if_gen.get_ports(vs_name["interface"]),
                 vs_name["port_prefix"],
                 vs_name["wire_prefix"],
                 bus_size=vs_name["bus_size"] if "bus_size" in vs_name.keys() else 1,

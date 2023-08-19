@@ -13,27 +13,16 @@ interface_names = [
     "clk_en_rst",
     "clk_rst",
     "rom_sp",
-    "rom_dp",
     "rom_tdp",
-    "ram_sp_be",
-    "ram_sp_se",
     "ram_sp",
-    "ram_2p_be",
-    "ram_2p_tiled",
-    "ram_2p",
-    "ram_t2p",
-    "ram_dp_be_xil",
-    "ram_dp_be",
-    "ram_dp",
-    "ram_tdp_be",
     "ram_tdp",
+    "ram_2p",
     "axil_read",
     "axil_write",
     "axil",
     "axi_read",
     "axi_write",
     "axi",
-    "ahb",
     "apb",
     "axis",
 ]
@@ -49,1165 +38,539 @@ interface_types = [
     "m_tb_wire",
     "s_tb_wire",
     ]
+
+DATA_W = 32
+ADDR_W = 32
+
+def create_iob():
+    return [
+        {
+            "name": "iob_avalid",
+            "direction": "output",
+            "width": 1,
+            "descr": "Request address is valid.",
+        },
+        {
+            "name": "iob_addr",
+            "direction": "output",
+            "width": ADDR_W,
+            "descr": "Address.",
+        },
+        {
+            "name": "iob_wdata",
+            "direction": "output",
+            "width": DATA_W,
+            "descr": "Write data.",
+        },
+        {
+            "name": "iob_wstrb",
+            "direction": "output",
+            "width": NDS,
+            "descr": "Write strobe.",
+        },
+        {
+            "name": "iob_rvalid",
+            "direction": "input",
+            "width": 1,
+            "descr": "Read data valid.",
+        },
+        {
+            "name": "iob_rdata",
+            "direction": "input",
+            "width": m*DATA_W,
+            "descr": "Read data.",
+        },
+        {
+            "name": "iob_ready",
+            "direction": "input",
+            "width": m,
+            "descr": "Interface ready.",
+        },
+]
+
+def create_clk_rst():
+    return [
+        {
+            "name": "clk",
+            "direction": "input",
+            "width": 1,
+            "descr": "Clock",
+        },
+        {
+            "name": "arst",
+            "direction": "input",
+            "width": 1,
+            "descr": "Asynchronous active-high reset",
+        },
+    ]
+
+def create_clk_en_rst():
+    return [
+        {
+            "name": "clk",
+            "direction": "input",
+            "width": 1,
+            "descr": "Clock",
+        },
+        {
+            "name": "cke",
+            "direction": "input",
+            "width": 1,
+            "descr": "Enable",
+        },
+        {
+            "name": "arst",
+            "direction": "input",
+            "width": 1,
+            "descr": "Asynchronous active-high reset",
+        },
+    ]
+
+def create_mem_read(suffix):
+    return [
+        {
+            "name": "clk_"+suffix,
+            "direction": "input",
+            "width": 1,
+            "descr": f"Clock port {suffix}",
+        },
+        {
+            "name": "en_"+suffix,
+            "direction": "input",
+            "width": 1,
+            "descr": f"Enable port {suffix}",
+        },
+        {
+            "name": "addr_a",
+            "direction": "input",
+            "width": ADDR_W,
+            "descr": "Address port {suffix}",
+        },
+        {
+            "name": "rdata_"+suffix,
+            "direction": "output",
+            "width": DATA_W,
+            "descr": "Data port {suffix}",
+        },
+    ]
     
 
+def create_mem_write(suffix):
+    return [
+        {
+            "name": "clk_"+suffix,
+            "direction": "input",
+            "width": 1,
+            "descr": f"Clock port {suffix}",
+        },
+        {
+            "name": "en_"+suffix,
+            "direction": "input",
+            "width": 1,
+            "descr": f"Enable port {suffix}",
+        },
+        {
+            "name": "addr_a",
+            "direction": "input",
+            "width": ADDR_W,
+            "descr": "Address port {suffix}",
+        },
+        {
+            "name": "wdata_"+suffix,
+            "direction": "input",
+            "width": DATA_W,
+            "descr": "Data port {suffix}",
+        },
+        {
+            "name": "wstrb_"+suffix,
+            "direction": "input",
+            "width": NDS,
+            "descr": "Write strobe port {suffix}",
+        },
+    ]
 
-#interfaces 
+def create_rom_sp():
+    return list(dict.fromkeys(create_mem_read_port("")))
 
-iob = [
-    {
-        "type": "output",
-        "n_bits": "1",
-        "name": "iob_avalid",
-        "default": "0",
-        "descr": "Request valid.",
-    },
-    {
-        "type": "output",
-        "n_bits": "ADDR_W",
-        "name": "iob_addr",
-        "default": "0",
-        "descr": "Address.",
-    },
-    {
-        "type": "output",
-        "n_bits": "DATA_W",
-        "name": "iob_wdata",
-        "default": "0",
-        "descr": "Write data.",
-    },
-    {
-        "type": "output",
-        "n_bits": "(DATA_W/8)",
-        "name": "iob_wstrb",
-        "default": "0",
-        "descr": "Write strobe.",
-    },
-    {
-        "type": "input",
-        "n_bits": "1",
-        "name": "iob_rvalid",
-        "default": "0",
-        "descr": "Read data valid.",
-    },
-    {
-        "type": "input",
-        "n_bits": "DATA_W",
-        "name": "iob_rdata",
-        "default": "0",
-        "descr": "Read data.",
-    },
-    {
-        "type": "input",
-        "n_bits": "1",
-        "name": "iob_ready",
-        "default": "0",
-        "descr": "Interface ready.",
-    },
-]
+def create_rom_tdp(port_prefix):
+    return list(dict.fromkeys(
+        create_mem_read_port("a") +
+        create_mem_read_port("b")
+    ))
 
-clk_rst = [
-    {
-        "type": "output",
-        "n_bits": "1",
-        "name": "clk",
-        "default": "0",
-        "descr": "clock signal",
-    },
-    {
-        "type": "output",
-        "n_bits": "1",
-        "name": "arst",
-        "default": "0",
-        "descr": "asynchronous reset",
-    },
-]
+def create_ram_sp():
+    return list(dict.fromkeys(
+        create_mem_read_port("") +
+        create_mem_write_port("")
+    ))
 
-clk_en_rst = [
-    {
-        "type": "output",
-        "n_bits": "1",
-        "name": "clk",
-        "default": "0",
-        "descr": "clock signal",
-    },
-    {
-        "type": "output",
-        "n_bits": "1",
-        "name": "cke",
-        "default": "0",
-        "descr": "clock enable",
-    },
-    {
-        "type": "output",
-        "n_bits": "1",
-        "name": "arst",
-        "default": "0",
-        "descr": "asynchronous reset",
-    },
-]
+def create_ram_tdp():
+    return list(dict.fromkeys(
+        create_mem_read_port("a") +
+        create_mem_read_port("b") +
+        create_mem_write_port("a") +
+        create_mem_write_port("b")
+    ))
 
-rom = [
-    {
-        "sp": 1,
-        "tdp": 0,
-        "dp": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "clk",
-        "default": "0",
-        "descr": "clock",
-    },
-    {
-        "sp": 1,
-        "tdp": 0,
-        "dp": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "r_en",
-        "default": "0",
-        "descr": "read enable",
-    },
-    {
-        "sp": 1,
-        "tdp": 0,
-        "dp": 0,
-        "type": "input",
-        "n_bits": "ADDR_W",
-        "name": "addr",
-        "default": "0",
-        "descr": "address",
-    },
-    {
-        "sp": 1,
-        "tdp": 0,
-        "dp": 0,
-        "type": "output",
-        "n_bits": "DATA_W",
-        "name": "r_data",
-        "default": "0",
-        "descr": "read data",
-    },
-    {
-        "sp": 0,
-        "tdp": 1,
-        "dp": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "clk_a",
-        "default": "0",
-        "descr": "clock port A",
-    },
-    {
-        "sp": 0,
-        "tdp": 1,
-        "dp": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "clk_b",
-        "default": "0",
-        "descr": "clock port B",
-    },
-    {
-        "sp": 0,
-        "tdp": 1,
-        "dp": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "r_en_a",
-        "default": "0",
-        "descr": "read enable port A",
-    },
-    {
-        "sp": 0,
-        "tdp": 1,
-        "dp": 1,
-        "type": "input",
-        "n_bits": "ADDR_W",
-        "name": "addr_a",
-        "default": "0",
-        "descr": "address port A",
-    },
-    {
-        "sp": 0,
-        "tdp": 1,
-        "dp": 1,
-        "type": "output",
-        "n_bits": "DATA_W",
-        "name": "r_data_a",
-        "default": "0",
-        "descr": "read data port A",
-    },
-    {
-        "sp": 0,
-        "tdp": 1,
-        "dp": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "r_en_b",
-        "default": "0",
-        "descr": "read enable port B",
-    },
-    {
-        "sp": 0,
-        "tdp": 1,
-        "dp": 1,
-        "type": "input",
-        "n_bits": "ADDR_W",
-        "name": "addr_b",
-        "default": "0",
-        "descr": "address port B",
-    },
-    {
-        "sp": 0,
-        "tdp": 1,
-        "dp": 1,
-        "type": "output",
-        "n_bits": "DATA_W",
-        "name": "r_data_b",
-        "default": "0",
-        "descr": "read data port B",
-    },
-]
-
-ram_sp = [
-    {
-        "be": 1,
-        "sp": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "clk",
-        "default": "0",
-        "descr": "clock",
-    },
-    {
-        "be": 1,
-        "sp": 1,
-        "type": "input",
-        "n_bits": "DATA_W",
-        "name": "d",
-        "default": "0",
-        "descr": "ram sp data input",
-    },
-    {
-        "be": 1,
-        "sp": 1,
-        "type": "input",
-        "n_bits": "ADDR_W",
-        "name": "addr",
-        "default": "0",
-        "descr": "ram sp address",
-    },
-    {
-        "be": 1,
-        "sp": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "en",
-        "default": "0",
-        "descr": "ram sp enable",
-    },
-    {
-        "be": 1,
-        "sp": 1,
-        "type": "output",
-        "n_bits": "DATA_W",
-        "name": "d",
-        "default": "0",
-        "descr": "ram sp data output",
-    },
-    {
-        "be": 0,
-        "sp": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "we",
-        "default": "0",
-        "descr": "ram sp write enable",
-    },
-    {
-        "be": 1,
-        "sp": 0,
-        "type": "input",
-        "n_bits": "DATA_W/8",
-        "name": "we",
-        "default": "0",
-        "descr": "ram sp write strobe",
-    },
-]
-
-ram_2p = [
-    {
-        "2p": 1,
-        "be": 1,
-        "tiled": 1,
-        "t2p": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "clk",
-        "default": "0",
-        "descr": "clock",
-    },
-    {
-        "2p": 0,
-        "be": 0,
-        "tiled": 0,
-        "t2p": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "w_clk",
-        "default": "0",
-        "descr": "write clock",
-    },
-    {
-        "2p": 1,
-        "be": 1,
-        "tiled": 1,
-        "t2p": 1,
-        "type": "input",
-        "n_bits": "DATA_W",
-        "name": "w_data",
-        "default": "0",
-        "descr": "ram 2p write data",
-    },
-    {
-        "2p": 1,
-        "be": 1,
-        "tiled": 0,
-        "t2p": 1,
-        "type": "input",
-        "n_bits": "ADDR_W",
-        "name": "w_addr",
-        "default": "0",
-        "descr": "ram 2p write address",
-    },
-    {
-        "2p": 0,
-        "be": 0,
-        "tiled": 1,
-        "t2p": 0,
-        "type": "input",
-        "n_bits": "ADDR_W",
-        "name": "addr",
-        "default": "0",
-        "descr": "ram 2p address",
-    },
-    {
-        "2p": 1,
-        "be": 0,
-        "tiled": 1,
-        "t2p": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "w_en",
-        "default": "0",
-        "descr": "ram 2p write enable",
-    },
-    {
-        "2p": 0,
-        "be": 1,
-        "tiled": 0,
-        "t2p": 0,
-        "type": "input",
-        "n_bits": "DATA_W/8",
-        "name": "w_en",
-        "default": "0",
-        "descr": "ram 2p write strobe",
-    },
-    {
-        "2p": 0,
-        "be": 0,
-        "tiled": 0,
-        "t2p": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "r_clk",
-        "default": "0",
-        "descr": "read clock",
-    },
-    {
-        "2p": 1,
-        "be": 1,
-        "tiled": 0,
-        "t2p": 1,
-        "type": "input",
-        "n_bits": "ADDR_W",
-        "name": "r_addr",
-        "default": "0",
-        "descr": "ram 2p read address",
-    },
-    {
-        "2p": 1,
-        "be": 1,
-        "tiled": 1,
-        "t2p": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "r_en",
-        "default": "0",
-        "descr": "ram 2p read enable",
-    },
-    {
-        "2p": 1,
-        "be": 1,
-        "tiled": 1,
-        "t2p": 1,
-        "type": "output",
-        "n_bits": "DATA_W",
-        "name": "r_data",
-        "default": "0",
-        "descr": "ram 2p read data",
-    },
-]
-
-ram_dp = [
-    {
-        "dp": 1,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 0,
-        "tdp_be": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "clk",
-        "default": "0",
-        "descr": "clock",
-    },
-    {
-        "dp": 0,
-        "dp_be": 0,
-        "dp_be_xil": 0,
-        "tdp": 1,
-        "tdp_be": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "clkA",
-        "default": "0",
-        "descr": "clock A",
-    },
-    {
-        "dp": 1,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 1,
-        "tdp_be": 1,
-        "type": "input",
-        "n_bits": "DATA_W",
-        "name": "dA",
-        "default": "0",
-        "descr": "Data in A",
-    },
-    {
-        "dp": 1,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 1,
-        "tdp_be": 1,
-        "type": "input",
-        "n_bits": "ADDR_W",
-        "name": "addrA",
-        "default": "0",
-        "descr": "Address A",
-    },
-    {
-        "dp": 1,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 1,
-        "tdp_be": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "enA",
-        "default": "0",
-        "descr": "Enable A",
-    },
-    {
-        "dp": 1,
-        "dp_be": 0,
-        "dp_be_xil": 0,
-        "tdp": 1,
-        "tdp_be": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "weA",
-        "default": "0",
-        "descr": "Write enable A",
-    },
-    {
-        "dp": 0,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 0,
-        "tdp_be": 1,
-        "type": "input",
-        "n_bits": "DATA_W/8",
-        "name": "weA",
-        "default": "0",
-        "descr": "Write strobe A",
-    },
-    {
-        "dp": 1,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 1,
-        "tdp_be": 1,
-        "type": "output",
-        "n_bits": "DATA_W",
-        "name": "dA",
-        "default": "0",
-        "descr": "Data out A",
-    },
-    {
-        "dp": 0,
-        "dp_be": 0,
-        "dp_be_xil": 0,
-        "tdp": 1,
-        "tdp_be": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "clkB",
-        "default": "0",
-        "descr": "clock B",
-    },
-    {
-        "dp": 1,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 1,
-        "tdp_be": 1,
-        "type": "input",
-        "n_bits": "DATA_W",
-        "name": "dB",
-        "default": "0",
-        "descr": "Data in B",
-    },
-    {
-        "dp": 1,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 1,
-        "tdp_be": 1,
-        "type": "input",
-        "n_bits": "ADDR_W",
-        "name": "addrB",
-        "default": "0",
-        "descr": "Address B",
-    },
-    {
-        "dp": 1,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 1,
-        "tdp_be": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "enB",
-        "default": "0",
-        "descr": "Enable B",
-    },
-    {
-        "dp": 1,
-        "dp_be": 0,
-        "dp_be_xil": 0,
-        "tdp": 1,
-        "tdp_be": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "weB",
-        "default": "0",
-        "descr": "Write enable B",
-    },
-    {
-        "dp": 0,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 0,
-        "tdp_be": 1,
-        "type": "input",
-        "n_bits": "DATA_W/8",
-        "name": "weB",
-        "default": "0",
-        "descr": "Write strobe B",
-    },
-    {
-        "dp": 1,
-        "dp_be": 1,
-        "dp_be_xil": 1,
-        "tdp": 1,
-        "tdp_be": 1,
-        "type": "output",
-        "n_bits": "DATA_W",
-        "name": "dB",
-        "default": "0",
-        "descr": "Data out B",
-    },
-]
-
+def create_ram_2p (port_prefix):
+    return list(dict.fromkeys(
+        create_mem_write_port("a") +
+        create_mem_read_port("b")
+    ))
+ 
 #
 # AXI4
 #
+SIZE_W = 3
+BURST_W = 2
+LOCK_W = 2
+CACHE_W = 4
+PROT_W = 3
+QOS_W = 4
+RESP_W = 2
 
-AXI_SIZE_W = "3"
-AXI_BURST_W = "2"
-AXI_LOCK_W = "2"
-AXI_CACHE_W = "4"
-AXI_PROT_W = "3"
-AXI_QOS_W = "4"
-AXI_RESP_W = "2"
+def create_axil_write ():
+    return [
+        {
+            "name": "axil_awaddr",
+            "direction": "output",
+            "width": ADDR_W,
+            "descr": "Address write channel address.",
+        },
+        {
+            "name": "axil_awprot",
+            "direction": "output",
+            "width": PROT_W,
+            "descr": "Address write channel protection type. Set to 000 if master output; ignored if slave input.",
+        },
+        {
+            "name": "axil_awvalid",
+            "direction": "output",
+            "width": 1,
+            "descr": "Address write channel valid.",
+        },
+        {
+            "name": "axil_awready",
+            "direction": "input",
+            "width": 1,
+            "descr": "Address write channel ready.",
+        },
+        {
+            "name": "axil_wdata",
+            "direction": "output",
+            "width": DATA_W,
+            "descr": "Write channel data.",
+        },
+        {
+            "name": "axil_wstrb",
+            "direction": "output",
+            "width": DATA_W/8,
+            "descr": "Write channel write strobe.",
+        },
+        {
+            "name": "axil_wvalid",
+            "direction": "output",
+            "width": 1,
+            "descr": "Write channel valid.",
+        },
+        {
+            "name": "axil_wready",
+            "direction": "input",
+            "width": 1,
+            "descr": "Write channel ready.",
+        },
+        {
+            "name": "axil_bresp",
+            "direction": "input",
+            "width": RESP_W,
+            "descr": "Write response channel response.",
+        },
+        {
+            "name": "axil_bvalid",
+            "direction": "input",
+            "width": 1,
+            "descr": "Write response channel valid.",
+        },
+        {
+            "name": "axil_bready",
+            "direction": "output",
+            "width": 1,
+            "descr": "Write response channel ready.",
+        },
+    ]
 
-axi_write = [
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": "AXI_ID_W",
-        "name": "axi_awid",
-        "default": "0",
-        "descr": "Address write channel ID.",
-    },
-    {
-        "lite": 1,
-        "type": "output",
-        "n_bits": "AXI_ADDR_W",
-        "name": "axi_awaddr",
-        "default": "0",
-        "descr": "Address write channel address.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": "AXI_LEN_W",
-        "name": "axi_awlen",
-        "default": "0",
-        "descr": "Address write channel burst length.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": AXI_SIZE_W,
-        "name": "axi_awsize",
-        "default": "2",
-        "descr": "Address write channel burst size. This signal indicates the size of each transfer in the burst.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": AXI_BURST_W,
-        "name": "axi_awburst",
-        "default": "1",
-        "descr": "Address write channel burst type.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": AXI_LOCK_W,
-        "name": "axi_awlock",
-        "default": "0",
-        "descr": "Address write channel lock type.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": AXI_CACHE_W,
-        "name": "axi_awcache",
-        "default": "2",
-        "descr": "Address write channel memory type. Set to 0000 if master output; ignored if slave input.",
-    },
-    {
-        "lite": 1,
-        "type": "output",
-        "n_bits": AXI_PROT_W,
-        "name": "axi_awprot",
-        "default": "2",
-        "descr": "Address write channel protection type. Set to 000 if master output; ignored if slave input.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": AXI_QOS_W,
-        "name": "axi_awqos",
-        "default": "0",
-        "descr": "Address write channel quality of service.",
-    },
-    {
-        "lite": 1,
-        "type": "output",
-        "n_bits": "1",
-        "name": "axi_awvalid",
-        "default": "0",
-        "descr": "Address write channel valid.",
-    },
-    {
-        "lite": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "axi_awready",
-        "default": "1",
-        "descr": "Address write channel ready.",
-    },
-    {
-        "lite": 1,
-        "type": "output",
-        "n_bits": "AXI_DATA_W",
-        "name": "axi_wdata",
-        "default": "0",
-        "descr": "Write channel data.",
-    },
-    {
-        "lite": 1,
-        "type": "output",
-        "n_bits": "(AXI_DATA_W/8)",
-        "name": "axi_wstrb",
-        "default": "0",
-        "descr": "Write channel write strobe.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": "1",
-        "name": "axi_wlast",
-        "default": "0",
-        "descr": "Write channel last word flag.",
-    },
-    {
-        "lite": 1,
-        "type": "output",
-        "n_bits": "1",
-        "name": "axi_wvalid",
-        "default": "0",
-        "descr": "Write channel valid.",
-    },
-    {
-        "lite": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "axi_wready",
-        "default": "1",
-        "descr": "Write channel ready.",
-    },
-    {
-        "lite": 0,
-        "type": "input",
-        "n_bits": "AXI_ID_W",
-        "name": "axi_bid",
-        "default": "0",
-        "descr": "Write response channel ID.",
-    },
-    {
-        "lite": 1,
-        "type": "input",
-        "n_bits": AXI_RESP_W,
-        "name": "axi_bresp",
-        "default": "0",
-        "descr": "Write response channel response.",
-    },
-    {
-        "lite": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "axi_bvalid",
-        "default": "0",
-        "descr": "Write response channel valid.",
-    },
-    {
-        "lite": 1,
-        "type": "output",
-        "n_bits": "1",
-        "name": "axi_bready",
-        "default": "1",
-        "descr": "Write response channel ready.",
-    },
-]
+def create_axi_write ():
 
-axi_read = [
+    axil_write = create_axil_write()
+
+    for port in axil_write:
+        port["name"] = port["name"].replace("axil", "axi")
+        
+    return axil_write + [
+        {
+            "name": "axi_awid",
+            "direction": "output",
+            "width": ID_W,
+            "descr": "Address write channel ID.",
+        },
+        {
+            "name": "axi_awlen",
+            "direction": "output",
+            "width": LEN_W,
+            "descr": "Address write channel burst length.",
+        },
+        {
+            "name": "axi_awsize",
+            "direction": "output",
+            "width": SIZE_W,
+            "descr": "Address write channel burst size. This signal indicates the size of each transfer in the burst.",
+        },
+        {
+            "name": "axi_awburst",
+            "direction": "output",
+            "width": BURST_W,
+            "descr": "Address write channel burst type.",
+        },
+        {
+            "name": "axi_awlock",
+            "direction": "output",
+            "width": LOCK_W,
+            "descr": "Address write channel lock type.",
+        },
+        {
+            "name": "axi_awcache",
+            "direction": "output",
+            "width": CACHE_W,
+            "descr": "Address write channel memory type. Set to 0000 if master output; ignored if slave input.",
+        },
+        {
+            "name": "axi_awqos",
+            "direction": "output",
+            "width": QOS_W,
+            "descr": "Address write channel quality of service.",
+        },
+        {
+            "name": "axi_wlast",
+            "direction": "output",
+            "width": 1,
+            "descr": "Write channel last word flag.",
+        },
+        {
+            "name": "axi_bid",
+            "direction": "input",
+            "width": ID_W,
+            "descr": "Write response channel ID.",
+        },
+    ]
+
+def create_axil_read():
+    return [
     {
-        "lite": 0,
-        "type": "output",
-        "n_bits": "AXI_ID_W",
-        "name": "axi_arid",
-        "default": "0",
-        "descr": "Address read channel ID.",
-    },
-    {
-        "lite": 1,
-        "type": "output",
-        "n_bits": "AXI_ADDR_W",
-        "name": "axi_araddr",
-        "default": "0",
+        "name": "axil_araddr",
+        "direction": "output",
+        "width": ADDR_W,
         "descr": "Address read channel address.",
     },
     {
-        "lite": 0,
-        "type": "output",
-        "n_bits": "AXI_LEN_W",
-        "name": "axi_arlen",
-        "default": "0",
-        "descr": "Address read channel burst length.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": AXI_SIZE_W,
-        "name": "axi_arsize",
-        "default": "2",
-        "descr": "Address read channel burst size. This signal indicates the size of each transfer in the burst.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": AXI_BURST_W,
-        "name": "axi_arburst",
-        "default": "1",
-        "descr": "Address read channel burst type.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": AXI_LOCK_W,
-        "name": "axi_arlock",
-        "default": "0",
-        "descr": "Address read channel lock type.",
-    },
-    {
-        "lite": 0,
-        "type": "output",
-        "n_bits": AXI_CACHE_W,
-        "name": "axi_arcache",
-        "default": "2",
-        "descr": "Address read channel memory type. Set to 0000 if master output; ignored if slave input.",
-    },
-    {
-        "lite": 1,
-        "type": "output",
-        "n_bits": AXI_PROT_W,
-        "name": "axi_arprot",
-        "default": "2",
+        "name": "axil_arprot",
+        "direction": "output",
+        "width": PROT_W,
         "descr": "Address read channel protection type. Set to 000 if master output; ignored if slave input.",
     },
     {
-        "lite": 0,
-        "type": "output",
-        "n_bits": AXI_QOS_W,
-        "name": "axi_arqos",
-        "default": "0",
-        "descr": "Address read channel quality of service.",
-    },
-    {
-        "lite": 1,
-        "type": "output",
-        "n_bits": "1",
-        "name": "axi_arvalid",
-        "default": "0",
+        "name": "axil_arvalid",
+        "direction": "output",
+        "width": 1,
         "descr": "Address read channel valid.",
     },
     {
-        "lite": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "axi_arready",
-        "default": "1",
+        "name": "axil_arready",
+        "direction": "input",
+        "width": 1,
         "descr": "Address read channel ready.",
     },
     {
-        "lite": 0,
-        "type": "input",
-        "n_bits": "AXI_ID_W",
-        "name": "axi_rid",
-        "default": "0",
-        "descr": "Read channel ID.",
-    },
-    {
-        "lite": 1,
-        "type": "input",
-        "n_bits": "AXI_DATA_W",
-        "name": "axi_rdata",
-        "default": "0",
+        "name": "axil_rdata",
+        "direction": "input",
+        "width": DATA_W,
         "descr": "Read channel data.",
     },
     {
-        "lite": 1,
-        "type": "input",
-        "n_bits": AXI_RESP_W,
-        "name": "axi_rresp",
-        "default": "0",
+        "name": "axil_rresp",
+        "direction": "input",
+        "width": RESP_W,
         "descr": "Read channel response.",
     },
     {
-        "lite": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "axi_rlast",
-        "default": "0",
-        "descr": "Read channel last word.",
-    },
-    {
-        "lite": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "axi_rvalid",
-        "default": "0",
+        "name": "axil_rvalid",
+        "direction": "input",
+        "width": 1,
         "descr": "Read channel valid.",
     },
     {
-        "lite": 1,
-        "type": "output",
-        "n_bits": "1",
-        "name": "axi_rready",
-        "default": "1",
+        "name": "axil_rready",
+        "direction": "output",
+        "width": 1,
         "descr": "Read channel ready.",
     },
 ]
 
-axi = axi_write + axi_read
-axil = axi
 
-axis = [
-    {
-        "name": "axis_tvalid",
-        "type": "output",
-        "n_bits": "1",
-        "default": "0",
-        "descr": "axis stream valid.",
-    },
-    {
-        "name": "axis_tready",
-        "type": "input",
-        "n_bits": "1",
-        "default": "1",
-        "descr": "axis stream ready.",
-    },
-    {
-        "name": "axis_tdata",
-        "type": "output",
-        "n_bits": "AXI_DATA_W",
-        "default": "0",
-        "descr": "axis stream data.",
-    },
-    {
-        "name": "axis_tlast",
-        "type": "output",
-        "n_bits": "1",
-        "default": "0",
-        "descr": "axis stream last.",
-    },
-]        
+def create_axi_read():
+    axil_read = create_axil_read()
+
+    for port in axil_read:
+        port["name"] = port["name"].replace("axil", "axi")
+    
+    return axil_read + [
+        {
+            "name": "axi_arid",
+            "direction": "output",
+            "width": ID_W,
+            "descr": "Address read channel ID.",
+        },
+        {
+            "name": "axi_arlen",
+            "direction": "output",
+            "width": LEN_W,
+            "descr": "Address read channel burst length.",
+        },
+        {
+            "name": "axi_arsize",
+            "direction": "output",
+            "width": SIZE_W,
+            "descr": "Address read channel burst size. This signal indicates the size of each transfer in the burst.",
+        },
+        {
+            "name": "axi_arburst",
+            "direction": "output",
+            "width": BURST_W,
+            "descr": "Address read channel burst type.",
+        },
+        {
+            "name": "axi_arlock",
+            "direction": "output",
+            "width": LOCK_W,
+            "descr": "Address read channel lock type.",
+        },
+        {
+            "name": "axi_arcache",
+            "direction": "output",
+            "width": CACHE_W,
+            "descr": "Address read channel memory type. Set to 0000 if master output; ignored if slave input.",
+        },
+        {
+            "name": "axi_arqos",
+            "direction": "output",
+            "width": QOS_W,
+            "descr": "Address read channel quality of service.",
+        },
+        {
+            "name": "axi_rid",
+            "direction": "input",
+            "width": ID_W,
+            "descr": "Read channel ID.",
+        },
+        {
+            "name": "axi_rlast",
+            "direction": "input",
+            "width": 1,
+            "descr": "Read channel last word.",
+        },
+    ]
+
+def create_axil():
+    axil_read = create_axil_read()
+    axil_write = create_axil_write()
+    return axil_read + axil_write
+
+def create_axi():
+    return (create_axi_read() + create_axi_write())
+
+def create_axis():
+    return [
+        {
+            "name": "axis_tvalid",
+            "direction": "output",
+            "width": 1,
+            "descr": "axis stream valid.",
+        },
+        {
+            "name": "axis_tready",
+            "direction": "input",
+            "width": 1,
+            "descr": "axis stream ready.",
+        },
+        {
+            "name": "axis_tdata",
+            "direction": "output",
+            "width": DATA_W,
+            "descr": "axis stream data.",
+        },
+        {
+            "name": "axis_tlast",
+            "direction": "output",
+            "width": 1,
+            "descr": "axis stream last.",
+        },
+    ]
 
 
 #
-# AMBA
+# APB
 #
 
-AHB_BURST_W = "3"
-AHB_PROT_W = "4"
-AHB_SIZE_W = "3"
-AHB_TRANS_W = "2"
-
-ahb = [
-    {
-        "ahb": 1,
-        "apb": 1,
-        "type": "output",
-        "n_bits": "AHB_ADDR_W",
-        "name": "ahb_addr",
-        "default": "0",
-        "descr": "Byte address of the transfer.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "output",
-        "n_bits": AHB_BURST_W,
-        "name": "ahb_burst",
-        "default": "0",
-        "descr": "Burst type.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "output",
-        "n_bits": "1",
-        "name": "ahb_mastlock",
-        "default": "0",
-        "descr": "Transfer is part of a lock sequence.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "output",
-        "n_bits": AHB_PROT_W,
-        "name": "ahb_prot",
-        "default": "1",
-        "descr": "Protection type. Set to 0000 if master output; ignored if slave input.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "output",
-        "n_bits": AHB_SIZE_W,
-        "name": "ahb_size",
-        "default": "2",
-        "descr": "Burst size. Indicates the size of each transfer in the burst.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "output",
-        "n_bits": "1",
-        "name": "ahb_nonsec",
-        "default": "0",
-        "descr": "Non-secure transfer.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "output",
-        "n_bits": "1",
-        "name": "ahb_excl",
-        "default": "0",
-        "descr": "Exclusive transfer.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "output",
-        "n_bits": "AHB_MASTER_W",
-        "name": "ahb_master",
-        "default": "0",
-        "descr": "Master ID.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "output",
-        "n_bits": AHB_TRANS_W,
-        "name": "ahb_trans",
-        "default": "0",
-        "descr": "Transfer type. Indicates the type of the transfer.",
-    },
-    {
-        "ahb": 1,
-        "apb": 1,
-        "type": "output",
-        "n_bits": "1",
-        "name": "ahb_sel",
-        "default": "0",
-        "descr": "Slave select.",
-    },
-    {
-        "ahb": 0,
-        "apb": 1,
-        "type": "output",
-        "n_bits": "1",
-        "name": "ahb_enable",
-        "default": "0",
-        "descr": "Enable. Indicates the number of clock cycles of the transfer.",
-    },
-    {
-        "ahb": 1,
-        "apb": 1,
-        "type": "output",
-        "n_bits": "1",
-        "name": "ahb_write",
-        "default": "0",
-        "descr": "Write. Indicates the direction of the operation.",
-    },
-    {
-        "ahb": 1,
-        "apb": 1,
-        "type": "output",
-        "n_bits": "AHB_DATA_W",
-        "name": "ahb_wdata",
-        "default": "0",
-        "descr": "Write data.",
-    },
-    {
-        "ahb": 1,
-        "apb": 1,
-        "type": "output",
-        "n_bits": "(AHB_DATA_W/8)",
-        "name": "ahb_wstrb",
-        "default": "0",
-        "descr": "Write strobe.",
-    },
-    {
-        "ahb": 1,
-        "apb": 1,
-        "type": "input",
-        "n_bits": "AHB_DATA_W",
-        "name": "ahb_rdata",
-        "default": "0",
-        "descr": "Read data.",
-    },
-    {
-        "ahb": 1,
-        "apb": 1,
-        "type": "input",
-        "n_bits": "1",
-        "name": "ahb_ready",
-        "default": "0",
-        "descr": "Ready. Indicates the end of a transfer.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "output",
-        "n_bits": "1",
-        "name": "ahb_ready",
-        "default": "0",
-        "descr": "Ready input. Indicates the end of the last transfer.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "ahb_resp",
-        "default": "0",
-        "descr": "Transfer response.",
-    },
-    {
-        "ahb": 1,
-        "apb": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "ahb_exokay",
-        "default": "1",
-        "descr": "Exclusive transfer response.",
-    },
-    {
-        "ahb": 0,
-        "apb": 0,
-        "type": "input",
-        "n_bits": "1",
-        "name": "ahb_slverr",
-        "default": "0",
-        "descr": "Slave error. Indicates if the transfer has falied.",
-    },
-]
-
-apb = ahb
-
-def get_ports(interface):
-
-    if_name = get_if_name(interface)
-    
-    port_list = eval(if_name)
-    
-    for i in port_list:
-        if if_name == "axil":
-            if i["lite"] == 1:
-                port_list[-1]["name"] = port_list[-1]["name"].replace("axi_", "axil_")
-                port_list[-1]["n_bits"] = port_list[-1]["n_bits"].replace("AXI_", "AXIL_")
-            else:
-                port_list.remove(i)
-        if if_name == "apb":
-            if i["apb"] == 1:
-                port_list[-1]["name"] = port_list[-1]["name"].replace("ahb_", "apb_")
-                port_list[-1]["n_bits"] = port_list[-1]["n_bits"].replace("AHB_", "APB_")
-            else:
-                port_list.remove(i)
-
-    return port_list
-
+def create_apb():
+    return [
+        {
+            "name": "apb_addr",
+            "direction": "output",
+            "width": ADDR_W,
+            "descr": "Byte address of the transfer.",
+        },
+        {
+            "name": "apb_sel",
+            "direction": "output",
+            "width": 1,
+            "descr": "Slave select.",
+        },
+        {
+            "name": "apb_enable",
+            "direction": "output",
+            "width": 1,
+            "descr": "Enable. Indicates the number of clock cycles of the transfer.",
+        },
+        {
+            "name": "apb_write",
+            "direction": "output",
+            "width": 1,
+            "descr": "Write. Indicates the direction of the operation.",
+        },
+        {
+            "name": "apb_wdata",
+            "direction": "output",
+            "width": DATA_W,
+            "descr": "Write data.",
+        },
+        {
+            "name": "apb_wstrb",
+            "direction": "output",
+            "width": DATA_W/8,
+            "descr": "Write strobe.",
+        },
+        {
+            "name": "apb_rdata",
+            "direction": "input",
+            "width": DATA_W,
+            "descr": "Read data.",
+        },
+        {
+            "name": "apb_ready",
+            "direction": "input",
+            "width": 1,
+            "descr": "Ready. Indicates the end of a transfer.",
+        },
+    ]
 
 #
 # Handle signal direction 
@@ -1264,12 +627,12 @@ def write_port(direction, width, name, fout):
 
 def m_port(port_list, prefix, param_prefix, fout, bus_size=1):
     for i in range(len(port_list)):
-        port_direction = port_list[i]["type"]
-        name = prefix + port_list[i]["name"] + suffix(port_list[i]["type"])
+        port_direction = port_list[i]["direction"]
+        name = prefix + port_list[i]["name"] + suffix(port_list[i]["direction"])
         if bus_size == 1:
-            width = port_list[i]["n_bits"]
+            width = port_list[i]["width"]
         else:
-            width = "(" + str(bus_size) + "*" + port_list[i]["n_bits"] + ")"
+            width = "(" + str(bus_size) + "*" + port_list[i]["width"] + ")"
         width = add_param_prefix(width, param_prefix)
         bus_width = " [" + width + "-1:0] "
         # Write port
@@ -1278,12 +641,12 @@ def m_port(port_list, prefix, param_prefix, fout, bus_size=1):
 
 def s_port(port_list, prefix, param_prefix, fout, bus_size=1):
     for i in range(len(port_list)):
-        port_direction = reverse(port_list[i]["type"])
-        name = prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["type"]))
+        port_direction = reverse(port_list[i]["direction"])
+        name = prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["direction"]))
         if bus_size == 1:
-            width = port_list[i]["n_bits"]
+            width = port_list[i]["width"]
         else:
-            width = "(" + str(bus_size) + "*" + port_list[i]["n_bits"] + ")"
+            width = "(" + str(bus_size) + "*" + port_list[i]["width"] + ")"
         width = add_param_prefix(width, param_prefix)
         bus_width = " [" + width + "-1:0] "
         # Write port
@@ -1317,7 +680,7 @@ def portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
         write_portmap(
             port,
             connection_name,
-            port_list[i]["n_bits"],
+            port_list[i]["width"],
             bus_start,
             bus_size,
             fout,
@@ -1325,12 +688,12 @@ def portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
 
 def m_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(port_list)):
-        port = port_prefix + port_list[i]["name"] + suffix(port_list[i]["type"])
+        port = port_prefix + port_list[i]["name"] + suffix(port_list[i]["direction"])
         connection_name = wire_prefix + port_list[i]["name"]
         write_portmap(
             port,
             connection_name,
-            port_list[i]["n_bits"],
+            port_list[i]["width"],
             bus_start,
             bus_size,
             fout,
@@ -1339,12 +702,12 @@ def m_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1
 
 def s_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(port_list)):
-        port = port_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["type"]))
+        port = port_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["direction"]))
         connection_name = wire_prefix + port_list[i]["name"]
         write_portmap(
             port,
             connection_name,
-            port_list[i]["n_bits"],
+            port_list[i]["width"],
             bus_start,
             bus_size,
             fout,
@@ -1353,14 +716,14 @@ def s_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1
 
 def m_m_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(port_list)):
-        port = port_prefix + port_list[i]["name"] + suffix(port_list[i]["type"])
+        port = port_prefix + port_list[i]["name"] + suffix(port_list[i]["direction"])
         connection_name = (
-            wire_prefix + port_list[i]["name"] + suffix(port_list[i]["type"])
+            wire_prefix + port_list[i]["name"] + suffix(port_list[i]["direction"])
         )
         write_portmap(
             port,
             connection_name,
-            port_list[i]["n_bits"],
+            port_list[i]["width"],
             bus_start,
             bus_size,
             fout,
@@ -1369,14 +732,14 @@ def m_m_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size
 
 def s_s_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
     for i in range(len(port_list)):
-        port = port_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["type"]))
+        port = port_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["direction"]))
         connection_name = (
-            wire_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["type"]))
+            wire_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["direction"]))
         )
         write_portmap(
             port,
             connection_name,
-            port_list[i]["n_bits"],
+            port_list[i]["width"],
             bus_start,
             bus_size,
             fout,
@@ -1430,46 +793,44 @@ def wire(port_list, prefix, param_prefix, fout, bus_size=1):
             prefix + port_list[i]["name"],
             param_prefix,
             bus_size,
-            port_list[i]["n_bits"],
+            port_list[i]["width"],
             fout,
         )
 
 
 def m_tb_wire(port_list, prefix, param_prefix, fout, bus_size=1):
     for i in range(len(port_list)):
-        tb_signal = tbsignal(port_list[i]["type"])
+        tb_signal = tbsignal(port_list[i]["direction"])
         write_tb_wire(
             tb_signal,
             prefix,
             port_list[i]["name"],
             param_prefix,
             bus_size,
-            port_list[i]["n_bits"],
+            port_list[i]["width"],
             fout,
-            port_list[i]["default"],
         )
     fout.write("\n")
 
 
 def s_tb_wire(port_list, prefix, param_prefix, fout, bus_size=1):
     for i in range(len(port_list)):
-        tb_signal = tbsignal(reverse(port_list[i]["type"]))
+        tb_signal = tbsignal(reverse(port_list[i]["direction"]))
         write_tb_wire(
             tb_signal,
             prefix,
             port_list[i]["name"],
             param_prefix,
             bus_size,
-            port_list[i]["n_bits"],
+            port_list[i]["width"],
             fout,
-            port_list[i]["default"],
         )
     fout.write("\n")
 
 def write_vs_contents(
         file_object,
         interface,
-        port_list = [],
+        port_list,
         port_prefix = "",
         wire_prefix = "",
         bus_size = 1,
@@ -1477,9 +838,6 @@ def write_vs_contents(
 ):
     interface_type = get_if_type(interface)
 
-    if port_list == []:
-        port_list = get_ports(interface)
-    
     param_prefix = port_prefix.upper()
 
     if interface_type.find("portmap") + 1:
@@ -1504,7 +862,7 @@ def get_if_type(arg):
     for if_type in interface_types:
         if arg.endswith(if_type):
             return if_type
-    if if_type == interface_names[-1]:
+    if if_type == interface_types[-1]:
         print("Error: Interface type not found")
         sys.exit(1)
         
@@ -1549,12 +907,85 @@ def parse_arguments():
         default=""
     )
 
+    parser.add_argument(
+        "--ADDR_W",
+        nargs=1,
+        help="""Wire prefix.""",
+        default=32
+    )
+
+    parser.add_argument(
+        "--DATA_W",
+        nargs=1,
+        help="""Data width.""",
+        default=32
+    )
+
+    parser.add_argument(
+        "--ID_W",
+        nargs=1,
+        help="""ID width.""",
+        default=1
+    )
+
+    parser.add_argument(
+        "--PROT_W",
+        nargs=1,
+        help="""PROT width.""",
+        default=3
+    )
+
+    parser.add_argument(
+        "--RESP_W",
+        nargs=1,
+        help="""RESP width.""",
+        default=2
+    )
+
+    parser.add_argument(
+        "--SIZE_W",
+        nargs=1,
+        help="""SIZE width.""",
+        default=3
+    )
+
+    parser.add_argument(
+        "--BURST_W",
+        nargs=1,
+        help="""BURST width.""",
+        default=2
+    )
+
+    parser.add_argument(
+        "--LOCK_W",
+        nargs=1,
+        help="""LOCK width.""",
+        default=2
+    )
+
+    parser.add_argument(
+        "--CACHE_W",
+        nargs=1,
+        help="""CACHE width.""",
+        default=4
+    )
+
+    parser.add_argument(
+        "--QOS_W",
+        nargs=1,
+        help="""QOS width.""",
+        default=4
+    )
     return parser.parse_args()
+
+
+
+
+
 
 #
 # Main
 #
-
 
 def main():
 
@@ -1564,11 +995,38 @@ def main():
     file_prefix = args.file_prefix
     port_prefix = args.port_prefix
     wire_prefix = args.wire_prefix
+
+    global ADDR_W
+    global DATA_W
+    global ID_W
+    global PROT_W
+    global RESP_W
+    global SIZE_W
+    global BURST_W
+    global LOCK_W
+    global CACHE_W
+    global QOS_W
+    
+    DATA_W = args.DATA_W
+    ADDR_W = args.ADDR_W
+    ID_W = args.ID_W
+    PROT_W = args.PROT_W
+    RESP_W = args.RESP_W
+    SIZE_W = args.SIZE_W
+    BURST_W = args.BURST_W
+    LOCK_W = args.LOCK_W
+    CACHE_W = args.CACHE_W
+    QOS_W = args.QOS_W
+    
     
     # write .vs file
     fout = open(file_prefix + interface + ".vs", "w")
-    
-    write_vs_contents(fout, interface, [], port_prefix, wire_prefix)
+
+    if_name = get_if_name(interface)
+
+    ports = eval ("create_"+if_name+"()")
+
+    write_vs_contents(fout, interface, ports, port_prefix, wire_prefix)
 
     fout.close()
 
