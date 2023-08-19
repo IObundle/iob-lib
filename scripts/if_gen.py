@@ -8,15 +8,10 @@ import sys
 import argparse
 import re
 
-interface_names = [
-    "iob",
+if_names = [
     "clk_en_rst",
     "clk_rst",
-    "rom_sp",
-    "rom_tdp",
-    "ram_sp",
-    "ram_tdp",
-    "ram_2p",
+    "iob",
     "axil_read",
     "axil_write",
     "axil",
@@ -25,9 +20,16 @@ interface_names = [
     "axi",
     "apb",
     "axis",
+    "rom_sp",
+    "rom_tdp",
+    "ram_sp",
+    "ram_tdp",
+    "ram_2p",
 ]
-    
-interface_types = [
+
+
+
+if_types = [
     "m_port",
     "s_port",
     "m_portmap",
@@ -40,9 +42,15 @@ interface_types = [
     ]
 
 DATA_W = 32
+DATA_SECTION_W = 8
 ADDR_W = 32
 
-def create_iob():
+#
+# below are functions that return interface ports for each interface type
+# the port direction is relative to the master module (driver)
+#
+
+def get_iob_ports():
     return [
         {
             "name": "iob_avalid",
@@ -65,7 +73,7 @@ def create_iob():
         {
             "name": "iob_wstrb",
             "direction": "output",
-            "width": NDS,
+            "width": int(DATA_W/DATA_SECTION_W),
             "descr": "Write strobe.",
         },
         {
@@ -77,150 +85,153 @@ def create_iob():
         {
             "name": "iob_rdata",
             "direction": "input",
-            "width": m*DATA_W,
+            "width": DATA_W,
             "descr": "Read data.",
         },
         {
             "name": "iob_ready",
             "direction": "input",
-            "width": m,
+            "width": 1,
             "descr": "Interface ready.",
         },
 ]
 
-def create_clk_rst():
+def get_clk_rst_ports():
     return [
         {
             "name": "clk",
-            "direction": "input",
+            "direction": "output",
             "width": 1,
             "descr": "Clock",
         },
         {
             "name": "arst",
-            "direction": "input",
+            "direction": "output",
             "width": 1,
             "descr": "Asynchronous active-high reset",
         },
     ]
 
-def create_clk_en_rst():
+def get_clk_en_rst_ports():
     return [
         {
             "name": "clk",
-            "direction": "input",
+            "direction": "output",
             "width": 1,
             "descr": "Clock",
         },
         {
             "name": "cke",
-            "direction": "input",
+            "direction": "output",
             "width": 1,
             "descr": "Enable",
         },
         {
             "name": "arst",
-            "direction": "input",
+            "direction": "output",
             "width": 1,
             "descr": "Asynchronous active-high reset",
         },
     ]
 
-def create_mem_read(suffix):
+def get_mem_read_ports(suffix):
     return [
         {
             "name": "clk_"+suffix,
-            "direction": "input",
+            "direction": "output",
             "width": 1,
             "descr": f"Clock port {suffix}",
         },
         {
             "name": "en_"+suffix,
-            "direction": "input",
+            "direction": "output",
             "width": 1,
             "descr": f"Enable port {suffix}",
         },
         {
             "name": "addr_a",
-            "direction": "input",
+            "direction": "output",
             "width": ADDR_W,
             "descr": "Address port {suffix}",
         },
         {
             "name": "rdata_"+suffix,
-            "direction": "output",
+            "direction": "input",
             "width": DATA_W,
             "descr": "Data port {suffix}",
         },
     ]
     
 
-def create_mem_write(suffix):
+def get_mem_write_ports(suffix):
     return [
         {
             "name": "clk_"+suffix,
-            "direction": "input",
+            "direction": "output",
             "width": 1,
             "descr": f"Clock port {suffix}",
         },
         {
             "name": "en_"+suffix,
-            "direction": "input",
+            "direction": "output",
             "width": 1,
             "descr": f"Enable port {suffix}",
         },
         {
             "name": "addr_a",
-            "direction": "input",
+            "direction": "output",
             "width": ADDR_W,
             "descr": "Address port {suffix}",
         },
         {
             "name": "wdata_"+suffix,
-            "direction": "input",
+            "direction": "output",
             "width": DATA_W,
             "descr": "Data port {suffix}",
         },
         {
             "name": "wstrb_"+suffix,
-            "direction": "input",
-            "width": NDS,
+            "direction": "output",
+            "width": int(DATA_W/DATA_SECTION_W),
             "descr": "Write strobe port {suffix}",
         },
     ]
 
-def create_rom_sp():
-    return list(dict.fromkeys(create_mem_read_port("")))
+def get_rom_sp_ports():
+    ports = get_mem_read_ports("") + get_mem_write_ports("")
+    return [dict(t) for t in {tuple(d.items()) for d in ports}]
 
-def create_rom_tdp(port_prefix):
+
+def get_rom_tdp_ports(port_prefix):
     return list(dict.fromkeys(
-        create_mem_read_port("a") +
-        create_mem_read_port("b")
+        get_mem_read_ports("a") +
+        get_mem_read_ports("b")
     ))
 
-def create_ram_sp():
+def get_ram_sp_ports():
     return list(dict.fromkeys(
-        create_mem_read_port("") +
-        create_mem_write_port("")
+        get_mem_read_ports("") +
+        get_mem_write_ports("")
     ))
 
-def create_ram_tdp():
+def get_ram_tdp_ports():
     return list(dict.fromkeys(
-        create_mem_read_port("a") +
-        create_mem_read_port("b") +
-        create_mem_write_port("a") +
-        create_mem_write_port("b")
+        get_mem_read_ports("a") +
+        get_mem_read_ports("b") +
+        get_mem_write_ports("a") +
+        get_mem_write_ports("b")
     ))
 
-def create_ram_2p (port_prefix):
+def get_ram_2p_ports(port_prefix):
     return list(dict.fromkeys(
-        create_mem_write_port("a") +
-        create_mem_read_port("b")
+        get_mem_write_ports("a") +
+        get_mem_read_ports("b")
     ))
  
 #
 # AXI4
 #
+ID_W = 1
 SIZE_W = 3
 BURST_W = 2
 LOCK_W = 2
@@ -228,8 +239,9 @@ CACHE_W = 4
 PROT_W = 3
 QOS_W = 4
 RESP_W = 2
+LEN_W = 8
 
-def create_axil_write ():
+def get_axil_write_ports ():
     return [
         {
             "name": "axil_awaddr",
@@ -264,7 +276,7 @@ def create_axil_write ():
         {
             "name": "axil_wstrb",
             "direction": "output",
-            "width": DATA_W/8,
+            "width": int(DATA_W/DATA_SECTION_W),
             "descr": "Write channel write strobe.",
         },
         {
@@ -299,9 +311,66 @@ def create_axil_write ():
         },
     ]
 
-def create_axi_write ():
+def get_axil_read_ports():
+    return [
+    {
+        "name": "axil_araddr",
+        "direction": "output",
+        "width": ADDR_W,
+        "descr": "Address read channel address.",
+    },
+    {
+        "name": "axil_arprot",
+        "direction": "output",
+        "width": PROT_W,
+        "descr": "Address read channel protection type. Set to 000 if master output; ignored if slave input.",
+    },
+    {
+        "name": "axil_arvalid",
+        "direction": "output",
+        "width": 1,
+        "descr": "Address read channel valid.",
+    },
+    {
+        "name": "axil_arready",
+        "direction": "input",
+        "width": 1,
+        "descr": "Address read channel ready.",
+    },
+    {
+        "name": "axil_rdata",
+        "direction": "input",
+        "width": DATA_W,
+        "descr": "Read channel data.",
+    },
+    {
+        "name": "axil_rresp",
+        "direction": "input",
+        "width": RESP_W,
+        "descr": "Read channel response.",
+    },
+    {
+        "name": "axil_rvalid",
+        "direction": "input",
+        "width": 1,
+        "descr": "Read channel valid.",
+    },
+    {
+        "name": "axil_rready",
+        "direction": "output",
+        "width": 1,
+        "descr": "Read channel ready.",
+    },
+]
 
-    axil_write = create_axil_write()
+
+def get_axil_ports():
+    return (get_axil_read_ports() + get_axil_write_ports())
+
+
+def get_axi_write_ports ():
+
+    axil_write = get_axil_write_ports()
 
     for port in axil_write:
         port["name"] = port["name"].replace("axil", "axi")
@@ -363,61 +432,10 @@ def create_axi_write ():
         },
     ]
 
-def create_axil_read():
-    return [
-    {
-        "name": "axil_araddr",
-        "direction": "output",
-        "width": ADDR_W,
-        "descr": "Address read channel address.",
-    },
-    {
-        "name": "axil_arprot",
-        "direction": "output",
-        "width": PROT_W,
-        "descr": "Address read channel protection type. Set to 000 if master output; ignored if slave input.",
-    },
-    {
-        "name": "axil_arvalid",
-        "direction": "output",
-        "width": 1,
-        "descr": "Address read channel valid.",
-    },
-    {
-        "name": "axil_arready",
-        "direction": "input",
-        "width": 1,
-        "descr": "Address read channel ready.",
-    },
-    {
-        "name": "axil_rdata",
-        "direction": "input",
-        "width": DATA_W,
-        "descr": "Read channel data.",
-    },
-    {
-        "name": "axil_rresp",
-        "direction": "input",
-        "width": RESP_W,
-        "descr": "Read channel response.",
-    },
-    {
-        "name": "axil_rvalid",
-        "direction": "input",
-        "width": 1,
-        "descr": "Read channel valid.",
-    },
-    {
-        "name": "axil_rready",
-        "direction": "output",
-        "width": 1,
-        "descr": "Read channel ready.",
-    },
-]
 
 
-def create_axi_read():
-    axil_read = create_axil_read()
+def get_axi_read_ports():
+    axil_read = get_axil_read_ports()
 
     for port in axil_read:
         port["name"] = port["name"].replace("axil", "axi")
@@ -479,15 +497,11 @@ def create_axi_read():
         },
     ]
 
-def create_axil():
-    axil_read = create_axil_read()
-    axil_write = create_axil_write()
-    return axil_read + axil_write
 
-def create_axi():
-    return (create_axi_read() + create_axi_write())
+def get_axi_ports():
+    return (get_axi_read_ports() + get_axi_write_ports())
 
-def create_axis():
+def get_axis_ports():
     return [
         {
             "name": "axis_tvalid",
@@ -520,7 +534,7 @@ def create_axis():
 # APB
 #
 
-def create_apb():
+def get_apb_ports():
     return [
         {
             "name": "apb_addr",
@@ -555,7 +569,7 @@ def create_apb():
         {
             "name": "apb_wstrb",
             "direction": "output",
-            "width": DATA_W/8,
+            "width": int(DATA_W/DATA_SECTION_W),
             "descr": "Write strobe.",
         },
         {
@@ -577,27 +591,27 @@ def create_apb():
 #
 
 # reverse module signal direction
-def reverse(direction):
+def reverse_direction(direction):
     if direction == "input":
         return "output"
     elif direction == "output":
         return "input"
     else:
-        print("ERROR: reverse_direction : invalid argument")
-        quit()
+        print("ERROR: invalid argument.")
+        exit(1)
 
 #testbench signal direction
-def tbsignal(direction):
+def get_tbsignal_type(direction):
     if direction == "input":
         return "wire"
     elif direction == "output":
         return "reg"
     else:
-        print("ERROR: tb_reciprocal : invalid argument")
-        quit()
+        print("ERROR: invalid argument.")
+        exit(1)
 
 #get suffix from direction 
-def suffix(direction):
+def get_suffix(direction):
     if direction == "input" or direction == "reg":
         return "_i"
     elif direction == "output" or direction == "wire":
@@ -605,52 +619,47 @@ def suffix(direction):
     elif direction == "inout":
         return "_io"
     else:
-        print("ERROR: invalid signal direction.")
-        quit()
+        print("ERROR: invalid argument.")
+        exit(1)
 
-#
 # Add a given prefix (in upppercase) to every parameter/macro found in the string
-#
-
-def add_param_prefix(string, param_prefix):
-    return re.sub(r"([a-zA-Z_][\w_]*)", param_prefix.upper() + r"\g<1>", string)
+def add_param_prefix(width_str, prefix):
+    return re.sub(r"([a-zA-Z_][\w_]*)", prefix.upper() + r"\g<1>", width_str)
 
 
 #
 # Port
 #
 
+MULT=1
 
 # Write single port with given direction, bus width, and name to file
-def write_port(direction, width, name, fout):
+def write_port(fout, name, direction, width):
     fout.write(direction + width + name + "," + "\n")
 
-def m_port(port_list, prefix, param_prefix, fout, bus_size=1):
+def write_m_port(fout, port_prefix, param_prefix, port_list):
     for i in range(len(port_list)):
-        port_direction = port_list[i]["direction"]
-        name = prefix + port_list[i]["name"] + suffix(port_list[i]["direction"])
-        if bus_size == 1:
-            width = port_list[i]["width"]
+        direction = port_list[i]["direction"]
+        name = port_prefix + '_' + port_list[i]["name"] + get_suffix(port_list[i]["direction"])
+        if MULT == 1:
+            width_str = str(port_list[i]["width"])
         else:
-            width = "(" + str(bus_size) + "*" + port_list[i]["width"] + ")"
-        width = add_param_prefix(width, param_prefix)
-        bus_width = " [" + width + "-1:0] "
-        # Write port
-        write_port(port_direction, bus_width, name, fout)
+            width_str = str("(" + str(MULT) + "*" + port_list[i]["width"] + ")")
+        width_str = add_param_prefix(width_str, port_prefix)
+        width_str = " [" + width_str + "-1:0] "
+        write_port(fout, name, direction, width_str)
 
-
-def s_port(port_list, prefix, param_prefix, fout, bus_size=1):
+def write_s_port(fout, port_prefix, param_prefix, port_list):
     for i in range(len(port_list)):
-        port_direction = reverse(port_list[i]["direction"])
-        name = prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["direction"]))
-        if bus_size == 1:
-            width = port_list[i]["width"]
+        direction = reverse_direction(port_list[i]["direction"])
+        name = port_prefix + '_' + port_list[i]["name"] + get_suffix(reverse_direction(port_list[i]["direction"]))
+        if MULT == 1:
+            width_str = str(port_list[i]["width"])
         else:
-            width = "(" + str(bus_size) + "*" + port_list[i]["width"] + ")"
-        width = add_param_prefix(width, param_prefix)
-        bus_width = " [" + width + "-1:0] "
-        # Write port
-        write_port(port_direction, bus_width, name, fout)
+            width_str = str("(" + str(MULT) + "*" + port_list[i]["width"] + ")")
+        width_str = add_param_prefix(width_str, port_prefix)
+        width_str = " [" + width_str + "-1:0] "
+        write_port(fout, name, direction, width_str)
 
 
 #
@@ -658,12 +667,12 @@ def s_port(port_list, prefix, param_prefix, fout, bus_size=1):
 #
 
 
-# Write portmap with given portname, wire name, bus start index and size to file
-def write_portmap(port, connection_name, width, bus_start, bus_size, fout):
-    if bus_size == 1:
+# Write single portmap with given portname, wire name, bus start index and size to file
+def write_portmap(port, connection_name, width, bus_start, MULT, fout):
+    if MULT == 1:
         connection = connection_name
     else:
-        bus_select_size = str(bus_size) + "*" + width
+        bus_select_size = str(MULT) + "*" + width
         if bus_start == 0:
             bus_start_index = str(0)
         else:
@@ -673,7 +682,7 @@ def write_portmap(port, connection_name, width, bus_start, bus_size, fout):
         )
     fout.write("." + port + "(" + connection + "), //" + "\n")
 
-def portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+def portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, MULT=1):
     for i in range(len(port_list)):
         port = port_prefix + port_list[i]["name"]
         connection_name = wire_prefix + port_list[i]["name"]
@@ -682,66 +691,66 @@ def portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
             connection_name,
             port_list[i]["width"],
             bus_start,
-            bus_size,
+            MULT,
             fout,
         )
 
-def m_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+def m_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, MULT=1):
     for i in range(len(port_list)):
-        port = port_prefix + port_list[i]["name"] + suffix(port_list[i]["direction"])
+        port = port_prefix + port_list[i]["name"] + get_suffix(port_list[i]["direction"])
         connection_name = wire_prefix + port_list[i]["name"]
         write_portmap(
             port,
             connection_name,
             port_list[i]["width"],
             bus_start,
-            bus_size,
+            MULT,
             fout,
         )
 
 
-def s_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+def s_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, MULT=1):
     for i in range(len(port_list)):
-        port = port_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["direction"]))
+        port = port_prefix + port_list[i]["name"] + get_suffix(reverse_direction(port_list[i]["direction"]))
         connection_name = wire_prefix + port_list[i]["name"]
         write_portmap(
             port,
             connection_name,
             port_list[i]["width"],
             bus_start,
-            bus_size,
+            MULT,
             fout,
         )
 
 
-def m_m_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+def m_m_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, MULT=1):
     for i in range(len(port_list)):
-        port = port_prefix + port_list[i]["name"] + suffix(port_list[i]["direction"])
+        port = port_prefix + port_list[i]["name"] + get_suffix(port_list[i]["direction"])
         connection_name = (
-            wire_prefix + port_list[i]["name"] + suffix(port_list[i]["direction"])
+            wire_prefix + port_list[i]["name"] + get_suffix(port_list[i]["direction"])
         )
         write_portmap(
             port,
             connection_name,
             port_list[i]["width"],
             bus_start,
-            bus_size,
+            MULT,
             fout,
         )
 
 
-def s_s_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size=1):
+def s_s_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, MULT=1):
     for i in range(len(port_list)):
-        port = port_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["direction"]))
+        port = port_prefix + port_list[i]["name"] + get_suffix(reverse_direction(port_list[i]["direction"]))
         connection_name = (
-            wire_prefix + port_list[i]["name"] + suffix(reverse(port_list[i]["direction"]))
+            wire_prefix + port_list[i]["name"] + get_suffix(reverse_direction(port_list[i]["direction"]))
         )
         write_portmap(
             port,
             connection_name,
             port_list[i]["width"],
             bus_start,
-            bus_size,
+            MULT,
             fout,
         )
 
@@ -750,21 +759,21 @@ def s_s_portmap(port_list, port_prefix, wire_prefix, fout, bus_start=0, bus_size
 #
 
 # Write wire with given name, bus size, width to file
-def write_wire(name, param_prefix, bus_size, width, fout):
+def write_wire(name, param_prefix, MULT, width, fout):
     width = add_param_prefix(width, param_prefix)
-    if bus_size == 1:
+    if MULT == 1:
         bus_width = " [" + width + "-1:0] "
     else:
-        bus_width = " [" + str(bus_size) + "*" + width + "-1:0] "
+        bus_width = " [" + str(MULT) + "*" + width + "-1:0] "
     fout.write("wire" + bus_width + name + "; //" + "\n")
 
 # Write reg with given name, bus size, width, initial value to file
-def write_reg(name, param_prefix, bus_size, width, default, fout):
+def write_reg(name, param_prefix, MULT, width, default, fout):
     width = add_param_prefix(width, param_prefix)
-    if bus_size == 1:
+    if MULT == 1:
         bus_width = " [" + width + "-1:0] "
     else:
-        bus_width = " [" + str(bus_size) + "*" + width + "-1:0] "
+        bus_width = " [" + str(MULT) + "*" + width + "-1:0] "
     fout.write("reg" + bus_width + name + " = " + default + "; //" + "\n")
 
 # Write tb wire with given tb_signal, prefix, name, bus size, width to file
@@ -773,231 +782,83 @@ def write_tb_wire(
     prefix,
     name,
     param_prefix,
-    bus_size,
+    MULT,
     width,
     fout,
     default="0",
 ):
-    signal_name = prefix + name + suffix(tb_signal)
+    signal_name = prefix + name + get_suffix(tb_signal)
     if tb_signal == "reg":
         write_reg(
-            signal_name, param_prefix, bus_size, width, default, fout
+            signal_name, param_prefix, MULT, width, default, fout
         )
     else:
-        write_wire(signal_name, param_prefix, bus_size, width, fout)
+        write_wire(signal_name, param_prefix, MULT, width, fout)
 
 
-def wire(port_list, prefix, param_prefix, fout, bus_size=1):
+def wire(port_list, prefix, param_prefix, fout, MULT=1):
     for i in range(len(port_list)):
         write_wire(
             prefix + port_list[i]["name"],
             param_prefix,
-            bus_size,
+            MULT,
             port_list[i]["width"],
             fout,
         )
 
 
-def m_tb_wire(port_list, prefix, param_prefix, fout, bus_size=1):
+def m_tb_wire(port_list, prefix, param_prefix, fout, MULT=1):
     for i in range(len(port_list)):
-        tb_signal = tbsignal(port_list[i]["direction"])
+        tb_signal = get_tbsignal_type(port_list[i]["direction"])
         write_tb_wire(
             tb_signal,
             prefix,
             port_list[i]["name"],
             param_prefix,
-            bus_size,
+            MULT,
             port_list[i]["width"],
             fout,
         )
     fout.write("\n")
 
 
-def s_tb_wire(port_list, prefix, param_prefix, fout, bus_size=1):
+def s_tb_wire(port_list, prefix, param_prefix, fout, MULT=1):
     for i in range(len(port_list)):
-        tb_signal = tbsignal(reverse(port_list[i]["direction"]))
+        tb_signal = get_tbsignal_type(reverse_direction(port_list[i]["direction"]))
         write_tb_wire(
             tb_signal,
             prefix,
             port_list[i]["name"],
             param_prefix,
-            bus_size,
+            MULT,
             port_list[i]["width"],
             fout,
         )
     fout.write("\n")
 
-def write_vs_contents(
-        file_object,
-        interface,
-        port_list,
-        port_prefix = "",
-        wire_prefix = "",
-        bus_size = 1,
-        bus_start = 0,
-):
-    interface_type = get_if_type(interface)
-
+def gen_if(name, file_prefix, port_prefix, wire_prefix, ports):
     param_prefix = port_prefix.upper()
+    if ports == []:
+        eval_str ="get_" + name + "_ports()"
+        ports = eval (eval_str)
 
-    if interface_type.find("portmap") + 1:
-        eval(
-            interface_type
-            + "(port_list, port_prefix, wire_prefix, file_object, bus_start=bus_start, bus_size=bus_size)"
-        )
-    elif interface_type.find("wire") + 1:
-        eval(interface_type + "(port_list, wire_prefix, param_prefix, file_object, bus_size=bus_size)")
-    else:
-        eval(interface_type + "(port_list, port_prefix, param_prefix, file_object, bus_size=bus_size)")
-
-def get_if_name(arg):
-    for if_name in interface_names:
-        if arg.startswith(if_name):
-            return if_name
-    if if_name == interface_names[-1]:
-        print("Error: Interface type not found")
-        sys.exit(1)
-
-def get_if_type(arg):
-    for if_type in interface_types:
-        if arg.endswith(if_type):
-            return if_type
-    if if_type == interface_types[-1]:
-        print("Error: Interface type not found")
-        sys.exit(1)
-        
-#
-# Parse command line arguments
-#
-
-def validate_nametype(arg):
-    if get_if_name(arg) is None:
-        raise argparse.ArgumentTypeError("Invalid interface name")
-    return arg
-    
-def parse_arguments():
-    parser = argparse.ArgumentParser(
-        description="Generates Verilog snippet files for a given interface",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-
-    parser.add_argument(
-        "nametype",
-        type = validate_nametype,
-        help=f"Interface name and type. Available names: {', '.join(interface_names)}",
-    )
-
-    parser.add_argument(
-        "file_prefix",
-        nargs="?",
-        help="""Output file prefix.""",
-        default=""
-    )
-    parser.add_argument(
-        "port_prefix",
-        nargs="?",
-        help="""Port prefix.""",
-        default=""
-    )
-
-    parser.add_argument(
-        "wire_prefix",
-        nargs="?",
-        help="""Wire prefix.""",
-        default=""
-    )
-
-    parser.add_argument(
-        "--ADDR_W",
-        nargs=1,
-        help="""Wire prefix.""",
-        default=32
-    )
-
-    parser.add_argument(
-        "--DATA_W",
-        nargs=1,
-        help="""Data width.""",
-        default=32
-    )
-
-    parser.add_argument(
-        "--ID_W",
-        nargs=1,
-        help="""ID width.""",
-        default=1
-    )
-
-    parser.add_argument(
-        "--PROT_W",
-        nargs=1,
-        help="""PROT width.""",
-        default=3
-    )
-
-    parser.add_argument(
-        "--RESP_W",
-        nargs=1,
-        help="""RESP width.""",
-        default=2
-    )
-
-    parser.add_argument(
-        "--SIZE_W",
-        nargs=1,
-        help="""SIZE width.""",
-        default=3
-    )
-
-    parser.add_argument(
-        "--BURST_W",
-        nargs=1,
-        help="""BURST width.""",
-        default=2
-    )
-
-    parser.add_argument(
-        "--LOCK_W",
-        nargs=1,
-        help="""LOCK width.""",
-        default=2
-    )
-
-    parser.add_argument(
-        "--CACHE_W",
-        nargs=1,
-        help="""CACHE width.""",
-        default=4
-    )
-
-    parser.add_argument(
-        "--QOS_W",
-        nargs=1,
-        help="""QOS width.""",
-        default=4
-    )
-    return parser.parse_args()
-
-
-
-
-
+#    for if_type in range(len(if_types)):
+    for i in range(2):
+        fout = open(file_prefix +'_' + name + '_' + if_types[i] + ".vs", "w")
+        eval_str = "write_" + if_types[i] + "(fout, port_prefix, param_prefix, ports)"
+        eval(eval_str)
+        fout.close()
 
 #
-# Main
+# Test this module
 #
 
 def main():
 
-    # parse and extract command line arguments
-    args = parse_arguments()
-    interface = args.nametype
-    file_prefix = args.file_prefix
-    port_prefix = args.port_prefix
-    wire_prefix = args.wire_prefix
-
+    global MULT
     global ADDR_W
     global DATA_W
+
     global ID_W
     global PROT_W
     global RESP_W
@@ -1006,29 +867,11 @@ def main():
     global LOCK_W
     global CACHE_W
     global QOS_W
-    
-    DATA_W = args.DATA_W
-    ADDR_W = args.ADDR_W
-    ID_W = args.ID_W
-    PROT_W = args.PROT_W
-    RESP_W = args.RESP_W
-    SIZE_W = args.SIZE_W
-    BURST_W = args.BURST_W
-    LOCK_W = args.LOCK_W
-    CACHE_W = args.CACHE_W
-    QOS_W = args.QOS_W
-    
-    
-    # write .vs file
-    fout = open(file_prefix + interface + ".vs", "w")
+    global LEN_W
 
-    if_name = get_if_name(interface)
-
-    ports = eval ("create_"+if_name+"()")
-
-    write_vs_contents(fout, interface, ports, port_prefix, wire_prefix)
-
-    fout.close()
+    #for if_type in range(len(if_types)):
+    for i in range(11,12):
+        gen_if(if_names[i], "bla", "di", "da", [])
 
 if __name__ == "__main__":
     main()
