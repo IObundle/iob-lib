@@ -59,23 +59,34 @@ module iob_merge #(
    //
    //route response from slave to previously selected master
    //
-   integer j;
-   always @* begin
-      for (j = 0; j < N_MASTERS; j = j + 1) begin
-         if (j == sel_q) begin
-            m_resp_o[`RDATA(j)] = s_resp_i[`RDATA(0)];
-            m_resp_o[`RVALID(j)] = s_resp_i[`RVALID(0)];
-         end else begin
-            m_resp_o[`RDATA(j)] = {DATA_W{1'b0}};
-            m_resp_o[`RVALID(j)] = 1'b0;
-         end
-         if (j == sel) begin
-             m_resp_o[`READY(j)] = s_resp_i[`READY(0)];
-         end else begin
-            m_resp_o[`READY(j)] = 1'b0;
+   generate
+      genvar b;
+      for (b = 0; b < N_MASTERS; b = b + 1) begin : g_m_rdata_rvalid
+         always @* begin
+            if (b == sel_q) begin
+               m_resp_o[`RDATA(b)] = s_resp_i[`RDATA(0)];
+               m_resp_o[`RVALID(b)] = s_resp_i[`RVALID(0)];
+            end else begin
+               m_resp_o[`RDATA(b)] = {DATA_W{1'b0}};
+               m_resp_o[`RVALID(b)] = 1'b0;
+            end
          end
       end
-   end
+   endgenerate
+
+
+   generate
+      genvar a;
+      for (a = 0; a < N_MASTERS; a = a + 1) begin : g_m_ready
+         always @* begin
+            if((sel == a) | (~m_avalid[a])) begin
+               m_resp_o[`READY(a)] = s_resp_i[`READY(0)];
+            end else begin
+               m_resp_o[`READY(a)] = 1'b0;
+            end
+         end
+      end
+   endgenerate
 
    //register master selection
    iob_reg_re #(
