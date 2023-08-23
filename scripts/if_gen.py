@@ -577,7 +577,7 @@ def reverse_direction(direction):
     elif direction == "output":
         return "input"
     else:
-        print("ERROR: invalid argument.")
+        print(f"ERROR: reverse_direction: invalid argument {direction}.")
         exit(1)
 
 #testbench signal direction
@@ -587,7 +587,7 @@ def get_tbsignal_type(direction):
     elif direction == "output":
         return "reg"
     else:
-        print("ERROR: invalid argument.")
+        print(f"ERROR: reverse_direction: invalid argument {direction}.")
         exit(1)
 
 #get suffix from direction 
@@ -599,7 +599,7 @@ def get_suffix(direction):
     elif direction == "inout":
         return "_io"
     else:
-        print("ERROR: invalid argument.")
+        print(f"ERROR: reverse_direction: invalid argument {direction}.")
         exit(1)
 
 # Add a given prefix (in upppercase) to every parameter/macro found in the string
@@ -644,10 +644,9 @@ def write_s_port(fout, port_prefix, param_prefix, port_list):
 def write_portmap(fout, port_prefix, wire_prefix, direction, port, connect_to_port):
     suffix = get_suffix(reverse_direction(port["direction"]))
     port_name = port_prefix + '_' + port["name"] + suffix
-    if connect_to_port == False:
-        wire_name = port_prefix + '_' + port["name"]
-    else:
-        wire_name = port_name
+    wire_name = wire_prefix + '_' + port["name"]
+    if connect_to_port:
+        wire_name = wire_name + suffix
     fout.write("." + port_name+"(" + wire_name + ")," + "\n")
 
 def write_m_portmap(fout, port_prefix, wire_prefix, port_list):
@@ -675,59 +674,76 @@ def write_s_s_portmap(fout, port_prefix, wire_prefix, port_list):
 #
 
 # Write wire with given name, bus size, width to file
-def write_wire(fout, name, wire_prefix, param_prefix, width):
-    width = add_param_prefix(width, param_prefix)
-    if MULT == 1:
-        bus_width = " [" + width + "-1:0] "
-    else:
-        bus_width = " [" + str(MULT) + "*" + width + "-1:0] "
-    fout.write("wire" + bus_width + name + "; //" + "\n")
+def write_single_wire(fout, wire_prefix, param_prefix, wire, for_tb, direction):
+    wire_name = wire_prefix + '_' + wire["name"]
+    wtype = "wire"
+    if for_tb:
+        if direction == "input":
+            wire_name = wire_name + get_suffix(wire["direction"])
+            wtype = get_tbsignal_type(reverse_direction(wire["direction"]))
+        else:
+            wire_name = wire_name + get_suffix(reverse_direction(wire["direction"]))
+            wtype = get_tbsignal_type(wire["direction"])
+    width_str = add_param_prefix(str(wire["width"]), param_prefix)
+    width_str = " [(" + str(MULT) + "*" + width_str + ")-1:0] "
+    fout.write(wtype + width_str + wire_name + "; //" + "\n")
 
-# Write reg with given name, bus size, width, initial value to file
-def write_reg(fout, name, reg_prefix, param_prefix, width):
-    width = add_param_prefix(width, param_prefix)
-    if MULT == 1:
-        bus_width = " [" + width + "-1:0] "
-    else:
-        bus_width = " [" + str(MULT) + "*" + width + "-1:0] "
-    fout.write("reg" + bus_width + name + "; //" + "\n")
+def write_wire(fout, wire_prefix, param_prefix, wires):
+    for i in range(len(wires)):
+        write_single_wire(fout, wire_prefix, param_prefix, wires[i], False, "")
 
-def write_bus(fout, port_list, port_prefix, param_prefix):
-    for i in range(len(port_list)):
-        write_wire(prefix + port_list[i]["name"], param_prefix, port_list[i]["width"])
+def write_tb_wire(fout, wire_prefix, param_prefix, wires, direction):
+    for i in range(len(wires)):
+        write_single_wire(fout, wire_prefix, param_prefix, wires[i], True, direction)
 
+def write_m_tb_wire(fout, wire_prefix, param_prefix, wires):
+    write_tb_wire(fout, wire_prefix, param_prefix, wires, "output")
 
-def write_m_tb_bus(fout, port_list, port_prefix, param_prefix):
-    for i in range(len(port_list)):
-        tb_signal = get_tbsignal_type(reverse_direction(port_list[i]["direction"]))
-        write_tb_wire(tb_signal, prefix, port_list[i]["name"],param_prefix,port_list[i]["width"],
-        )
-    fout.write("\n")
+def write_s_tb_wire(fout, wire_prefix, param_prefix, wires):
+    write_tb_wire(fout, wire_prefix, param_prefix, wires, "input")
 
+#
+# GENERATE INTERFACES
+#
 
-def write_s_tb_wire(port_list, prefix, param_prefix, fout, MULT=1):
-    for i in range(len(port_list)):
-        tb_signal = get_tbsignal_type(reverse_direction(port_list[i]["direction"]))
-        write_tb_wire(fout, tb_signal,prefix,port_list[i]["name"],param_prefix,port_list[i]["width"])
-    fout.write("\n")
-
+    
 def gen_if(name, file_prefix, port_prefix, wire_prefix, ports):
-    print(name, file_prefix, port_prefix, wire_prefix, ports)
+    #print(name, file_prefix, port_prefix, wire_prefix, ports)
+
+    # get param prefix
     param_prefix = port_prefix.upper()
+
+    #get ports
     if ports == []:
         eval_str ="get_" + name + "_ports()"
-        print(eval_str)
+        #print(eval_str)
         ports = eval (eval_str)
 
-#    for if_type in range(len(if_types)):
-    for i in range(6,7):
+    #
+    #GENERATE SNIPPETS FOR ALL TYPES OF PORTS AND WIRES
+    #
+    #for if_type in range(len(if_types)):
+    for i in range(0,9):
         fout = open(file_prefix +'_' + name + '_' + if_types[i] + ".vs", "w")
-        eval_str = "write_" + if_types[i] + "(fout, port_prefix, param_prefix, ports)"
+
+        # get prefixes
+        if "portmap" in if_types[i]:
+            prefix1 = port_prefix
+            prefix2 = wire_prefix
+        elif "wire" in if_types[i]:
+            prefix1 = wire_prefix
+            prefix2 = param_prefix
+        else: # "port"
+            prefix1 = port_prefix
+            prefix2 = param_prefix
+
+        eval_str = "write_" + if_types[i] + "(fout, prefix1, prefix2, ports)"
+        #print(eval_str, prefix1, prefix2)
         eval(eval_str)
         fout.close()
 
 #
-# Test this module
+# Test this Python module
 #
 
 def main():
