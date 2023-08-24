@@ -642,7 +642,7 @@ def write_s_port(fout, port_prefix, param_prefix, port_list):
 
 # Write single port with given direction, bus width, and name to file
 def write_portmap(fout, port_prefix, wire_prefix, direction, port, connect_to_port):
-    suffix = get_suffix(reverse_direction(port["direction"]))
+    suffix = get_suffix(direction)
     port_name = port_prefix + port["name"] + suffix
     wire_name = wire_prefix + port["name"]
     if connect_to_port:
