@@ -56,14 +56,25 @@ def generate_ports(ios, top_module, out_dir):
         if "if_defined" in table.keys():
             f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
 
+        #
+        file_prefix = table["port_prefix"] + table["wire_prefix"]
+            
         if_gen.gen_if(
             table["name"],
-            table["port_prefix"] + table["wire_prefix"],
+            file_prefix,
             table["port_prefix"],
             table["wire_prefix"],
             table["ports"]
         )
 
+        # append vs_file to io.vs
+        if table["type"] == "slave":
+            infix = "s"
+        else:
+            infix = "m"
+        vs_file = open(f"{file_prefix}{table['name']}_{infix}_port.vs", "r")
+        f_io.write(vs_file.read())
+        
         # move all .vs files from current directory to out_dir
         for file in os.listdir("."):
             if file.endswith(".vs"):

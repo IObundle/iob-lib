@@ -592,9 +592,9 @@ def get_tbsignal_type(direction):
 
 #get suffix from direction 
 def get_suffix(direction):
-    if direction == "input" or direction == "reg":
+    if direction == "input":
         return "_i"
-    elif direction == "output" or direction == "wire":
+    elif direction == "output":
         return "_o"
     elif direction == "inout":
         return "_io"
@@ -615,7 +615,7 @@ MULT=1
 
 # Write single port with given direction, bus width, and name to file
 def write_port(fout, port_prefix, direction, port):
-    name = port_prefix + '_' + port["name"] + get_suffix(reverse_direction(port["direction"]))
+    name = port_prefix + port["name"] + get_suffix(direction)
     width = port["width"] * MULT
     if width == 1:
         width_str = " "
@@ -643,8 +643,8 @@ def write_s_port(fout, port_prefix, param_prefix, port_list):
 # Write single port with given direction, bus width, and name to file
 def write_portmap(fout, port_prefix, wire_prefix, direction, port, connect_to_port):
     suffix = get_suffix(reverse_direction(port["direction"]))
-    port_name = port_prefix + '_' + port["name"] + suffix
-    wire_name = wire_prefix + '_' + port["name"]
+    port_name = port_prefix + port["name"] + suffix
+    wire_name = wire_prefix + port["name"]
     if connect_to_port:
         wire_name = wire_name + suffix
     fout.write("." + port_name+"(" + wire_name + ")," + "\n")
@@ -675,7 +675,7 @@ def write_s_s_portmap(fout, port_prefix, wire_prefix, port_list):
 
 # Write wire with given name, bus size, width to file
 def write_single_wire(fout, wire_prefix, param_prefix, wire, for_tb, direction):
-    wire_name = wire_prefix + '_' + wire["name"]
+    wire_name = wire_prefix + wire["name"]
     wtype = "wire"
     if for_tb:
         if direction == "input":
@@ -724,7 +724,7 @@ def gen_if(name, file_prefix, port_prefix, wire_prefix, ports):
     #
     #for if_type in range(len(if_types)):
     for i in range(0,9):
-        fout = open(file_prefix +'_' + name + '_' + if_types[i] + ".vs", "w")
+        fout = open(file_prefix + name + '_' + if_types[i] + ".vs", "w")
 
         # get prefixes
         if "portmap" in if_types[i]:
@@ -750,7 +750,7 @@ def main():
 
     #for if_type in range(len(if_names)):
     for i in range(0,16):
-        gen_if(if_names[i], "bla", "di", "da", [])
-
+        gen_if(if_names[i], "bla_", "di_", "da_", [])
+        
 if __name__ == "__main__":
     main()
