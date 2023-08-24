@@ -43,23 +43,32 @@ def delete_last_comma(file_obj):
     file_obj.write(" ")
 
 
-def write_ports(ios, top_module, out_dir):
-    
+def generate_ports(ios, top_module, out_dir):
+
     f_io = open(f"{out_dir}/{top_module}_io.vs", "w+")
-    
+
     for table in ios:
+        # If table has 'doc_only' attribute set to True, skip it
+        if "doc_only" in table.keys() and table["doc_only"]:
+            continue
+
         # Open ifdef if conditional interface
         if "if_defined" in table.keys():
             f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
 
-        if_gen.write_vs_contents(
-            file_object=f_io,
-            in_port_list = table["ports"],
-            interface_type = if_gen.get_if_type(table["name"]),
-            port_prefix = table["port_prefix"] if "port_prefix" in table.keys() else "",
-            wire_prefix = table["wire_prefix"] if "wire_prefix" in table.keys() else "",
+        if_gen.gen_if(
+            table["name"],
+            table["port_prefix"] + table["wire_prefix"],
+            table["port_prefix"],
+            table["wire_prefix"],
+            table["ports"]
         )
 
+        # move all .vs files from current directory to out_dir
+        for file in os.listdir("."):
+            if file.endswith(".vs"):
+                os.rename(file, f"{out_dir}/{file}")
+        
         # Close ifdef if conditional interface
         if "if_defined" in table.keys():
             f_io.write("`endif\n")
@@ -67,22 +76,6 @@ def write_ports(ios, top_module, out_dir):
     # Find and remove last comma
     delete_last_comma(f_io)
 
-    f_io.close()
-
-
-def generate_ports(ios):
-
-    for table in ios:
-        # If table has 'doc_only' attribute set to True, skip it
-        if "doc_only" in table.keys() and table["doc_only"]:
-            continue
-
-        if_name = if_gen.get_if_name(table["name"])
-
-        if if_name:
-            table["ports"] = if_gen.get_ports(if_name)
-
-    return ios
 
 # Generate if.tex file with list TeX tables of IOs
 def generate_if_tex(ios, out_dir):
@@ -130,24 +123,25 @@ def generate_ios_tex(ios, out_dir):
     for table in ios:
         tex_table = []
         # Check if this table is a standard interface (from if_gen.py)
-        if_name = if_gen.get_if_name(table["name"])
-        if if_name in if_gen.interface_names:
+        if_name = table["name"]
+        if if_name in if_gen.if_names:
             # Interface is standard, generate ports
-            if_table = if_gen.get_ports(if_name)
+            eval_str = f"if_gen.get_{if_name}_ports()"
+            if_table = eval(eval_str)
             
             for port in if_table:
-                port_direction = (
-                    port["type"]
-                    if "m_" in port["name"]
-                    else if_gen.reverse(port["type"])
-                )  # Reverse port direction if it is a slave interface
+                port_direction = port["direction"]
+                #reverse direction if port is a slave port
+                if table["type"] == "slave":
+                    port_direction = reverse_port(port_direction)
+
                 tex_table.append(
                     [
-                        (port["name"] + if_gen.suffix(port_direction)).replace(
+                        (port["name"] + if_gen.get_suffix(port_direction)).replace(
                             "_", "\_"
                         ),
                         port_direction.replace("`IOB_", "").replace("(", ""),
-                        port["n_bits"].replace("_", "\_"),
+                        str(port["width"]).replace("_", "\_"),
                         port["descr"].replace("_", "\_"),
                     ]
                 )
@@ -157,8 +151,8 @@ def generate_ios_tex(ios, out_dir):
                 tex_table.append(
                     [
                         port["name"].replace("_", "\_"),
-                        port["type"],
-                        port["n_bits"].replace("_", "\_"),
+                        port["direction"],
+                        str(port["width"]).replace("_", "\_"),
                         port["descr"].replace("_", "\_"),
                     ]
                 )

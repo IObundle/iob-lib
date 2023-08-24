@@ -372,8 +372,8 @@ class iob_module:
             mk_conf.conf_vh(cls.confs, cls.name, cls.build_dir + "/hardware/src")
 
         if cls.ios:
-            ios.write_ports (ios.generate_ports(cls.ios), cls.name, cls.build_dir + "/hardware/src")
-            
+            ios.generate_ports(cls.ios, cls.name, cls.build_dir + "/hardware/src")
+
     @classmethod
     def _generate_sw(cls, mkregs_obj, reg_table):
         """Generate common software files"""
@@ -509,27 +509,7 @@ class iob_module:
         if not "wire_prefix" in vs_name:
             vs_name["wire_prefix"] = ""
         
-        if (type(vs_name) is dict):
-            f_out = open(
-                os.path.join(
-                    dest_dir, vs_name["file_prefix"] + vs_name["interface"] + ".vs"
-                ),
-                "w",
-            )
-            
-            if_gen.write_vs_contents(
-                f_out,
-                vs_name["interface"],
-                if_gen.get_ports(vs_name["interface"]),
-                vs_name["port_prefix"],
-                vs_name["wire_prefix"],
-                bus_size=vs_name["bus_size"] if "bus_size" in vs_name.keys() else 1,
-                bus_start=vs_name["bus_start"] if "bus_start" in vs_name.keys() else 0,
-            )
-        else:
-            raise Exception(
-                f"{iob_colors.FAIL} Can't generate '{vs_name}'. Type not recognized.{iob_colors.ENDC}"
-            )
+ 
 
     @classmethod
     def get_setup_purpose(cls):
