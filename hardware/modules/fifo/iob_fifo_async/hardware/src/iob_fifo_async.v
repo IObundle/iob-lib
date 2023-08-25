@@ -8,9 +8,9 @@ module iob_fifo_async #(
    parameter ADDR_W = 3,  //higher ADDR_W lower DATA_W
    //determine W_ADDR_W and R_ADDR_W
    parameter MAXDATA_W =
-            `IOB_MAX(W_DATA_W, R_DATA_W),
+   `IOB_MAX(W_DATA_W, R_DATA_W),
    parameter MINDATA_W =
-            `IOB_MIN(W_DATA_W, R_DATA_W),
+   `IOB_MIN(W_DATA_W, R_DATA_W),
    parameter R = MAXDATA_W / MINDATA_W,
    parameter ADDR_W_DIFF = $clog2(R),
    parameter MINADDR_W = ADDR_W - $clog2(R),  //lower ADDR_W (higher DATA_W)
@@ -73,9 +73,6 @@ module iob_fifo_async #(
 
    generate
       if (W_DATA_W > R_DATA_W) begin : g_write_wider_bin
-         wire clk_i = r_clk_i;
-         wire cke_i = r_cke_i;
-         wire arst_i = r_arst_i;
          assign w_waddr_bin_n = w_waddr_bin << ADDR_W_DIFF;
          assign w_raddr_bin_n = w_raddr_bin;
          assign r_raddr_bin_n = r_raddr_bin;
@@ -198,14 +195,32 @@ module iob_fifo_async #(
       .bin_o(w_raddr_bin)
    );
 
-   wire [W_ADDR_W-1:0] w_addr;
-   wire [R_ADDR_W-1:0] r_addr;
-   assign w_addr           = w_waddr_bin[W_ADDR_W-1:0];
-   assign r_addr           = r_raddr_bin[R_ADDR_W-1:0];
+   wire [W_ADDR_W-1:0] w_addr = w_waddr_bin[W_ADDR_W-1:0];
+   wire [R_ADDR_W-1:0] r_addr = r_raddr_bin[R_ADDR_W-1:0];
 
-   assign ext_mem_w_clk_o  = w_clk_i;
-   assign ext_mem_r_clk_o  = r_clk_i;
+   assign ext_mem_w_clk_o = w_clk_i;
+   assign ext_mem_r_clk_o = r_clk_i;
 
-   `include "iob_asym_converter.vs"
+   iob_asym_converter #(
+      .W_DATA_W(W_DATA_W),
+      .R_DATA_W(R_DATA_W),
+      .ADDR_W  (ADDR_W)
+   ) asym_converter (
+      .ext_mem_w_en_o  (ext_mem_w_en_o),
+      .ext_mem_w_addr_o(ext_mem_w_addr_o),
+      .ext_mem_w_data_o(ext_mem_w_data_o),
+      .ext_mem_r_en_o  (ext_mem_r_en_o),
+      .ext_mem_r_addr_o(ext_mem_r_addr_o),
+      .ext_mem_r_data_i(ext_mem_r_data_i),
+      .clk_i           (r_clk_i),
+      .cke_i           (r_cke_i),
+      .arst_i          (r_arst_i),
+      .w_addr_i        (w_addr),
+      .w_en_i          (w_en_int),
+      .w_data_i        (w_data_i),
+      .r_addr_i        (r_addr),
+      .r_en_i          (r_en_int),
+      .r_data_o        (r_data_o)
+   );
 
 endmodule
