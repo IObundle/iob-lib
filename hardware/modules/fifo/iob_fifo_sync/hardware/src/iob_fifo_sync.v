@@ -48,10 +48,10 @@ module iob_fifo_sync #(
    localparam [ADDR_W:0] FIFO_SIZE = {1'b1, {ADDR_W{1'b0}}};  //in bytes
 
    //effective write enable
-   wire w_en_int = (w_en_i & (~w_full_o));
+   wire                w_en_int = (w_en_i & (~w_full_o));
 
    //write address
-   wire                                    [W_ADDR_W-1:0] w_addr;
+   wire [W_ADDR_W-1:0] w_addr;
    iob_counter #(
       .DATA_W (W_ADDR_W),
       .RST_VAL({W_ADDR_W{1'd0}})
@@ -64,10 +64,10 @@ module iob_fifo_sync #(
    );
 
    //effective read enable
-   wire r_en_int = (r_en_i & (~r_empty_o));
+   wire                r_en_int = (r_en_i & (~r_empty_o));
 
    //read address
-   wire                                     [R_ADDR_W-1:0] r_addr;
+   wire [R_ADDR_W-1:0] r_addr;
    iob_counter #(
       .DATA_W (R_ADDR_W),
       .RST_VAL({R_ADDR_W{1'd0}})
@@ -142,15 +142,25 @@ module iob_fifo_sync #(
    );
 
    assign ext_mem_clk_o = clk_i;
-   //If W_DATA_W > R_DATA_W, generate read general signals
-   generate
-      if (W_DATA_W > R_DATA_W) begin : g_gen_signals_write_wider
-         wire r_clk_i = clk_i;
-         wire r_cke_i = cke_i;
-         wire r_arst_i = arst_i;
-      end
-   endgenerate
 
-   `include "iob_asym_converter.vs"
+   iob_asym_converter #(
+      .W_DATA_W(W_DATA_W),
+      .R_DATA_W(R_DATA_W),
+      .ADDR_W  (ADDR_W)
+   ) asym_converter (
+      .ext_mem_w_en_o  (ext_mem_w_en_o),
+      .ext_mem_w_addr_o(ext_mem_w_addr_o),
+      .ext_mem_w_data_o(ext_mem_w_data_o),
+      .ext_mem_r_en_o  (ext_mem_r_en_o),
+      .ext_mem_r_addr_o(ext_mem_r_addr_o),
+      .ext_mem_r_data_i(ext_mem_r_data_i),
+      `include "clk_en_rst_s_s_portmap.vs"
+      .w_addr_i        (w_addr),
+      .w_en_i          (w_en_int),
+      .w_data_i        (w_data_i),
+      .r_addr_i        (r_addr),
+      .r_en_i          (r_en_int),
+      .r_data_o        (r_data_o)
+   );
 
 endmodule

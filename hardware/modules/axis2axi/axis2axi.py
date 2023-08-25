@@ -6,7 +6,6 @@ from iob_fifo_sync import iob_fifo_sync
 from iob_counter import iob_counter
 from iob_reg_r import iob_reg_r
 from iob_reg_re import iob_reg_re
-from iob_asym_converter import iob_asym_converter
 from axi_ram import axi_ram
 from iob_ram_t2p import iob_ram_t2p
 
@@ -32,7 +31,6 @@ class axis2axi(iob_module):
                 iob_counter,
                 iob_reg_r,
                 iob_reg_re,
-                iob_asym_converter,
                 (axi_ram, {"purpose": "simulation"}),
                 (iob_ram_t2p, {"purpose": "simulation"}),
             ]
