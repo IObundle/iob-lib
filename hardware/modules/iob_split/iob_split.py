@@ -7,8 +7,8 @@ from iob_mux import iob_mux
 from iob_demux import iob_demux
 
 
-class iob_sync(iob_module):
-    name = "iob_split_ni"
+class iob_split(iob_module):
+    name = "iob_split"
     version = "V0.10"
     flows = "sim"
     setup_dir = os.path.dirname(__file__)

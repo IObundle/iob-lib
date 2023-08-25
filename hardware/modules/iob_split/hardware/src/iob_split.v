@@ -3,7 +3,7 @@
 `include "iob_utils.vh"
 
 // Split the IOb native interface, from a single master to multiple followers
-module iob_split_ni #(
+module iob_split #(
    parameter N_FOLWRS = 2,              // Number of followers, minimum of 2
    parameter NB = $clog2(N_FOLWRS)      // Number of bits needed to address all followers
 ) (
