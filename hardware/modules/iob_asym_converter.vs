@@ -13,8 +13,9 @@ generate
          .RST_VAL({$clog2(R) {1'd0}}),
          .CLKEDGE("posedge")
       ) r_addr_reg_inst (
-         `include "clk_en_rst_s_s_portmap.vs"
-
+         .clk_i (r_clk_i),
+         .cke_i (r_cke_i),
+         .arst_i(r_arst_i),
          .data_i(r_addr[$clog2(R)-1:0]),
          .data_o(r_addr_lsbs_reg)
       );

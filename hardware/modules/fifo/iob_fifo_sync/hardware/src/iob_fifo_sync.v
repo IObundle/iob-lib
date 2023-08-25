@@ -142,6 +142,15 @@ module iob_fifo_sync #(
    );
 
    assign ext_mem_clk_o = clk_i;
+   //If W_DATA_W > R_DATA_W, generate read general signals
+   generate
+      if (W_DATA_W > R_DATA_W) begin : g_gen_signals_write_wider
+         wire r_clk_i = clk_i;
+         wire r_cke_i = cke_i;
+         wire r_arst_i = arst_i;
+      end
+   endgenerate
+
    `include "iob_asym_converter.vs"
 
 endmodule
