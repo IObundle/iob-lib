@@ -15,7 +15,7 @@ module iob_split #(
    output              m_avalid,
    output [ADDR_W-1:0] m_address,
    output [DATA_W:0]   m_wdata,
-   output [4-1:0]      m_wstrb,s
+   output [4-1:0]      m_wstrb,
    input  [DATA_W:0]   m_rdata,
    input               m_rvalid,
    input               m_ready,
