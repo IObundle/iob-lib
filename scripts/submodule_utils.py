@@ -317,9 +317,9 @@ def get_module_io(ios, confs=None, corename=None):
 
             # Add corename prefix to parameters in port width, if `confs` and `corename` are given
             if confs and corename:
-                signal["n_bits"] = add_prefix_to_parameters_in_port(
+                signal["width"] = add_prefix_to_parameters_in_port(
                     signal, confs, corename + "_"
-                )["n_bits"]
+                )["width"]
         module_signals.extend(table_signals)
     return module_signals
 
@@ -338,13 +338,13 @@ def add_prefix_to_parameters_in_string(string, confs, prefix):
     return string
 
 
-# port: dictionary describing a port (IO). Example: {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
+# port: dictionary describing a port (IO). Example: {'name':"clk_i", 'type':"I", 'width':'1', 'descr':"Peripheral clock input"}
 # confs: confs list of dictionaries. Each dictionary describes a parameter (macros will be filtered if they exist)
 # prefix: String to add as a prefix to any parameter found in the port width
 def add_prefix_to_parameters_in_port(port, confs, prefix):
     local_port = port.copy()
-    local_port["n_bits"] = add_prefix_to_parameters_in_string(
-        local_port["n_bits"], confs, prefix
+    local_port["width"] = add_prefix_to_parameters_in_string(
+        local_port["width"], confs, prefix
     )
     return local_port
 
@@ -390,10 +390,10 @@ def get_module_parameters(verilog_lines):
 
 # Filter out non reserved signals from a given list (not stored in string reserved_signals)
 # Example signal_list:
-# [ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"},
-#  {'name':"custom_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral custom input"} ]
+# [ {'name':"clk_i", 'type':"I", 'width':'1', 'descr':"Peripheral clock input"},
+#  {'name':"custom_i", 'type':"I", 'width':'1', 'descr':"Peripheral custom input"} ]
 # Return of this example:
-# [ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"} ]
+# [ {'name':"clk_i", 'type':"I", 'width':'1', 'descr':"Peripheral clock input"} ]
 def get_reserved_signals(signal_list):
     return_list = []
     for signal in signal_list:
@@ -413,10 +413,10 @@ def get_reserved_signal_connection(signal_name, instace_name, swreg_filename):
 
 # Filter out reserved signals from a given list (stored in string reserved_signals)
 # Example signal_list:
-# [ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"},
-#  {'name':"custom_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral custom input"} ]
+# [ {'name':"clk_i", 'type':"I", 'width':'1', 'descr':"Peripheral clock input"},
+#  {'name':"custom_i", 'type':"I", 'width':'1', 'descr':"Peripheral custom input"} ]
 # Return of this example:
-# [ {'name':"custom_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral custom input"} ]
+# [ {'name':"custom_i", 'type':"I", 'width':'1', 'descr':"Peripheral custom input"} ]
 def get_pio_signals(signal_list):
     return_list = []
     for signal in signal_list:

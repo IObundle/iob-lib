@@ -56,7 +56,6 @@ def generate_ports(ios, top_module, out_dir):
         if "if_defined" in table.keys():
             f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
 
-        #
         file_prefix = table["port_prefix"] + table["wire_prefix"]
             
         if_gen.gen_if(
