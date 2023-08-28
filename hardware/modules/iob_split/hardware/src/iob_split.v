@@ -2,64 +2,102 @@
 
 `include "iob_utils.vh"
 
+// Split the IOb native interface, from a single master to multiple followers
 module iob_split #(
-   parameter DATA_W   = 32,
-   parameter ADDR_W   = 32,
-   parameter N_SLAVES = 2,          //number of slaves
-   parameter P_SLAVES = `REQ_W - 2  //slave select word msb position
+   parameter ADDR_W = 32,
+   parameter DATA_W = 32,
+   parameter N      = 2,             // Number of followers, minimum of 2
+   parameter NB     = $clog2(N)      // Number of bits needed to address all followers
 ) (
    `include "clk_rst_s_port.vs"
 
-   //masters interface
-   input      [ `REQ_W-1:0] m_req_i,
-   output reg [`RESP_W-1:0] m_resp_o,
+   // Master's interface
+   input                 m_avalid_i,
+   input  [ADDR_W-1:0]   m_address_i,
+   input  [DATA_W:0]     m_wdata_i,
+   input  [4-1:0]        m_wstrb_i,
+   output [DATA_W:0]     m_rdata_o,
+   output                m_rvalid_o,
+   output                m_ready_o,
 
-   //slave interface
-   output reg [ N_SLAVES*`REQ_W-1:0] s_req_o,
-   input      [N_SLAVES*`RESP_W-1:0] s_resp_i
+   // Followers' interface
+   output [N*1-1:0]      f_avalid_o,
+   output [ADDR_W-1:0]   f_address_o,
+   output [DATA_W-1:0]   f_wdata_o,
+   output [4-1:0]        f_wstrb_o,
+   input  [N*DATA_W-1:0] f_rdata_i,
+   input  [N*1-1:0]      f_rvalid_i,
+   input  [N*1-1:0]      f_ready_i,
+
+   // Follower selection
+   input  [NB-1:0]       f_sel_i
 );
 
-   localparam Nb = $clog2(N_SLAVES) + ($clog2(N_SLAVES) == 0);
-
-   //slave select word
-   wire [Nb-1:0] s_sel;
-   wire [Nb-1:0] s_sel_r;
-   wire m_avalid;
-
-   assign s_sel = m_req_i[P_SLAVES-:Nb];
-   assign m_avalid = m_req_i[`AVALID(0)];
-
-   //route master request to selected slave
-   integer i;
-   always @* begin
-      /*
-     $display("pslave %d", P_SLAVES+1);
-     $display("mreq %x", m_req_i);
-     $display("s_sel %x", s_sel);
-   */
-      for (i = 0; i < N_SLAVES; i = i + 1)
-         if (i == s_sel) s_req_o[`REQ(i)] = m_req_i;
-         else s_req_o[`REQ(i)] = {(`REQ_W) {1'b0}};
-   end
-
    //
-   //route response from previously selected slave to master
+   // Register the follower selection
    //
 
-   assign m_resp_o[`RDATA(0)] = s_resp_i[`RDATA(s_sel_r)];
-   assign m_resp_o[`RVALID(0)] = s_resp_i[`RVALID(s_sel_r)];
-   assign m_resp_o[`READY(0)] = s_resp_i[`READY(s_sel)];
-
-   //register the slave selection
+   wire [NB-1:0] f_sel_r;
    iob_reg_re #(
-      .DATA_W (Nb),
+      .DATA_W (NB),
       .RST_VAL(0)
-   ) iob_reg_s_sel (
+   ) reg_f_sel (
       `include "clk_rst_s_s_portmap.vs"
       .cke_i (1'b1),
       .rst_i (1'b0),
-      .en_i  (m_avalid),
-      .data_i(s_sel),
-      .data_o(s_sel_r)
+      .en_i  (m_avalid_i),
+      .data_i(f_sel_i),
+      .data_o(f_sel_r)
    );
+
+   //
+   // Route master request to selected follower
+   //
+
+   // Avalid goes to the selected follower
+   iob_demux #(
+      .DATA_W (1),
+      .N      (N)
+   ) demux_avalid (
+      .sel_i (f_sel_r),
+      .data_i(m_avalid_i),
+      .data_o(f_avalid_o)
+   );
+
+   // These go to all followers (only the one with asserted avalid will use them)
+   assign f_address_o = m_address_i;
+   assign f_wdata_o   = m_wdata_i;
+   assign f_wstrb_o   = m_wstrb_i;
+
+   //
+   // Route selected follower response to master
+   //
+
+   iob_mux #(
+      .DATA_W (DATA_W),
+      .N      (N)
+   ) mux_rdata (
+      .sel_i (f_sel_r),
+      .data_i(f_rdata_i),
+      .data_o(m_rdata_o)
+   );
+
+   iob_mux #(
+      .DATA_W (1),
+      .N      (N)
+   ) mux_rvalid (
+      .sel_i (f_sel_r),
+      .data_i(f_rvalid_i),
+      .data_o(m_rvalid_o)
+   );
+
+   iob_mux #(
+      .DATA_W (1),
+      .N      (N)
+   ) mux_ready (
+      .sel_i (f_sel_r),
+      .data_i(f_ready_i),
+      .data_o(m_ready_o)
+   );
+
 endmodule
