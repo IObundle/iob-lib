@@ -29,7 +29,8 @@ module iob_merge #(
    input                 f_rvalid_i,
    input                 f_ready_i,
 
-   // Master selection source
+   // Master selection source (an array of bits, where each bit represents a master and
+   // is set to 1 if that one master is selected)
    input  [N-1:0]       m_sel_src_i
 );
 
