@@ -73,8 +73,7 @@ module axis2axi #(
       .AXI_DATA_W(AXI_DATA_W),
       .AXI_LEN_W (AXI_LEN_W),
       .AXI_ID_W  (AXI_ID_W),
-      .BURST_W   (BURST_W),
-      .BUFFER_W  (BUFFER_W)
+      .BURST_W   (BURST_W)
    ) axis2axi_in_inst (
       .config_in_addr_i (config_in_addr_i),
       .config_in_valid_i(config_in_valid_i),
