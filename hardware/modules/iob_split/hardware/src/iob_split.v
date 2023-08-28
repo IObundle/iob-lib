@@ -4,21 +4,21 @@
 
 // Split the IOb native interface, from a single master to multiple followers
 module iob_split #(
-   parameter ADDR_W   = 32,
-   parameter DATA_W   = 32,
-   parameter N = 2,              // Number of followers, minimum of 2
-   parameter NB = $clog2(N)      // Number of bits needed to address all followers
+   parameter ADDR_W = 32,
+   parameter DATA_W = 32,
+   parameter N      = 2,             // Number of followers, minimum of 2
+   parameter NB     = $clog2(N)      // Number of bits needed to address all followers
 ) (
    `include "clk_rst_s_port.vs"
 
    // Master's interface
-   input              m_avalid_i,
-   input [ADDR_W-1:0] m_address_i,
-   input [DATA_W:0]   m_wdata_i,
-   input [4-1:0]      m_wstrb_i,
-   output  [DATA_W:0] m_rdata_o,
-   output             m_rvalid_o,
-   output             m_ready_o,
+   input                 m_avalid_i,
+   input  [ADDR_W-1:0]   m_address_i,
+   input  [DATA_W:0]     m_wdata_i,
+   input  [4-1:0]        m_wstrb_i,
+   output [DATA_W:0]     m_rdata_o,
+   output                m_rvalid_o,
+   output                m_ready_o,
 
    // Followers' interface
    output [N*1-1:0]      f_avalid_o,
@@ -29,7 +29,8 @@ module iob_split #(
    input  [N*1-1:0]      f_rvalid_i,
    input  [N*1-1:0]      f_ready_i,
 
-   input  [NB-1:0] f_sel_i
+   // Follower selection
+   input  [NB-1:0]       f_sel_i
 );
 
    //
@@ -40,12 +41,12 @@ module iob_split #(
    iob_reg_re #(
       .DATA_W (NB),
       .RST_VAL(0)
-   ) iob_reg_f_sel (
+   ) reg_f_sel (
       `include "clk_rst_s_s_portmap.vs"
       .cke_i (1'b1),
       .rst_i (1'b0),
-      .en_i  (m_avalid),
-      .data_i(f_sel),
+      .en_i  (m_avalid_i),
+      .data_i(f_sel_i),
       .data_o(f_sel_r)
    );
 
@@ -59,14 +60,14 @@ module iob_split #(
       .N      (N)
    ) demux_avalid (
       .sel_i (f_sel_r),
-      .data_i(m_avalid),
-      .data_o(f_avalid)
+      .data_i(m_avalid_i),
+      .data_o(f_avalid_o)
    );
 
    // These go to all followers (only the one with asserted avalid will use them)
-   assign f_address = m_address;
-   assign f_wdata   = m_wdata;
-   assign f_wstrb   = m_wstrb;
+   assign f_address_o = m_address_i;
+   assign f_wdata_o   = m_wdata_i;
+   assign f_wstrb_o   = m_wstrb_i;
 
    //
    // Route selected follower response to master
@@ -77,8 +78,8 @@ module iob_split #(
       .N      (N)
    ) mux_rdata (
       .sel_i (f_sel_r),
-      .data_i(f_rdata),
-      .data_o(m_rdata)
+      .data_i(f_rdata_i),
+      .data_o(m_rdata_o)
    );
 
    iob_mux #(
@@ -86,8 +87,8 @@ module iob_split #(
       .N      (N)
    ) mux_rvalid (
       .sel_i (f_sel_r),
-      .data_i(f_rvalid),
-      .data_o(m_rvalid)
+      .data_i(f_rvalid_i),
+      .data_o(m_rvalid_o)
    );
 
    iob_mux #(
@@ -95,8 +96,8 @@ module iob_split #(
       .N      (N)
    ) mux_ready (
       .sel_i (f_sel_r),
-      .data_i(f_ready),
-      .data_o(m_ready)
+      .data_i(f_ready_i),
+      .data_o(m_ready_o)
    );
 
 endmodule
