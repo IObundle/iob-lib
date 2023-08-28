@@ -12,24 +12,24 @@ module iob_split #(
    `include "clk_rst_s_port.vs"
 
    // Master's interface
-   output              m_avalid,
-   output [ADDR_W-1:0] m_address,
-   output [DATA_W:0]   m_wdata,
-   output [4-1:0]      m_wstrb,
-   input  [DATA_W:0]   m_rdata,
-   input               m_rvalid,
-   input               m_ready,
+   input              m_avalid_i,
+   input [ADDR_W-1:0] m_address_i,
+   input [DATA_W:0]   m_wdata_i,
+   input [4-1:0]      m_wstrb_i,
+   output  [DATA_W:0] m_rdata_o,
+   output             m_rvalid_o,
+   output             m_ready_o,
 
    // Followers' interface
-   output [N*1-1:0]      f_avalid,
-   output [ADDR_W-1:0]   f_address,
-   output [DATA_W-1:0]   f_wdata,
-   output [4-1:0]        f_wstrb,
-   input  [N*DATA_W-1:0] f_rdata,
-   input  [N*1-1:0]      f_rvalid,
-   input  [N*1-1:0]      f_ready,
+   output [N*1-1:0]      f_avalid_o,
+   output [ADDR_W-1:0]   f_address_o,
+   output [DATA_W-1:0]   f_wdata_o,
+   output [4-1:0]        f_wstrb_o,
+   input  [N*DATA_W-1:0] f_rdata_i,
+   input  [N*1-1:0]      f_rvalid_i,
+   input  [N*1-1:0]      f_ready_i,
 
-   input  [NB-1:0] f_sel
+   input  [NB-1:0] f_sel_i
 );
 
    //
