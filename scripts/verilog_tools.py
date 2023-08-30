@@ -50,7 +50,7 @@ def replace_includes(setup_dir="", build_dir=""):
     VerilogFiles = []
     SearchPaths = f"{build_dir}/hardware"
     VSnippetDir = f"{setup_dir}/hardware/aux"
-    ExcludeDirs = ["hardware/fpga/db"]
+    ExcludeDirs = ["hardware/fpga/db", "hardware/fpga/ip"]
 
     os.makedirs(VSnippetDir, exist_ok=True)
 
