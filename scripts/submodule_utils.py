@@ -468,10 +468,10 @@ def get_module_io(ios, confs=None, corename=None):
             # Add ifdef attribute to every signal if table also has it
             if "if_defined" in table.keys():
                 signal["if_defined"] = table["if_defined"]
-
-            signal["name_without_prefix"] = signal[
-                "name"
-            ]  # Save the name without prefix in an attribute
+            # Save the name without prefix in an attribute
+            signal["name_without_prefix"] = signal["name"]
+            # Save the interface name in an attribute
+            signal["if_name"] = table["name"]
             # Add prefix to signal name if ios_table_prefix is set
             if "ios_table_prefix" in table.keys() and table["ios_table_prefix"]:
                 signal["name"] = (
