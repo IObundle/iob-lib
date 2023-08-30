@@ -50,10 +50,15 @@ def replace_includes(setup_dir="", build_dir=""):
     VerilogFiles = []
     SearchPaths = f"{build_dir}/hardware"
     VSnippetDir = f"{setup_dir}/hardware/aux"
+    ExcludeDirs = ["hardware/fpga/db"]
 
     os.makedirs(VSnippetDir, exist_ok=True)
 
     for root, dirs, files in os.walk(SearchPaths):
+        # Skip directories from ExcludeDirs
+        if any(exclude_dir in root for exclude_dir in ExcludeDirs):
+            continue
+
         for file in files:
             if file.endswith(".vs"):
                 VSnippetFiles.append(f"{root}/{file}")
