@@ -12,22 +12,22 @@ module iob_merge #(
    `include "clk_rst_s_port.vs"
 
    // Masters' interface
-   input  [N*1-1:0]      m_avalid_i,
-   input  [ADDR_W-1:0]   m_address_i,
-   input  [DATA_W-1:0]   m_wdata_i,
-   input  [4-1:0]        m_wstrb_i,
-   output [N*DATA_W-1:0] m_rdata_o,
-   output [N*1-1:0]      m_rvalid_o,
-   output [N*1-1:0]      m_ready_o,
+   input  [N*1-1:0]        m_avalid_i,
+   input  [N*ADDR_W-1:0]   m_addr_i,
+   input  [N*DATA_W-1:0]   m_wdata_i,
+   input  [N*DATA_W/8-1:0] m_wstrb_i,
+   output [N*DATA_W-1:0]   m_rdata_o,
+   output [N*1-1:0]        m_rvalid_o,
+   output [N*1-1:0]        m_ready_o,
 
    // Follower's interface
-   output                f_avalid_o,
-   output [ADDR_W-1:0]   f_address_o,
-   output [DATA_W:0]     f_wdata_o,
-   output [4-1:0]        f_wstrb_o,
-   input  [DATA_W:0]     f_rdata_i,
-   input                 f_rvalid_i,
-   input                 f_ready_i,
+   output                  f_avalid_o,
+   output [ADDR_W-1:0]     f_addr_o,
+   output [DATA_W-1:0]     f_wdata_o,
+   output [DATA_W/8-1:0]   f_wstrb_o,
+   input  [DATA_W-1:0]     f_rdata_i,
+   input                   f_rvalid_i,
+   input                   f_ready_i,
 
    // Master selection source (an array of bits, where each bit represents a master and
    // is set to 1 if that one master is selected)
@@ -38,12 +38,12 @@ module iob_merge #(
    // Select the master and register the selection
    //
 
-   wire [NB-1:0] m_sel;
-   integer k;
+   reg [NB-1:0] m_sel;
+   integer m_sel_int;
    always @* begin
-      for (k = 0; k < N; k = k + 1) begin
-         if (m_sel_src_i[k]) begin
-            m_sel = k[NB-1:0];
+      for (m_sel_int = 0; m_sel_int < N; m_sel_int++) begin
+         if (m_sel_src_i[m_sel_int]) begin
+            m_sel = m_sel_int[NB-1:0];
          end
       end
    end
@@ -56,7 +56,7 @@ module iob_merge #(
       `include "clk_rst_s_s_portmap.vs"
       .cke_i (1'b1),
       .rst_i (1'b0),
-      .en_i  (m_avalid_o),
+      .en_i  (m_avalid_i[m_sel_int]),
       .data_i(m_sel),
       .data_o(m_sel_r)
    );
@@ -75,27 +75,27 @@ module iob_merge #(
    );
 
    iob_mux #(
-      .DATA_W (1),
+      .DATA_W (ADDR_W),
       .N      (N)
-   ) mux_avalid (
+   ) mux_addr (
       .sel_i (m_sel_r),
-      .data_i(m_address_i),
-      .data_o(f_address_o)
+      .data_i(m_addr_i),
+      .data_o(f_addr_o)
    );
 
    iob_mux #(
-      .DATA_W (1),
+      .DATA_W (DATA_W),
       .N      (N)
-   ) mux_avalid (
+   ) mux_wdata (
       .sel_i (m_sel_r),
       .data_i(m_wdata_i),
       .data_o(f_wdata_o)
    );
 
    iob_mux #(
-      .DATA_W (1),
+      .DATA_W (DATA_W/8),
       .N      (N)
-   ) mux_avalid (
+   ) mux_wstrb (
       .sel_i (m_sel_r),
       .data_i(m_wstrb_i),
       .data_o(f_wstrb_o)
@@ -106,9 +106,9 @@ module iob_merge #(
    //
 
    iob_demux #(
-      .DATA_W (1),
+      .DATA_W (DATA_W),
       .N      (N)
-   ) mux_avalid (
+   ) mux_rdata (
       .sel_i (m_sel_r),
       .data_i(f_rdata_i),
       .data_o(m_rdata_o)
@@ -117,7 +117,7 @@ module iob_merge #(
    iob_demux #(
       .DATA_W (1),
       .N      (N)
-   ) mux_avalid (
+   ) mux_rvalid (
       .sel_i (m_sel_r),
       .data_i(f_rvalid_i),
       .data_o(m_rvalid_o)
@@ -126,7 +126,7 @@ module iob_merge #(
    iob_demux #(
       .DATA_W (1),
       .N      (N)
-   ) mux_avalid (
+   ) mux_ready (
       .sel_i (m_sel_r),
       .data_i(f_ready_i),
       .data_o(m_ready_o)
