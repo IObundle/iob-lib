@@ -19,7 +19,7 @@ class iob_split(iob_module):
         super()._create_submodules_list(
             [
                 {"interface": "clk_rst_s_port"},
-                {"interface": "clk_rst_s_s_port"},
+                {"interface": "clk_rst_s_s_portmap"},
                 iob_reg_re,
                 iob_demux,
                 iob_mux,

@@ -19,14 +19,14 @@ reserved_signals = {
     "cke_i": ".cke_i(cke_i)",
     "en_i": ".en_i(en_i)",
     "arst_i": ".arst_i(arst_i)",
-    "iob_avalid_i": ".iob_avalid_i(slaves_req[`AVALID(`/*<InstanceName>*/)])",
-    "iob_addr_i": ".iob_addr_i(slaves_req[`ADDRESS(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])",
-    "iob_wdata_i": ".iob_wdata_i(slaves_req[`WDATA(`/*<InstanceName>*/)])",
-    "iob_wstrb_i": ".iob_wstrb_i(slaves_req[`WSTRB(`/*<InstanceName>*/)])",
-    "iob_rdata_o": ".iob_rdata_o(slaves_resp[`RDATA(`/*<InstanceName>*/)])",
-    "iob_ready_o": ".iob_ready_o(slaves_resp[`READY(`/*<InstanceName>*/)])",
-    "iob_rvalid_o": ".iob_rvalid_o(slaves_resp[`RVALID(`/*<InstanceName>*/)])",
-    "trap_o": ".trap_o(/*<InstanceName>*/_trap_o)",
+    "iob_avalid_i": ".iob_avalid_i(periphs_dbus_avalid[(`/*<InstanceFullName>*/)*1 +: 1])",
+    "iob_addr_i": ".iob_addr_i(periphs_dbus_addr[(`/*<InstanceFullName>*/)*/*<InstanceName>*/_ADDR_W +: /*<InstanceName>*/_ADDR_W])",
+    "iob_wdata_i": ".iob_wdata_i(periphs_dbus_wdata[(`/*<InstanceFullName>*/)*/*<InstanceName>*/_DATA_W +: /*<InstanceName>*/_DATA_W])",
+    "iob_wstrb_i": ".iob_wstrb_i(periphs_dbus_wstrb[(`/*<InstanceFullName>*/)*/*<InstanceName>*/_DATA_W/8 +: /*<InstanceName>*/_DATA_W/8])",
+    "iob_rdata_o": ".iob_rdata_o(periphs_dbus_rdata[(`/*<InstanceFullName>*/)*1 +: /*<InstanceName>*/_DATA_W])",
+    "iob_rvalid_o": ".iob_rvalid_o(periphs_dbus_rvalid[(`/*<InstanceFullName>*/)*1 +: 1])",
+    "iob_ready_o": ".iob_ready_o(periphs_dbus_ready[(`/*<InstanceFullName>*/)*1 +: 1])",
+    "trap_o": ".trap_o(/*<InstanceFullName>*/_trap_o)",
     "axi_awid_o": ".axi_awid_o          (axi_awid_o             [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
     "axi_awaddr_o": ".axi_awaddr_o      (internal_axi_awaddr_o  [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
     "axi_awlen_o": ".axi_awlen_o        (axi_awlen_o            [/*<extmem_conn_num>*/*AXI_LEN_W      +:/*<bus_size>*/*AXI_LEN_W])",
@@ -565,12 +565,20 @@ def get_reserved_signals(signal_list):
     return return_list
 
 
-def get_reserved_signal_connection(signal_name, instace_name, swreg_filename):
+def get_reserved_signal_connection(signal_name, full_instace_name, swreg_filename, instance_name):
     signal_connection = reserved_signals[signal_name]
     return re.sub(
-        "\/\*<InstanceName>\*\/",
-        instace_name,
-        re.sub("\/\*<SwregFilename>\*\/", swreg_filename, signal_connection),
+        "\/\*<InstanceFullName>\*\/",
+        full_instace_name,
+        re.sub(
+            "\/\*<SwregFilename>\*\/",
+            swreg_filename,
+            re.sub(
+                "\/\*<InstanceName>\*\/",
+                instance_name,
+                signal_connection
+            )
+        ),
     )
 
 
@@ -633,7 +641,7 @@ def get_periphs_id(peripherals_str):
 # Return list of dictionaries representing macros of each peripheral instance with their ID assigned
 def get_periphs_id_as_macros(peripherals_list):
     macro_list = []
-    for idx, instance in enumerate(peripherals_list, 1):
+    for idx, instance in enumerate(peripherals_list):
         macro_list.append(
             {
                 "name": instance.name,
@@ -649,14 +657,12 @@ def get_periphs_id_as_macros(peripherals_list):
 
 # Return amount of system peripherals
 def get_n_periphs(peripherals_list):
-    # +1 because the internal memory is not in the peripherals_list. int_mem is implicit peripheral. It is treated as a peripheral by the internal signals. (might change in the future)
-    return str(len(peripherals_list) + 1)
+    return str(len(peripherals_list))
 
 
 # Return bus width required to address all peripherals
 def get_n_periphs_w(peripherals_list):
-    # +1 because the internal memory is not in the peripherals_list. int_mem is implicit peripheral. It is treated as a peripheral by the internal signals. (might change in the future)
-    i = len(peripherals_list) + 1
+    i = len(peripherals_list)
     if not i:
         return str(0)
     else:
