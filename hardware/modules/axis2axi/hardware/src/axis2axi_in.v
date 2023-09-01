@@ -120,7 +120,6 @@ module axis2axi_in #(
    assign axi_wvalid_o      = wvalid_int;
    assign axi_wdata_o       = fifo_data;
    assign axi_wlast_o       = last_transfer;
-   assign axi_wdata_o       = fifo_data;
 
    assign axis_in_ready_o   = !fifo_full;
    assign config_in_ready_o = (fifo_empty && state == WAIT_DATA);
