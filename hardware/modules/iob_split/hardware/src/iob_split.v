@@ -38,13 +38,12 @@ module iob_split #(
    //
 
    wire [NB-1:0] f_sel_r;
-   iob_reg_re #(
+   iob_reg_e #(
       .DATA_W (NB),
       .RST_VAL(0)
    ) reg_f_sel (
       `include "clk_rst_s_s_portmap.vs"
       .cke_i (1'b1),
-      .rst_i (1'b0),
       .en_i  (m_avalid_i),
       .data_i(f_sel_i),
       .data_o(f_sel_r)
