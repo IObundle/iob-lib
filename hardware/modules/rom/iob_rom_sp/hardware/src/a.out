@@ -1,0 +1,50 @@
+#! /usr/local/bin/vvp
+:ivl_version "10.3 (stable)" "(v10_3)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "system";
+:vpi_module "vhdl_sys";
+:vpi_module "v2005_math";
+:vpi_module "va_math";
+S_0x55f09dd840c0 .scope module, "iob_rom_sp" "iob_rom_sp" 2 3;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 1 "clk_i"
+    .port_info 1 /INPUT 1 "r_en_i"
+    .port_info 2 /INPUT 10 "addr_i"
+    .port_info 3 /OUTPUT 8 "r_data_o"
+P_0x55f09dd84240 .param/l "ADDR_W" 0 2 5, +C4<00000000000000000000000000001010>;
+P_0x55f09dd84280 .param/l "DATA_W" 0 2 4, +C4<00000000000000000000000000001000>;
+P_0x55f09dd842c0 .param/str "HEXFILE" 0 2 6, "none";
+P_0x55f09dd84300 .param/str "mem_init_file_int" 1 2 15, "none";
+o0x7f8f744ea018 .functor BUFZ 10, C4<zzzzzzzzzz>; HiZ drive
+v0x55f09dd97410_0 .net "addr_i", 9 0, o0x7f8f744ea018;  0 drivers
+o0x7f8f744ea048 .functor BUFZ 1, C4<z>; HiZ drive
+v0x55f09ddc9440_0 .net "clk_i", 0 0, o0x7f8f744ea048;  0 drivers
+v0x55f09ddc9500_0 .var "r_data_o", 7 0;
+o0x7f8f744ea0a8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x55f09ddc95f0_0 .net "r_en_i", 0 0, o0x7f8f744ea0a8;  0 drivers
+v0x55f09ddc96b0 .array "rom", 0 1023, 7 0;
+E_0x55f09dd84ac0 .event posedge, v0x55f09ddc9440_0;
+    .scope S_0x55f09dd840c0;
+T_0 ;
+    %end;
+    .thread T_0;
+    .scope S_0x55f09dd840c0;
+T_1 ;
+    %wait E_0x55f09dd84ac0;
+    %load/vec4 v0x55f09ddc95f0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.0, 8;
+    %load/vec4 v0x55f09dd97410_0;
+    %pad/u 12;
+    %ix/vec4 4;
+    %load/vec4a v0x55f09ddc96b0, 4;
+    %assign/vec4 v0x55f09ddc9500_0, 0;
+T_1.0 ;
+    %jmp T_1;
+    .thread T_1;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "/home/efaustino/iob-soc--estagio/iob-soc-revamp/submodules/LIB/hardware/modules/rom/iob_rom_sp/hardware/src/iob_rom_sp.v";

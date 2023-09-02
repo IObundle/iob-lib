@@ -21,13 +21,13 @@ module iob_split #(
    output                  m_ready_o,
 
    // Followers' interface
-   output [N*1-1:0]        f_avalid_o,
-   output [N*ADDR_W-1:0]   f_addr_o,
-   output [N*DATA_W-1:0]   f_wdata_o,
-   output [N*DATA_W/8-1:0] f_wstrb_o,
-   input  [N*DATA_W-1:0]   f_rdata_i,
-   input  [N*1-1:0]        f_rvalid_i,
-   input  [N*1-1:0]        f_ready_i,
+   output reg [N*1-1:0]        f_avalid_o,
+   output reg [N*ADDR_W-1:0]   f_addr_o,
+   output reg [N*DATA_W-1:0]   f_wdata_o,
+   output reg [N*DATA_W/8-1:0] f_wstrb_o,
+   input      [N*DATA_W-1:0]   f_rdata_i,
+   input      [N*1-1:0]        f_rvalid_i,
+   input      [N*1-1:0]        f_ready_i,
 
    // Follower selection
    input  [NB-1:0]       f_sel_i
@@ -53,20 +53,42 @@ module iob_split #(
    // Route master request to selected follower
    //
 
-   // Avalid goes to the selected follower
    iob_demux #(
       .DATA_W (1),
       .N      (N)
    ) demux_avalid (
-      .sel_i (f_sel_r),
+      .sel_i (f_sel_i),
       .data_i(m_avalid_i),
       .data_o(f_avalid_o)
    );
 
-   // These go to all followers (only the one with asserted avalid will use them)
-   assign f_addr_o  = m_addr_i;
-   assign f_wdata_o = m_wdata_i;
-   assign f_wstrb_o = m_wstrb_i;
+   // Leave this with iob_demux2. Errors happen(ed?) in the waves if iob_demux is used.
+   iob_demux2 #(
+      .DATA_W (ADDR_W),
+      .N      (N)
+   ) demux_addr (
+      .sel_i (f_sel_i),
+      .data_i(m_addr_i),
+      .data_o(f_addr_o)
+   );
+
+   iob_demux #(
+      .DATA_W (DATA_W),
+      .N      (N)
+   ) demux_wdata (
+      .sel_i (f_sel_i),
+      .data_i(m_wdata_i),
+      .data_o(f_wdata_o)
+   );
+
+   iob_demux #(
+      .DATA_W (DATA_W/8),
+      .N      (N)
+   ) demux_wstrb (
+      .sel_i (f_sel_i),
+      .data_i(m_wstrb_i),
+      .data_o(f_wstrb_o)
+   );
 
    //
    // Route selected follower response to master

@@ -5,6 +5,7 @@ from iob_module import iob_module
 from iob_reg_re import iob_reg_re
 from iob_mux import iob_mux
 from iob_demux import iob_demux
+from iob_demux2 import iob_demux2
 
 
 class iob_split(iob_module):
@@ -22,6 +23,7 @@ class iob_split(iob_module):
                 {"interface": "clk_rst_s_s_portmap"},
                 iob_reg_re,
                 iob_demux,
+                iob_demux2,
                 iob_mux,
             ]
         )
