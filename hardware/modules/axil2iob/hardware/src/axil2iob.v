@@ -15,7 +15,7 @@ module axil2iob #(
    `include "iob_axil_s_port.vs"
 
    // IOb master interface
-   `include "iob_port.vs"
+   `include "iob_m_port.vs"
 );
 
    wire iob_rvalid_q;
