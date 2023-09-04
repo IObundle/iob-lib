@@ -15,39 +15,68 @@ module axil2iob #(
    `include "iob_axil_s_port.vs"
 
    // IOb master interface
-   `include "iob_m_port.vs"
+   `include "iob_port.vs"
 );
+
+   wire iob_rvalid_q;
+   wire iob_rvalid_e;
+   wire write_enable;
+   wire axil_bvalid_n;
+   wire axil_bvalid_e;
+
+   assign iob_rvalid_e = iob_rvalid_i|axil_rready_i;
+   assign write_enable = |axil_wstrb_i;
+   assign axil_bvalid_n = axil_awvalid_i & axil_wvalid_i;
+   assign axil_bvalid_e = axil_bvalid_n|axil_bready_i;
 
    //
    // COMPUTE AXIL OUTPUTS
    //
-
    // write address
-   assign axil_awready_o = iob_ready_i;
-   assign axil_awprot_o  = 3'b000;
-   
+   assign axil_awready_o = iob_ready_i & axil_wvalid_i;
    // write
    assign axil_wready_o  = iob_ready_i;
-
    // write response
    assign axil_bresp_o   = 2'b0;
-   assign axil_bvalid_o  = 1'b1;
-
    // read address
    assign axil_arready_o = iob_ready_i;
-   assign axil_arprot_o  = 3'b000;
-
    // read
    assign axil_rdata_o   = iob_rdata_i;
    assign axil_rresp_o   = 2'b0;
-   assign axil_rvalid_o  = iob_rvalid_i;
+   assign axil_rvalid_o  = iob_rvalid_i ? 1'b1 : iob_rvalid_q;
 
    //
    // COMPUTE IOb OUTPUTS
    //
-   assign iob_avalid_o   = axil_awvalid_i | axil_wvalid_i | axil_arvalid_i;
+   assign iob_avalid_o   = (axil_bvalid_n & write_enable) | axil_arvalid_i;
    assign iob_addr_o     = axil_awvalid_i ? axil_awaddr_i : axil_araddr_i;
    assign iob_wdata_o    = axil_wdata_i;
    assign iob_wstrb_o    = axil_wvalid_i ? axil_wstrb_i : {DATA_W / 8{1'b0}};
+
+   iob_reg_re #(
+      .DATA_W (1),
+      .RST_VAL(0)
+   ) iob_reg_rvalid (
+      .clk_i (clk_i),
+      .arst_i(arst_i),
+      .cke_i (cke_i),
+      .rst_i (1'b0),
+      .en_i  (iob_rvalid_e),
+      .data_i(iob_rvalid_i),
+      .data_o(iob_rvalid_q)
+   );
+
+   iob_reg_re #(
+      .DATA_W (1),
+      .RST_VAL(0)
+   ) iob_reg_bvalid (
+      .clk_i (clk_i),
+      .arst_i(arst_i),
+      .cke_i (cke_i),
+      .rst_i (1'b0),
+      .en_i  (axil_bvalid_e),
+      .data_i(axil_bvalid_n),
+      .data_o(axil_bvalid_o)
+   );
 
 endmodule
