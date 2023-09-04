@@ -21,13 +21,13 @@ module iob_split #(
    output                  m_ready_o,
 
    // Followers' interface
-   output reg [N*1-1:0]        f_avalid_o,
-   output reg [N*ADDR_W-1:0]   f_addr_o,
-   output reg [N*DATA_W-1:0]   f_wdata_o,
-   output reg [N*DATA_W/8-1:0] f_wstrb_o,
-   input      [N*DATA_W-1:0]   f_rdata_i,
-   input      [N*1-1:0]        f_rvalid_i,
-   input      [N*1-1:0]        f_ready_i,
+   output [N*1-1:0]        f_avalid_o,
+   output [N*ADDR_W-1:0]   f_addr_o,
+   output [N*DATA_W-1:0]   f_wdata_o,
+   output [N*DATA_W/8-1:0] f_wstrb_o,
+   input  [N*DATA_W-1:0]   f_rdata_i,
+   input  [N*1-1:0]        f_rvalid_i,
+   input  [N*1-1:0]        f_ready_i,
 
    // Follower selection
    input  [NB-1:0]       f_sel_i
