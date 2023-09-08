@@ -19,7 +19,7 @@ module iob_div_subshift #(
    wire [2*DATA_W:0] dqr_reg;
 
    iob_reg #(
-      .DATA_W (2 * DATA_W + 1),
+      .DATA_W ((2 * DATA_W) + 1),
       .RST_VAL(1'b0)
    ) dqr_reg0 (
       `include "clk_en_rst_s_s_portmap.vs"
@@ -42,33 +42,40 @@ module iob_div_subshift #(
       .data_o(divisor_reg)
    );
 
-   wire [DATA_W-1:0] subtraend = dqr_reg[2*DATA_W-2-:DATA_W];
-   reg  [  DATA_W:0] tmp;
+   wire [DATA_W-1:0] subtraend = dqr_reg[(2*DATA_W)-2-:DATA_W];
+   wire  [  DATA_W:0] tmp;
 
    //output quotient and remainder
    assign quotient_o  = dqr_reg[DATA_W-1:0];
-   assign remainder_o = dqr_reg[2*DATA_W-1:DATA_W];
+   assign remainder_o = dqr_reg[(2*DATA_W)-1:DATA_W];
+
+   assign tmp = {1'b0, subtraend} - {1'b0, divisor_reg};
 
 
    //
    //PROGRAM
    //
 
-   reg [$clog2(DATA_W+2):0] pc, pc_nxt;  //program counter
-   always @(posedge clk_i, posedge arst_i)
-      if (arst_i) pc <= 1'b0;
-      else pc <= pc_nxt;
+   reg [$clog2(DATA_W+2):0] pcnt_nxt;  //program counter
+   reg [$clog2(DATA_W+2):0] pcnt;
+   always @(posedge clk_i, posedge arst_i) begin
+       if (arst_i) begin
+           pcnt <= 1'b0;
+       end else begin
+           pcnt <= pcnt_nxt;
+       end
+   end
 
    always @* begin
-      pc_nxt      = pc + 1'b1;
+      pcnt_nxt      = pcnt + 1'b1;
       dqr_nxt     = dqr_reg;
       divisor_nxt = divisor_reg;
       done_o      = 1'b1;
 
-      case (pc)
+      case (pcnt)
          0: begin  //wait for start, load operands and do it
             if (!start_i) begin
-               pc_nxt = pc;
+               pcnt_nxt = pcnt;
             end else begin
                divisor_nxt = divisor_i;
                dqr_nxt     = {{DATA_W{1'b0}}, dividend_i};
@@ -76,16 +83,18 @@ module iob_div_subshift #(
          end
 
          DATA_W + 1: begin
-            pc_nxt = 1'b0;
+            pcnt_nxt = 1'b0;
          end
 
          default: begin  //shift and subtract
             done_o = 1'b0;
-            tmp    = {1'b0, subtraend} - {1'b0, divisor_reg};
-            if (~tmp[DATA_W]) dqr_nxt = {tmp, dqr_reg[DATA_W-2 : 0], 1'b1};
-            else dqr_nxt = {dqr_reg[2*DATA_W-2 : 0], 1'b0};
+            if (~tmp[DATA_W]) begin
+                dqr_nxt = {tmp, dqr_reg[DATA_W-2 : 0], 1'b1};
+            end else begin
+                dqr_nxt = {dqr_reg[(2*DATA_W)-2 : 0], 1'b0};
+            end
          end
-      endcase  // case (pc)
+      endcase  // case (pcnt)
    end
 
 endmodule
