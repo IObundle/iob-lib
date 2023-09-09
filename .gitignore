@@ -1,2 +1,4 @@
 scripts/__pycache__
 scripts/vhparser.pyc
+
+*.out

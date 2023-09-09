@@ -53,20 +53,45 @@ module iob_split #(
    // Route master request to selected follower
    //
 
-   // Avalid goes to the selected follower
    iob_demux #(
       .DATA_W (1),
       .N      (N)
    ) demux_avalid (
-      .sel_i (f_sel_r),
+      .sel_i (f_sel_i),
       .data_i(m_avalid_i),
       .data_o(f_avalid_o)
    );
 
-   // These go to all followers (only the one with asserted avalid will use them)
+   // Leave this with iob_demux2. Errors happen(ed?) in the waves if iob_demux is used.
    assign f_addr_o  = m_addr_i;
+   iob_demux2 #(
    assign f_wdata_o = m_wdata_i;
+      .DATA_W (ADDR_W),
    assign f_wstrb_o = m_wstrb_i;
+      .N      (N)
+   ) demux_addr (
+      .sel_i (f_sel_i),
+      .data_i(m_addr_i),
+      .data_o(f_addr_o)
+   );
+
+   iob_demux #(
+      .DATA_W (DATA_W),
+      .N      (N)
+   ) demux_wdata (
+      .sel_i (f_sel_i),
+      .data_i(m_wdata_i),
+      .data_o(f_wdata_o)
+   );
+
+   iob_demux #(
+      .DATA_W (DATA_W/8),
+      .N      (N)
+   ) demux_wstrb (
+      .sel_i (f_sel_i),
+      .data_i(m_wstrb_i),
+      .data_o(f_wstrb_o)
+   );
 
    //
    // Route selected follower response to master
