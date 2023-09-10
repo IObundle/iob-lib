@@ -23,7 +23,7 @@ reserved_signals = {
     "iob_addr_i": ".iob_addr_i(periphs_dbus_addr[(`/*<InstanceFullName>*/)*/*<InstanceName>*/_ADDR_W +: /*<InstanceName>*/_ADDR_W])",
     "iob_wdata_i": ".iob_wdata_i(periphs_dbus_wdata[(`/*<InstanceFullName>*/)*/*<InstanceName>*/_DATA_W +: /*<InstanceName>*/_DATA_W])",
     "iob_wstrb_i": ".iob_wstrb_i(periphs_dbus_wstrb[(`/*<InstanceFullName>*/)*/*<InstanceName>*/_DATA_W/8 +: /*<InstanceName>*/_DATA_W/8])",
-    "iob_rdata_o": ".iob_rdata_o(periphs_dbus_rdata[(`/*<InstanceFullName>*/)*1 +: /*<InstanceName>*/_DATA_W])",
+    "iob_rdata_o": ".iob_rdata_o(periphs_dbus_rdata[(`/*<InstanceFullName>*/)*/*<InstanceName>*/_DATA_W +: /*<InstanceName>*/_DATA_W])",
     "iob_rvalid_o": ".iob_rvalid_o(periphs_dbus_rvalid[(`/*<InstanceFullName>*/)*1 +: 1])",
     "iob_ready_o": ".iob_ready_o(periphs_dbus_ready[(`/*<InstanceFullName>*/)*1 +: 1])",
     "trap_o": ".trap_o(/*<InstanceFullName>*/_trap_o)",
