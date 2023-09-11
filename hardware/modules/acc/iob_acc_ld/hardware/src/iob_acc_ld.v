@@ -21,7 +21,8 @@ module iob_acc_ld #(
 
    iob_reg_re #(
       .DATA_W(DATA_W),
-      .RST_VAL(RST_VAL)
+      .RST_VAL(RST_VAL),
+      .CLKEDGE("posedge")
    ) reg0 (
       `include "clk_en_rst_s_s_portmap.vs"
 

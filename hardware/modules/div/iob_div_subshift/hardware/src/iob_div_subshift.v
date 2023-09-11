@@ -20,7 +20,8 @@ module iob_div_subshift #(
 
    iob_reg #(
       .DATA_W ((2 * DATA_W) + 1),
-      .RST_VAL(1'b0)
+      .RST_VAL({((2*DATA_W) + 1){1'b0}}),
+      .CLKEDGE("posedge")
    ) dqr_reg0 (
       `include "clk_en_rst_s_s_portmap.vs"
 
@@ -34,7 +35,8 @@ module iob_div_subshift #(
 
    iob_reg #(
       .DATA_W (DATA_W),
-      .RST_VAL(1'b0)
+      .RST_VAL({DATA_W{1'b0}}),
+      .CLKEDGE("posedge")
    ) div_reg0 (
       `include "clk_en_rst_s_s_portmap.vs"
 
@@ -60,7 +62,8 @@ module iob_div_subshift #(
    wire [$clog2(DATA_W+2):0] pcnt;
    iob_reg #(
        .DATA_W($clog2(DATA_W+2)+1),
-       .RST_VAL(1'b0)
+       .RST_VAL({($clog2(DATA_W+2)+1){1'b0}}),
+       .CLKEDGE("posedge")
    ) pcnt_reg (
        .clk_i(clk_i),
        .cke_i(cke_i),
