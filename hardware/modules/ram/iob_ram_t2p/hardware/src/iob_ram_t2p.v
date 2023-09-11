@@ -19,15 +19,15 @@ module iob_ram_t2p #(
 );
 
    //this allows ISE 14.7 to work; do not remove
-   localparam mem_init_file_int = HEXFILE;
+   localparam MEM_INIT_FILE_INT = HEXFILE;
 
    // Declare the RAM
    reg [DATA_W-1:0] ram[(2**ADDR_W)-1:0];
 
    // Initialize the RAM
    initial begin
-       if (mem_init_file_int != "none") begin
-           $readmemh(mem_init_file_int, ram, 0, (2 ** ADDR_W) - 1);
+       if (MEM_INIT_FILE_INT != "none") begin
+           $readmemh(MEM_INIT_FILE_INT, ram, 0, (2 ** ADDR_W) - 1);
        end
    end
 
