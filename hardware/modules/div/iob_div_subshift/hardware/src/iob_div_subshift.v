@@ -58,11 +58,11 @@ module iob_div_subshift #(
    //PROGRAM
    //
 
-   reg [$clog2(DATA_W+2):0] pcnt_nxt;  //program counter
-   wire [$clog2(DATA_W+2):0] pcnt;
+   reg [$clog2(DATA_W+1)-1:0] pcnt_nxt;  //program counter
+   wire [$clog2(DATA_W+1)-1:0] pcnt;
    iob_reg #(
-       .DATA_W($clog2(DATA_W+2)+1),
-       .RST_VAL({($clog2(DATA_W+2)+1){1'b0}}),
+       .DATA_W($clog2(DATA_W+1)),
+       .RST_VAL({($clog2(DATA_W+1)){1'b0}}),
        .CLKEDGE("posedge")
    ) pcnt_reg (
        .clk_i(clk_i),
