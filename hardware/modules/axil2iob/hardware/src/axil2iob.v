@@ -26,30 +26,30 @@ module axil2iob #(
   wire                  axil_bvalid_n;
   wire                  axil_bvalid_e;
 
-  assign write_enable  = |axil_wstrb;
-  assign axil_bvalid_n = axil_wvalid;
-  assign axil_bvalid_e = axil_bvalid_n | axil_bready;
-  assign iob_rvalid_e  = iob_rvalid_i | axil_rready;
+  assign write_enable  = |axil_wstrb_i;
+  assign axil_bvalid_n = axil_wvalid_i;
+  assign axil_bvalid_e = axil_bvalid_n | axil_bready_i;
+  assign iob_rvalid_e  = iob_rvalid_i | axil_rready_i;
 
   // COMPUTE AXIL OUTPUTS
   // // write address
-  assign axil_awready  = iob_ready_i;
+  assign axil_awready_o  = iob_ready_i;
   // // write
-  assign axil_wready   = iob_ready_i;
+  assign axil_wready_o   = iob_ready_i;
   // // write response
-  assign axil_bresp    = 2'b0;
+  assign axil_bresp_o    = 2'b0;
   // // read address
-  assign axil_arready  = iob_ready_i;
+  assign axil_arready_o  = iob_ready_i;
   // // read
-  assign axil_rdata    = iob_rdata_i;
-  assign axil_rresp    = 2'b0;
-  assign axil_rvalid   = iob_rvalid_i ? 1'b1 : iob_rvalid_q;
+  assign axil_rdata_o    = iob_rdata_i;
+  assign axil_rresp_o    = 2'b0;
+  assign axil_rvalid_o   = iob_rvalid_i ? 1'b1 : iob_rvalid_q;
 
   // COMPUTE IOb OUTPUTS
-  assign iob_avalid_o  = (axil_bvalid_n & write_enable) | axil_arvalid;
-  assign iob_addr_o    = axil_arvalid ? axil_araddr : (axil_awvalid ? axil_awaddr : axil_awaddr_q);
-  assign iob_wdata_o   = axil_wdata;
-  assign iob_wstrb_o   = axil_arvalid ? {STRB_WIDTH{1'b0}} : axil_wstrb;
+  assign iob_avalid_o  = (axil_bvalid_n & write_enable) | axil_arvalid_i;
+  assign iob_addr_o    = axil_arvalid_i ? axil_araddr_i : (axil_awvalid_i ? axil_awaddr_i : axil_awaddr_q);
+  assign iob_wdata_o   = axil_wdata_i;
+  assign iob_wstrb_o   = axil_arvalid_i ? {STRB_WIDTH{1'b0}} : axil_wstrb_i;
 
   iob_reg_re #(
       .DATA_W (ADDR_WIDTH),
@@ -59,8 +59,8 @@ module axil2iob #(
       .arst_i(arst_i),
       .cke_i (cke_i),
       .rst_i (1'b0),
-      .en_i  (axil_awvalid),
-      .data_i(axil_awaddr),
+      .en_i  (axil_awvalid_i),
+      .data_i(axil_awaddr_i),
       .data_o(axil_awaddr_q)
   );
 
@@ -87,7 +87,7 @@ module axil2iob #(
       .rst_i (1'b0),
       .en_i  (axil_bvalid_e),
       .data_i(axil_bvalid_n),
-      .data_o(axil_bvalid)
+      .data_o(axil_bvalid_o)
   );
 
 endmodule
