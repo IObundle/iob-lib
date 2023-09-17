@@ -112,7 +112,6 @@ class iob_module:
         # Add current setup purpose to list
         cls._setup_purpose.append(purpose)
 
-        cls.__pre_specific_setup()
         cls._specific_setup()
         cls._post_setup()
 
@@ -159,7 +158,7 @@ class iob_module:
         cls._setup_regs()
 
     @classmethod
-    def __pre_specific_setup(cls):
+    def _specific_setup(cls):
         """Private method to setup and instantiate submodules before specific setup"""
         # Setup submodules placed in `submodule_list` list
         cls._setup_submodules(cls.submodule_list)
@@ -168,7 +167,7 @@ class iob_module:
         # Setup block groups (not called from init_attributes() because
         # this function has instances of modules that are only created by this function)
         cls._setup_block_groups()
-
+        
     ###############################################################
     # Methods commonly overriden by subclasses
     ###############################################################
@@ -189,16 +188,6 @@ class iob_module:
     @classmethod
     def _create_instances(cls):
         """Default method to instantiate modules does nothing"""
-        pass
-
-    @classmethod
-    def _specific_setup(cls):
-        """Default _specific_setup does nothing.
-        This function should be overriden by its subclasses to
-        implement their specific setup functionality.
-        If they create sources in the build dir, they should be aware of the
-        latest setup purpose, using: `cls.get_setup_purpose()`
-        """
         pass
 
     @classmethod
