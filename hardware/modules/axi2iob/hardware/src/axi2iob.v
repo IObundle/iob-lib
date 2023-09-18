@@ -6,17 +6,13 @@
  */
 module axi2iob #(
     // Width of address bus in bits
-    parameter ADDR_WIDTH           = 32,
+    parameter ADDR_WIDTH   = 32,
     // Width of input (slave/master) AXI/IOb interface data bus in bits
-    parameter DATA_WIDTH           = 32,
+    parameter DATA_WIDTH   = 32,
     // Width of input (slave/master) AXI/IOb interface wstrb (width of data bus in words)
-    parameter STRB_WIDTH           = (DATA_WIDTH / 8),
+    parameter STRB_WIDTH   = (DATA_WIDTH / 8),
     // Width of AXI ID signal
-    parameter AXI_ID_WIDTH         = 8,
-    // When adapting to a wider bus, re-pack full-width burst instead of passing through narrow burst if possible
-    parameter CONVERT_BURST        = 1,
-    // When adapting to a wider bus, re-pack all bursts instead of passing through narrow burst if possible
-    parameter CONVERT_NARROW_BURST = 0
+    parameter AXI_ID_WIDTH = 8
 ) (
     input wire clk_i,
     input wire arst_i,
@@ -72,10 +68,7 @@ module axi2iob #(
     input  wire                  iob_ready_i
 );
 
-  localparam [1:0]
-    STATE_IDLE = 2'd0,
-    STATE_DATA = 2'd1,
-    STATE_RESP = 2'd2;
+  localparam [1:0] STATE_IDLE = 2'd0, STATE_DATA = 2'd1, STATE_RESP = 2'd2;
 
   /*
   * AXI lite master interface (used as a middle ground from AXI4 to IOb)
@@ -110,30 +103,30 @@ module axi2iob #(
   wire                  m_axil_bvalid_n;
   wire                  m_axil_bvalid_e;
 
-  assign write_enable    = |m_axil_wstrb;
+  assign write_enable = |m_axil_wstrb;
   assign m_axil_bvalid_n = m_axil_wvalid;
   assign m_axil_bvalid_e = m_axil_bvalid_n | m_axil_bready;
-  assign iob_rvalid_e    = iob_rvalid_i | m_axil_rready;
+  assign iob_rvalid_e = iob_rvalid_i | m_axil_rready;
 
   // COMPUTE AXIL OUTPUTS
   // // write address
-  assign m_axil_awready  = iob_ready_i;
+  assign m_axil_awready = iob_ready_i;
   // // write
-  assign m_axil_wready   = iob_ready_i;
+  assign m_axil_wready = iob_ready_i;
   // // write response
-  assign m_axil_bresp    = 2'b0;
+  assign m_axil_bresp = 2'b0;
   // // read address
-  assign m_axil_arready  = iob_ready_i;
+  assign m_axil_arready = iob_ready_i;
   // // read
-  assign m_axil_rdata    = iob_rdata_i;
-  assign m_axil_rresp    = 2'b0;
-  assign m_axil_rvalid   = iob_rvalid_i ? 1'b1 : iob_rvalid_q;
+  assign m_axil_rdata = iob_rdata_i;
+  assign m_axil_rresp = 2'b0;
+  assign m_axil_rvalid = iob_rvalid_i ? 1'b1 : iob_rvalid_q;
 
   // COMPUTE IOb OUTPUTS
-  assign iob_avalid_o    = (m_axil_bvalid_n & write_enable) | m_axil_arvalid;
-  assign iob_addr_o      = m_axil_arvalid ? m_axil_araddr : (m_axil_awvalid ? m_axil_awaddr : m_axil_awaddr_q);
-  assign iob_wdata_o     = m_axil_wdata;
-  assign iob_wstrb_o     = m_axil_arvalid ? {STRB_WIDTH{1'b0}} : m_axil_wstrb;
+  assign iob_avalid_o = (m_axil_bvalid_n & write_enable) | m_axil_arvalid;
+  assign iob_addr_o = m_axil_arvalid ? m_axil_araddr : (m_axil_awvalid ? m_axil_awaddr : m_axil_awaddr_q);
+  assign iob_wdata_o = m_axil_wdata;
+  assign iob_wstrb_o = m_axil_arvalid ? {STRB_WIDTH{1'b0}} : m_axil_wstrb;
 
   iob_reg_re #(
       .DATA_W (ADDR_WIDTH),
@@ -184,10 +177,9 @@ module axi2iob #(
   reg [DATA_WIDTH-1:0] w_data_reg, w_data_next;
   reg [STRB_WIDTH-1:0] w_strb_reg, w_strb_next;
   reg [7:0] w_burst_reg, w_burst_next;
-  reg [2:0] w_burst_size_reg , w_burst_size_next;
+  reg [2:0] w_burst_size_reg, w_burst_size_next;
   reg [2:0] w_master_burst_size_reg, w_master_burst_size_next;
   reg w_burst_active_reg, w_burst_active_next;
-  reg w_convert_burst_reg, w_convert_burst_next;
   reg w_first_transfer_reg, w_first_transfer_next;
   reg w_last_segment_reg, w_last_segment_next;
 
@@ -232,7 +224,6 @@ module axi2iob #(
     w_burst_size_next        = w_burst_size_reg;
     w_master_burst_size_next = w_master_burst_size_reg;
     w_burst_active_next      = w_burst_active_reg;
-    w_convert_burst_next     = w_convert_burst_reg;
     w_first_transfer_next    = w_first_transfer_reg;
     w_last_segment_next      = w_last_segment_reg;
 
@@ -337,7 +328,6 @@ module axi2iob #(
       w_burst_size_reg        <= 3'd0;
       w_master_burst_size_reg <= 3'd0;
       w_burst_active_reg      <= 1'b0;
-      w_convert_burst_reg     <= 1'b0;
       w_first_transfer_reg    <= 1'b0;
       w_last_segment_reg      <= 1'b0;
 
@@ -364,7 +354,6 @@ module axi2iob #(
       w_burst_size_reg        <= w_burst_size_next;
       w_master_burst_size_reg <= w_master_burst_size_next;
       w_burst_active_reg      <= w_burst_active_next;
-      w_convert_burst_reg     <= w_convert_burst_next;
       w_first_transfer_reg    <= w_first_transfer_next;
       w_last_segment_reg      <= w_last_segment_next;
 
