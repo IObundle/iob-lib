@@ -27,9 +27,9 @@ module axis2axi_in #(
    // External memory interfaces
    output [         1-1:0] ext_mem_w_en_o,
    output [AXI_DATA_W-1:0] ext_mem_w_data_o,
-   output [  BUFFER_W-1:0] ext_mem_w_addr_o,
+   output [BURST_W+1-1:0] ext_mem_w_addr_o,
    output [         1-1:0] ext_mem_r_en_o,
-   output [  BUFFER_W-1:0] ext_mem_r_addr_o,
+   output [BURST_W+1-1:0] ext_mem_r_addr_o,
    input  [AXI_DATA_W-1:0] ext_mem_r_data_i,
 
    `include "clk_en_rst_s_port.vs"
@@ -120,10 +120,14 @@ module axis2axi_in #(
    assign axi_wvalid_o      = wvalid_int;
    assign axi_wdata_o       = fifo_data;
    assign axi_wlast_o       = last_transfer;
-   assign axi_wdata_o       = fifo_data;
 
    assign axis_in_ready_o   = !fifo_full;
    assign config_in_ready_o = (fifo_empty && state == WAIT_DATA);
+
+   // Registers port logic
+   reg transfer_count_reg_rst;
+   reg transfer_count_reg_en;
+   reg axi_length_reg_en;
 
    // State machine
    always @* begin
@@ -132,12 +136,19 @@ module axis2axi_in #(
       wvalid_int   = 1'b0;
       next_address = current_address;
 
+      transfer_count_reg_rst = 1'b0;
+      transfer_count_reg_en = 1'b0;
+      axi_length_reg_en = 1'b0;
+
       if (config_in_valid_i) next_address = config_in_addr_i;
 
       case (state)
-         WAIT_DATA:
-         if (start_transfer) begin
-            state_nxt = START_TRANSFER;
+         WAIT_DATA: begin
+            if (start_transfer) begin
+               state_nxt = START_TRANSFER;
+               axi_length_reg_en = 1'b1;
+            end
+            transfer_count_reg_rst = 1'b1;
          end
          START_TRANSFER: begin
             awvalid_int = 1'b1;
@@ -149,6 +160,7 @@ module axis2axi_in #(
                next_address = current_address + ((axi_awlen_o + 1) << 2);
                state_nxt    = WAIT_BRESP;
             end
+            transfer_count_reg_en = transfer;
          end
          WAIT_BRESP:
          if (axi_bvalid_i) begin
@@ -158,37 +170,29 @@ module axis2axi_in #(
    end
 
    iob_counter #(BURST_SIZE, 0) transfer_count_reg (
-      clk_i,
-      arst_i,
-      cke_i,
-      (state == WAIT_DATA),
-      (state == TRANSFER && transfer),
-      transfer_count
+      `include "clk_en_rst_s_s_portmap.vs"
+      .rst_i(transfer_count_reg_rst),
+      .en_i(transfer_count_reg_en),
+      .data_o(transfer_count)
    );
    iob_reg_re #(BURST_W + 1, 0) axi_length_reg (
-      clk_i,
-      arst_i,
-      cke_i,
-      rst_i,
-      (state == WAIT_DATA && start_transfer),
-      transfer_len,
-      awlen_int
+      `include "clk_en_rst_s_s_portmap.vs"
+      .rst_i (rst_i),
+      .en_i(axi_length_reg_en),
+      .data_i(transfer_len),
+      .data_o(awlen_int)
    );
    iob_reg_r #(AXI_ADDR_W, 0) address_reg (
-      clk_i,
-      arst_i,
-      cke_i,
-      rst_i,
-      next_address,
-      current_address
+      `include "clk_en_rst_s_s_portmap.vs"
+      .rst_i (rst_i),
+      .data_i(next_address),
+      .data_o(current_address)
    );
    iob_reg_r #(2, 0) state_reg (
-      clk_i,
-      arst_i,
-      cke_i,
-      rst_i,
-      state_nxt,
-      state
+      `include "clk_en_rst_s_s_portmap.vs"
+      .rst_i (rst_i),
+      .data_i(state_nxt),
+      .data_o(state)
    );
 
    iob_fifo_sync #(
