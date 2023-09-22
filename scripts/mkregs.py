@@ -196,14 +196,14 @@ class mkregs:
 
             # VERSION is not a register, it is an internal constant
             if name != "VERSION":
-                if row["type"] == "W":
+                if "W" in row["type"]:
                     if auto:
                         f.write(
                             f"  output [{self.verilog_max(n_bits,1)}-1:0] {name}_o,\n"
                         )
                     else:
                         f.write(f"  output {name}_wen_o,\n")
-                elif row["type"] == "R":
+                if "R" in row["type"]:
                     f.write(f"  input [{self.verilog_max(n_bits,1)}-1:0] {name}_i,\n")
                     if not auto:
                         f.write(f"  output {name}_ren_o,\n")
@@ -217,7 +217,7 @@ class mkregs:
     # auxiliar read register case name
     def aux_read_reg_case_name(self, row):
         aux_read_reg_case_name = ""
-        if row["type"] == "R":
+        if "R" in row["type"]:
             addr = row["addr"]
             n_bits = row["n_bits"]
             log2n_items = row["log2n_items"]
@@ -238,12 +238,12 @@ class mkregs:
 
             # VERSION is not a register, it is an internal constant
             if name != "VERSION":
-                if row["type"] == "W":
+                if "W" in row["type"]:
                     if auto:
                         f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name};\n")
                     else:
                         f.write(f"wire {name}_wen;\n")
-                elif row["type"] == "R":
+                if "R" in row["type"]:
                     f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name};\n")
                     if not row["autologic"]:
                         f.write(f"wire {name}_rvalid;\n")
@@ -260,12 +260,12 @@ class mkregs:
 
             # VERSION is not a register, it is an internal constant
             if name != "VERSION":
-                if row["type"] == "W":
+                if "W" in row["type"]:
                     if auto:
                         f.write(f"  .{name}_o({name}),\n")
                     else:
                         f.write(f"  .{name}_wen_o({name}_wen),\n")
-                else:
+                if "R" in row["type"]:
                     f.write(f"  .{name}_i({name}),\n")
                     if not auto:
                         f.write(f"  .{name}_ren_o({name}_ren),\n")
@@ -348,12 +348,12 @@ class mkregs:
 
         # insert write register logic
         for row in table:
-            if row["type"] == "W":
+            if "W" in row["type"]:
                 self.gen_wr_reg(row, f_gen)
 
         # insert read register logic
         for row in table:
-            if row["type"] == "R":
+            if "R" in row["type"]:
                 self.gen_rd_reg(row, f_gen)
 
         #
@@ -369,7 +369,7 @@ class mkregs:
 
         # auxiliar read register cases
         for row in table:
-            if row["type"] == "R":
+            if "R" in row["type"]:
                 aux_read_reg = self.aux_read_reg_case_name(row)
                 if aux_read_reg:
                     f_gen.write(f"reg {aux_read_reg};\n")
@@ -465,7 +465,7 @@ class mkregs:
             addr_w_base = max(log(self.cpu_n_bytes, 2), addr_w)
             auto = row["autologic"]
 
-            if row["type"] == "R":
+            if "R" in row["type"]:
                 aux_read_reg = self.aux_read_reg_case_name(row)
 
                 if self.bfloor(addr, addr_w_base) == self.bfloor(
@@ -507,7 +507,7 @@ class mkregs:
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
             auto = row["autologic"]
 
-            if row["type"] == "W":
+            if "W" in row["type"]:
                 if not auto:
                     # get wready
                     f_gen.write(
@@ -637,9 +637,7 @@ class mkregs:
         fswhdr.write("//Addresses\n")
         for row in table:
             name = row["name"]
-            if row["type"] == "W":
-                fswhdr.write(f"#define {core_prefix}{name} {row['addr']}\n")
-            if row["type"] == "R":
+            if "W" in row["type"] or "R" in row["type"]:
                 fswhdr.write(f"#define {core_prefix}{name} {row['addr']}\n")
 
         fswhdr.write("\n//Data widths (bit)\n")
@@ -649,9 +647,7 @@ class mkregs:
             n_bytes = int(self.bceil(n_bits, 3) / 8)
             if n_bytes == 3:
                 n_bytes = 4
-            if row["type"] == "W":
-                fswhdr.write(f"#define {core_prefix}{name}_W {n_bytes*8}\n")
-            if row["type"] == "R":
+            if "W" in row["type"] or "R" in row["type"]:
                 fswhdr.write(f"#define {core_prefix}{name}_W {n_bytes*8}\n")
 
         fswhdr.write("\n// Base Address\n")
@@ -666,7 +662,7 @@ class mkregs:
             if n_bytes == 3:
                 n_bytes = 4
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
-            if row["type"] == "W":
+            if "W" in row["type"]:
                 sw_type = self.swreg_type(name, n_bytes)
                 addr_arg = ""
                 if addr_w / n_bytes > 1:
@@ -674,7 +670,7 @@ class mkregs:
                 fswhdr.write(
                     f"void {core_prefix}SET_{name}({sw_type} value{addr_arg});\n"
                 )
-            if row["type"] == "R":
+            if "R" in row["type"]:
                 sw_type = self.swreg_type(name, n_bytes)
                 addr_arg = ""
                 if addr_w / n_bytes > 1:
@@ -706,7 +702,7 @@ class mkregs:
             if n_bytes == 3:
                 n_bytes = 4
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
-            if row["type"] == "W":
+            if "W" in row["type"]:
                 sw_type = self.swreg_type(name, n_bytes)
                 addr_arg = ""
                 addr_arg = ""
@@ -721,7 +717,7 @@ class mkregs:
                     f"  (*( (volatile {sw_type} *) ( (base) + ({core_prefix}{name}){addr_shift}) ) = (value));\n"
                 )
                 fsw.write("}\n\n")
-            if row["type"] == "R":
+            if "R" in row["type"]:
                 sw_type = self.swreg_type(name, n_bytes)
                 addr_arg = ""
                 addr_shift = ""
