@@ -59,6 +59,7 @@ def replace_includes(setup_dir="", build_dir=""):
                 VerilogFiles.append(f"{root}/{file}")
 
     for VerilogFile in VerilogFiles:
+        print(f"Replacing includes in {VerilogFile}")
         with open(VerilogFile, "r") as source:
             lines = source.readlines()
             # replace the include statements with the content of the file

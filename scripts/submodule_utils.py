@@ -176,31 +176,6 @@ def get_peripheral_ios(peripherals_list):
     return ios_list
 
 
-# This function is used to setup peripheral related configuration in the python module of iob-soc systems
-# python_module: Module of the iob-soc system being setup
-def iob_soc_peripheral_setup(python_module):
-    # Get peripherals list from 'peripherals' table in blocks list
-    peripherals_list = python_module.peripherals
-
-    if peripherals_list:
-        # Get port list, parameter list and top module name for each type of peripheral used
-        _, params_list, _ = get_peripherals_ports_params_top(peripherals_list)
-        # Insert peripheral instance parameters in system parameters
-        # This causes the system to have a parameter for each parameter of each peripheral instance
-        for instance in peripherals_list:
-            for parameter in params_list[instance.__class__.name]:
-                parameter_to_append = parameter.copy()
-                # Override parameter value if user specified a 'parameters' dictionary with an override value for this parameter.
-                if parameter["name"] in instance.parameters:
-                    parameter_to_append["val"] = instance.parameters[parameter["name"]]
-                # Add instance name prefix to the name of the parameter. This makes this parameter unique to this instance
-                parameter_to_append[
-                    "name"
-                ] = f"{instance.name}_{parameter_to_append['name']}"
-                python_module.confs.append(parameter_to_append)
-
-        # Get peripheral related macros
-        get_peripheral_macros(python_module.confs, peripherals_list)
 
 # Get path to build directory of directory
 # Parameter: directory: path to core directory

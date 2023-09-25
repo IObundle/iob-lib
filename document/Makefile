@@ -70,13 +70,23 @@ ugtop.tex:
 
 #include implementation results if available
 
-ifneq ($(wildcard quartus.tex),)
-INTEL_FPGA:=1
+ifeq ($(INTEL_FPGA),1)
+SRC+=$(BUILD_DIR)/doc/quartus.tex
 endif
 
-ifneq ($(wildcard vivado.tex),)
-AMD_FPGA:=1
+ifeq ($(AMD_FPGA),1)
+SRC+=$(BUILD_DIR)/doc/vivado.tex
 endif
+
+# generate quartus fitting results 
+$(BUILD_DIR)/doc/quartus.tex:
+	LOG=$(BUILD_FPGA_DIR)/reports/$(wildcard *.fit.summary) $(LIB_DIR)/scripts/quartus2tex.sh
+	mv `basename $@` $(BUILD_DOC_DIR)
+
+# generate vivado fitting results 
+$(BUILD_DIR)/doc/vivado.tex:
+	LOG=$(BUILD_FPGA_DIR)/vivado.log $(LIB_DIR)/scripts/vivado2tex.sh
+	mv `basename $@` $(BUILD_DOC_DIR)
 
 RESULTS = $(INTEL_FPGA)$(AMD_FPGA)$(UMC130_ASIC)
 

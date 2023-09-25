@@ -3,20 +3,13 @@
 # This file is run as a makefile to setup a build directory for an IP core
 #
 
-help:
-	@echo The following targets are available:
-	@echo "  setup:  Setup the build directory"
-	@echo "  clean:  Remove the build directory"
-
 TOP_MODULE_NAME ?=$(basename $(wildcard *.py))
 PROJECT_ROOT ?=.
 
 LIB_DIR ?=submodules/LIB
 SETUP_ARGS += LIB_DIR=$(LIB_DIR)
 
-# python scripts directory
 PYTHON_DIR=$(LIB_DIR)/scripts
-
 PYTHON_EXEC:=/usr/bin/env python3 -B
 
 
@@ -74,33 +67,6 @@ endif
 
 format-all: build_dir_name  python-format c-format verilog-lint verilog-format
 
-#
-#DOCUMENT
-#
-
-ifneq ($(wildcard document),)
-
-ifeq ($(INTEL_FPGA),1)
-SRC+=$(BUILD_DIR)/doc/quartus.tex
-endif
-
-ifeq ($(AMD_FPGA),1)
-SRC+=$(BUILD_DIR)/doc/vivado.tex
-endif
-
-# generate quartus fitting results 
-$(BUILD_DIR)/doc/quartus.tex:
-	make -C $(BUILD_DIR) fpga-build BOARD=CYCLONEV-GT-DK
-	LOG=$(BUILD_FPGA_DIR)/reports/$(wildcard *.fit.summary) $(LIB_DIR)/scripts/quartus2tex.sh
-	mv `basename $@` $(BUILD_DOC_DIR)
-
-# generate vivado fitting results 
-$(BUILD_DIR)/doc/vivado.tex:
-	make -C $(BUILD_DIR) fpga-build BOARD=AES-KU040-DB-G
-	LOG=$(BUILD_FPGA_DIR)/vivado.log $(LIB_DIR)/scripts/vivado2tex.sh
-	mv `basename $@` $(BUILD_DOC_DIR)
-
-endif
 
 clean:
 	-@if [ -f ../$(CORE)_V*/Makefile ]; then make -C ../$(CORE)_V* clean; fi
@@ -114,7 +80,7 @@ endif
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-setup: build_dir_name $(BUILD_DIR) $(SRC) format-all
+setup: build_dir_name $(SRC) format-all
 	@for i in $(SRC); do echo $$i; done
 
 

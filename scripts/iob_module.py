@@ -179,10 +179,6 @@ class iob_module:
 
     @classmethod
     def _create_submodules_list(cls, submodule_list=[]):
-        """Default method to create list of submodules just appends the list of submodules given, to the class list.
-        This method does not do any sanity checking on the list of submodules.
-        :param list submodule_list: List of submodules to append to the class `submodule_list` attribute.
-        """
         cls.submodule_list += submodule_list
 
     @classmethod
@@ -192,30 +188,18 @@ class iob_module:
 
     @classmethod
     def _setup_confs(cls, confs=[]):
-        """Append confs to the current confs class list, overriding existing ones
-        :param list confs: List of confs to append/override in class attribute
-        """
         cls.update_dict_list(cls.confs, confs)
 
     @classmethod
     def _setup_ios(cls, ios=[]):
-        """Append ios to the current ios class list, overriding existing ones
-        :param list ios: List of ios to append/override in class attribute
-        """
         cls.update_dict_list(cls.ios, ios)
 
     @classmethod
     def _setup_regs(cls, regs=[]):
-        """Append regs to the current regs class list, overriding existing ones
-        :param list regs: List of regs to append/override in class attribute
-        """
         cls.update_dict_list(cls.regs, regs)
 
     @classmethod
     def _setup_block_groups(cls, block_groups=[]):
-        """Append block_groups to the current block_groups class list, overriding existing ones
-        :param list block_groups: List of block_groups to append/override in class attribute
-        """
         cls.update_dict_list(cls.block_groups, block_groups)
 
     ###############################################################
