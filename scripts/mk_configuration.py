@@ -122,15 +122,15 @@ def append_str_config_build_mk(str_2_append, build_dir):
 def generate_confs_tex(confs, out_dir):
     tex_table = []
     for conf in confs:
-        conf_val = conf["val"].replace("_", "\_") if type(conf["val"]) != bool else "1"
+        conf_val = conf["val"] if type(conf["val"]) != bool else "1"
         tex_table.append(
             [
-                conf["name"].replace("_", "\_"),
-                conf["type"].replace("_", "\_"),
-                conf["min"].replace("_", "\_"),
+                conf["name"],
+                conf["type"],
+                conf["min"],
                 conf_val,
-                conf["max"].replace("_", "\_"),
-                conf["descr"].replace("_", "\_"),
+                conf["max"],
+                conf["descr"],
             ]
         )
 
