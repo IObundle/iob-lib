@@ -7,6 +7,7 @@ from axil_s_s_portmap import axil_s_s_portmap
 from iob_m_port import iob_m_port
 from iob_m_portmap import iob_m_portmap
 from iob_s_portmap import iob_s_portmap
+from iob_reg_re import iob_reg_re
 
 
 class axil2iob(iob_module):
@@ -28,5 +29,6 @@ class axil2iob(iob_module):
                 {"interface": "clk_rst_s_s_portmap"},
                 {"interface": "clk_rst_s_port"},
                 iob_s_portmap,
+                iob_reg_re,
             ]
         )

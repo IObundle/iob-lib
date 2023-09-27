@@ -862,19 +862,20 @@ class mkregs:
         for table in regs:
             tex_table = []
             for reg in table["regs"]:
+                # Find address of matching register in regs_with_addr list
+                addr = next(
+                    register["addr"]
+                    for register in regs_with_addr
+                    if register["name"] == reg["name"]
+                )
                 tex_table.append(
                     [
-                        reg["name"].replace("_", "\_"),
+                        reg["name"],
                         reg["type"],
-                        # Find address of matching register in regs_with_addr list
-                        next(
-                            register["addr"]
-                            for register in regs_with_addr
-                            if register["name"] == reg["name"]
-                        ),
-                        str(reg["n_bits"]).replace("_", "\_"),
-                        str(reg["rst_val"]).replace("_", "\_"),
-                        reg["descr"].replace("_", "\_"),
+                        str(addr),
+                        str(reg["n_bits"]),
+                        str(reg["rst_val"]),
+                        reg["descr"],
                     ]
                 )
 

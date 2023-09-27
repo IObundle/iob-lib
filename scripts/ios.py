@@ -101,10 +101,14 @@ def generate_ios_header(ios, top_module, out_dir):
         else:
             # Interface is not standard, read ports
             for port in table["ports"]:
-                f_io.write(
-                    f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if ios_table_prefix else ''}{port['name']},\n"
-                    # f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if ios_table_prefix else ''}{port['name']}, //{port['descr']}\n"
-                )
+                if port["n_bits"] == "1":
+                    f_io.write(
+                        f"{get_port_type(port['type'])} {table['name']+'_' if ios_table_prefix else ''}{port['name']},\n"
+                    )
+                else:
+                    f_io.write(
+                        f"{get_port_type(port['type'])} [{port['n_bits']}-1:0] {table['name']+'_' if ios_table_prefix else ''}{port['name']},\n"
+                    )
         if "if_defined" in table.keys():
             f_io.write("`endif\n")
 
@@ -171,12 +175,10 @@ def generate_ios_tex(ios, out_dir):
                 )  # Reverse port direction if it is a slave interface
                 tex_table.append(
                     [
-                        (port["name"] + if_gen.suffix(port_direction)).replace(
-                            "_", "\_"
-                        ),
-                        port_direction.replace("`IOB_", "").replace("(", ""),
-                        port["width"].replace("_", "\_"),
-                        port["description"].replace("_", "\_"),
+                        (port["name"] + if_gen.suffix(port_direction)),
+                        port_direction,
+                        port["width"],
+                        port["description"],
                     ]
                 )
         else:
@@ -184,10 +186,10 @@ def generate_ios_tex(ios, out_dir):
             for port in table["ports"]:
                 tex_table.append(
                     [
-                        port["name"].replace("_", "\_"),
+                        port["name"],
                         get_port_type(port["type"]),
-                        port["n_bits"].replace("_", "\_"),
-                        port["descr"].replace("_", "\_"),
+                        port["n_bits"],
+                        port["descr"],
                     ]
                 )
 
@@ -225,7 +227,7 @@ def get_peripheral_port_mapping(peripheral_instance, if_name, port_name):
         return f"{peripheral_instance.name}_{port_name}"
 
     assert (
-        if_name+'_'+port_name in peripheral_instance.io
+        if_name + "_" + port_name in peripheral_instance.io
     ), f"{iob_colors.FAIL}Port '{port_name}' of interface '{if_name}' for peripheral '{peripheral_instance.name}' not mapped!{iob_colors.ENDC}"
     # IO mapping dictionary exists, get verilog string for that mapping
-    return get_verilog_mapping(peripheral_instance.io[if_name+'_'+port_name])
+    return get_verilog_mapping(peripheral_instance.io[if_name + "_" + port_name])

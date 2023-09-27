@@ -12,6 +12,12 @@ def write_table(outfile, table):
         if (i % 2) != 0:
             fout.write("\\rowcolor{iob-blue}\n")
         line = table[i]
+        #replace underscores and $ with \_ and \$
+        print("Line: ", line)
+        for l in range(len(line)):
+            print("Line[",l,"]: ", line[l])
+            line[l] = line[l].replace("_", "\_")
+            line[l] = line[l].replace("$", "\$")
         line_out = str(line[0])
         for l in range(1, len(line)):
             line_out = line_out + (" & %s" % line[l])

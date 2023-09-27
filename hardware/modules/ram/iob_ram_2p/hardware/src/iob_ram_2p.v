@@ -19,20 +19,32 @@ module iob_ram_2p #(
 );
 
    //this allows ISE 14.7 to work; do not remove
-   localparam mem_init_file_int = HEXFILE;
+   localparam MEM_INIT_FILE_INT = HEXFILE;
 
    // Declare the RAM
-   reg [DATA_W-1:0] mem    [2**ADDR_W];
+   reg [DATA_W-1:0] mem    [(2**ADDR_W)-1:0];
 
    reg [DATA_W-1:0] r_data;
    // Initialize the RAM
-   initial if (mem_init_file_int != "none") $readmemh(mem_init_file_int, mem, 0, (2 ** ADDR_W) - 1);
+   initial begin
+       if (MEM_INIT_FILE_INT != "none") begin
+           $readmemh(MEM_INIT_FILE_INT, mem, 0, (2 ** ADDR_W) - 1);
+       end
+   end
 
    //read port
-   always @(posedge clk_i) if (r_en_i) r_data <= mem[r_addr_i];
+   always @(posedge clk_i) begin
+       if (r_en_i) begin
+           r_data <= mem[r_addr_i];
+       end
+   end
 
    //write port
-   always @(posedge clk_i) if (w_en_i) mem[w_addr_i] <= w_data_i;
+   always @(posedge clk_i) begin
+       if (w_en_i) begin
+           mem[w_addr_i] <= w_data_i;
+       end
+   end
 
    assign r_data_o = r_data;
 
