@@ -176,31 +176,6 @@ def get_peripheral_ios(peripherals_list):
     return ios_list
 
 
-# This function is used to setup peripheral related configuration in the python module of iob-soc systems
-# python_module: Module of the iob-soc system being setup
-def iob_soc_peripheral_setup(python_module):
-    # Get peripherals list from 'peripherals' table in blocks list
-    peripherals_list = python_module.peripherals
-
-    if peripherals_list:
-        # Get port list, parameter list and top module name for each type of peripheral used
-        _, params_list, _ = get_peripherals_ports_params_top(peripherals_list)
-        # Insert peripheral instance parameters in system parameters
-        # This causes the system to have a parameter for each parameter of each peripheral instance
-        for instance in peripherals_list:
-            for parameter in params_list[instance.__class__.name]:
-                parameter_to_append = parameter.copy()
-                # Override parameter value if user specified a 'parameters' dictionary with an override value for this parameter.
-                if parameter["name"] in instance.parameters:
-                    parameter_to_append["val"] = instance.parameters[parameter["name"]]
-                # Add instance name prefix to the name of the parameter. This makes this parameter unique to this instance
-                parameter_to_append[
-                    "name"
-                ] = f"{instance.name}_{parameter_to_append['name']}"
-                python_module.confs.append(parameter_to_append)
-
-        # Get peripheral related macros
-        get_peripheral_macros(python_module.confs, peripherals_list)
 
 # Get path to build directory of directory
 # Parameter: directory: path to core directory
@@ -317,9 +292,9 @@ def get_module_io(ios, confs=None, corename=None):
 
             # Add corename prefix to parameters in port width, if `confs` and `corename` are given
             if confs and corename:
-                signal["n_bits"] = add_prefix_to_parameters_in_port(
+                signal["width"] = add_prefix_to_parameters_in_port(
                     signal, confs, corename + "_"
-                )["n_bits"]
+                )["width"]
         module_signals.extend(table_signals)
     return module_signals
 
@@ -338,13 +313,13 @@ def add_prefix_to_parameters_in_string(string, confs, prefix):
     return string
 
 
-# port: dictionary describing a port (IO). Example: {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"}
+# port: dictionary describing a port (IO). Example: {'name':"clk_i", 'type':"I", 'width':'1', 'descr':"Peripheral clock input"}
 # confs: confs list of dictionaries. Each dictionary describes a parameter (macros will be filtered if they exist)
 # prefix: String to add as a prefix to any parameter found in the port width
 def add_prefix_to_parameters_in_port(port, confs, prefix):
     local_port = port.copy()
-    local_port["n_bits"] = add_prefix_to_parameters_in_string(
-        local_port["n_bits"], confs, prefix
+    local_port["width"] = add_prefix_to_parameters_in_string(
+        local_port["width"], confs, prefix
     )
     return local_port
 
@@ -390,10 +365,10 @@ def get_module_parameters(verilog_lines):
 
 # Filter out non reserved signals from a given list (not stored in string reserved_signals)
 # Example signal_list:
-# [ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"},
-#  {'name':"custom_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral custom input"} ]
+# [ {'name':"clk_i", 'type':"I", 'width':'1', 'descr':"Peripheral clock input"},
+#  {'name':"custom_i", 'type':"I", 'width':'1', 'descr':"Peripheral custom input"} ]
 # Return of this example:
-# [ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"} ]
+# [ {'name':"clk_i", 'type':"I", 'width':'1', 'descr':"Peripheral clock input"} ]
 def get_reserved_signals(signal_list):
     return_list = []
     for signal in signal_list:
@@ -413,10 +388,10 @@ def get_reserved_signal_connection(signal_name, instace_name, swreg_filename):
 
 # Filter out reserved signals from a given list (stored in string reserved_signals)
 # Example signal_list:
-# [ {'name':"clk_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral clock input"},
-#  {'name':"custom_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral custom input"} ]
+# [ {'name':"clk_i", 'type':"I", 'width':'1', 'descr':"Peripheral clock input"},
+#  {'name':"custom_i", 'type':"I", 'width':'1', 'descr':"Peripheral custom input"} ]
 # Return of this example:
-# [ {'name':"custom_i", 'type':"I", 'n_bits':'1', 'descr':"Peripheral custom input"} ]
+# [ {'name':"custom_i", 'type':"I", 'width':'1', 'descr':"Peripheral custom input"} ]
 def get_pio_signals(signal_list):
     return_list = []
     for signal in signal_list:

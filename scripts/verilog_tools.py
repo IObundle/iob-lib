@@ -49,9 +49,6 @@ def replace_includes(setup_dir="", build_dir=""):
     VSnippetFiles = []
     VerilogFiles = []
     SearchPaths = f"{build_dir}/hardware"
-    VSnippetDir = f"{setup_dir}/hardware/aux"
-
-    os.makedirs(VSnippetDir, exist_ok=True)
 
     for root, dirs, files in os.walk(SearchPaths):
         for file in files:
@@ -62,6 +59,7 @@ def replace_includes(setup_dir="", build_dir=""):
                 VerilogFiles.append(f"{root}/{file}")
 
     for VerilogFile in VerilogFiles:
+        print(f"Replacing includes in {VerilogFile}")
         with open(VerilogFile, "r") as source:
             lines = source.readlines()
             # replace the include statements with the content of the file
@@ -70,10 +68,9 @@ def replace_includes(setup_dir="", build_dir=""):
         with open(VerilogFile, "w") as source:
             source.writelines(new_lines)
 
-    # Remove the VSnippetFiles
-    #for VSnippetFile in VSnippetFiles:
-     #   os.remove(VSnippetFile)
-    #os.rmdir(VSnippetDir)
+    # Remove .vs files from current directory
+    for VSnippetFile in VSnippetFiles:
+        os.remove(VSnippetFile)
 
     print(
         f"{iob_colors.INFO}Replaced Verilog Snippet includes with respective content and deleted the files.{iob_colors.ENDC}"

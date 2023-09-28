@@ -112,7 +112,6 @@ class iob_module:
         # Add current setup purpose to list
         cls._setup_purpose.append(purpose)
 
-        cls.__pre_specific_setup()
         cls._specific_setup()
         cls._post_setup()
 
@@ -159,7 +158,7 @@ class iob_module:
         cls._setup_regs()
 
     @classmethod
-    def __pre_specific_setup(cls):
+    def _specific_setup(cls):
         """Private method to setup and instantiate submodules before specific setup"""
         # Setup submodules placed in `submodule_list` list
         cls._setup_submodules(cls.submodule_list)
@@ -168,7 +167,7 @@ class iob_module:
         # Setup block groups (not called from init_attributes() because
         # this function has instances of modules that are only created by this function)
         cls._setup_block_groups()
-
+        
     ###############################################################
     # Methods commonly overriden by subclasses
     ###############################################################
@@ -180,10 +179,6 @@ class iob_module:
 
     @classmethod
     def _create_submodules_list(cls, submodule_list=[]):
-        """Default method to create list of submodules just appends the list of submodules given, to the class list.
-        This method does not do any sanity checking on the list of submodules.
-        :param list submodule_list: List of submodules to append to the class `submodule_list` attribute.
-        """
         cls.submodule_list += submodule_list
 
     @classmethod
@@ -192,41 +187,19 @@ class iob_module:
         pass
 
     @classmethod
-    def _specific_setup(cls):
-        """Default _specific_setup does nothing.
-        This function should be overriden by its subclasses to
-        implement their specific setup functionality.
-        If they create sources in the build dir, they should be aware of the
-        latest setup purpose, using: `cls.get_setup_purpose()`
-        """
-        pass
-
-    @classmethod
     def _setup_confs(cls, confs=[]):
-        """Append confs to the current confs class list, overriding existing ones
-        :param list confs: List of confs to append/override in class attribute
-        """
         cls.update_dict_list(cls.confs, confs)
 
     @classmethod
     def _setup_ios(cls, ios=[]):
-        """Append ios to the current ios class list, overriding existing ones
-        :param list ios: List of ios to append/override in class attribute
-        """
         cls.update_dict_list(cls.ios, ios)
 
     @classmethod
     def _setup_regs(cls, regs=[]):
-        """Append regs to the current regs class list, overriding existing ones
-        :param list regs: List of regs to append/override in class attribute
-        """
         cls.update_dict_list(cls.regs, regs)
 
     @classmethod
     def _setup_block_groups(cls, block_groups=[]):
-        """Append block_groups to the current block_groups class list, overriding existing ones
-        :param list block_groups: List of block_groups to append/override in class attribute
-        """
         cls.update_dict_list(cls.block_groups, block_groups)
 
     ###############################################################
@@ -372,8 +345,8 @@ class iob_module:
             mk_conf.conf_vh(cls.confs, cls.name, cls.build_dir + "/hardware/src")
 
         if cls.ios:
-            ios.write_ports (ios.generate_ports(cls.ios), cls.name, cls.build_dir + "/hardware/src")
-            
+            ios.generate_ports(cls.ios, cls.name, cls.build_dir + "/hardware/src")
+
     @classmethod
     def _generate_sw(cls, mkregs_obj, reg_table):
         """Generate common software files"""
@@ -509,27 +482,7 @@ class iob_module:
         if not "wire_prefix" in vs_name:
             vs_name["wire_prefix"] = ""
         
-        if (type(vs_name) is dict):
-            f_out = open(
-                os.path.join(
-                    dest_dir, vs_name["file_prefix"] + vs_name["interface"] + ".vs"
-                ),
-                "w",
-            )
-            
-            if_gen.write_vs_contents(
-                f_out,
-                vs_name["interface"],
-                if_gen.get_ports(vs_name["interface"]),
-                vs_name["port_prefix"],
-                vs_name["wire_prefix"],
-                bus_size=vs_name["bus_size"] if "bus_size" in vs_name.keys() else 1,
-                bus_start=vs_name["bus_start"] if "bus_start" in vs_name.keys() else 0,
-            )
-        else:
-            raise Exception(
-                f"{iob_colors.FAIL} Can't generate '{vs_name}'. Type not recognized.{iob_colors.ENDC}"
-            )
+ 
 
     @classmethod
     def get_setup_purpose(cls):
