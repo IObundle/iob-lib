@@ -611,16 +611,17 @@ def add_param_prefix(width_str, prefix):
 # Port
 #
 
-MULT=1
-
 # Write single port with given direction, bus width, and name to file
 def write_port(fout, port_prefix, direction, port):
     name = port_prefix + port["name"] + get_suffix(direction)
-    width = port["width"] * MULT
+    mult = 1
+    if "mult" in port:
+        mult = port["mult"]
+    width = port["width"] * mult
     if width == 1:
         width_str = " "
     else:
-        width_str = str("(" + str(MULT) + "*" + str(port["width"]) + ")")
+        width_str = str("(" + str(mult) + "*" + str(port["width"]) + ")")
         width_str = add_param_prefix(width_str, port_prefix)
         width_str = " [" + width_str + "-1:0] "
     fout.write(direction + width_str + name + "," + "\n")
@@ -677,6 +678,9 @@ def write_s_s_portmap(fout, port_prefix, wire_prefix, port_list):
 def write_single_wire(fout, wire_prefix, param_prefix, wire, for_tb, direction):
     wire_name = wire_prefix + wire["name"]
     wtype = "wire"
+    mult = 1
+    if "mult" in wire:
+        mult = wire["mult"]
     if for_tb:
         if direction == "input":
             wire_name = wire_name + get_suffix(wire["direction"])
@@ -685,7 +689,7 @@ def write_single_wire(fout, wire_prefix, param_prefix, wire, for_tb, direction):
             wire_name = wire_name + get_suffix(reverse_direction(wire["direction"]))
             wtype = get_tbsignal_type(wire["direction"])
     width_str = add_param_prefix(str(wire["width"]), param_prefix)
-    width_str = " [(" + str(MULT) + "*" + width_str + ")-1:0] "
+    width_str = " [(" + str(mult) + "*" + width_str + ")-1:0] "
     fout.write(wtype + width_str + wire_name + "; //" + "\n")
 
 def write_wire(fout, wire_prefix, param_prefix, wires):

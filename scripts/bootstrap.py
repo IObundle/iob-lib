@@ -5,28 +5,6 @@ import os
 import sys
 import datetime
 
-if len(sys.argv) < 2:
-    print(
-        "Usage: %s <top_module_name> [setup_args] [-s <search_path>] [-f <func_name>]"
-        % sys.argv[0]
-    )
-    print(
-        "<top_module_name>: Name of top module class and file (they must have the same name)."
-    )
-    print(
-        "-s <search_path>: Optional root of search path for python modules. Defaults to current directory."
-    )
-    print("-f <func_name>: Optional function name to execute")
-    print(
-        "setup_args: Optional project-defined arguments that may be using during setup process of the current project."
-    )
-    exit(0)
-
-search_path = "."
-if "-s" in sys.argv:
-    search_path = sys.argv[sys.argv.index("-s") + 1]
-
-
 # Search for files under the given directory using a breadth-first search
 def bfs_search_files(search_path):
     dirs = [search_path]
@@ -52,29 +30,6 @@ def bfs_search_files(search_path):
         # from the current itter.
         dirs = nextDirs
     return return_values
-
-
-# Add python modules search paths for every module
-print(f"Searching for modules under '{search_path}'...", file=sys.stderr)
-found_modules = []
-for filepath, files in bfs_search_files(search_path):
-    for filename in files:
-        if filename.endswith(".py") and filename not in found_modules:
-            sys.path.append(filepath)
-            found_modules.append(filename)
-
-# Import top module
-top_module_name = sys.argv[1].split(".")[0]
-exec("import " + top_module_name)
-
-
-# Set a custom LIB directory
-for arg in sys.argv:
-    if "LIB_DIR" in arg:
-        import build_srcs
-
-        build_srcs.LIB_DIR = arg.split("=")[1]
-        break
 
 
 # Insert header in source files
@@ -111,6 +66,14 @@ def insert_header():
         f.write("\n\n\n" + content)
 
 
+# Print build directory attribute of the top module
+def get_build_dir():
+    top_module = vars(sys.modules[top_module_name])[top_module_name]
+    top_module.is_top_module = True
+    top_module.init_attributes()
+    print(top_module.build_dir)
+
+
 # Given a version string, return a 4 digit representation of that version.
 def version_from_str(version_str):
     major, minor = version_str.replace("V", "").split(".")
@@ -128,19 +91,55 @@ def get_delivery_vars():
     print(f"PREVIOUS_VERSION={version_from_str(top_module.previous_version)} ", end="")
     print(f"VERSION_STR={top_module.version} ")
 
-
-# Print build directory attribute of the top module
-def get_build_dir():
-    top_module = vars(sys.modules[top_module_name])[top_module_name]
-    top_module.is_top_module = True
-    top_module.init_attributes()
-    print(top_module.build_dir)
-
-
 # Instantiate top module to start setup process
 def instantiate_top_module():
     vars(sys.modules[top_module_name])[top_module_name].setup_as_top_module()
+    
 
+
+if len(sys.argv) < 2:
+    print(
+        "Usage: %s <top_module_name> [setup_args] [-s <search_path>] [-f <func_name>]"
+        % sys.argv[0]
+    )
+    print(
+        "<top_module_name>: Name of top module class and file (they must have the same name)."
+    )
+    print(
+        "-s <search_path>: Optional root of search path for python modules. Defaults to current directory."
+    )
+    print("-f <func_name>: Optional function name to execute")
+    print(
+        "setup_args: Optional project-defined arguments that may be using during setup process of the current project."
+    )
+    exit(1)
+
+search_path = "."
+if "-s" in sys.argv:
+    search_path = sys.argv[sys.argv.index("-s") + 1]
+
+
+# Add python modules search paths for every module
+print(f"Searching for modules under '{search_path}'...", file=sys.stderr)
+found_modules = []
+for filepath, files in bfs_search_files(search_path):
+    for filename in files:
+        if filename.endswith(".py") and filename not in found_modules:
+            sys.path.append(filepath)
+            found_modules.append(filename)
+
+# Import top module
+top_module_name = sys.argv[1].split(".")[0]
+exec("import " + top_module_name)
+
+
+# Set a custom LIB directory
+for arg in sys.argv:
+    if "LIB_DIR" in arg:
+        import build_srcs
+
+        build_srcs.LIB_DIR = arg.split("=")[1]
+        break
 
 # Call either the default function or the one given by the user
 function_2_call = "instantiate_top_module"
