@@ -76,6 +76,35 @@ class iob_module:
     # Methods NOT to be overriden by subclasses
     ###############################################################
 
+    @staticmethod
+    def find_modules(search_path="."):
+        """Run a BFS for python modules under the given directory and append their paths to `sys.path`.
+        This allows every module found to be imported.
+        :param str search_path: Path to search for modules
+        """
+        dirs = [search_path]
+        found_modules = []
+        return_values = []
+        # while there are dirs to search
+        while len(dirs):
+            nextDirs = []
+            for parent in dirs:
+                # Scan this dir
+                for f in os.listdir(parent):
+                    # if there is a dir, then save for next ittr
+                    ff = os.path.join(parent, f)
+                    if os.path.isdir(ff):
+                        nextDirs.append(ff)
+                        continue
+                    # if there is a python module and has not been added before, then add it to sys.path
+                    if f.endswith(".py") and f not in found_modules:
+                        sys.path.append(parent)
+                        found_modules.append(f)
+            # once we've done all the current dirs then
+            # we set up the next itter as the child dirs
+            # from the current itter.
+            dirs = nextDirs
+
     @classmethod
     def setup_as_top_module(cls):
         """Initialize the setup process for the top module.
