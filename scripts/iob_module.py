@@ -35,7 +35,8 @@ class iob_module:
     block_groups = None  # List of block groups for this module. Used for documentation.
     wire_list = None  # List of internal wires of the Verilog module. Used to interconnect module components.
     is_top_module = False  # Select if this module is the top module
-
+    swregs = "hwsw"
+    
     _initialized_attributes = (
         False  # Store if attributes have been initialized for this class
     )
@@ -109,13 +110,12 @@ class iob_module:
     def setup_as_top_module(cls):
         """Initialize the setup process for the top module.
         This method should only be called once, and only for the top module class.
-        It is typically called by the `bootstrap.py` script.
         """
         cls.__setup(is_top_module=True)
 
     @classmethod
     def __setup(cls, purpose="hardware", is_top_module=False):
-        """Private setup method for this module.
+        """
         purpose: Reason for setting up the module. Used to select between the standard destination locations.
         is_top_module: Select if this is the top module. This should only be enabled on the top module class.
         """
@@ -138,11 +138,13 @@ class iob_module:
         if is_top_module and not cls._setup_purpose:
             cls.__create_build_dir()
 
-        # Add current setup purpose to list
         cls._setup_purpose.append(purpose)
 
-        cls._specific_setup()
+        cls.__setup_submodules(cls.submodule_list)
+        cls._pre_setup()
+        cls.__intermediate_setup()
         cls._post_setup()
+        cls.__final_setup()
 
     @classmethod
     def init_attributes(cls):
@@ -176,26 +178,9 @@ class iob_module:
         cls.block_groups = []
         cls.submodule_list = []
         cls.wire_list = []
-
         cls._init_attributes()
 
-        cls._create_submodules_list()
 
-        # Call _setup_* function for attributes (these may be overriden by subclasses)
-        cls._setup_confs()
-        cls._setup_ios()
-        cls._setup_regs()
-
-    @classmethod
-    def _specific_setup(cls):
-        """Private method to setup and instantiate submodules before specific setup"""
-        # Setup submodules placed in `submodule_list` list
-        cls._setup_submodules(cls.submodule_list)
-        # Create instances of submodules (previously setup)
-        cls._create_instances()
-        # Setup block groups (not called from init_attributes() because
-        # this function has instances of modules that are only created by this function)
-        cls._setup_block_groups()
         
     ###############################################################
     # Methods commonly overriden by subclasses
@@ -206,69 +191,58 @@ class iob_module:
         """Default method to init attributes does nothing"""
         pass
 
-    @classmethod
-    def _create_submodules_list(cls, submodule_list=[]):
-        cls.submodule_list += submodule_list
-
-    @classmethod
-    def _create_instances(cls):
-        """Default method to instantiate modules does nothing"""
-        pass
-
-    @classmethod
-    def _setup_confs(cls, confs=[]):
-        cls.update_dict_list(cls.confs, confs)
-
-    @classmethod
-    def _setup_ios(cls, ios=[]):
-        cls.update_dict_list(cls.ios, ios)
-
-    @classmethod
-    def _setup_regs(cls, regs=[]):
-        cls.update_dict_list(cls.regs, regs)
-
-    @classmethod
-    def _setup_block_groups(cls, block_groups=[]):
-        cls.update_dict_list(cls.block_groups, block_groups)
-
     ###############################################################
     # Methods optionally overriden by subclasses
     ###############################################################
 
     @classmethod
+    def _pre_setup(cls):
+        """Default method to setup does nothing"""
+        pass
+
+    @classmethod
     def _post_setup(cls):
+        """Default method to post setup does nothing"""
+        pass
+    
+    ###############################################################
+    # Private methods
+    ###############################################################
+
+    @classmethod
+    def __intermediate_setup(cls):
         """Launch post(-specific)-setup tasks"""
         # Setup flows (copy LIB files)
         build_srcs.flows_setup(cls)
 
         # Copy sources from the module's setup dir (and from its superclasses)
-        cls._copy_srcs()
+        cls.__copy_srcs()
 
         # Auto-add common module macros and submodules
-        cls._auto_add_settings()
+        cls.__auto_add_settings()
 
         # Generate hw, sw and doc files
-        cls._generate_files()
+        mkregs_obj, reg_table = cls.__build_regs_table()
+        if "hw" in cls.swregs:
+            cls.__generate_hw(mkregs_obj, reg_table)
+        if "sw" in cls.swregs:
+            cls.__generate_sw(mkregs_obj, reg_table)
+        cls.__generate_doc(mkregs_obj, reg_table)
 
         # Run `*_setup.py` python scripts
-        cls._run_setup_files()
+        cls.__run_setup_files()
 
+    @classmethod
+    def __final_setup(cls):
         if cls.is_top_module:
             # Replace Verilog snippet includes
-            cls._replace_snippet_includes()
+            cls.__replace_snippet_includes()
             # Clean duplicate sources in `hardware/src` and its subfolders (like `hardware/simulation/src`)
-            cls._remove_duplicate_sources()
+            cls.__remove_duplicate_sources()
 
+        
     @classmethod
-    def _generate_files(cls):
-        """Generate hw, sw and doc files"""
-        mkregs_obj, reg_table = cls._build_regs_table()
-        cls._generate_hw(mkregs_obj, reg_table)
-        cls._generate_sw(mkregs_obj, reg_table)
-        cls._generate_doc(mkregs_obj, reg_table)
-
-    @classmethod
-    def _auto_add_settings(cls):
+    def __auto_add_settings(cls):
         """Auto-add settings like macros and submodules to the module"""
         # Auto-add 'VERSION' macro if it doesn't exist.
         # But only if this module has at least one other configuration aswell
@@ -293,16 +267,16 @@ class iob_module:
             if cls.name != "iob_ctls":
                 from iob_ctls import iob_ctls
 
-                iob_ctls.__setup(purpose=cls.get_setup_purpose())
+                iob_ctls.__setup(purpose=cls.__get_setup_purpose())
             ## Auto-add iob_s_port.vh
-            cls.__generate({"interface": "iob_s_port"}, purpose=cls.get_setup_purpose())
+            cls.__generate({"interface": "iob_s_port"}, purpose=cls.__get_setup_purpose())
             ## Auto-add iob_s_portmap.vh
             cls.__generate(
-                {"interface": "iob_s_s_portmap"}, purpose=cls.get_setup_purpose()
+                {"interface": "iob_s_s_portmap"}, purpose=cls.__get_setup_purpose()
             )
 
     @classmethod
-    def _build_regs_table(cls, no_overlap=False):
+    def __build_regs_table(cls, no_overlap=False):
         """Build registers table.
         :returns mkregs mkregs_obj: Instance of mkregs class
         :returns list reg_table: Register table generated by `get_reg_table` method of `mkregs_obj`
@@ -355,7 +329,7 @@ class iob_module:
         return mkregs_obj, reg_table
 
     @classmethod
-    def _generate_hw(cls, mkregs_obj, reg_table):
+    def __generate_hw(cls, mkregs_obj, reg_table):
         """Generate common hardware files"""
         if cls.regs:
             mkregs_obj.write_hwheader(
@@ -377,7 +351,7 @@ class iob_module:
             ios.generate_ports(cls.ios, cls.name, cls.build_dir + "/hardware/src")
 
     @classmethod
-    def _generate_sw(cls, mkregs_obj, reg_table):
+    def __generate_sw(cls, mkregs_obj, reg_table):
         """Generate common software files"""
         if "emb" in cls.flows:
             os.makedirs(cls.build_dir + "/software/src", exist_ok=True)
@@ -394,7 +368,7 @@ class iob_module:
             mk_conf.conf_h(cls.confs, cls.name, cls.build_dir + "/software/src")
 
     @classmethod
-    def _generate_doc(cls, mkregs_obj, reg_table):
+    def __generate_doc(cls, mkregs_obj, reg_table):
         """Generate common documentation files"""
         if cls.is_top_module and "doc" in cls.flows:
             mk_conf.generate_confs_tex(cls.confs, cls.build_dir + "/document/tsrc")
@@ -408,7 +382,7 @@ class iob_module:
             )
 
     @classmethod
-    def _remove_duplicate_sources(cls):
+    def __remove_duplicate_sources(cls):
         """Remove sources in the build directory from subfolders that exist in `hardware/src`"""
         # Go through all subfolders defined in PURPOSE_DIRS
         for subfolder in cls.PURPOSE_DIRS.values():
@@ -417,7 +391,7 @@ class iob_module:
                 continue
 
             # Get common srcs between `hardware/src` and current subfolder
-            common_srcs = cls.find_common_deep(
+            common_srcs = cls.__find_common_deep(
                 os.path.join(cls.build_dir, "hardware/src"),
                 os.path.join(cls.build_dir, subfolder),
             )
@@ -426,11 +400,11 @@ class iob_module:
                 os.remove(os.path.join(cls.build_dir, subfolder, src))
 
     @classmethod
-    def _replace_snippet_includes(cls):
+    def __replace_snippet_includes(cls):
         verilog_tools.replace_includes(cls.setup_dir, cls.build_dir)
 
     @classmethod
-    def _run_setup_files(cls):
+    def __run_setup_files(cls):
         flows_setup_files = {
             "sim": cls.setup_dir + "/hardware/simulation/sim_setup.py",
             "fpga": cls.setup_dir + "/hardware/fpga/fpga_setup.py",
@@ -456,7 +430,7 @@ class iob_module:
             spec.loader.exec_module(module)
 
     @classmethod
-    def _setup_submodules(cls, submodule_list):
+    def __setup_submodules(cls, submodule_list):
         """
         Generate or run setup functions for the interfaces/submodules in the given submodules list.
         """
@@ -481,7 +455,7 @@ class iob_module:
             # If the submodule purpose is hardware, change that purpose to match the purpose of the current class.
             # (If we setup the current class for simulation, then we want the submodules for simulation aswell)
             if setup_options["purpose"] == "hardware":
-                setup_options["purpose"] = cls.get_setup_purpose()
+                setup_options["purpose"] = cls.__get_setup_purpose()
 
             # Check if should generate with if_gen or setup a submodule.
             if type(_submodule) == dict:
@@ -501,7 +475,7 @@ class iob_module:
         """
         Generate a Verilog snippet with `if_gen.py`.
         """
-        dest_dir = os.path.join(cls.build_dir, cls.get_purpose_dir(purpose))
+        dest_dir = os.path.join(cls.build_dir, cls.__get_purpose_dir(purpose))
 
         # set prefixes if they do not exist
         if not "file_prefix" in vs_name:
@@ -514,7 +488,7 @@ class iob_module:
  
 
     @classmethod
-    def get_setup_purpose(cls):
+    def __get_setup_purpose(cls):
         """Get the purpose of the latest setup.
         :returns str setup_purpose: The latest setup purpose
         """
@@ -526,7 +500,7 @@ class iob_module:
         return cls._setup_purpose[-1]
 
     @classmethod
-    def get_purpose_dir(cls, purpose):
+    def __get_purpose_dir(cls, purpose):
         """Get output directory based on the purpose given."""
         assert (
             purpose in cls.PURPOSE_DIRS
@@ -553,7 +527,7 @@ class iob_module:
         )  # Copy generic MAKEFILE
 
     @classmethod
-    def _copy_srcs(cls, exclude_file_list=[], highest_superclass=None):
+    def __copy_srcs(cls, exclude_file_list=[], highest_superclass=None):
         """Copy module sources to the build directory from every subclass in between `iob_module` and `cls`, inclusive.
         The function will not copy sources from classes that have no setup_dir (empty string)
         cls: Lowest subclass
@@ -608,7 +582,7 @@ class iob_module:
                 # If we are handling the `hardware/src` directory,
                 # copy to the correct destination based on `_setup_purpose`.
                 if directory == "hardware/src":
-                    dst_directory = cls.get_purpose_dir(cls.get_setup_purpose())
+                    dst_directory = cls.__get_purpose_dir(cls.__get_setup_purpose())
                 else:
                     dst_directory = directory
 
@@ -617,7 +591,7 @@ class iob_module:
                     os.path.join(module_class.setup_dir, directory),
                     os.path.join(cls.build_dir, dst_directory),
                     dirs_exist_ok=True,
-                    copy_function=cls.copy_with_rename(module_class.name, cls.name),
+                    copy_function=cls.__copy_with_rename(module_class.name, cls.name),
                     ignore=shutil.ignore_patterns(*exclude_file_list),
                 )
 
@@ -630,27 +604,8 @@ class iob_module:
                     ignore=shutil.ignore_patterns(*exclude_file_list),
                 )
 
-    ###############################################################
-    # Utility methods
-    ###############################################################
-
     @staticmethod
-    def update_dict_list(dict_list, new_items):
-        """Update a list of dictionaries with new items given in a list
-
-        :param list dict_list: List of dictionaries, where each item is a dictionary that has a "name" key
-        :param list new_items: List of dictionaries, where each item is a dictionary that has a "name" key and should be inserted into the dict_list
-        """
-        for item in new_items:
-            for _item in dict_list:
-                if _item["name"] == item["name"]:
-                    _item.update(item)
-                    break
-            else:
-                dict_list.append(item)
-
-    @staticmethod
-    def find_common_deep(path1, path2):
+    def __find_common_deep(path1, path2):
         """Find common files (recursively) inside two given directories
         Taken from: https://stackoverflow.com/a/51625515
         :param str path1: Directory path 1
@@ -668,7 +623,7 @@ class iob_module:
         )
 
     @staticmethod
-    def copy_with_rename(old_core_name, new_core_name):
+    def __copy_with_rename(old_core_name, new_core_name):
         """Creates a function that:
         - Renames any '<old_core_name>' string inside the src file and in its filename, to the given '<new_core_name>' string argument.
         """
