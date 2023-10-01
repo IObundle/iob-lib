@@ -1,7 +1,13 @@
 import os
 import shutil
 
+# Find python modules
+if __name__ == "__main__":
+    import sys
+    sys.path.append("./scripts")
 from iob_module import iob_module
+if __name__ == "__main__":
+    iob_module.find_modules()
 
 
 class iob_utils(iob_module):
@@ -12,7 +18,7 @@ class iob_utils(iob_module):
 
     # Copy sources of this module to the build directory
     @classmethod
-    def _copy_srcs(cls):
+    def _copy_srcs(cls): #FIXME: Use new copy_srcs func
         out_dir = cls.get_purpose_dir(cls._setup_purpose[-1])
         # Copy source to build directory
         shutil.copyfile(
@@ -31,3 +37,7 @@ class iob_utils(iob_module):
                         cls.build_dir, cls.cls.PURPOSE_DIRS[purpose], "iob_utils.vh"
                     )
                 )
+
+
+if __name__ == "__main__":
+    iob_utils.setup_as_top_module()

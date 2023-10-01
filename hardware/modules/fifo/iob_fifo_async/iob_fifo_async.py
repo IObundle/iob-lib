@@ -1,6 +1,12 @@
 import os
 
+# Find python modules
+if __name__ == "__main__":
+    import sys
+    sys.path.append("./scripts")
 from iob_module import iob_module
+if __name__ == "__main__":
+    iob_module.find_modules()
 
 from iob_utils import iob_utils
 from iob_gray_counter import iob_gray_counter
@@ -17,15 +23,17 @@ class iob_fifo_async(iob_module):
     setup_dir = os.path.dirname(__file__)
 
     @classmethod
-    def _create_submodules_list(cls):
-        """Create submodules list with dependencies of this module"""
-        super()._create_submodules_list(
-            [
-                iob_utils,
-                iob_gray_counter,
-                iob_gray2bin,
-                iob_sync,
-                iob_asym_converter,
-                (iob_ram_t2p, {"purpose": "simulation"}),
-            ]
-        )
+    def _init_attributes(cls):
+        """Init module attributes"""
+        cls.submodules = [
+            iob_utils,
+            iob_gray_counter,
+            iob_gray2bin,
+            iob_sync,
+            iob_asym_converter,
+            (iob_ram_t2p, {"purpose": "simulation"}),
+        ]
+
+
+if __name__ == "__main__":
+    iob_fifo_async.setup_as_top_module()

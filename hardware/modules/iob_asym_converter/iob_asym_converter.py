@@ -1,7 +1,13 @@
 import os
 import shutil
 
+# Find python modules
+if __name__ == "__main__":
+    import sys
+    sys.path.append("./scripts")
 from iob_module import iob_module
+if __name__ == "__main__":
+    iob_module.find_modules()
 
 
 class iob_asym_converter(iob_module):
@@ -31,3 +37,7 @@ class iob_asym_converter(iob_module):
                         cls.build_dir, cls.PURPOSE_DIRS[purpose], "iob_asym_converter.v"
                     )
                 )
+
+
+if __name__ == "__main__":
+    iob_asym_converter.setup_as_top_module()

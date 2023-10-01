@@ -171,6 +171,13 @@ class iob_module:
         if not cls.previous_version:
             cls.previous_version = cls.version
 
+        # Set a custom LIB directory
+        if cls.is_top_module:
+            for arg in sys.argv:
+                if "LIB_DIR" in arg:
+                    build_srcs.LIB_DIR = arg.split("=")[1]
+                    break
+
         # Initialize empty lists for attributes (We can't initialize in the attribute declaration because it would cause every subclass to reference the same list)
         cls.confs = []
         cls.regs = []
