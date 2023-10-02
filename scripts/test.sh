@@ -13,14 +13,14 @@ for i in $TB_DIRS; do MODULES+=" `basename $(builtin cd $i/../../..; pwd)`" ; do
 
 #test first argument is "clean", run make clean for all modules and exit
 if [ "$1" == "clean" ]; then
-    for i in $MODULES; do make clean CORE=$i TOP_MODULE_NAME=$i; done
+    for i in $MODULES; do make clean CORE=$i; done
     exit 0
 fi
 
 #test if first argument is test and run all tests
 if [ "$1" == "test" ]; then
     for i in $MODULES; do
-        make clean setup CORE=$i TOP_MODULE_NAME=$i
+        make clean setup CORE=$i
         make -C ../${i}_V* sim-run
     done
     exit 0
@@ -28,11 +28,11 @@ fi
 
 #test if first argument is "build" and run build for single module
 if [ "$1" == "build" ]; then
-    make clean setup CORE=$2 TOP_MODULE_NAME=$2
+    make clean setup CORE=$2
     make -C ../$2_V* sim-build
     exit 0
 fi
 
 #run single test
-make clean setup CORE=$1 TOP_MODULE_NAME=$1
+make clean setup CORE=$1
 make -C ../$1_V* sim-run VCD=$VCD

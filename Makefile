@@ -9,7 +9,11 @@ DISABLE_FORMAT:=1
 # Default lib module to setup. Can be overriden by the user.
 CORE ?=iob_ctls
 
-include setup.mk
+clean:
+	rm -rf ../$(CORE)_V*
+
+setup:
+	python3 -B `find . -name '$(CORE).py'` LIB_DIR=$(LIB_DIR)
 
 sim-build:
 	scripts/test.sh build $(CORE)
