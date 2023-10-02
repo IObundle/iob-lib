@@ -148,7 +148,7 @@ def generate_ios_tex(ios, out_dir):
 
                 tex_table.append(
                     [
-                        (port["name"] + if_gen.suffix(port_direction)),
+                        (port["name"] + if_gen.get_suffix(port_direction)),
                         port_direction,
                         port["width"],
                         port["description"],
