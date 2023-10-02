@@ -151,7 +151,7 @@ def generate_ios_tex(ios, out_dir):
                         (port["name"] + if_gen.get_suffix(port_direction)),
                         port_direction,
                         port["width"],
-                        port["description"],
+                        port["descr"],
                     ]
                 )
         else:
@@ -160,8 +160,8 @@ def generate_ios_tex(ios, out_dir):
                 tex_table.append(
                     [
                         port["name"],
-                        get_port_type(port["type"]),
-                        port["n_bits"],
+                        port["direction"],
+                        port["width"],
                         port["descr"],
                     ]
                 )
