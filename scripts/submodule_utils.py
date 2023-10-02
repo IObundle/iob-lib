@@ -18,6 +18,7 @@ import if_gen
 reserved_signals = {
     "clk": ".clk_i(clk_i)",
     "cke": ".cke_i(cke_i)",
+    "en": ".en_i(en_i)",
     "arst": ".arst_i(arst_i)",
     "iob_avalid": ".iob_avalid_i(slaves_req[`AVALID(`/*<InstanceName>*/)])",
     "iob_addr": ".iob_addr_i(slaves_req[`ADDRESS(`/*<InstanceName>*/,`/*<SwregFilename>*/_ADDR_W)])",
@@ -28,7 +29,7 @@ reserved_signals = {
     "iob_rvalid": ".iob_rvalid_o(slaves_resp[`RVALID(`/*<InstanceName>*/)])",
     "trap": ".trap_o(/*<InstanceName>*/_trap_o)",
     "axi_awid": ".axi_awid_o          (axi_awid_o             [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
-    "axi_awaddr": ".axi_awaddr_o      (internal_axi_awaddr_o  [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
+    "axi_awaddr": ".axi_awaddr_o      (axi_awaddr_o           [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
     "axi_awlen": ".axi_awlen_o        (axi_awlen_o            [/*<extmem_conn_num>*/*AXI_LEN_W      +:/*<bus_size>*/*AXI_LEN_W])",
     "axi_awsize": ".axi_awsize_o      (axi_awsize_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
     "axi_awburst": ".axi_awburst_o    (axi_awburst_o          [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
@@ -48,7 +49,7 @@ reserved_signals = {
     "axi_bvalid": ".axi_bvalid_i      (axi_bvalid_i           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
     "axi_bready": ".axi_bready_o      (axi_bready_o           [/*<extmem_conn_num>*/*1              +:/*<bus_size>*/*1])",
     "axi_arid": ".axi_arid_o          (axi_arid_o             [/*<extmem_conn_num>*/*AXI_ID_W       +:/*<bus_size>*/*AXI_ID_W])",
-    "axi_araddr": ".axi_araddr_o      (internal_axi_araddr_o  [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
+    "axi_araddr": ".axi_araddr_o      (axi_araddr_o           [/*<extmem_conn_num>*/*AXI_ADDR_W     +:/*<bus_size>*/*AXI_ADDR_W])",
     "axi_arlen": ".axi_arlen_o        (axi_arlen_o            [/*<extmem_conn_num>*/*AXI_LEN_W      +:/*<bus_size>*/*AXI_LEN_W])",
     "axi_arsize": ".axi_arsize_o      (axi_arsize_o           [/*<extmem_conn_num>*/*3              +:/*<bus_size>*/*3])",
     "axi_arburst": ".axi_arburst_o    (axi_arburst_o          [/*<extmem_conn_num>*/*2              +:/*<bus_size>*/*2])",
@@ -281,10 +282,11 @@ def get_module_io(ios, confs=None, corename=None):
             # Add ifdef attribute to every signal if table also has it
             if "if_defined" in table.keys():
                 signal["if_defined"] = table["if_defined"]
-
-            signal["name_without_prefix"] = signal[
-                "name"
-            ]  # Save the name without prefix in an attribute
+            # Save the name without prefix in an attribute
+            signal["name_without_prefix"] = signal["name"]
+            # Save the interface name in an attribute
+            signal["if_name"] = table["name"]
+            # Add prefix to signal name if port_prefix is set
             if "port_prefix" in table.keys() and table["port_prefix"]:
                 signal["name"] = (
                     table["name"] + "_" + signal["name"]

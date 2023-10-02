@@ -41,7 +41,7 @@ class iob_module:
         False  # Store if attributes have been initialized for this class
     )
 
-    submodule_list = None  # List of submodules to setup
+    submodules = None  # List of submodules to setup
 
     # List of setup purposes for this module. Also used to check if module has already been setup.
     _setup_purpose = None
@@ -140,7 +140,7 @@ class iob_module:
 
         cls._setup_purpose.append(purpose)
 
-        cls.__setup_submodules(cls.submodule_list)
+        cls.__setup_submodules(cls.submodules)
         cls._pre_setup()
         cls.__intermediate_setup()
         cls._post_setup()
@@ -183,7 +183,7 @@ class iob_module:
         cls.regs = []
         cls.ios = []
         cls.block_groups = []
-        cls.submodule_list = []
+        cls.submodules = []
         cls.wire_list = []
         cls._init_attributes()
 
@@ -437,11 +437,11 @@ class iob_module:
             spec.loader.exec_module(module)
 
     @classmethod
-    def __setup_submodules(cls, submodule_list):
+    def __setup_submodules(cls, submodules):
         """
         Generate or run setup functions for the interfaces/submodules in the given submodules list.
         """
-        for submodule in submodule_list:
+        for submodule in submodules:
             _submodule = submodule
             setup_options = {}
 
@@ -474,7 +474,7 @@ class iob_module:
             else:
                 # Unknown type
                 raise Exception(
-                    f"{iob_colors.FAIL}Unknown type in submodule_list of {cls.name}: {_submodule}{iob_colors.ENDC}"
+                    f"{iob_colors.FAIL}Unknown type in submodules of {cls.name}: {_submodule}{iob_colors.ENDC}"
                 )
 
     @classmethod

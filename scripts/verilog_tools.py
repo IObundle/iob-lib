@@ -49,8 +49,13 @@ def replace_includes(setup_dir="", build_dir=""):
     VSnippetFiles = []
     VerilogFiles = []
     SearchPaths = f"{build_dir}/hardware"
+    ExcludeDirs = ["hardware/fpga/db", "hardware/fpga/ip"]
 
     for root, dirs, files in os.walk(SearchPaths):
+        # Skip directories from ExcludeDirs
+        if any(exclude_dir in root for exclude_dir in ExcludeDirs):
+            continue
+
         for file in files:
             if file.endswith(".vs"):
                 VSnippetFiles.append(f"{root}/{file}")
@@ -61,7 +66,11 @@ def replace_includes(setup_dir="", build_dir=""):
     for VerilogFile in VerilogFiles:
         print(f"Replacing includes in {VerilogFile}")
         with open(VerilogFile, "r") as source:
-            lines = source.readlines()
+            try:
+                lines = source.readlines()
+            except UnicodeDecodeError:
+                print(f"{iob_colors.FAIL}Error occured when opening '{VerilogFile}'. That file is not utf-8 encoded.{iob_colors.ENDC}.")
+                exit(1)
             # replace the include statements with the content of the file
             new_lines = replace_includes_in_lines(lines, VSnippetFiles)
         # write the new file

@@ -1,5 +1,4 @@
 import os
-import shutil
 
 # Find python modules
 if __name__ == "__main__":

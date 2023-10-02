@@ -148,12 +148,10 @@ def generate_ios_tex(ios, out_dir):
 
                 tex_table.append(
                     [
-                        (port["name"] + if_gen.get_suffix(port_direction)).replace(
-                            "_", "\_"
-                        ),
-                        port_direction.replace("`IOB_", "").replace("(", ""),
-                        str(port["width"]).replace("_", "\_"),
-                        port["descr"].replace("_", "\_"),
+                        (port["name"] + if_gen.suffix(port_direction)),
+                        port_direction,
+                        port["width"],
+                        port["description"],
                     ]
                 )
         else:
@@ -161,12 +159,11 @@ def generate_ios_tex(ios, out_dir):
             for port in table["ports"]:
                 tex_table.append(
                     [
-                        port["name"].replace("_", "\_"),
-                        port["direction"],
-                        str(port["width"]).replace("_", "\_"),
-                        port["descr"].replace("_", "\_"),
+                        port["name"],
+                        get_port_type(port["type"]),
+                        port["n_bits"],
+                        port["descr"],
                     ]
                 )
 
         write_table(f"{out_dir}/{table['name']}_if", tex_table)
-

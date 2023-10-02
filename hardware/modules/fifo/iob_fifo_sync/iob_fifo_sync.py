@@ -8,6 +8,7 @@ from iob_module import iob_module
 if __name__ == "__main__":
     iob_module.find_modules()
 
+from iob_reg_e import iob_reg_e
 from iob_reg_r import iob_reg_r
 from iob_reg import iob_reg
 from iob_counter import iob_counter
@@ -26,6 +27,7 @@ class iob_fifo_sync(iob_module):
     def _init_attributes(cls):
         """Init module attributes"""
         cls.submodules = [
+            iob_reg_e,
             iob_reg_r,
             iob_reg,
             iob_counter,
@@ -51,7 +53,7 @@ class iob_fifo_sync(iob_module):
                 "descr": "Synchronous reset interface",
                 "ports": [
                     {
-                        "name": "rst_i",
+                        "name": "rst",
                         "direction": "input",
                         "width": 1,
                         "descr": "Synchronous reset input",
@@ -66,19 +68,19 @@ class iob_fifo_sync(iob_module):
                 "descr": "Write interface",
                 "ports": [
                     {
-                        "name": "w_en_i",
+                        "name": "w_en",
                         "direction": "input",
                         "width": 1,
                         "descr": "Write enable",
                     },
                     {
-                        "name": "w_data_i",
+                        "name": "w_data",
                         "direction": "input",
                         "width": "W_DATA_W",
                         "descr": "Write data",
                     },
                     {
-                        "name": "w_full_o",
+                        "name": "w_full",
                         "direction": "output",
                         "width": 1,
                         "descr": "Write full signal",
@@ -93,19 +95,19 @@ class iob_fifo_sync(iob_module):
                 "descr": "Read interface",
                 "ports": [
                     {
-                        "name": "r_en_i",
+                        "name": "r_en",
                         "direction": "input",
                         "width": 1,
                         "descr": "Read enable",
                     },
                     {
-                        "name": "r_data_o",
+                        "name": "r_data",
                         "direction": "output",
                         "width": "R_DATA_W",
                         "descr": "Read data",
                     },
                     {
-                        "name": "r_empty_o",
+                        "name": "r_empty",
                         "direction": "output",
                         "width": 1,
                         "descr": "Read empty signal",
@@ -120,47 +122,47 @@ class iob_fifo_sync(iob_module):
                 "descr": "External memory interface",
                 "ports": [
                     {
-                        "name": "ext_mem_clk_o",
+                        "name": "ext_mem_clk",
                         "direction": "output",
                         "width": 1,
                         "descr": "Memory clock",
                     },
                     #  Write port
                     {
-                        "name": "ext_mem_w_en_o",
+                        "name": "ext_mem_w_en",
                         "direction": "output",
                         "width": "R",
                         "descr": "Memory write enable",
                     },
                     {
-                        "name": "ext_mem_w_addr_o",
+                        "name": "ext_mem_w_addr",
                         "direction": "output",
                         "width": "MINADDR_W",
                         "descr": "Memory write address",
                     },
                     {
-                        "name": "ext_mem_w_data_o",
+                        "name": "ext_mem_w_data",
                         "direction": "output",
-                        "width": "MAXADDR_W",
+                        "width": "MAXDATA_W",
                         "descr": "Memory write data",
                     },
                     #  Read port
                     {
-                        "name": "ext_mem_r_en_o",
+                        "name": "ext_mem_r_en",
                         "direction": "output",
                         "width": "R",
                         "descr": "Memory read enable",
                     },
                     {
-                        "name": "ext_mem_r_addr_o",
+                        "name": "ext_mem_r_addr",
                         "direction": "output",
                         "width": "MINADDR_W",
                         "descr": "Memory read address",
                     },
                     {
-                        "name": "ext_mem_r_data_i",
+                        "name": "ext_mem_r_data",
                         "direction": "input",
-                        "width": "MAXADDR_W",
+                        "width": "MAXDATA_W",
                         "descr": "Memory read data",
                     },
                 ],
@@ -173,7 +175,7 @@ class iob_fifo_sync(iob_module):
                 "descr": "FIFO interface",
                 "ports": [
                     {
-                        "name": "level_o",
+                        "name": "level",
                         "direction": "output",
                         "width": "ADDR_W+1",
                         "descr": "FIFO level",

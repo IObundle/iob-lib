@@ -8,49 +8,16 @@ module iob_fifo_async #(
    parameter ADDR_W = 3,  //higher ADDR_W lower DATA_W
    //determine W_ADDR_W and R_ADDR_W
    parameter MAXDATA_W =
-            `IOB_MAX(W_DATA_W, R_DATA_W),
+   `IOB_MAX(W_DATA_W, R_DATA_W),
    parameter MINDATA_W =
-            `IOB_MIN(W_DATA_W, R_DATA_W),
+   `IOB_MIN(W_DATA_W, R_DATA_W),
    parameter R = MAXDATA_W / MINDATA_W,
    parameter ADDR_W_DIFF = $clog2(R),
    parameter MINADDR_W = ADDR_W - $clog2(R),  //lower ADDR_W (higher DATA_W)
    parameter W_ADDR_W = (W_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W,
    parameter R_ADDR_W = (R_DATA_W == MAXDATA_W) ? MINADDR_W : ADDR_W
 ) (
-
-   //memory write port
-   output [        1-1:0] ext_mem_w_clk_o,
-   output [        R-1:0] ext_mem_w_en_o,
-   output [MINADDR_W-1:0] ext_mem_w_addr_o,
-   output [MAXDATA_W-1:0] ext_mem_w_data_o,
-   //memory read port
-   output [        1-1:0] ext_mem_r_clk_o,
-   output [        R-1:0] ext_mem_r_en_o,
-   output [MINADDR_W-1:0] ext_mem_r_addr_o,
-   input  [MAXDATA_W-1:0] ext_mem_r_data_i,
-
-   //read port
-   input                 r_clk_i,
-   input                 r_cke_i,
-   input                 r_arst_i,
-   input                 r_rst_i,
-   input                 r_en_i,
-   output [R_DATA_W-1:0] r_data_o,
-   output                r_empty_o,
-   output                r_full_o,
-   output [    ADDR_W:0] r_level_o,
-
-   //write port
-   input                 w_clk_i,
-   input                 w_cke_i,
-   input                 w_arst_i,
-   input                 w_rst_i,
-   input                 w_en_i,
-   input  [W_DATA_W-1:0] w_data_i,
-   output                w_empty_o,
-   output                w_full_o,
-   output [    ADDR_W:0] w_level_o
-
+   `include "iob_fifo_async_io.vs"
 );
 
    localparam [ADDR_W:0] FIFO_SIZE = {1'b1, {ADDR_W{1'b0}}};  //in bytes
@@ -73,9 +40,6 @@ module iob_fifo_async #(
 
    generate
       if (W_DATA_W > R_DATA_W) begin : g_write_wider_bin
-         wire clk_i = r_clk_i;
-         wire cke_i = r_cke_i;
-         wire arst_i = r_arst_i;
          assign w_waddr_bin_n = w_waddr_bin << ADDR_W_DIFF;
          assign w_raddr_bin_n = w_raddr_bin;
          assign r_raddr_bin_n = r_raddr_bin;
@@ -99,7 +63,8 @@ module iob_fifo_async #(
    wire [W_ADDR_W:0] r_waddr_gray;
    iob_sync #(
       .DATA_W (W_ADDR_W + 1),
-      .RST_VAL({(W_ADDR_W + 1) {1'd0}})
+      .RST_VAL({(W_ADDR_W + 1) {1'd0}}),
+      .CLKEDGE("posedge")
    ) w_waddr_gray_sync0 (
       .clk_i   (r_clk_i),
       .arst_i  (r_arst_i),
@@ -112,7 +77,8 @@ module iob_fifo_async #(
    wire [R_ADDR_W:0] w_raddr_gray;
    iob_sync #(
       .DATA_W (R_ADDR_W + 1),
-      .RST_VAL({(R_ADDR_W + 1) {1'd0}})
+      .RST_VAL({(R_ADDR_W + 1) {1'd0}}),
+      .CLKEDGE("posedge")
    ) r_raddr_gray_sync0 (
       .clk_i   (w_clk_i),
       .arst_i  (w_arst_i),
@@ -198,14 +164,32 @@ module iob_fifo_async #(
       .bin_o(w_raddr_bin)
    );
 
-   wire [W_ADDR_W-1:0] w_addr;
-   wire [R_ADDR_W-1:0] r_addr;
-   assign w_addr           = w_waddr_bin[W_ADDR_W-1:0];
-   assign r_addr           = r_raddr_bin[R_ADDR_W-1:0];
+   wire [W_ADDR_W-1:0] w_addr = w_waddr_bin[W_ADDR_W-1:0];
+   wire [R_ADDR_W-1:0] r_addr = r_raddr_bin[R_ADDR_W-1:0];
 
-   assign ext_mem_w_clk_o  = w_clk_i;
-   assign ext_mem_r_clk_o  = r_clk_i;
+   assign ext_mem_w_clk_o = w_clk_i;
+   assign ext_mem_r_clk_o = r_clk_i;
 
-   `include "iob_asym_converter.vs"
+   iob_asym_converter #(
+      .W_DATA_W(W_DATA_W),
+      .R_DATA_W(R_DATA_W),
+      .ADDR_W  (ADDR_W)
+   ) asym_converter (
+      .ext_mem_w_en_o  (ext_mem_w_en_o),
+      .ext_mem_w_addr_o(ext_mem_w_addr_o),
+      .ext_mem_w_data_o(ext_mem_w_data_o),
+      .ext_mem_r_en_o  (ext_mem_r_en_o),
+      .ext_mem_r_addr_o(ext_mem_r_addr_o),
+      .ext_mem_r_data_i(ext_mem_r_data_i),
+      .clk_i           (r_clk_i),
+      .cke_i           (r_cke_i),
+      .arst_i          (r_arst_i),
+      .w_addr_i        (w_addr),
+      .w_en_i          (w_en_int),
+      .w_data_i        (w_data_i),
+      .r_addr_i        (r_addr),
+      .r_en_i          (r_en_int),
+      .r_data_o        (r_data_o)
+   );
 
 endmodule

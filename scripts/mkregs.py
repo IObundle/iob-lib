@@ -458,7 +458,6 @@ class mkregs:
                             log2n_items, self.config, "max"
                         )
                     )
-                    - 1
                 )
                 * n_bytes
             )
@@ -478,7 +477,7 @@ class mkregs:
                     f_gen.write(f"  if({aux_read_reg}) ")
                 else:
                     f_gen.write(
-                        f"  {aux_read_reg} = (`IOB_WORD_ADDR(iob_addr_i) >= {self.bfloor(addr, addr_w_base)};\n"
+                        f"  {aux_read_reg} = (`IOB_WORD_ADDR(iob_addr_i) >= {self.bfloor(addr, addr_w_base)} && `IOB_WORD_ADDR(iob_addr_i) < {self.bfloor(addr_last, addr_w_base)});\n"
                     )
                     f_gen.write(f"  if({aux_read_reg}) ")
                 f_gen.write(f"begin\n")
@@ -867,19 +866,20 @@ class mkregs:
         for table in regs:
             tex_table = []
             for reg in table["regs"]:
+                # Find address of matching register in regs_with_addr list
+                addr = next(
+                    register["addr"]
+                    for register in regs_with_addr
+                    if register["name"] == reg["name"]
+                )
                 tex_table.append(
                     [
-                        reg["name"].replace("_", "\_"),
+                        reg["name"],
                         reg["type"],
-                        # Find address of matching register in regs_with_addr list
-                        next(
-                            register["addr"]
-                            for register in regs_with_addr
-                            if register["name"] == reg["name"]
-                        ),
-                        str(reg["n_bits"]).replace("_", "\_"),
-                        str(reg["rst_val"]).replace("_", "\_"),
-                        reg["descr"].replace("_", "\_"),
+                        str(addr),
+                        str(reg["n_bits"]),
+                        str(reg["rst_val"]),
+                        reg["descr"],
                     ]
                 )
 
