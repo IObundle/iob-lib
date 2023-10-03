@@ -25,6 +25,38 @@ class iob_sync(iob_module):
             iob_reg,
         ]
 
+        cls.ios += [
+            {
+                "name": "clk_rst",
+                "type": "slave",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Clock and reset",
+                "ports": [],
+            },
+            {
+                "name": "io",
+                "type": "master",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Input and output",
+                "ports": [
+                    {
+                        "name": "signal",
+                        "direction": "input",
+                        "width": "DATA_W",
+                        "descr": "Input",
+                    },
+                    {
+                        "name": "signal",
+                        "direction": "output",
+                        "width": "DATA_W",
+                        "descr": "Output",
+                    },
+                ],
+            },
+        ]
+
 
 if __name__ == "__main__":
     iob_sync.setup_as_top_module()
