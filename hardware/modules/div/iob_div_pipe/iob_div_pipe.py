@@ -15,6 +15,60 @@ class iob_div_pipe(iob_module):
     flows = "sim"
     setup_dir = os.path.dirname(__file__)
 
+    @classmethod
+    def _init_attributes(cls):
+        """Init module attributes"""
+        cls.ios += [
+            {
+                "name": "clk",
+                "type": "master",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Clock",
+                "ports": [
+                    {
+                        "name": "clk",
+                        "direction": "input",
+                        "width": 1,
+                        "descr": "Clock",
+                    },
+                ],
+            },
+            {
+                "name": "div",
+                "type": "master",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Division interface",
+                "ports": [
+                    {
+                        "name": "dividend",
+                        "direction": "input",
+                        "width": "DATA_W",
+                        "descr": "",
+                    },
+                    {
+                        "name": "divisor",
+                        "direction": "input",
+                        "width": "DATA_W",
+                        "descr": "",
+                    },
+                    {
+                        "name": "quotient",
+                        "direction": "output",
+                        "width": "DATA_W",
+                        "descr": "",
+                    },
+                    {
+                        "name": "remainder",
+                        "direction": "output",
+                        "width": "DATA_W",
+                        "descr": "",
+                    },
+                ],
+            },
+        ]
+
 
 if __name__ == "__main__":
     iob_div_pipe.setup_as_top_module()

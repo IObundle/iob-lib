@@ -30,42 +30,7 @@ module axis2axi #(
    parameter BURST_W    = 0,
    parameter BUFFER_W   = BURST_W + 1
 ) (
-   // Configuration (AXIS In)
-   input  [AXI_ADDR_W-1:0] config_in_addr_i,
-   input  [         1-1:0] config_in_valid_i,
-   output [         1-1:0] config_in_ready_o,
-
-   // AXIS In
-   input  [AXI_DATA_W-1:0] axis_in_data_i,
-   input  [         1-1:0] axis_in_valid_i,
-   output [         1-1:0] axis_in_ready_o,
-
-   // Configuration (AXIS Out)
-   input  [AXI_ADDR_W-1:0] config_out_addr_i,
-   input  [AXI_ADDR_W-1:0] config_out_length_i,
-   input  [         1-1:0] config_out_valid_i,
-   output [         1-1:0] config_out_ready_o,
-
-   // AXIS Out
-   output [AXI_DATA_W-1:0] axis_out_data_o,
-   output [         1-1:0] axis_out_valid_o,
-   input  [         1-1:0] axis_out_ready_i,
-
-   // AXI master interface
-   `include "axi_m_port.vs"
-
-   // External memory interfaces
-   output [         1-1:0] ext_mem_w_en_o,
-   output [AXI_DATA_W-1:0] ext_mem_w_data_o,
-   output [  BUFFER_W-1:0] ext_mem_w_addr_o,
-   output [         1-1:0] ext_mem_r_en_o,
-   output [  BUFFER_W-1:0] ext_mem_r_addr_o,
-   input  [AXI_DATA_W-1:0] ext_mem_r_data_i,
-
-   input clk_i,
-   input cke_i,
-   input rst_i,
-   input arst_i
+   `include "axis2axi_io.vs"
 );
 
    axis2axi_in #(
@@ -114,7 +79,7 @@ module axis2axi #(
       .axis_out_valid_o(axis_out_valid_o),
       .axis_out_ready_i(axis_out_ready_i),
 
-      `include "aaxi_read_m_m_portmap.vs"
+      `include "axi_read_m_m_portmap.vs"
 
       .clk_i (clk_i),
       .cke_i (cke_i),

@@ -93,7 +93,7 @@ class iob_fifo_async(iob_module):
                     {
                         "name": "w_level",
                         "direction": "output",
-                        "width": "ADDR_W",
+                        "width": "ADDR_W+1",
                         "descr": "Write fifo level",
                     },
                 ],
@@ -156,7 +156,7 @@ class iob_fifo_async(iob_module):
                     {
                         "name": "r_level",
                         "direction": "output",
-                        "width": "ADDR_W",
+                        "width": "ADDR_W+1",
                         "descr": "Read fifo level",
                     },
                 ],
@@ -168,13 +168,13 @@ class iob_fifo_async(iob_module):
                 "wire_prefix": "",
                 "descr": "External memory interface",
                 "ports": [
+                    #  Write port
                     {
-                        "name": "ext_mem_clk",
+                        "name": "ext_mem_w_clk",
                         "direction": "output",
                         "width": 1,
                         "descr": "Memory clock",
                     },
-                    #  Write port
                     {
                         "name": "ext_mem_w_en",
                         "direction": "output",
@@ -194,6 +194,12 @@ class iob_fifo_async(iob_module):
                         "descr": "Memory write data",
                     },
                     #  Read port
+                    {
+                        "name": "ext_mem_r_clk",
+                        "direction": "output",
+                        "width": 1,
+                        "descr": "Memory clock",
+                    },
                     {
                         "name": "ext_mem_r_en",
                         "direction": "output",

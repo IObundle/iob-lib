@@ -478,21 +478,35 @@ class iob_module:
                 )
 
     @classmethod
-    def __generate(cls, vs_name, purpose="hardware"):
+    def __generate(cls, vs_dict, purpose="hardware"):
         """
         Generate a Verilog snippet with `if_gen.py`.
         """
         dest_dir = os.path.join(cls.build_dir, cls.__get_purpose_dir(purpose))
 
         # set prefixes if they do not exist
-        if not "file_prefix" in vs_name:
-            vs_name["file_prefix"] = ""
-        if not "port_prefix" in vs_name:
-            vs_name["port_prefix"] = ""
-        if not "wire_prefix" in vs_name:
-            vs_name["wire_prefix"] = ""
+        if not "file_prefix" in vs_dict:
+            vs_dict["file_prefix"] = ""
+        if not "port_prefix" in vs_dict:
+            vs_dict["port_prefix"] = ""
+        if not "wire_prefix" in vs_dict:
+            vs_dict["wire_prefix"] = ""
+        if not "ports" in vs_dict:
+            vs_dict["ports"] = []
         
- 
+        # Skip unknown interfaces
+        if vs_dict['interface'] not in if_gen.if_names:
+            print(f"{iob_colors.WARNING}Unknown interface {vs_dict['interface']}{iob_colors.ENDC}")
+            return
+
+        # Generate interface
+        if_gen.gen_if(
+            vs_dict["interface"],
+            vs_dict["file_prefix"],
+            vs_dict["port_prefix"],
+            vs_dict["wire_prefix"],
+            vs_dict["ports"]
+        )
 
     @classmethod
     def __get_setup_purpose(cls):

@@ -26,6 +26,59 @@ class iob_reg_re(iob_module):
             iob_reg_r,
         ]
 
+        cls.ios += [
+            {
+                "name": "clk_en_rst",
+                "type": "slave",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Clock, clock enable and reset",
+                "ports": [],
+            },
+            {
+                "name": "en_rst",
+                "type": "master",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Enable and Synchronous reset interface",
+                "ports": [
+                    {
+                        "name": "en",
+                        "direction": "input",
+                        "width": 1,
+                        "descr": "Enable input",
+                    },
+                    {
+                        "name": "rst",
+                        "direction": "input",
+                        "width": 1,
+                        "descr": "Synchronous reset input",
+                    },
+                ],
+            },
+            {
+                "name": "io",
+                "type": "master",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Data interface",
+                "ports": [
+                    {
+                        "name": "data",
+                        "direction": "input",
+                        "width": "DATA_W",
+                        "descr": "Write data",
+                    },
+                    {
+                        "name": "data",
+                        "direction": "output",
+                        "width": "DATA_W",
+                        "descr": "Read data",
+                    },
+                ],
+            },
+        ]
+
 
 if __name__ == "__main__":
     iob_reg_re.setup_as_top_module()

@@ -26,6 +26,71 @@ class iob_div_subshift(iob_module):
             iob_reg,
         ]
 
+        cls.ios += [
+            {
+                "name": "clk_en_rst",
+                "type": "slave",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Clock, clock enable and reset",
+                "ports": [],
+            },
+            {
+                "name": "status",
+                "type": "master",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "",
+                "ports": [
+                    {
+                        "name": "start",
+                        "direction": "input",
+                        "width": 1,
+                        "descr": "Start signal",
+                    },
+                    {
+                        "name": "done",
+                        "direction": "output",
+                        "width": 1,
+                        "descr": "Done signal",
+                    },
+                ],
+            },
+            {
+                "name": "div",
+                "type": "master",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Division interface",
+                "ports": [
+                    {
+                        "name": "dividend",
+                        "direction": "input",
+                        "width": "DATA_W",
+                        "descr": "",
+                    },
+                    {
+                        "name": "divisor",
+                        "direction": "input",
+                        "width": "DATA_W",
+                        "descr": "",
+                    },
+                    {
+                        "name": "quotient",
+                        "direction": "output",
+                        "width": "DATA_W",
+                        "descr": "",
+                    },
+                    {
+                        "name": "remainder",
+                        "direction": "output",
+                        "width": "DATA_W",
+                        "descr": "",
+                    },
+                ],
+            },
+        ]
+
 
 if __name__ == "__main__":
     iob_div_subshift.setup_as_top_module()
