@@ -42,13 +42,13 @@ class mkregs:
             # a or b is a string
             return f"(({a} > {b}) ? {a} : {b})"
 
-    def get_reg_table(self, regs, no_overlap):
+    def get_reg_table(self, regs):
         # Create reg table
         reg_table = []
         for i_regs in regs:
             reg_table += i_regs["regs"]
 
-        return self.compute_addr(reg_table, no_overlap)
+        return self.compute_addr(reg_table)
 
     def bceil(self, n, log2base):
         base = int(2**log2base)
@@ -743,73 +743,86 @@ class mkregs:
                 f"{iob_colors.FAIL}address {addr} with span {2**addr_w} is not aligned{iob_colors.ENDC}"
             )
 
-    # check if address overlaps with previous
-    @staticmethod
-    def check_overlap(addr, addr_type, read_addr, write_addr):
-        if addr_type == "R" and addr < read_addr:
-            sys.exit(
-                f"{iob_colors.FAIL}read address {addr} overlaps with previous addresses{iob_colors.ENDC}"
-            )
-        elif addr_type == "W" and addr < write_addr:
-            sys.exit(
-                f"{iob_colors.FAIL}write address {addr} overlaps with previous addresses{iob_colors.ENDC}"
-            )
+    # Compute address
+    def compute_addr(self, regs):
+        addrs_table = []
 
-    # compute address
-    def compute_addr(self, table, no_overlap):
-        read_addr = 0
-        write_addr = 0
+        # Find manual addresses (addr >= 0) and save them and their addr_w in list
+        for reg in regs:
+            addr = reg["addr"]
 
-        tmp = []
-
-        for row in table:
-            addr = row["addr"]
-            addr_type = row["type"]
-            n_bits = row["n_bits"]
-            log2n_items = row["log2n_items"]
-            n_bytes = self.bceil(n_bits, 3) / 8
-            if n_bytes == 3:
-                n_bytes = 4
-            addr_w = self.calc_addr_w(log2n_items, n_bytes)
-            if addr >= 0:  # manual address
-                self.check_alignment(addr, addr_w)
-                self.check_overlap(addr, addr_type, read_addr, write_addr)
-                addr_tmp = addr
-            elif addr_type == "R":  # auto address
-                read_addr = self.bceil(read_addr, addr_w)
-                addr_tmp = read_addr
-            elif addr_type == "W":
-                write_addr = self.bceil(write_addr, addr_w)
-                addr_tmp = write_addr
-            else:
+            addr_type = reg["type"]
+            if addr_type != "R" and addr_type != "W":
                 sys.exit(
-                    f"{iob_colors.FAIL}invalid address type {addr_type} for register named {row['name']}{iob_colors.ENDC}"
+                    f"{iob_colors.FAIL}invalid address type {addr_type} for register named {reg['name']}{iob_colors.ENDC}"
                 )
 
-            if no_overlap:
-                addr_tmp = max(read_addr, write_addr)
+            if addr >= 0:
+                n_bits = reg["n_bits"]
+                log2n_items = reg["log2n_items"]
+                n_bytes = self.bceil(n_bits, 3) / 8
+                if n_bytes == 3:
+                    n_bytes = 4
+                addr_w = self.calc_addr_w(log2n_items, n_bytes)
 
-            # save address temporarily in list
-            tmp.append(addr_tmp)
+                # Check if address is already in table
+                for addr_reg in addrs_table:
+                    if addr_reg[0] == addr:
+                        sys.exit(
+                            f"{iob_colors.FAIL}address {addr} is already in table{iob_colors.ENDC}"
+                        )
+                self.check_alignment(addr, addr_w)
+                addrs_table.append((addr, addr_w))
 
-            # update addresses
-            addr_tmp += 2**addr_w
-            if addr_type == "R":
-                read_addr = addr_tmp
-            elif addr_type == "W":
-                write_addr = addr_tmp
-            if no_overlap:
-                read_addr = addr_tmp
-                write_addr = addr_tmp
+        # Fill in auto addresses
+        for reg in regs:
+            addr = reg["addr"]
 
-        # update reg addresses
-        for i in range(len(tmp)):
-            table[i]["addr"] = tmp[i]
+            if addr == -1:  # Found auto address
+                n_bits = reg["n_bits"]
+                log2n_items = reg["log2n_items"]
+                n_bytes = self.bceil(n_bits, 3) / 8
+                if n_bytes == 3:
+                    n_bytes = 4
+                addr_w = self.calc_addr_w(log2n_items, n_bytes)
+                # find next free address
+                addr = 0
+                while True:
+                    # check if address span is free (not overlapping with any other address span)
+                    addr_free = True
+                    for addr_reg in addrs_table:
+                        # Check lower bound
+                        if (addr_reg[0] <= addr < addr_reg[0] + 2 ** addr_reg[1] 
+                        # Check upper bound
+                        ) or (
+                            addr_reg[0] < (addr + 2**addr_w) <= addr_reg[0] + 2 ** addr_reg[1] 
+                        # Check if address span encompasses other address span
+                        ) or ( 
+                            addr_reg[0] >= addr and addr_reg[0] + 2 ** addr_reg[1] <= addr + 2**addr_w
+                        ) :
+                            addr_free = False
+                            break
+                    if addr_free:
+                        break
+                    else:
+                        addr += 2 ** addr_w
 
-        # update core address space size
-        self.core_addr_w = int(ceil(log(max(read_addr, write_addr), 2)))
+                reg["addr"] = addr
+                # This check is a fail safe, it should never happen
+                self.check_alignment(addr, addr_w)
+                addrs_table.append((addr, addr_w))
 
-        return table
+        # DEBUG
+        addrs_table.sort(key=lambda tup: tup[0])
+        print(addrs_table)
+
+        # Update core address space size
+        max_addr_reg = max(addrs_table, key=lambda tup: tup[0])
+        max_addr = max_addr_reg[0]
+        max_addr_w = max_addr_reg[1]
+        self.core_addr_w = int(ceil(log(max_addr + 2**max_addr_w, 2)))
+
+        return regs
 
     # Generate swreg.tex file with list TeX tables of regs
     @staticmethod
