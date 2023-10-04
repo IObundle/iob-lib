@@ -40,7 +40,7 @@ class iob_module:
     wire_list = None  # List of internal wires of the Verilog module. Used to interconnect module components.
     is_top_module = False  # Select if this module is the top module
     swregs = "hwsw"
-    
+
     _initialized_attributes = (
         False  # Store if attributes have been initialized for this class
     )
@@ -195,9 +195,6 @@ class iob_module:
         if not cls.previous_version:
             cls.previous_version = cls.version
 
-
-
-        
     ###############################################################
     # Methods commonly overriden by subclasses
     ###############################################################
@@ -220,7 +217,7 @@ class iob_module:
     def _post_setup(cls):
         """Default method to post setup does nothing"""
         pass
-    
+
     ###############################################################
     # Private methods
     ###############################################################
@@ -280,13 +277,13 @@ class iob_module:
         # Find Verilog sources and headers from build dir
         verilog_headers = []
         verilog_sources = []
-        for path in Path(os.path.join(cls.build_dir, "hardware")).rglob('*.vh'):
+        for path in Path(os.path.join(cls.build_dir, "hardware")).rglob("*.vh"):
             # Skip specific Verilog headers
             if path.name.endswith("version.vh") or "test_" in path.name:
                 continue
             verilog_headers.append(str(path))
             # print(str(path))
-        for path in Path(os.path.join(cls.build_dir, "hardware")).rglob('*.v'):
+        for path in Path(os.path.join(cls.build_dir, "hardware")).rglob("*.v"):
             verilog_sources.append(str(path))
             # print(str(path))
 
@@ -296,15 +293,17 @@ class iob_module:
 
         # Run Verilog formatter
         if run_verilog_format:
-            verilog_format.format_files(verilog_headers + verilog_sources,
-                                        os.path.join(build_srcs.LIB_DIR, "scripts/verible-format.rules"))
+            verilog_format.format_files(
+                verilog_headers + verilog_sources,
+                os.path.join(build_srcs.LIB_DIR, "scripts/verible-format.rules"),
+            )
 
         # Run Python formatter
-        sw_format.run_formatter("black", cls.setup_dir)
+        sw_format.run_formatter("black")
         sw_format.run_formatter("black", cls.build_dir)
 
         # Run C formatter
-        sw_format.run_formatter("clang", cls.setup_dir)
+        sw_format.run_formatter("clang")
         sw_format.run_formatter("clang", cls.build_dir)
 
     @classmethod
@@ -335,7 +334,9 @@ class iob_module:
 
                 iob_ctls.__setup(purpose=cls.__get_setup_purpose())
             ## Auto-add iob_s_port.vh
-            cls.__generate({"interface": "iob_s_port"}, purpose=cls.__get_setup_purpose())
+            cls.__generate(
+                {"interface": "iob_s_port"}, purpose=cls.__get_setup_purpose()
+            )
             ## Auto-add iob_s_portmap.vh
             cls.__generate(
                 {"interface": "iob_s_s_portmap"}, purpose=cls.__get_setup_purpose()
@@ -552,10 +553,12 @@ class iob_module:
             vs_dict["wire_prefix"] = ""
         if not "ports" in vs_dict:
             vs_dict["ports"] = []
-        
+
         # Skip unknown interfaces
-        if vs_dict['interface'] not in if_gen.if_names:
-            print(f"{iob_colors.WARNING}Unknown interface '{vs_dict['interface']}'.{iob_colors.ENDC}")
+        if vs_dict["interface"] not in if_gen.if_names:
+            print(
+                f"{iob_colors.WARNING}Unknown interface '{vs_dict['interface']}'.{iob_colors.ENDC}"
+            )
             return
 
         # Generate interface
@@ -564,7 +567,7 @@ class iob_module:
             vs_dict["file_prefix"],
             vs_dict["port_prefix"],
             vs_dict["wire_prefix"],
-            vs_dict["ports"]
+            vs_dict["ports"],
         )
 
     @classmethod

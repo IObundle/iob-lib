@@ -16,6 +16,7 @@ def reverse_port(port_type):
     else:
         return "input"
 
+
 def delete_last_comma(file_obj):
     # Place cursor at the end of the file
     file_obj.read()
@@ -58,13 +59,13 @@ def generate_ports(ios, top_module, out_dir):
             f_io.write(f"`ifdef {top_module.upper()}_{table['if_defined']}\n")
 
         file_prefix = table["port_prefix"] + table["wire_prefix"]
-            
+
         if_gen.gen_if(
             table["name"],
             file_prefix,
             table["port_prefix"],
             table["wire_prefix"],
-            table["ports"]
+            table["ports"],
         )
 
         # append vs_file to io.vs
@@ -74,12 +75,12 @@ def generate_ports(ios, top_module, out_dir):
             infix = "m"
         vs_file = open(f"{file_prefix}{table['name']}_{infix}_port.vs", "r")
         f_io.write(vs_file.read())
-        
+
         # move all .vs files from current directory to out_dir
         for file in os.listdir("."):
             if file.endswith(".vs"):
                 os.rename(file, f"{out_dir}/{file}")
-        
+
         # Close ifdef if conditional interface
         if "if_defined" in table.keys():
             f_io.write("`endif\n")
@@ -130,7 +131,7 @@ def generate_if_tex(ios, out_dir):
 def generate_ios_tex(ios, out_dir):
     # Create if.tex file
     generate_if_tex(ios, out_dir)
- 
+
     for table in ios:
         tex_table = []
         # Check if this table is a standard interface (from if_gen.py)
@@ -139,10 +140,10 @@ def generate_ios_tex(ios, out_dir):
             # Interface is standard, generate ports
             eval_str = f"if_gen.get_{if_name}_ports()"
             if_table = eval(eval_str)
-            
+
             for port in if_table:
                 port_direction = port["direction"]
-                #reverse direction if port is a slave port
+                # reverse direction if port is a slave port
                 if table["type"] == "slave":
                     port_direction = reverse_port(port_direction)
 

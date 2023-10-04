@@ -18,8 +18,7 @@ linters = [
 
 
 def lint_files(files_list):
-    """Run Linter on given list of files, while grouping them according to their location in the IObundle standard directory structure.
-    """
+    """Run Linter on given list of files, while grouping them according to their location in the IObundle standard directory structure."""
     # Group files by their directories
     dir_file_list = {}
     for file in files_list:

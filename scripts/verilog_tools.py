@@ -69,7 +69,9 @@ def replace_includes(setup_dir="", build_dir=""):
             try:
                 lines = source.readlines()
             except UnicodeDecodeError:
-                print(f"{iob_colors.FAIL}Error occured when opening '{VerilogFile}'. That file is not utf-8 encoded.{iob_colors.ENDC}.")
+                print(
+                    f"{iob_colors.FAIL}Error occured when opening '{VerilogFile}'. That file is not utf-8 encoded.{iob_colors.ENDC}."
+                )
                 exit(1)
             # replace the include statements with the content of the file
             new_lines = replace_includes_in_lines(lines, VSnippetFiles)

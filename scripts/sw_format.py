@@ -75,9 +75,7 @@ def run_formatter(formatter, path="."):
             file_extentions = ""
 
     # find all files and format
-    format_cmd = (
-        f"{build_find_cmd(path, file_extentions)} | xargs -r {cmd} {flags}"
-    )
+    format_cmd = f"{build_find_cmd(path, file_extentions)} | xargs -r {cmd} {flags}"
     print(format_cmd)
     subprocess.run(format_cmd, shell=True, check=True)
 
