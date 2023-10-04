@@ -10,10 +10,13 @@ if __name__ == "__main__":
 
 
 class iob_mux(iob_module):
-    name = "iob_mux"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
+    @classmethod
+    def _init_attributes(cls):
+        """Init module attributes"""
+        cls.name = "iob_mux"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
 
 
 if __name__ == "__main__":

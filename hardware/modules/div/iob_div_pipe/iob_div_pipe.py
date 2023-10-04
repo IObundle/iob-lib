@@ -12,14 +12,13 @@ if __name__ == "__main__":
 
 
 class iob_div_pipe(iob_module):
-    name = "iob_div_pipe"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "iob_div_pipe"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.ios += [
             {
                 "name": "clk",

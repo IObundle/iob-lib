@@ -17,14 +17,13 @@ from iob_reg_re import iob_reg_re
 
 
 class axil2iob(iob_module):
-    name = "axil2iob"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "axil2iob"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.submodules = [
             axil_s_port,
             axil_s_s_portmap,

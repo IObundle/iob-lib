@@ -10,14 +10,13 @@ if __name__ == "__main__":
 
 
 class iob2axil(iob_module):
-    name = "iob2axil"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "iob2axil"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.submodules = [
             {"interface": "clk_rst_s_port"},
             {"interface": "iob_s_port"},

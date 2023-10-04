@@ -10,10 +10,13 @@ if __name__ == "__main__":
 
 
 class altddion_out(iob_module):
-    name = "altddion_out"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
+    @classmethod
+    def _init_attributes(cls):
+        """Init module attributes"""
+        cls.name = "altddion_out"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
 
 
 if __name__ == "__main__":

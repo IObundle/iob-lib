@@ -12,14 +12,13 @@ from iob_sync import iob_sync
 
 
 class iob_s2f_sync(iob_module):
-    name = "iob_s2f_sync"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "iob_s2f_sync"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.submodules = [
             iob_sync,
             {"interface": "clk_rst_s_port"},

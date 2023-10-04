@@ -15,14 +15,13 @@ from iob_prio_enc import iob_prio_enc
 
 
 class iob_ctls(iob_module):
-    name = "iob_ctls"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "iob_ctls"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.submodules = [
             iob_reverse,
             iob_prio_enc,

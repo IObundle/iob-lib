@@ -14,14 +14,13 @@ from iob_ram_2p import iob_ram_2p
 
 
 class iob_ram_2p_tiled(iob_module):
-    name = "iob_ram_2p_tiled"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "iob_ram_2p_tiled"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.submodules = [
             iob_ram_2p,
         ]

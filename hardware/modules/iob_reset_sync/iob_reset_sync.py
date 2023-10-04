@@ -10,10 +10,13 @@ if __name__ == "__main__":
 
 
 class iob_reset_sync(iob_module):
-    name = "iob_reset_sync"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
+    @classmethod
+    def _init_attributes(cls):
+        """Init module attributes"""
+        cls.name = "iob_reset_sync"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
 
 
 if __name__ == "__main__":

@@ -12,14 +12,13 @@ from iob_sync import iob_sync
 
 
 class iob_regfile_t2p(iob_module):
-    name = "iob_regfile_t2p"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "iob_regfile_t2p"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.submodules = [
             iob_sync,
         ]

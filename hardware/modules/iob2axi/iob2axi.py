@@ -19,14 +19,13 @@ from iob_fifo_sync import iob_fifo_sync
 
 
 class iob2axi(iob_module):
-    name = "iob2axi"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "iob2axi"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.submodules = [
             m_axi_m_port,
             m_axi_write_m_port,

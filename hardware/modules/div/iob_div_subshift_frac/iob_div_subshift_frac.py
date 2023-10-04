@@ -16,14 +16,13 @@ from iob_div_subshift import iob_div_subshift
 
 
 class iob_div_subshift_frac(iob_module):
-    name = "iob_div_subshift_frac"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "iob_div_subshift_frac"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.submodules = [
             {"interface": "clk_en_rst_s_s_portmap"},
             {"interface": "clk_en_rst_s_port"},

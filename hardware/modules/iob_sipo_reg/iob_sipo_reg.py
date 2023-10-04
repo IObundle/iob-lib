@@ -13,14 +13,13 @@ from iob_reg import iob_reg
 
 
 class iob_sipo_reg(iob_module):
-    name = "iob_sipo_reg"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "iob_sipo_reg"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.submodules = [
             {"interface": "clk_en_rst_s_port"},
             {"interface": "clk_en_rst_s_s_portmap"},

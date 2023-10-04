@@ -10,14 +10,13 @@ if __name__ == "__main__":
 
 
 class iob_split(iob_module):
-    name = "iob_split"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
     def _init_attributes(cls):
         """Init module attributes"""
+        cls.name = "iob_split"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
         cls.submodules = [
             {"interface": "clk_rst_s_s_portmap"},
             {"interface": "clk_rst_s_port"},
