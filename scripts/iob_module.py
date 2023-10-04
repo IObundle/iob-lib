@@ -264,7 +264,13 @@ class iob_module:
         run_verilog_lint = True
         run_verilog_format = True
 
-        # Parse arguments
+        # Parse environment vars (if any)
+        if "DISABLE_LINT" in os.environ:
+            run_verilog_lint = not bool(os.environ["DISABLE_LINT"])
+        if "DISABLE_FORMAT" in os.environ:
+            run_verilog_format = not bool(os.environ["DISABLE_FORMAT"])
+
+        # Parse arguments (if any)
         for arg in sys.argv:
             if "DISABLE_LINT" in arg:
                 run_verilog_lint = not bool(arg.split("=")[1])
@@ -278,11 +284,11 @@ class iob_module:
             # Skip specific Verilog headers
             if path.name.endswith("version.vh") or "test_" in path.name:
                 continue
-            verilog_headers.append(path.name)
-            # print(path.name)
+            verilog_headers.append(str(path))
+            # print(str(path))
         for path in Path(os.path.join(cls.build_dir, "hardware")).rglob('*.v'):
-            verilog_sources.append(path.name)
-            # print(path.name)
+            verilog_sources.append(str(path))
+            # print(str(path))
 
         # Run Verilog linter
         if run_verilog_lint:

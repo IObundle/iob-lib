@@ -5,7 +5,7 @@
 
 LIB_DIR:=.
 DISABLE_LINT:=1
-DISABLE_FORMAT:=1
+export DISABLE_LINT
 # Default lib module to setup. Can be overriden by the user.
 CORE ?=iob_ctls
 

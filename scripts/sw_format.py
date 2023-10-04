@@ -78,8 +78,8 @@ def run_formatter(formatter, path="."):
     format_cmd = (
         f"{build_find_cmd(path, file_extentions)} | xargs -r {cmd} {flags}"
     )
-    subprocess.run(format_cmd, shell=True, check=True)
     print(format_cmd)
+    subprocess.run(format_cmd, shell=True, check=True)
 
 
 if __name__ == "__main__":

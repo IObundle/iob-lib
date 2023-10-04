@@ -75,7 +75,8 @@ def lint_files(files_list):
             linter_cmd = f"{linter['command']} {linter['include_flag']}{(' '+linter['include_flag']).join(directories_to_lint[directory])} {' '.join(files)}"
             print(linter_cmd)
             result = subprocess.run(linter_cmd, shell=True)
-            exit(result.returncode)
+            if result.returncode != 0:
+                exit(result.returncode)
 
     # DEBUG: Print child directories and files to lint
     #    print("Base dir: "+directory, file=sys.stderr)

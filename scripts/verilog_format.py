@@ -10,13 +10,14 @@ def format_files(files_list, format_rules_file="./submodules/LIB/scripts/verible
     :param format_rules_file: rules file to use.
     """
     # Read format rules
-    with open('verible-format.rules') as f:
+    with open(format_rules_file) as f:
         format_rules = f.read().replace('\n', ' ')
 
-    format_cmd = f'verible-verilog-format --inplace {format_rules} "{" ".join(files_list)}"'
+    format_cmd = f'verible-verilog-format --inplace {format_rules} {" ".join(files_list)}'
     print(format_cmd)
     result = subprocess.run(format_cmd, shell=True)
-    exit(result.returncode)
+    if result.returncode != 0:
+        exit(result.returncode)
 
 
 if __name__ == "__main__":
