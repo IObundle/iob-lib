@@ -59,26 +59,8 @@ def build_find_cmd(path, file_extentions):
     return find_cmd
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        prog="sw_format.py",
-        description="""Software format script.
-        Format all software files in directory or repository (except submodules).
-        Currently supports black (python) and clang (C/C++).""",
-    )
-    parser.add_argument(
-        "formater", choices=["black", "clang"], help="Formater program to run."
-    )
-    parser.add_argument(
-        "path",
-        type=str,
-        nargs="?",
-        default=".",
-        help="path to format. Formats all subdirs, except for git submodules",
-    )
-    args = parser.parse_args()
-
-    match args.formater:
+def run_formatter(formatter, path="."):
+    match formatter:
         case "black":
             cmd = "black"
             flags = ""
@@ -94,7 +76,29 @@ if __name__ == "__main__":
 
     # find all files and format
     format_cmd = (
-        f"{build_find_cmd(args.path, file_extentions)} | xargs -r {cmd} {flags}"
+        f"{build_find_cmd(path, file_extentions)} | xargs -r {cmd} {flags}"
     )
     subprocess.run(format_cmd, shell=True, check=True)
     print(format_cmd)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="sw_format.py",
+        description="""Software format script.
+        Format all software files in directory or repository (except submodules).
+        Currently supports black (python) and clang (C/C++).""",
+    )
+    parser.add_argument(
+        "formatter", choices=["black", "clang"], help="formatter program to run."
+    )
+    parser.add_argument(
+        "path",
+        type=str,
+        nargs="?",
+        default=".",
+        help="path to format. Formats all subdirs, except for git submodules",
+    )
+    args = parser.parse_args()
+
+    run_formatter(args.formatter, args.path)

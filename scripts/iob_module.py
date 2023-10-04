@@ -12,6 +12,10 @@ import mkregs
 import blocks
 import ios
 import mk_configuration as mk_conf
+import verilog_lint
+import verilog_format
+import sw_format
+from pathlib import Path
 
 
 class iob_module:
@@ -111,7 +115,18 @@ class iob_module:
         """Initialize the setup process for the top module.
         This method should only be called once, and only for the top module class.
         """
+        cls.__global_pre_setup_tasks()
         cls.__setup(is_top_module=True)
+
+    @classmethod
+    def __global_pre_setup_tasks(cls):
+        """Tasks to run before starting global setup process."""
+        # Parse LIB_DIR argument
+        for arg in sys.argv:
+            if "LIB_DIR" in arg:
+                # Set a custom LIB directory
+                build_srcs.LIB_DIR = arg.split("=")[1]
+                break
 
     @classmethod
     def __setup(cls, purpose="hardware", is_top_module=False):
@@ -156,6 +171,15 @@ class iob_module:
             return
         cls._initialized_attributes = True
 
+        # Initialize empty lists for attributes (We can't initialize in the attribute declaration because it would cause every subclass to reference the same list)
+        cls.confs = []
+        cls.regs = []
+        cls.ios = []
+        cls.block_groups = []
+        cls.submodules = []
+        cls.wire_list = []
+        cls._init_attributes()
+
         # Set the build directory in the `iob_module` superclass, so everyone has access to it
         if cls.is_top_module:
             # Auto-fill build directory if its not set
@@ -171,21 +195,6 @@ class iob_module:
         if not cls.previous_version:
             cls.previous_version = cls.version
 
-        # Set a custom LIB directory
-        if cls.is_top_module:
-            for arg in sys.argv:
-                if "LIB_DIR" in arg:
-                    build_srcs.LIB_DIR = arg.split("=")[1]
-                    break
-
-        # Initialize empty lists for attributes (We can't initialize in the attribute declaration because it would cause every subclass to reference the same list)
-        cls.confs = []
-        cls.regs = []
-        cls.ios = []
-        cls.block_groups = []
-        cls.submodules = []
-        cls.wire_list = []
-        cls._init_attributes()
 
 
         
@@ -246,8 +255,52 @@ class iob_module:
             cls.__replace_snippet_includes()
             # Clean duplicate sources in `hardware/src` and its subfolders (like `hardware/simulation/src`)
             cls.__remove_duplicate_sources()
+            # Run linter and formatters
+            cls.__lint_and_format()
 
-        
+    @classmethod
+    def __lint_and_format(cls):
+        """Run Linters and Formatters in setup and build directories."""
+        run_verilog_lint = True
+        run_verilog_format = True
+
+        # Parse arguments
+        for arg in sys.argv:
+            if "DISABLE_LINT" in arg:
+                run_verilog_lint = not bool(arg.split("=")[1])
+            elif "DISABLE_FORMAT" in arg:
+                run_verilog_format = not bool(arg.split("=")[1])
+
+        # Find Verilog sources and headers from build dir
+        verilog_headers = []
+        verilog_sources = []
+        for path in Path(os.path.join(cls.build_dir, "hardware")).rglob('*.vh'):
+            # Skip specific Verilog headers
+            if path.name.endswith("version.vh") or "test_" in path.name:
+                continue
+            verilog_headers.append(path.name)
+            # print(path.name)
+        for path in Path(os.path.join(cls.build_dir, "hardware")).rglob('*.v'):
+            verilog_sources.append(path.name)
+            # print(path.name)
+
+        # Run Verilog linter
+        if run_verilog_lint:
+            verilog_lint.lint_files(verilog_headers + verilog_sources)
+
+        # Run Verilog formatter
+        if run_verilog_format:
+            verilog_format.format_files(verilog_headers + verilog_sources,
+                                        os.path.join(build_srcs.LIB_DIR, "scripts/verible-format.rules"))
+
+        # Run Python formatter
+        sw_format.run_formatter("black", cls.setup_dir)
+        sw_format.run_formatter("black", cls.build_dir)
+
+        # Run C formatter
+        sw_format.run_formatter("clang", cls.setup_dir)
+        sw_format.run_formatter("clang", cls.build_dir)
+
     @classmethod
     def __auto_add_settings(cls):
         """Auto-add settings like macros and submodules to the module"""
@@ -496,7 +549,7 @@ class iob_module:
         
         # Skip unknown interfaces
         if vs_dict['interface'] not in if_gen.if_names:
-            print(f"{iob_colors.WARNING}Unknown interface {vs_dict['interface']}{iob_colors.ENDC}")
+            print(f"{iob_colors.WARNING}Unknown interface '{vs_dict['interface']}'.{iob_colors.ENDC}")
             return
 
         # Generate interface
