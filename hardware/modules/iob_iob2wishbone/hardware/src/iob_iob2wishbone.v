@@ -53,7 +53,7 @@ module iob_iob2wishbone #(
    assign wb_we       = |iob_wstrb_i;
 
    assign iob_rvalid_o = wb_ack_r & (~wb_we_r);
-   assign iob_rdata_o  = wb_data_r;
+   assign iob_rdata_o  = wb_ack_i ? wb_data_i : wb_data_r;
    assign iob_ready_o  = (~iob_avalid_r) | wb_ack_r;
 
    iob_reg_re #(
