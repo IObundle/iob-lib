@@ -56,7 +56,7 @@ config.tcl:
 	@echo "set NODE $(NODE)" > $@
 	@echo "set NAME $(NAME)" >> $@
 	@echo "set CSR_IF $(CSR_IF)" >> $@
-	@echo "set DESIGN $(NAME)_$(CSR_IF)" >> $@
+	@echo "set DESIGN $(NAME)" >> $@
 	@echo "set OUTPUT_DIR $(OUTPUT_DIR)" >> $@
 	@echo "set INCLUDE [list $(INCLUDE)]" >> $@
 	@echo "set VSRC [glob $(VSRC)]" >> $@
