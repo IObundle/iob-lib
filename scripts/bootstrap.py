@@ -97,7 +97,6 @@ def insert_header():
     core_name = top_module.name
     core_version = top_module.version
 
-
     h_arg_index = sys.argv.index("-h")
 
     # header is in the file whose name is given in the first argument after `-h`
