@@ -553,6 +553,8 @@ class iob_module:
             vs_dict["wire_prefix"] = ""
         if not "ports" in vs_dict:
             vs_dict["ports"] = []
+        if not "mult" in vs_dict:
+            vs_dict["mult"] = 1
 
         # Skip unknown interfaces
         if vs_dict["interface"] not in if_gen.if_names:
@@ -568,6 +570,7 @@ class iob_module:
             vs_dict["port_prefix"],
             vs_dict["wire_prefix"],
             vs_dict["ports"],
+            vs_dict["mult"],
         )
 
     @classmethod

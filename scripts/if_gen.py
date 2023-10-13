@@ -745,8 +745,8 @@ def write_s_tb_wire(fout, wire_prefix, param_prefix, wires):
 #
 
 
-def gen_if(name, file_prefix, port_prefix, wire_prefix, ports):
-    # print(name, file_prefix, port_prefix, wire_prefix, ports)
+def gen_if(name, file_prefix, port_prefix, wire_prefix, ports, mult=1):
+    # print(name, file_prefix, port_prefix, wire_prefix, ports, mult)
 
     # get param prefix
     param_prefix = port_prefix.upper()
@@ -756,6 +756,10 @@ def gen_if(name, file_prefix, port_prefix, wire_prefix, ports):
         eval_str = "get_" + name + "_ports()"
         # print(eval_str)
         ports = eval(eval_str)
+
+        if mult > 1:
+            for port in ports:
+                port["mult"] = mult
 
     #
     # GENERATE SNIPPETS FOR ALL TYPES OF PORTS AND WIRES
