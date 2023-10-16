@@ -12,6 +12,10 @@ import mkregs
 import blocks
 import ios
 import mk_configuration as mk_conf
+import verilog_lint
+import verilog_format
+import sw_format
+from pathlib import Path
 
 
 class iob_module:
@@ -36,12 +40,12 @@ class iob_module:
     wire_list = None  # List of internal wires of the Verilog module. Used to interconnect module components.
     is_top_module = False  # Select if this module is the top module
     swregs = "hwsw"
-    
+
     _initialized_attributes = (
         False  # Store if attributes have been initialized for this class
     )
 
-    submodule_list = None  # List of submodules to setup
+    submodules = None  # List of submodules to setup
 
     # List of setup purposes for this module. Also used to check if module has already been setup.
     _setup_purpose = None
@@ -111,7 +115,18 @@ class iob_module:
         """Initialize the setup process for the top module.
         This method should only be called once, and only for the top module class.
         """
+        cls.__global_pre_setup_tasks()
         cls.__setup(is_top_module=True)
+
+    @classmethod
+    def __global_pre_setup_tasks(cls):
+        """Tasks to run before starting global setup process."""
+        # Parse LIB_DIR argument
+        for arg in sys.argv:
+            if "LIB_DIR" in arg:
+                # Set a custom LIB directory
+                build_srcs.LIB_DIR = arg.split("=")[1]
+                break
 
     @classmethod
     def __setup(cls, purpose="hardware", is_top_module=False):
@@ -140,7 +155,7 @@ class iob_module:
 
         cls._setup_purpose.append(purpose)
 
-        cls.__setup_submodules(cls.submodule_list)
+        cls.__setup_submodules(cls.submodules)
         cls._pre_setup()
         cls.__intermediate_setup()
         cls._post_setup()
@@ -155,6 +170,15 @@ class iob_module:
         if cls._initialized_attributes:
             return
         cls._initialized_attributes = True
+
+        # Initialize empty lists for attributes (We can't initialize in the attribute declaration because it would cause every subclass to reference the same list)
+        cls.confs = []
+        cls.regs = []
+        cls.ios = []
+        cls.block_groups = []
+        cls.submodules = []
+        cls.wire_list = []
+        cls._init_attributes()
 
         # Set the build directory in the `iob_module` superclass, so everyone has access to it
         if cls.is_top_module:
@@ -171,17 +195,6 @@ class iob_module:
         if not cls.previous_version:
             cls.previous_version = cls.version
 
-        # Initialize empty lists for attributes (We can't initialize in the attribute declaration because it would cause every subclass to reference the same list)
-        cls.confs = []
-        cls.regs = []
-        cls.ios = []
-        cls.block_groups = []
-        cls.submodule_list = []
-        cls.wire_list = []
-        cls._init_attributes()
-
-
-        
     ###############################################################
     # Methods commonly overriden by subclasses
     ###############################################################
@@ -204,7 +217,7 @@ class iob_module:
     def _post_setup(cls):
         """Default method to post setup does nothing"""
         pass
-    
+
     ###############################################################
     # Private methods
     ###############################################################
@@ -239,8 +252,60 @@ class iob_module:
             cls.__replace_snippet_includes()
             # Clean duplicate sources in `hardware/src` and its subfolders (like `hardware/simulation/src`)
             cls.__remove_duplicate_sources()
+            # Run linter and formatters
+            cls.__lint_and_format()
 
-        
+    @classmethod
+    def __lint_and_format(cls):
+        """Run Linters and Formatters in setup and build directories."""
+        run_verilog_lint = True
+        run_verilog_format = True
+
+        # Parse environment vars (if any)
+        if "DISABLE_LINT" in os.environ:
+            run_verilog_lint = not bool(os.environ["DISABLE_LINT"])
+        if "DISABLE_FORMAT" in os.environ:
+            run_verilog_format = not bool(os.environ["DISABLE_FORMAT"])
+
+        # Parse arguments (if any)
+        for arg in sys.argv:
+            if "DISABLE_LINT" in arg:
+                run_verilog_lint = not bool(arg.split("=")[1])
+            elif "DISABLE_FORMAT" in arg:
+                run_verilog_format = not bool(arg.split("=")[1])
+
+        # Find Verilog sources and headers from build dir
+        verilog_headers = []
+        verilog_sources = []
+        for path in Path(os.path.join(cls.build_dir, "hardware")).rglob("*.vh"):
+            # Skip specific Verilog headers
+            if path.name.endswith("version.vh") or "test_" in path.name:
+                continue
+            verilog_headers.append(str(path))
+            # print(str(path))
+        for path in Path(os.path.join(cls.build_dir, "hardware")).rglob("*.v"):
+            verilog_sources.append(str(path))
+            # print(str(path))
+
+        # Run Verilog linter
+        if run_verilog_lint:
+            verilog_lint.lint_files(verilog_headers + verilog_sources)
+
+        # Run Verilog formatter
+        if run_verilog_format:
+            verilog_format.format_files(
+                verilog_headers + verilog_sources,
+                os.path.join(build_srcs.LIB_DIR, "scripts/verible-format.rules"),
+            )
+
+        # Run Python formatter
+        sw_format.run_formatter("black")
+        sw_format.run_formatter("black", cls.build_dir)
+
+        # Run C formatter
+        sw_format.run_formatter("clang")
+        sw_format.run_formatter("clang", cls.build_dir)
+
     @classmethod
     def __auto_add_settings(cls):
         """Auto-add settings like macros and submodules to the module"""
@@ -269,7 +334,9 @@ class iob_module:
 
                 iob_ctls.__setup(purpose=cls.__get_setup_purpose())
             ## Auto-add iob_s_port.vh
-            cls.__generate({"interface": "iob_s_port"}, purpose=cls.__get_setup_purpose())
+            cls.__generate(
+                {"interface": "iob_s_port"}, purpose=cls.__get_setup_purpose()
+            )
             ## Auto-add iob_s_portmap.vh
             cls.__generate(
                 {"interface": "iob_s_s_portmap"}, purpose=cls.__get_setup_purpose()
@@ -430,11 +497,11 @@ class iob_module:
             spec.loader.exec_module(module)
 
     @classmethod
-    def __setup_submodules(cls, submodule_list):
+    def __setup_submodules(cls, submodules):
         """
         Generate or run setup functions for the interfaces/submodules in the given submodules list.
         """
-        for submodule in submodule_list:
+        for submodule in submodules:
             _submodule = submodule
             setup_options = {}
 
@@ -467,25 +534,44 @@ class iob_module:
             else:
                 # Unknown type
                 raise Exception(
-                    f"{iob_colors.FAIL}Unknown type in submodule_list of {cls.name}: {_submodule}{iob_colors.ENDC}"
+                    f"{iob_colors.FAIL}Unknown type in submodules of {cls.name}: {_submodule}{iob_colors.ENDC}"
                 )
 
     @classmethod
-    def __generate(cls, vs_name, purpose="hardware"):
+    def __generate(cls, vs_dict, purpose="hardware"):
         """
         Generate a Verilog snippet with `if_gen.py`.
         """
         dest_dir = os.path.join(cls.build_dir, cls.__get_purpose_dir(purpose))
 
         # set prefixes if they do not exist
-        if not "file_prefix" in vs_name:
-            vs_name["file_prefix"] = ""
-        if not "port_prefix" in vs_name:
-            vs_name["port_prefix"] = ""
-        if not "wire_prefix" in vs_name:
-            vs_name["wire_prefix"] = ""
-        
- 
+        if not "file_prefix" in vs_dict:
+            vs_dict["file_prefix"] = ""
+        if not "port_prefix" in vs_dict:
+            vs_dict["port_prefix"] = ""
+        if not "wire_prefix" in vs_dict:
+            vs_dict["wire_prefix"] = ""
+        if not "ports" in vs_dict:
+            vs_dict["ports"] = []
+        if not "mult" in vs_dict:
+            vs_dict["mult"] = 1
+
+        # Skip unknown interfaces
+        if vs_dict["interface"] not in if_gen.if_names:
+            print(
+                f"{iob_colors.WARNING}Unknown interface '{vs_dict['interface']}'.{iob_colors.ENDC}"
+            )
+            return
+
+        # Generate interface
+        if_gen.gen_if(
+            vs_dict["interface"],
+            vs_dict["file_prefix"],
+            vs_dict["port_prefix"],
+            vs_dict["wire_prefix"],
+            vs_dict["ports"],
+            vs_dict["mult"],
+        )
 
     @classmethod
     def __get_setup_purpose(cls):

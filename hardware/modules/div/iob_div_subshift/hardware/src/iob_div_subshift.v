@@ -3,15 +3,7 @@
 module iob_div_subshift #(
    parameter DATA_W = 32
 ) (
-   `include "clk_en_rst_s_port.vs"
-
-   input      start_i,
-   output reg done_o,
-
-   input  [DATA_W-1:0] dividend_i,
-   input  [DATA_W-1:0] divisor_i,
-   output [DATA_W-1:0] quotient_o,
-   output [DATA_W-1:0] remainder_o
+   `include "iob_div_subshift_io.vs"
 );
 
    //dividend/quotient/remainder register
@@ -72,11 +64,14 @@ module iob_div_subshift #(
        .data_o(pcnt)
    );
 
+   reg done_reg;
+   assign done_o = done_reg;
+
    always @* begin
       pcnt_nxt      = pcnt + 1'b1;
       dqr_nxt     = dqr_reg;
       divisor_nxt = divisor_reg;
-      done_o      = 1'b1;
+      done_reg      = 1'b1;
 
       case (pcnt)
          0: begin  //wait for start, load operands and do it
@@ -93,7 +88,7 @@ module iob_div_subshift #(
          end
 
          default: begin  //shift and subtract
-            done_o = 1'b0;
+            done_reg = 1'b0;
             if (~tmp[DATA_W]) begin
                 dqr_nxt = {tmp, dqr_reg[DATA_W-2 : 0], 1'b1};
             end else begin

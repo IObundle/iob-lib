@@ -5,12 +5,12 @@ module iob_sync #(
    parameter RST_VAL = {DATA_W{1'b0}},
    parameter CLKEDGE = "posedge"
 ) (
-   `include "clk_rst_s_port.vs"
-   input      [DATA_W-1:0] signal_i,
-   output reg [DATA_W-1:0] signal_o
+   `include "iob_sync_io.vs"
 );
 
    reg [DATA_W-1:0] synchronizer;
+   reg [DATA_W-1:0] output_reg;
+   assign signal_o = output_reg;
 
    generate
       if (CLKEDGE == "posedge") begin : positive_edge
@@ -24,9 +24,9 @@ module iob_sync #(
 
          always @(posedge clk_i, posedge arst_i) begin
             if (arst_i) begin
-               signal_o <= RST_VAL;
+               output_reg <= RST_VAL;
             end else begin
-               signal_o <= synchronizer;
+               output_reg <= synchronizer;
             end
          end
       end else begin : negative_edge
@@ -40,9 +40,9 @@ module iob_sync #(
 
          always @(negedge clk_i, posedge arst_i) begin
             if (arst_i) begin
-               signal_o <= RST_VAL;
+               output_reg <= RST_VAL;
             end else begin
-               signal_o <= synchronizer;
+               output_reg <= synchronizer;
             end
          end
       end

@@ -1,6 +1,14 @@
 import os
 
+# Find python modules
+if __name__ == "__main__":
+    import sys
+
+    sys.path.append("./scripts")
 from iob_module import iob_module
+
+if __name__ == "__main__":
+    iob_module.find_modules()
 
 from m_axi_m_port import m_axi_m_port
 from m_axi_write_m_port import m_axi_write_m_port
@@ -13,24 +21,25 @@ from iob_fifo_sync import iob_fifo_sync
 
 
 class iob2axi(iob_module):
-    name = "iob2axi"
-    version = "V0.10"
-    flows = "sim"
-    setup_dir = os.path.dirname(__file__)
-
     @classmethod
-    def _create_submodules_list(cls):
-        """Create submodules list with dependencies of this module"""
-        super()._create_submodules_list(
-            [
-                m_axi_m_port,
-                m_axi_write_m_port,
-                m_axi_read_m_port,
-                m_m_axi_write_portmap,
-                m_m_axi_read_portmap,
-                {"interface": "clk_rst_s_port"},
-                iob2axi_wr,
-                iob2axi_rd,
-                iob_fifo_sync,
-            ]
-        )
+    def _init_attributes(cls):
+        """Init module attributes"""
+        cls.name = "iob2axi"
+        cls.version = "V0.10"
+        cls.flows = "sim"
+        cls.setup_dir = os.path.dirname(__file__)
+        cls.submodules = [
+            m_axi_m_port,
+            m_axi_write_m_port,
+            m_axi_read_m_port,
+            m_m_axi_write_portmap,
+            m_m_axi_read_portmap,
+            {"interface": "clk_rst_s_port"},
+            iob2axi_wr,
+            iob2axi_rd,
+            iob_fifo_sync,
+        ]
+
+
+if __name__ == "__main__":
+    iob2axi.setup_as_top_module()

@@ -14,11 +14,11 @@ def write_table(outfile, table):
         line = table[i]
         # replace underscores and $clog2 with \_ and $\log_2
         for j in range(len(line)):
-            line[j] = line[j].replace("_", "\_")
+            line[j] = str(line[j]).replace("_", "\_")
             line[j] = line[j].replace("$clog2", "log2")
         # if one of the elements has matching parenthesis, remove the enclosing ones
         for j in range(len(line)):
-            if line[j].count("(") == line[j].count(")"):
+            if line[j].count("(") == line[j].count(")") and line[j].count("(") > 0:
                 if line[j][0] == "(" and line[j][-1] == ")":
                     line[j] = line[j][1:-1]
         # Assemble the line
