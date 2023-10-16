@@ -5,9 +5,7 @@
 
 from latex import write_table
 import if_gen
-import importlib.util
 import os
-import iob_colors
 
 
 def reverse_port(port_type):
