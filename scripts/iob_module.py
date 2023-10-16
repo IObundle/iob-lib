@@ -147,7 +147,7 @@ class iob_module:
         # Only init attributes if this is the first time we run setup
         if not cls._setup_purpose:
             cls.is_top_module = is_top_module
-            cls.init_attributes()
+            cls.__init_attributes()
 
         # Create build directory this is the top module class, and is the first time setup
         if is_top_module and not cls._setup_purpose:
@@ -162,8 +162,8 @@ class iob_module:
         cls.__final_setup()
 
     @classmethod
-    def init_attributes(cls):
-        """Public method to initialize attributes of the class
+    def __init_attributes(cls):
+        """Private method to initialize attributes of the class
         This method is automatically called by the `setup` method.
         """
         # Only run this method if attributes have not yet been initialized
