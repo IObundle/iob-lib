@@ -201,21 +201,29 @@ class iob_module:
 
     @classmethod
     def _init_attributes(cls):
-        """Default method to init attributes does nothing"""
+        """Default method to init attributes does nothing.
+        Override this method in subclasses to initialize class attributes.
+        For example, to initialize the `confs` list.
+        """
         pass
-
-    ###############################################################
-    # Methods optionally overriden by subclasses
-    ###############################################################
 
     @classmethod
     def _pre_setup(cls):
-        """Default method to setup does nothing"""
+        """Default method to pre-setup does nothing.
+        Override this method in subclasses to do pre-setup tasks.
+        The pre-setup runs after the `_init_attributes` method has been executed for this class and all of its submodules.
+        Use this method when the tasks need to modify attributes of this class based on attributes of its submodules.
+        For example, to update the `ios` of the current core based on the `ios` of the submodules.
+        """
         pass
 
     @classmethod
     def _post_setup(cls):
-        """Default method to post setup does nothing"""
+        """Default method to post-setup does nothing.
+        Override this method in subclasses to do post-setup tasks.
+        The post-setup runs after the build directory has been created.
+        For example, to modify files that were generated in the build directory by the setup process.
+        """
         pass
 
     ###############################################################
