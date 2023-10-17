@@ -2,63 +2,94 @@
 `include "iob_utils.vh"
 
 
-module iob_shift_reg #(
-   parameter DATA_W = 21,
-   parameter N = 21,
-   parameter ADDR_W = $clog2(N)
-  
-) (
-   `include "clk_en_rst_s_port.vs"
+module iob_shift_reg 
+  #(
+    parameter DATA_W = 21,
+    parameter N = 21,
+    parameter ADDR_W = $clog2(N)
+    
+    ) 
+   (
+`include "clk_en_rst_s_port.vs"
 
-   input rst_i,
+    input                 en_i,
+    input                 rst_i,
+    input  [DATA_W-1:0]   data_i,
+    output [DATA_W-1:0]   data_o,
+    
+    //memory clock 
+    output                 ext_mem_clk_o,
+    //memory write port
+    output ext_mem_w_en_o,
+    output [ADDR_W-1:0] ext_mem_w_addr_o,
+    output [DATA_W-1:0] ext_mem_w_data_o,
+    //read port
+    output ext_mem_r_en_o,
+    output [ADDR_W-1:0] ext_mem_r_addr_o,
+    input  [DATA_W-1:0] ext_mem_r_data_i
+    );
 
-   //write port
-   input                 w_en_i,
-   input  [DATA_W-1:0]   w_data_i,
-   output                w_full_o,
+    //address
+   wire [ADDR_W-1:0]    addr_w;
+   wire [ADDR_W-1:0]    addr_r;
 
-   //read port
-   input                 r_en_i,
-   output [DATA_W-1:0] r_data_o,
-   output                r_empty_o,
+   wire [1:0]           out_en;
 
-   //memory clock 
-   output                 ext_mem_clk_o,
-   //memory write port
-   output ext_mem_w_en_o,
-   output [ADDR_W-1:0] ext_mem_w_addr_o,
-   output [DATA_W-1:0] ext_mem_w_data_o,
-   //read port
-   output ext_mem_r_en_o,
-   output [ADDR_W-1:0] ext_mem_r_addr_o,
-   input  [DATA_W-1:0] ext_mem_r_data_i
-);
-
-   //declare fifo_level
-   reg [ADDR_W-1:0] fifo_level;
-
-   //instantiate iob_fifo_sync
-   iob_fifo_sync #(
-      .DATA_W(DATA_W),
-      .N(N),
-      .ADDR_W(ADDR_W)
-   ) iob_fifo_sync_inst (
-      .clk_i(clk_i),
-      .rst_i(rst_i),
-      .w_en_i(w_en_i),
-      .w_data_i(w_data_i),
-      .w_full_o(w_full_o),
-      .r_en_i(r_en_i),
-      .r_data_o(r_data_o),
-      .r_empty_o(r_empty_o),
-      .ext_mem_clk_o(ext_mem_clk_o),
-      .ext_mem_w_en_o(ext_mem_w_en_o),
-      .ext_mem_w_addr_o(ext_mem_w_addr_o),
-      .ext_mem_w_data_o(ext_mem_w_data_o),
-      .ext_mem_r_en_o(ext_mem_r_en_o),
-      .ext_mem_r_addr_o(ext_mem_r_addr_o),
-      .ext_mem_r_data_i(ext_mem_r_data_i),
-      .level_o (fifo_level)
-   );
+   wire                 rst_int_w;
+   wire                 rst_int_r;
    
+   
+   assign data_o = ext_mem_r_data_i & {DATA_W{out_en[1]}};
+
+   assign ext_mem_clk_o = clk_i;
+
+   assign ext_mem_w_en_o = en_i;
+   assign ext_mem_w_addr_o = addr_w;
+   assign ext_mem_w_data_o = data_i;
+
+   assign ext_mem_r_en_o = en_i;
+   assign ext_mem_r_addr_o = addr_r;
+  
+
+   //counter enable
+   assign out_en[0] = out_en[1]  | (addr_w == (N-1));
+   
+   assign rst_int_w = rst_i | (addr_w == (N-1));
+   assign rst_int_r = rst_i | (addr_r == (N-1));
+
+   //write address
+   iob_counter #(
+                 .DATA_W (ADDR_W),
+                 .RST_VAL({ADDR_W{1'd0}})
+                 ) 
+   w_addr_cnt0 (
+`include "clk_en_rst_s_s_portmap.vs"
+                .rst_i (rst_int_w),
+                .en_i  (en_i),
+                .data_o(addr_w)
+                );
+
+   //read address
+   iob_counter #(
+     .DATA_W (ADDR_W),
+     .RST_VAL(0)
+     ) r_addr_cnt0 (
+`include "clk_en_rst_s_s_portmap.vs"
+     .rst_i (rst_int_r),
+     .en_i  (en_i),
+     .data_o(addr_r)
+     );
+      
+   
+  iob_reg #(
+      .DATA_W (1),
+      .RST_VAL(0),
+      .CLKEDGE("posedge")
+   ) out_enable (
+      `include "clk_en_rst_s_s_portmap.vs"
+      .data_i(out_en[0]),
+      .data_o(out_en[1])
+   );
+
+      
 endmodule
