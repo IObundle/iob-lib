@@ -19,8 +19,37 @@ class iob_reg(iob_module):
         cls.version = "V0.10"
         cls.flows = "sim"
         cls.setup_dir = os.path.dirname(__file__)
-        cls.submodules = [
-            {"interface": "clk_en_rst_s_port"},
+
+        cls.ios += [
+            {
+                "name": "clk_en_rst",
+                "type": "slave",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Clock, enable, and reset",
+                "ports": [],
+            },
+            {
+                "name": "io",
+                "type": "master",
+                "port_prefix": "",
+                "wire_prefix": "",
+                "descr": "Input and output",
+                "ports": [
+                    {
+                        "name": "data",
+                        "direction": "input",
+                        "width": "DATA_W",
+                        "descr": "Input",
+                    },
+                    {
+                        "name": "data",
+                        "direction": "output",
+                        "width": "DATA_W",
+                        "descr": "Output",
+                    },
+                ],
+            },
         ]
 
 
