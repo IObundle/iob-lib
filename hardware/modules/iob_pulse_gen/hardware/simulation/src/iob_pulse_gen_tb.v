@@ -5,9 +5,9 @@ module iob_pulse_gen_tb;
    localparam START    = 0;
    localparam DURATION = 10;
 
-   reg clk;
-   reg rst;
-   reg start_i;
+   reg clk = 0;
+   reg rst = 0;
+   reg start_i = 0;
    wire pulse_o;
 
    iob_pulse_gen #(
@@ -24,9 +24,13 @@ module iob_pulse_gen_tb;
       );
 
    initial begin
-      clk     = 0;
-      rst     = 1;
+      // optional VCD
+`ifdef VCD
+      $dumpfile("uut.vcd");
+      $dumpvars();
+`endif
 
+      #11 rst = 1;
       #10 rst = 0;
 
       #10 start_i = 1;

@@ -46,7 +46,7 @@ module iob_pulse_gen #(
    );
 
    //pulse
-   assign pulse_o = cnt_en & (cnt <= START);
+   assign pulse_o = cnt_en & (cnt >= START) & (cnt < (START + DURATION));
 
 endmodule
 
