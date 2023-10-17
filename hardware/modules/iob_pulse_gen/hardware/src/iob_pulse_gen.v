@@ -11,6 +11,9 @@ module iob_pulse_gen #(
 );
 
    localparam WIDTH = $clog2(START + DURATION + 2);
+   // compensate extra cycle to register output
+   localparam START_INT = (START <= 0) ? 0 : START-1;
+   localparam END = START_INT + DURATION;
 
    //start detect
    wire start_detected;
@@ -32,7 +35,7 @@ module iob_pulse_gen #(
    wire [WIDTH-1:0] cnt;
 
    //counter enable
-   assign cnt_en = start_detected & (cnt <= (START + DURATION));
+   assign cnt_en = start_detected & (cnt <= END);
 
    //counter
    iob_counter #(
@@ -46,7 +49,18 @@ module iob_pulse_gen #(
    );
 
    //pulse
-   assign pulse_o = cnt_en & (cnt <= START);
+   wire pulse_nxt;
+   assign pulse_nxt = cnt_en & (cnt < END) & (cnt >= START_INT);
+
+   // register pulse
+   iob_reg #(
+       .DATA_W(1),
+       .RST_VAL(1'b0)
+   ) pulse_reg (
+       `include "clk_en_rst_s_s_portmap.vs"
+       .data_i(pulse_nxt),
+       .data_o(pulse_o)
+   );
 
 endmodule
 
