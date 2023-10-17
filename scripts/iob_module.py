@@ -134,7 +134,7 @@ class iob_module:
         purpose: Reason for setting up the module. Used to select between the standard destination locations.
         is_top_module: Select if this is the top module. This should only be enabled on the top module class.
         """
-        # print(f'DEBUG: Setup: {cls.name}, purpose: {purpose}') # DEBUG
+        # print(f"DEBUG: Setup: {cls.name}, purpose: {purpose}")  # DEBUG
 
         # Initialize empty list for purpose
         if cls._setup_purpose == None:

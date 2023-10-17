@@ -37,4 +37,4 @@ class iob_nco(iob_module):
 
 
 if __name__ == "__main__":
-    iob_reg.setup_as_top_module()
+    iob_nco.setup_as_top_module()
