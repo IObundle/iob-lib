@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
 
+"""
+Usage:
+- From a shell:
+    ./netlist_proc.py input_netlist.v output_netlist.v iob_top_module
+
+- From another python script:
+    import netlist_proc
+
+    netlist_proc.process_netlist(
+        input="input_netlist.v",
+        output="output_netlist.v",
+        top_module="iob_top_module",
+        prefix="_prefix_",
+    )
+"""
+
 import argparse
 import re
 import sys
@@ -41,7 +57,9 @@ def process_netlist(input, output, top_module, prefix="_"):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="IObundle Netlist Processing Script")
+    parser = argparse.ArgumentParser(
+        description="IObundle Netlist Processing Script. Adds prefixes to all module names (except top module) to avoid module name collisions with other verilog sources."
+    )
     parser.add_argument("input", help="Input netlist file.")
     parser.add_argument("output", help="Output netlist file.")
     parser.add_argument("-t", help="Netlist top level module.")
