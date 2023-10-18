@@ -43,11 +43,9 @@ def delete_last_comma(file_obj):
 
 
 def generate_ports(ios, top_module, out_dir):
-
     f_io = open(f"{out_dir}/{top_module}_io.vs", "w+")
 
     for table in ios:
-
         # If table has 'doc_only' attribute set to True, skip it
         if "doc_only" in table.keys() and table["doc_only"]:
             continue

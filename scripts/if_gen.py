@@ -366,7 +366,6 @@ def get_axil_ports():
 
 
 def get_axi_write_ports():
-
     axil_write = get_axil_write_ports()
 
     for port in axil_write:
@@ -589,6 +588,7 @@ def get_apb_ports():
 # Handle signal direction
 #
 
+
 # reverse module signal direction
 def reverse_direction(direction):
     if direction == "input":
@@ -633,6 +633,7 @@ def add_param_prefix(width_str, prefix):
 # Port
 #
 
+
 # Write single port with given direction, bus width, and name to file
 def write_port(fout, port_prefix, direction, port):
     name = port_prefix + port["name"] + get_suffix(direction)
@@ -664,6 +665,7 @@ def write_s_port(fout, port_prefix, param_prefix, port_list):
 #
 # Portmap
 #
+
 
 # Write single port with given direction, bus width, and name to file
 def write_portmap(fout, port_prefix, wire_prefix, direction, port, connect_to_port):
@@ -702,6 +704,7 @@ def write_s_s_portmap(fout, port_prefix, wire_prefix, port_list):
 #
 # Wire
 #
+
 
 # Write wire with given name, bus size, width to file
 def write_single_wire(fout, wire_prefix, param_prefix, wire, for_tb, direction):
@@ -791,7 +794,6 @@ def gen_if(name, file_prefix, port_prefix, wire_prefix, ports, mult=1):
 
 
 def main():
-
     # for if_type in range(len(if_names)):
     for i in range(0, 16):
         gen_if(if_names[i], "bla_", "di_", "da_", [])

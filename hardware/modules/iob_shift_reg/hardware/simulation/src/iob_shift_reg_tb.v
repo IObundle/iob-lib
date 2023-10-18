@@ -10,15 +10,17 @@ module iob_shift_reg_tb;
 
    localparam TESTSIZE = 2**ADDR_W;
 
-   reg                 reset = 0;
    reg                 arst = 0;
    reg                 clk = 0;
    reg                 cke = 1;
 
+   reg                 rst = 0;
    reg                 en = 0;
+   reg                 ld = 0;
+   
    reg  [DATA_W-1:0] data_i;
-
    wire [DATA_W-1:0] data_o;
+
 
    parameter CLK_PER = 10;  // clk period = 10 timeticks
    always #(CLK_PER / 2) clk = ~clk;
@@ -51,24 +53,27 @@ module iob_shift_reg_tb;
       repeat (4) @(posedge clk) #1;
       en = 0;
       
-      #CLK_PER;
-      @(posedge clk) #1;
-      reset = 1;
+      #8
       arst  = 1;
-      repeat (4) @(posedge clk) #1;
-      reset = 0;
+      #CLK_PER
+      @(posedge clk) #1;
       arst  = 0;
+      repeat (4) @(posedge clk) #1;
+      ld = 1;
+      @(posedge clk) #1;
+      ld = 0;
+      repeat (4) @(posedge clk) #1;
 
       for (i = 0; i < 2**(ADDR_W+1); i = i + 1) begin
          en   = 1;
          data_i = test_data[i*DATA_W+:DATA_W];
-         @(posedge clk) #1;
          if (i < N && data_o !== 0) begin
-            $fatal(1, "ERROR: got %d, expected 0\n", data_o);
+            $fatal(1, "ERROR: got %d, expected 0 while not full\n", data_o);
          end
          if (i >= N && data_o !== test_data[(i-N)*DATA_W+:DATA_W]) begin
             $fatal(1, "ERROR: got %d, expected %d", data_o, test_data[(i-N)*DATA_W+:DATA_W]);
          end
+         @(posedge clk) #1;
       end
       en = 0;
       $display("Test passed");
@@ -86,7 +91,7 @@ module iob_shift_reg_tb;
       .cke_i (cke),
 
       .en_i  (en),
-      .rst_i (reset),
+      .rst_i (rst),
       .data_i(data_i),
       .data_o(data_o),
 
