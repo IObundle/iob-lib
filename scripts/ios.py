@@ -66,6 +66,7 @@ def generate_ports(ios, top_module, out_dir):
             table["wire_prefix"],
             table["ports"],
             table["mult"] if "mult" in table.keys() else 1,
+            table["widths"] if "widths" in table.keys() else {},
         )
 
         # append vs_file to io.vs
