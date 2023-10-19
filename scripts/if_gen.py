@@ -4,8 +4,6 @@
 # new standard interface, add the name to the interface_names list, and an
 # interface dictionary as below run this script with the -h option for help
 
-import sys
-import argparse
 import re
 
 if_names = [
@@ -39,6 +37,32 @@ if_types = [
     "s_tb_wire",
 ]
 
+def parse_widths(func):
+    """Decorator to temporarily change values of global variables based on `widths` dicitonary."""
+    def inner(widths={}):
+        vars_backup = {}
+        # Backup global variables
+        for k, v in widths.items():
+            assert k in globals(), f"Width variable '{k}' does not exist!"
+            vars_backup[k] = globals()[k]
+            globals()[k] = v
+        # Call the function
+        return_obj = func()
+        # Restore global variables
+        for k in widths:
+            globals()[k] = vars_backup[k]
+        return return_obj
+    return inner
+
+
+def try_math_eval(expr):
+    """Try to evaluate math expressions, otherwise return the input."""
+    try:
+        return int(eval(expr, {'__builtins__': None}, {}))
+    except TypeError:
+        return expr
+
+
 DATA_W = 32
 DATA_SECTION_W = 8
 ADDR_W = 32
@@ -49,6 +73,7 @@ ADDR_W = 32
 #
 
 
+@parse_widths
 def get_iob_ports():
     return [
         {
@@ -72,7 +97,7 @@ def get_iob_ports():
         {
             "name": "iob_wstrb",
             "direction": "output",
-            "width": int(DATA_W / DATA_SECTION_W),
+            "width": try_math_eval(f"{DATA_W}/{DATA_SECTION_W}"),
             "descr": "Write strobe.",
         },
         {
@@ -96,6 +121,7 @@ def get_iob_ports():
     ]
 
 
+@parse_widths
 def get_clk_rst_ports():
     return [
         {
@@ -113,6 +139,7 @@ def get_clk_rst_ports():
     ]
 
 
+@parse_widths
 def get_clk_en_rst_ports():
     clk_rst_ports = get_clk_rst_ports()
     return [
@@ -175,7 +202,7 @@ def get_mem_write_ports(suffix):
         {
             "name": "wstrb" + "_" + suffix,
             "direction": "output",
-            "width": int(DATA_W / DATA_SECTION_W),
+            "width": try_math_eval(f"{DATA_W}/{DATA_SECTION_W}"),
             "descr": "Write strobe port {suffix}",
         },
     ]
@@ -193,21 +220,25 @@ def remove_duplicates(ports):
     return result
 
 
+@parse_widths
 def get_rom_sp_ports():
     ports = get_mem_read_ports("") + get_mem_write_ports("")
     return remove_duplicates(ports)
 
 
+@parse_widths
 def get_rom_tdp_ports():
     ports = get_mem_read_ports("a") + get_mem_read_ports("b")
     return remove_duplicates(ports)
 
 
+@parse_widths
 def get_ram_sp_ports():
     ports = get_mem_read_ports("") + get_mem_write_ports("")
     return remove_duplicates(ports)
 
 
+@parse_widths
 def get_ram_tdp_ports():
     ports = (
         get_mem_read_ports("a")
@@ -218,6 +249,7 @@ def get_ram_tdp_ports():
     return remove_duplicates(ports)
 
 
+@parse_widths
 def get_ram_2p_ports():
     ports = get_mem_read_ports("b") + get_mem_write_ports("a")
     return remove_duplicates(ports)
@@ -237,6 +269,7 @@ RESP_W = 2
 LEN_W = 8
 
 
+@parse_widths
 def get_axil_write_ports():
     return [
         {
@@ -272,7 +305,7 @@ def get_axil_write_ports():
         {
             "name": "axil_wstrb",
             "direction": "output",
-            "width": int(DATA_W / DATA_SECTION_W),
+            "width": try_math_eval(f"{DATA_W}/{DATA_SECTION_W}"),
             "descr": "Write channel write strobe.",
         },
         {
@@ -308,6 +341,7 @@ def get_axil_write_ports():
     ]
 
 
+@parse_widths
 def get_axil_read_ports():
     return [
         {
@@ -361,10 +395,12 @@ def get_axil_read_ports():
     ]
 
 
+@parse_widths
 def get_axil_ports():
     return get_axil_read_ports() + get_axil_write_ports()
 
 
+@parse_widths
 def get_axi_write_ports():
 
     axil_write = get_axil_write_ports()
@@ -430,6 +466,7 @@ def get_axi_write_ports():
     ]
 
 
+@parse_widths
 def get_axi_read_ports():
     axil_read = get_axil_read_ports()
 
@@ -494,10 +531,12 @@ def get_axi_read_ports():
     ]
 
 
+@parse_widths
 def get_axi_ports():
     return get_axi_read_ports() + get_axi_write_ports()
 
 
+@parse_widths
 def get_axis_ports():
     return [
         {
@@ -532,6 +571,7 @@ def get_axis_ports():
 #
 
 
+@parse_widths
 def get_apb_ports():
     return [
         {
@@ -567,7 +607,7 @@ def get_apb_ports():
         {
             "name": "apb_wstrb",
             "direction": "output",
-            "width": int(DATA_W / DATA_SECTION_W),
+            "width": try_math_eval(f"{DATA_W}/{DATA_SECTION_W}"),
             "descr": "Write strobe.",
         },
         {
@@ -745,7 +785,7 @@ def write_s_tb_wire(fout, wire_prefix, param_prefix, wires):
 #
 
 
-def gen_if(name, file_prefix, port_prefix, wire_prefix, ports, mult=1):
+def gen_if(name, file_prefix, port_prefix, wire_prefix, ports, mult=1, widths={}):
     # print(name, file_prefix, port_prefix, wire_prefix, ports, mult)
 
     # get param prefix
@@ -753,7 +793,7 @@ def gen_if(name, file_prefix, port_prefix, wire_prefix, ports, mult=1):
 
     # get ports
     if ports == []:
-        eval_str = "get_" + name + "_ports()"
+        eval_str = "get_" + name + "_ports(widths=widths)"
         # print(eval_str)
         ports = eval(eval_str)
 
