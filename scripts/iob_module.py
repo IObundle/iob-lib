@@ -373,7 +373,7 @@ class iob_module:
         mkregs_obj = mkregs.mkregs()
         mkregs_obj.config = cls.confs
         # Get register table
-        reg_table = mkregs_obj.get_reg_table(cls.regs, cls.rw_overlap)
+        reg_table = mkregs_obj.get_reg_table(cls.regs, cls.rw_overlap, cls.autoaddr)
 
         return mkregs_obj, reg_table
 
