@@ -42,13 +42,13 @@ class mkregs:
             # a or b is a string
             return f"(({a} > {b}) ? {a} : {b})"
 
-    def get_reg_table(self, regs, no_overlap):
+    def get_reg_table(self, regs, rw_overlap):
         # Create reg table
         reg_table = []
         for i_regs in regs:
             reg_table += i_regs["regs"]
 
-        return self.compute_addr(reg_table, no_overlap)
+        return self.compute_addr(reg_table, rw_overlap)
 
     def bceil(self, n, log2base):
         base = int(2**log2base)
@@ -756,7 +756,7 @@ class mkregs:
             )
 
     # compute address
-    def compute_addr(self, table, no_overlap):
+    def compute_addr(self, table, rw_overlap):
         read_addr = 0
         write_addr = 0
 
@@ -786,7 +786,7 @@ class mkregs:
                     f"{iob_colors.FAIL}invalid address type {addr_type} for register named {row['name']}{iob_colors.ENDC}"
                 )
 
-            if no_overlap:
+            if not rw_overlap:
                 addr_tmp = max(read_addr, write_addr)
 
             # save address temporarily in list
@@ -798,7 +798,7 @@ class mkregs:
                 read_addr = addr_tmp
             elif addr_type == "W":
                 write_addr = addr_tmp
-            if no_overlap:
+            if not rw_overlap:
                 read_addr = addr_tmp
                 write_addr = addr_tmp
 
