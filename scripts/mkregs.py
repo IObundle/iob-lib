@@ -179,10 +179,11 @@ class mkregs:
         )
 
         if not auto:  # output read enable
-            f.write(f"wire {name}_addressed;\n")
-            f.write(
-                f"assign {name}_addressed = (iob_addr_i >= {addr}) && (iob_addr_i < ({addr}+(2**({addr_w}))));\n"
-            )
+            if "R" not in row['type']:
+                f.write(f"wire {name}_addressed;\n")
+                f.write(
+                    f"assign {name}_addressed = (iob_addr_i >= {addr}) && (iob_addr_i < ({addr}+(2**({addr_w}))));\n"
+                )
             f.write(
                 f"assign {name}_ren_o = {name}_addressed & iob_avalid_i & (~|iob_wstrb_i);\n"
             )
@@ -240,11 +241,11 @@ class mkregs:
             if name != "VERSION":
                 if "W" in row["type"]:
                     if auto:
-                        f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name};\n")
+                        f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_w;\n")
                     else:
                         f.write(f"wire {name}_wen;\n")
                 if "R" in row["type"]:
-                    f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name};\n")
+                    f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_r;\n")
                     if not row["autologic"]:
                         f.write(f"wire {name}_rvalid;\n")
                         f.write(f"wire {name}_ren;\n")
@@ -262,11 +263,11 @@ class mkregs:
             if name != "VERSION":
                 if "W" in row["type"]:
                     if auto:
-                        f.write(f"  .{name}_o({name}),\n")
+                        f.write(f"  .{name}_o({name}_w),\n")
                     else:
                         f.write(f"  .{name}_wen_o({name}_wen),\n")
                 if "R" in row["type"]:
-                    f.write(f"  .{name}_i({name}),\n")
+                    f.write(f"  .{name}_i({name}_r),\n")
                     if not auto:
                         f.write(f"  .{name}_ren_o({name}_ren),\n")
                         f.write(f"  .{name}_rvalid_i({name}_rvalid),\n")
@@ -771,10 +772,10 @@ class mkregs:
                 self.check_alignment(addr, addr_w)
                 self.check_overlap(addr, addr_type, read_addr, write_addr)
                 addr_tmp = addr
-            elif addr_type == "R":  # auto address
+            elif "R" in addr_type:  # auto address
                 read_addr = self.bceil(read_addr, addr_w)
                 addr_tmp = read_addr
-            elif addr_type == "W":
+            elif "W" in addr_type:
                 write_addr = self.bceil(write_addr, addr_w)
                 addr_tmp = write_addr
             else:
@@ -790,9 +791,9 @@ class mkregs:
 
             # update addresses
             addr_tmp += 2**addr_w
-            if addr_type == "R":
+            if "R" in addr_type:
                 read_addr = addr_tmp
-            elif addr_type == "W":
+            elif "W" in addr_type:
                 write_addr = addr_tmp
             if no_overlap:
                 read_addr = addr_tmp
