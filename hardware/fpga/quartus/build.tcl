@@ -134,7 +134,14 @@ if {[catch {execute_module -tool sta -args "--report_script=quartus/timing.tcl"}
     puts "\nINFO: STA was successful.\n"
 }
 
-
+#rerun quartus sta to generate reports
+if [catch {qexec "[file join $::quartus(binpath) quartus_sta] -t quartus/timing.tcl $NAME"} result] {
+    puts "\nResult: $result\n"
+    puts "ERROR: STA failed. See report files.\n"
+    qexit -error
+} else {
+    puts "\nINFO: STA was successful.\n"
+}
     
 if {$IS_FPGA != "1"} {
 
@@ -166,16 +173,5 @@ if {$IS_FPGA != "1"} {
 project_close
 
 #rename report files
-set report_list [glob -directory "reports" *]
-# add NAME to all reports missing NAME prefix
-foreach report $report_list {
-    if {[string match "*${NAME}*" $report] == 0} {
-        set new_name "${NAME}.[file tail $report]"
-        file rename $report reports/$new_name
-    }
-}
-
 file rename reports/$NAME.fit.summary reports/$NAME\_$PART.fit.summary
 file rename reports/$NAME.sta.summary reports/$NAME\_$PART.sta.summary
-
-
