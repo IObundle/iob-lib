@@ -179,7 +179,7 @@ class mkregs:
         )
 
         if not auto:  # output read enable
-            if "R" not in row['type']:
+            if "W" not in row['type']:
                 f.write(f"wire {name}_addressed;\n")
                 f.write(
                     f"assign {name}_addressed = (iob_addr_i >= {addr}) && (iob_addr_i < ({addr}+(2**({addr_w}))));\n"
