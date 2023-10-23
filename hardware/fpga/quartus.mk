@@ -6,7 +6,7 @@ CONSTRAINTS:=$(wildcard *.sdc)
 FPGA_SERVER=$(QUARTUS_SERVER)
 FPGA_USER=$(QUARTUS_USER)
 
-ENV=$(QUARTUSPATH)/nios2eds/nios2_command_shell.sh
+ENV=nios2_command_shell.sh
 
 $(FPGA_OBJ): $(wildcard *.v)  $(wildcard *.vh) 
 	$(ENV) quartus_sh -t $(LIB_DIR)/hardware/fpga/quartus.tcl $(TOP_MODULE) "$(VSRC)" $(FPGA_PART)
