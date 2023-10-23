@@ -166,6 +166,15 @@ if {$IS_FPGA != "1"} {
 project_close
 
 #rename report files
+set report_list [glob -directory "reports" *]
+# add NAME to all reports missing NAME prefix
+foreach report $report_list {
+    if {[string match "*${NAME}*" $report] == 0} {
+        set new_name "${NAME}.[file tail $report]"
+        file rename $report reports/$new_name
+    }
+}
+
 file rename reports/$NAME.fit.summary reports/$NAME\_$PART.fit.summary
 file rename reports/$NAME.sta.summary reports/$NAME\_$PART.sta.summary
 
