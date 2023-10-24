@@ -93,18 +93,17 @@ class mkregs:
             n_bytes = 4
         addr = row["addr"]
         addr_w = self.calc_verilog_addr_w(log2n_items, n_bytes)
-        auto = row["autologic"]
+        auto = row["autoreg"]
 
         f.write(
             f"\n\n//NAME: {name};\n//TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n"
         )
 
         # compute wdata with only the needed bits
-        if auto:
-            f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_wdata; \n")
-            f.write(
-                f"assign {name}_wdata = iob_wdata_i[{self.boffset(addr,self.cpu_n_bytes)}+:{self.verilog_max(n_bits,1)}];\n"
-            )
+        f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_wdata; \n")
+        f.write(
+            f"assign {name}_wdata = iob_wdata_i[{self.boffset(addr,self.cpu_n_bytes)}+:{self.verilog_max(n_bits,1)}];\n"
+        )
 
         # signal to indicate if the register is addressed
         f.write(f"wire {name}_addressed;\n")
@@ -161,6 +160,7 @@ class mkregs:
             f.write(
                 f"assign {name}_wen_o = ({name}_addressed & iob_avalid_i)? |iob_wstrb_i: 1'b0;\n"
             )
+            f.write(f"assign {name}_wdata_o = {name}_wdata;\n")
 
     def gen_rd_reg(self, row, f):
         name = row["name"]
@@ -172,7 +172,7 @@ class mkregs:
             n_bytes = 4
         addr = row["addr"]
         addr_w = self.calc_verilog_addr_w(log2n_items, n_bytes)
-        auto = row["autologic"]
+        auto = row["autoreg"]
 
         f.write(
             f"\n\n//NAME: {name};\n//TYPE: {row['type']}; WIDTH: {n_bits}; RST_VAL: {rst_val}; ADDR: {addr}; SPACE (bytes): {2**self.calc_addr_w(log2n_items,n_bytes)} (max); AUTO: {auto}\n\n"
@@ -193,24 +193,25 @@ class mkregs:
         for row in table:
             name = row["name"]
             n_bits = row["n_bits"]
-            auto = row["autologic"]
+            auto = row["autoreg"]
 
             # VERSION is not a register, it is an internal constant
             if name != "VERSION":
                 if "W" in row["type"]:
                     if auto:
-                        f.write(
-                            f"  output [{self.verilog_max(n_bits,1)}-1:0] {name}_o,\n"
-                        )
+                        f.write(f"  output [{self.verilog_max(n_bits,1)}-1:0] {name}_o,\n")
                     else:
+                        f.write(f"  output [{self.verilog_max(n_bits,1)}-1:0] {name}_wdata_o,\n")
                         f.write(f"  output {name}_wen_o,\n")
+                        f.write(f"  input {name}_wready_i,\n")
                 if "R" in row["type"]:
-                    f.write(f"  input [{self.verilog_max(n_bits,1)}-1:0] {name}_i,\n")
-                    if not auto:
+                    if auto:
+                        f.write(f"  input [{self.verilog_max(n_bits,1)}-1:0] {name}_i,\n")
+                    else:
+                        f.write(f"  input [{self.verilog_max(n_bits,1)}-1:0] {name}_rdata_i,\n")
                         f.write(f"  output {name}_ren_o,\n")
                         f.write(f"  input {name}_rvalid_i,\n")
-                if not auto:
-                    f.write(f"  input {name}_ready_i,\n")
+                        f.write(f"  input {name}_rready_i,\n")
 
         f.write(f"  output iob_ready_nxt_o,\n")
         f.write(f"  output iob_rvalid_nxt_o,\n")
@@ -235,44 +236,50 @@ class mkregs:
         for row in table:
             name = row["name"]
             n_bits = row["n_bits"]
-            auto = row["autologic"]
+            auto = row["autoreg"]
 
             # VERSION is not a register, it is an internal constant
             if name != "VERSION":
                 if "W" in row["type"]:
                     if auto:
-                        f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_w;\n")
+                        f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_wr;\n")
                     else:
-                        f.write(f"wire {name}_wen;\n")
+                        f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_wdata_wr;\n")
+                        f.write(f"wire {name}_wen_wr;\n")
+                        f.write(f"wire {name}_wready_wr;\n")
                 if "R" in row["type"]:
-                    f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_r;\n")
-                    if not row["autologic"]:
-                        f.write(f"wire {name}_rvalid;\n")
-                        f.write(f"wire {name}_ren;\n")
-                if not auto:
-                    f.write(f"wire {name}_ready;\n")
+                    if auto:
+                        f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_rd;\n")
+                    else:
+                        f.write(f"wire [{self.verilog_max(n_bits,1)}-1:0] {name}_rdata_rd;\n")
+                        f.write(f"wire {name}_ren_rd;\n")
+                        f.write(f"wire {name}_rvalid_rd;\n")
+                        f.write(f"wire {name}_rready_rd;\n")
         f.write("\n")
 
     # generate portmap for swreg instance in top module
     def gen_portmap(self, table, f):
         for row in table:
             name = row["name"]
-            auto = row["autologic"]
+            auto = row["autoreg"]
 
             # VERSION is not a register, it is an internal constant
             if name != "VERSION":
                 if "W" in row["type"]:
                     if auto:
-                        f.write(f"  .{name}_o({name}_w),\n")
+                        f.write(f"  .{name}_o({name}_wr),\n")
                     else:
-                        f.write(f"  .{name}_wen_o({name}_wen),\n")
+                        f.write(f"  .{name}_wdata_o({name}_wdata_wr),\n")
+                        f.write(f"  .{name}_wen_o({name}_wen_wr),\n")
+                        f.write(f"  .{name}_wready_i({name}_wready_wr),\n")
                 if "R" in row["type"]:
-                    f.write(f"  .{name}_i({name}_r),\n")
-                    if not auto:
-                        f.write(f"  .{name}_ren_o({name}_ren),\n")
-                        f.write(f"  .{name}_rvalid_i({name}_rvalid),\n")
-                if not auto:
-                    f.write(f"  .{name}_ready_i({name}_ready),\n")
+                    if auto:
+                        f.write(f"  .{name}_i({name}_rd),\n")
+                    else:
+                        f.write(f"  .{name}_rdata_i({name}_rdata_rd),\n")
+                        f.write(f"  .{name}_ren_o({name}_ren_rd),\n")
+                        f.write(f"  .{name}_rvalid_i({name}_rvalid_rd),\n")
+                        f.write(f"  .{name}_rready_i({name}_rready_rd),\n")
 
         f.write(f"  .iob_ready_nxt_o(iob_ready_nxt_o),\n")
         f.write(f"  .iob_rvalid_nxt_o(iob_rvalid_nxt_o),\n")
@@ -464,7 +471,7 @@ class mkregs:
             )
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
             addr_w_base = max(log(self.cpu_n_bytes, 2), addr_w)
-            auto = row["autologic"]
+            auto = row["autoreg"]
 
             if "R" in row["type"]:
                 aux_read_reg = self.aux_read_reg_case_name(row)
@@ -487,12 +494,16 @@ class mkregs:
                     f_gen.write(
                         f"    rdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = 16'h{rst_val}|{8*n_bytes}'d0;\n"
                     )
-                else:
+                elif auto:
                     f_gen.write(
                         f"    rdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = {name}_i|{8*n_bytes}'d0;\n"
                     )
+                else:
+                    f_gen.write(
+                        f"    rdata_int[{self.boffset(addr, self.cpu_n_bytes)}+:{8*n_bytes}] = {name}_rdata_i|{8*n_bytes}'d0;\n"
+                    )
                 if not auto:
-                    f_gen.write(f"    rready_int = {name}_ready_i;\n")
+                    f_gen.write(f"    rready_int = {name}_rready_i;\n")
                     f_gen.write(f"    rvalid_int = {name}_rvalid_i;\n")
                 f_gen.write(f"  end\n\n")
 
@@ -506,7 +517,7 @@ class mkregs:
             if n_bytes == 3:
                 n_bytes = 4
             addr_w = self.calc_addr_w(log2n_items, n_bytes)
-            auto = row["autologic"]
+            auto = row["autoreg"]
 
             if "W" in row["type"]:
                 if not auto:
@@ -514,7 +525,7 @@ class mkregs:
                     f_gen.write(
                         f"  if((waddr >= {addr}) && (waddr < {addr + 2**addr_w})) begin\n"
                     )
-                    f_gen.write(f"    wready_int = {name}_ready_i;\n  end\n")
+                    f_gen.write(f"    wready_int = {name}_wready_i;\n  end\n")
 
         f_gen.write("  ready_nxt = (|iob_wstrb_i)? wready_int: rready_int;\n")
         f_gen.write("  rvalid_nxt = iob_rvalid_o;\n")
