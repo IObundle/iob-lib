@@ -86,28 +86,42 @@ def insert_header():
     # <comment> is the comment character to be used
     # <file1> <file2> <file3> ... are the files to be processed
 
-    x = datetime.datetime.now()
+    # get the current year
+    year = datetime.datetime.now().year
 
     top_module = vars(sys.modules[top_module_name])[top_module_name]
     top_module.is_top_module = True
     top_module.init_attributes()
 
-    NAME, VERSION = top_module.name, top_module.version
+    # get the name and version of the top module
+    core_name = top_module.name
+    core_version = top_module.version
 
     h_arg_index = sys.argv.index("-h")
 
     # header is in the file whose name is given in the first argument after `-h`
     f = open(sys.argv[h_arg_index + 1], "r")
     header = f.readlines()
-    print(header)
     f.close()
 
-    for filename in sys.argv[h_arg_index + 3 :]:
+    # replace the following strings in the header:
+    # $NAME with the core name
+    # $VERSION with the core version
+    # $YEAR with the current year
+    for i in range(len(header)):
+        header[i] = header[i].replace("$NAME", core_name)
+        header[i] = header[i].replace("$VERSION", core_version)
+        header[i] = header[i].replace("$YEAR", str(year))
+
+    # insert the header in the files given in the command line
+    files_list = sys.argv[h_arg_index + 3 :]
+    comment_string = sys.argv[h_arg_index + 2]
+    for filename in files_list:
         f = open(filename, "r+")
         content = f.read()
         f.seek(0, 0)
         for line in header:
-            f.write(sys.argv[h_arg_index + 2] + "  " + f"{line}")
+            f.write(comment_string + "  " + f"{line}")
         f.write("\n\n\n" + content)
 
 

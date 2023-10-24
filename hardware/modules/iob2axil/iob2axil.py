@@ -14,7 +14,6 @@ class iob2axil(iob_module):
         """Create submodules list with dependencies of this module"""
         super()._create_submodules_list(
             [
-                {"interface": "clk_rst_s_port"},
                 {"interface": "iob_s_port"},
                 {"interface": "iob_s_s_portmap"},
                 {"interface": "axil_m_port"},

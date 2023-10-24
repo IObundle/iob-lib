@@ -128,13 +128,13 @@ endif
 #
 ifneq ($(filter fpga, $(FLOWS)),)
 FPGA_DIR=hardware/fpga
-fpga-build: fw-build
+fpga-build:
 	make -C $(FPGA_DIR) build
 
-fpga-run: fw-build
+fpga-run:
 	make -C $(FPGA_DIR) run
 
-fpga-test: fw-build
+fpga-test:
 	make -C $(FPGA_DIR) test
 
 fpga-debug:

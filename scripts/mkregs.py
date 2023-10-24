@@ -42,13 +42,13 @@ class mkregs:
             # a or b is a string
             return f"(({a} > {b}) ? {a} : {b})"
 
-    def get_reg_table(self, regs, no_overlap):
+    def get_reg_table(self, regs, rw_overlap, autoaddr):
         # Create reg table
         reg_table = []
         for i_regs in regs:
             reg_table += i_regs["regs"]
 
-        return self.compute_addr(reg_table, no_overlap)
+        return self.compute_addr(reg_table, rw_overlap, autoaddr)
 
     def bceil(self, n, log2base):
         base = int(2**log2base)
@@ -281,8 +281,8 @@ class mkregs:
                         f.write(f"  .{name}_rvalid_i({name}_rvalid_rd),\n")
                         f.write(f"  .{name}_rready_i({name}_rready_rd),\n")
 
-        f.write(f"  .iob_ready_nxt_o(iob_ready_nxt_o),\n")
-        f.write(f"  .iob_rvalid_nxt_o(iob_rvalid_nxt_o),\n")
+        f.write(f"  .iob_ready_nxt_o(iob_ready_nxt),\n")
+        f.write(f"  .iob_rvalid_nxt_o(iob_rvalid_nxt),\n")
 
     def write_hwcode(self, table, out_dir, top):
         #
@@ -299,7 +299,7 @@ class mkregs:
         f_inst.write(f'  `include "{top}_inst_params.vs"\n')
         f_inst.write("\n) swreg_0 (\n")
         self.gen_portmap(table, f_inst)
-        f_inst.write('  `include "iob_s_s_portmap.vs"\n')
+        f_inst.write('  `include "iob_s_portmap.vs"\n')
         f_inst.write("  .clk_i(clk_i),\n")
         f_inst.write("  .cke_i(cke_i),\n")
         f_inst.write("  .arst_i(arst_i)\n")
@@ -763,15 +763,39 @@ class mkregs:
                 f"{iob_colors.FAIL}write address {addr} overlaps with previous addresses{iob_colors.ENDC}"
             )
 
+    # check autoaddr configuration
+    @staticmethod
+    def check_autoaddr(autoaddr, row):
+        is_version = row["name"] == "VERSION"
+        if is_version:
+            # VERSION has always automatic address
+            return -1
+
+        # invalid autoaddr + register addr configurations
+        if autoaddr and ("addr" in row):
+            sys.exit(
+                f"{iob_colors.FAIL}Manual address in register named {row['name']} while in auto address mode.{iob_colors.ENDC}"
+            )
+        if (not autoaddr) and ("addr" not in row):
+            sys.exit(
+                f"{iob_colors.FAIL}Missing address in register named {row['name']} while in manual address mode.{iob_colors.ENDC}"
+            )
+
+        if autoaddr:
+            return -1
+        else:
+            return row["addr"]
+
+
     # compute address
-    def compute_addr(self, table, no_overlap):
+    def compute_addr(self, table, rw_overlap, autoaddr):
         read_addr = 0
         write_addr = 0
 
         tmp = []
 
         for row in table:
-            addr = row["addr"]
+            addr = self.check_autoaddr(autoaddr, row)
             addr_type = row["type"]
             n_bits = row["n_bits"]
             log2n_items = row["log2n_items"]
@@ -794,7 +818,7 @@ class mkregs:
                     f"{iob_colors.FAIL}invalid address type {addr_type} for register named {row['name']}{iob_colors.ENDC}"
                 )
 
-            if no_overlap:
+            if not rw_overlap:
                 addr_tmp = max(read_addr, write_addr)
 
             # save address temporarily in list
@@ -806,7 +830,7 @@ class mkregs:
                 read_addr = addr_tmp
             elif "W" in addr_type:
                 write_addr = addr_tmp
-            if no_overlap:
+            if not rw_overlap:
                 read_addr = addr_tmp
                 write_addr = addr_tmp
 
