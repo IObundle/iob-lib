@@ -778,7 +778,6 @@ class mkregs:
         else:
             return row["addr"]
 
-
     # compute address
     def compute_addr(self, table, rw_overlap, autoaddr):
         read_addr = 0
