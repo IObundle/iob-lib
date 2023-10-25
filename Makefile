@@ -12,16 +12,16 @@ CORE ?=iob_ctls
 include setup.mk
 
 sim-build:
-	scripts/test.sh build $(CORE)
+	nix-shell --run "scripts/test.sh build $(CORE)"
 
 sim-run:
-	VCD=$(VCD) scripts/test.sh $(CORE)
+	nix-shell --run "VCD=$(VCD) scripts/test.sh $(CORE)"
 
 sim-test:
-	scripts/test.sh test
+	nix-shell --run "scripts/test.sh test"
 
 sim-clean:
-	scripts/test.sh clean
+	nix-shell --run "scripts/test.sh clean"
 
 
 
