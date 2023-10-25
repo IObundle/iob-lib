@@ -5,7 +5,7 @@
 
 help:
 	@echo The following targets are available:
-	@echo "  setup:  Setup the build directory"
+	@echo "  build-setup:  Setup the build directory"
 	@echo "  clean:  Remove the build directory"
 
 TOP_MODULE_NAME ?=$(basename $(wildcard *.py))
@@ -114,8 +114,8 @@ endif
 python-cache-clean:
 	find . -name "*__pycache__" -exec rm -rf {} \; -prune
 
-setup: build_dir_name $(BUILD_DIR) $(SRC) format-all
+build-setup: build_dir_name $(BUILD_DIR) $(SRC) format-all
 	@for i in $(SRC); do echo $$i; done
 
 
-.PHONY: setup clean setup c-format python-format verilog-format
+.PHONY: build-setup clean c-format python-format verilog-format
