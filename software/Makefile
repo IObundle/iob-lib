@@ -98,12 +98,9 @@ test_emul: run_emul
 #            General targets            #
 #########################################
 
-# TODO add to iob-soc custom clean list
-# CLEAN_LIST+=
-
-clean: $(CLEAN_LIST)
+clean:
 	@rm -rf *.bin *.elf *.map *.hex
 	@rm -rf fw_emul test.log soc2cnsl cnsl2soc
-	@rm -rf *.txt
+	@rm -rf *.txt iob_soc_conf.h
 
 .PHONY: clean

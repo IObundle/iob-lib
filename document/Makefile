@@ -113,7 +113,7 @@ clean:
 veryclean: clean
 	make -C figures clean 
 
-test: clean debug ug.pdf
+test: clean debug ug.pdf clean debug pb.pdf clean debug  presentation.pdf
 
 debug: $(TSRC)
 	@echo TSRC=$(TSRC)
